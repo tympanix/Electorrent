@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="torrentApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="bower_components/semantic/dist/semantic.min.css">
+    <link rel="stylesheet" href="css/main.css" charset="utf-8">
+</head>
+<body ng-controller="mainController">
+
+    <div class="wrapper">
+        <div class="sidebar">
+            <div class="sidebar-wrapper">
+                <ul class="nav">
+                    <li>
+                        <i class="ui large blue arrow down icon"></i>
+                        Downloading
+                    </li>
+                    <li>
+                        <i class="ui large yellow tasks icon"></i>
+                        Queue
+                    </li>
+                    <li>
+                        <i class="ui large green checkmark icon"></i>
+                        Finished
+                    </li>
+                    <li>
+                        <i class="ui large red remove icon"></i>
+                        Failed
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="main-panel">
+            <div class="container">
+                <div class="header">
+                    Sup man
+                </div>
+                <div class="content">
+
+
+                    <h1>Electorrent</h1>
+                    <ul>
+                        <script>
+                        var remote = require("electron").remote;
+                        var args = remote.getGlobal('arguments');
+                        args.forEach(function(val,index, array) {
+                            document.write("<li>" + val + "</li>")
+                        });
+                        console.log(remote.getGlobal('arguments'));
+                        </script>
+                    </ul>
+
+                    <table class="ui single line fluid selectable compact table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Date Joined</th>
+                                <th>E-mail</th>
+                                <th>Called</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="(key, torrent) in torrents">
+                                <td>{{torrent.name}}</td>
+                                <td>{{torrent.statusMessage}}</td>
+                                <td>{{torrent.label}}</td>
+                                <td>{{torrent.dateAdded}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <a class="ui button" ng-click="download()">Download</a>
+                    <a class="ui button" ng-click="list()">List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="bower_components\angular\angular.js" charset="utf-8"></script>
+    <script src="bower_components\angular-resource\angular-resource.min.js" charset="utf-8"></script>
+
+    <script src="main.js" charset="utf-8"></script>
+    <script src="scripts\controllers\main.js" charset="utf-8"></script>
+    <script src="scripts\services\torrent.js" charset="utf-8"></script>
+    <script src="scripts\services\utorrentservice.js" charset="utf-8"></script>
+
+    <!-- build:remove -->
+    <!-- Connect to server process -->
+    <script>require('electron-connect').client.create()</script>
+    <!-- end:build -->
+</body>
+</html>
