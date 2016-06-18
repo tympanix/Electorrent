@@ -10,69 +10,50 @@
 
     <div class="wrapper">
         <div class="sidebar">
-            <div class="sidebar-wrapper">
-                <ul class="nav">
-                    <li>
-                        <i class="ui large blue arrow down icon"></i>
-                        Downloading
-                    </li>
-                    <li>
-                        <i class="ui large yellow tasks icon"></i>
-                        Queue
-                    </li>
-                    <li>
-                        <i class="ui large green checkmark icon"></i>
-                        Finished
-                    </li>
-                    <li>
-                        <i class="ui large red remove icon"></i>
-                        Failed
-                    </li>
-                </ul>
-            </div>
+            <ul class="nav">
+                <li>
+                    <i class="ui large blue arrow down icon"></i>
+                    Downloading
+                </li>
+                <li>
+                    <i class="ui large yellow tasks icon"></i>
+                    Queue
+                </li>
+                <li>
+                    <i class="ui large green checkmark icon"></i>
+                    Finished
+                </li>
+                <li>
+                    <i class="ui large red remove icon"></i>
+                    Failed
+                </li>
+            </ul>
         </div>
         <div class="main-panel">
-            <div class="container">
-                <div class="header">
-                    Sup man
-                </div>
-                <div class="content">
-
-
-                    <h1>Electorrent</h1>
-                    <ul>
-                        <script>
-                        var remote = require("electron").remote;
-                        var args = remote.getGlobal('arguments');
-                        args.forEach(function(val,index, array) {
-                            document.write("<li>" + val + "</li>")
-                        });
-                        console.log(remote.getGlobal('arguments'));
-                        </script>
-                    </ul>
-
-                    <table class="ui single line fluid selectable compact table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Date Joined</th>
-                                <th>E-mail</th>
-                                <th>Called</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="(key, torrent) in torrents">
-                                <td>{{torrent.name}}</td>
-                                <td>{{torrent.statusMessage}}</td>
-                                <td>{{torrent.label}}</td>
-                                <td>{{torrent.dateAdded}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <a class="ui button" ng-click="download()">Download</a>
-                    <a class="ui button" ng-click="list()">List</a>
-                </div>
+            <div class="action header">
+                Sup man
+                <a class="ui button" ng-click="download()">Download</a>
+                <a class="ui button" ng-click="list()">List</a>
+            </div>
+            <div class="main-content">
+                <table class="ui single line unstackable selectable compact torrent table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Date Joined</th>
+                            <th>E-mail</th>
+                            <th>Called</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="(key, torrent) in torrents">
+                            <td>{{torrent.name}}</td>
+                            <td>{{torrent.statusMessage}}</td>
+                            <td>{{torrent.label}}</td>
+                            <td>{{torrent.dateAdded}}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

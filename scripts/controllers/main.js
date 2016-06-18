@@ -22,4 +22,5 @@ angular.module("torrentApp").controller("mainController", ["$scope", "utorrentSe
             console.log($scope.torrents);
         })
     };
+
 }])

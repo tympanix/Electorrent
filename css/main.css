@@ -1,52 +1,35 @@
 .wrapper {
-  position: relative;
-  top: 0;
-  height: 100vh;
+    position: relative;
+    top: 0;
+    height: 100vh;
 }
 
 .wrapper .sidebar,
 .main-panel {
-  overflow: auto;
-  max-height: 100%;
-  height: 100%;
- }
-
-.wrapper .sidebar {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 260px;
-  display: block;
-  z-index: 1;
-  color: #000;
-  font-weight: 200;
-  background-size: cover;
-  background-position: center center;
-  overflow-x: hidden;
+    overflow: auto;
+    max-height: 100%;
+    height: 100%;
 }
 
-.sidebar .sidebar-wrapper {
-  position: relative;
-  max-height: none;
-  min-height: 100%;
-  overflow: hidden;
-  width: 260px;
-  z-index: 4;
-  border-right: 1px solid #CECECE;
+.wrapper .sidebar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    display: block;
+    z-index: 1;
+    color: #000;
+    background-size: cover;
+    background-position: center center;
+    overflow-x: hidden;
+    border-right: 1px solid #CECECE;
 }
 
 .sidebar .nav {
     padding: 0 10px;
 }
 
-.sidebar .nav li {
-    -webkit-transition: all 150ms ease-in;
-    -moz-transition: all 150ms ease-in;
-    -o-transition: all 150ms ease-in;
-    -ms-transition: all 150ms ease-in;
-    transition: all 150ms ease-in;
-}
 
 .sidebar .nav li {
     font-size: 15px;
@@ -62,25 +45,32 @@
 }
 
 .main-panel {
-  background: rgba(203, 203, 210, 0.15);
-  position: relative;
-  z-index: 2;
-  float: right;
-  width: calc(100% - 260px);
-  min-height: 100%;
-  overflow-x: hidden;
+    background: rgba(203, 203, 210, 0.15);
+    position: relative;
+    z-index: 2;
+    float: right;
+    width: calc(100% - 260px);
+    min-height: 100%;
+    overflow-x: hidden;
 }
 
-.container .header {
-    left: 0;
-    right: 0;
-    top: 0;
+.main-panel .action.header {
     height: 50px;
-    padding: 10px 20px;
+    padding: 0 20px;
     background-color: #FFF;
-    line-height: 30px;
+    line-height: 50px;
+    border-bottom: 1px solid #CECECE;
+    z-index: 1000;
 }
 
-.container .content {
-    padding: 20px;
+.main-content {
+    height: calc(100% - 50px);
+    overflow: auto;
+}
+
+.torrent.table {
+    border-radius: 0;
+    margin: 0;
+    border: none;
+    width: 100%;
 }
