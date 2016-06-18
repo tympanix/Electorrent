@@ -13,6 +13,7 @@
   "author": "tympanix",
   "license": "MIT",
   "devDependencies": {
+    "electron-connect": "^0.4.2",
     "electron-packager": "^7.0.2",
     "electron-prebuilt": "^1.1.2",
     "gulp": "^3.9.1"
