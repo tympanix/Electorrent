@@ -1,0 +1,20 @@
+{
+  "name": "torrent-app",
+  "version": "1.0.0",
+  "description": "A simple app for handling magnet links and torrents for my home server",
+  "main": "app.js",
+  "scripts": {
+    "start": "electron . sucker",
+    "build": "electron-packager . --platform=win32 --arch=32bit --overwrite"
+  },
+  "keywords": [
+    "utorrent"
+  ],
+  "author": "tympanix",
+  "license": "MIT",
+  "devDependencies": {
+    "electron-packager": "^7.0.2",
+    "electron-prebuilt": "^1.1.2",
+    "gulp": "^3.9.1"
+  }
+}
