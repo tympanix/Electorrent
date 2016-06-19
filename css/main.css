@@ -74,3 +74,7 @@
     border: none;
     width: 100%;
 }
+
+.torrent.progress {
+    margin: 0 !important;
+}
