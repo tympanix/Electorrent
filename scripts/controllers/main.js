@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("mainController", ["$scope", "utorrentService", function ($scope, $utorrentService) {
+angular.module("torrentApp").controller("mainController", ["$scope", "$interval", "$log", "utorrentService", function ($scope, $interval, $log, $utorrentService) {
     var ut = $utorrentService;
 
     ut.init();
@@ -11,16 +11,44 @@ angular.module("torrentApp").controller("mainController", ["$scope", "utorrentSe
         ut.addTorrentUrl("magnet:?xt=urn:btih:ce8357ded670f06329f6028d2f2cea6f514646e0&dn=Zootopia+2016+1080p+HDRip+x264+AC3-JYK&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969");
     }
 
-    $scope.list = function() {
-        var newTorrents = {};
+    $scope.update = function() {
         ut.torrents().then(function(torrents){
+            newTorrents(torrents)
+            deleteTorrents(torrents)
+            changeTorrents(torrents)
+        });
+    };
+
+    function newTorrents(torrents){
+        if (torrents.all && torrents.all.length > 0) {
             for (i = 0; i < torrents.all.length; i++){
                 var torrent = ut.build(torrents.all[i])
-                newTorrents[torrent.hash] = torrent;
+                $scope.torrents[torrent.hash] = torrent;
             }
-            $scope.torrents = newTorrents;
-            console.log($scope.torrents);
-        })
-    };
+        }
+    }
+
+    function deleteTorrents(torrents){
+        if (torrents.deleted && torrents.deleted.length > 0) {
+            $log.debug('"torrentm" key with ' + torrents.deleted.length + ' elements');
+            for (i = 0; i < torrents.deleted.length; i++) {
+                delete $scope.torrents[torrents.deleted[i]];
+            }
+        }
+    }
+
+    function changeTorrents(torrents){
+        if (torrents.changed && torrents.changed.length > 0) {
+            $log.debug('"torrentp" key with ' + torrents.changed.length + ' elements');
+            for (i = 0; i < torrents.changed.length; i++) {
+                var torrent = ut.build(torrents.changed[i]);
+                $scope.torrents[torrent.hash] = torrent;
+            }
+        }
+    }
+
+    $interval(function(){
+        $scope.update();
+    }, 5000)
 
 }])
