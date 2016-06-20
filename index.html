@@ -2,7 +2,7 @@
 <html ng-app="torrentApp">
 <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>Electorrent</title>
     <link rel="stylesheet" href="bower_components/semantic/dist/semantic.min.css">
     <link rel="stylesheet" href="css/main.css" charset="utf-8">
 </head>
@@ -11,19 +11,19 @@
     <div class="wrapper">
         <div class="sidebar">
             <ul class="nav">
-                <li>
+                <li ng-click="filterByStatus('downloading')">
                     <i class="ui large blue arrow down icon"></i>
                     Downloading
                 </li>
-                <li>
+                <li ng-click="filterByStatus('queued')">
                     <i class="ui large yellow tasks icon"></i>
-                    Queue
+                    Queued
                 </li>
-                <li>
+                <li ng-click="filterByStatus('finished')">
                     <i class="ui large green checkmark icon"></i>
                     Finished
                 </li>
-                <li>
+                <li ng-click="filterByStatus('error')">
                     <i class="ui large red remove icon"></i>
                     Failed
                 </li>
@@ -31,7 +31,6 @@
         </div>
         <div class="main-panel">
             <div class="action header">
-                Sup man
                 <a class="ui button" ng-click="download()">Download</a>
                 <a class="ui button" ng-click="update()">Update</a>
             </div>
@@ -40,20 +39,19 @@
                     <thead>
                         <tr>
                             <th class="eight wide">Name</th>
-                            <th class="two wide">Status</th>
+                            <th class="two wide">Size</th>
                             <th class="three wide">Progress</th>
                             <th class="three wide">Date Added</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="torrent in torrents | toArray | orderBy:'dateAdded':true">
-                            <td>{{torrent.name}}</td>
-                            <td>{{torrent.statusMessage}}</td>
+                        <tr ng-repeat="torrent in arrayTorrents">
+                            <td>{{torrent.decodedName}}</td>
+                            <td>{{torrent.size | bytes}}</td>
                             <td>
-                                <div class="ui torrent progress" progress percent="torrent.percent/10">
-                                    <div class="bar">
-                                        <div class="progress"></div>
-                                    </div>
+                                <div class="ui torrent progress success" progress="torrent">
+                                    <label></label>
+                                    <div class="bar"></div>
                                 </div>
                             </td>
                             <td>{{torrent.dateAdded | date}}</td>
@@ -65,7 +63,7 @@
     </div>
     <!-- Dependencies -->
     <script type="text/javascript">
-        window.$ = window.jQuery = require('jquery');
+    window.$ = window.jQuery = require('jquery');
     </script>
     <script src="bower_components/angular/angular.js" charset="utf-8"></script>
     <script src="bower_components/angular-resource/angular-resource.min.js" charset="utf-8"></script>
@@ -85,6 +83,7 @@
     <!-- Filters -->
     <script src="scripts/filters/dateFilter.js" charset="utf-8"></script>
     <script src="scripts/filters/toArray.js" charset="utf-8"></script>
+    <script src="scripts/filters/bytes.js" charset="utf-8"></script>
 
     <!-- Directives -->
     <script src="scripts/directives/progress.js" charset="utf-8"></script>
