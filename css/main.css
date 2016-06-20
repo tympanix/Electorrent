@@ -27,7 +27,7 @@
 }
 
 .sidebar .nav {
-    padding: 0 10px;
+    padding: 0 12px;
 }
 
 
@@ -38,6 +38,10 @@
     border-radius: 5px;
     list-style-type: none;
     cursor: pointer;
+}
+
+.sidebar .nav li.active {
+    background: #F5F5F5 !important;
 }
 
 .sidebar .nav li:hover {
@@ -56,11 +60,12 @@
 
 .main-panel .action.header {
     height: 50px;
-    padding: 0 20px;
+    padding: 0 7px;
     background-color: #FFF;
     line-height: 50px;
     border-bottom: 1px solid #CECECE;
     z-index: 1000;
+    overflow: hidden;
 }
 
 .main-content {
@@ -73,6 +78,11 @@
     margin: 0;
     border: none;
     width: 100%;
+}
+
+.torrent.table tbody tr {
+    cursor: default;
+    -webkit-user-select: none;
 }
 
 .torrent.progress {
@@ -95,4 +105,9 @@
     min-width: 0;
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
+}
+
+.torrent.label {
+    float: right;
+    border-radius: 25px;
 }
