@@ -77,4 +77,22 @@
 
 .torrent.progress {
     margin: 0 !important;
+    overflow: hidden;
+}
+
+.torrent.progress label {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    line-height: 24.5px;
+    text-align: center;
+    z-index: 100;
+    color: rgba(255, 255, 255, .9);
+    font-weight: 700;
+}
+
+.torrent.progress .bar {
+    min-width: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
 }
