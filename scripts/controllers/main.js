@@ -7,6 +7,7 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
 
     $scope.torrents = {};
     $scope.arrayTorrents = [];
+    $scope.contextMenu = null;
 
     $scope.filters = {
         status: 'downloading'
@@ -26,6 +27,13 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
         refreshTorrents();
     }
 
+    $scope.showContextMenu = function(event, torrent, index) {
+        if (!torrent.selected){
+            singleSelect(torrent);
+        }
+        $scope.contextMenu.show(event);
+        console.info("Right click context menu!");
+    }
 
     $scope.numInFilter = function(status) {
         var num = 0;
@@ -178,7 +186,7 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
 
     function deleteTorrents(torrents){
         if (torrents.deleted && torrents.deleted.length > 0) {
-            $log.debug('"torrentm" key with ' + torrents.deleted.length + ' elements');
+            //$log.debug('"torrentm" key with ' + torrents.deleted.length + ' elements');
             for (var i = 0; i < torrents.deleted.length; i++) {
                 delete $scope.torrents[torrents.deleted[i]];
             }
@@ -188,7 +196,7 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
 
     function changeTorrents(torrents){
         if (torrents.changed && torrents.changed.length > 0) {
-            $log.debug('"torrentp" key with ' + torrents.changed.length + ' elements');
+            //$log.debug('"torrentp" key with ' + torrents.changed.length + ' elements');
             for (var i = 0; i < torrents.changed.length; i++) {
                 var torrent = ut.build(torrents.changed[i]);
                 if ($scope.torrents[torrent.hash].selected){
