@@ -73,52 +73,70 @@
                     <tbody>
                         <tr ng-repeat="torrent in arrayTorrents"
                         ng-class="{active: torrent.selected}"
-                        ng-click="setSelected($event, torrent, $index)">
-                            <td>{{torrent.decodedName}}</td>
-                            <td>{{torrent.size | bytes}}</td>
-                            <td>
-                                <div class="ui torrent progress success" progress="torrent">
-                                    <label></label>
-                                    <div class="bar"></div>
-                                </div>
-                            </td>
-                            <td>{{torrent.dateAdded | date}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                        ng-click="setSelected($event, torrent, $index)"
+                        ng-right-click="showContextMenu($event, torrent, $index)">
+                        <td>{{torrent.decodedName}}</td>
+                        <td>{{torrent.size | bytes}}</td>
+                        <td>
+                            <div class="ui torrent progress success" progress="torrent">
+                                <label></label>
+                                <div class="bar"></div>
+                            </div>
+                        </td>
+                        <td>{{torrent.dateAdded | date}}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
-    <!-- Dependencies -->
-    <script type="text/javascript">
-    window.$ = window.jQuery = require('jquery');
-    </script>
-    <script src="bower_components/angular/angular.js" charset="utf-8"></script>
-    <script src="bower_components/angular-resource/angular-resource.min.js" charset="utf-8"></script>
-    <script src="bower_components/moment/min/moment.min.js" charset="utf-8"></script>
-    <script src="bower_components/semantic/dist/semantic.min.js" charset="utf-8"></script>
+</div>
 
-    <!-- Application -->
-    <script src="main.js" charset="utf-8"></script>
+<context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
+    <div class="ui vertical menu">
+        <a class="item">
+            Home
+        </a>
+        <a class="item">
+            Messages
+        </a>
+        <a class="item">
+            Friends
+        </a>
+    </div>
+</context-menu>
 
-    <!-- Controllers -->
-    <script src="scripts\controllers\main.js" charset="utf-8"></script>
+<!-- Dependencies -->
+<script type="text/javascript">
+window.$ = window.jQuery = require('jquery');
+</script>
+<script src="bower_components/angular/angular.js" charset="utf-8"></script>
+<script src="bower_components/angular-resource/angular-resource.min.js" charset="utf-8"></script>
+<script src="bower_components/moment/min/moment.min.js" charset="utf-8"></script>
+<script src="bower_components/semantic/dist/semantic.min.js" charset="utf-8"></script>
 
-    <!-- Services -->
-    <script src="scripts\services\torrent.js" charset="utf-8"></script>
-    <script src="scripts\services\utorrentservice.js" charset="utf-8"></script>
+<!-- Application -->
+<script src="main.js" charset="utf-8"></script>
 
-    <!-- Filters -->
-    <script src="scripts/filters/dateFilter.js" charset="utf-8"></script>
-    <script src="scripts/filters/toArray.js" charset="utf-8"></script>
-    <script src="scripts/filters/bytes.js" charset="utf-8"></script>
+<!-- Controllers -->
+<script src="scripts\controllers\main.js" charset="utf-8"></script>
 
-    <!-- Directives -->
-    <script src="scripts/directives/progress.js" charset="utf-8"></script>
+<!-- Services -->
+<script src="scripts\services\torrent.js" charset="utf-8"></script>
+<script src="scripts\services\utorrentservice.js" charset="utf-8"></script>
 
-    <!-- build:remove -->
-    <!-- Connect to server process -->
-    <script>require('electron-connect').client.create()</script>
-    <!-- end:build -->
+<!-- Filters -->
+<script src="scripts/filters/dateFilter.js" charset="utf-8"></script>
+<script src="scripts/filters/toArray.js" charset="utf-8"></script>
+<script src="scripts/filters/bytes.js" charset="utf-8"></script>
+
+<!-- Directives -->
+<script src="scripts/directives/progress.js" charset="utf-8"></script>
+<script src="scripts/directives/rightclick.js" charset="utf-8"></script>
+<script src="scripts/directives/contextmenu.js" charset="utf-8"></script>
+
+<!-- build:remove -->
+<!-- Connect to server process -->
+<script>require('electron-connect').client.create()</script>
+<!-- end:build -->
 </body>
 </html>
