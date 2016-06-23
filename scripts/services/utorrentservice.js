@@ -5,7 +5,7 @@ angular.module('torrentApp')
 
         var loading = null;
         var data = {
-            url: 'http://localhost:59696/gui/',
+            url: 'http://192.168.0.33:8080/gui/',
             password: null,
             token: null,
             cid: 0,

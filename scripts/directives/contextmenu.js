@@ -11,7 +11,10 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
         element.data('contextmenu',true);
 
         // Bind show function to scope variable
-        scope.bind = { show: showContextMenu(element) };
+        scope.bind = {
+            show: showContextMenu(element),
+            hide: hideContextMenu(element)
+        };
 
         // Remove context menu when user clicks anywhere not in the context menu
         angular.element($document[0].body).on('click',function(event) {
@@ -21,26 +24,47 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
             }
         });
 
-        // Remove context menu when user presses the escape key
+        //Remove context menu when user presses the escape key
         angular.element($document).on('keyup', function(event){
             if (event.keyCode === 27 /* Escape key */){
                 $(element).hide();
             }
         });
 
-        // Remove context menu on window resize
-        angular.element($window).on('resize', function(event){
+        $(element).find('.context.dropdown').each(function(){
+            console.log("Linking sub menu", this);
+            $(this)
+            .mouseenter(function(){
+                var menu = $(this).find('.menu')
+                var height = menu.innerHeight();
+                // menu.addClass('upward');
+                // menu.css('margin-top', (-1*height) + 'px')
+                menu.show();
+            })
+            .mouseleave(function(){
+                $(this).find('.menu').hide();
+            });
+        })
+    }
+
+    function bindCloseOperations(element) {
+        // Remove context menu when the user scrolls the main content
+        $('.main-content').one('scroll', function() {
+            console.log("Scroll!");
             $(element).hide();
         });
 
-        // Remove context menu when the user scrolls the main content
-        angular.element('.main-content').bind("scroll", function() {
+        // Remove context menu on window resize
+        $($window).one('resize', function(){
+            console.log("Resize!");
             $(element).hide();
         });
     }
 
     function showContextMenu(element){
         return function(event){
+            bindCloseOperations(element);
+
             var totWidth = $(window).width();
             var totHeight = $(window).height();
 
@@ -61,6 +85,12 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
                 top: menuY,
                 display: 'block'
             });
+        }
+    }
+
+    function hideContextMenu(element) {
+        return function(){
+            $(element).hide();
         }
     }
 }]);

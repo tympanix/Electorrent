@@ -30,6 +30,21 @@ function createWindow() {
   });
 }
 
+// If another instance of the app is allready running, execute this callback
+var shouldQuit = app.makeSingleInstance(function(commandLine, workingDirectory) {
+  // Someone tried to run a second instance, we should focus our window
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.focus();
+  }
+  return true;
+});
+
+if (shouldQuit) {
+  app.quit();
+  return;
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
