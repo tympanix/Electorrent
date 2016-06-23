@@ -93,16 +93,41 @@
 
 <context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
     <div class="ui vertical menu">
-        <a class="item">
-            <i class="ui user icon"></i>
-            Home
+        <a class="item" ng-click="doContextAction('recheck')">
+            <i class="ui checkmark icon"></i>
+            Recheck
         </a>
-        <a class="item">
-            Messages
+        <a class="item" ng-click="doContextAction('forcerestart')">
+            <i class="ui flag icon"></i>
+            Force Start
         </a>
-        <a class="item">
-            Friends
+        <a class="item" ng-click="doContextAction('queueup')">
+            <i class="ui arrow up icon"></i>
+            Move Up Queue
         </a>
+        <a class="item" ng-click="doContextAction('queuedown')">
+            <i class="ui arrow down icon"></i>
+            Move Down Queue
+        </a>
+        <a class="item" ng-click="doContextAction('remove')">
+            <i class="ui remove icon"></i>
+            Remove
+        </a>
+        <div class="ui context dropdown item">
+            <i class="dropdown icon"></i>
+            Remove And
+            <div class="menu">
+                <a class="item" ng-click="doContextAction('removetorrent')">
+                    Delete Torrent
+                </a>
+                <a class="item" ng-click="doContextAction('removedata')">
+                    Delete Data
+                </a>
+                <a class="item" ng-click="doContextAction('removedatatorrent')">
+                    Delete All
+                </a>
+            </div>
+        </div>
     </div>
 </context-menu>
 
@@ -134,6 +159,7 @@ window.$ = window.jQuery = require('jquery');
 <script src="scripts/directives/progress.js" charset="utf-8"></script>
 <script src="scripts/directives/rightclick.js" charset="utf-8"></script>
 <script src="scripts/directives/contextmenu.js" charset="utf-8"></script>
+<script src="scripts/directives/dropdown.js" charset="utf-8"></script>
 
 <!-- build:remove -->
 <!-- Connect to server process -->

@@ -80,3 +80,6 @@ $RECYCLE.BIN/
 
 # Bower components
 bower_components
+
+# Ignore distibution folder
+dist
