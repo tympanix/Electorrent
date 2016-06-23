@@ -95,7 +95,7 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
     }
 
     $scope.setSelected = function(event, torrent, index) {
-        if (event.ctrlKey){
+        if (event.ctrlKey || event.metaKey){
             toggleSelect(torrent);
         } else if (event.shiftKey){
             multiSelect(index);
