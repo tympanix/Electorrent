@@ -3,7 +3,9 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
     var selected = [];
     var lastSelected = null;
 
-    ut.init();
+    ut.init().then(function(){
+        $scope.update();
+    });
 
     $scope.torrents = {};
     $scope.arrayTorrents = [];
@@ -13,17 +15,14 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
         status: 'downloading'
     }
 
-
-    $scope.name = "Mathias";
-
     $scope.download = function(){
         ut.addTorrentUrl("magnet:?xt=urn:btih:B8E6C2551CD060F1D31657C11787DF9F65AE5A13&dn=orange+is+the+new+black+s04e01+webrip+xvid+mp3+rarbg&tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce");
     }
 
     $scope.filterByStatus = function(status){
-        $scope.filters.status = status;
         deselectAll();
         lastSelected = null;
+        $scope.filters.status = status;
         refreshTorrents();
     }
 
@@ -127,10 +126,16 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
             call({ hash: getSelectedHashes()}).$promise
             .then(function(){
                 console.log("Action " + action + " performed!");
+                $scope.update();
             })
         } else {
             console.error("Action " + action + " not allowed");
         }
+    }
+
+    $scope.doContextAction = function(action) {
+        $scope.contextMenu.hide();
+        $scope.doAction(action);
     }
 
     function fetchTorrents(){
@@ -186,7 +191,6 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
 
     function deleteTorrents(torrents){
         if (torrents.deleted && torrents.deleted.length > 0) {
-            //$log.debug('"torrentm" key with ' + torrents.deleted.length + ' elements');
             for (var i = 0; i < torrents.deleted.length; i++) {
                 delete $scope.torrents[torrents.deleted[i]];
             }
@@ -196,7 +200,6 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
 
     function changeTorrents(torrents){
         if (torrents.changed && torrents.changed.length > 0) {
-            //$log.debug('"torrentp" key with ' + torrents.changed.length + ' elements');
             for (var i = 0; i < torrents.changed.length; i++) {
                 var torrent = ut.build(torrents.changed[i]);
                 if ($scope.torrents[torrent.hash].selected){

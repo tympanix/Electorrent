@@ -125,3 +125,8 @@ html, body {
 .torrent.context.menu .ui.vertical.menu {
     box-shadow: 0 0 50px #AAA;
 }
+
+/*.ui.vertical.menu .ui.dropdown.item .menu.upward {
+    top: 100% !important;
+    border-radius: .28571429rem .28571429rem .28571429rem 0;
+}*/
