@@ -24,6 +24,7 @@
     "angular-file-upload": "ng-file-upload#2.0.5",
     "semantic": "^2.1.8",
     "moment": "momentjs#^2.13.0",
-    "jQuery": "^3.0.0"
+    "jQuery": "^3.0.0",
+    "angular-animate": "^1.5.7"
   }
 }

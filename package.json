@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "electron . sucker",
-    "build": "electron-packager . Electorrent --platform=win32 --arch=ia32 --out=./dist --overwrite"
+    "build": "electron-packager ./dist Electorrent --platform=win32 --arch=x64 --out=./build --overwrite"
   },
   "keywords": [
     "utorrent"
@@ -16,7 +16,15 @@
     "electron-connect": "^0.4.2",
     "electron-packager": "^7.0.2",
     "electron-prebuilt": "^1.1.2",
+    "electron-rebuild": "^1.1.5",
     "gulp": "^3.9.1",
-    "jquery": "^3.0.0"
+    "gulp-clean": "^0.3.2",
+    "gulp-processhtml": "^1.1.0",
+    "gulp-useref": "^3.1.0",
+    "jquery": "^3.0.0",
+    "run-sequence": "^1.2.1"
+  },
+  "dependencies": {
+    "level": "^1.4.0"
   }
 }
