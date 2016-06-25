@@ -1,3 +1,4 @@
+<div class="wrapper">
 <div class="sidebar">
     <ul class="nav">
         <li ng-click="filterByStatus('downloading')">
@@ -52,15 +53,15 @@
     <div class="main-content">
         <table class="ui single line unstackable selectable fixed compact torrent table">
             <thead>
-                <tr>
-                    <th class="eight wide">Name</th>
-                    <th class="two wide">Size</th>
-                    <th class="three wide">Progress</th>
-                    <th class="three wide">Date Added</th>
-                </tr>
+            <tr>
+                <th class="eight wide">Name</th>
+                <th class="two wide">Size</th>
+                <th class="three wide">Progress</th>
+                <th class="three wide">Date Added</th>
+            </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="torrent in arrayTorrents"
+            <tr ng-repeat="torrent in arrayTorrents"
                 ng-class="{active: torrent.selected}"
                 ng-click="setSelected($event, torrent, $index)"
                 ng-right-click="showContextMenu($event, torrent, $index)">
@@ -74,7 +75,48 @@
                 </td>
                 <td>{{torrent.dateAdded | date}}</td>
             </tr>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
+    <div class="ui vertical menu">
+        <a class="item" ng-click="doContextAction('recheck')">
+            <i class="ui checkmark icon"></i>
+            Recheck
+        </a>
+        <a class="item" ng-click="doContextAction('forcerestart')">
+            <i class="ui flag icon"></i>
+            Force Start
+        </a>
+        <a class="item" ng-click="doContextAction('queueup')">
+            <i class="ui arrow up icon"></i>
+            Move Up Queue
+        </a>
+        <a class="item" ng-click="doContextAction('queuedown')">
+            <i class="ui arrow down icon"></i>
+            Move Down Queue
+        </a>
+        <a class="item" ng-click="doContextAction('remove')">
+            <i class="ui remove icon"></i>
+            Remove
+        </a>
+        <div class="ui context dropdown item">
+            <i class="dropdown icon"></i>
+            Remove And
+            <div class="menu">
+                <a class="item" ng-click="doContextAction('removetorrent')">
+                    Delete Torrent
+                </a>
+                <a class="item" ng-click="doContextAction('removedata')">
+                    Delete Data
+                </a>
+                <a class="item" ng-click="doContextAction('removedatatorrent')">
+                    Delete All
+                </a>
+            </div>
+        </div>
+    </div>
+</context-menu>
 </div>

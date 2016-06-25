@@ -1,17 +1,15 @@
 angular.module("torrentApp").directive('contextMenu', ['$document', '$window', function($document, $window) {
     return {
         restrict: 'E',
-        scope : {
-            bind: '='
-        },
         link: link
     }
 
-    function link(scope, element){
+    function link(scope, element, attr){
+        console.log("Context menu!", scope);
         element.data('contextmenu',true);
 
         // Bind show function to scope variable
-        scope.bind = {
+        scope.$parent[attr.bind] = {
             show: showContextMenu(element),
             hide: hideContextMenu(element)
         };

@@ -153,7 +153,7 @@ html, body {
 .overlay.ng-hide-add-active,
 .overlay.ng-hide-remove-active {
   /* the transition is defined in the active class */
-  transition: 0.20s ease-out all;
+  transition: 0.24s ease-out all;
 }
 
 .overlay.ng-hide-add {
