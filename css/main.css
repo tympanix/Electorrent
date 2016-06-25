@@ -140,6 +140,14 @@ html, body {
     z-index: 100000;
 }
 
+.main.wrapper {
+    background-color: #F0F0F0;
+}
+
+.narrow.column {
+    max-width: 450px;
+}
+
 /*#########################################*/
 /* Overlay Animation */
 /*#########################################*/
@@ -147,13 +155,13 @@ html, body {
 .overlay.ng-hide-add, .overlay.ng-hide-remove {
   /* this is required as of 1.3x to properly
      apply all styling in a show/hide animation */
-  transition: 0s ease-out all;
+  -webkit-transition: 0s cubic-bezier(.24,.78,.35,.99) all;
 }
 
 .overlay.ng-hide-add-active,
 .overlay.ng-hide-remove-active {
   /* the transition is defined in the active class */
-  transition: 0.24s ease-out all;
+  -webkit-transition: 0.24s cubic-bezier(.24,.78,.35,.99) all;
 }
 
 .overlay.ng-hide-add {

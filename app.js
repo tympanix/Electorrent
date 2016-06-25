@@ -19,7 +19,7 @@ let torrentWindow;
 let connectWindow;
 
 // Configurations database
-const config = level('./config');
+const config = level('./config', { valueEncoding: 'json' });
 global.config = config;
 
 config.get('animal', function(err, animal){

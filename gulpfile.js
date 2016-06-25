@@ -16,7 +16,7 @@ gulp.task('serve', function () {
     gulp.watch('app.js', electron.restart);
 
     // Reload renderer process
-    gulp.watch(['main.js', 'index.html', 'css/**/*.css', 'scripts/**/*.js'], electron.reload);
+    gulp.watch(['main.js', 'index.html', 'css/**/*.css', 'scripts/**/*.js', 'views/**'], electron.reload);
 });
 
 gulp.task('build:clean', function() {
