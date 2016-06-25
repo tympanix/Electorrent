@@ -83,3 +83,9 @@ bower_components
 
 # Ignore distibution folder
 dist
+
+# Database configuration
+config
+
+# Build
+build

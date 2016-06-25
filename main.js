@@ -1,1 +1,1 @@
-var torrentApp = angular.module("torrentApp", ["ngResource"]);
+var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate"]);
