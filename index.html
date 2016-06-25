@@ -14,17 +14,20 @@
 </head>
 <body ng-controller="mainController">
     <div class="wrapper">
-        <!-- Settings -->
+        <!-- Settings Screen -->
         <div ng-show="showSettings()" class="overlay">
-            <div ng-include="'./views/settings.html'" ng-controller="settingsController"></div>
+            <div ng-include="'./views/settings.html'"></div>
         </div>
 
+        <!-- Welcome Screen -->
         <div ng-show="showWelcome()" class="overlay">
             <div ng-include="'./views/welcome.html'"></div>
         </div>
 
         <!-- Torrents -->
-        <div ng-include="'./views/torrents.html'" ng-controller="torrentsController"></div>
+        <div ng-show="showTorrents()">
+            <div ng-include="'./views/torrents.html'"></div>
+        </div>
 
     </div>
 
@@ -49,11 +52,13 @@
     <script src="scripts/controllers/main.js" charset="utf-8"></script>
     <script src="scripts/controllers/torrents.js" charset="utf-8"></script>
     <script src="scripts/controllers/settings.js" charset="utf-8"></script>
+    <script src="scripts/controllers/welcome.js" charset="utf-8"></script>
 
     <!-- Services -->
     <script src="scripts/services/torrent.js" charset="utf-8"></script>
     <script src="scripts/services/utorrentservice.js" charset="utf-8"></script>
     <script src="scripts/services/electron.js" charset="utf-8"></script>
+    <script src="scripts/services/config.js" charset="utf-8"></script>
 
     <!-- Filters -->
     <script src="scripts/filters/dateFilter.js" charset="utf-8"></script>

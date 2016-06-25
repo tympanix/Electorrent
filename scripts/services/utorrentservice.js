@@ -6,6 +6,7 @@ angular.module('torrentApp')
         var loading = null;
         var data = {
             url: 'http://192.168.0.33:8080/gui/',
+            username: null,
             password: null,
             token: null,
             cid: 0,
@@ -23,6 +24,33 @@ angular.module('torrentApp')
 
         var torrentServerService = {
             conf: data,
+            connect: function(ip, port, username, password) {
+                data.username = username;
+                data.password = password;
+                data.url = 'http://'+ip+':'+port+'/gui/';
+                return torrentServerService.auth();
+            },
+            auth: function() {
+                var loading = $q.defer();
+                $log.info('get token');
+                var encoded = new Buffer(data.username+":"+data.password).toString('base64');
+                $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
+                $http.get(data.url + 'token.html?t=' + Date.now(), {
+                    timeout: 30000
+                }).
+                success(function(str) {
+                    var match = str.match(/>([^<]+)</);
+                    if (match) {
+                        data.token = match[match.length - 1];
+                        loading.resolve(data.token);
+                        $log.info('got token ' + data.token);
+                    }
+                }).error(function() {
+                    loading.reject('Error loading token');
+                    $log.error(arguments);
+                });
+                return loading.promise;
+            },
             init: function() {
                 if (data.token) {
                     $log.info('token already cached');
