@@ -3,6 +3,8 @@ angular.module("torrentApp").controller("mainController", ["$scope", "$interval"
     var selected = [];
     var lastSelected = null;
 
+    $scope.page = "torrents";
+
     ut.init().then(function(){
         $scope.update();
     });

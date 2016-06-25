@@ -3,12 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Electorrent</title>
+
+    <!-- build:css css/vendor.css -->
     <link rel="stylesheet" href="bower_components/semantic/dist/semantic.min.css">
+    <!-- endbuild -->
+
+    <!-- build:css css/styles.css -->
     <link rel="stylesheet" href="css/main.css" charset="utf-8">
+    <!-- endbuild -->
 </head>
 <body ng-controller="mainController">
-
     <div class="wrapper">
+        <div ng-show="showSettings" class="overlay">
+            <div ng-include="'./views/settings.html'" ng-controller="settingsController"></div>
+        </div>
+
         <div class="sidebar">
             <ul class="nav">
                 <li ng-click="filterByStatus('downloading')">
@@ -59,6 +68,7 @@
                 </a>
                 <a class="ui button" ng-click="download()">Download</a>
                 <a class="ui button" ng-click="update()">Update</a>
+                <a class="ui button" ng-click="showSettings = true">Settings</a>
             </div>
             <div class="main-content">
                 <table class="ui single line unstackable selectable fixed compact torrent table">
@@ -135,16 +145,23 @@
 <script type="text/javascript">
 window.$ = window.jQuery = require('jquery');
 </script>
+
+<!-- build:js ./scripts/vendor.js -->
+<script>require('./scripts/windows/torrentWindow.js')</script>
 <script src="bower_components/angular/angular.js" charset="utf-8"></script>
 <script src="bower_components/angular-resource/angular-resource.min.js" charset="utf-8"></script>
+<script src="bower_components/angular-animate/angular-animate.js" charset="utf-8"></script>
 <script src="bower_components/moment/min/moment.min.js" charset="utf-8"></script>
 <script src="bower_components/semantic/dist/semantic.min.js" charset="utf-8"></script>
+<!-- endbuild -->
 
+<!-- build:js ./scripts/app.js -->
 <!-- Application -->
 <script src="main.js" charset="utf-8"></script>
 
 <!-- Controllers -->
-<script src="scripts\controllers\main.js" charset="utf-8"></script>
+<script src="scripts/controllers/main.js" charset="utf-8"></script>
+<script src="scripts/controllers/settings.js" charset="utf-8"></script>
 
 <!-- Services -->
 <script src="scripts\services\torrent.js" charset="utf-8"></script>
@@ -160,6 +177,7 @@ window.$ = window.jQuery = require('jquery');
 <script src="scripts/directives/rightclick.js" charset="utf-8"></script>
 <script src="scripts/directives/contextmenu.js" charset="utf-8"></script>
 <script src="scripts/directives/dropdown.js" charset="utf-8"></script>
+<!-- endbuild -->
 
 <!-- build:remove -->
 <!-- Connect to server process -->
