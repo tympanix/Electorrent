@@ -14,174 +14,66 @@
 </head>
 <body ng-controller="mainController">
     <div class="wrapper">
-        <div ng-show="showSettings" class="overlay">
+        <!-- Settings -->
+        <div ng-show="showSettings()" class="overlay">
             <div ng-include="'./views/settings.html'" ng-controller="settingsController"></div>
         </div>
 
-        <div class="sidebar">
-            <ul class="nav">
-                <li ng-click="filterByStatus('downloading')">
-                    <i class="ui large blue arrow down icon"></i>
-                    Downloading
-                    <div class="ui torrent label">{{numInFilter('downloading')}}</div>
-                </li>
-                <li ng-click="filterByStatus('finished')">
-                    <i class="ui large green checkmark icon"></i>
-                    Finished
-                    <div class="ui torrent label">{{numInFilter('finished')}}</div>
-                </li>
-                <li ng-click="filterByStatus('seeding')">
-                    <i class="ui large orange arrow up icon"></i>
-                    Seeding
-                    <div class="ui torrent label">{{numInFilter('seeding')}}</div>
-                </li>
-                <li ng-click="filterByStatus('paused')">
-                    <i class="ui large grey pause icon"></i>
-                    Paused
-                    <div class="ui torrent label">{{numInFilter('paused')}}</div>
-                </li>
-                <li ng-click="filterByStatus('queued')">
-                    <i class="ui large yellow tasks icon"></i>
-                    Queued
-                    <div class="ui torrent label">{{numInFilter('queued')}}</div>
-                </li>
-                <li ng-click="filterByStatus('error')">
-                    <i class="ui large red remove icon"></i>
-                    Failed
-                    <div class="ui torrent label">{{numInFilter('error')}}</div>
-                </li>
-            </ul>
+        <div ng-show="showWelcome()" class="overlay">
+            <div ng-include="'./views/welcome.html'"></div>
         </div>
-        <div class="main-panel">
-            <div class="action header">
-                <a class="ui green labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('start')">
-                    <i class="play icon"></i>
-                    Start
-                </a>
-                <a class="ui red labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('stop')">
-                    <i class="stop icon"></i>
-                    Stop
-                </a>
-                <a class="ui yellow labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('pause')">
-                    <i class="pause icon"></i>
-                    Pause
-                </a>
-                <a class="ui button" ng-click="download()">Download</a>
-                <a class="ui button" ng-click="update()">Update</a>
-                <a class="ui button" ng-click="showSettings = true">Settings</a>
-            </div>
-            <div class="main-content">
-                <table class="ui single line unstackable selectable fixed compact torrent table">
-                    <thead>
-                        <tr>
-                            <th class="eight wide">Name</th>
-                            <th class="two wide">Size</th>
-                            <th class="three wide">Progress</th>
-                            <th class="three wide">Date Added</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="torrent in arrayTorrents"
-                        ng-class="{active: torrent.selected}"
-                        ng-click="setSelected($event, torrent, $index)"
-                        ng-right-click="showContextMenu($event, torrent, $index)">
-                        <td>{{torrent.decodedName}}</td>
-                        <td>{{torrent.size | bytes}}</td>
-                        <td>
-                            <div class="ui torrent progress success" progress="torrent">
-                                <label></label>
-                                <div class="bar"></div>
-                            </div>
-                        </td>
-                        <td>{{torrent.dateAdded | date}}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+
+        <!-- Torrents -->
+        <div ng-include="'./views/torrents.html'" ng-controller="torrentsController"></div>
+
     </div>
-</div>
 
-<context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
-    <div class="ui vertical menu">
-        <a class="item" ng-click="doContextAction('recheck')">
-            <i class="ui checkmark icon"></i>
-            Recheck
-        </a>
-        <a class="item" ng-click="doContextAction('forcerestart')">
-            <i class="ui flag icon"></i>
-            Force Start
-        </a>
-        <a class="item" ng-click="doContextAction('queueup')">
-            <i class="ui arrow up icon"></i>
-            Move Up Queue
-        </a>
-        <a class="item" ng-click="doContextAction('queuedown')">
-            <i class="ui arrow down icon"></i>
-            Move Down Queue
-        </a>
-        <a class="item" ng-click="doContextAction('remove')">
-            <i class="ui remove icon"></i>
-            Remove
-        </a>
-        <div class="ui context dropdown item">
-            <i class="dropdown icon"></i>
-            Remove And
-            <div class="menu">
-                <a class="item" ng-click="doContextAction('removetorrent')">
-                    Delete Torrent
-                </a>
-                <a class="item" ng-click="doContextAction('removedata')">
-                    Delete Data
-                </a>
-                <a class="item" ng-click="doContextAction('removedatatorrent')">
-                    Delete All
-                </a>
-            </div>
-        </div>
-    </div>
-</context-menu>
+    <!-- Dependencies -->
+    <script type="text/javascript">
+    window.$ = window.jQuery = require('jquery');
+    </script>
 
-<!-- Dependencies -->
-<script type="text/javascript">
-window.$ = window.jQuery = require('jquery');
-</script>
+    <!-- build:js ./scripts/vendor.js -->
+    <script src="bower_components/angular/angular.js" charset="utf-8"></script>
+    <script src="bower_components/angular-resource/angular-resource.min.js" charset="utf-8"></script>
+    <script src="bower_components/angular-animate/angular-animate.js" charset="utf-8"></script>
+    <script src="bower_components/moment/min/moment.min.js" charset="utf-8"></script>
+    <script src="bower_components/semantic/dist/semantic.min.js" charset="utf-8"></script>
+    <!-- endbuild -->
 
-<!-- build:js ./scripts/vendor.js -->
-<script>require('./scripts/windows/torrentWindow.js')</script>
-<script src="bower_components/angular/angular.js" charset="utf-8"></script>
-<script src="bower_components/angular-resource/angular-resource.min.js" charset="utf-8"></script>
-<script src="bower_components/angular-animate/angular-animate.js" charset="utf-8"></script>
-<script src="bower_components/moment/min/moment.min.js" charset="utf-8"></script>
-<script src="bower_components/semantic/dist/semantic.min.js" charset="utf-8"></script>
-<!-- endbuild -->
+    <!-- build:js ./scripts/app.js -->
+    <!-- Application -->
+    <script src="main.js" charset="utf-8"></script>
 
-<!-- build:js ./scripts/app.js -->
-<!-- Application -->
-<script src="main.js" charset="utf-8"></script>
+    <!-- Controllers -->
+    <script src="scripts/controllers/main.js" charset="utf-8"></script>
+    <script src="scripts/controllers/torrents.js" charset="utf-8"></script>
+    <script src="scripts/controllers/settings.js" charset="utf-8"></script>
 
-<!-- Controllers -->
-<script src="scripts/controllers/main.js" charset="utf-8"></script>
-<script src="scripts/controllers/settings.js" charset="utf-8"></script>
+    <!-- Services -->
+    <script src="scripts/services/torrent.js" charset="utf-8"></script>
+    <script src="scripts/services/utorrentservice.js" charset="utf-8"></script>
+    <script src="scripts/services/electron.js" charset="utf-8"></script>
 
-<!-- Services -->
-<script src="scripts\services\torrent.js" charset="utf-8"></script>
-<script src="scripts\services\utorrentservice.js" charset="utf-8"></script>
+    <!-- Filters -->
+    <script src="scripts/filters/dateFilter.js" charset="utf-8"></script>
+    <script src="scripts/filters/toArray.js" charset="utf-8"></script>
+    <script src="scripts/filters/bytes.js" charset="utf-8"></script>
 
-<!-- Filters -->
-<script src="scripts/filters/dateFilter.js" charset="utf-8"></script>
-<script src="scripts/filters/toArray.js" charset="utf-8"></script>
-<script src="scripts/filters/bytes.js" charset="utf-8"></script>
+    <!-- Directives -->
+    <script src="scripts/directives/progress.js" charset="utf-8"></script>
+    <script src="scripts/directives/rightclick.js" charset="utf-8"></script>
+    <script src="scripts/directives/contextmenu.js" charset="utf-8"></script>
+    <script src="scripts/directives/dropdown.js" charset="utf-8"></script>
 
-<!-- Directives -->
-<script src="scripts/directives/progress.js" charset="utf-8"></script>
-<script src="scripts/directives/rightclick.js" charset="utf-8"></script>
-<script src="scripts/directives/contextmenu.js" charset="utf-8"></script>
-<script src="scripts/directives/dropdown.js" charset="utf-8"></script>
-<!-- endbuild -->
 
-<!-- build:remove -->
-<!-- Connect to server process -->
-<script>require('electron-connect').client.create()</script>
-<!-- end:build -->
+    <!-- Components -->
+    <script src="scripts/components/menu.js" charset="utf-8"></script>
+    <!-- endbuild -->
+
+    <!-- build:remove -->
+    <!-- Connect to server process -->
+    <script>require('electron-connect').client.create()</script>
+    <!-- end:build -->
 </body>
 </html>

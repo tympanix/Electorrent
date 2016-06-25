@@ -20,6 +20,7 @@ let connectWindow;
 
 // Configurations database
 const config = level('./config');
+global.config = config;
 
 config.get('animal', function(err, animal){
     console.log("Config", animal);
