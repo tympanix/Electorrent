@@ -2,14 +2,14 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
     return {
         restrict: 'E',
         link: link
-    }
+    };
 
     function link(scope, element, attr){
         console.log("Context menu!", scope);
         element.data('contextmenu',true);
 
         // Bind show function to scope variable
-        scope.$parent[attr.bind] = {
+        scope[attr.bind] = {
             show: showContextMenu(element),
             hide: hideContextMenu(element)
         };
@@ -42,7 +42,7 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
             .mouseleave(function(){
                 $(this).find('.menu').hide();
             });
-        })
+        });
     }
 
     function bindCloseOperations(element) {
@@ -89,6 +89,6 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
     function hideContextMenu(element) {
         return function(){
             $(element).hide();
-        }
+        };
     }
 }]);

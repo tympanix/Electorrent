@@ -1,14 +1,14 @@
-angular.module("torrentApp").controller("mainController", ["$scope", "utorrentService", "electron", function ($scope, $utorrentService, electron) {
+angular.module("torrentApp").controller("mainController", ["$scope", "utorrentService", "electron", "configService", function ($scope, $utorrentService, electron, config) {
     var ut = $utorrentService;
-    $scope.hello = "Hello settings world!";
-
+    var showTorrents = false;
     var page = null;
 
-    electron.config.get('first', function(err, data){
-        if (err){
-            page = 'welcome';
-            $scope.$apply();
-        }
+    config.getServer().then(function(){
+        // TODO: Try to connect to server
+        showTorrents = true;
+    }).catch(function(){
+        // First time starting application
+        page = 'welcome';
     })
 
     $scope.$on('show:settings', function(event, data) {
@@ -31,6 +31,10 @@ angular.module("torrentApp").controller("mainController", ["$scope", "utorrentSe
 
     $scope.showWelcome = function() {
         return page === 'welcome';
+    }
+
+    $scope.showTorrents = function() {
+        return showTorrents;
     }
 
 }]);
