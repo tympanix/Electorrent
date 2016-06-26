@@ -1,10 +1,10 @@
 {
   "name": "electorrent",
   "version": "1.0.0",
-  "description": "A simple app for handling magnet links and torrents for my home server",
+  "description": "An Electron/Node/AngularJS remote client app for uTorrent server",
   "main": "app.js",
   "scripts": {
-    "start": "electron . sucker",
+    "start": "electron .",
     "build": "electron-packager . Electorrent --platform=win32 --arch=x64 --out=./build --overwrite --ignore=node_modules/*"
   },
   "keywords": [
@@ -19,13 +19,9 @@
     "electron-rebuild": "^1.1.5",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
-    "gulp-processhtml": "^1.1.0",
+    "gulp-run": "^1.7.1",
     "gulp-useref": "^3.1.0",
-    "jquery": "^3.0.0",
     "run-sequence": "^1.2.1"
   },
-  "dependencies": {
-    "level": "^1.4.0",
-    "path": "^0.12.7"
-  }
+  "dependencies": {}
 }
