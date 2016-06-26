@@ -1,5 +1,5 @@
 angular.module('torrentApp').factory("electron", [function() {
-    var o = new Object();
+    var o = {};
 
     // Get the Electron remote
     const remote        = require('electron').remote;
@@ -24,5 +24,7 @@ angular.module('torrentApp').factory("electron", [function() {
 
     // Custom resources
     o.config            = remote.getGlobal('config');
+
+    // Return object
     return o;
 }])

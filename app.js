@@ -10,18 +10,16 @@ const {BrowserWindow} = electron;
 // Require IPC module to communicate with render processes
 const {ipcMain} = electron;
 
-// LevelDB for storing configurations
-const level = require('level');
 const path = require('path');
+
+// Configuration module
+const config = require('./lib/config.js');
+config.init(path.join(app.getPath('userData'), 'config.json'));
+global.config = config;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let torrentWindow;
-
-// Configurations database
-const configPath = path.join(app.getPath('userData'), 'config');
-const config = level(configPath, { valueEncoding: 'json' });
-global.config = config;
 
 // Register handler for magnet links
 app.setAsDefaultProtocolClient('magnet');
@@ -48,9 +46,9 @@ function createTorrentWindow() {
     torrentWindow.openDevTools();
 }
 
-function sendMagnetLinks(arguments){
+function sendMagnetLinks(args){
     var magnetLinks = [];
-    arguments.forEach(function(val){
+    args.forEach(function(val){
         if (val.startsWith('magnet')){
             magnetLinks.push(val);
         }
@@ -63,11 +61,11 @@ ipcMain.on('send:magnets', function(){
 })
 
 // If another instance of the app is allready running, execute this callback
-var shouldQuit = app.makeSingleInstance(function(arguments /*, workingDirectory*/) {
+var shouldQuit = app.makeSingleInstance(function(args /*, workingDirectory*/) {
     // Someone tried to run a second instance, we should focus our window
 
     if (torrentWindow) {
-        sendMagnetLinks(arguments);
+        sendMagnetLinks(args);
         if (torrentWindow.isMinimized()) torrentWindow.restore();
         torrentWindow.focus();
     }
