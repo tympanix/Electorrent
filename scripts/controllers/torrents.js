@@ -2,6 +2,7 @@
 
 angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "utorrentService", function ($scope, $timeout, $filter, $log, $utorrentService) {
     const TIMEOUT = 2000;
+    const LIMIT = 25;
 
     var ut = $utorrentService;
     var selected = [];
@@ -11,9 +12,14 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.torrents = {};
     $scope.arrayTorrents = [];
     $scope.contextMenu = null;
+    $scope.torrentLimit = LIMIT;
 
     $scope.filters = {
         status: 'downloading'
+    };
+
+    $scope.showMore = function() {
+        $scope.torrentLimit += LIMIT;
     };
 
     $scope.debug = function(){
@@ -58,6 +64,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         deselectAll();
         lastSelected = null;
         $scope.filters.status = status;
+        $scope.torrentLimit = LIMIT;
         refreshTorrents();
     }
 

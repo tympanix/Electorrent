@@ -1,6 +1,6 @@
 {
-  "name": "torrent-app",
-  "description": "A simple app for handling magnet links and torrents for my home server",
+  "name": "electorrent",
+  "description": "An Electron/Node/AngularJS remote client app for uTorrent server",
   "main": "app.js",
   "authors": [
     "Mathias Mortensen"
@@ -9,7 +9,6 @@
   "keywords": [
     "utorrent"
   ],
-  "homepage": "s.sparken.dk",
   "private": true,
   "ignore": [
     "**/.*",
@@ -25,6 +24,7 @@
     "semantic": "^2.1.8",
     "moment": "momentjs#^2.13.0",
     "jQuery": "^3.0.0",
-    "angular-animate": "^1.5.7"
+    "angular-animate": "^1.5.7",
+    "ngInfiniteScroll": "^1.2.2"
   }
 }
