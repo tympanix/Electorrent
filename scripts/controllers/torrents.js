@@ -1,11 +1,10 @@
-angular.module("torrentApp").controller("torrentsController", ["$scope", "$interval", "$filter", "$log", "utorrentService", function ($scope, $interval, $filter, $log, $utorrentService) {
+angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "utorrentService", function ($scope, $timeout, $filter, $log, $utorrentService) {
+    const TIMEOUT = 2000;
+
     var ut = $utorrentService;
     var selected = [];
     var lastSelected = null;
-
-    ut.init().then(function(){
-        $scope.update();
-    });
+    var timeout;
 
     $scope.torrents = {};
     $scope.arrayTorrents = [];
@@ -15,8 +14,35 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$inter
         status: 'downloading'
     }
 
+    $scope.$on('start:torrents', function(){
+        console.info("Received start torrents!");
+        $scope.update();
+        startTimer();
+    })
+
+    $scope.$on('show:settings', function(){
+        stopTimer();
+    })
+
+    function startTimer(){
+        timeout = $timeout(function(){
+            //console.info("Update!");
+            $scope.update().then(function(){
+                startTimer();
+            })
+        }, 2000)
+    }
+
+    function stopTimer(){
+        console.info("Torrents stopped");
+        $timeout.cancel(timeout);
+    }
+
     $scope.download = function(){
-        ut.addTorrentUrl("magnet:?xt=urn:btih:B8E6C2551CD060F1D31657C11787DF9F65AE5A13&dn=orange+is+the+new+black+s04e01+webrip+xvid+mp3+rarbg&tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce");
+        ut.addTorrentUrl("magnet:?xt=urn:btih:B8E6C2551CD060F1D31657C11787DF9F65AE5A13&dn=orange+is+the+new+black+s04e01+webrip+xvid+mp3+rarbg&tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce")
+        .then(function(){
+            $scope.update();
+        });
     };
 
     $scope.filterByStatus = function(status){
@@ -101,15 +127,17 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$inter
         } else {
             singleSelect(torrent);
         }
-        console.log("Selected", selected);
+        //console.log("Selected", selected);
     }
 
     $scope.update = function() {
-        ut.torrents().then(function(torrents){
+        var q = ut.torrents()
+        q.then(function(torrents){
             newTorrents(torrents);
             deleteTorrents(torrents);
             changeTorrents(torrents);
         });
+        return q;
     };
 
     function getSelectedHashes(){
@@ -183,6 +211,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$inter
         if (torrents.all && torrents.all.length > 0) {
             for (var i = 0; i < torrents.all.length; i++){
                 var torrent = ut.build(torrents.all[i]);
+                //console.info("New torrent", torrent.decodedName);
                 $scope.torrents[torrent.hash] = torrent;
             }
             refreshTorrents()
@@ -202,7 +231,8 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$inter
         if (torrents.changed && torrents.changed.length > 0) {
             for (var i = 0; i < torrents.changed.length; i++) {
                 var torrent = ut.build(torrents.changed[i]);
-                if ($scope.torrents[torrent.hash].selected){
+                var existing = $scope.torrents[torrent.hash];
+                if (existing && existing.selected){
                     torrent.selected = true;
                 }
                 $scope.torrents[torrent.hash] = torrent;
@@ -210,9 +240,5 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$inter
             refreshTorrents()
         }
     }
-
-    $interval(function(){
-        $scope.update();
-    }, 2000);
 
 }])

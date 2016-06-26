@@ -24,8 +24,7 @@ html, body {
     display: block;
     z-index: 1;
     color: #000;
-    background-size: cover;
-    background-position: center center;
+    background-color: #FFF;
     overflow-x: hidden;
     border-right: 1px solid #CECECE;
 }
@@ -53,7 +52,7 @@ html, body {
 }
 
 .main-panel {
-    background: rgba(203, 203, 210, 0.15);
+    background: rgba(247, 247, 248, 1);
     position: relative;
     z-index: 2;
     float: right;

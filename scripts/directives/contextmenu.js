@@ -5,7 +5,6 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
     };
 
     function link(scope, element, attr){
-        console.log("Context menu!", scope);
         element.data('contextmenu',true);
 
         // Bind show function to scope variable
@@ -30,7 +29,6 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
         });
 
         $(element).find('.context.dropdown').each(function(){
-            console.log("Linking sub menu", this);
             $(this)
             .mouseenter(function(){
                 var menu = $(this).find('.menu')
