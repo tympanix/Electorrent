@@ -32,7 +32,7 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
             $(this)
             .mouseenter(function(){
                 var menu = $(this).find('.menu')
-                var height = menu.innerHeight();
+                // var height = menu.innerHeight();
                 // menu.addClass('upward');
                 // menu.css('margin-top', (-1*height) + 'px')
                 menu.show();
@@ -81,7 +81,7 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', f
                 top: menuY,
                 display: 'block'
             });
-        }
+        };
     }
 
     function hideContextMenu(element) {

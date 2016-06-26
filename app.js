@@ -12,21 +12,19 @@ const {ipcMain} = electron;
 
 // LevelDB for storing configurations
 const level = require('level');
+const path = require('path');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let torrentWindow;
-let connectWindow;
 
 // Configurations database
-const config = level('./config', { valueEncoding: 'json' });
+const configPath = path.join(app.getPath('userData'), 'config');
+const config = level(configPath, { valueEncoding: 'json' });
 global.config = config;
 
-// Load arguments
-global.arguments = process.argv.splice(1);
-global.arguments.forEach(function(val,index, array) {
-    console.log(index + ': ' + val);
-});
+// Register handler for magnet links
+app.setAsDefaultProtocolClient('magnet');
 
 function createTorrentWindow() {
     // Create the browser window.
@@ -50,30 +48,31 @@ function createTorrentWindow() {
     torrentWindow.openDevTools();
 }
 
-function createConnectWindow(){
-    connectWindow = new BrowserWindow({
-        parent: torrentWindow,
-        modal: true,
-        width: 500, height: 300,
-        show: false
-    });
-
-    connectWindow.loadURL(`file://${__dirname}/connect.html`);
-
-    connectWindow.on('closed', () => {
-        connectWindow = null;
-        console.log("Connect window closed!");
-    });
+function sendMagnetLinks(arguments){
+    var magnetLinks = [];
+    arguments.forEach(function(val){
+        if (val.startsWith('magnet')){
+            magnetLinks.push(val);
+        }
+    })
+    torrentWindow.webContents.send('magnet', magnetLinks);
 }
 
+ipcMain.on('send:magnets', function(){
+    sendMagnetLinks(process.argv);
+})
+
 // If another instance of the app is allready running, execute this callback
-var shouldQuit = app.makeSingleInstance(function(commandLine, workingDirectory) {
+var shouldQuit = app.makeSingleInstance(function(arguments /*, workingDirectory*/) {
     // Someone tried to run a second instance, we should focus our window
+
     if (torrentWindow) {
+        sendMagnetLinks(arguments);
         if (torrentWindow.isMinimized()) torrentWindow.restore();
         torrentWindow.focus();
     }
     return true;
+
 });
 
 if (shouldQuit) {
@@ -86,7 +85,6 @@ if (shouldQuit) {
 // Some APIs can only be used after this event occurs.
 app.on('ready', function(){
     createTorrentWindow();
-    createConnectWindow();
 });
 
 // Quit when all windows are closed.
@@ -102,16 +100,6 @@ app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (torrentWindow === null) {
-        createWindow();
+        createTorrentWindow();
     }
 });
-
-ipcMain.on('show-connect', function(){
-    if (!connectWindow){
-        createConnectWindow();
-    }
-    connectWindow.show();
-});
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
