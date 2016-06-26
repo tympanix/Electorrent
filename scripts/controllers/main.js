@@ -1,17 +1,20 @@
 
-angular.module("torrentApp").controller("mainController", ["$scope", "utorrentService", "electron", "configService", function ($scope, $utorrentService, electron, config) {
+angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "utorrentService", "electron", "configService", function ($rootScope, $scope, $timeout, $utorrentService, electron, config) {
     const PAGE_SETTINGS = 'settings';
     const PAGE_WELCOME = 'welcome';
 
-    var showTorrents = false;
+    $scope.showTorrents = false;
     var page = null;
 
-    config.getServer().then(function(data){
-        connectToServer(data.ip, data.port, data.user, data.password)
-    }).catch(function(){
-        // First time starting application
-        page = 'welcome';
-    })
+    $rootScope.$on('ready', function() {
+        config.getServer().then(function(data){
+            console.log("Connect", data);
+            connectToServer(data.ip, data.port, data.user, data.password)
+        }).catch(function(){
+            // First time starting application
+            pageWelcome();
+        })
+    });
 
     function connectToServer(ip, port, user, password){
         $utorrentService.connect(ip, port, user, password)
@@ -37,13 +40,18 @@ angular.module("torrentApp").controller("mainController", ["$scope", "utorrentSe
     })
 
     function pageTorrents(){
-        showTorrents = true;
+        console.info("Show torrents page!");
+        $scope.showTorrents = true;
         $scope.$broadcast('start:torrents');
         page = null;
     }
 
     function pageSettings(){
         page = PAGE_SETTINGS;
+    }
+
+    function pageWelcome(){
+        page = PAGE_WELCOME;
     }
 
     $scope.$on('show:settings', function() {
@@ -67,10 +75,6 @@ angular.module("torrentApp").controller("mainController", ["$scope", "utorrentSe
 
     $scope.showWelcome = function() {
         return page === PAGE_WELCOME;
-    }
-
-    $scope.showTorrents = function() {
-        return showTorrents;
     }
 
 }]);

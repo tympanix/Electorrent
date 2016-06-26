@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "electron . sucker",
-    "build": "electron-packager . Electorrent --platform=win32 --arch=x64 --out=./build --overwrite --ignore=node_modules/electron-* --ignore=node_modules/gulp*"
+    "build": "electron-packager . Electorrent --platform=win32 --arch=x64 --out=./build --overwrite --ignore=node_modules/*"
   },
   "keywords": [
     "utorrent"
