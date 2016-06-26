@@ -212,6 +212,9 @@ angular.module('torrentApp')
         Torrent.prototype.isStatusSeeding = function() {
             return this.isStatusStarted() && (this.isStatusCompleted());
         };
+        Torrent.prototype.isStatusStopped = function() {
+            return (!this.isStatusStarted()) && (!this.isStatusCompleted());
+        };
 
         Torrent.prototype.getQueueStr = function() {
             if (this.torrentQueueOrder === -1) {

@@ -17,15 +17,10 @@
             Seeding
             <div class="ui torrent label">{{numInFilter('seeding')}}</div>
         </li>
-        <li ng-click="filterByStatus('paused')">
-            <i class="ui large grey pause icon"></i>
-            Paused
-            <div class="ui torrent label">{{numInFilter('paused')}}</div>
-        </li>
-        <li ng-click="filterByStatus('queued')">
-            <i class="ui large yellow tasks icon"></i>
-            Queued
-            <div class="ui torrent label">{{numInFilter('queued')}}</div>
+        <li ng-click="filterByStatus('stopped')">
+            <i class="ui large grey stop icon"></i>
+            Stopped
+            <div class="ui torrent label">{{numInFilter('stopped')}}</div>
         </li>
         <li ng-click="filterByStatus('error')">
             <i class="ui large red remove icon"></i>
@@ -83,6 +78,10 @@
 
 <context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
     <div class="ui vertical menu">
+        <a class="item" ng-click="debug()">
+            <i class="ui info icon"></i>
+            Debug
+        </a>
         <a class="item" ng-click="doContextAction('recheck')">
             <i class="ui checkmark icon"></i>
             Recheck
