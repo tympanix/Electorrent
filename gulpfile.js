@@ -55,3 +55,7 @@ gulp.task('build', function() {
 gulp.task('pack:win64', ['build'], function(){
     return run('electron-packager ./dist Electorrent --platform=win32 --arch=x64 --out=./build --overwrite').exec()
 });
+
+gulp.task('pack:win32', ['build'], function(){
+    return run('electron-packager ./dist Electorrent --platform=win32 --arch=ia32 --out=./build --overwrite').exec()
+});

@@ -122,7 +122,7 @@ html, body {
 }
 
 .torrent.context.menu .ui.vertical.menu {
-    box-shadow: 0 0 50px #AAA;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
 }
 
 /*.ui.vertical.menu .ui.dropdown.item .menu.upward {
