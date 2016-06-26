@@ -1,11 +1,11 @@
 {
-  "name": "torrent-app",
+  "name": "electorrent",
   "version": "1.0.0",
   "description": "A simple app for handling magnet links and torrents for my home server",
   "main": "app.js",
   "scripts": {
     "start": "electron . sucker",
-    "build": "electron-packager ./dist Electorrent --platform=win32 --arch=x64 --out=./build --overwrite"
+    "build": "electron-packager . Electorrent --platform=win32 --arch=x64 --out=./build --overwrite --ignore=node_modules/electron-* --ignore=node_modules/gulp*"
   },
   "keywords": [
     "utorrent"
@@ -25,6 +25,7 @@
     "run-sequence": "^1.2.1"
   },
   "dependencies": {
-    "level": "^1.4.0"
+    "level": "^1.4.0",
+    "path": "^0.12.7"
   }
 }

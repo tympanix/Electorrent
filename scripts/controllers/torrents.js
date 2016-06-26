@@ -1,3 +1,5 @@
+"use strict";
+
 angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "utorrentService", function ($scope, $timeout, $filter, $log, $utorrentService) {
     const TIMEOUT = 2000;
 
@@ -12,25 +14,32 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
 
     $scope.filters = {
         status: 'downloading'
-    }
+    };
+
+    $scope.debug = function(){
+        for (var i = 0; i < selected.length; i++){
+            console.info(selected[i]);
+        }
+        $scope.contextMenu.hide();
+    };
 
     $scope.$on('start:torrents', function(){
         console.info("Received start torrents!");
         $scope.update();
         startTimer();
-    })
+    });
 
     $scope.$on('show:settings', function(){
         stopTimer();
-    })
+    });
 
     function startTimer(){
         timeout = $timeout(function(){
             //console.info("Update!");
             $scope.update().then(function(){
                 startTimer();
-            })
-        }, 2000)
+            });
+        }, TIMEOUT);
     }
 
     function stopTimer(){
@@ -52,7 +61,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         refreshTorrents();
     }
 
-    $scope.showContextMenu = function(event, torrent, index) {
+    $scope.showContextMenu = function(event, torrent /*, index*/) {
         if (!torrent.selected){
             singleSelect(torrent);
         }
@@ -62,8 +71,10 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
 
     $scope.numInFilter = function(status) {
         var num = 0;
-        angular.forEach($scope.torrents, function(torrent, hash) {
-            if (statusFilter(torrent, status)) num++;
+        angular.forEach($scope.torrents, function(torrent /*, hash*/) {
+            if (statusFilter(torrent, status)){
+                num++;
+            }
         });
         return num;
     }
@@ -100,7 +111,9 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
 
     function multiSelect(index){
         var lastIndex = $scope.arrayTorrents.indexOf(lastSelected);
-        if (lastIndex < 0) return;
+        if (lastIndex < 0){
+            return;
+        }
 
         var i, j;
         if (lastIndex < index){
@@ -168,7 +181,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
 
     function fetchTorrents(){
         var results = [];
-        angular.forEach($scope.torrents, function(torrent, hash) {
+        angular.forEach($scope.torrents, function(torrent /*, hash*/) {
             results.push(torrent);
         });
         return results;
@@ -188,6 +201,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
             case 'queued': return torrent.isStatusQueued();
             case 'seeding': return torrent.isStatusSeeding();
             case 'error': return torrent.isStatusError();
+            case 'stopped': return torrent.isStatusStopped();
         }
     }
 
@@ -211,7 +225,6 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         if (torrents.all && torrents.all.length > 0) {
             for (var i = 0; i < torrents.all.length; i++){
                 var torrent = ut.build(torrents.all[i]);
-                //console.info("New torrent", torrent.decodedName);
                 $scope.torrents[torrent.hash] = torrent;
             }
             refreshTorrents()
