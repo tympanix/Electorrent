@@ -47,7 +47,8 @@
         <a class="ui button" ng-click="update()">Update</a>
     </div>
     <div class="main-content">
-        <table class="ui single line unstackable selectable fixed compact torrent table">
+        <table class="ui single line unstackable selectable fixed compact torrent table"
+            infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
             <thead>
             <tr>
                 <th class="eight wide">Name</th>
@@ -57,7 +58,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="torrent in arrayTorrents"
+            <tr ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit"
                 ng-class="{active: torrent.selected}"
                 ng-click="setSelected($event, torrent, $index)"
                 ng-right-click="showContextMenu($event, torrent, $index)">
