@@ -22,14 +22,6 @@ let connectWindow;
 const config = level('./config', { valueEncoding: 'json' });
 global.config = config;
 
-config.get('animal', function(err, animal){
-    console.log("Config", animal);
-});
-
-// config.put('animnal', 'bear', function(){
-//     console.log("Put key");
-// })
-
 // Load arguments
 global.arguments = process.argv.splice(1);
 global.arguments.forEach(function(val,index, array) {
@@ -41,7 +33,6 @@ function createTorrentWindow() {
     torrentWindow = new BrowserWindow({show: false, width: 1200, height: 800, backgroundColor: '#ffffff'});
 
     torrentWindow.once('ready-to-show', () => {
-        console.log("FINISH LOAD!");
         torrentWindow.show();
     });
 
