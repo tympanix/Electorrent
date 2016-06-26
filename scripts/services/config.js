@@ -2,25 +2,24 @@
 
 angular.module('torrentApp').service('configService', ['electron', '$q', function(electron, $q) {
 
-    function put(value, key){
-        var q = $q.defer();
+    const config = electron.config;
 
-        electron.config.put(value, key, function(err){
+    // Angular wrapper for saving to config
+    function put(key, value){
+        var q = $q.defer();
+        config.put(key, value, function(err){
             if (err) q.reject(err)
             else q.resolve();
-        })
-
+        });
         return q.promise;
     }
 
+    // Angular wrapper for getting config
     function get(value){
         var q = $q.defer();
-
-        electron.config.get(value, function(err, data){
-            if (err) q.reject(err)
-            else q.resolve(data)
-        })
-
+        value = config.get(value);
+        if (value === null) q.reject('The key was not found')
+        else q.resolve(value);
         return q.promise;
     }
 
