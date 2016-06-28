@@ -1,78 +1,79 @@
 <!DOCTYPE html>
 <div class="wrapper" ng-controller="torrentsController">
-<div class="torrent sidebar">
-    <ul class="nav">
-        <li ng-click="filterByStatus('downloading')" ng-class="activeOn('downloading')">
-            <i class="ui large blue arrow down icon"></i>
-            Downloading
-            <div class="ui torrent label">{{numInFilter('downloading')}}</div>
-        </li>
-        <li ng-click="filterByStatus('finished')" ng-class="activeOn('finished')">
-            <i class="ui large green checkmark icon"></i>
-            Finished
-            <div class="ui torrent label">{{numInFilter('finished')}}</div>
-        </li>
-        <li ng-click="filterByStatus('seeding')" ng-class="activeOn('seeding')">
-            <i class="ui large orange arrow up icon"></i>
-            Seeding
-            <div class="ui torrent label">{{numInFilter('seeding')}}</div>
-        </li>
-        <li ng-click="filterByStatus('stopped')" ng-class="activeOn('stopped')">
-            <i class="ui large grey stop icon"></i>
-            Stopped
-            <div class="ui torrent label">{{numInFilter('stopped')}}</div>
-        </li>
-        <li ng-click="filterByStatus('error')" ng-class="activeOn('error')">
-            <i class="ui large red remove icon"></i>
-            Failed
-            <div class="ui torrent label">{{numInFilter('error')}}</div>
-        </li>
-    </ul>
-</div>
-<div class="main-panel">
-    <div class="action header">
-        <a class="ui green labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('start')">
-            <i class="play icon"></i>
-            Start
-        </a>
-        <a class="ui red labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('stop')">
-            <i class="stop icon"></i>
-            Stop
-        </a>
-        <a class="ui yellow labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('pause')">
-            <i class="pause icon"></i>
-            Pause
-        </a>
+    <div class="torrent sidebar">
+        <ul class="nav">
+            <li ng-click="filterByStatus('downloading')" ng-class="activeOn('downloading')">
+                <i class="ui large blue arrow down icon"></i>
+                Downloading
+                <div class="ui torrent label">{{numInFilter('downloading')}}</div>
+            </li>
+            <li ng-click="filterByStatus('finished')" ng-class="activeOn('finished')">
+                <i class="ui large green checkmark icon"></i>
+                Finished
+                <div class="ui torrent label">{{numInFilter('finished')}}</div>
+            </li>
+            <li ng-click="filterByStatus('seeding')" ng-class="activeOn('seeding')">
+                <i class="ui large orange arrow up icon"></i>
+                Seeding
+                <div class="ui torrent label">{{numInFilter('seeding')}}</div>
+            </li>
+            <li ng-click="filterByStatus('stopped')" ng-class="activeOn('stopped')">
+                <i class="ui large grey stop icon"></i>
+                Stopped
+                <div class="ui torrent label">{{numInFilter('stopped')}}</div>
+            </li>
+            <li ng-click="filterByStatus('error')" ng-class="activeOn('error')">
+                <i class="ui large red remove icon"></i>
+                Failed
+                <div class="ui torrent label">{{numInFilter('error')}}</div>
+            </li>
+        </ul>
     </div>
-    <div class="main-content">
-        <table class="ui single line unstackable selectable fixed compact torrent table"
+    <div class="main-panel">
+        <div class="action header">
+            <a class="ui green labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('start')">
+                <i class="play icon"></i>
+                Start
+            </a>
+            <a class="ui red labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('stop')">
+                <i class="stop icon"></i>
+                Stop
+            </a>
+            <a class="ui yellow labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('pause')">
+                <i class="pause icon"></i>
+                Pause
+            </a>
+        </div>
+        <div class="main-content">
+            <table resizeable class="ui single line unstackable selectable fixed compact torrent table"
             infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
             <thead>
-            <tr>
-                <th class="eight wide">Name</th>
-                <th class="two wide">Size</th>
-                <th class="three wide">Progress</th>
-                <th class="three wide">Date Added</th>
-            </tr>
+                <tr>
+                    <th class="eight wide">Name</th>
+                    <th class="two wide">Size</th>
+                    <th style="width:200px;">Progress</th>
+                    <th class="three wide">Date Added</th>
+                </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit"
+                <tr ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit"
                 ng-class="{active: torrent.selected}"
                 ng-click="setSelected($event, torrent, $index)"
                 ng-right-click="showContextMenu($event, torrent, $index)">
-                <td>{{torrent.decodedName}}</td>
-                <td>{{torrent.size | bytes}}</td>
-                <td>
+                <td><span class="value">{{torrent.decodedName}}</span></td>
+                <td><span class="value">{{torrent.size | bytes}}</span></td>
+                <td><div class="value">
                     <div class="ui torrent progress success" progress="torrent">
                         <label></label>
                         <div class="bar"></div>
                     </div>
-                </td>
-                <td>{{torrent.dateAdded | date}}</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                    </div>
+            </td>
+            <td><span class="value">{{torrent.dateAdded | date}}</span></td>
+        </tr>
+    </tbody>
+</table>
+</div>
 </div>
 
 <context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
