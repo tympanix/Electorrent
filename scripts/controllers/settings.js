@@ -1,14 +1,25 @@
-angular.module("torrentApp").controller("settingsController", ["$scope", "utorrentService", "configService", function($scope, $utorrentService, config) {
-    var ut = $utorrentService;
-    $scope.hello = "Hello settings world!";
+angular.module("torrentApp").controller("settingsController", ["$scope", "utorrentService", "configService", "notificationService", "electron", function($scope, $utorrentService, config, $notify, electron) {
 
     $scope.connecting = false;
-    $scope.page = 'connection';
+    $scope.page = 'general';
 
     loadAllSettings();
 
-    function loadAllSettings(){
+    function loadAllSettings() {
         $scope.server = config.getServer()
+        $scope.general = {
+            magnets: electron.app.isDefaultProtocolClient('magnet')
+        }
+    }
+
+    function subscribeToMagnets() {
+        if ($scope.general.magnets) {
+            console.log("Set handler!");
+            electron.app.setAsDefaultProtocolClient('magnet');
+        } else {
+            console.log("Remove handler!");
+            electron.app.removeAsDefaultProtocolClient('magnet');
+        }
     }
 
     $scope.$on('show:settings', function() {
@@ -17,6 +28,11 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
     })
 
     function writeSettings() {
+        saveServer();
+        subscribeToMagnets();
+    }
+
+    function saveServer() {
         config.saveServer($scope.server)
             .then(function() {
                 $scope.close();
@@ -38,13 +54,14 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
         var password = $scope.server.password;
 
         $utorrentService.connect(ip, port, user, password)
-            .then(function(data) {
+            .then(function() {
                 writeSettings();
                 $scope.connecting = false;
             })
             .catch(function(err) {
                 console.error("Oh noes!", err);
                 $scope.connecting = false;
+                $notify.alert("Connection Problem", "Oh noes! We could not connect to the server");
             })
     }
 

@@ -1,24 +1,19 @@
 html, body {
     overflow: hidden;
 }
-
 .wrapper {
     position: relative;
     top: 0;
     height: 100vh;
 }
-
 .main.wrapper {
     background-color: #F0F0F0;
 }
-
-.wrapper .sidebar,
-.main-panel {
+.wrapper .sidebar, .main-panel {
     overflow: auto;
     max-height: 100%;
     height: 100%;
 }
-
 .wrapper .sidebar {
     position: absolute;
     top: 0;
@@ -30,8 +25,7 @@ html, body {
     overflow-x: hidden;
     border-right: 1px solid #CECECE;
 }
-
-.sidebar + div {
+.sidebar+ div {
     position: relative;
     z-index: 2;
     float: right;
@@ -39,17 +33,13 @@ html, body {
     min-height: 100%;
     overflow: hidden;
 }
-
 .torrent.sidebar {
     background-color: #FFF;
 }
-
 .sidebar .nav {
     margin: 0px;
     padding: 14px;
 }
-
-
 .sidebar .nav li {
     font-size: 15px;
     padding: 15px;
@@ -58,19 +48,15 @@ html, body {
     list-style-type: none;
     cursor: pointer;
 }
-
 .sidebar .nav li.active {
     background: #F5F5F5 !important;
 }
-
 .sidebar .nav li:hover {
     background: #F5F5F5 !important;
 }
-
 .main-panel {
     background: rgba(247, 247, 248, 1);
 }
-
 .main-panel .action.header {
     height: 50px;
     padding: 0 7px;
@@ -80,22 +66,18 @@ html, body {
     z-index: 1000;
     overflow: hidden;
 }
-
-.container .content {
+.container > .content {
     position: absolute;
     right: 0;
     left: 0;
+    min-width: 300px;
     max-height: calc(100% - 65px);
     padding: 21px;
     overflow-y: auto;
     overflow-x: hidden;
 }
-
-.container .actions {
-
-}
-
-.container .actions.footer {
+.container > .actions {}
+.container > .actions.footer {
     position: absolute;
     bottom: 0;
     right: 0;
@@ -107,29 +89,24 @@ html, body {
     background-color: #f9fafb;
     overflow: hidden;
 }
-
 .main-panel .main-content {
     height: calc(100% - 50px);
     overflow: auto;
 }
-
 .torrent.table {
     border-radius: 0;
     margin: 0;
     border: none;
     width: 100%;
 }
-
 .torrent.table tbody tr {
     cursor: default;
     -webkit-user-select: none;
 }
-
 .torrent.progress {
     margin: 0 !important;
     overflow: hidden;
 }
-
 .torrent.progress label {
     position: absolute;
     width: 100%;
@@ -140,28 +117,23 @@ html, body {
     color: rgba(255, 255, 255, .9);
     font-weight: 700;
 }
-
 .torrent.progress .bar {
     min-width: 0;
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
 }
-
 .torrent.label {
     float: right;
     border-radius: 25px;
 }
-
 .torrent.context.menu {
     display: none;
-    position:absolute;
+    position: absolute;
     z-index: 1000;
 }
-
 .torrent.context.menu .ui.vertical.menu {
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
 }
-
 .overlay {
     position: absolute;
     background-color: #F0F0F0;
@@ -169,15 +141,12 @@ html, body {
     width: 100%;
     z-index: 100000;
 }
-
 .transparent.overlay {
     background-color: rgba(0, 0, 0, 0.75);
 }
-
 .narrow.column {
     max-width: 450px;
 }
-
 .ui.stretched.segment {
     overflow: hidden;
     position: absolute;
@@ -196,33 +165,85 @@ html, body {
 /*#########################################*/
 
 .overlay.ng-hide-add, .overlay.ng-hide-remove {
-  /* this is required as of 1.3x to properly
-     apply all styling in a show/hide animation */
-  -webkit-transition: 0s cubic-bezier(.24,.78,.35,.99) all;
+    /* this is required as of 1.3x to properly
+    apply all styling in a show/hide animation */
+    -webkit-transition: 0s cubic-bezier(.24, .78, .35, .99) all;
 }
-
-.overlay.ng-hide-add-active,
-.overlay.ng-hide-remove-active {
-  /* the transition is defined in the active class */
-  -webkit-transition: 0.24s cubic-bezier(.24,.78,.35,.99) all;
+.overlay.ng-hide-add-active, .overlay.ng-hide-remove-active {
+    /* the transition is defined in the active class */
+    -webkit-transition: 0.24s cubic-bezier(.24, .78, .35, .99) all;
 }
-
 .overlay.ng-hide-add {
-    opacity:1;
+    opacity: 1;
     transform: scale(1.0);
 }
-
 .overlay.ng-hide-add.ng-hide-add-active {
-    opacity:0;
+    opacity: 0;
     transform: scale(1.1);
 }
-
 .overlay.ng-hide-remove {
     opacity: 0;
     transform: scale(1.1);
 }
-
 .overlay.ng-hide-remove.ng-hide-remove-active {
     opacity: 1;
     transform: scale(1.0);
+}
+
+/*#########################################*/
+/* Notifications */
+/*#########################################*/
+
+.notifications.container {
+    top: 15px;
+    right: 15px;
+    width: 375px;
+    position: absolute;
+    z-index: 100001;
+}
+.notification {
+    margin: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+.ui.negative.message {
+    background-color: #F2B3B3;
+    color: #7A1200;
+    border: none;
+}
+.notification.ng-enter {
+    -webkit-animation: notification-show 0.24s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
+}
+.notification.ng-leave {
+    -webkit-animation: notification-hide .12s cubic-bezier(.34, .07, 1, .2), notification-shrink .24s .12s cubic-bezier(0.5, 0, 0, 1);
+    -webkit-animation-fill-mode: forwards;
+}
+@-webkit-keyframes notification-show {
+    0% {
+        opacity: 0;
+        transform: perspective(350px) translate(0, -30px) rotateX(90deg);
+    }
+    100% {
+        opacity: 1;
+        transform: perspective(350px) translate(0, 0) rotateX( 0deg);
+    }
+}
+@-webkit-keyframes notification-hide {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(.5);
+    }
+}
+@-webkit-keyframes notification-shrink {
+    0% {
+        opacity: 0;
+        max-height: 70px;
+    }
+    100% {
+        opacity: 0;
+        max-height: 0;
+    }
 }

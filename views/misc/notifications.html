@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<div class="notifications container" ng-controller="notificationsController">
+    <div class="notification" ng-repeat="notification in notifications">
+        <div class="ui message" ng-class="notification.type">
+            <i class="close icon" ng-click="close($index)"></i>
+            <div class="header">
+                {{notification.title}}
+            </div>
+            <p>{{notification.message}}</p>
+        </div>
+    </div>
+</div>
