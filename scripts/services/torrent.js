@@ -19,7 +19,7 @@ angular.module('torrentApp')
         };
 
         var cleanName = function(name) {
-            return name.toLowerCase().replace(/s?([0-9]{1,2})[x|e|-]([0-9]{1,2})/,'').replace(/(bdrip|brrip|cam|dttrip|dvdrip|dvdscr|dvd|fs|hdtv|hdtvrip|hq|pdtv|satrip|dvbrip|r5|r6|ts|tc|tvrip|vhsrip|vhsscr|ws|aac|ac3|dd|dsp|dts|lc|ld|md|mp3|xvid|720p|1080p|fs|internal|limited|proper|stv|subbed|tma|tnz|silent|tls|gbm|fsh|rev|trl|upz|unrated|webrip|ws|mkv|avi|mov|mp4|mp3|iso|x264|x265|h264|h265)/g,'').trim();
+            return name.toLowerCase().replace(/s?([0-9]{1,2})[x|e|-]([0-9]{1,2})/, '').replace(/(bdrip|brrip|cam|dttrip|dvdrip|dvdscr|dvd|fs|hdtv|hdtvrip|hq|pdtv|satrip|dvbrip|r5|r6|ts|tc|tvrip|vhsrip|vhsscr|ws|aac|ac3|dd|dsp|dts|lc|ld|md|mp3|xvid|720p|1080p|fs|internal|limited|proper|stv|subbed|tma|tnz|silent|tls|gbm|fsh|rev|trl|upz|unrated|webrip|ws|mkv|avi|mov|mp4|mp3|iso|x264|x265|h264|h265)/g, '').trim();
         };
 
         /**
@@ -77,6 +77,7 @@ angular.module('torrentApp')
             additionalData) {
 
             this.selected = false;
+            this.isStarred = false;
 
             this.hash = hash;
             this.status = status;
@@ -85,7 +86,7 @@ angular.module('torrentApp')
             this.percent = percent;
             this.downloaded = downloaded;
             this.uploaded = uploaded;
-            this.ratio = (ratio/1000).toFixed(2);
+            this.ratio = (ratio / 1000).toFixed(2);
             this.uploadSpeed = uploadSpeed;
             this.downloadSpeed = downloadSpeed;
             this.eta = eta;
@@ -109,7 +110,6 @@ angular.module('torrentApp')
 
             this.decodedName = decodeName(this.name);
             this.getStatuses();
-            this.isStarred = false;
             this.cleanedName = cleanName(this.decodedName);
         }
 
@@ -126,22 +126,89 @@ angular.module('torrentApp')
         };
         var statusesFlags = [1, 2, 4, 8, 16, 32, 64, 128].reverse();
 
+        Torrent.prototype.bind = function(hash,
+            status,
+            name,
+            size,
+            percent,
+            downloaded,
+            uploaded,
+            ratio,
+            uploadSpeed,
+            downloadSpeed,
+            eta,
+            label,
+            peersConnected,
+            peersInSwarm,
+            seedsConnected,
+            seedsInSwarm,
+            availability,
+            torrentQueueOrder,
+            remaining,
+            downloadUrl,
+            rssFeedUrl,
+            statusMessage,
+            streamId,
+            dateAdded,
+            dateCompleted,
+            appUpdateUrl,
+            savePath,
+            additionalData) {
+
+            this.hash = hash;
+            this.status = status;
+            this.name = name;
+            this.size = size;
+            this.percent = percent;
+            this.downloaded = downloaded;
+            this.uploaded = uploaded;
+            this.ratio = (ratio / 1000).toFixed(2);
+            this.uploadSpeed = uploadSpeed;
+            this.downloadSpeed = downloadSpeed;
+            this.eta = eta;
+            this.label = label;
+            this.peersConnected = peersConnected;
+            this.peersInSwarm = peersInSwarm;
+            this.seedsConnected = seedsConnected;
+            this.seedsInSwarm = seedsInSwarm;
+            this.availability = (availability / 65536).toFixed(1);
+            this.torrentQueueOrder = torrentQueueOrder;
+            this.remaining = remaining;
+            this.downloadUrl = downloadUrl;
+            this.rssFeedUrl = rssFeedUrl;
+            this.statusMessage = statusMessage;
+            this.streamId = streamId;
+            this.dateAdded = dateAdded * 1000;
+            this.dateCompleted = dateCompleted * 1000;
+            this.appUpdateUrl = appUpdateUrl;
+            this.savePath = savePath;
+            this.additionalData = additionalData;
+
+            this.decodedName = decodeName(this.name);
+            this.getStatuses();
+            this.cleanedName = cleanName(this.decodedName);
+        };
+
+        Torrent.prototype.update = function(array) {
+            this.bind.apply(this, array);
+        };
+
         Torrent.prototype.getMagnetURI = function(longUri) {
             var i = 0;
             var link = 'magnet:?xt=urn:btih:' + this.hash;
-             if (longUri) {
+            if (longUri) {
                 link += '&dn=' + encodeURIComponent(this.name);
                 link += '&xl=' + encodeURIComponent(this.size);
 
                 if (this.props && this.props.trackers) {
                     var trackers = this.props.trackers.split('\r\n');
-                    for (i=0;i<trackers.length;i++){
+                    for (i = 0; i < trackers.length; i++) {
                         if (trackers[i].length > 0) {
                             link += '&tr=' + encodeURIComponent(trackers[i]);
                         }
                     }
                 }
-             }
+            }
             return link;
         };
 
@@ -207,13 +274,13 @@ angular.module('torrentApp')
             return (this.percent === 1000);
         };
         Torrent.prototype.isStatusDownloading = function() {
-            return this.isStatusStarted() && (!this.isStatusCompleted());
+            return this.getStatusFlag(64);
         };
         Torrent.prototype.isStatusSeeding = function() {
             return this.isStatusStarted() && (this.isStatusCompleted());
         };
         Torrent.prototype.isStatusStopped = function() {
-            return (!this.isStatusStarted()) && (!this.isStatusCompleted());
+            return (!this.getStatusFlag(64)) && (!this.isStatusCompleted());
         };
 
         Torrent.prototype.getQueueStr = function() {
@@ -318,7 +385,7 @@ angular.module('torrentApp')
 
         Torrent.cache = {};
 
-         /**
+        /**
          * Return the constructor function
          */
         return Torrent;

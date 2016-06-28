@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <div class="wrapper" ng-controller="torrentsController">
-<div class="sidebar">
+<div class="torrent sidebar">
     <ul class="nav">
-        <li ng-click="filterByStatus('downloading')">
+        <li ng-click="filterByStatus('downloading')" ng-class="activeOn('downloading')">
             <i class="ui large blue arrow down icon"></i>
             Downloading
             <div class="ui torrent label">{{numInFilter('downloading')}}</div>
         </li>
-        <li ng-click="filterByStatus('finished')">
+        <li ng-click="filterByStatus('finished')" ng-class="activeOn('finished')">
             <i class="ui large green checkmark icon"></i>
             Finished
             <div class="ui torrent label">{{numInFilter('finished')}}</div>
         </li>
-        <li ng-click="filterByStatus('seeding')">
+        <li ng-click="filterByStatus('seeding')" ng-class="activeOn('seeding')">
             <i class="ui large orange arrow up icon"></i>
             Seeding
             <div class="ui torrent label">{{numInFilter('seeding')}}</div>
         </li>
-        <li ng-click="filterByStatus('stopped')">
+        <li ng-click="filterByStatus('stopped')" ng-class="activeOn('stopped')">
             <i class="ui large grey stop icon"></i>
             Stopped
             <div class="ui torrent label">{{numInFilter('stopped')}}</div>
         </li>
-        <li ng-click="filterByStatus('error')">
+        <li ng-click="filterByStatus('error')" ng-class="activeOn('error')">
             <i class="ui large red remove icon"></i>
             Failed
             <div class="ui torrent label">{{numInFilter('error')}}</div>

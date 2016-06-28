@@ -16,20 +16,20 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
 
     // Angular wrapper for getting config
     function get(value){
-        var q = $q.defer();
-        value = config.get(value);
-        if (value === null) q.reject('The key was not found')
-        else q.resolve(value);
-        return q.promise;
+        return config.get(value);
     }
 
     this.saveServer = function(ip, port, user, password){
-        return put('server', {
-            ip: ip,
-            port: port,
-            user: user,
-            password: password
-        })
+        if (arguments.length === 1){
+            return put('server', arguments[0]);
+        } else {
+            return put('server', {
+                ip: ip,
+                port: port,
+                user: user,
+                password: password
+            })
+        }
     }
 
     this.getServer = function() {

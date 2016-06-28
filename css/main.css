@@ -8,6 +8,10 @@ html, body {
     height: 100vh;
 }
 
+.main.wrapper {
+    background-color: #F0F0F0;
+}
+
 .wrapper .sidebar,
 .main-panel {
     overflow: auto;
@@ -23,14 +27,26 @@ html, body {
     width: 260px;
     display: block;
     z-index: 1;
-    color: #000;
-    background-color: #FFF;
     overflow-x: hidden;
     border-right: 1px solid #CECECE;
 }
 
+.sidebar + div {
+    position: relative;
+    z-index: 2;
+    float: right;
+    width: calc(100% - 260px);
+    min-height: 100%;
+    overflow: hidden;
+}
+
+.torrent.sidebar {
+    background-color: #FFF;
+}
+
 .sidebar .nav {
-    padding: 0 12px;
+    margin: 0px;
+    padding: 14px;
 }
 
 
@@ -53,12 +69,6 @@ html, body {
 
 .main-panel {
     background: rgba(247, 247, 248, 1);
-    position: relative;
-    z-index: 2;
-    float: right;
-    width: calc(100% - 260px);
-    min-height: 100%;
-    overflow: hidden;
 }
 
 .main-panel .action.header {
@@ -68,6 +78,33 @@ html, body {
     line-height: 50px;
     border-bottom: 1px solid #CECECE;
     z-index: 1000;
+    overflow: hidden;
+}
+
+.container .content {
+    position: absolute;
+    right: 0;
+    left: 0;
+    max-height: calc(100% - 65px);
+    padding: 21px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.container .actions {
+
+}
+
+.container .actions.footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    height: 65px;
+    padding: 1rem;
+    border-top: 1px solid #CECECE;
+    text-align: right;
+    background-color: #f9fafb;
     overflow: hidden;
 }
 
@@ -125,13 +162,7 @@ html, body {
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
 }
 
-/*.ui.vertical.menu .ui.dropdown.item .menu.upward {
-    top: 100% !important;
-    border-radius: .28571429rem .28571429rem .28571429rem 0;
-}*/
-
 .overlay {
-    padding: 20px;
     position: absolute;
     background-color: #F0F0F0;
     height: 100%;
@@ -139,12 +170,25 @@ html, body {
     z-index: 100000;
 }
 
-.main.wrapper {
-    background-color: #F0F0F0;
+.transparent.overlay {
+    background-color: rgba(0, 0, 0, 0.75);
 }
 
 .narrow.column {
     max-width: 450px;
+}
+
+.ui.stretched.segment {
+    overflow: hidden;
+    position: absolute;
+    display: block;
+    height: auto;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 10vmin;
+    padding: 0px;
 }
 
 /*#########################################*/
