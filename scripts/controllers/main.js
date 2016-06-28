@@ -6,20 +6,23 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     $scope.showTorrents = false;
     var page = null;
 
+    pageSettings();
+
     $rootScope.$on('ready', function() {
-        config.getServer().then(function(data){
+        var data = config.getServer()
+        if (data){
             console.log("Connect", data);
             connectToServer(data.ip, data.port, data.user, data.password)
-        }).catch(function(){
+        } else {
             // First time starting application
             pageWelcome();
-        })
+        }
     });
 
     function connectToServer(ip, port, user, password){
         $utorrentService.connect(ip, port, user, password)
         .then(function(){
-            pageTorrents();
+            //pageTorrents();
             requestMagnetLinks();
         })
         .catch(function(){

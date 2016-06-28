@@ -29,6 +29,14 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         $scope.contextMenu.hide();
     };
 
+    $scope.activeOn = function(filter) {
+        if ($scope.filters.status === filter){
+            return 'active';
+        } else {
+            return '';
+        }
+    }
+
     $scope.$on('start:torrents', function(){
         console.info("Received start torrents!");
         $scope.update();
@@ -252,10 +260,19 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
             for (var i = 0; i < torrents.changed.length; i++) {
                 var torrent = ut.build(torrents.changed[i]);
                 var existing = $scope.torrents[torrent.hash];
-                if (existing && existing.selected){
-                    torrent.selected = true;
+
+                if (existing){
+                    existing.update(torrents.changed[i]);
+                } else {
+                    $scope.torrents[torrent.hash] = torrent;
                 }
-                $scope.torrents[torrent.hash] = torrent;
+
+                // var torrent = ut.build(torrents.changed[i]);
+                // var existing = $scope.torrents[torrent.hash];
+                // if (existing && existing.selected){
+                //     torrent.selected = true;
+                // }
+                // $scope.torrents[torrent.hash] = torrent;
             }
             refreshTorrents()
         }
