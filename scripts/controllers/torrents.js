@@ -61,13 +61,6 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         $timeout.cancel(timeout);
     }
 
-    $scope.download = function(){
-        ut.addTorrentUrl("magnet:?xt=urn:btih:B8E6C2551CD060F1D31657C11787DF9F65AE5A13&dn=orange+is+the+new+black+s04e01+webrip+xvid+mp3+rarbg&tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce")
-        .then(function(){
-            $scope.update();
-        });
-    };
-
     $scope.filterByStatus = function(status){
         deselectAll();
         lastSelected = null;
