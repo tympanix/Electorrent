@@ -6,8 +6,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     $scope.showTorrents = false;
     var page = null;
 
-    pageSettings();
-
     $rootScope.$on('ready', function() {
         var data = config.getServer()
         if (data){
@@ -22,7 +20,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     function connectToServer(ip, port, user, password){
         $utorrentService.connect(ip, port, user, password)
         .then(function(){
-            //pageTorrents();
+            pageTorrents();
             requestMagnetLinks();
         })
         .catch(function(){

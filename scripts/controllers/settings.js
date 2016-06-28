@@ -44,6 +44,7 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
 
     $scope.close = function() {
         $scope.$emit('show:torrents');
+        loadAllSettings();
     }
 
     $scope.save = function() {
