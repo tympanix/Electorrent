@@ -1,0 +1,12 @@
+/*#########################################*/
+/* Settings Styles */
+/*#########################################*/
+
+.settings.sidebar .nav .active i {
+    color: #2185d0 !important;
+}
+
+.settings.sidebar .nav .active {
+    font-weight: 700;
+    
+}

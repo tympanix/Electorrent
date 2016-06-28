@@ -1,7 +1,43 @@
 <!DOCTYPE html>
-<div ng-controller="settingsController">
-    <h1>{{hello}}</h1>
-    <input type="checkbox"> Mature language filter
+<div class="wrapper" ng-controller="settingsController as settings">
 
-    <a class="ui button" ng-click="close()">Close</a>
+    <div class="ui stretched segment">
+        <div class="settings sidebar">
+            <ul class="nav">
+                <li ng-class="activeOn('general')" ng-click="gotoPage('general')">
+                    <i class="ui large settings icon"></i>
+                    General Settings
+                </li>
+                <li ng-class="activeOn('connection')" ng-click="gotoPage('connection')">
+                    <i class="ui large sitemap icon"></i>
+                    Connection
+                </li>
+                <li ng-click="filterByStatus('error')">
+                    <i class="ui large at icon"></i>
+                    About
+                </li>
+            </ul>
+        </div>
+        <div class="container">
+            <div class="content" ng-switch="page">
+
+                <div ng-switch-when="connection">
+                    <div ng-include="'./views/settings/connection.html'"></div>
+                </div>
+
+            </div>
+            <div class="actions footer">
+                <a class="ui deny right labeled icon button" ng-click="close()">
+                    Cancel
+                    <i class="cancel icon"></i>
+                </a>
+                <a class="ui positive right labeled icon button" ng-click="save()">
+                    Save
+                    <i class="checkmark icon"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
 </div>

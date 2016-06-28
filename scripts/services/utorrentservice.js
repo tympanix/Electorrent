@@ -36,7 +36,7 @@ angular.module('torrentApp')
                 var encoded = new Buffer(data.username+":"+data.password).toString('base64');
                 $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
                 $http.get(data.url + 'token.html?t=' + Date.now(), {
-                    timeout: 30000
+                    timeout: 5000
                 }).
                 success(function(str) {
                     var match = str.match(/>([^<]+)</);
@@ -362,37 +362,9 @@ angular.module('torrentApp')
 
             },
             build: function(array, additionalData) {
-                var torrent = new Torrent(
-                    array[0],
-                    array[1],
-                    array[2],
-                    array[3],
-                    array[4],
-                    array[5],
-                    array[6],
-                    array[7],
-                    array[8],
-                    array[9],
-                    array[10],
-                    array[11],
-                    array[12],
-                    array[13],
-                    array[14],
-                    array[15],
-                    array[16],
-                    array[17],
-                    array[18],
-                    array[19],
-                    array[20],
-                    array[21],
-                    array[22],
-                    array[23],
-                    array[24],
-                    array[25],
-                    array[26],
-                    additionalData
-                );
-                //torrent._base = array;
+                var torrent = Object.create(Torrent.prototype);
+                array.push(additionalData);
+                torrent = (Torrent.apply(torrent, array) || torrent);
                 return torrent;
             }
         };
