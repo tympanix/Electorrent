@@ -15,9 +15,13 @@
 </head>
 <body ng-controller="mainController" ready-broadcast>
     <div class="main wrapper">
+
+        <!-- Notifications -->
+        <div ng-include="'./views/misc/notifications.html'"></div>
+
         <!-- Settings Screen -->
         <div ng-show="showSettings()" class="overlay">
-            <div ng-include="'./views/settings.html'" style="height: 100%;"></div>
+            <div ng-include="'./views/settings.html'"></div>
         </div>
 
         <!-- Welcome Screen -->
@@ -59,12 +63,14 @@
     <script src="scripts/controllers/torrents.js" charset="utf-8"></script>
     <script src="scripts/controllers/settings.js" charset="utf-8"></script>
     <script src="scripts/controllers/welcome.js" charset="utf-8"></script>
+    <script src="scripts/controllers/notifications.js" charset="utf-8"></script>
 
     <!-- Services -->
     <script src="scripts/services/torrent.js" charset="utf-8"></script>
     <script src="scripts/services/utorrentservice.js" charset="utf-8"></script>
     <script src="scripts/services/electron.js" charset="utf-8"></script>
     <script src="scripts/services/config.js" charset="utf-8"></script>
+    <script src="scripts/services/notification.js" charset="utf-8"></script>
 
     <!-- Filters -->
     <script src="scripts/filters/dateFilter.js" charset="utf-8"></script>
@@ -77,6 +83,7 @@
     <script src="scripts/directives/contextmenu.js" charset="utf-8"></script>
     <script src="scripts/directives/dropdown.js" charset="utf-8"></script>
     <script src="scripts/directives/readyBroadcast.js" charset="utf-8"></script>
+    <script src="scripts/directives/checkbox.js" charset="utf-8"></script>
 
     <!-- Components -->
     <script src="scripts/components/menu.js" charset="utf-8"></script>
