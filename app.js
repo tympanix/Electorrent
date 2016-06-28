@@ -21,9 +21,6 @@ global.config = config;
 // be closed automatically when the JavaScript object is garbage collected.
 let torrentWindow;
 
-// Register handler for magnet links
-app.setAsDefaultProtocolClient('magnet');
-
 function createTorrentWindow() {
     // Create the browser window.
     torrentWindow = new BrowserWindow({show: false, width: 1200, height: 800, backgroundColor: '#ffffff'});
