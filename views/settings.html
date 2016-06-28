@@ -12,7 +12,7 @@
                     <i class="ui large sitemap icon"></i>
                     Connection
                 </li>
-                <li ng-click="filterByStatus('error')">
+                <li ng-class="activeOn('about')" ng-click="gotoPage('about')">
                     <i class="ui large at icon"></i>
                     About
                 </li>
@@ -20,9 +20,16 @@
         </div>
         <div class="container">
             <div class="content" ng-switch="page">
+                <div ng-switch-when="general">
+                    <div ng-include="'./views/settings/general.html'"></div>
+                </div>
 
                 <div ng-switch-when="connection">
                     <div ng-include="'./views/settings/connection.html'"></div>
+                </div>
+
+                <div ng-switch-when="about">
+                    <div ng-include="'./views/settings/about.html'"></div>
                 </div>
 
             </div>
