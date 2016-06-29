@@ -4,8 +4,8 @@ angular.module("torrentApp").directive('dropdown', ['$document', '$window', func
         link: link
     }
 
-    function link(scope, element){
-        $(element).dropdown({ on: 'hover' });
+    function link(scope, element /*, attr*/){
+        $(element).dropdown();
     }
 
 }]);

@@ -43,6 +43,16 @@
                 <i class="pause icon"></i>
                 Pause
             </a>
+            <div dropdown class="ui icon top left pointing dropdown button">
+                <i class="tag icon"></i>
+                <div class="menu">
+                    <div class="header">Display Density</div>
+                    <div class="item">Comfortable</div>
+                    <div class="item">Cozy</div>
+                    <div class="item">Compact</div>
+                    <div class="item">Settings</div>
+                </div>
+            </div>
         </div>
         <div class="main-content">
             <table resizeable class="ui single line unstackable selectable fixed compact torrent table"
@@ -59,7 +69,8 @@
                 <tr ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit"
                 ng-class="{active: torrent.selected}"
                 ng-click="setSelected($event, torrent, $index)"
-                ng-right-click="showContextMenu($event, torrent, $index)">
+                ng-right-click="showContextMenu($event, torrent, $index)"
+                repeat-done>
                 <td><span class="value">{{torrent.decodedName}}</span></td>
                 <td><span class="value">{{torrent.size | bytes}}</span></td>
                 <td><div class="value">
@@ -67,7 +78,7 @@
                         <label></label>
                         <div class="bar"></div>
                     </div>
-                    </div>
+                </div>
             </td>
             <td><span class="value">{{torrent.dateAdded | date}}</span></td>
         </tr>
