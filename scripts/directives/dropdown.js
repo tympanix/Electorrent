@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('dropdown', ['$document', '$window', function($document, $window) {
+angular.module("torrentApp").directive('dropdown', [function() {
     return {
         restrict: 'A',
         link: link
@@ -6,7 +6,10 @@ angular.module("torrentApp").directive('dropdown', ['$document', '$window', func
 
     function link(scope, element, attr){
 
-        $(element).dropdown();
+        $(element).dropdown({
+            transition: "vertical flip",
+            duration: 100
+        });
 
         scope[attr.bind] = {
             clear: doAction(element, 'clear'),

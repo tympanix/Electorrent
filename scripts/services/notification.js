@@ -24,4 +24,14 @@ angular.module('torrentApp')
             $rootScope.$emit('notification', notification);
         }
 
+        this.alertAuth = function(message, status){
+            if (status === -1){
+                this.alert("Connection problem", "The connection to the server timed out!")
+            } else if (status === 401){
+                this.alert("Connection problem", "You entered an incorrent username/password")
+            } else {
+                this.alert("Connection problem", "The connection could not be established")
+            }
+        }
+
     }]);
