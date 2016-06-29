@@ -43,91 +43,94 @@
                 <i class="pause icon"></i>
                 Pause
             </a>
-            <div dropdown class="ui icon top left pointing dropdown button">
+            <div dropdown bind="labelsDrowdown" class="ui icon top left pointing dropdown button" ng-class="{disabled: noneSelected()}">
                 <i class="tag icon"></i>
                 <div class="menu">
-                    <div class="header">Display Density</div>
-                    <div class="item">Comfortable</div>
-                    <div class="item">Cozy</div>
-                    <div class="item">Compact</div>
-                    <div class="item">Settings</div>
+                    <div class="header">Add Label</div>
+                    <div class="item" ng-repeat="(label, value) in labels" ng-click="setLabel(label)">{{label}}</div>
                 </div>
             </div>
         </div>
         <div class="main-content">
-            <table resizeable class="ui single line unstackable selectable fixed compact torrent table"
-            infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
-            <thead>
-                <tr>
-                    <th class="eight wide">Name</th>
-                    <th class="two wide">Size</th>
-                    <th style="width:200px;">Progress</th>
-                    <th class="three wide">Date Added</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit"
-                ng-class="{active: torrent.selected}"
-                ng-click="setSelected($event, torrent, $index)"
-                ng-right-click="showContextMenu($event, torrent, $index)"
-                repeat-done>
-                <td><span class="value">{{torrent.decodedName}}</span></td>
-                <td><span class="value">{{torrent.size | bytes}}</span></td>
-                <td><div class="value">
-                    <div class="ui torrent progress success" progress="torrent">
-                        <label></label>
-                        <div class="bar"></div>
-                    </div>
-                </div>
-            </td>
-            <td><span class="value">{{torrent.dateAdded | date}}</span></td>
-        </tr>
-    </tbody>
-</table>
-</div>
-</div>
-
-<context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
-    <div class="ui vertical menu">
-        <a class="item" ng-click="debug()">
-            <i class="ui info icon"></i>
-            Debug
-        </a>
-        <a class="item" ng-click="doContextAction('recheck')">
-            <i class="ui checkmark icon"></i>
-            Recheck
-        </a>
-        <a class="item" ng-click="doContextAction('forcerestart')">
-            <i class="ui flag icon"></i>
-            Force Start
-        </a>
-        <a class="item" ng-click="doContextAction('queueup')">
-            <i class="ui arrow up icon"></i>
-            Move Up Queue
-        </a>
-        <a class="item" ng-click="doContextAction('queuedown')">
-            <i class="ui arrow down icon"></i>
-            Move Down Queue
-        </a>
-        <a class="item" ng-click="doContextAction('remove')">
-            <i class="ui remove icon"></i>
-            Remove
-        </a>
-        <div class="ui context dropdown item">
-            <i class="dropdown icon"></i>
-            Remove And
-            <div class="menu">
-                <a class="item" ng-click="doContextAction('removetorrent')">
-                    Delete Torrent
-                </a>
-                <a class="item" ng-click="doContextAction('removedata')">
-                    Delete Data
-                </a>
-                <a class="item" ng-click="doContextAction('removedatatorrent')">
-                    Delete All
-                </a>
-            </div>
+            <table resizeable class="ui single line unstackable selectable fixed compact torrent table" infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
+                <thead>
+                    <tr>
+                        <th class="eight wide">Name</th>
+                        <th class="two wide">Size</th>
+                        <th style="width:200px;">Progress</th>
+                        <th style="width:75px;">Label</th>
+                        <th class="three wide">Date Added</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit" ng-class="{active: torrent.selected}" ng-click="setSelected($event, torrent, $index)" ng-right-click="showContextMenu($event, torrent, $index)" repeat-done>
+                        <td>
+                            <span class="value">{{torrent.decodedName}}</span>
+                        </td>
+                        <td>
+                            <span class="value">{{torrent.size | bytes}}</span>
+                        </td>
+                        <td>
+                            <div class="value">
+                                <div class="ui torrent progress success" progress="torrent">
+                                    <label></label>
+                                    <div class="bar"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="value">{{torrent.label}}</span>
+                        </td>
+                        <td>
+                            <span class="value">{{torrent.dateAdded | date}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
-</context-menu>
+
+    <context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
+        <div class="ui vertical menu">
+            <a class="item" ng-click="debug()">
+                <i class="ui info icon"></i>
+                Debug
+            </a>
+            <a class="item" ng-click="doContextAction('recheck')">
+                <i class="ui checkmark icon"></i>
+                Recheck
+            </a>
+            <a class="item" ng-click="doContextAction('forcerestart')">
+                <i class="ui flag icon"></i>
+                Force Start
+            </a>
+            <a class="item" ng-click="doContextAction('queueup')">
+                <i class="ui arrow up icon"></i>
+                Move Up Queue
+            </a>
+            <a class="item" ng-click="doContextAction('queuedown')">
+                <i class="ui arrow down icon"></i>
+                Move Down Queue
+            </a>
+            <a class="item" ng-click="doContextAction('remove')">
+                <i class="ui remove icon"></i>
+                Remove
+            </a>
+            <div class="ui context dropdown item">
+                <i class="dropdown icon"></i>
+                Remove And
+                <div class="menu">
+                    <a class="item" ng-click="doContextAction('removetorrent')">
+                        Delete Torrent
+                    </a>
+                    <a class="item" ng-click="doContextAction('removedata')">
+                        Delete Data
+                    </a>
+                    <a class="item" ng-click="doContextAction('removedatatorrent')">
+                        Delete All
+                    </a>
+                </div>
+            </div>
+        </div>
+    </context-menu>
 </div>

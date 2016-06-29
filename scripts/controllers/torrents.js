@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "utorrentService", function ($scope, $timeout, $filter, $log, $utorrentService) {
+angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "utorrentService", "notificationService", function ($scope, $timeout, $filter, $log, $utorrentService, $notify) {
     const TIMEOUT = 2000;
     const LIMIT = 25;
 
@@ -12,8 +12,9 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.torrents = {};
     $scope.arrayTorrents = [];
     $scope.contextMenu = null;
+    $scope.labelsDrowdown = null;
     $scope.torrentLimit = LIMIT;
-    $scope.labels = [];
+    $scope.labels = {};
 
     $scope.filters = {
         status: 'downloading'
@@ -36,6 +37,16 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         } else {
             return '';
         }
+    }
+
+    $scope.setLabel = function(label){
+        ut.setLabel(getSelectedHashes(), label)
+            .then(function() {
+                $scope.update();
+            })
+            .catch(function() {
+                $notify.alert("Could not set label", "The label could not be changes. Please go to settings and configure your connection");
+            })
     }
 
     $scope.$on('start:torrents', function(){
@@ -142,6 +153,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     }
 
     $scope.setSelected = function(event, torrent, index) {
+        $scope.labelsDrowdown.clear();
         if (event.ctrlKey || event.metaKey){
             toggleSelect(torrent);
         } else if (event.shiftKey){
@@ -275,8 +287,13 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
 
     function updateLabels(torrents){
         if (torrents.labels && torrents.labels.length > 0) {
-            $scope.labels = torrents.labels;
+            torrents.labels.forEach(function(label, index){
+                if (!$scope.labels[label[0]]){
+                    $scope.labels[label[0]] = label[1];
+                }
+            })
         }
+        console.log("Labels", $scope.labels);
     }
 
 }])
