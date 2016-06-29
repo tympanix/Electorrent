@@ -11,6 +11,10 @@ angular.module("torrentApp").directive('resizeable', ["$timeout", function($time
                 minWidth: 25
             });
         }, 100);
+
+        $(element).resize(function(){
+            console.log("RESIZE TABLE!");
+        });
     }
 
 }]);
