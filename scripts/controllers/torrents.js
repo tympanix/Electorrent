@@ -13,6 +13,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.arrayTorrents = [];
     $scope.contextMenu = null;
     $scope.torrentLimit = LIMIT;
+    $scope.labels = [];
 
     $scope.filters = {
         status: 'downloading'
@@ -157,6 +158,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
             newTorrents(torrents);
             deleteTorrents(torrents);
             changeTorrents(torrents);
+            updateLabels(torrents);
         });
         return q;
     };
@@ -268,6 +270,12 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
                 // $scope.torrents[torrent.hash] = torrent;
             }
             refreshTorrents()
+        }
+    }
+
+    function updateLabels(torrents){
+        if (torrents.labels && torrents.labels.length > 0) {
+            $scope.labels = torrents.labels;
         }
     }
 

@@ -58,13 +58,14 @@ html, body {
     background: rgba(247, 247, 248, 1);
 }
 .main-panel .action.header {
+    white-space: nowrap;
     height: 50px;
     padding: 0 7px;
     background-color: #FFF;
     line-height: 50px;
     border-bottom: 1px solid #CECECE;
     z-index: 1000;
-    overflow: hidden;
+    overflow: visible !important;
 }
 .container > .content {
     position: absolute;
