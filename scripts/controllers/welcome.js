@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeout", "utorrentService", "electron", "configService", function ($scope, $timeout, $utorrentService, electron, config) {
+angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeout", "utorrentService", "electron", "configService", "notificationService", function ($scope, $timeout, $utorrentService, electron, config, $notify) {
 
     $scope.connecting = false;
 
@@ -13,9 +13,11 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
         $utorrentService.connect(ip, port, user, password).then(function() {
             $timeout(function(){
                 saveServer(ip, port, user, password);
+                $notify.ok("Success!", "Hooray! Welcome to Electorrent")
             }, 500)
-        }).catch(function() {
+        }).catch(function(err) {
             $timeout(function(){
+                console.error(err);
                 $scope.connecting = false;
             }, 500)
         })

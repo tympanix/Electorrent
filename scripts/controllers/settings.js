@@ -62,7 +62,6 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
             .catch(function(err) {
                 console.error("Oh noes!", err);
                 $scope.connecting = false;
-                $notify.alert("Connection Problem", "Oh noes! We could not connect to the server");
             })
     }
 

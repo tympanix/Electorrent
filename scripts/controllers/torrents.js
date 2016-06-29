@@ -191,8 +191,11 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
                 console.log("Action " + action + " performed!");
                 $scope.update();
             })
+            .catch(function(err) {
+                $notify.alert("Invalid action", err);
+            })
         } else {
-            console.error("Action " + action + " not allowed");
+            $notify.alert("Invalid action", "Action " + action + " is not allowed!");
         }
     };
 
@@ -274,12 +277,6 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
                     $scope.torrents[torrent.hash] = torrent;
                 }
 
-                // var torrent = ut.build(torrents.changed[i]);
-                // var existing = $scope.torrents[torrent.hash];
-                // if (existing && existing.selected){
-                //     torrent.selected = true;
-                // }
-                // $scope.torrents[torrent.hash] = torrent;
             }
             refreshTorrents()
         }
@@ -287,13 +284,12 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
 
     function updateLabels(torrents){
         if (torrents.labels && torrents.labels.length > 0) {
-            torrents.labels.forEach(function(label, index){
+            torrents.labels.forEach(function(label /*, index*/){
                 if (!$scope.labels[label[0]]){
                     $scope.labels[label[0]] = label[1];
                 }
             })
         }
-        console.log("Labels", $scope.labels);
     }
 
 }])

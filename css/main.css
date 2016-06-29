@@ -79,6 +79,7 @@ html, body {
 }
 .container > .actions {}
 .container > .actions.footer {
+    white-space: nowrap;
     position: absolute;
     bottom: 0;
     right: 0;
@@ -144,7 +145,7 @@ html, body {
     background-color: #F0F0F0;
     height: 100%;
     width: 100%;
-    z-index: 100000;
+    z-index: 10000;
 }
 .transparent.overlay {
     background-color: rgba(0, 0, 0, 0.75);
@@ -204,7 +205,7 @@ html, body {
     right: 15px;
     width: 375px;
     position: absolute;
-    z-index: 100001;
+    z-index: 100000;
 }
 .notification {
     margin: 5px;
@@ -213,6 +214,11 @@ html, body {
 .ui.negative.message {
     background-color: #F2B3B3;
     color: #7A1200;
+    border: none;
+}
+.ui.positive.message {
+    background-color: rgb(199, 236, 179);
+    color: #1F5130;
     border: none;
 }
 .notification.ng-enter {
