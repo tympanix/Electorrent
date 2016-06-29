@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('torrentApp')
-    .service('utorrentService', function($http, $resource, $log, $q, Torrent) {
+    .service('utorrentService', ["$http", "$resource", "$log", "$q", "Torrent", "notificationService", function($http, $resource, $log, $q, Torrent, $notify) {
 
         var loading = null;
         var data = {
@@ -45,9 +45,9 @@ angular.module('torrentApp')
                         loading.resolve(data.token);
                         $log.info('got token ' + data.token);
                     }
-                }).error(function() {
-                    loading.reject('Error loading token');
-                    $log.error(arguments);
+                }).error(function(err, status) {
+                    $notify.alertAuth(err, status);
+                    loading.reject(err || 'Error loading token', status);
                 });
                 return loading.promise;
             },
@@ -370,4 +370,4 @@ angular.module('torrentApp')
         };
 
         return torrentServerService;
-    });
+    }]);
