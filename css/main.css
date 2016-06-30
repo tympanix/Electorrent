@@ -93,9 +93,9 @@ html, body {
 }
 .main-panel .main-content {
     height: calc(100% - 50px);
-    overflow: visible;
-    overflow-x: hidden;
-    overflow-y: auto;
+    /*overflow-x: hidden;
+    overflow-y: auto;*/
+    overflow-y: overlay; /* Chrome scrollbar on top */
 }
 .torrent.table {
     border-radius: 0;
@@ -164,6 +164,20 @@ html, body {
     right: 0;
     margin: 10vmin;
     padding: 0px;
+}
+
+::-webkit-scrollbar {
+    background: none;
+    -webkit-appearance: none;
+    width: 7px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+::-webkit-scrollbar * {
+    background:transparent;
 }
 
 /*#########################################*/
