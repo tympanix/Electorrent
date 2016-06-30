@@ -52,34 +52,36 @@
             </div>
         </div>
         <div class="main-content">
-            <table resizeable class="ui single line unstackable selectable fixed compact torrent table" infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
+            <table class="ui single line unstackable selectable fixed compact torrent resize table" infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
                 <thead>
                     <tr>
                         <th class="eight wide">Name</th>
-                        <th class="two wide">Size</th>
-                        <th>Progress</th>
-                        <th style="width:75px;">Label</th>
-                        <th class="three wide">Date Added</th>
+                        <th class="two wide">
+                            <div class="handle"></div>Size</th>
+                        <th class="three wide">
+                            <div class="handle"></div>Progress</th>
+                        <th class="one wide">
+                            <div class="handle"></div>Label</th>
+                        <th class="two wide">
+                            <div class="handle"></div>Date Added</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit" ng-class="{active: torrent.selected}" ng-click="setSelected($event, torrent, $index)" ng-right-click="showContextMenu($event, torrent, $index)" repeat-done>
                         <td>
-                            <span class="value">{{torrent.decodedName}}</span>
+                            {{torrent.decodedName}}
                         </td>
                         <td>
-                            <span class="value">{{torrent.size | bytes}}</span>
+                            {{torrent.size | bytes}}
                         </td>
                         <td>
-                            <div class="value">
-                                <progress torrent="torrent" />
-                            </div>
+                            <progress torrent="torrent"/>
                         </td>
                         <td>
-                            <span class="value">{{torrent.label}}</span>
+                            {{torrent.label}}
                         </td>
                         <td>
-                            <span class="value">{{torrent.dateAdded | date}}</span>
+                            {{torrent.dateAdded | date}}
                         </td>
                     </tr>
                 </tbody>

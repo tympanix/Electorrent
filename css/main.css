@@ -93,6 +93,7 @@ html, body {
 }
 .main-panel .main-content {
     height: calc(100% - 50px);
+    overflow: visible;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -100,7 +101,6 @@ html, body {
     border-radius: 0;
     margin: 0;
     border: none;
-    width: 100%;
 }
 .value {
     padding: 0 .7em;
@@ -257,4 +257,31 @@ html, body {
         opacity: 0;
         max-height: 0;
     }
+}
+
+
+/*#########################################*/
+/* Table Resizing */
+/*#########################################*/
+
+table.resize th {
+    position: relative;
+    overflow: visible !important;
+}
+
+table.resize tr th .handle {
+    /*background-color: red;*/
+    width: 10px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: -5px;
+    cursor: e-resize;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -webkit-user-select: none;
+}
+
+table.resize tr th .handle.active {
+    border-right: 1px dotted #000;
 }
