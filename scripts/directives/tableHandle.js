@@ -5,11 +5,9 @@ angular.module("torrentApp").directive('handle', ["$timeout", function($timeout)
     };
 
     function link(scope, handle /*, attr*/){
-
         $timeout(function(){
             intilialize(scope, handle);
         }, 100)
-
     }
 
     function intilialize(scope, handle){
@@ -20,7 +18,8 @@ angular.module("torrentApp").directive('handle', ["$timeout", function($timeout)
         // Replace columns width with absolut measurements
         $(column).width($(column).width())
 
-        $(handle).height($(table).height())
+        // Used to set the column height
+        //$(handle).height($(table).height())
 
         $(column).resize(function(){
             console.log("Resize!");
