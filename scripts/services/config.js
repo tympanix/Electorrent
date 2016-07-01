@@ -19,6 +19,19 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
         return config.get(value);
     }
 
+    this.getAllSettings = function() {
+        return config.getAllSettings();
+    }
+
+    this.saveAllSettings = function(settings) {
+        var q = $q.defer();
+        config.saveAll(settings, function(err){
+            if (err) q.reject(err)
+            else q.resolve();
+        });
+        return q.promise;
+    }
+
     this.saveServer = function(ip, port, user, password){
         if (arguments.length === 1){
             return put('server', arguments[0]);
@@ -34,6 +47,14 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
 
     this.getServer = function() {
         return get('server');
+    }
+
+    this.getResizeMode = function() {
+        return get('resizeMode');
+    }
+
+    this.setResizeMode = function(mode) {
+        return put('resizeMode', mode);
     }
 
 }]);

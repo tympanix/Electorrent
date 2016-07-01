@@ -1,12 +1,32 @@
 angular.module("torrentApp").controller("settingsController", ["$scope", "utorrentService", "configService", "notificationService", "electron", function($scope, $utorrentService, config, $notify, electron) {
 
+    // External Settings reference
+    $scope.settings = {
+        server: {
+            ip: '',
+            port: '',
+            user: '',
+            password: ''
+        },
+        ui: {
+            resizeMode: ''
+        }
+    };
+
+    // Internal settings reference
+    $scope.general = {
+        magnet: false
+    }
+
     $scope.connecting = false;
     $scope.page = 'general';
 
     loadAllSettings();
 
     function loadAllSettings() {
-        $scope.server = config.getServer()
+        $scope.settings = config.getAllSettings();
+        // $scope.server = config.getServer()
+
         $scope.general = {
             magnets: electron.app.isDefaultProtocolClient('magnet')
         }
@@ -28,18 +48,15 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
     })
 
     function writeSettings() {
-        saveServer();
-        subscribeToMagnets();
-    }
-
-    function saveServer() {
-        config.saveServer($scope.server)
+        config.saveAllSettings($scope.settings)
             .then(function() {
                 $scope.close();
+                $notify.ok("Saved Settings", "You settings has been updated")
             })
             .catch(function(err) {
-                console.error('Oh noes', err);
+                $notify.alert("Settings could not be saved", err)
             })
+        subscribeToMagnets();
     }
 
     $scope.close = function() {
@@ -49,10 +66,10 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
 
     $scope.save = function() {
         $scope.connecting = true;
-        var ip = $scope.server.ip;
-        var port = $scope.server.port;
-        var user = $scope.server.user;
-        var password = $scope.server.password;
+        var ip = $scope.settings.server.ip;
+        var port = $scope.settings.server.port;
+        var user = $scope.settings.server.user;
+        var password = $scope.settings.server.password;
 
         $utorrentService.connect(ip, port, user, password)
             .then(function() {

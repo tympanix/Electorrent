@@ -17,6 +17,8 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         }
     });
 
+    //pageSettings();
+
     function connectToServer(ip, port, user, password){
         $utorrentService.connect(ip, port, user, password)
         .then(function(){
