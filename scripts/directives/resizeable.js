@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('resizeable', ["$timeout", function($timeout) {
+angular.module("torrentApp").directive('resizeable', [function() {
     var minWidth = 24;
 
     var modeOverflow = false;
@@ -8,67 +8,68 @@ angular.module("torrentApp").directive('resizeable', ["$timeout", function($time
     var columns = null;
     var table = null;
     var resizer = null;
+    var isFirstDrag = true;
 
-    function link(scope, element, attr){
+    function link(scope, element, attr) {
+        // Set global reference to table
+        table = element;
 
-        $timeout(function(){
-            // Set global reference to table
-            table = element;
+        // Add css styling/properties to table
+        $(table).addClass('resize');
 
-            // Add css styling/properties to table
-            $(table).addClass('resize');
+        // Initialise handlers, bindings and modes
+        initialiseAll(table, attr, scope);
 
-            // Initialise handlers, bindings and modes
-            initialiseAll(table, attr, scope);
+        // Bind utility functions to scope object
+        bindUtilityFunctions(table, attr, scope)
 
-            // Bind utility functions to scope object
-            bindUtilityFunctions(table, attr, scope)
-
-            // Watch for mode changes and update all
-            watchModeChange(table, attr, scope);
-        }, 100)
+        // Watch for mode changes and update all
+        watchModeChange(table, attr, scope);
     }
 
-    function bindUtilityFunctions(table, attr, scope){
+    function bindUtilityFunctions(table, attr, scope) {
         if (scope.bind === undefined) return;
         scope.bind = {
-            update: function(){
+            update: function() {
                 cleanUpAll(table);
                 initialiseAll(table, attr, scope);
             }
         }
     }
 
-    function watchModeChange(table, attr, scope){
-        scope.$watch(function() {return scope.mode; }, function(newMode){
+    function watchModeChange(table, attr, scope) {
+        scope.$watch(function() {
+            return scope.mode;
+        }, function(newMode) {
             console.log("Update!", newMode);
             cleanUpAll(table);
             initialiseAll(table, attr, scope);
         });
     }
 
-    function cleanUpAll(table){
+    function cleanUpAll(table) {
         cleanUpModes();
         resetTable(table);
         deleteHandles(table);
     }
 
-    function cleanUpModes(){
+    function cleanUpModes() {
         modeOverflow = false;
         modeFixed = false;
         invalidMode = false;
+        isFirstDrag = true;
     }
 
-    function resetTable(table){
+    function resetTable(table) {
         $(table).width('100%');
         $(table).find('th').width('auto');
     }
 
-    function deleteHandles(table){
+    function deleteHandles(table) {
         $(table).find('th').find('.handle').remove();
     }
 
-    function initialiseAll(table, attr, scope){
+    function initialiseAll(table, attr, scope) {
         // Get all column headers
         columns = $(table).find('th');
 
@@ -82,24 +83,19 @@ angular.module("torrentApp").directive('resizeable', ["$timeout", function($time
         resizer = getResizer();
 
         // Execute setup function for the given resizer mode
-        if (resizer.setup){
+        if (resizer.setup) {
             resizer.setup();
         }
 
         // Initialise all handlers for every column
-        columns.each(function(index, column){
+        columns.each(function(index, column) {
             initHandle(table, column);
         })
 
-        // At last, execute the resizer finish function
-        if (resizer.finish){
-            resizer.finish();
-        }
-
     }
 
-    function setMode(attributes, scope){
-        if ('overflow' in attributes || scope.mode === 'overflow'){
+    function setMode(attributes, scope) {
+        if ('overflow' in attributes || scope.mode === 'overflow') {
             // Mode overflow
             modeOverflow = true;
         } else if ('fixed' in attributes || scope.mode === 'fixed') {
@@ -111,31 +107,36 @@ angular.module("torrentApp").directive('resizeable', ["$timeout", function($time
         }
     }
 
-    function initHandle(table, column){
+    function initHandle(table, column) {
         // Prepend a new handle div to the column
-        var handle = $('<div>', {class: 'handle'});
+        var handle = $('<div>', {
+            class: 'handle'
+        });
         $(column).prepend(handle);
 
         // Make handle as tall as the table
-        $(handle).height($(table).height())
+        //$(handle).height($(table).height())
 
         var controlledColumn = column;
-        if (modeFixed) {
-            // Fixed mode handlers always control
-            // neighbour columns instead of itself
-            controlledColumn = $(column).next();
+        if (resizer.handleMiddlware){
+            controlledColumn = resizer.handleMiddlware(handle, column)
         }
 
         // Bind mousedown, mousemove & mouseup events
         bindEventToHandle(table, handle, controlledColumn);
     }
 
-    function bindEventToHandle(table, handle, column){
-        // Replace column's width with absolute measurements
-        $(column).width($(column).width())
+    function bindEventToHandle(table, handle, column) {
 
         // This event starts the dragging
-        $(handle).mousedown(function(event){
+        $(handle).mousedown(function(event) {
+            if (isFirstDrag) {
+                if (resizer.firstdrag) {
+                    resizer.firstdrag(column, handle);
+                    isFirstDrag = false;
+                }
+            }
+
             // Prevent text-selection, object dragging ect.
             event.preventDefault();
 
@@ -150,7 +151,7 @@ angular.module("torrentApp").directive('resizeable', ["$timeout", function($time
             var orgWidth = $(column).width();
 
             // On every mouse move, calculate the new width
-            $(window).mousemove(calculateWidthEvent(column, orgX, orgWidth, resizer.restrict, resizer.calculate))
+            $(window).mousemove(calculateWidthEvent(column, orgX, orgWidth))
 
             // Stop dragging as soon as the mouse is released
             $(window).one('mouseup', unbindEvent(handle))
@@ -158,46 +159,53 @@ angular.module("torrentApp").directive('resizeable', ["$timeout", function($time
         })
     }
 
-    function calculateWidthEvent(column, orgX, orgWidth, restrict, calculator){
-        return function(event){
+    function calculateWidthEvent(column, orgX, orgWidth) {
+        return function(event) {
             // Get current mouse position
             var newX = event.clientX;
 
             // Use calculator function to calculate new width
             var diffX = newX - orgX;
-            var newWidth = calculator(orgWidth, diffX);
+            var newWidth = resizer.calculate(orgWidth, diffX);
 
             // Use restric function to abort potential restriction
-            if (restrict(newWidth, minWidth)) return;
+            if (resizer.restrict(newWidth, minWidth)) return;
             $(column).width(newWidth);
         }
     }
 
-    function getResizer(){
-        if (modeOverflow){
+    function getResizer() {
+        if (modeOverflow) {
             return overflowResizer();
-        } else if (modeFixed){
+        } else if (modeFixed) {
             return fixedResizer();
         }
     }
 
-    function overflowResizer(){
+    function overflowResizer() {
 
-        function setup(){
+        function setup() {
             // Allow overflow in this mode
-            $(table).parent().css({ overflow: 'auto'});
+            $(table).parent().css({
+                overflow: 'auto'
+            });
         }
 
-        function finish(){
+        function firstdrag() {
+            // Replace column's width with absolute measurements
+            $(columns).each(function(index, column) {
+                $(column).width($(column).width());
+            })
+
             // For mode overflow, make table as small as possible
             $(table).width(1);
         }
 
-        function calcOverflowWidth(orgX, orgWidth){
-            return orgX + orgWidth;
+        function calcOverflowWidth(orgWidth, diffX) {
+            return orgWidth + diffX;
         }
 
-        function restrict(newWidth, minWidth){
+        function restrict(newWidth, minWidth) {
             console.log("Base restric!");
             return newWidth < minWidth
         }
@@ -206,64 +214,80 @@ angular.module("torrentApp").directive('resizeable', ["$timeout", function($time
             setup: setup,
             restrict: restrict,
             calculate: calcOverflowWidth,
-            finish: finish
+            firstdrag: firstdrag
         };
     }
 
-    function fixedResizer(){
+    function fixedResizer() {
         var fixedColumn = $(table).find('th').first();
         var bound = false;
 
-        function setup(){
+        function setup() {
             // Hide overflow in mode fixed
-            $(table).parent().css({ overflowX: 'hidden'})
+            $(table).parent().css({
+                overflowX: 'hidden'
+            })
 
             // First column is auto to compensate for 100% table width
-            $(columns).first().css({ width: 'auto' });
+            $(columns).first().css({
+                width: 'auto'
+            });
 
             // Mode fixed does not require handler on last column
             columns = columns.not(':last');
-        }
 
-        function finish(){
             // For mode fixed, make table 100% width always
             $(table).width('100%');
         }
 
-        function fixedRestrict(newWidth, minWidth){
-            if (bound){
-                if (newWidth < bound){
+        function firstdrag( /*column, handle*/ ) {
+            // Replace each column's width with absolute measurements
+            $(table).find('th').not(':first')
+                .each(function(index, column) {
+                    $(column).width($(column).width());
+                })
+        }
+
+        function handleMiddleware(handle, column){
+            // Fixed mode handles always controll neightbour column
+            return $(column).next();
+        }
+
+        function fixedRestrict(newWidth, minWidth) {
+            if (bound) {
+                if (newWidth < bound) {
                     $(fixedColumn).width('auto');
                     bound = false;
                     return false;
                 } else {
                     return true;
                 }
-            } else if (newWidth < minWidth){
+            } else if (newWidth < minWidth) {
                 return true;
             } else if ($(fixedColumn).width() <= minWidth) {
-                console.log("Bound!");
                 bound = newWidth;
                 $(fixedColumn).width(minWidth);
                 return true;
             }
         }
 
-        function newWidth(orgX, orgWidth){
-            return orgX - orgWidth;
+        function newWidth(orgWidth, diffX) {
+            // Subtract difference - neightbour grows
+            return orgWidth - diffX;
         }
 
         return {
             setup: setup,
+            handleMiddlware: handleMiddleware,
             restrict: fixedRestrict,
             calculate: newWidth,
-            finish: finish
+            firstdrag: firstdrag
         };
     }
 
-    function unbindEvent(handle){
+    function unbindEvent(handle) {
         // Event called at end of drag
-        return function(/*event*/){
+        return function( /*event*/ ) {
             $(handle).removeClass('active');
             $(window).unbind('mousemove');
             $('body').removeClass('table-resize');

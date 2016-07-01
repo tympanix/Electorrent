@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <h1>General Settings</h1>
 <div class="ui large divided list">
+    <!-- Magnet links -->
     <div class="item">
         <div class="right floated middle aligned content">
-            <div checkbox class="ui toggle checkbox"
-                bind="general.magnets"
-                is-checked="general.magnets">
+            <div checkbox class="ui toggle checkbox" bind="general.magnets" is-checked="general.magnets">
                 <input type="checkbox" tabindex="0" class="hidden">
             </div>
         </div>
@@ -16,6 +15,30 @@
             </div>
             <div class="description">
                 Enabling this makes Electorrent the default program for magnet links
+            </div>
+        </div>
+    </div>
+
+    <!-- Table resize style -->
+    <div class="item">
+        <div class="right floated middle aligned content">
+            <div dropdown bind="settings.ui.resizeMode" class="ui selection dropdown">
+                <input type="hidden" name="gender">
+                <i class="dropdown icon"></i>
+                <div class="default text">Resize Mode</div>
+                <div class="menu">
+                    <div class="item" data-value="fixed">Fixed</div>
+                    <div class="item" data-value="overflow">Overflow</div>
+                </div>
+            </div>
+        </div>
+        <i class="large expand middle aligned icon"></i>
+        <div class="middle aligned content">
+            <div class="header">
+                Table Resize Style
+            </div>
+            <div class="description">
+                Changes how the torrent table behaves when resized
             </div>
         </div>
     </div>
