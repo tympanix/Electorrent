@@ -93,8 +93,8 @@ html, body {
 }
 .main-panel .main-content {
     height: calc(100% - 50px);
-    /*overflow-x: hidden;
-    overflow-y: auto;*/
+    overflow-x: hidden;
+    /*overflow-y: auto;*/
     overflow-y: overlay; /* Chrome scrollbar on top */
 }
 .torrent.table {
@@ -280,7 +280,7 @@ html, body {
 
 table.resize th {
     position: relative;
-    overflow: visible !important;
+    min-width: 10px !important;
 }
 
 table.resize tr th .handle {
@@ -289,11 +289,12 @@ table.resize tr th .handle {
     height: 100%;
     position: absolute;
     top: 0;
-    left: -5px;
+    right: 0px;
     cursor: e-resize;
-    -webkit-user-drag: none;
-    -webkit-user-select: none;
-    -webkit-user-select: none;
+}
+
+body.table-resize {
+    cursor: e-resize !important;
 }
 
 table.resize tr th .handle.active {
