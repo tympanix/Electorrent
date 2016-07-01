@@ -15,6 +15,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.labelsDrowdown = null;
     $scope.torrentLimit = LIMIT;
     $scope.labels = {};
+    $scope.tableMode = "fixed";
 
     $scope.filters = {
         status: 'downloading'
