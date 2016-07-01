@@ -72,7 +72,7 @@ html, body {
     right: 0;
     left: 0;
     min-width: 300px;
-    max-height: calc(100% - 65px);
+    height: calc(100% - 65px);
     padding: 21px;
     overflow-y: auto;
     overflow-x: hidden;
