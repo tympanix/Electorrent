@@ -44,7 +44,7 @@
                 Pause
             </a>
             <div
-                dropdown="labelsDrowdown"
+                dropdown ref="labelsDrowdown"
                 class="ui icon top left pointing dropdown button"
                 ng-class="{disabled: noneSelected()}">
                 <i class="tag icon"></i>
@@ -56,7 +56,7 @@
         </div>
         <div class="main-content">
             <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
-                <table resizeable mode="tableMode" class="ui single line unstackable selectable fixed compact torrent resize table">
+                <table resizeable mode="resizeMode" container=".main-content" class="ui single line unstackable selectable fixed compact torrent resize table">
                     <thead>
                         <tr>
                             <th>Name</th>

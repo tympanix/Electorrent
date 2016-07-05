@@ -4,6 +4,10 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
 
     const config = electron.config;
 
+    this.settings = function() {
+        return config.settingsReference();
+    }
+
     // Angular wrapper for saving to config
     function put(key, value){
         var q = $q.defer();

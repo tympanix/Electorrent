@@ -1,7 +1,11 @@
 angular.module("torrentApp").directive('dropdown', [function() {
     return {
         restrict: 'A',
-        link: link
+        link: link,
+        scope: {
+            ref: '=?',
+            bind: '=?'
+        }
     }
 
     function link(scope, element, attr) {
@@ -12,8 +16,8 @@ angular.module("torrentApp").directive('dropdown', [function() {
             onChange: onChange
         });
 
-        if ('dropdown' in attr){
-            scope[attr.dropdown] = {
+        if ('ref' in attr){
+            scope.ref = {
                 clear: doAction(element, 'clear'),
                 refresh: doAction(element, 'refresh'),
                 setSelected: doAction(element, 'set selected'),
@@ -22,14 +26,14 @@ angular.module("torrentApp").directive('dropdown', [function() {
         }
 
         scope.$watch(function() {
-            return scope.$eval(attr.bind);
+            return scope.bind;
         }, function(newValue) {
             $(element).dropdown('set selected', newValue);
         });
 
         function onChange(value /*, text, choice*/){
-            if (scope[attr.bind]){
-                scope[attr.bind] = value;
+            if (scope.bind){
+                scope.bind = value;
             }
         }
 

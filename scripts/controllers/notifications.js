@@ -8,7 +8,6 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
 
     $rootScope.$on('notification', function(event, data){
         $scope.notifications.push(data);
-        console.info("Got notification!", data);
     })
 
 }]);
