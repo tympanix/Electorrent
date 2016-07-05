@@ -30,6 +30,7 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
         $scope.general = {
             magnets: electron.app.isDefaultProtocolClient('magnet')
         }
+        
     }
 
     function subscribeToMagnets() {
@@ -74,6 +75,7 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
         $utorrentService.connect(ip, port, user, password)
             .then(function() {
                 writeSettings();
+                $scope.$emit('emit:new:settings', $scope.settings)
                 $scope.connecting = false;
             })
             .catch(function(err) {

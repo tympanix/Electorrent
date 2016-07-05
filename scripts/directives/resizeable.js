@@ -3,16 +3,21 @@ angular.module("torrentApp").directive('resizeable', [function() {
 
     var modeOverflow = false;
     var modeFixed = false;
+    var modeBasic = false;
     var invalidMode = false;
 
     var columns = null;
     var table = null;
+    var container = null;
     var resizer = null;
     var isFirstDrag = true;
 
     function link(scope, element, attr) {
         // Set global reference to table
         table = element;
+
+        // Set global reference to container
+        container = scope.container ? $(scope.container) : $(table).parent();
 
         // Add css styling/properties to table
         $(table).addClass('resize');
@@ -56,6 +61,7 @@ angular.module("torrentApp").directive('resizeable', [function() {
     function cleanUpModes() {
         modeOverflow = false;
         modeFixed = false;
+        modeBasic = false;
         invalidMode = false;
         isFirstDrag = true;
     }
@@ -101,6 +107,9 @@ angular.module("torrentApp").directive('resizeable', [function() {
         } else if ('fixed' in attributes || scope.mode === 'fixed') {
             // Mode fixed
             modeFixed = true;
+        } else if ('basic' in attributes || scope.mode === 'basic') {
+            // Mode basic
+            modeBasic = true;
         } else {
             // Mode not regocnized :(
             invalidMode = true;
@@ -137,6 +146,14 @@ angular.module("torrentApp").directive('resizeable', [function() {
                 }
             }
 
+            var optional = {}
+            if (resizer.intervene) {
+                optional = resizer.intervene.selector(column);
+                optional.column = optional;
+                optional.orgWidth = $(optional).width();
+                console.log("Optional", optional);
+            }
+
             // Prevent text-selection, object dragging ect.
             event.preventDefault();
 
@@ -151,7 +168,7 @@ angular.module("torrentApp").directive('resizeable', [function() {
             var orgWidth = $(column).width();
 
             // On every mouse move, calculate the new width
-            $(window).mousemove(calculateWidthEvent(column, orgX, orgWidth))
+            $(window).mousemove(calculateWidthEvent(column, orgX, orgWidth, optional))
 
             // Stop dragging as soon as the mouse is released
             $(window).one('mouseup', unbindEvent(handle))
@@ -159,7 +176,7 @@ angular.module("torrentApp").directive('resizeable', [function() {
         })
     }
 
-    function calculateWidthEvent(column, orgX, orgWidth) {
+    function calculateWidthEvent(column, orgX, orgWidth, optional) {
         return function(event) {
             // Get current mouse position
             var newX = event.clientX;
@@ -170,6 +187,15 @@ angular.module("torrentApp").directive('resizeable', [function() {
 
             // Use restric function to abort potential restriction
             if (resizer.restrict(newWidth, minWidth)) return;
+
+            // Extra optional column
+            if (resizer.intervene){
+                var optWidth = resizer.intervene.calculator(optional.orgWidth, diffX);
+                if (resizer.intervene.restrict(optWidth, minWidth)) return;
+                $(optional).width(optWidth)
+            }
+
+            // Set size
             $(column).width(newWidth);
         }
     }
@@ -179,6 +205,8 @@ angular.module("torrentApp").directive('resizeable', [function() {
             return overflowResizer();
         } else if (modeFixed) {
             return fixedResizer();
+        } else if (modeBasic) {
+            return basicResizer();
         }
     }
 
@@ -186,7 +214,7 @@ angular.module("torrentApp").directive('resizeable', [function() {
 
         function setup() {
             // Allow overflow in this mode
-            $(table).parent().css({
+            $(container).css({
                 overflow: 'auto'
             });
         }
@@ -224,7 +252,7 @@ angular.module("torrentApp").directive('resizeable', [function() {
 
         function setup() {
             // Hide overflow in mode fixed
-            $(table).parent().css({
+            $(container).css({
                 overflowX: 'hidden'
             })
 
@@ -285,12 +313,91 @@ angular.module("torrentApp").directive('resizeable', [function() {
         };
     }
 
+    function basicResizer() {
+
+        function setup() {
+            // Hide overflow
+            $(container).css({
+                overflowX: 'hidden'
+            })
+
+            // Make table 100% width always
+            $(table).width('100%');
+
+            columns = $(columns).not(':last');
+        }
+
+        function firstdrag( /*column, handle*/ ) {
+            // Replace each column's width with absolute measurements
+            $(table).find('th').each(function(index, column) {
+                $(column).width($(column).width());
+            })
+        }
+
+        function calcOverflowWidth(orgWidth, diffX) {
+            return orgWidth + diffX;
+        }
+
+        function restrict(newWidth, minWidth) {
+            return newWidth < minWidth
+        }
+
+        function intervene() {
+
+            function selector(column) {
+                return $(column).next()
+            }
+
+            function calculator(orgWidth, diffX) {
+                return orgWidth - diffX;
+            }
+
+            function restrict(newWidth, minWidth){
+                return newWidth < minWidth;
+            }
+
+            return {
+                selector: selector,
+                calculator: calculator,
+                restrict: restrict
+            }
+        }
+
+        function enddrag() {
+            var totWidth = $(table).outerWidth();
+
+            var totPercent = 0;
+
+            $(table).find('th').each(function(index, column) {
+                var colWidth = $(column).outerWidth();
+                var percentWidth = colWidth / totWidth * 100 + '%';
+                totPercent += (colWidth / totWidth * 100);
+                $(column).css({ width: percentWidth });
+            })
+
+            console.log("Total percent", totPercent);
+        }
+
+        return {
+            setup: setup,
+            restrict: restrict,
+            calculate: calcOverflowWidth,
+            firstdrag: firstdrag,
+            enddrag: enddrag,
+            intervene: intervene()
+        };
+    }
+
     function unbindEvent(handle) {
         // Event called at end of drag
         return function( /*event*/ ) {
             $(handle).removeClass('active');
             $(window).unbind('mousemove');
             $('body').removeClass('table-resize');
+
+            if (resizer.enddrag) {
+                resizer.enddrag();
+            }
         }
     }
 
@@ -300,7 +407,8 @@ angular.module("torrentApp").directive('resizeable', [function() {
         link: link,
         scope: {
             mode: '=',
-            bind: '='
+            bind: '=',
+            container: '@'
         }
     };
 

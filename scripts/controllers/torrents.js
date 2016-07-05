@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "utorrentService", "notificationService", function ($scope, $timeout, $filter, $log, $utorrentService, $notify) {
+angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "utorrentService", "notificationService", "configService", function ($scope, $timeout, $filter, $log, $utorrentService, $notify, config) {
     const TIMEOUT = 2000;
     const LIMIT = 25;
 
@@ -9,17 +9,24 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     var lastSelected = null;
     var timeout;
 
+    var settings = config.settings();
+
     $scope.torrents = {};
     $scope.arrayTorrents = [];
     $scope.contextMenu = null;
     $scope.labelsDrowdown = null;
     $scope.torrentLimit = LIMIT;
     $scope.labels = {};
-    $scope.tableMode = "fixed";
+    $scope.resizeMode = settings.ui.resizeMode;
 
     $scope.filters = {
         status: 'downloading'
     };
+
+    $scope.$on('new:settings', function(event, data) {
+        console.log("New sttings!", data);
+        $scope.resizeMode = data.ui.resizeMode;
+    })
 
     $scope.showMore = function() {
         $scope.torrentLimit += LIMIT;
