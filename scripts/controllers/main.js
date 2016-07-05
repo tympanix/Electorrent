@@ -72,6 +72,12 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         pageTorrents();
     })
 
+    $scope.$on('emit:new:settings', function(event, data) {
+        //event.stopPropagation();
+        console.log("Main recieved new settings", data);
+        $scope.$broadcast('new:settings', data)
+    })
+
     $scope.showSettings = function(){
         return page === PAGE_SETTINGS;
     }
