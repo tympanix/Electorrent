@@ -1,0 +1,30 @@
+{
+  "name": "electorrent",
+  "productName": "Electorrent",
+  "version": "1.0.0",
+  "description": "An Electron/Node/AngularJS remote client app for uTorrent server",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tympanix/Electorrent.git"
+  },
+  "keywords": [
+    "Electorrent",
+    "Electron",
+    "uTorrent",
+    "Server",
+    "GUI"
+  ],
+  "author": "Mathias Mortensen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Tympanix/Electorrent/issues"
+  },
+  "homepage": "https://github.com/Tympanix/Electorrent#readme",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
+}
