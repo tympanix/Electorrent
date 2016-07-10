@@ -87,5 +87,6 @@ dist
 # Database configuration
 config
 
-# Build
-build
+# Ignore app directory
+app/*
+!app/package.json

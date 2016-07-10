@@ -5,7 +5,10 @@
   "main": "app.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . Electorrent --platform=win32 --arch=x64 --out=./build --overwrite --ignore=node_modules/*"
+    "build": "electron-packager . Electorrent --platform=win32 --arch=x64 --out=./build --overwrite --ignore=node_modules/*",
+    "postinstall": "install-app-deps",
+    "pack": "build --dir",
+    "dist:win": "build --win --ia32 --x64"
   },
   "keywords": [
     "utorrent"
@@ -13,6 +16,7 @@
   "author": "Mathias Mortensen",
   "license": "MIT",
   "devDependencies": {
+    "electron-builder": "^5.11.3",
     "electron-connect": "^0.4.2",
     "electron-packager": "^7.0.2",
     "electron-prebuilt": "^1.1.2",
@@ -23,5 +27,11 @@
     "gulp-useref": "^3.1.0",
     "run-sequence": "^1.2.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "build": {
+    "appId": "dk.sparken.electorrent",
+    "app-category-type": "public.app-category.utilities"
+  }
 }
