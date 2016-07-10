@@ -23,7 +23,12 @@ let torrentWindow;
 
 function createTorrentWindow() {
     // Create the browser window.
-    torrentWindow = new BrowserWindow({show: false, width: 1200, height: 800, backgroundColor: '#ffffff'});
+    torrentWindow = new BrowserWindow({
+        show: false,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+     });
 
     torrentWindow.once('ready-to-show', () => {
         torrentWindow.show();

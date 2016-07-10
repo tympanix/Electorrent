@@ -273,31 +273,3 @@ html, body {
         max-height: 0;
     }
 }
-
-
-/*#########################################*/
-/* Table Resizing */
-/*#########################################*/
-
-table.resize th {
-    position: relative;
-    min-width: 10px !important;
-}
-
-table.resize tr th .handle {
-    /*background-color: red;*/
-    width: 10px;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    right: 0px;
-    cursor: e-resize;
-}
-
-body.table-resize {
-    cursor: e-resize !important;
-}
-
-table.resize tr th .handle.active {
-    border-right: 1px dotted #000;
-}
