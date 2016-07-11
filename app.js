@@ -4,6 +4,9 @@ const electron = require('electron');
 // Module to control application life.
 const {app} = electron;
 
+// Handle Squirrel startup parameters
+if(require('electron-squirrel-startup')) return;
+
 // Module to create native browser window.
 const {BrowserWindow} = electron;
 
@@ -13,13 +16,13 @@ const {ipcMain} = electron;
 // Require path nodejs module
 const path = require('path');
 
-// Handle Squirrel startup parameters
-if(require('electron-squirrel-startup')) return;
-
 // Configuration module
 const config = require('./lib/config.js');
 config.init(path.join(app.getPath('userData'), 'config.json'));
 global.config = config;
+
+// Auto update module
+const updater = require('./lib/update.js')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -49,7 +52,7 @@ function createTorrentWindow() {
         torrentWindow = null;
     });
 
-    torrentWindow.openDevTools();
+    //torrentWindow.openDevTools();
 }
 
 function sendMagnetLinks(args){
@@ -89,6 +92,7 @@ if (shouldQuit) {
 // Some APIs can only be used after this event occurs.
 app.on('ready', function(){
     createTorrentWindow();
+    updater.watchUpdate(torrentWindow);
 });
 
 // Quit when all windows are closed.
