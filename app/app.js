@@ -5,7 +5,7 @@ const electron = require('electron');
 const {app} = electron;
 
 // Handle Squirrel startup parameters
-if(require('electron-squirrel-startup')) return;
+if(require('./lib/squirrel.js')) return;
 
 // Module to create native browser window.
 const {BrowserWindow} = electron;
