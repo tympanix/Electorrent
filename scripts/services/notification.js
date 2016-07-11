@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('torrentApp')
-    .service('notificationService', ["$rootScope", function($rootScope) {
+    .service('notificationService', ["$rootScope", "electron", function($rootScope, electron) {
 
         this.alert = function(title, message) {
             sendNotification(title, message, "negative");
@@ -33,5 +33,10 @@ angular.module('torrentApp')
                 this.alert("Connection problem", "The connection could not be established")
             }
         }
+
+        // Listen for incomming notifications from main process
+        electron.ipc.on('notify', function(event, data){
+            sendNotification(data.title, data.message, data.type || 'warning');
+        })
 
     }]);

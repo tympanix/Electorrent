@@ -1339,6 +1339,7 @@ angular.module('torrentApp').factory("electron", [function() {
     o.screen            = remote.screen;
     o.tray              = remote.shell;
     o.capturer          = remote.capturer;
+    o.autoUpdater       = remote.autoUpdater;
 
     // Custom resources
     o.config            = remote.getGlobal('config');
@@ -1415,7 +1416,7 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
 'use strict';
 
 angular.module('torrentApp')
-    .service('notificationService', ["$rootScope", function($rootScope) {
+    .service('notificationService', ["$rootScope", "electron", function($rootScope, electron) {
 
         this.alert = function(title, message) {
             sendNotification(title, message, "negative");
@@ -1447,6 +1448,11 @@ angular.module('torrentApp')
                 this.alert("Connection problem", "The connection could not be established")
             }
         }
+
+        // Listen for incomming notifications from main process
+        electron.ipc.on('notify', function(event, data){
+            sendNotification(data.title, data.message, data.type || 'warning');
+        })
 
     }]);
 
@@ -1872,6 +1878,10 @@ angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function
                     label: 'Learn More',
                     click() { electron.shell.openExternal('http://electron.atom.io'); }
                 },
+                {
+                    label: 'Check For Updates',
+                    click() { electron.autoUpdater.checkForUpdates() }
+                }
             ]
         },
     ];
@@ -1922,7 +1932,7 @@ angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function
                 {
                     label: 'Quit',
                     accelerator: 'Command+Q',
-                    click() { app.quit(); }
+                    click() { electron.app.quit(); }
                 },
             ]
         });

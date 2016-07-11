@@ -1,5 +1,6 @@
 {
     "name": "electorrent",
+    "productName": "Electorrent",
     "version": "1.0.0",
     "description": "An Electron/Node/AngularJS remote client app for uTorrent server",
     "main": "app.js",

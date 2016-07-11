@@ -109,6 +109,10 @@ angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function
                     label: 'Learn More',
                     click() { electron.shell.openExternal('http://electron.atom.io'); }
                 },
+                {
+                    label: 'Check For Updates',
+                    click() { electron.autoUpdater.checkForUpdates() }
+                }
             ]
         },
     ];
@@ -159,7 +163,7 @@ angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function
                 {
                     label: 'Quit',
                     accelerator: 'Command+Q',
-                    click() { app.quit(); }
+                    click() { electron.app.quit(); }
                 },
             ]
         });

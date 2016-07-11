@@ -21,6 +21,7 @@ angular.module('torrentApp').factory("electron", [function() {
     o.screen            = remote.screen;
     o.tray              = remote.shell;
     o.capturer          = remote.capturer;
+    o.autoUpdater       = remote.autoUpdater;
 
     // Custom resources
     o.config            = remote.getGlobal('config');
