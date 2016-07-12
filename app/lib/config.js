@@ -3,7 +3,7 @@ var data = null;
 
 var defaultSettings = {
     ui: {
-        resizeMode: 'basic'
+        resizeMode: 'FixedResizer'
     }
 };
 
