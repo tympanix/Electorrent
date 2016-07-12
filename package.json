@@ -24,13 +24,13 @@
   "author": "tympanix",
   "license": "MIT",
   "devDependencies": {
-    "electron-connect": "^0.4.2",
     "electron-prebuilt": "^1.2.6",
     "electron-squirrel-startup": "^1.0.0"
   },
   "dependencies": {
     "bower": "^1.7.9",
     "electron-builder": "^5.11.3",
+    "electron-connect": "^0.4.2",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-run": "^1.7.1",
