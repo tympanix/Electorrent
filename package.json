@@ -11,7 +11,8 @@
         "pack": "build --dir",
         "dist:win": "build --win --x64",
         "dist:mac": "build --mac",
-        "release": "build"
+        "release": "build",
+        "build": "gulp build"
     },
     "keywords": [
         "utorrent"
@@ -24,11 +25,11 @@
     "license": "MIT",
     "devDependencies": {
         "electron-connect": "^0.4.2",
-        "electron-prebuilt": "^1.2.6"
+        "electron-prebuilt": "^1.2.6",
+        "electron-squirrel-startup": "^1.0.0"
     },
     "dependencies": {
         "electron-builder": "^5.11.3",
-        "electron-squirrel-startup": "^1.0.0",
         "gulp": "^3.9.1",
         "gulp-clean": "^0.3.2",
         "gulp-run": "^1.7.1",

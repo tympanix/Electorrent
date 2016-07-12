@@ -1,7 +1,16 @@
 var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll"]);
 
 // Set application menu
-torrentApp.run(['menu', 'electron', function(menu, electron){
+torrentApp.run(['menuWin', 'menuMac', 'electron', function(menuWin, menuMac, electron){
+    var menu = null;
+
+    if (process.platform === 'darwin') {
+        menu = menuMac;
+    }
+    else {
+        menu = menuWin;
+    }
+    
     var appMenu = electron.menu.buildFromTemplate(menu);
     electron.menu.setApplicationMenu(appMenu);
 }]);
@@ -1767,7 +1776,7 @@ angular.module("torrentApp").directive('repeatDone', [function() {
     }
 }]);
 
-angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function(electron, $rootScope) {
+angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', function(electron, $rootScope) {
     const template = [
         {
             label: 'Edit',
@@ -1876,7 +1885,7 @@ angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function
             submenu: [
                 {
                     label: 'Learn More',
-                    click() { electron.shell.openExternal('http://electron.atom.io'); }
+                    click() { electron.shell.openExternal('https://github.com/Tympanix/Electorrent'); }
                 },
                 {
                     label: 'Check For Updates',
@@ -1886,9 +1895,15 @@ angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function
         },
     ];
 
-    if (process.platform === 'darwin') {
-        const name = electron.app.getName();
-        template.unshift({
+    return template;
+
+}])
+
+angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', function(electron, $rootScope) {
+    const name = electron.app.getName();
+
+    const template = [
+        {
             label: name,
             submenu: [
                 {
@@ -1900,8 +1915,9 @@ angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function
                 },
                 {
                     label: 'Preferences...',
+                    accelerator: 'Command+,',
                     click: function() {
-                        console.log("Preferences");
+                        $rootScope.$broadcast('show:settings');
                     }
                 },
                 {
@@ -1935,32 +1951,124 @@ angular.module('torrentApp').factory("menu", ['electron', '$rootScope', function
                     click() { electron.app.quit(); }
                 },
             ]
-        });
-        // Window menu.
-        template[3].submenu = [
-            {
-                label: 'Close',
-                accelerator: 'CmdOrCtrl+W',
-                role: 'close'
-            },
-            {
-                label: 'Minimize',
-                accelerator: 'CmdOrCtrl+M',
-                role: 'minimize'
-            },
-            {
-                label: 'Zoom',
-                role: 'zoom'
-            },
-            {
-                type: 'separator'
-            },
-            {
-                label: 'Bring All to Front',
-                role: 'front'
-            }
-        ];
-    }
+        },
+        {
+            label: 'Edit',
+            submenu: [
+                {
+                    label: 'Undo',
+                    accelerator: 'CmdOrCtrl+Z',
+                    role: 'undo'
+                },
+                {
+                    label: 'Redo',
+                    accelerator: 'Shift+CmdOrCtrl+Z',
+                    role: 'redo'
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Cut',
+                    accelerator: 'CmdOrCtrl+X',
+                    role: 'cut'
+                },
+                {
+                    label: 'Copy',
+                    accelerator: 'CmdOrCtrl+C',
+                    role: 'copy'
+                },
+                {
+                    label: 'Paste',
+                    accelerator: 'CmdOrCtrl+V',
+                    role: 'paste'
+                },
+                {
+                    label: 'Paste and Match Style',
+                    accelerator: 'Shift+Command+V',
+                    role: 'pasteandmatchstyle'
+                },
+                {
+                    label: 'Delete',
+                    role: 'delete'
+                },
+                {
+                    label: 'Select All',
+                    accelerator: 'CmdOrCtrl+A',
+                    role: 'selectall'
+                },
+            ]
+        },
+        {
+            label: 'View',
+            submenu: [
+                {
+                    label: 'Reload',
+                    accelerator: 'CmdOrCtrl+R',
+                    click(item, focusedWindow) {
+                        if (focusedWindow) focusedWindow.reload();
+                    }
+                },
+                {
+                    label: 'Toggle Full Screen',
+                    accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
+                    click(item, focusedWindow) {
+                        if (focusedWindow)
+                        focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
+                    }
+                },
+                {
+                    label: 'Toggle Developer Tools',
+                    accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+                    click(item, focusedWindow) {
+                        if (focusedWindow)
+                        focusedWindow.webContents.toggleDevTools();
+                    }
+                },
+            ]
+        },
+        {
+            label: 'Window',
+            role: 'window',
+            submenu: [
+                {
+                    label: 'Close',
+                    accelerator: 'CmdOrCtrl+W',
+                    role: 'close'
+                },
+                {
+                    label: 'Minimize',
+                    accelerator: 'CmdOrCtrl+M',
+                    role: 'minimize'
+                },
+                {
+                    label: 'Zoom',
+                    role: 'zoom'
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Bring All to Front',
+                    role: 'front'
+                }
+            ]
+        },
+        {
+            label: 'Help',
+            role: 'help',
+            submenu: [
+                {
+                    label: 'Learn More',
+                    click() { electron.shell.openExternal('https://github.com/Tympanix/Electorrent'); }
+                },
+                {
+                    label: 'Check For Updates',
+                    click() { electron.autoUpdater.checkForUpdates() }
+                }
+            ]
+        },
+    ];
 
     return template;
 
