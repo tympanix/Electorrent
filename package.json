@@ -1,44 +1,42 @@
 {
-  "name": "electorrent",
-  "productName": "Electorrent",
-  "version": "1.0.0",
-  "description": "An Electron/Node/AngularJS remote client app for uTorrent server",
-  "main": "app.js",
-  "scripts": {
-    "start": "electron .",
-    "build": "electron-packager . Electorrent --platform=win32 --arch=x64 --out=./build --overwrite --ignore=node_modules/*",
-    "postinstall": "install-app-deps",
-    "pack": "build --dir",
-    "dist:win": "build --win --x64",
-    "dist:mac": "build --mac",
-    "release": "build"
-  },
-  "keywords": [
-    "utorrent"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Tympanix/Electorrent.git"
-  },
-  "author": "tympanix",
-  "license": "MIT",
-  "devDependencies": {
-    "electron-builder": "^5.11.3",
-    "electron-connect": "^0.4.2",
-    "electron-packager": "^7.0.2",
-    "electron-prebuilt": "^1.2.6",
-    "electron-rebuild": "^1.1.5",
-    "gulp": "^3.9.1",
-    "gulp-clean": "^0.3.2",
-    "gulp-run": "^1.7.1",
-    "gulp-useref": "^3.1.0",
-    "run-sequence": "^1.2.1"
-  },
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
-  },
-  "build": {
-    "appId": "dk.sparken.electorrent",
-    "app-category-type": "public.app-category.utilities"
-  }
+    "name": "electorrent",
+    "productName": "Electorrent",
+    "version": "1.0.0",
+    "description": "An Electron/Node/AngularJS remote client app for uTorrent server",
+    "main": "app.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-packager . Electorrent --platform=win32 --arch=x64 --out=./build --overwrite --ignore=node_modules/*",
+        "postinstall": "install-app-deps",
+        "pack": "build --dir",
+        "dist:win": "build --win --x64",
+        "dist:mac": "build --mac",
+        "release": "build"
+    },
+    "keywords": [
+        "utorrent"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Tympanix/Electorrent.git"
+    },
+    "author": "tympanix",
+    "license": "MIT",
+    "devDependencies": {
+        "electron-connect": "^0.4.2",
+        "electron-prebuilt": "^1.2.6"
+    },
+    "dependencies": {
+        "electron-builder": "^5.11.3",
+        "electron-squirrel-startup": "^1.0.0",
+        "gulp": "^3.9.1",
+        "gulp-clean": "^0.3.2",
+        "gulp-run": "^1.7.1",
+        "gulp-useref": "^3.1.0",
+        "run-sequence": "^1.2.1"
+    },
+    "build": {
+        "appId": "dk.sparken.electorrent",
+        "app-category-type": "public.app-category.utilities"
+    }
 }
