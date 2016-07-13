@@ -10,11 +10,24 @@ if(require('electron-squirrel-startup')) return;
 // Module to create native browser window.
 const {BrowserWindow} = electron;
 
+// Require path nodejs module
+const path = require('path');
+
+const winston = require('winston');
+
+const logfile = path.join(app.getPath('userData'), 'somefile.log')
+const logger = new (winston.Logger)({
+    transports: [
+        new (winston.transports.File)({ filename: logfile })
+    ]
+});
+
+logger.info("Starting app!");
+
 // Require IPC module to communicate with render processes
 const {ipcMain} = electron;
 
-// Require path nodejs module
-const path = require('path');
+const {dialog} = electron;
 
 // Configuration module
 const config = require('./lib/config.js');
@@ -35,7 +48,7 @@ function createTorrentWindow() {
         width: 1200,
         height: 800,
         backgroundColor: '#ffffff'
-     });
+    });
 
     torrentWindow.once('ready-to-show', () => {
         torrentWindow.show();
@@ -74,6 +87,7 @@ var shouldQuit = app.makeSingleInstance(function(args /*, workingDirectory*/) {
     // Someone tried to run a second instance, we should focus our window
 
     if (torrentWindow) {
+        logger.info("Magnet links: " + args);
         sendMagnetLinks(args);
         if (torrentWindow.isMinimized()) torrentWindow.restore();
         torrentWindow.focus();
@@ -86,6 +100,12 @@ if (shouldQuit) {
     app.quit();
     return;
 }
+
+// Handle magnet links on MacOS
+app.on('open-url', function(event, url) {
+    logger.info("Open URL " + url)
+    sendMagnetLinks([url]);
+})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -103,15 +123,6 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
-
-ipcMain.on('test:update', function(){
-    torrentWindow.webContents.send('update', {
-        releaseNotes: "This is the release notes",
-        releaseName: "1.0.1",
-        releaseDate: "2016-07-13T18:47:50.001Z",
-        updateUrl: "https://electorrent.herokuapp.com/update/win32/1.0.0"
-    })
-})
 
 app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the

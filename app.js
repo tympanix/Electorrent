@@ -10,11 +10,20 @@ if(require('electron-squirrel-startup')) return;
 // Module to create native browser window.
 const {BrowserWindow} = electron;
 
-// Require IPC module to communicate with render processes
-const {ipcMain} = electron;
-
 // Require path nodejs module
 const path = require('path');
+
+// Set up winston logger
+const winston = require('winston');
+const logfile = path.join(app.getPath('userData'), 'logfile.log')
+const logger = new (winston.Logger)({
+    transports: [
+        new (winston.transports.File)({ filename: logfile })
+    ]
+});
+
+// Require IPC module to communicate with render processes
+const {ipcMain} = electron;
 
 // Configuration module
 const config = require('./lib/config.js');
@@ -35,7 +44,7 @@ function createTorrentWindow() {
         width: 1200,
         height: 800,
         backgroundColor: '#ffffff'
-     });
+    });
 
     torrentWindow.once('ready-to-show', () => {
         torrentWindow.show();
@@ -86,6 +95,11 @@ if (shouldQuit) {
     app.quit();
     return;
 }
+
+// Handle magnet links on MacOS
+app.on('open-url', function(event, url) {
+    sendMagnetLinks([url]);
+})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
