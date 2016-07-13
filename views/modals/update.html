@@ -1,0 +1,34 @@
+<div class="ui small modal">
+    <i class="close icon"></i>
+    <div class="header">
+
+        Update Available
+    </div>
+    <div class="content">
+
+        <h4 class="ui header">
+            <div class="content">
+                Version:
+                {{data.releaseName}}
+                <div class="sub header">{{data.releaseDate | releaseDate}}</div>
+            </div>
+        </h4>
+
+        <h4 class="ui horizontal divider header" style="margin-top: 14px">
+            <i class="tag icon"></i>
+            Release Notes
+        </h4>
+
+        <p marked="data.releaseNotes"></p>
+
+    </div>
+    <div class="actions">
+        <a class="ui black deny button">
+            {{btnCancel || 'Cancel'}}
+        </a>
+        <a class="ui positive right labeled icon button">
+            {{btnOk || 'Ok'}}
+            <i class="arrow circle outline up icon"></i>
+        </a>
+    </div>
+</div>

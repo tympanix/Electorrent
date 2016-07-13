@@ -119,7 +119,7 @@ html, body {
     height: 100%;
     line-height: 24.5px;
     text-align: center;
-    z-index: 100;
+    z-index: 1;
     color: rgba(255, 255, 255, .9);
     font-weight: 700;
 }

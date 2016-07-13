@@ -104,6 +104,15 @@ app.on('window-all-closed', () => {
     }
 });
 
+ipcMain.on('test:update', function(){
+    torrentWindow.webContents.send('update', {
+        releaseNotes: "This is the release notes",
+        releaseName: "1.0.1",
+        releaseDate: "2016-07-13T18:47:50.001Z",
+        updateUrl: "https://electorrent.herokuapp.com/update/win32/1.0.0"
+    })
+})
+
 app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
