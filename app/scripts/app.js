@@ -1,4 +1,4 @@
-var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll"]);
+var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll", "hc.marked"]);
 
 // Set application menu
 torrentApp.run(['menuWin', 'menuMac', 'electron', function(menuWin, menuMac, electron){
@@ -10,7 +10,7 @@ torrentApp.run(['menuWin', 'menuMac', 'electron', function(menuWin, menuMac, ele
     else {
         menu = menuWin;
     }
-    
+
     var appMenu = electron.menu.buildFromTemplate(menu);
     electron.menu.setApplicationMenu(appMenu);
 }]);
@@ -544,7 +544,14 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
 
 }]);
 
-angular.module("torrentApp").controller("notificationsController", ["$scope", "$rootScope", function($scope, $rootScope) {
+angular.module("torrentApp").controller("notificationsController", ["$scope", "$rootScope", "$timeout", "electron", "$http", "notificationService", function($scope, $rootScope, $timeout, electron, $http, $notify) {
+
+    var id = 0;
+
+    $scope.updateData = {
+        releaseDate: "Just now...",
+        updateUrl: "http://www.update.this.app.com"
+    };
 
     $scope.notifications = [];
 
@@ -553,8 +560,40 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
     }
 
     $rootScope.$on('notification', function(event, data){
+        id++;
+        data.notificationId = id;
         $scope.notifications.push(data);
+        removeAlert(data, data.delay || 3000);
     })
+
+    function removeAlert(data, delay){
+        $timeout(function(){
+            $scope.notifications = $scope.notifications.filter(function(value){
+                return value.notificationId !== data.notificationId;
+            })
+        }, delay);
+    }
+
+    // Listen for software update event from main process
+    electron.ipc.on('update', function(event, data){
+        $http.get(data.updateUrl, { timeout: 10000 })
+            .success(function(releaseData){
+                data.releaseNotes = releaseData.notes;
+                data.releaseDate = releaseData.pub_date;
+            })
+            .catch(function(){
+                data.releaseNotes = "Not available. Please go to the website for more info"
+            })
+            .then(function() {
+                $scope.updateData = data
+                $('#updateModal').modal('show');
+            })
+    })
+
+    $scope.installUpdate = function() {
+        console.log("Install and update!");
+        electron.autoUpdater.quitAndInstall();
+    }
 
 }]);
 
@@ -1466,20 +1505,19 @@ angular.module('torrentApp')
     }]);
 
 angular.module("torrentApp").filter('date', function() {
-        return function(epochtime) {
-            return moment(epochtime).fromNow();
-        };
-    });
-
-angular.module("torrentApp").filter("toArray", function(){
-    return function(obj) {
-        var result = [];
-        angular.forEach(obj, function(val, key) {
-            result.push(val);
-        });
-        return result;
+    return function(epochtime) {
+        return moment(epochtime).fromNow();
     };
 });
+
+angular.module("torrentApp").filter('releaseDate', function() {
+    return function(date) {
+        if (!date){
+            return "Release date unknown"
+        }
+        return moment(date, moment.ISO_8601).format("MMMM Do YYYY, HH:mm");
+    }
+})
 
 angular.module("torrentApp").filter('bytes', function() {
         return function(bytes) {
@@ -1776,6 +1814,55 @@ angular.module("torrentApp").directive('repeatDone', [function() {
     }
 }]);
 
+angular.module('torrentApp').directive('modal', function() {
+    return {
+        templateUrl: template,
+        replace: true,
+        transclude: true,
+        scope: {
+            title: '@',
+            btnOk: '@',
+            btnCancel: '@',
+            icon: '@',
+            approve: '&',
+            deny: '&',
+            data: '='
+        },
+        restrict: 'E',
+        link: link
+    };
+
+    function template(elem, attrs) {
+        return attrs.templateUrl || 'some/path/default.html'
+    }
+
+    function link(scope, element/*, attrs*/) {
+        //console.log("Link", element);
+        $(element).modal({
+            onDeny: function () {
+                return scope.deny();
+            },
+            onApprove: function () {
+                return scope.approve();
+            },
+            onHidden: function () {
+                clearForm(element);
+            },
+            closable: false
+        });
+
+        scope.$on("$destroy", function() {
+            element.remove();
+        });
+    }
+
+    function clearForm(element){
+        $(element).form('clear');
+        $(element).find('.error.message').empty()
+    }
+
+});
+
 angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', function(electron, $rootScope) {
     const template = [
         {
@@ -1890,6 +1977,10 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', funct
                 {
                     label: 'Check For Updates',
                     click() { electron.autoUpdater.checkForUpdates() }
+                },
+                {
+                    label: 'Test Update',
+                    click() { electron.ipc.send('test:update') }
                 }
             ]
         },
