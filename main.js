@@ -1,4 +1,4 @@
-var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll"]);
+var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll", "hc.marked"]);
 
 // Set application menu
 torrentApp.run(['menuWin', 'menuMac', 'electron', function(menuWin, menuMac, electron){
@@ -10,7 +10,7 @@ torrentApp.run(['menuWin', 'menuMac', 'electron', function(menuWin, menuMac, ele
     else {
         menu = menuWin;
     }
-    
+
     var appMenu = electron.menu.buildFromTemplate(menu);
     electron.menu.setApplicationMenu(appMenu);
 }]);

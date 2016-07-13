@@ -1,46 +1,54 @@
 <!DOCTYPE html>
 <html ng-app="torrentApp">
-<head>
-    <meta charset="UTF-8">
-    <title>Electorrent</title>
+    <head>
+        <meta charset="UTF-8">
+        <title>Electorrent</title>
 
-    <link rel="stylesheet" href="css/vendor.css">
+        <link rel="stylesheet" href="css/vendor.css">
 
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body ng-controller="mainController" ready-broadcast>
-    <div class="main wrapper">
+        <link rel="stylesheet" href="css/styles.css">
+    </head>
+    <body ng-controller="mainController" ready-broadcast>
+        <div class="main wrapper">
 
-        <!-- Notifications -->
-        <div ng-include="'./views/misc/notifications.html'"></div>
+            <!-- Notifications -->
+            <div ng-include="'./views/notifications.html'"></div>
 
-        <!-- Settings Screen -->
-        <div ng-show="showSettings()" class="overlay">
-            <div ng-include="'./views/settings.html'"></div>
+            <!-- Settings Screen -->
+            <div ng-show="showSettings()" class="overlay">
+                <div ng-include="'./views/settings.html'"></div>
+            </div>
+
+            <!-- Welcome Screen -->
+            <div ng-show="showWelcome()" class="overlay">
+                <div ng-include="'./views/welcome.html'"></div>
+            </div>
+
+            <!-- Torrents -->
+            <div ng-show="showTorrents">
+                <div ng-include="'./views/torrents.html'"></div>
+            </div>
+
         </div>
 
-        <!-- Welcome Screen -->
-        <div ng-show="showWelcome()" class="overlay">
-            <div ng-include="'./views/welcome.html'"></div>
-        </div>
+        <!-- Dependencies -->
 
-        <!-- Torrents -->
-        <div ng-show="showTorrents">
-            <div ng-include="'./views/torrents.html'"></div>
-        </div>
+        <!-- Insert this line above script imports  -->
+        <script>
+            if (typeof module === 'object') {
+                window.module = module;
+                module = undefined;
+            }
+        </script>
 
-    </div>
+        <script src="./scripts/vendor.js"></script>
 
-    <!-- Dependencies -->
+        <!-- Insert this line after script imports -->
+        <script>
+            if (window.module)
+                module = window.module;
+        </script>
 
-    <!-- Insert this line above script imports  -->
-    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+        <script src="./scripts/app.js"></script>
 
-    <script src="./scripts/vendor.js"></script>
-
-    <!-- Insert this line after script imports -->
-    <script>if (window.module) module = window.module;</script>
-
-    <script src="./scripts/app.js"></script>
-
-    
+        
