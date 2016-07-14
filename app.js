@@ -98,8 +98,12 @@ if (shouldQuit) {
 
 // Handle magnet links on MacOS
 app.on('open-url', function(event, url) {
-    sendMagnetLinks([url]);
-})
+    if (torrentWindow) {
+        sendMagnetLinks([url]);
+    } else {
+        process.argv.push(url);
+    }
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
