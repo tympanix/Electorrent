@@ -11,6 +11,7 @@
     "pack": "build --dir",
     "dist:win": "build --win --x64",
     "dist:mac": "build --mac",
+    "prerelease": "gulp build",
     "release": "build",
     "bower": "bower install"
   },
@@ -34,7 +35,8 @@
     "gulp-clean": "^0.3.2",
     "gulp-run": "^1.7.1",
     "gulp-useref": "^3.1.0",
-    "run-sequence": "^1.2.1"
+    "run-sequence": "^1.2.1",
+    "winston": "^2.2.0"
   },
   "build": {
     "appId": "dk.sparken.electorrent",
