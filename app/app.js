@@ -13,21 +13,17 @@ const {BrowserWindow} = electron;
 // Require path nodejs module
 const path = require('path');
 
+// Set up winston logger
 const winston = require('winston');
-
-const logfile = path.join(app.getPath('userData'), 'somefile.log')
+const logfile = path.join(app.getPath('userData'), 'logfile.log')
 const logger = new (winston.Logger)({
     transports: [
         new (winston.transports.File)({ filename: logfile })
     ]
 });
 
-logger.info("Starting app!");
-
 // Require IPC module to communicate with render processes
 const {ipcMain} = electron;
-
-const {dialog} = electron;
 
 // Configuration module
 const config = require('./lib/config.js');
@@ -87,7 +83,6 @@ var shouldQuit = app.makeSingleInstance(function(args /*, workingDirectory*/) {
     // Someone tried to run a second instance, we should focus our window
 
     if (torrentWindow) {
-        logger.info("Magnet links: " + args);
         sendMagnetLinks(args);
         if (torrentWindow.isMinimized()) torrentWindow.restore();
         torrentWindow.focus();
@@ -103,7 +98,6 @@ if (shouldQuit) {
 
 // Handle magnet links on MacOS
 app.on('open-url', function(event, url) {
-    logger.info("Open URL " + url)
     sendMagnetLinks([url]);
 })
 
