@@ -7,13 +7,13 @@
   "scripts": {
     "start": "electron .",
     "build": "gulp build",
+    "install": "bower install",
     "postinstall": "install-app-deps",
     "pack": "build --dir",
     "dist:win": "build --win --x64",
     "dist:mac": "build --mac",
     "prerelease": "gulp build",
-    "release": "build",
-    "bower": "bower install"
+    "release": "build"
   },
   "keywords": [
     "utorrent"
