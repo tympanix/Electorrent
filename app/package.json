@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/Tympanix/Electorrent#readme",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "winston": "^2.2.0"
   }
 }

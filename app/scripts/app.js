@@ -54,9 +54,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     // Listen for incomming magnet links from the main process
     electron.ipc.on('magnet', function(event, data){
-
-        console.log("Magnets!!!", data);
-
         data.forEach(function(magnet){
             $utorrentService.addTorrentUrl(magnet);
         })
