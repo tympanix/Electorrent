@@ -88,5 +88,5 @@ dist
 config
 
 # Ignore app directory
-app/*
+app
 !app/package.json
