@@ -1,14 +1,21 @@
 <p align="center">
-  <img src="assets/electron-icon.png" style="margin: auto;" width="256">
+  <img src="assets/electron-icon.png" width="256">
+</p> 
+<p align="center">
+  <a href="https://travis-ci.org/Tympanix/Electorrent">
+    <img src="https://travis-ci.org/Tympanix/Electorrent.svg?branch=master">
+  </a>
+  <a href="https://github.com/Tympanix/Electorrent/releases/latest">
+    <img src="https://img.shields.io/github/release/Tympanix/Electorrent.svg?maxAge=86400">
+  </a>
+  <img src="https://img.shields.io/github/downloads/Tympanix/Electorrent/total.svg?maxAge=86400">
 </p>
 
 # Electorrent
 An Electron/Node/AngularJS remote client app for uTorrent server
 
-[![Build Status](https://travis-ci.org/Tympanix/Electorrent.svg?branch=master)](https://travis-ci.org/Tympanix/Electorrent)
-[![GitHub release](https://img.shields.io/github/release/Tympanix/Electorrent.svg?maxAge=2592000)]()
-
 ## Downloads
+*Please note: I do not own code signing certificates which may results in anti-virus warnings!*
 * [Windows](https://electorrent.herokuapp.com/download/win32)
 * [MacOS](https://electorrent.herokuapp.com/download/osx)
 
