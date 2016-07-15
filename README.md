@@ -25,6 +25,12 @@ An Electron/Node/AngularJS remote client app for uTorrent server
 * Easy one click installer using Squirrel framework
 * Automatic silent updates straight from the GitHub repository
 
+## Screenshots
+
+Torrents Screen              |  Settings Screen
+:---------------------------:|:---------------------------:
+![](assets/screen1-win.png)  | ![](assets/screen2-win.png)
+
 ## FAQ
  * **Can I use this program with a normal installation of µTorrent?**
  
