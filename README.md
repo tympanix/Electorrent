@@ -16,7 +16,7 @@ An Electron/Node/AngularJS remote client app for uTorrent server
 
 ## Downloads
 *Please note: I do not own code signing certificates which may results in anti-virus warnings!*
-* [Windows](https://electorrent.herokuapp.com/download/win32)
+* [Windows](https://electorrent.herokuapp.com/download/win32) (64 bit only)
 * [MacOS](https://electorrent.herokuapp.com/download/osx)
 
 ## Features
