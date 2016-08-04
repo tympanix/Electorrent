@@ -18,6 +18,11 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
         magnet: false
     }
 
+    $scope.appVersion = electron.app.getVersion()
+    $scope.nodeVersion = process.versions.node;
+    $scope.chromeVersion = process.versions.chrome;
+    $scope.electronVersion = process.versions.electron;
+
     $scope.connecting = false;
     $scope.page = 'general';
 
@@ -30,7 +35,7 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
         $scope.general = {
             magnets: electron.app.isDefaultProtocolClient('magnet')
         }
-        
+
     }
 
     function subscribeToMagnets() {
