@@ -21,12 +21,12 @@
     "angular": "^1.5.6",
     "angular-resource": "^1.5.6",
     "angular-file-upload": "ng-file-upload#2.0.5",
-    "semantic": "^2.1.8",
+    "semantic": "^2.2.2",
     "moment": "momentjs#^2.13.0",
     "jQuery": "^3.0.0",
     "angular-animate": "^1.5.7",
     "ngInfiniteScroll": "^1.2.2",
-    "angular-table-resize": "^1.0.3",
+    "angular-table-resize": "^1.0.4",
     "angular-marked": "^1.2.1"
   }
 }
