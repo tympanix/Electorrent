@@ -19,6 +19,8 @@ angular.module("torrentApp").directive('progress', function() {
         $scope.class = function(){
             if ($scope.torrent.isStatusPaused()){
                 return 'grey';
+            } else if ($scope.torrent.isStatusSeeding()){
+                return 'orange';
             } else if ($scope.torrent.isStatusDownloading()){
                 return 'blue';
             } else if ($scope.torrent.isStatusError()){
