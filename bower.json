@@ -26,7 +26,7 @@
     "jQuery": "^3.0.0",
     "angular-animate": "^1.5.7",
     "ngInfiniteScroll": "^1.2.2",
-    "angular-table-resize": "^1.0.1",
+    "angular-table-resize": "^1.0.3",
     "angular-marked": "^1.2.1"
   }
 }
