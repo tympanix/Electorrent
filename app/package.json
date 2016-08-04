@@ -18,7 +18,10 @@
     "Server",
     "GUI"
   ],
-  "author": "Mathias Mortensen",
+  "author": {
+      "name": "Mathias Mortensen",
+      "email": "tympanix@gmail.com"
+  },
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/Tympanix/Electorrent/issues"
