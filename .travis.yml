@@ -18,6 +18,7 @@ cache:
 addons:
   apt:
     packages:
+      - graphicsmagick
       - libgnome-keyring-dev
       - icnsutils
 
