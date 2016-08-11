@@ -1,5 +1,6 @@
 html, body {
     overflow: hidden;
+    -webkit-user-select: none;
 }
 .wrapper {
     position: relative;
