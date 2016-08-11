@@ -66,14 +66,11 @@
                     <thead>
                         <tr>
                             <th id="colName">Name</th>
-                            <th id="colSize" class="two wide">
-                                Size</th>
-                            <th id="colProgress" class="three wide">
-                                Progress</th>
-                            <th id="colLabel" class="one wide">
-                                Label</th>
-                            <th id="colAdded" class="two wide">
-                                Date Added</th>
+                            <th id="colSize">Size</th>
+                            <th id="colDownSpeed">Speed</th>
+                            <th id="colProgress">Progress</th>
+                            <th id="colLabel">Label</th>
+                            <th id="colAdded">Date Added</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,6 +85,9 @@
                             </td>
                             <td>
                                 {{torrent.size | bytes}}
+                            </td>
+                            <td>
+                                {{torrent.downloadSpeed | speed}}
                             </td>
                             <td>
                                 <progress torrent="torrent"/>

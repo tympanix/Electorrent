@@ -19,3 +19,9 @@ angular.module("torrentApp").filter('bytes', function() {
             return [val, uom].join(' ');
         };
     });
+
+angular.module("torrentApp").filter('speed', ['bytesFilter', function(bytes) {
+    return function(bytesPerSecond) {
+        return bytes(bytesPerSecond) + '/s';
+    }
+}])
