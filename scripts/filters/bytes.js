@@ -20,8 +20,18 @@ angular.module("torrentApp").filter('bytes', function() {
         };
     });
 
-angular.module("torrentApp").filter('speed', ['bytesFilter', function(bytes) {
-    return function(bytesPerSecond) {
-        return bytes(bytesPerSecond) + '/s';
+angular.module("torrentApp").filter('speed', ['bytesFilter', 'Torrent', function(bytes, Torrent) {
+    return function(bytesPerSecond, torrent) {
+        var display = true;
+
+        if (torrent instanceof Torrent){
+            display = torrent.isStatusDownloading()
+        }
+
+        if (display){
+            return bytes(bytesPerSecond) + '/s';
+        } else {
+            return '';
+        }
     }
 }])
