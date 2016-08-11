@@ -3,10 +3,10 @@ language: node_js
 sudo: required
 dist: trusty
 
-matrix:
-  - os: osx
-  - os: linux
-
+os:
+  - linux
+  - osx
+  
 cache:
   directories:
   - node_modules
