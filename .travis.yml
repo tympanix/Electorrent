@@ -4,9 +4,8 @@ sudo: required
 dist: trusty
 
 matrix:
-  include:
-    - os: osx
-    - os: linux
+  - os: osx
+  - os: linux
 
 cache:
   directories:
