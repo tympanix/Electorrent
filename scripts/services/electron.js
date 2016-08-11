@@ -25,6 +25,8 @@ angular.module('torrentApp').factory("electron", [function() {
 
     // Custom resources
     o.config            = remote.getGlobal('config');
+    o.updater           = remote.require('./lib/update.js');
+    o.is                = remote.require('electron-is');
 
     // Return object
     return o;
