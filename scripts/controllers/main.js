@@ -7,17 +7,17 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     var page = null;
 
     $rootScope.$on('ready', function() {
+        electron.updater.checkForUpdates();
+        
         var data = config.getServer()
         if (data){
             console.log("Connect", data);
-            connectToServer(data.ip, data.port, data.user, data.password)
+            connectToServer(data.ip, data.port, data.user, data.password);
         } else {
             // First time starting application
             pageWelcome();
         }
     });
-
-    //pageSettings();
 
     function connectToServer(ip, port, user, password){
         $utorrentService.connect(ip, port, user, password)

@@ -29,7 +29,9 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
     }
 
     // Listen for software update event from main process
-    electron.ipc.on('update', function(event, data){
+    electron.ipc.on('autoUpdate', function(event, data){
+        $scope.manualUpdate = false;
+
         $http.get(data.updateUrl, { timeout: 10000 })
             .success(function(releaseData){
                 data.releaseNotes = releaseData.notes;
@@ -44,9 +46,23 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
             })
     })
 
+    // Listen for manual updates from the main process
+    electron.ipc.on('manualUpdate', function(event, data){
+        $scope.updateData = data
+        $scope.manualUpdate = true;
+
+        $timeout(function(){
+            $('#updateModal').modal('show');
+        }, 500)
+    });
+
     $scope.installUpdate = function() {
         console.log("Install and update!");
-        electron.autoUpdater.quitAndInstall();
+        if ($scope.manualUpdate){
+        } else {
+            electron.autoUpdater.quitAndInstall();
+        }
+
     }
 
 }]);
