@@ -110,7 +110,7 @@ app.on('open-url', function(event, url) {
 // Some APIs can only be used after this event occurs.
 app.on('ready', function(){
     createTorrentWindow();
-    updater.watchUpdate(torrentWindow);
+    updater.initialise(torrentWindow);
 });
 
 // Quit when all windows are closed.

@@ -111,7 +111,7 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', funct
                 },
                 {
                     label: 'Check For Updates',
-                    click() { electron.autoUpdater.checkForUpdates() }
+                    click() { electron.updater.checkForUpdates() }
                 }
             ]
         },
