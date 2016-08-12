@@ -13,15 +13,6 @@ const {BrowserWindow} = electron;
 // Require path nodejs module
 const path = require('path');
 
-// Set up winston logger
-const winston = require('winston');
-const logfile = path.join(app.getPath('userData'), 'logfile.log')
-const logger = new (winston.Logger)({
-    transports: [
-        new (winston.transports.File)({ filename: logfile })
-    ]
-});
-
 // Require IPC module to communicate with render processes
 const {ipcMain} = electron;
 
