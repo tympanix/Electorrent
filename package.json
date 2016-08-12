@@ -25,7 +25,7 @@
   "author": "Mathias Mortensen",
   "devDependencies": {
     "electron-is": "^2.1.0",
-    "electron-prebuilt": "^1.3.2",
+    "electron-prebuilt": "^1.3.3",
     "electron-squirrel-startup": "^1.0.0",
     "request": "^2.74.0",
     "semver": "^5.3.0"
