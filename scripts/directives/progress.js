@@ -32,7 +32,7 @@ angular.module("torrentApp").directive('progress', function() {
         }
 
         $scope.label = function(){
-            const statusRegex = /[^a-zA-Z ]/g;
+            const statusRegex = /[^a-zA-Z(): ]/g;
             var label = $scope.torrent.statusMessage.replace(statusRegex, '');
             if ($scope.torrent.isStatusDownloading()){
                 label += (" " + $scope.torrent.getPercentStr());
