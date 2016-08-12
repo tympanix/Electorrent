@@ -59,6 +59,7 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
     $scope.installUpdate = function() {
         console.log("Install and update!");
         if ($scope.manualUpdate){
+            electron.ipc.send('startUpdate', null);
         } else {
             electron.autoUpdater.quitAndInstall();
         }
