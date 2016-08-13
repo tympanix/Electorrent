@@ -1,6 +1,8 @@
 // The Electron module
 const electron = require('electron');
 
+const program = require('commander');
+
 // Module to control application life.
 const {app} = electron;
 
@@ -18,8 +20,6 @@ const {ipcMain} = electron;
 
 // Configuration module
 const config = require('./lib/config.js');
-config.init(path.join(app.getPath('userData'), 'config.json'));
-global.config = config;
 
 // Auto update module
 const updater = require('./lib/update.js')
