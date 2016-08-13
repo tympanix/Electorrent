@@ -25,6 +25,7 @@
   "author": "Mathias Mortensen",
   "devDependencies": {
     "bower": "^1.7.9",
+    "commander": "^2.9.0",
     "electron-builder": "^5.25.1",
     "electron-connect": "^0.4.4",
     "electron-is": "^2.1.0",
