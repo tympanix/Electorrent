@@ -8,7 +8,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     $rootScope.$on('ready', function() {
         electron.updater.checkForUpdates();
-        
+
         var data = config.getServer()
         if (data){
             console.log("Connect", data);
@@ -26,7 +26,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
             requestMagnetLinks();
         })
         .catch(function(){
-            pageSettings();
+            pageSettings('connection');
         });
     }
 
@@ -49,7 +49,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         page = null;
     }
 
-    function pageSettings(){
+    function pageSettings(settingsPage){
+        if (settingsPage){
+            $scope.$broadcast('settings:page', settingsPage);
+        }
         page = PAGE_SETTINGS;
     }
 
