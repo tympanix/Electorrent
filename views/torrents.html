@@ -107,7 +107,7 @@
 
     <context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
         <div class="ui vertical menu">
-            <a class="item" ng-click="debug()">
+            <a class="item" ng-click="debug()" ng-if="program.debug">
                 <i class="ui info icon"></i>
                 Debug
             </a>
