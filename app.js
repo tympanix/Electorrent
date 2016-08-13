@@ -1,31 +1,21 @@
 // The Electron module
 const electron = require('electron');
-
 const program = require('commander');
-
-// Module to control application life.
-const {app} = electron;
+const path = require('path');
 
 // Handle Squirrel startup parameters
 if(require('electron-squirrel-startup')) return;
 
-// Module to create native browser window.
+// Electron modules
+const {app} = electron;
 const {BrowserWindow} = electron;
-
-// Require path nodejs module
-const path = require('path');
-
-// Require IPC module to communicate with render processes
 const {ipcMain} = electron;
 
-// Configuration module
+// Custom modules
 const config = require('./lib/config.js');
-
-// Auto update module
 const updater = require('./lib/update.js')
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
+// Global windows object reference
 let torrentWindow;
 
 function createTorrentWindow() {
