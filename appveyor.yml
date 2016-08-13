@@ -9,7 +9,7 @@ cache:
   - node_modules
   - app\node_modules
   - '%APPDATA%\npm-cache'
-  - '%APPDATA%\bower'
+  - '%LOCALAPPDATA%\bower'
   - '%USERPROFILE%\.electron'
 
 init:
