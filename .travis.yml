@@ -13,6 +13,7 @@ cache:
   - app/node_modules
   - $HOME/.electron
   - $HOME/.cache
+  - $HOME/.npm
 
 addons:
   apt:
