@@ -13,7 +13,12 @@ const {ipcMain} = electron;
 
 // Custom modules
 const config = require('./lib/config.js');
-const updater = require('./lib/update.js')
+const updater = require('./lib/update.js');
+
+// Set up program arguments
+program.version(app.getVersion())
+program.option('-d, --debug', 'Start Electorrent in debug mode')
+program.parse(process.argv);
 
 // Global windows object reference
 let torrentWindow;
