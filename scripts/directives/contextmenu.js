@@ -1,10 +1,12 @@
-angular.module("torrentApp").directive('contextMenu', ['$document', '$window', function($document, $window) {
+angular.module("torrentApp").directive('contextMenu', ['$document', '$window', 'electron', function($document, $window, electron) {
     return {
         restrict: 'E',
         link: link
     };
 
     function link(scope, element, attr){
+        scope.program = electron.program;
+
         element.data('contextmenu',true);
 
         // Bind show function to scope variable
