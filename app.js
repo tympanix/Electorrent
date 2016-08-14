@@ -1,7 +1,6 @@
 // The Electron module
 const electron = require('electron');
-const program = require('commander');
-const path = require('path');
+const yargs = require('yargs');
 
 // Handle Squirrel startup parameters
 if(require('electron-squirrel-startup')) return;
@@ -11,19 +10,21 @@ const {app} = electron;
 const {BrowserWindow} = electron;
 const {ipcMain} = electron;
 
-// Set up program arguments
-program.version(app.getVersion());
-program.option('-d, --debug', 'Start Electorrent in debug mode');
-program.option('-v, --verbose', 'Enable verbose mode for verbose logging');
-program.parse(process.argv);
-
 // Custom modules
-const config = require('./lib/config.js');
-const updater = require('./lib/update.js');
+const config = require('./lib/config');
+const updater = require('./lib/update');
 const logger = require('./lib/logger');
 
+// Set up program arguments
+yargs.version(() => { return app.getVersion() })
+yargs.help('h').alias('h', 'help')
+yargs.usage(`Electorrent ${app.getVersion()}`)
+yargs.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
+yargs.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
+
+// Log startup information
 logger.debug('Starting Electorrent in debug mode');
-logger.verbose('Verbose loggin enabled');
+logger.verbose('Verbose logging enabled');
 
 // Global windows object reference
 let torrentWindow;
