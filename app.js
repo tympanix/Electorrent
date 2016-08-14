@@ -11,14 +11,19 @@ const {app} = electron;
 const {BrowserWindow} = electron;
 const {ipcMain} = electron;
 
-// Custom modules
-const config = require('./lib/config.js');
-const updater = require('./lib/update.js');
-
 // Set up program arguments
 program.version(app.getVersion())
 program.option('-d, --debug', 'Start Electorrent in debug mode')
+program.option('-v, --verbose', 'Enable verbose mode for verbose logging')
 program.parse(process.argv);
+
+// Custom modules
+const config = require('./lib/config.js');
+const updater = require('./lib/update.js');
+const logger = require('./lib/logger');
+
+logger.debug('Starting Electorrent in debug mode')
+logger.verbose('Verbose loggin enabled');
 
 // Global windows object reference
 let torrentWindow;
