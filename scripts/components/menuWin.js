@@ -1,4 +1,5 @@
 angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', function(electron, $rootScope) {
+
     const template = [
         {
             label: 'Edit',
@@ -40,15 +41,6 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', funct
                     label: 'Paste',
                     accelerator: 'CmdOrCtrl+V',
                     role: 'paste'
-                },
-                {
-                    label: 'Paste and Match Style',
-                    accelerator: 'Shift+Command+V',
-                    role: 'pasteandmatchstyle'
-                },
-                {
-                    label: 'Delete',
-                    role: 'delete'
                 },
                 {
                     label: 'Select All',
