@@ -154,7 +154,7 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', funct
                 },
                 {
                     label: 'Check For Updates',
-                    click() { electron.updater.checkForUpdates() }
+                    click() { electron.updater.checkForUpdates(true) }
                 }
             ]
         },
