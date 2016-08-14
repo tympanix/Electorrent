@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("notificationsController", ["$scope", "$rootScope", "$timeout", "electron", "$http", "notificationService", function($scope, $rootScope, $timeout, electron, $http, $notify) {
+angular.module("torrentApp").controller("notificationsController", ["$scope", "$rootScope", "$timeout", "electron", "$http", function($scope, $rootScope, $timeout, electron, $http) {
 
     var id = 0;
 
