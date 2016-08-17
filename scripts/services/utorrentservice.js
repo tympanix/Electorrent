@@ -13,6 +13,12 @@ angular.module('torrentApp')
             build: -1
         };
 
+        function build(array) {
+            var torrent = Object.create(Torrent.prototype);
+            torrent = (Torrent.apply(torrent, array) || torrent);
+            return torrent;
+        }
+
         var updateCidInterceptor = {
             response: function(response) {
                 data.cid = response.data.torrentc;
@@ -117,8 +123,8 @@ angular.module('torrentApp')
                 var utorrentRes = this._torrents().list(
                     function() {
                         torrents.labels = utorrentRes.label;
-                        torrents.all = utorrentRes.torrents;
-                        torrents.changed = utorrentRes.torrentp;
+                        torrents.all = (utorrentRes.torrents || []).map(build);
+                        torrents.changed = (utorrentRes.torrentp || []).map(build);
                         torrents.deleted = utorrentRes.torrentm;
                         ret.resolve(torrents);
                     },
