@@ -90,3 +90,6 @@ config
 # Ignore app directory
 app
 !app/package.json
+
+# Vagrant folder
+.vagrant
