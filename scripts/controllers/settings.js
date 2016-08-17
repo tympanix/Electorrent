@@ -100,7 +100,6 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "utorre
     }
 
     $scope.$on('settings:page', function(event, page){
-        console.log("Settings page", page, event);
         $scope.gotoPage(page);
     })
 

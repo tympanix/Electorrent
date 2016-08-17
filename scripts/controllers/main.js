@@ -1,5 +1,5 @@
 
-angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "utorrentService", "electron", "configService", function ($rootScope, $scope, $timeout, $utorrentService, electron, config) {
+angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "torrentMiddlewareService", "electron", "configService", function ($rootScope, $scope, $timeout, $utorrentService, electron, config) {
     const PAGE_SETTINGS = 'settings';
     const PAGE_WELCOME = 'welcome';
 
