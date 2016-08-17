@@ -257,7 +257,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     function newTorrents(torrents){
         if (torrents.all && torrents.all.length > 0) {
             for (var i = 0; i < torrents.all.length; i++){
-                var torrent = ut.build(torrents.all[i]);
+                var torrent = torrents.all[i];
                 $scope.torrents[torrent.hash] = torrent;
             }
             refreshTorrents()
@@ -274,13 +274,14 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     }
 
     function changeTorrents(torrents){
+        console.log("Changed", torrents.changed);
         if (torrents.changed && torrents.changed.length > 0) {
             for (var i = 0; i < torrents.changed.length; i++) {
-                var torrent = ut.build(torrents.changed[i]);
+                var torrent = torrents.changed[i];
                 var existing = $scope.torrents[torrent.hash];
 
                 if (existing){
-                    existing.update(torrents.changed[i]);
+                    existing.update(torrent);
                 } else {
                     $scope.torrents[torrent.hash] = torrent;
                 }
