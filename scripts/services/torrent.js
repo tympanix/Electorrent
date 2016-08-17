@@ -189,8 +189,12 @@ angular.module('torrentApp')
             this.cleanedName = cleanName(this.decodedName);
         };
 
-        Torrent.prototype.update = function(array) {
-            this.bind.apply(this, array);
+        Torrent.prototype.update = function(other) {
+            for (var k in other) {
+                if (other.hasOwnProperty(k) && k !== 'selected') {
+                    this[k] = other[k];
+                }
+            }
         };
 
         Torrent.prototype.getMagnetURI = function(longUri) {
