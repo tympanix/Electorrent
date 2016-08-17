@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "utorrentService", "notificationService", "configService", function ($scope, $timeout, $filter, $log, $utorrentService, $notify, config) {
+angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "torrentMiddlewareService", "notificationService", "configService", function ($scope, $timeout, $filter, $log, $utorrentService, $notify, config) {
     const TIMEOUT = 2000;
     const LIMIT = 25;
 
