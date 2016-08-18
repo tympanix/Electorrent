@@ -65,6 +65,8 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
             rid = data.rid;
             defer.resolve(torrents);
 
+            console.log("Sync", data);
+
         }).catch(function(err){
             console.error(err);
             defer.reject(err);

@@ -16,24 +16,11 @@ angular.module("torrentApp").directive('progress', function() {
     function controller($scope){
 
         $scope.class = function(){
-            if ($scope.torrent.isStatusPaused()){
-                return 'grey';
-            } else if ($scope.torrent.isStatusSeeding()){
-                return 'orange';
-            } else if ($scope.torrent.isStatusDownloading()){
-                return 'blue';
-            } else if ($scope.torrent.isStatusError()){
-                return 'error';
-            } else if ($scope.torrent.isStatusCompleted()){
-                return 'success';
-            } else {
-                return 'disabled';
-            }
+            return $scope.torrent.statusColor();
         }
 
         $scope.label = function(){
-            const statusRegex = /[^a-zA-Z(): ]/g;
-            var label = $scope.torrent.statusMessage.replace(statusRegex, '');
+            var label = $scope.torrent.statusText();
             if ($scope.torrent.isStatusDownloading()){
                 label += (" " + $scope.torrent.getPercentStr());
             }
@@ -43,9 +30,7 @@ angular.module("torrentApp").directive('progress', function() {
 
     function link(scope, element /*, attrs*/ ) {
         var torrent = scope.torrent;
-        // element.find('.bar').css('width', torrent.percent / 10 + '%')
-        // element.find('label').html(torrent.statusMessage);
-        //
+
         scope.$watch(function() {
             return torrent.percent;
         }, function() {
