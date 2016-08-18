@@ -192,9 +192,10 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     }
 
     $scope.doAction = function(action) {
-        var call = ut.actions()[action];
+        var call = ut.actions[action];
+
         if (call){
-            call({ hash: getSelectedHashes()}).$promise
+            call(getSelectedHashes())
             .then(function(){
                 console.log("Action " + action + " performed!");
                 $scope.update();
