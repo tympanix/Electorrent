@@ -2,6 +2,8 @@
 
 angular.module('torrentApp').factory('AbstractTorrent', function() {
 
+    const statusRegex = /[^a-zA-Z(): ]/g;
+
     var decodeName = function(name) {
         if(!name) return undefined
 
@@ -183,6 +185,26 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
 
     AbstractTorrent.prototype.getPercentStr = function() {
         return(this.percent / 10).toFixed(0) + '%';
+    };
+
+    AbstractTorrent.prototype.statusColor = function () {
+        if (this.isStatusPaused()){
+            return 'grey';
+        } else if (this.isStatusSeeding()){
+            return 'orange';
+        } else if (this.isStatusDownloading()){
+            return 'blue';
+        } else if (this.isStatusError()){
+            return 'error';
+        } else if (this.isStatusCompleted()){
+            return 'success';
+        } else {
+            return 'disabled';
+        }
+    };
+
+    AbstractTorrent.prototype.statusText = function () {
+        return this.statusMessage.replace(statusRegex, '');
     };
 
     /**
