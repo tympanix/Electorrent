@@ -2,8 +2,6 @@
 
 angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(AbstractTorrent) {
 
-
-
     /**
     hash (string),
     status* (integer),
@@ -88,38 +86,6 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
             savePath: savePath,
             additionalData: additionalData}
         );
-        //
-        // this.selected = false;
-        // this.isStarred = false;
-        //
-        // this.hash = hash;
-        // this.status = status;
-        // this.name = name;
-        // this.size = size;
-        // this.percent = percent;
-        // this.downloaded = downloaded;
-        // this.uploaded = uploaded;
-        // this.ratio = (ratio / 1000).toFixed(2);
-        // this.uploadSpeed = uploadSpeed;
-        // this.downloadSpeed = downloadSpeed;
-        // this.eta = eta;
-        // this.label = label;
-        // this.peersConnected = peersConnected;
-        // this.peersInSwarm = peersInSwarm;
-        // this.seedsConnected = seedsConnected;
-        // this.seedsInSwarm = seedsInSwarm;
-        // this.availability = (availability / 65536).toFixed(1);
-        // this.torrentQueueOrder = torrentQueueOrder;
-        // this.remaining = remaining;
-        // this.downloadUrl = downloadUrl;
-        // this.rssFeedUrl = rssFeedUrl;
-        // this.statusMessage = statusMessage;
-        // this.streamId = streamId;
-        // this.dateAdded = dateAdded * 1000;
-        // this.dateCompleted = dateCompleted * 1000;
-        // this.appUpdateUrl = appUpdateUrl;
-        // this.savePath = savePath;
-        // this.additionalData = additionalData;
 
     }
 
@@ -137,34 +103,6 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
         128: 'loaded'
     };
     var statusesFlags = [1, 2, 4, 8, 16, 32, 64, 128].reverse();
-
-
-    Torrent.prototype.update = function(other) {
-        for(var k in other) {
-            if(other.hasOwnProperty(k) && k !== 'selected') {
-                this[k] = other[k];
-            }
-        }
-    };
-
-    Torrent.prototype.getMagnetURI = function(longUri) {
-        var i = 0;
-        var link = 'magnet:?xt=urn:btih:' + this.hash;
-        if(longUri) {
-            link += '&dn=' + encodeURIComponent(this.name);
-            link += '&xl=' + encodeURIComponent(this.size);
-
-            if(this.props && this.props.trackers) {
-                var trackers = this.props.trackers.split('\r\n');
-                for(i = 0; i < trackers.length; i++) {
-                    if(trackers[i].length > 0) {
-                        link += '&tr=' + encodeURIComponent(trackers[i]);
-                    }
-                }
-            }
-        }
-        return link;
-    };
 
     Torrent.prototype.getStatusFlag = function(x) {
         /*jshint bitwise: false*/
@@ -234,25 +172,6 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
     };
     Torrent.prototype.isStatusStopped = function() {
         return(!this.getStatusFlag(64)) && (!this.isStatusCompleted());
-    };
-
-    Torrent.prototype.getQueueStr = function() {
-        if(this.torrentQueueOrder === -1) {
-            return '*';
-        }
-        return this.torrentQueueOrder;
-    };
-
-    Torrent.prototype.getPercentStr = function() {
-        return(this.percent / 10).toFixed(0) + '%';
-    };
-
-    Torrent.prototype.getLabels = function() {
-        if(typeof this.label === 'string') {
-            return [this.label];
-        } else {
-            return this.label;
-        }
     };
 
     /**
