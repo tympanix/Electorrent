@@ -274,7 +274,6 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     }
 
     function changeTorrents(torrents){
-        console.log("Changed", torrents.changed);
         if (torrents.changed && torrents.changed.length > 0) {
             for (var i = 0; i < torrents.changed.length; i++) {
                 var torrent = torrents.changed[i];
