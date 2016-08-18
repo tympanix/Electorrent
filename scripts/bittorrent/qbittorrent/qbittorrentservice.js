@@ -52,14 +52,22 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
             },
             withCredentials: true
         }).success(function(data){
-            rid = data.rid;
             torrents.labels = data.categories;
-            torrents.all = buildAll(data.torrents);
+
+            if (data.full_update){
+                torrents.all = buildAll(data.torrents);
+            } else {
+                torrents.changed = buildAll(data.torrents);
+            }
+
             torrents.deleted = data.torrents_removed || [];
 
-            console.log("Sync", data);
+            rid = data.rid;
+            defer.resolve(torrents);
+
         }).catch(function(err){
             console.error(err);
+            defer.reject(err);
         })
 
         return defer.promise;
@@ -70,9 +78,10 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
 
         var torrentArray = []
 
-        torrents.keys().map(function(hash){
-            torrentArray.push(new Torrent(hash, torrents[hash]));
-        })
+        Object.keys(torrents).map(function(hash){
+            var torrent = new Torrent(hash, torrents[hash]);
+            torrentArray.push(torrent);
+        });
 
         return torrentArray;
     }
