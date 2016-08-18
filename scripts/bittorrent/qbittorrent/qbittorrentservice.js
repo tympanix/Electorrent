@@ -2,6 +2,11 @@
 
 angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource", "$log", "$q", "TorrentQ", "notificationService", "httpFormService", function($http, $resource, $log, $q, Torrent, $notify, httpFormService) {
 
+    const boundaryHyphens = 27;
+    const hyphen = '-';
+    const boundaryUniqueNumber = 6688794727912;
+    const httpBoundary = hyphen.repeat(boundaryHyphens).concat(boundaryUniqueNumber);
+
     var rid = 0;
 
     const httpform = {
@@ -12,14 +17,37 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         }
     };
 
-    this.connect = function(ip, port, user, pass) {
+    const config = {
+        ip: '',
+        port: ''
+    }
 
+    function url() {
+        var ip, port, path;
+        if (arguments.length === 1){
+            ip = config.ip;
+            port = config.port;
+            path = arguments[0];
+        } else {
+            ip = arguments[0]
+            port = arguments[1]
+            path = arguments[2]
+        }
+        return `http://${ip}:${port}${path}`;
+    }
+
+    function saveConnection(ip, port) {
+        config.ip = ip;
+        config.port = port;
+    }
+
+    this.connect = function(ip, port, user, pass) {
         var defer = $q.defer();
 
-        $http.post('http://127.0.0.1:8080/login', { username: 'admin', password: 'adminadmin'}, httpform)
+        $http.post(url(ip, port, '/login'), { username: user, password: pass}, httpform)
         .success(function(data) {
-            console.log("qB connect", data);
             if(data === 'Ok.') {
+                saveConnection(ip, port);
                 defer.resolve('qBittorrent login successfull');
             } else {
                 defer.reject('Wrong username/password');
@@ -35,7 +63,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
     this.torrents = function() {
         var defer = $q.defer();
 
-        $http.get('http://127.0.0.1:8080/sync/maindata', {
+        $http.get(url('/sync/maindata'), {
             params: {
                 rid: rid
             },
@@ -78,7 +106,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
 
         var promises = [];
         hashes.forEach(function(hash) {
-            var req = $http.post('http://127.0.0.1:8080/command/' + command, {hash: hash}, httpform);
+            var req = $http.post(`${url('/command')}/${command}`, {hash: hash}, httpform);
             promises.push(req);
         });
         return $q.all(promises);
@@ -131,14 +159,9 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         'forcestart': undefined
     }
 
-    const boundaryHyphens = 27;
-    const hyphen = '-';
-    const boundaryUniqueNumber = 6688794727912;
-    const httpBoundary = hyphen.repeat(boundaryHyphens).concat(boundaryUniqueNumber);
-
     this.addTorrentUrl = function(magnet) {
         var data = httpPostTorrentData(magnet);
-        return $http.post('http://127.0.0.1:8080/command/download', data, {
+        return $http.post(url('/command/download'), data, {
             withCredentials: true,
             headers: {
                 'Content-Type': `multipart/form-data; boundary=${httpBoundary}`,
@@ -176,6 +199,5 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
 
         return torrentArray;
     }
-
-}
-]);
+    
+}]);
