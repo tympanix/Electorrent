@@ -4,6 +4,14 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
 
     var rid = 0;
 
+    function build(array) {
+        var t = Object.create(Torrent.prototype);
+
+        // TODO: Create a new Torrent
+
+        return t;
+    }
+
     this.connect = function(ip, port, user, pass) {
 
         var defer = $q.defer();
@@ -54,7 +62,9 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         }).success(function(data){
             rid = data.rid;
             torrents.labels = data.categories;
-            torrents.all = data.torrents;
+            torrents.all = data.torrents || [];
+            torrents.deleted = data.torrents_removed || [];
+
             console.log("Sync", data);
         }).catch(function(err){
             console.error(err);

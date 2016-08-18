@@ -125,69 +125,7 @@ angular.module('torrentApp')
             128: 'loaded'
         };
         var statusesFlags = [1, 2, 4, 8, 16, 32, 64, 128].reverse();
-
-        Torrent.prototype.bind = function(hash,
-            status,
-            name,
-            size,
-            percent,
-            downloaded,
-            uploaded,
-            ratio,
-            uploadSpeed,
-            downloadSpeed,
-            eta,
-            label,
-            peersConnected,
-            peersInSwarm,
-            seedsConnected,
-            seedsInSwarm,
-            availability,
-            torrentQueueOrder,
-            remaining,
-            downloadUrl,
-            rssFeedUrl,
-            statusMessage,
-            streamId,
-            dateAdded,
-            dateCompleted,
-            appUpdateUrl,
-            savePath,
-            additionalData) {
-
-            this.hash = hash;
-            this.status = status;
-            this.name = name;
-            this.size = size;
-            this.percent = percent;
-            this.downloaded = downloaded;
-            this.uploaded = uploaded;
-            this.ratio = (ratio / 1000).toFixed(2);
-            this.uploadSpeed = uploadSpeed;
-            this.downloadSpeed = downloadSpeed;
-            this.eta = eta;
-            this.label = label;
-            this.peersConnected = peersConnected;
-            this.peersInSwarm = peersInSwarm;
-            this.seedsConnected = seedsConnected;
-            this.seedsInSwarm = seedsInSwarm;
-            this.availability = (availability / 65536).toFixed(1);
-            this.torrentQueueOrder = torrentQueueOrder;
-            this.remaining = remaining;
-            this.downloadUrl = downloadUrl;
-            this.rssFeedUrl = rssFeedUrl;
-            this.statusMessage = statusMessage;
-            this.streamId = streamId;
-            this.dateAdded = dateAdded * 1000;
-            this.dateCompleted = dateCompleted * 1000;
-            this.appUpdateUrl = appUpdateUrl;
-            this.savePath = savePath;
-            this.additionalData = additionalData;
-
-            this.decodedName = decodeName(this.name);
-            this.getStatuses();
-            this.cleanedName = cleanName(this.decodedName);
-        };
+        
 
         Torrent.prototype.update = function(other) {
             for (var k in other) {
