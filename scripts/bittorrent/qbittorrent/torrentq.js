@@ -34,7 +34,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             status: undefined,
             name: data.name,
             size: data.size || data.total_size,
-            percent: data.progress * 1000,
+            percent: data.progress * 1000 || undefined,
             downloaded: data.total_downloaded,
             uploaded: data.total_uploaded,
             ratio: data.share_ration || data.ratio,
@@ -53,8 +53,8 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             rssFeedUrl: undefined,
             statusMessage: data.state,
             streamId: undefined,
-            dateAdded: data.addition_date || data.added_on,
-            dateCompleted: data.completion_date || data.completion_on,
+            dateAdded: (data.addition_date || data.added_on) * 1000 || undefined,
+            dateCompleted: (data.completion_date || data.completion_on) * 1000 || undefined,
             appUpdateUrl: undefined,
             savePath: data.savePath,
             additionalData: undefined
@@ -94,30 +94,14 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
         return (args.indexOf(this.statusMessage) > -1);
     }
 
-
-    Torrent.prototype.isStatusStarted = function() {
-        return
-    };
-    Torrent.prototype.isStatusChecking = function() {
-        return
-    };
-    Torrent.prototype.isStatusStartAfterCheck = function() {
-        return
-    };
-    Torrent.prototype.isStatusChecked = function() {
-        return
-    };
     Torrent.prototype.isStatusError = function() {
-        return this.getStatus('error')
+        return this.getStatus('error');
     };
     Torrent.prototype.isStatusPaused = function() {
         return this.getStatus('paused', 'pausedUP', 'pausedDL');
     };
     Torrent.prototype.isStatusQueued = function() {
         return this.getStatus('queuedUP', 'queuedDL');
-    };
-    Torrent.prototype.isStatusLoaded = function() {
-        return false;
     };
     Torrent.prototype.isStatusCompleted = function() {
         return(this.percent === 1000);
@@ -126,10 +110,44 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
         return this.getStatus('downloading')
     };
     Torrent.prototype.isStatusSeeding = function() {
-        return this.getStatus('uploading')
+        return this.getStatus('uploading', 'stalledUP')
     };
     Torrent.prototype.isStatusStopped = function() {
         return false;
+    };
+
+    AbstractTorrent.prototype.statusColor = function () {
+        if (this.isStatusSeeding()){
+            return 'orange';
+        } else if (this.isStatusDownloading()){
+            return 'blue';
+        } else if (this.isStatusError()){
+            return 'error';
+        } else if (this.isStatusCompleted()){
+            return 'success';
+        } else if (this.isStatusPaused()){
+            return 'grey';
+        } else {
+            return 'disabled';
+        }
+    };
+
+    AbstractTorrent.prototype.statusText = function () {
+        if (this.isStatusSeeding()){
+            return 'Seeding';
+        } else if (this.isStatusDownloading()){
+            return 'Downloading';
+        } else if (this.isStatusError()){
+            return 'Error';
+        } else if (this.isStatusCompleted()){
+            return 'Completed';
+        } else if (this.isStatusPaused()){
+            return 'Paused';
+        } else if (this.isStatusStopped()){
+            return 'Stopped';
+        } else {
+            return 'Unknown';
+        }
     };
 
     /**
