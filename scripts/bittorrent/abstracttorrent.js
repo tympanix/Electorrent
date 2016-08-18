@@ -106,7 +106,9 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
     AbstractTorrent.prototype.update = function(other) {
         for(var k in other) {
             if(other.hasOwnProperty(k) && k !== 'selected') {
-                this[k] = other[k];
+                if (other[k] !== undefined){
+                    this[k] = other[k];
+                }
             }
         }
     };

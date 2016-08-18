@@ -4,14 +4,6 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
 
     var rid = 0;
 
-    function build(array) {
-        var t = Object.create(Torrent.prototype);
-
-        // TODO: Create a new Torrent
-
-        return t;
-    }
-
     this.connect = function(ip, port, user, pass) {
 
         var defer = $q.defer();
@@ -28,7 +20,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
                 username: 'admin',
                 password: 'adminadmin'
             }
-        }).success(function(data, status, headers, config, statusText){
+        }).success(function(data){
             console.log("qB connect", data);
             if (data === 'Ok.'){
                 defer.resolve('qBittorrent login successfull');
@@ -62,7 +54,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         }).success(function(data){
             rid = data.rid;
             torrents.labels = data.categories;
-            torrents.all = data.torrents || [];
+            torrents.all = buildAll(data.torrents);
             torrents.deleted = data.torrents_removed || [];
 
             console.log("Sync", data);
@@ -71,6 +63,18 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         })
 
         return defer.promise;
+    }
+
+    function buildAll(torrents) {
+        if (!torrents) return [];
+
+        var torrentArray = []
+
+        torrents.keys().map(function(hash){
+            torrentArray.push(new Torrent(hash, torrents[hash]));
+        })
+
+        return torrentArray;
     }
 
 }]);
