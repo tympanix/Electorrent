@@ -27,7 +27,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
     /**
      * Constructor, with class name
      */
-    function Torrent(hash, data) {
+    function TorrentQ(hash, data) {
 
         AbstractTorrent.call(this, {
             hash: hash,
@@ -87,36 +87,36 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
     }
 
     // Inherit by prototypal inheritance
-    Torrent.prototype = Object.create(AbstractTorrent.prototype);
+    TorrentQ.prototype = Object.create(AbstractTorrent.prototype);
 
-    Torrent.prototype.getStatus = function() {
+    TorrentQ.prototype.getStatus = function() {
         var args = Array.prototype.slice.call(arguments);
         return (args.indexOf(this.statusMessage) > -1);
     }
 
-    Torrent.prototype.isStatusError = function() {
+    TorrentQ.prototype.isStatusError = function() {
         return this.getStatus('error');
     };
-    Torrent.prototype.isStatusPaused = function() {
+    TorrentQ.prototype.isStatusPaused = function() {
         return this.getStatus('paused', 'pausedUP', 'pausedDL');
     };
-    Torrent.prototype.isStatusQueued = function() {
+    TorrentQ.prototype.isStatusQueued = function() {
         return this.getStatus('queuedUP', 'queuedDL');
     };
-    Torrent.prototype.isStatusCompleted = function() {
+    TorrentQ.prototype.isStatusCompleted = function() {
         return(this.percent === 1000);
     };
-    Torrent.prototype.isStatusDownloading = function() {
+    TorrentQ.prototype.isStatusDownloading = function() {
         return this.getStatus('downloading')
     };
-    Torrent.prototype.isStatusSeeding = function() {
+    TorrentQ.prototype.isStatusSeeding = function() {
         return this.getStatus('uploading', 'stalledUP')
     };
-    Torrent.prototype.isStatusStopped = function() {
+    TorrentQ.prototype.isStatusStopped = function() {
         return false;
     };
 
-    AbstractTorrent.prototype.statusColor = function () {
+    TorrentQ.prototype.statusColor = function () {
         if (this.isStatusSeeding()){
             return 'orange';
         } else if (this.isStatusDownloading()){
@@ -132,7 +132,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
         }
     };
 
-    AbstractTorrent.prototype.statusText = function () {
+    TorrentQ.prototype.statusText = function () {
         if (this.isStatusSeeding()){
             return 'Seeding';
         } else if (this.isStatusDownloading()){
@@ -153,5 +153,5 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
     /**
      * Return the constructor function
      */
-    return Torrent;
+    return TorrentQ;
 }]);
