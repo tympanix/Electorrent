@@ -34,10 +34,10 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             status: undefined,
             name: data.name,
             size: data.size || data.total_size,
-            percent: data.progress * 100 * 1000,
+            percent: data.progress * 1000,
             downloaded: data.total_downloaded,
             uploaded: data.total_uploaded,
-            ratio: data.share_ration,
+            ratio: data.share_ration || data.ratio,
             uploadSpeed: data.up_speed || data.upspeed,
             downloadSpeed: data.dl_speed || data.dlspeed,
             eta: data.eta,
@@ -45,7 +45,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             peersConnected: data.nb_connections,
             peersInSwarm: data.peers_total,
             seedsConnected: data.seeds,
-            seedsInSwarm: data.seeds_total,
+            seedsInSwarm: data.seeds_total || data.num_complete,
             availability: undefined,
             torrentQueueOrder: data.priority,
             remaining: undefined,
@@ -53,8 +53,8 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             rssFeedUrl: undefined,
             statusMessage: data.state,
             streamId: undefined,
-            dateAdded: data.addition_date,
-            dateCompleted: data.completion_date,
+            dateAdded: data.addition_date || data.added_on,
+            dateCompleted: data.completion_date || data.completion_on,
             appUpdateUrl: undefined,
             savePath: data.savePath,
             additionalData: undefined
@@ -78,49 +78,58 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
         this.havePieces = data.pieces_have;
         this.totalPieces = data.pieces_num;
         this.reannounce = data.reannounce;
-        data.upSpeedAvg = data.up_speed_avg;
+        this.upSpeedAvg = data.up_speed_avg;
+        this.forceStart = data.force_start;
+        this.leechersInSwarm = data.num_incomplete;
+        this.leechersConnected = data.num_leechs;
+        this.sequentialDownload = data.seq_dl;
 
     }
 
     // Inherit by prototypal inheritance
     Torrent.prototype = Object.create(AbstractTorrent.prototype);
 
+    Torrent.prototype.getStatus = function() {
+        var args = Array.prototype.slice.call(arguments);
+        return (args.indexOf(this.statusMessage) > -1);
+    }
+
 
     Torrent.prototype.isStatusStarted = function() {
-        return this.getStatusFlag(1);
+        return
     };
     Torrent.prototype.isStatusChecking = function() {
-        return this.getStatusFlag(2);
+        return
     };
     Torrent.prototype.isStatusStartAfterCheck = function() {
-        return this.getStatusFlag(4);
+        return
     };
     Torrent.prototype.isStatusChecked = function() {
-        return this.getStatusFlag(8);
+        return
     };
     Torrent.prototype.isStatusError = function() {
-        return this.getStatusFlag(16);
+        return this.getStatus('error')
     };
     Torrent.prototype.isStatusPaused = function() {
-        return this.getStatusFlag(32);
+        return this.getStatus('paused', 'pausedUP', 'pausedDL');
     };
     Torrent.prototype.isStatusQueued = function() {
-        return this.getStatusFlag(64) && !this.isStatusDownloading();
+        return this.getStatus('queuedUP', 'queuedDL');
     };
     Torrent.prototype.isStatusLoaded = function() {
-        return this.getStatusFlag(128);
+        return false;
     };
     Torrent.prototype.isStatusCompleted = function() {
         return(this.percent === 1000);
     };
     Torrent.prototype.isStatusDownloading = function() {
-        return this.getStatusFlag(64);
+        return this.getStatus('downloading')
     };
     Torrent.prototype.isStatusSeeding = function() {
-        return this.isStatusStarted() && (this.isStatusCompleted());
+        return this.getStatus('uploading')
     };
     Torrent.prototype.isStatusStopped = function() {
-        return(!this.getStatusFlag(64)) && (!this.isStatusCompleted());
+        return false;
     };
 
     /**
