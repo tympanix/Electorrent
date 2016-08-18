@@ -27,7 +27,7 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
     /**
      * Constructor, with class name
      */
-    function Torrent(hash,
+    function TorrentU(hash,
         status,
         name,
         size,
@@ -90,7 +90,7 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
     }
 
     // Inherit by prototypal inheritance
-    Torrent.prototype = Object.create(AbstractTorrent.prototype);
+    TorrentU.prototype = Object.create(AbstractTorrent.prototype);
 
     var statusesMap = {
         1: 'started',
@@ -104,13 +104,13 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
     };
     var statusesFlags = [1, 2, 4, 8, 16, 32, 64, 128].reverse();
 
-    Torrent.prototype.getStatusFlag = function(x) {
+    TorrentU.prototype.getStatusFlag = function(x) {
         /*jshint bitwise: false*/
         return(this.status & x) === x;
         /*jshint bitwise: true*/
     };
 
-    Torrent.prototype.getStatuses = function() {
+    TorrentU.prototype.getStatuses = function() {
         //var str = '';
         var i = 0;
 
@@ -137,45 +137,45 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
         return this.statusesCached;
     };
 
-    Torrent.prototype.isStatusStarted = function() {
+    TorrentU.prototype.isStatusStarted = function() {
         return this.getStatusFlag(1);
     };
-    Torrent.prototype.isStatusChecking = function() {
+    TorrentU.prototype.isStatusChecking = function() {
         return this.getStatusFlag(2);
     };
-    Torrent.prototype.isStatusStartAfterCheck = function() {
+    TorrentU.prototype.isStatusStartAfterCheck = function() {
         return this.getStatusFlag(4);
     };
-    Torrent.prototype.isStatusChecked = function() {
+    TorrentU.prototype.isStatusChecked = function() {
         return this.getStatusFlag(8);
     };
-    Torrent.prototype.isStatusError = function() {
+    TorrentU.prototype.isStatusError = function() {
         return this.getStatusFlag(16);
     };
-    Torrent.prototype.isStatusPaused = function() {
+    TorrentU.prototype.isStatusPaused = function() {
         return this.getStatusFlag(32);
     };
-    Torrent.prototype.isStatusQueued = function() {
+    TorrentU.prototype.isStatusQueued = function() {
         return this.getStatusFlag(64) && !this.isStatusDownloading();
     };
-    Torrent.prototype.isStatusLoaded = function() {
+    TorrentU.prototype.isStatusLoaded = function() {
         return this.getStatusFlag(128);
     };
-    Torrent.prototype.isStatusCompleted = function() {
+    TorrentU.prototype.isStatusCompleted = function() {
         return(this.percent === 1000);
     };
-    Torrent.prototype.isStatusDownloading = function() {
+    TorrentU.prototype.isStatusDownloading = function() {
         return this.getStatusFlag(64);
     };
-    Torrent.prototype.isStatusSeeding = function() {
+    TorrentU.prototype.isStatusSeeding = function() {
         return this.isStatusStarted() && (this.isStatusCompleted());
     };
-    Torrent.prototype.isStatusStopped = function() {
+    TorrentU.prototype.isStatusStopped = function() {
         return(!this.getStatusFlag(64)) && (!this.isStatusCompleted());
     };
 
     /**
      * Return the constructor function
      */
-    return Torrent;
+    return TorrentU;
 }]);
