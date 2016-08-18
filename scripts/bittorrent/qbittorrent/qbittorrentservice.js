@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource", "$log", "$q", "Torrent", "notificationService", "httpFormService", function($http, $resource, $log, $q, Torrent, $notify, httpFormService) {
+angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource", "$log", "$q", "TorrentQ", "notificationService", "httpFormService", function($http, $resource, $log, $q, Torrent, $notify, httpFormService) {
 
     var rid = 0;
 
