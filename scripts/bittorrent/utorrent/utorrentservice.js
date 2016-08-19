@@ -3,7 +3,6 @@
 angular.module('torrentApp')
     .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "notificationService", function($http, $resource, $log, $q, Torrent, $notify) {
 
-        var loading = null;
         var data = {
             url: null,
             username: null,
