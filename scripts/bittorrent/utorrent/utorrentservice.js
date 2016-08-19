@@ -28,67 +28,46 @@ angular.module('torrentApp')
             }
         };
 
-        this.connect = function(ip, port, username, password) {
-            data.username = username;
-            data.password = password;
-            data.url = 'http://'+ip+':'+port+'/gui/';
-            return this.auth();
+        function extractTokenFromHTML(str) {
+            var match = str.match(/>([^<]+)</);
+            if (match) {
+                data.token = match[match.length - 1];
+                return true;
+            }
+            return false;
         }
 
-        this.auth = function() {
+        function url(ip, port) {
+            return `http://${ip}:${port}/gui/`;
+        }
+
+        function saveConnection(ip, port, username, password) {
+            data.username = username;
+            data.password = password;
+            data.url = url(ip, port);
+        }
+
+        this.connect = function(ip, port, user, pass) {
             var loading = $q.defer();
             $log.info('get token');
-            var encoded = new Buffer(data.username+":"+data.password).toString('base64');
+
+            var encoded = new Buffer(`${user}:${pass}`).toString('base64');
             $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
 
-            $http.get(data.url + 'token.html?t=' + Date.now(), {
+            $http.get(url(ip, port) + 'token.html?t=' + Date.now(), {
                 timeout: 5000
             }).success(function(str) {
-                var match = str.match(/>([^<]+)</);
-                if (match) {
-                    data.token = match[match.length - 1];
+                if (extractTokenFromHTML(str)) {
+                    saveConnection(ip, port, user, pass);
                     loading.resolve(data.token);
-                    $log.info('got token ' + data.token);
+                } else {
+                    loading.reject('Could not find token');
                 }
             }).error(function(err, status) {
                 $notify.alertAuth(err, status);
                 loading.reject(err || 'Error loading token', status);
             });
 
-            return loading.promise;
-        }
-
-        this.init = function() {
-            if (data.token) {
-                $log.info('token already cached');
-                loading.resolve(data.token);
-                return loading.promise;
-            }
-
-            if (loading !== null) {
-                $log.info('token load in progress. Deferring callback');
-                return loading.promise;
-            } else {
-                loading = $q.defer();
-            }
-
-            $log.info('get token');
-            var encoded = new Buffer("admin:").toString('base64');
-            $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
-            $http.get(data.url + 'token.html?t=' + Date.now(), {
-                timeout: 30000
-            }).
-            success(function(str) {
-                var match = str.match(/>([^<]+)</);
-                if (match) {
-                    data.token = match[match.length - 1];
-                    loading.resolve(data.token);
-                    $log.info('got token ' + data.token);
-                }
-            }).error(function() {
-                loading.reject('Error loading token');
-                $log.error(arguments);
-            });
             return loading.promise;
         }
 
