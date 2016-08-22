@@ -184,23 +184,6 @@ angular.module('torrentApp')
             return doAction('getprops', hashes)
         }
 
-
-
-        this.actions = {
-            'start': this.start,
-            'stop': this.stop,
-            'pause': this.pause,
-            'remove': this.remove,
-            'removedata': this.removedata,
-            'removetorrent': this.removetorrent,
-            'removedatatorrent': this.removedatatorrent,
-            'forcestart': this.forcestart,
-            'recheck': this.recheck,
-            'queueup': this.queueup,
-            'queuedown': this.queuedown,
-            'getprops': this.getprops
-        }
-
         this.getFileDownloadUrl = function(torrent,file) {
             if(torrent.streamId && this.settingsMap['webui.uconnect_enable'] && file.size === file.sizeDownloaded) {
                 return '/proxy?sid=' + torrent.streamId + '&file=' + file.hash + '&disposition=ATTACHMENT&service=DOWNLOAD&qos=0';
@@ -289,6 +272,34 @@ angular.module('torrentApp')
             return buildVersionStr();
 
         }
+
+        this.actionHeader = [
+            {
+                label: 'Start',
+                type: 'button',
+                color: 'green',
+                click: this.start,
+                icon: 'play'
+            },
+            {
+                label: 'Pause',
+                type: 'button',
+                color: 'yellow',
+                click: this.pause,
+                icon: 'pause'
+            },
+            {
+                label: 'Stop',
+                type: 'button',
+                color: 'red',
+                click: this.stop,
+                icon: 'stop'
+            },
+            {
+                label: 'Labels',
+                type: 'labels'
+            }
+        ]
 
         this.contextMenu = [
             {
