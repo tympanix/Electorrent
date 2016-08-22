@@ -290,7 +290,7 @@ angular.module('torrentApp')
 
         }
 
-        this.gui = [
+        this.contextMenu = [
             {
                 label: 'Recheck',
                 click: this.recheck,

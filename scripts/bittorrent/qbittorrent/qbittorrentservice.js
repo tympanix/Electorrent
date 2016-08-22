@@ -148,17 +148,6 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return doAction('bottomPrio', hashes);
     }
 
-    this.actions = {
-        'start': this.start,
-        'pause': this.pause,
-        'remove': this.delete,
-        'removedata': this.deleteWithData,
-        'recheck': this.recheck,
-        'queueup': this.queueUp,
-        'queuedown': this.queueDown,
-        'forcestart': undefined
-    }
-
     this.addTorrentUrl = function(magnet) {
         var data = httpPostTorrentData(magnet);
         return $http.post(url('/command/download'), data, {
@@ -200,7 +189,22 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return torrentArray;
     }
 
-    this.gui = [
+    this.actions = {
+        'start': this.start,
+        'pause': this.pause,
+        'remove': this.delete,
+        'removedata': this.deleteWithData,
+        'recheck': this.recheck,
+        'queueup': this.queueUp,
+        'queuedown': this.queueDown,
+        'forcestart': undefined
+    }
+
+    this.actionHeader = {
+
+    }
+
+    this.contextMenu = [
         {
             label: 'Recheck',
             click: this.recheck,
