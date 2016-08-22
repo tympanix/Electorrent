@@ -112,6 +112,10 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return $q.all(promises);
     }
 
+    function doGlobalAction(command) {
+        return $http.post(`${url('/command')}/${command}`);
+    }
+
     this.pause = function(hashes) {
         return doAction('pause', hashes);
     }
@@ -146,6 +150,14 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
 
     this.queueBottom = function(hashes) {
         return doAction('bottomPrio', hashes);
+    }
+
+    this.pauseAll = function() {
+        return doGlobalAction('pauseAll')
+    }
+
+    this.resumeAll = function() {
+        return doGlobalAction('resumeAll')
     }
 
     this.addTorrentUrl = function(magnet) {
@@ -222,13 +234,12 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
             icon: 'plus',
             actions: [
                 {
-                    label: 'Hello'
+                    label: 'Pause All',
+                    click: this.pauseAll
                 },
                 {
-                    label: 'Hello 2'
-                },
-                {
-                    label: 'Hello 3'
+                    label: 'Resume All',
+                    click: this.resumeAll
                 }
             ]
         },
