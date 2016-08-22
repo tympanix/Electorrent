@@ -18,6 +18,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.torrentLimit = LIMIT;
     $scope.labels = {};
     $scope.resizeMode = settings.ui.resizeMode;
+    $scope.ut = ut;
 
     $scope.filters = {
         status: 'downloading'
@@ -208,9 +209,15 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         }
     };
 
-    $scope.doContextAction = function(action) {
-        $scope.contextMenu.hide();
-        $scope.doAction(action);
+    $scope.doContextAction = function(action, name) {
+        action(getSelectedHashes())
+        .then(function(){
+            console.log("Action " + name + " performed!");
+            $scope.update();
+        })
+        .catch(function(err) {
+            $notify.alert("Invalid action", err);
+        })
     }
 
     function fetchTorrents(){
