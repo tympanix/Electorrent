@@ -1,6 +1,7 @@
 angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', function($compile, electron) {
 
     var actionHeader = null;
+    var toggleAble = [];
 
     return {
         restrict: 'A',
@@ -22,6 +23,8 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', 
     }
 
     function render(scope, element, attr){
+        toggleAble = [];
+
         scope.actions.forEach(function(item){
             if (item.type === 'button') {
                 appendButton(element, item, scope);
@@ -31,6 +34,22 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', 
                 appendDropdown(element, item, scope);
             }
         });
+
+        scope.$watch(function() {
+            return scope.enabled;
+        }, function(disable) {
+            toggleActive(disable)
+        });
+    }
+
+    function toggleActive(disable) {
+        toggleAble.forEach(function(element) {
+            if (disable) {
+                element.addClass('disabled')
+            } else {
+                element.removeClass('disabled')
+            }
+        })
     }
 
     function appendDropdown(list, item, scope) {
@@ -72,6 +91,10 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', 
         button.bind('click', function() {
             scope.click(item.click, item.label);
         })
+
+        if (!item.alwaysActive) {
+            toggleAble.push(button);
+        }
 
         list.append(button);
     }
