@@ -13,7 +13,8 @@ angular.module("torrentApp").directive('dropdown', [function() {
         $(element).dropdown({
             transition: "vertical flip",
             duration: 100,
-            onChange: onChange
+            onChange: onChange,
+            action: 'hide'
         });
 
         if ('ref' in attr){
