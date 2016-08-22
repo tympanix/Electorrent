@@ -201,17 +201,6 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return torrentArray;
     }
 
-    this.actions = {
-        'start': this.start,
-        'pause': this.pause,
-        'remove': this.delete,
-        'removedata': this.deleteWithData,
-        'recheck': this.recheck,
-        'queueup': this.queueUp,
-        'queuedown': this.queueDown,
-        'forcestart': undefined
-    }
-
     this.actionHeader = [
         {
             label: 'Start',
