@@ -5,6 +5,7 @@ angular.module("torrentApp").directive('labelsDropdown', [function() {
         templateUrl: './views/misc/labels.html',
         scope: {
             enabled: '=?',
+            action: '=',
             labels: '='
         }
     };

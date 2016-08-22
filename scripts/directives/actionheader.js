@@ -77,7 +77,12 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', 
     }
 
     function appendLabelsDropdown(list, item, scope){
-        var dropdown = angular.element('<span labels-dropdown labels="labels" enabled="enabled"></span>');
+        var dropdown = angular.element('<span labels-dropdown labels="labels" action="addLabel" enabled="enabled"></span>');
+
+        scope.addLabel = function(label) {
+            scope.click(item.click, item.label + ' ' + label, label)
+        }
+
         $compile(dropdown)(scope);
         list.append(dropdown);
     }
