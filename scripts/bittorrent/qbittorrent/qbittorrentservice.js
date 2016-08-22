@@ -199,5 +199,43 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
 
         return torrentArray;
     }
-    
+
+    this.gui = [
+        {
+            label: 'Recheck',
+            click: this.recheck,
+            icon: 'checkmark'
+        },
+        {
+            label: 'Move Up Queue',
+            click: this.queueUp,
+            icon: 'arrow up'
+        },
+        {
+            label: 'Move Queue Down',
+            click: this.queueDown,
+            icon: 'arrow down'
+        },
+        {
+            label: 'Queue Top',
+            click: this.queueTop,
+            icon: 'chevron circle up'
+        },
+        {
+            label: 'Queue Bottom',
+            click: this.queueBottom,
+            icon: 'chevron circle down'
+        },
+        {
+            label: 'Remove',
+            click: this.delete,
+            icon: 'remove'
+        },
+        {
+            label: 'Remove And Delete',
+            click: this.deleteWithData,
+            icon: 'trash'
+        }
+    ];
+
 }]);
