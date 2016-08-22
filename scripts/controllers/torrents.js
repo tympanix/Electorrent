@@ -231,7 +231,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     function statusFilter(torrent, status) {
         switch (status) {
             case 'finished': return torrent.isStatusCompleted();
-            case 'downloading': return torrent.isStatusDownloading();
+            case 'downloading': return torrent.isStatusDownloading() || torrent.isStatusPaused();
             case 'paused': return torrent.isStatusPaused();
             case 'queued': return torrent.isStatusQueued();
             case 'seeding': return torrent.isStatusSeeding();
