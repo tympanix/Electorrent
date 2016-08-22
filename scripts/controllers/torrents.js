@@ -162,7 +162,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     }
 
     $scope.setSelected = function(event, torrent, index) {
-        $scope.labelsDrowdown.clear();
+        //$scope.labelsDrowdown.clear();
         if (event.ctrlKey || event.metaKey){
             toggleSelect(torrent);
         } else if (event.shiftKey){
@@ -192,21 +192,15 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         return hashes;
     }
 
-    $scope.doAction = function(action) {
-        var call = ut.actions[action];
-
-        if (call){
-            call(getSelectedHashes())
+    $scope.doAction = function(action, name) {
+        action(getSelectedHashes())
             .then(function(){
-                console.log("Action " + action + " performed!");
+                console.log("Action " + name + " performed!");
                 $scope.update();
             })
             .catch(function(err) {
                 $notify.alert("Invalid action", err);
-            })
-        } else {
-            $notify.alert("Invalid action", "Action " + action + " is not allowed!");
-        }
+            });
     };
 
     $scope.doContextAction = function(action, name) {
