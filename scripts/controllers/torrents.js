@@ -16,7 +16,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.contextMenu = null;
     $scope.labelsDrowdown = null;
     $scope.torrentLimit = LIMIT;
-    $scope.labels = {};
+    $scope.labels = [];
     $scope.resizeMode = settings.ui.resizeMode;
     $scope.ut = ut;
 
@@ -295,8 +295,8 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     function updateLabels(torrents){
         if (torrents.labels && torrents.labels.length > 0) {
             torrents.labels.forEach(function(label /*, index*/){
-                if (!$scope.labels[label[0]]){
-                    $scope.labels[label[0]] = label[1];
+                if (!$scope.labels.includes(label)) {
+                    $scope.labels.push(label)
                 }
             })
         }
