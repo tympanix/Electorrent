@@ -92,11 +92,12 @@ angular.module('torrentApp')
             };
             var utorrentRes = _torrents().list(
                 function() {
-                    torrents.labels = utorrentRes.label;
+                    torrents.labels = (utorrentRes.label || []).map(labelTransform);
                     torrents.all = (utorrentRes.torrents || []).map(build);
                     torrents.changed = (utorrentRes.torrentp || []).map(build);
                     torrents.deleted = utorrentRes.torrentm;
                     ret.resolve(torrents);
+                    console.log("LABELS!!!!!", torrents.labels);
                 },
                 function(err) {
                     ret.reject(err);
@@ -104,6 +105,10 @@ angular.module('torrentApp')
             );
 
             return ret.promise;
+        }
+
+        function labelTransform(label){
+            return label[0];
         }
 
         function _torrents() {
@@ -297,6 +302,7 @@ angular.module('torrentApp')
             },
             {
                 label: 'Labels',
+                click: this.setLabel,
                 type: 'labels'
             }
         ]
