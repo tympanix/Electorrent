@@ -97,7 +97,6 @@ angular.module('torrentApp')
                     torrents.changed = (utorrentRes.torrentp || []).map(build);
                     torrents.deleted = utorrentRes.torrentm;
                     ret.resolve(torrents);
-                    console.log("LABELS!!!!!", torrents.labels);
                 },
                 function(err) {
                     ret.reject(err);
