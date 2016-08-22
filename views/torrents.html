@@ -105,47 +105,5 @@
         </div>
     </div>
 
-    <context-menu bind="contextMenu" class="torrent context menu" id="contextmenu">
-        <div class="ui vertical menu">
-            <a class="item" ng-click="debug()" ng-if="program.debug">
-                <i class="ui info icon"></i>
-                Debug
-            </a>
-            <a class="item" ng-click="doContextAction('recheck')">
-                <i class="ui checkmark icon"></i>
-                Recheck
-            </a>
-            <a class="item" ng-click="doContextAction('forcerestart')">
-                <i class="ui flag icon"></i>
-                Force Start
-            </a>
-            <a class="item" ng-click="doContextAction('queueup')">
-                <i class="ui arrow up icon"></i>
-                Move Up Queue
-            </a>
-            <a class="item" ng-click="doContextAction('queuedown')">
-                <i class="ui arrow down icon"></i>
-                Move Down Queue
-            </a>
-            <a class="item" ng-click="doContextAction('remove')">
-                <i class="ui remove icon"></i>
-                Remove
-            </a>
-            <div class="ui context dropdown item">
-                <i class="dropdown icon"></i>
-                Remove And
-                <div class="menu">
-                    <a class="item" ng-click="doContextAction('removetorrent')">
-                        Delete Torrent
-                    </a>
-                    <a class="item" ng-click="doContextAction('removedata')">
-                        Delete Data
-                    </a>
-                    <a class="item" ng-click="doContextAction('removedatatorrent')">
-                        Delete All
-                    </a>
-                </div>
-            </div>
-        </div>
-    </context-menu>
+    <context-menu bind="contextMenu" menu="ut.gui" click="doContextAction" id="contextmenu"></context-menu>
 </div>

@@ -1,7 +1,9 @@
 'use strict';
 
 angular.module('torrentApp')
-    .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "notificationService", function($http, $resource, $log, $q, Torrent, $notify) {
+    .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "UtorrentGUI", "notificationService", function($http, $resource, $log, $q, Torrent, uTorrentGUI, $notify) {
+
+        //this.gui = new uTorrentGUI(this);
 
         var data = {
             url: null,
@@ -287,5 +289,50 @@ angular.module('torrentApp')
             return buildVersionStr();
 
         }
+
+        this.gui = [
+            {
+                label: 'Recheck',
+                click: this.recheck,
+                icon: 'checkmark'
+            },
+            {
+                label: 'Force Start',
+                click: this.forcestart,
+                icon: 'flag'
+            },
+            {
+                label: 'Move Up Queue',
+                click: this.queueup,
+                icon: 'arrow up'
+            },
+            {
+                label: 'Move Queue Down',
+                click: this.queuedown,
+                icon: 'arrow down'
+            },
+            {
+                label: 'Remove',
+                click: this.remove,
+                icon: 'remove'
+            },
+            {
+                label: 'Remove And',
+                menu: [
+                    {
+                        label: 'Delete Torrent',
+                        click: this.removetorrent,
+                    },
+                    {
+                        label: 'Delete Data',
+                        click: this.removedata,
+                    },
+                    {
+                        label: 'Delete All',
+                        click: this.removedatatorrent,
+                    }
+                ]
+            }
+        ];
 
     }]);

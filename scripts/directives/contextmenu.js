@@ -1,16 +1,88 @@
 angular.module("torrentApp").directive('contextMenu', ['$document', '$window', 'electron', function($document, $window, electron) {
+
+    var contextMenu = null;
+
     return {
         restrict: 'E',
-        link: link
+        scope: {
+            menu: '=',
+            bind: '=',
+            click: '='
+        },
+        compile: compile
     };
+
+    function compile(element) {
+        contextMenu = element;
+        element.addClass('torrent context menu');
+        return link;
+    }
+
+    function render(scope, element, attr){
+        console.log("Menu", scope.menu);
+        element.html('');
+
+        var list = angular.element('<div class="ui vertical menu"></div>');
+
+        element.append(list);
+
+        scope.menu.forEach(function(item){
+            if (item.menu) {
+                appendSubmenu(list, item, scope);
+            } else {
+                appendMenuItem(list, item, scope);
+            }
+        });
+
+    }
+
+    function appendMenuItem(element, item, scope) {
+        var menuItem = angular.element('<a class="item"></a>');
+
+        if (item.icon) {
+            addIcon(menuItem, item.icon);
+        }
+
+        menuItem.bind('click', function() {
+            contextMenu.hide();
+            scope.click(item.click, item.label);
+        });
+
+        menuItem.append(item.label);
+        element.append(menuItem);
+    }
+
+    function addIcon(item, iconName) {
+        var icon = angular.element('<i></i>')
+        icon.addClass('ui ' + iconName + ' icon');
+        item.append(icon);
+    }
+
+    function appendSubmenu(element, submenu, scope) {
+        var list = angular.element('<div class="ui context dropdown item">');
+        var menu = angular.element('<div class="menu">');
+
+        submenu.menu.forEach(function(item) {
+            appendMenuItem(menu, item, scope);
+        });
+
+        addIcon(list, 'dropdown');
+
+        list.append(submenu.label);
+        list.append(menu);
+        element.append(list);
+
+    }
 
     function link(scope, element, attr){
         scope.program = electron.program;
 
-        element.data('contextmenu',true);
+        element.data('contextmenu', true);
+
+        render(scope, element, attr);
 
         // Bind show function to scope variable
-        scope[attr.bind] = {
+        scope.bind = {
             show: showContextMenu(element),
             hide: hideContextMenu(element)
         };
@@ -23,7 +95,7 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', '
             }
         });
 
-        //Remove context menu when user presses the escape key
+        // Remove context menu when user presses the escape key
         angular.element($document).on('keyup', function(event){
             if (event.keyCode === 27 /* Escape key */){
                 $(element).hide();
