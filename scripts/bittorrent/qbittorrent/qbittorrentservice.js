@@ -200,9 +200,43 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         'forcestart': undefined
     }
 
-    this.actionHeader = {
-
-    }
+    this.actionHeader = [
+        {
+            label: 'Start',
+            type: 'button',
+            color: 'green',
+            click: this.start,
+            icon: 'play'
+        },
+        {
+            label: 'Pause',
+            type: 'button',
+            color: 'red',
+            click: this.pause,
+            icon: 'pause'
+        },
+        {
+            label: 'More',
+            type: 'dropdown',
+            color: 'blue',
+            icon: 'plus',
+            actions: [
+                {
+                    label: 'Hello'
+                },
+                {
+                    label: 'Hello 2'
+                },
+                {
+                    label: 'Hello 3'
+                }
+            ]
+        },
+        {
+            label: 'Labels',
+            type: 'labels'
+        }
+    ]
 
     this.contextMenu = [
         {
