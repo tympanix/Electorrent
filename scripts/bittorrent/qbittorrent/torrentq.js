@@ -107,7 +107,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
         return (this.percent === 1000) || this.getStatus('checkingUP');
     };
     TorrentQ.prototype.isStatusDownloading = function() {
-        return this.getStatus('downloading', 'checkingDL', 'stalledDL')
+        return this.getStatus('downloading', 'checkingDL', 'stalledDL', 'metaDL')
     };
     TorrentQ.prototype.isStatusSeeding = function() {
         return this.getStatus('uploading', 'stalledUP')
