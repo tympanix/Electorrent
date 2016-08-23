@@ -2,7 +2,7 @@
 
 angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource", "$log", "$q", "TorrentQ", "notificationService", "httpFormService", function($http, $resource, $log, $q, Torrent, $notify, httpFormService) {
 
-    const boundaryHyphens = 27;
+    const boundaryHyphens = 29;
     const hyphen = '-';
     const boundaryUniqueNumber = 6688794727912;
     const httpBoundary = hyphen.repeat(boundaryHyphens).concat(boundaryUniqueNumber);
@@ -112,6 +112,10 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return $q.all(promises);
     }
 
+    function doMultiAction(command, hashes) {
+        return $http.post(`${url('/command')}/${command}`, { hashes: hashes }, httpform);
+    }
+
     function doGlobalAction(command) {
         return $http.post(`${url('/command')}/${command}`);
     }
@@ -125,11 +129,11 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
     }
 
     this.delete = function(hashes) {
-        return doAction('delete', hashes);
+        return doMultiAction('delete', hashes);
     }
 
     this.deleteWithData = function(hashes) {
-        return doAction('deletePerm', hashes);
+        return doMultiAction('deletePerm', hashes);
     }
 
     this.recheck = function(hashes) {
@@ -137,19 +141,19 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
     }
 
     this.queueUp = function(hashes) {
-        return doAction('increasePrio', hashes);
+        return doMultiAction('increasePrio', hashes);
     }
 
     this.queueDown = function(hashes) {
-        return doAction('decreasePrio', hashes);
+        return doMultiAction('decreasePrio', hashes);
     }
 
     this.queueTop = function(hashes) {
-        return doAction('topPrio', hashes);
+        return doMultiAction('topPrio', hashes);
     }
 
     this.queueBottom = function(hashes) {
-        return doAction('bottomPrio', hashes);
+        return doMultiAction('bottomPrio', hashes);
     }
 
     this.pauseAll = function() {
@@ -161,13 +165,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
     }
 
     this.addTorrentUrl = function(magnet) {
-        var data = httpPostTorrentData(magnet);
-        return $http.post(url('/command/download'), data, {
-            withCredentials: true,
-            headers: {
-                'Content-Type': `multipart/form-data; boundary=${httpBoundary}`,
-            }
-        })
+        return $http.post(url('/command/download'), { urls: magnet }, httpform)
     }
 
     this.setCategory = function(hashes, category) {
@@ -181,15 +179,16 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         httpDataAddPart(r, 'urls', magnet);
         httpDataAddPart(r, 'savepath', '');
         httpDataAddPart(r, 'cookie', '');
-        httpDataAddPart(r, 'lbale', '');
+        httpDataAddPart(r, 'label', '', true);
 
         return r.join('\n');
     }
 
     function httpDataAddPart(r, part, data) {
         r.push(`Content-Disposition: form-data; name="${part}"`)
-        r.push(encodeURI(data))
-        r.push(httpBoundary)
+        r.push('');
+        r.push(data);
+        r.push(httpBoundary);
     }
 
     function buildAll(torrents) {
