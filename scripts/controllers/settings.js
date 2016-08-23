@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("settingsController", ["$scope", "utorrentService", "configService", "notificationService", "electron", function($scope, $utorrentService, config, $notify, electron) {
+angular.module("torrentApp").controller("settingsController", ["$scope", "torrentMiddlewareService", "configService", "notificationService", "electron", function($scope, $utorrentService, config, $notify, electron) {
 
     // External Settings reference
     $scope.settings = {
