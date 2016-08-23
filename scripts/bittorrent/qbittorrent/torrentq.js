@@ -98,7 +98,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
         return this.getStatus('error');
     };
     TorrentQ.prototype.isStatusStopped = function() {
-        return this.getStatus('paused', 'pausedUP', 'pausedDL');
+        return this.getStatus('paused', 'pausedUP', 'pausedDL') && !this.isStatusCompleted();
     };
     TorrentQ.prototype.isStatusQueued = function() {
         return this.getStatus('queuedUP', 'queuedDL');
