@@ -15,6 +15,7 @@ angular.module('torrentApp').factory("httpFormService", function() {
         if(!angular.isObject(data)) {
             return((data === null) ? "" : data.toString());
         }
+
         var buffer = [];
         // Serialize each key in the object.
         for(var name in data) {
@@ -22,14 +23,25 @@ angular.module('torrentApp').factory("httpFormService", function() {
                 continue;
             }
             var value = data[name];
-            buffer.push(
-                encodeURIComponent(name) +
-                "=" +
-                encodeURIComponent((value === null) ? "" : value)
-            );
+            buffer.push(parseComponent(name, value));
         }
 
         // Serialize the buffer and clean it up for transportation.
         return buffer.join("&").replace(/%20/g, "+");
+    }
+
+    function parseComponent(name, value) {
+        return encodeURIComponent(name) + "=" + parseValue(value);
+    }
+
+    function parseValue(value){
+        if (Array.isArray(value)) {
+            var encoded = value.map(encodeURIComponent);
+            return encoded.join('|');
+        } else if (value !== null) {
+            return encodeURIComponent(value)
+        } else {
+            return "";
+        }
     }
 });

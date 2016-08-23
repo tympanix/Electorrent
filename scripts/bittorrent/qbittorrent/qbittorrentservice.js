@@ -170,6 +170,10 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         })
     }
 
+    this.setCategory = function(hashes, category) {
+        return $http.post(url('/command/setCategory'), { hashes: hashes, category: category }, httpform)
+    }
+
     function httpPostTorrentData(magnet) {
         var r = [];
         r.push(httpBoundary);
@@ -234,6 +238,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         },
         {
             label: 'Labels',
+            click: this.setCategory,
             type: 'labels'
         }
     ]
