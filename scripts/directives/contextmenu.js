@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('contextMenu', ['$document', '$window', 'electron', function($document, $window, electron) {
+angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document', '$window', 'electron', function($rootScope, $document, $window, electron) {
 
     var contextMenu = null;
 
@@ -20,7 +20,7 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', '
 
     function render(scope, element, attr){
         console.log("Menu", scope.menu);
-        element.html('');
+        element.empty();
 
         var list = angular.element('<div class="ui vertical menu"></div>');
 
@@ -34,6 +34,8 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', '
             }
         });
 
+        bindMenuActions(element);
+        
     }
 
     function appendMenuItem(element, item, scope) {
@@ -74,6 +76,19 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', '
 
     }
 
+    function bindMenuActions(element) {
+        $(element).find('.context.dropdown').each(function(){
+            $(this)
+            .mouseenter(function(){
+                var menu = $(this).find('.menu')
+                menu.show();
+            })
+            .mouseleave(function(){
+                $(this).find('.menu').hide();
+            });
+        });
+    }
+
     function link(scope, element, attr){
         scope.program = electron.program;
 
@@ -102,18 +117,12 @@ angular.module("torrentApp").directive('contextMenu', ['$document', '$window', '
             }
         });
 
-        $(element).find('.context.dropdown').each(function(){
-            $(this)
-            .mouseenter(function(){
-                var menu = $(this).find('.menu')
-                // var height = menu.innerHeight();
-                // menu.addClass('upward');
-                // menu.css('margin-top', (-1*height) + 'px')
-                menu.show();
-            })
-            .mouseleave(function(){
-                $(this).find('.menu').hide();
-            });
+        scope.$watch(function() {
+            return $rootScope.$btclient;
+        }, function(client) {
+            if (client) {
+                render(scope, element, attr);
+            }
         });
     }
 
