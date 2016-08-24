@@ -8,13 +8,9 @@
             <i class="dropdown huge icon"></i>
             <div class="default text">Program</div>
             <div class="menu">
-                <div class="item" data-value="utorrent">
-                    <i class="torrent big uTorrent icon"></i>
-                    µTorrent
-                </div>
-                <div class="item" data-value="qbittorrent">
-                    <i class="torrent big qBittorrent icon"></i>
-                    qBittorrent
+                <div class="item" ng-repeat="(id, client) in btclients" data-value="{{id}}">
+                    <i class="icon torrent large" ng-class="client.icon"></i>
+                    {{client.name}}
                 </div>
             </div>
         </div>
