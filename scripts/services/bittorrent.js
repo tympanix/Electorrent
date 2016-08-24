@@ -11,6 +11,15 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
         }
     }
 
+    this.changeClient = function(clientName) {
+        var service = this.getClient(clientName);
+        this.setClient(service);
+    }
+
+    this.setClient = function(service) {
+        $rootScope.$btclient = service;
+    }
+
     function fetchClientAuto() {
         var client = config.getServer().type;
         return fetchClientManual(client);
@@ -21,7 +30,6 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
         if (client){
             var service = $injector.get(client.service);
-            $rootScope.$btclient = service;
             console.log("Changed client to:", client.name);
             return service;
         } else {
