@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("settingsController", ["$rootScope", "$scope", "$injector", "$bittorrent", "configService", "notificationService", "electron", function($rootScope, $scope, $injector, $bittorrent, config, $notify, electron) {
+angular.module("torrentApp").controller("settingsController", ["$rootScope", "$scope", "$injector", "$bittorrent", "$btclients", "configService", "notificationService", "electron", function($rootScope, $scope, $injector, $bittorrent, $btclients, config, $notify, electron) {
 
     // External Settings reference
     $scope.settings = {
@@ -13,6 +13,8 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
             resizeMode: ''
         }
     };
+
+    $scope.btclients = $btclients;
 
     // Internal settings reference
     $scope.general = {
