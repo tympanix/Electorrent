@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('actionHeader', ['$compile', 'torrentMiddlewareService', 'electron', function($compile, bittorrent, electron) {
+angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', function($compile, electron) {
 
     var actionHeader = null;
     var toggleAble = [];
@@ -10,7 +10,6 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'torrentMidd
             click: '=',
             labels: '=',
             bind: '=?',
-            click: '=?',
             enabled: '=?'
         },
         compile: compile
@@ -22,7 +21,7 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'torrentMidd
         return link;
     }
 
-    function render(scope, element, attr){
+    function render(scope, element /*, attr*/){
         toggleAble = [];
 
         scope.actions.forEach(function(item){

@@ -1,5 +1,5 @@
 
-angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "torrentMiddlewareService", "electron", "configService", function ($rootScope, $scope, $timeout, $utorrentService, electron, config) {
+angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "$bittorrent", "electron", "configService", function ($rootScope, $scope, $timeout, $bittorrent, electron, config) {
     const PAGE_SETTINGS = 'settings';
     const PAGE_WELCOME = 'welcome';
 
@@ -20,7 +20,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     });
 
     function connectToServer(ip, port, user, password){
-        $utorrentService.connect(ip, port, user, password)
+        $scope.$btclient.connect(ip, port, user, password)
         .then(function(){
             pageTorrents();
             requestMagnetLinks();
@@ -38,7 +38,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     // Listen for incomming magnet links from the main process
     electron.ipc.on('magnet', function(event, data){
         data.forEach(function(magnet){
-            $utorrentService.addTorrentUrl(magnet);
+            $scope.$btclient.addTorrentUrl(magnet);
         })
     })
 
