@@ -14,6 +14,11 @@ torrentApp.constant('clients', {
     }
 });
 
+// Configure the client
+torrentApp.run(["$rootScope", "$bittorrent", function($rootScope, $bittorrent){
+    $rootScope.$btclient = $bittorrent.getClient();
+}]);
+
 // Set application menu
 torrentApp.run(['menuWin', 'menuMac', 'electron', function(menuWin, menuMac, electron){
     var menu = null;
@@ -26,8 +31,4 @@ torrentApp.run(['menuWin', 'menuMac', 'electron', function(menuWin, menuMac, ele
 
     var appMenu = electron.menu.buildFromTemplate(menu);
     electron.menu.setApplicationMenu(appMenu);
-}]);
-
-torrentApp.run(["$rootScope", "$bittorrent", function($rootScope, $bittorrent){
-    $rootScope.$btclient = $bittorrent.getClient();
 }]);

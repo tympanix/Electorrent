@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', function($compile, electron) {
+angular.module("torrentApp").directive('actionHeader', ['$rootScope', '$compile', 'electron', function($rootScope, $compile, electron) {
 
     var actionHeader = null;
     var toggleAble = [];
@@ -24,6 +24,12 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', 
     function render(scope, element /*, attr*/){
         toggleAble = [];
 
+        // Remove existing dom
+        actionHeader.empty();
+
+        console.log("Render now!", scope.actions);
+
+        // Insert new dom elements
         scope.actions.forEach(function(item){
             if (item.type === 'button') {
                 appendButton(element, item, scope);
@@ -39,6 +45,7 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', 
         }, function(disable) {
             toggleActive(disable)
         });
+
     }
 
     function toggleActive(disable) {
@@ -125,6 +132,14 @@ angular.module("torrentApp").directive('actionHeader', ['$compile', 'electron', 
 
         };
 
+        scope.$watch(function() {
+            return $rootScope.$btclient;
+        }, function(client) {
+            console.info("Render this actions header!", client);
+            if (client) {
+                render(scope, element, attr);
+            }
+        });
     }
 
 }]);
