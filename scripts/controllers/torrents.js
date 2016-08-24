@@ -1,10 +1,9 @@
 "use strict";
 
-angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "torrentMiddlewareService", "notificationService", "configService", function ($scope, $timeout, $filter, $log, $utorrentService, $notify, config) {
+angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "$bittorrent", "notificationService", "configService", function ($scope, $timeout, $filter, $log, $bittorrent, $notify, config) {
     const TIMEOUT = 2000;
     const LIMIT = 25;
 
-    var ut = $utorrentService;
     var selected = [];
     var lastSelected = null;
     var timeout;
@@ -18,7 +17,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.torrentLimit = LIMIT;
     $scope.labels = [];
     $scope.resizeMode = settings.ui.resizeMode;
-    $scope.ut = ut;
+    $scope.client = $scope.$btclient;
 
     $scope.filters = {
         status: 'downloading'
@@ -49,7 +48,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     }
 
     $scope.setLabel = function(label){
-        ut.setLabel(getSelectedHashes(), label)
+        $scope.$btclient.setLabel(getSelectedHashes(), label)
             .then(function() {
                 $scope.update();
             })
@@ -174,7 +173,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     }
 
     $scope.update = function() {
-        var q = ut.torrents()
+        var q = $scope.$btclient.torrents()
         q.then(function(torrents){
             newTorrents(torrents);
             deleteTorrents(torrents);

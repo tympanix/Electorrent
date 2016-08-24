@@ -31,32 +31,8 @@
     </div>
 
     <div class="main-panel">
-        <div action-header actions="ut.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
-        <!-- <div class="action header">
-            <a class="ui green labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('start')">
-                <i class="play icon"></i>
-                Start
-            </a>
-            <a class="ui red labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('stop')">
-                <i class="stop icon"></i>
-                Stop
-            </a>
-            <a class="ui yellow labeled icon button" ng-class="{disabled: noneSelected()}" ng-click="doAction('pause')">
-                <i class="pause icon"></i>
-                Pause
-            </a>
-            <div
-                dropdown
-                ref="labelsDrowdown"
-                class="ui icon top left pointing dropdown button"
-                ng-class="{disabled: noneSelected()}">
-                <i class="tag icon"></i>
-                <div class="menu">
-                    <div class="header">Add Label</div>
-                    <div class="item" ng-repeat="(label, value) in labels" ng-click="setLabel(label)">{{label}}</div>
-                </div>
-            </div>
-        </div> -->
+        <div action-header actions="client.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
+        
         <div class="main-content">
             <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
                 <table
@@ -107,5 +83,5 @@
         </div>
     </div>
 
-    <context-menu bind="contextMenu" menu="ut.contextMenu" click="doContextAction" id="contextmenu"></context-menu>
+    <context-menu bind="contextMenu" menu="client.contextMenu" click="doContextAction" id="contextmenu"></context-menu>
 </div>

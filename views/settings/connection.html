@@ -17,18 +17,38 @@
             </div>
         </div>
     </div>
-    <div class="field">
-        <label>Username</label>
-        <div class="ui left icon input">
-            <i class="user icon"></i>
-            <input type="text" name="username" ng-model="settings.server.user" placeholder="Username">
+    <div class="two fields">
+        <div class="field">
+            <label>Username</label>
+            <div class="ui left icon input">
+                <i class="user icon"></i>
+                <input type="text" name="username" ng-model="settings.server.user" placeholder="Username">
+            </div>
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <div class="ui left icon input">
+                <i class="lock icon"></i>
+                <input type="password" name="password" ng-model="settings.server.password" placeholder="Password">
+            </div>
         </div>
     </div>
     <div class="field">
-        <label>Password</label>
-        <div class="ui left icon input">
-            <i class="lock icon"></i>
-            <input type="password" name="password" ng-model="settings.server.password" placeholder="Password">
+        <label>Bittorrent Client</label>
+        <div dropdown bind="settings.server.type" class="ui fluid selection dropdown">
+            <input type="hidden" name="torrentProgram">
+            <i class="dropdown huge icon"></i>
+            <div class="default text">Program</div>
+            <div class="menu">
+                <div class="item" data-value="utorrent">
+                    <i class="torrent big uTorrent icon"></i>
+                    µTorrent
+                </div>
+                <div class="item" data-value="qbittorrent">
+                    <i class="torrent big qBittorrent icon"></i>
+                    qBittorrent
+                </div>
+            </div>
         </div>
     </div>
 </form>
