@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 'clients', 'configService', function($rootScope, $injector, $clients, config){
+angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', '$btclients', 'configService', function($rootScope, $injector, $btclients, config){
     console.log("Config", config.getServer());
 
     this.getClient = function(clientName) {
@@ -27,7 +27,7 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
     }
 
     function fetchClientManual(name) {
-        var client = $clients[name];
+        var client = $btclients[name];
 
         if (client){
             var service = $injector.get(client.service);
