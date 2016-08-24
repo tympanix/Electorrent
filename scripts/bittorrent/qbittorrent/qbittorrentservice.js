@@ -2,6 +2,8 @@
 
 angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource", "$log", "$q", "TorrentQ", "notificationService", "httpFormService", function($http, $resource, $log, $q, Torrent, $notify, httpFormService) {
 
+    this.name = 'qBittorrent';
+
     const boundaryHyphens = 29;
     const hyphen = '-';
     const boundaryUniqueNumber = 6688794727912;

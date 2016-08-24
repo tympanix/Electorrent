@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("settingsController", ["$scope", "$injector", "$bittorrent", "configService", "notificationService", "electron", function($scope, $injector, $bittorrent, config, $notify, electron) {
+angular.module("torrentApp").controller("settingsController", ["$rootScope", "$scope", "$injector", "$bittorrent", "configService", "notificationService", "electron", function($rootScope, $scope, $injector, $bittorrent, config, $notify, electron) {
 
     // External Settings reference
     $scope.settings = {
@@ -40,16 +40,13 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "$injec
 
     function subscribeToMagnets() {
         if ($scope.general.magnets) {
-            console.log("Set handler!");
             electron.app.setAsDefaultProtocolClient('magnet');
         } else {
-            console.log("Remove handler!");
             electron.app.removeAsDefaultProtocolClient('magnet');
         }
     }
 
     $scope.$on('show:settings', function() {
-        console.info("Update settings!")
         loadAllSettings();
     })
 
@@ -84,7 +81,8 @@ angular.module("torrentApp").controller("settingsController", ["$scope", "$injec
             .then(function() {
                 writeSettings();
                 $bittorrent.setClient(btclient);
-                $scope.$emit('emit:new:settings', $scope.settings)
+                $rootScope.$broadcast('new:settings', $scope.settings)
+                //$scope.$emit('emit:new:settings', $scope.settings)
                 $scope.connecting = false;
             })
             .catch(function(err) {

@@ -26,7 +26,8 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.$on('new:settings', function(event, data) {
         console.log("New sttings!", data);
         $scope.resizeMode = data.ui.resizeMode;
-    })
+        resetAll();
+    });
 
     $scope.showMore = function() {
         $scope.torrentLimit += LIMIT;
@@ -58,7 +59,6 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     }
 
     $scope.$on('start:torrents', function(){
-        console.info("Received start torrents!");
         $scope.update();
         startTimer();
     });
@@ -74,6 +74,13 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
                 startTimer();
             });
         }, TIMEOUT);
+    }
+
+    function resetAll() {
+        $scope.torrents = {};
+        $scope.arrayTorrents = [];
+        $scope.labels = [];
+        $scope.update();
     }
 
     function stopTimer(){

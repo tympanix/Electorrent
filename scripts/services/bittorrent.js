@@ -18,6 +18,7 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
     this.setClient = function(service) {
         $rootScope.$btclient = service;
+        console.log("Changed client to:", service.name || "<service missing name>");
     }
 
     function fetchClientAuto() {
@@ -30,7 +31,6 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
         if (client){
             var service = $injector.get(client.service);
-            console.log("Changed client to:", client.name);
             return service;
         } else {
             throw new Error('Bittorrent client "' + client + '" not available')

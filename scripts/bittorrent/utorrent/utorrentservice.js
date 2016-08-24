@@ -3,7 +3,7 @@
 angular.module('torrentApp')
     .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "UtorrentGUI", "notificationService", function($http, $resource, $log, $q, Torrent, uTorrentGUI, $notify) {
 
-        //this.gui = new uTorrentGUI(this);
+        this.name = 'µTorrent';
 
         var data = {
             url: null,
@@ -50,7 +50,6 @@ angular.module('torrentApp')
 
         this.connect = function(ip, port, user, pass) {
             var loading = $q.defer();
-            $log.info('get token');
 
             var encoded = new Buffer(`${user}:${pass}`).toString('base64');
             $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
