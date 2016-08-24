@@ -43,7 +43,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     })
 
     function pageTorrents(){
-        console.info("Show torrents page!");
         $scope.showTorrents = true;
         $scope.$broadcast('start:torrents');
         page = null;
@@ -71,7 +70,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     })
 
     $scope.$on('show:torrents', function(){
-        console.info("#Show torrents!");
         pageTorrents();
     })
 
