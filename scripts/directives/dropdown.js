@@ -5,10 +5,7 @@ angular.module("torrentApp").directive('dropdown', [function() {
         scope: {
             ref: '=?',
             bind: '=?'
-        },
-        transclude: true,
-        replace: true,
-        template: '<div ng-transclude></div>'
+        }
     }
 
     function link(scope, element, attr) {
