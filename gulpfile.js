@@ -40,8 +40,8 @@ gulp.task('build:app', function() {
     .pipe(gulp.dest(OUT));
 });
 
-gulp.task('build:views', function() {
-    return gulp.src(['./views/**/*', './lib/**/*'], { base: './'})
+gulp.task('build:static', function() {
+    return gulp.src(['./views/**/*', './lib/**/*', './css/fonts/**/**'], { base: './'})
     .pipe(gulp.dest(OUT))
 })
 
@@ -51,7 +51,7 @@ gulp.task('build:assets' , function () {
 });
 
 gulp.task('build', function() {
-    runSequence('build:clean', ['build:concat', 'build:app', 'build:assets', 'build:views']);
+    runSequence('build:clean', ['build:concat', 'build:app', 'build:assets', 'build:static']);
 });
 
 gulp.task('pack:win64', ['build'], function(){
