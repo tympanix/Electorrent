@@ -32,10 +32,16 @@ Electorrent can connect to the following bittorrent clients:
 * Automatic silent updates straight from the GitHub repository
 
 ## Screenshots
-
-Torrents Screen              |  Settings Screen
-:---------------------------:|:---------------------------:
-![](assets/screen1-win.png)  | ![](assets/screen2-win.png)
+<p align="center">
+  <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen1-win.png?raw=true">
+    <img src="assets/screen1-win.png" width="75%">
+  </a>
+</p>
+<p align="center">
+  <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen2-win.png?raw=true">
+    <img src="assets/screen2-win.png" width="75%">
+  </a>
+</p> 
 
 ## FAQ
  * **Your program sucks. It doesn't support my bittorrent client**
