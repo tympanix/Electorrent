@@ -1,6 +1,7 @@
-angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeout", "utorrentService", "electron", "configService", "notificationService", function ($scope, $timeout, $utorrentService, electron, config, $notify) {
+angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeout", "$bittorrent", "$btclients", "electron", "configService", "notificationService", function ($scope, $timeout, $bittorrent, $btclients, electron, config, $notify) {
 
     $scope.connecting = false;
+    $scope.btclients = $btclients;
 
     $scope.connect = function() {
         $scope.connecting = true;
@@ -9,11 +10,20 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
         var port = $scope.port || '';
         var user = $scope.username || '';
         var password = $scope.password || '';
+        var client = $scope.client || '';
 
-        $utorrentService.connect(ip, port, user, password).then(function() {
+        var btclient = $bittorrent.getClient(client);
+
+        if (!btclient) {
+            $notify.alert("Opps!", "Please select a client to connect to!")
+            $scope.connecting = false;
+            return;
+        }
+
+        btclient.connect(ip, port, user, password).then(function() {
             $timeout(function(){
-                saveServer(ip, port, user, password);
-                $notify.ok("Success!", "Hooray! Welcome to Electorrent")
+                $bittorrent.setClient(btclient);
+                saveServer(ip, port, user, password, client);
             }, 500)
         }).catch(function(err) {
             $timeout(function(){
@@ -23,13 +33,15 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
         })
     }
 
-    function saveServer(ip, port, username, password){
-        config.saveServer(ip, port, username, password)
+    function saveServer(ip, port, username, password, client){
+        config.saveServer(ip, port, username, password, client)
         .then(function(){
             $scope.$emit('show:torrents');
+            $notify.ok("Success!", "Hooray! Welcome to Electorrent")
         })
         .catch(function(){
             $scope.connecting = false;
+            $notify.alert("Oops!", "Could not save settings?!")
         })
     }
 

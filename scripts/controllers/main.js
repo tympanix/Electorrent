@@ -9,6 +9,11 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     $rootScope.$on('ready', function() {
         electron.updater.checkForUpdates();
 
+        if (!$scope.$btclient) {
+            pageWelcome();
+            return;
+        }
+
         var data = config.getServer()
         if (data){
             console.log("Connect", data);
