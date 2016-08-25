@@ -22,12 +22,12 @@ angular.module("torrentApp").directive('actionHeader', ['$rootScope', '$compile'
     }
 
     function render(scope, element /*, attr*/){
+        if (!scope.actions) return;
+
         toggleAble = [];
 
         // Remove existing dom
         actionHeader.empty();
-
-        console.log("Render now!", scope.actions);
 
         // Insert new dom elements
         scope.actions.forEach(function(item){
@@ -135,7 +135,6 @@ angular.module("torrentApp").directive('actionHeader', ['$rootScope', '$compile'
         scope.$watch(function() {
             return $rootScope.$btclient;
         }, function(client) {
-            console.info("Render this actions header!", client);
             if (client) {
                 render(scope, element, attr);
             }

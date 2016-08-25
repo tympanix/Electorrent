@@ -18,8 +18,9 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
         return link;
     }
 
-    function render(scope, element, attr){
-        console.log("Menu", scope.menu);
+    function render(scope, element /*, attr*/){
+        if (!scope.menu) return;
+
         element.empty();
 
         var list = angular.element('<div class="ui vertical menu"></div>');
@@ -35,7 +36,7 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
         });
 
         bindMenuActions(element);
-        
+
     }
 
     function appendMenuItem(element, item, scope) {

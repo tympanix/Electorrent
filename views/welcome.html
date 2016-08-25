@@ -12,12 +12,13 @@
                     <div class="two fields">
                         <div class="field">
                             <div class="ui left icon input">
-                                <i class="sitemap icon"></i>
+                                <i class="world icon"></i>
                                 <input type="text" name="ip" ng-model="ip" placeholder="IP Address">
                             </div>
                         </div>
                         <div class="field">
-                            <div class="ui input">
+                            <div class="ui left icon input">
+                                <i class="sitemap icon"></i>
                                 <input type="number" name="port" ng-model="port" placeholder="Port">
                             </div>
                         </div>
@@ -33,6 +34,14 @@
                             <i class="lock icon"></i>
                             <input type="password" name="password" ng-model="password" placeholder="Password">
                         </div>
+                    </div>
+                    <div class="field">
+                        <dropdown title="Client Program" ng-model="client">
+                            <dropdown-group value="id" title="client.name" ng-repeat="(id, client) in btclients">
+                                <i class="icon torrent large" ng-class="client.icon"></i>
+                                {{client.name}}
+                            </dropdown-group>
+                        </dropdown>
                     </div>
 
                     <button class="ui fluid large green labeled icon submit button">

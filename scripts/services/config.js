@@ -36,7 +36,7 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
         return q.promise;
     }
 
-    this.saveServer = function(ip, port, user, password){
+    this.saveServer = function(ip, port, user, password, client){
         if (arguments.length === 1){
             return put('server', arguments[0]);
         } else {
@@ -44,7 +44,8 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
                 ip: ip,
                 port: port,
                 user: user,
-                password: password
+                password: password,
+                type: client
             })
         }
     }
