@@ -33,6 +33,11 @@ Electorrent can connect to the following bittorrent clients:
 
 ## Screenshots
 <p align="center">
+  <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen0-win.png?raw=true">
+    <img src="assets/screen0-win.png" width="75%">
+  </a>
+</p>
+<p align="center">
   <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen1-win.png?raw=true">
     <img src="assets/screen1-win.png" width="75%">
   </a>
