@@ -55,7 +55,8 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
                 defer.reject('Wrong username/password');
             }
         })
-        .catch(function() {
+        .catch(function(err, status) {
+            $notify.alertAuth(err, status);
             defer.reject('Could not connect to qBittorrent');
         });
 
