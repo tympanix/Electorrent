@@ -12,7 +12,12 @@
 </p>
 
 # Electorrent
-An Electron/Node/AngularJS remote client app for uTorrent server
+No more! Stop copy/pasting magnet links and uploading torrent files through a tedious webinterface. Electorrent is your new dekstop remote torrenting application. Remote control your NAS, VPS, seedbox - you name it.
+
+## Support
+Electorrent can connect to the following bittorrent clients:
+* [µTorrent](http://www.utorrent.com/)
+* [qBittorrent](http://www.qbittorrent.org/)
 
 ## Downloads
 *Please note: I do not own code signing certificates which may results in anti-virus warnings!*
@@ -21,25 +26,27 @@ An Electron/Node/AngularJS remote client app for uTorrent server
 * [Linux/debian](https://electorrent.herokuapp.com/download/linux)
 
 ## Features
-* Connects to µTorrent WebUI with IP address/port and username/password
+* Connects to your favorite torrent client
 * Handles the magnet link protocol for easy integration
 * Easy one click installer using Squirrel framework
 * Automatic silent updates straight from the GitHub repository
 
 ## Screenshots
-
-Torrents Screen              |  Settings Screen
-:---------------------------:|:---------------------------:
-![](assets/screen1-win.png)  | ![](assets/screen2-win.png)
+<p align="center">
+  <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen1-win.png?raw=true">
+    <img src="assets/screen1-win.png" width="75%">
+  </a>
+</p>
+<p align="center">
+  <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen2-win.png?raw=true">
+    <img src="assets/screen2-win.png" width="75%">
+  </a>
+</p> 
 
 ## FAQ
- * **Can I use this program with a normal installation of µTorrent?**
+ * **Your program sucks. It doesn't support my bittorrent client**
  
- Yes. You can enable the WebUI in the µTorrent settings and connect to localhost to try it out
- 
- * **Why doesn't automatic updates on MacOS work?**
- 
- Unfortunately, this requires me to sign the code with a expensive certificate which I can't afford
+ What an opportunity! Now open an issue telling me which bittorrent client you would like to see next :)
  
  * **What kind of technologies are used to build this?**
  
