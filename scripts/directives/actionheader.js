@@ -74,6 +74,7 @@ angular.module("torrentApp").directive('actionHeader', ['$rootScope', '$compile'
             option.append(action.label);
 
             option.bind('click', function() {
+                console.log("Click!");
                 scope.click(action.click, action.label)
             })
 
