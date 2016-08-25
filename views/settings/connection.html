@@ -3,17 +3,12 @@
 <form class="ui form" id="loginForm" ng-class="{loading: connecting}" onsubmit="return false;">
     <div class="field">
         <label>Bittorrent Client</label>
-        <div dropdown bind="settings.server.type" class="ui fluid selection dropdown">
-            <input type="hidden" name="torrentProgram">
-            <i class="dropdown huge icon"></i>
-            <div class="default text">Program</div>
-            <div class="menu">
-                <div class="item" ng-repeat="(id, client) in btclients" data-value="{{id}}">
-                    <i class="icon torrent large" ng-class="client.icon"></i>
-                    {{client.name}}
-                </div>
-            </div>
-        </div>
+        <dropdown title="Client Program" ng-model="settings.server.type">
+            <dropdown-group value="id" title="client.name" ng-repeat="(id, client) in btclients">
+                <i class="icon torrent large" ng-class="client.icon"></i>
+                {{client.name}}
+            </dropdown-group>
+        </dropdown>
     </div>
     <div class="two fields">
         <div class="field ten wide">

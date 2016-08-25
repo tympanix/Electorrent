@@ -22,16 +22,11 @@
     <!-- Table resize style -->
     <div class="item">
         <div class="right floated middle aligned content">
-            <div dropdown bind="settings.ui.resizeMode" class="ui selection dropdown">
-                <input type="hidden" name="resizeMode">
-                <i class="dropdown icon"></i>
-                <div class="default text">Resize Mode</div>
-                <div class="menu">
-                    <div class="item" data-value="FixedResizer">Fixed</div>
-                    <div class="item" data-value="OverflowResizer">Overflow</div>
-                    <div class="item" data-value="BasicResizer">Basic</div>
-                </div>
-            </div>
+            <dropdown title="Resize Mode" ng-model="settings.ui.resizeMode">
+                <dropdown-group data-value="FixedResizer">Fixed</dropdown-group>
+                <dropdown-group data-value="OverflowResizer">Overflow</dropdown-group>
+                <dropdown-group data-value="BasicResizer">Basic</dropdown-group>
+            </dropdown>
         </div>
         <i class="large expand middle aligned icon"></i>
         <div class="middle aligned content">

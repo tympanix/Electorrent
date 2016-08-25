@@ -5,7 +5,10 @@ angular.module("torrentApp").directive('dropdown', [function() {
         scope: {
             ref: '=?',
             bind: '=?'
-        }
+        },
+        transclude: true,
+        replace: true,
+        template: '<div ng-transclude></div>'
     }
 
     function link(scope, element, attr) {
@@ -29,7 +32,9 @@ angular.module("torrentApp").directive('dropdown', [function() {
         scope.$watch(function() {
             return scope.bind;
         }, function(newValue) {
-            $(element).dropdown('set selected', newValue);
+            if (newValue) {
+                $(element).dropdown('set selected', newValue);
+            }
         });
 
         function onChange(value /*, text, choice*/){
@@ -38,13 +43,38 @@ angular.module("torrentApp").directive('dropdown', [function() {
             }
         }
 
-    }
+        // scope.$on('update:dropdown', function() {
+        //     console.log("UPDATING DROPDOWN!");
+        // });
 
+    }
 
     function doAction(element, action) {
         return function(param) {
             $(element).dropdown(action, param);
         }
     }
+
+}]);
+
+angular.module("torrentApp").directive('dropItem', [function() {
+    return {
+        restrict: 'A',
+        link: link
+    }
+
+    function link(scope, element, attr) {
+        console.log("Item", attr.value, scope);
+        if (scope.bind === attr.value){
+            var dropdown = $(element).closest('.dropdown');
+            dropdown.dropdown('set selected', attr.value);
+        }
+
+        if (scope.$last) {
+            console.log("Last item", attr.value);
+            scope.$emit('update:dropdown');
+        }
+    }
+
 
 }]);
