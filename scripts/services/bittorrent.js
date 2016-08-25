@@ -1,7 +1,6 @@
 'use strict';
 
 angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', '$btclients', 'configService', function($rootScope, $injector, $btclients, config){
-    console.log("Config", config.getServer());
 
     this.getClient = function(clientName) {
         if (clientName) {
@@ -33,8 +32,7 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
             var service = $injector.get(client.service);
             return service;
         } else {
-            console.error('Bittorrent client "' + client + '" not available');
-            //throw new Error('Bittorrent client "' + client + '" not available')
+            console.error('Bittorrent client "' + name + '" not available');
         }
     }
 }]);
