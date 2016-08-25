@@ -16,7 +16,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
         var data = config.getServer()
         if (data){
-            console.log("Connect", data);
             connectToServer(data.ip, data.port, data.user, data.password);
         } else {
             // First time starting application
