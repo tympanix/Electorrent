@@ -52,6 +52,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
                 saveConnection(ip, port);
                 defer.resolve('qBittorrent login successfull');
             } else {
+                $notify.alert("Opps!", "Wrong username/password");
                 defer.reject('Wrong username/password');
             }
         })

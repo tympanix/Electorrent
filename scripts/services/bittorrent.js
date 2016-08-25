@@ -33,7 +33,8 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
             var service = $injector.get(client.service);
             return service;
         } else {
-            throw new Error('Bittorrent client "' + client + '" not available')
+            console.error('Bittorrent client "' + client + '" not available');
+            //throw new Error('Bittorrent client "' + client + '" not available')
         }
     }
 }]);
