@@ -4,6 +4,8 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     const PAGE_WELCOME = 'welcome';
 
     $scope.showTorrents = false;
+    $scope.showLoading = true;
+    $scope.statusText = "Loading";
     var page = null;
 
     $rootScope.$on('ready', function() {
@@ -24,6 +26,8 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     });
 
     function connectToServer(ip, port, user, password){
+        $scope.statusText = "Connecting to " + $scope.$btclient.name;
+
         $scope.$btclient.connect(ip, port, user, password)
         .then(function(){
             pageTorrents();
@@ -48,11 +52,13 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     function pageTorrents(){
         $scope.showTorrents = true;
+        $scope.showLoading = false;
         $scope.$broadcast('start:torrents');
         page = null;
     }
 
     function pageSettings(settingsPage){
+        $scope.showLoading = false;
         if (settingsPage){
             $scope.$broadcast('settings:page', settingsPage);
         }
@@ -60,6 +66,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     }
 
     function pageWelcome(){
+        $scope.showLoading = false;
         page = PAGE_WELCOME;
     }
 
