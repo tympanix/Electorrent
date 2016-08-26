@@ -14,6 +14,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
     const httpform = {
         withCredentials: true,
         transformRequest: httpFormService,
+        timeout: 5000,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         }
