@@ -36,6 +36,13 @@
                 <div ng-include="'./views/torrents.html'"></div>
             </div>
 
+            <!-- Loading Spinner -->
+            <div ng-if="showLoading">
+                <div class="ui active inverted dimmer">
+                    <div class="ui huge text loader">{{statusText}}</div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Dependencies -->
