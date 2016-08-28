@@ -10,17 +10,17 @@ const {app} = electron;
 const {BrowserWindow} = electron;
 const {ipcMain} = electron;
 
-// Custom modules
-const config = require('./lib/config');
-const updater = require('./lib/update');
-const logger = require('./lib/logger');
-
 // Set up program arguments
 yargs.version(() => { return app.getVersion() })
 yargs.help('h').alias('h', 'help')
 yargs.usage(`Electorrent ${app.getVersion()}`)
 yargs.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
 yargs.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
+
+// Custom modules
+const config = require('./lib/config');
+const updater = require('./lib/update');
+const logger = require('./lib/logger');
 
 // Log startup information
 logger.debug('Starting Electorrent in debug mode');
