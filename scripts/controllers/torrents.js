@@ -96,6 +96,19 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         refreshTorrents();
     }
 
+    $scope.filterByLabel = function(label){
+        console.log("Filter by label", label);
+        deselectAll();
+        lastSelected = null;
+        $scope.filters.label = label;
+        $scope.torrentLimit = LIMIT;
+        refreshTorrents();
+    }
+
+    $scope.activeLabel = function(label) {
+        return $scope.filters.label === label;
+    }
+
     $scope.showContextMenu = function(event, torrent /*, index*/) {
         if (!torrent.selected){
             singleSelect(torrent);
@@ -106,8 +119,10 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
 
     $scope.numInFilter = function(status) {
         var num = 0;
+        var filter = torrentFilter(status);
+
         angular.forEach($scope.torrents, function(torrent /*, hash*/) {
-            if (statusFilter(torrent, status)){
+            if (filter(torrent)) {
                 num++;
             }
         });
@@ -246,11 +261,24 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
         }
     }
 
-    function torrentFilter(){
+    function torrentFilter(status, label){
+        var filterStatus = status || $scope.filters.status;
+        var filterLabel = label || $scope.filters.label;
+
         return function(torrent){
-            if ($scope.filters.status) {
-                return statusFilter(torrent, $scope.filters.status);
+            var keep = [];
+
+            if (filterStatus) {
+                keep.push(statusFilter(torrent, filterStatus));
             }
+
+            if (filterLabel) {
+                keep.push(torrent.label === filterLabel)
+            }
+
+            return keep.every(function(shouldkeep) {
+                return shouldkeep;
+            });
         }
     }
 
