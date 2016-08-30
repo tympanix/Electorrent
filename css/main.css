@@ -26,7 +26,7 @@ html, body {
     overflow-x: hidden;
     border-right: 1px solid #CECECE;
 }
-.sidebar+ div {
+.sidebar + div {
     position: relative;
     z-index: 2;
     float: right;
@@ -54,6 +54,42 @@ html, body {
 }
 .sidebar .nav li:hover {
     background: #F5F5F5 !important;
+}
+.sidebar .nav + .divider {
+    margin-top: 0;
+}
+.sidebar .section {
+    padding: 12px;
+    padding-left: 24px;
+    padding-right: 24px;
+    /*background-color: #F5F5F5;*/
+    border-top: 1px solid #CECECE;
+    border-bottom: 1px solid #CECECE;
+    font-weight: 700;
+    font-style: normal;
+
+}
+.sidebar .filter.label {
+    margin: 0px;
+    padding: 25px;
+    padding-top: 12px;
+    padding-right: 50px;
+}
+.sidebar .filter.label li {
+    margin: 5px;
+    list-style-type: none;
+    cursor: pointer;
+}
+.torrent.tag {
+    background color: #F5F5F5;
+}
+.torrent.tag .detail {
+    float: right;
+}
+.clear.button {
+    float: right;
+    border-radius: 100px !important;
+    margin: -4px;
 }
 .main-panel {
     background: rgba(247, 247, 248, 1);
@@ -129,7 +165,7 @@ html, body {
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
 }
-.torrent.label {
+.torrent.sort.label {
     float: right;
     border-radius: 25px;
 }
