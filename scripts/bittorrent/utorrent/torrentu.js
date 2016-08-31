@@ -165,7 +165,7 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
         return(this.percent === 1000);
     };
     TorrentU.prototype.isStatusDownloading = function() {
-        return this.getStatusFlag(64);
+        return this.getStatusFlag(64) && this.percent !== 1000;
     };
     TorrentU.prototype.isStatusSeeding = function() {
         return this.isStatusStarted() && (this.isStatusCompleted());
