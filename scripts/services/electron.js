@@ -9,8 +9,9 @@ angular.module('torrentApp').factory("electron", [function() {
     o.shell             = require('electron').shell;
 
     //Remote moudles from main process
+    o.remote            = remote;
     o.app               = remote.app;
-    o.browserWindow     = remote.browserWindow;
+    o.browserWindow     = remote.BrowserWindow;
     o.clipboard         = remote.clipboard;
     o.dialog            = remote.dialog;
     o.menu              = remote.Menu;
@@ -28,6 +29,9 @@ angular.module('torrentApp').factory("electron", [function() {
     o.updater           = remote.require('./lib/update.js');
     o.is                = remote.require('electron-is');
     o.program           = remote.require('yargs').argv;
+    o.request           = remote.require('request');
+    o.fs                = remote.require('fs');
+    o.upload            = remote.require('./lib/upload.js')
 
     // Return object
     return o;
