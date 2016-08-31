@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('torrentApp')
-    .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "UtorrentGUI", "notificationService", function($http, $resource, $log, $q, Torrent, uTorrentGUI, $notify) {
+    .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "notificationService", function($http, $resource, $log, $q, Torrent, $notify) {
 
         this.name = 'µTorrent';
 
