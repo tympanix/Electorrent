@@ -9,7 +9,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     var page = null;
 
     $rootScope.$on('ready', function() {
-        //electron.updater.checkForUpdates();
+        electron.updater.checkForUpdates();
 
         if (!$scope.$btclient) {
             pageWelcome();
