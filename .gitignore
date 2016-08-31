@@ -93,3 +93,6 @@ app
 
 # Vagrant folder
 .vagrant
+
+# Visual Studio code
+.vscode
