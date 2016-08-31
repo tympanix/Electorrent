@@ -2,6 +2,25 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', funct
 
     const template = [
         {
+            label: 'File',
+            submenu: [
+                {
+                    label: "Add Torrent...",
+                    accelerator: "CmdOrCtrl+O",
+                    click: function() {
+                        electron.upload();
+                    }
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Exit',
+                    role: 'quit'
+                }
+            ]
+        },
+        {
             label: 'Edit',
             submenu: [
                 {

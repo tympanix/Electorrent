@@ -50,6 +50,18 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         })
     })
 
+    // Listen for incomming torrent files from the main process
+    electron.ipc.on('torrentfiles', function uploadTorrent(event, buffer, filename){
+        console.log("Got torrent file!");
+        var torrent = new Blob([buffer], {type : 'application/x-bittorrent'})
+        $scope.$btclient.uploadTorrent(torrent, filename)
+            .then(function(data) {
+                console.log("Upload", data);
+            }).catch(function(err) {
+                console.error("Error", err);
+            })
+    })
+
     function pageTorrents(){
         $scope.showTorrents = true;
         $scope.showLoading = false;

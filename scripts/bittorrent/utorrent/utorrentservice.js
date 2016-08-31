@@ -81,6 +81,20 @@ angular.module('torrentApp')
             }).get().$promise;
         }
 
+        this.uploadTorrent = function(blob, filename, dir, path) {
+            var url = data.url + '?token=' + data.token + '&action=add-file&download_dir=' + encodeURIComponent(dir) + '&path=' + encodeURIComponent(path);
+
+            var formData = new FormData();
+            formData.append('torrent_file', blob, filename);
+
+            return $http.post(url , formData, {
+                headers: { 'Content-Type': undefined },
+                transformRequest: function(data) {
+                    return data;
+                }
+            });
+        }
+
         this.torrents = function() {
             var ret = $q.defer();
             var torrents = {
