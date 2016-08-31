@@ -5,7 +5,7 @@
   "description": "An Electron/Node/AngularJS remote client app for uTorrent server",
   "main": "app.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron --debug .",
     "build": "gulp build",
     "install": "bower install",
     "postinstall": "install-app-deps",
