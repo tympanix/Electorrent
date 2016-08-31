@@ -96,7 +96,7 @@ app.on('open-url', function(event, url) {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', function(){
+app.on('ready', function() {
     createTorrentWindow();
     updater.initialise(torrentWindow);
 });

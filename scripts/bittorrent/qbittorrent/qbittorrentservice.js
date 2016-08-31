@@ -181,6 +181,18 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return $http.post(url('/command/setCategory'), { hashes: hashes, category: category }, httpform)
     }
 
+    this.uploadTorrent = function(blob, filename) {
+        var formData = new FormData();
+        formData.append('torrents', blob, filename);
+
+        return $http.post(url('/command/upload') , formData, {
+            headers: { 'Content-Type': undefined },
+            transformRequest: function(data) {
+                return data;
+            }
+        });
+    }
+
     function httpPostTorrentData(magnet) {
         var r = [];
         r.push(httpBoundary);
