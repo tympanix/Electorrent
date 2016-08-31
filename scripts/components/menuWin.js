@@ -15,6 +15,16 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', funct
                     type: 'separator'
                 },
                 {
+                    label: 'Settings',
+                    accelerator: 'Ctrl+,',
+                    click: function() {
+                        $rootScope.$broadcast('show:settings');
+                    }
+                },
+                {
+                    type: 'separator'
+                },
+                {
                     label: 'Exit',
                     role: 'quit'
                 }
@@ -32,16 +42,6 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', funct
                     label: 'Redo',
                     accelerator: 'Shift+CmdOrCtrl+Z',
                     role: 'redo'
-                },
-                {
-                    type: 'separator'
-                },
-                {
-                    label: 'Settings',
-                    accelerator: 'Ctrl+,',
-                    click: function() {
-                        $rootScope.$broadcast('show:settings');
-                    }
                 },
                 {
                     type: 'separator'
