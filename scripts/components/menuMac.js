@@ -52,6 +52,18 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', funct
             ]
         },
         {
+            label: 'File',
+            submenu: [
+                {
+                    label: "Add Torrent...",
+                    accelerator: "CmdOrCtrl+O",
+                    click: function() {
+                        electron.upload();
+                    }
+                }
+            ]
+        },
+        {
             label: 'Edit',
             submenu: [
                 {
