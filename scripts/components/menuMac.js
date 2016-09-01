@@ -60,7 +60,15 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', funct
                     click: function() {
                         electron.upload();
                     }
-                }
+                },
+                {
+                    label: "Paste Torrent URL...",
+                    accelerator: "CmdOrCtrl+I",
+                    click: function() {
+                        var magnet = electron.clipboard.readText();
+                        $rootScope.$btclient.addTorrentUrl(magnet);
+                    }
+                },
             ]
         },
         {
