@@ -47,6 +47,12 @@
         <div action-header actions="$btclient.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
 
         <div class="main-content">
+            <div ng-if="showDragAndDrop" class="popup">
+                <h2 class="ui center aligned icon header">
+                    <i class="add circle icon"></i>
+                    Upload Torrent Files
+                </h2>
+            </div>
             <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
                 <table
                     id="torrentTable"
