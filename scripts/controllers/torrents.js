@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeout", "$filter", "$log", "$bittorrent", "notificationService", "configService", function ($scope, $timeout, $filter, $log, $bittorrent, $notify, config) {
+angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$log", "$bittorrent", "notificationService", "configService", function ($rootScope, $scope, $timeout, $filter, $log, $bittorrent, $notify, config) {
     const TIMEOUT = 2000;
     const LIMIT = 25;
 
@@ -13,6 +13,7 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.torrents = {};
     $scope.arrayTorrents = [];
     $scope.contextMenu = null;
+    $scope.showDragAndDrop = false;
     $scope.labelsDrowdown = null;
     $scope.torrentLimit = LIMIT;
     $scope.labels = [];
@@ -22,6 +23,12 @@ angular.module("torrentApp").controller("torrentsController", ["$scope", "$timeo
     $scope.filters = {
         status: 'downloading'
     };
+
+    $rootScope.$on('show:draganddrop', function(event, show) {
+        console.log("GOT SHOW DAD");
+        $scope.showDragAndDrop = show;
+        $scope.$apply();
+    })
 
     $scope.$on('new:settings', function(event, data) {
         console.log("New sttings!", data);
