@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('dragAndDrop', [function() {
+angular.module("torrentApp").directive('dragAndDrop', ['electron', function(electron) {
     return function(scope, element, attrs) {
 
         document.ondragover = document.ondrop = function(event) {
@@ -13,6 +13,8 @@ angular.module("torrentApp").directive('dragAndDrop', [function() {
             for (var i = 0; i < files.length; i++) {
                 paths.push(files.item(i).path);
             }
+
+            electron.upload(paths);
 
             console.log("Paths", paths);
 
