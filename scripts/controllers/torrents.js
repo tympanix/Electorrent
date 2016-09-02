@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$log", "$bittorrent", "notificationService", "configService", function ($rootScope, $scope, $timeout, $filter, $log, $bittorrent, $notify, config) {
+angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$log", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $log, $bittorrent, $notify, config, AbstractTorrent) {
     const TIMEOUT = 2000;
     const LIMIT = 25;
 
@@ -250,10 +250,30 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         return results;
     }
 
+    $scope.changeSorting = function(sortName, descending) {
+        $scope.filters.sort = sortName;
+        $scope.filters.order = descending;
+        refreshTorrents();
+    }
+
     function torrentSorter(){
-        return function(a, b){
-            return b.dateAdded - a.dateAdded;
-        };
+        var sort = $scope.filters.sort || 'dateAdded';
+        var desc = $scope.filters.order;
+
+        var sorter = AbstractTorrent.sort(sort);
+
+        console.log("Sort", sort, desc, sorter);
+
+        var descSort = function(a, b) {
+            return sorter(a[sort], b[sort]);
+        }
+
+        var ascSort = function(a, b) {
+            return sorter(a[sort], b[sort]) * (-1);
+        }
+
+        if (desc) return descSort
+        else return ascSort
     }
 
     function statusFilter(torrent, status) {
