@@ -21,6 +21,7 @@ yargs.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
 const config = require('./lib/config');
 const updater = require('./lib/update');
 const logger = require('./lib/logger');
+const electorrent = require('./lib/electorrent');
 
 // Log startup information
 logger.debug('Starting Electorrent in debug mode');
@@ -40,6 +41,7 @@ function createTorrentWindow() {
 
     torrentWindow.once('ready-to-show', () => {
         torrentWindow.show();
+        electorrent.setWindow(torrentWindow);
     });
 
     torrentWindow.loadURL(`file://${__dirname}/index.html`);
