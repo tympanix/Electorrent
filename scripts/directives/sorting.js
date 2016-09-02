@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('sorting', [function() {
+angular.module("torrentApp").directive('sorting', ['configService', function(config) {
 
     var $last;
     var $sort;
