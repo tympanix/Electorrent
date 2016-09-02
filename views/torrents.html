@@ -48,10 +48,12 @@
 
         <div class="main-content">
             <div ng-if="showDragAndDrop" class="popup">
-                <h2 class="ui center aligned icon header">
-                    <i class="add circle icon"></i>
-                    Upload Torrent Files
-                </h2>
+                <div class="content">
+                    <h2 class="ui center aligned icon header">
+                        <i class="add circle icon"></i>
+                        Upload Torrent Files
+                    </h2>
+                </div>
             </div>
             <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
                 <table
