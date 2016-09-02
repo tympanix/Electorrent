@@ -139,12 +139,36 @@ html, body {
     margin: 0;
     border: none;
 }
+
 .value {
     padding: 0 .7em;
 }
+
+.sorting.icon {
+    position: absolute;
+    right: 5px;
+}
+
+.ui.table thead th {
+    cursor: default !important;
+}
+
+.torrent.table thead th.sortup,
+.torrent.table thead th.sortdown {
+    padding-right: 25px !important;
+}
+
+.torrent.table thead th.sortdown i::before {
+    content: "\f078"; /* Arrow down icon */
+}
+
+.torrent.table thead th.sortup i::before {
+    content: "\f077"; /* Arrow up icon */
+}
+
 .torrent.table tbody tr {
     cursor: default;
-    -webkit-user-select: none;
+    -webkit-user-select: none !important;
 }
 .torrent.progress {
     margin: 0 !important;

@@ -45,7 +45,6 @@
 
     <div class="main-panel">
         <div action-header actions="$btclient.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
-
         <div class="main-content">
             <div ng-if="showDragAndDrop" class="popup">
                 <div class="content">
@@ -62,14 +61,14 @@
                     mode="resizeMode"
                     container=".main-content"
                     class="ui single line unstackable selectable fixed compact torrent resize table">
-                    <thead>
+                    <thead sorting="changeSorting">
                         <tr>
-                            <th id="colName">Name</th>
-                            <th id="colSize">Size</th>
-                            <th id="colDownSpeed">Download</th>
-                            <th id="colProgress">Progress</th>
-                            <th id="colLabel">Label</th>
-                            <th id="colAdded">Date Added</th>
+                            <th id="colName" sort="decodedName">Name</th>
+                            <th id="colSize" sort="size">Size</th>
+                            <th id="colDownSpeed" sort="downloadSpeed">Download</th>
+                            <th id="colProgress" sort="percent">Progress</th>
+                            <th id="colLabel" sort="label">Label</th>
+                            <th id="colAdded" sort="dateAdded">Date Added</th>
                         </tr>
                     </thead>
                     <tbody>
