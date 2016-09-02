@@ -58,7 +58,6 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
 
         AbstractTorrent.call(this, {
             hash: hash,
-            status: status,
             name: name,
             size: size,
             percent: percent,
@@ -73,20 +72,22 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
             peersInSwarm: peersInSwarm,
             seedsConnected: seedsConnected,
             seedsInSwarm: seedsInSwarm,
-            availability: (availability / 65536).toFixed(1),
             torrentQueueOrder: torrentQueueOrder,
-            remaining: remaining,
-            downloadUrl: downloadUrl,
-            rssFeedUrl: rssFeedUrl,
             statusMessage: statusMessage,
-            streamId: streamId,
             dateAdded: dateAdded * 1000,
             dateCompleted: dateCompleted * 100,
-            appUpdateUrl: appUpdateUrl,
-            savePath: savePath,
-            additionalData: additionalData}
+            savePath: savePath}
         );
 
+        this.status = status;
+        this.availability = (availability / 65536).toFixed(1);
+        this.remaining = remaining;
+        this.downloadUrl = downloadUrl;
+        this.streamId = streamId;
+        this.rssFeedUrl = rssFeedUrl;
+        this.appUpdateUrl = appUpdateUrl;
+        this.additionalData = additionalData;
+        
     }
 
     // Inherit by prototypal inheritance

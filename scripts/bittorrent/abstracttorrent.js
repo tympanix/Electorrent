@@ -45,7 +45,6 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
      */
     function AbstractTorrent({
         hash,
-        status,
         name,
         size,
         percent,
@@ -60,25 +59,17 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
         peersInSwarm,
         seedsConnected,
         seedsInSwarm,
-        availability,
         torrentQueueOrder,
-        remaining,
-        downloadUrl,
-        rssFeedUrl,
         statusMessage,
-        streamId,
         dateAdded,
         dateCompleted,
-        appUpdateUrl,
-        savePath,
-        additionalData
+        savePath
     }) {
 
         this.selected = false;
         this.isStarred = false;
 
         this.hash = hash;
-        this.status = status;
         this.name = name;
         this.size = size;
         this.percent = percent;
@@ -93,18 +84,11 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
         this.peersInSwarm = peersInSwarm;
         this.seedsConnected = seedsConnected;
         this.seedsInSwarm = seedsInSwarm;
-        this.availability = availability;
         this.torrentQueueOrder = torrentQueueOrder;
-        this.remaining = remaining;
-        this.downloadUrl = downloadUrl;
-        this.rssFeedUrl = rssFeedUrl;
         this.statusMessage = statusMessage;
-        this.streamId = streamId;
         this.dateAdded = dateAdded;
         this.dateCompleted = dateCompleted;
-        this.appUpdateUrl = appUpdateUrl;
         this.savePath = savePath;
-        this.additionalData = additionalData;
 
         this.decodedName = decodeName(this.name);
         this.cleanedName = cleanName(this.decodedName);
@@ -139,18 +123,7 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
         return link;
     };
 
-    AbstractTorrent.prototype.isStatusStarted = function() {
-        throw new Error('isStatusStarted not implemented');
-    };
-    AbstractTorrent.prototype.isStatusChecking = function() {
-        throw new Error('isStatusChecking not implemented');
-    };
-    AbstractTorrent.prototype.isStatusStartAfterCheck = function() {
-        throw new Error('isStatusStartAfterCheck not implemented');
-    };
-    AbstractTorrent.prototype.isStatusChecked = function() {
-        throw new Error('isStatusChecked not implemented');
-    };
+
     AbstractTorrent.prototype.isStatusError = function() {
         throw new Error('isStatusError not implemented');
     };
@@ -159,9 +132,6 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
     };
     AbstractTorrent.prototype.isStatusQueued = function() {
         throw new Error('isStatusQueued not implemented');
-    };
-    AbstractTorrent.prototype.isStatusLoaded = function() {
-        throw new Error('isStatusLoaded not implemented');
     };
     AbstractTorrent.prototype.isStatusCompleted = function() {
         throw new Error('isStatusCompleted not implemented');
