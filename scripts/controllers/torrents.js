@@ -25,13 +25,11 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     };
 
     $rootScope.$on('show:draganddrop', function(event, show) {
-        console.log("GOT SHOW DAD");
         $scope.showDragAndDrop = show;
         $scope.$apply();
     })
 
     $scope.$on('new:settings', function(event, data) {
-        console.log("New sttings!", data);
         $scope.resizeMode = data.ui.resizeMode;
         resetAll();
     });
@@ -261,8 +259,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         var desc = $scope.filters.order;
 
         var sorter = AbstractTorrent.sort(sort);
-
-        console.log("Sort", sort, desc, sorter);
 
         var descSort = function(a, b) {
             return sorter(a[sort], b[sort]);
