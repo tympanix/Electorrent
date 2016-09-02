@@ -1,4 +1,4 @@
-angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', function(electron, $rootScope) {
+angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bittorrent', function(electron, $rootScope, $bittorrent) {
     const name = electron.app.getName();
 
     const template = [
@@ -65,8 +65,7 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', funct
                     label: "Paste Torrent URL...",
                     accelerator: "CmdOrCtrl+I",
                     click: function() {
-                        var magnet = electron.clipboard.readText();
-                        $rootScope.$btclient.addTorrentUrl(magnet);
+                        $bittorrent.uploadFromClipboard();
                     }
                 },
             ]

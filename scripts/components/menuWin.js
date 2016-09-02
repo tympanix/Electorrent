@@ -15,8 +15,7 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', funct
                     label: "Paste Torrent URL...",
                     accelerator: "CmdOrCtrl+I",
                     click: function() {
-                        var magnet = electron.clipboard.readText();
-                        $rootScope.$btclient.addTorrentUrl(magnet);
+                        $bittorrent.uploadFromClipboard();
                     }
                 },
                 {
