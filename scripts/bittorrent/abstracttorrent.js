@@ -177,6 +177,24 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
         return this.statusMessage.replace(statusRegex, '');
     };
 
+    AbstractTorrent.sort = function(attribute) {
+        switch (attribute) {
+            case 'decodedName': return alphabetical
+            case 'label': return alphabetical
+            default: return numerical
+        }
+    }
+
+    function alphabetical(a, b) {
+        var aLower = a.toLowerCase();
+        var bLower = b.toLowerCase();
+        return aLower.localeCompare(bLower);
+    }
+
+    function numerical(a, b){
+        return b - a;
+    }
+
     /**
      * Return the constructor function
      */
