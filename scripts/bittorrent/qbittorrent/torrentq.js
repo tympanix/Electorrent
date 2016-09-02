@@ -31,7 +31,6 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
 
         AbstractTorrent.call(this, {
             hash: hash,
-            status: undefined,
             name: data.name,
             size: data.size || data.total_size,
             percent: data.progress * 1000 || undefined,
@@ -46,18 +45,11 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             peersInSwarm: data.peers_total,
             seedsConnected: data.seeds,
             seedsInSwarm: data.seeds_total || data.num_complete,
-            availability: undefined,
             torrentQueueOrder: data.priority,
-            remaining: undefined,
-            downloadUrl: undefined,
-            rssFeedUrl: undefined,
             statusMessage: data.state,
-            streamId: undefined,
             dateAdded: (data.addition_date || data.added_on) * 1000 || undefined,
             dateCompleted: (data.completion_date || data.completion_on) * 1000 || undefined,
-            appUpdateUrl: undefined,
             savePath: data.savePath,
-            additionalData: undefined
         });
 
         this.creationDate = data.creation_date;
