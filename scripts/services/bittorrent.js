@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', '$btclients', 'configService', function($rootScope, $injector, $btclients, config){
+angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', '$btclients', 'configService', 'notificationService', 'electron', function($rootScope, $injector, $btclients, config, $notify, electron){
 
     this.getClient = function(clientName) {
         if (clientName) {
@@ -34,5 +34,16 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
         } else {
             console.error('Bittorrent client "' + name + '" not available');
         }
+    }
+
+    this.uploadFromClipboard = function() {
+        var magnet = electron.clipboard.readText();
+
+        if (!magnet.startsWith('magnet')) {
+            $notify.alert('Wait a minute?', 'Your clipboard doesn\'t contain a magnet link');
+            return;
+        }
+
+        $rootScope.$btclient.addTorrentUrl(magnet);
     }
 }]);
