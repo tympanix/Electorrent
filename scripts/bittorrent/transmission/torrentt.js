@@ -1,15 +1,15 @@
 'use strict';
 
-angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', function(AbstractTorrent) {
+angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(AbstractTorrent) {
 
     /**
      * Constructor, with class name.
-     * Replace all occurences of __TorrentName__ (including underscores) with
+     * Replace all occurences of TorrentT (including underscores) with
      * the name of your torrent class. Best practise is naming the class 'Torrent'
      * and appending a single letter desribing the client to which it belongs.
      * (e.g. TorrentQ for qBittorrent, TorrentU for µTorrent... and so on)
      */
-    function __TorrentName__(data) {
+    function TorrentT(data) {
         /*
          * Please modify the constructor function parameters to
          * your liking for the best implementation. If data is obtained as an array from
@@ -17,33 +17,33 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
          */
 
         AbstractTorrent.call(this, {
-            hash: undefined, /* Hash (string): unique identifier for the torrent */
-            name: undefined, /* Name (string): the name of the torrent */
-            size: undefined, /* Size (integer): size of the file to be downloaded in bytes */
-            percent: undefined, /* Percent (integer): completion in per-mille (100% = 1000)  */
-            downloaded: undefined, /* Downloaded (integer): number of bytes */
-            uploaded: undefined, /* Uploaded (integer): number of bytes */
-            ratio: undefined, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
-            uploadSpeed: undefined,  /* Upload Speed (integer): bytes per second */
-            downloadSpeed: undefined, /* Download Speed (integer): bytes per second */
-            eta: undefined, /* ETA (integer): second to completion */
-            label: undefined, /* Label (string): group/category identification */
-            peersConnected: undefined, /* Peers Connected (integer): number of peers connected */
-            peersInSwarm: undefined, /* Peers In Swarm (integer): number of peers in the swarm */
-            seedsConnected: undefined, /* Seeds Connected (integer): number of connected seeds */
-            seedsInSwarm: undefined, /* Seeds In Swarm (integer): number of connected seeds in swarm */
-            torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
-            statusMessage: undefined, /* Status (string): the current status of the torrent (e.g. downloading)  */
-            dateAdded: undefined, /* Date Added (integer): number of milliseconds unix time */
-            dateCompleted: undefined, /* Date Completed (integer): number of milliseconds unix time */
-            savePath: undefined, /* Save Path (string): the path at which the downloaded content is saved */
+            hash: data.id, /* Hash (string): unique identifier for the torrent */
+            name: data.name, /* Name (string): the name of the torrent */
+            size: data.totalSize, /* Size (integer): size of the file to be downloaded in bytes */
+            percent: data.percentDone * 1000, /* Percent (integer): completion in per-mille (100% = 1000)  */
+            downloaded: data.downloadedEver, /* Downloaded (integer): number of bytes */
+            uploaded: data.uploadedEver, /* Uploaded (integer): number of bytes */
+            ratio: data.uploadRatio, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
+            uploadSpeed: data.rateUpload,  /* Upload Speed (integer): bytes per second */
+            downloadSpeed: data.rateDownload, /* Download Speed (integer): bytes per second */
+            eta: data.eta, /* ETA (integer): second to completion */
+            label: data.comment, /* Label (string): group/category identification */
+            peersConnected: data.peersConnected, /* Peers Connected (integer): number of peers connected */
+            peersInSwarm: data.maxConnectedPeers, /* Peers In Swarm (integer): number of peers in the swarm */
+            seedsConnected: data.peersGettingToUs, /* Seeds Connected (integer): number of connected seeds */
+            seedsInSwarm: data.seedsGettingFromUs, /* Seeds In Swarm (integer): number of connected seeds in swarm */
+            torrentQueueOrder: data.queuePosition, /* Queue (integer): the number in the download queue */
+            statusMessage: '', /* Status (string): the current status of the torrent (e.g. downloading)  */
+            dateAdded: data.dateAdded, /* Date Added (integer): number of milliseconds unix time */
+            dateCompleted: data.doneDate, /* Date Completed (integer): number of milliseconds unix time */
+            savePath: data.downloadDir, /* Save Path (string): the path at which the downloaded content is saved */
         });
 
         /*
          * Additional data that does not match the default scheme above
          * may be added as extra fields. This can be done in the manner below
          */
-        this.myAddtionalData = undefined;
+        this.status = data.status;
 
     }
 
@@ -51,7 +51,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * Inherit by prototypal inheritance. Leave this line as is (only rename class name).
      * Do NOT implement any prototypal features above this line!
      */
-    __TorrentName__.prototype = Object.create(AbstractTorrent.prototype);
+    TorrentT.prototype = Object.create(AbstractTorrent.prototype);
 
 
     /**
@@ -59,7 +59,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * up in the 'Error' tab in the GUI
      * @return {boolean} isStatusError
      */
-    __TorrentName__.prototype.isStatusError = function() {
+    TorrentT.prototype.isStatusError = function() {
         return
     };
 
@@ -68,7 +68,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * the 'Stopped' tab to the left in the GUI
      * @return {boolean} isStatusStopped
      */
-    __TorrentName__.prototype.isStatusStopped = function() {
+    TorrentT.prototype.isStatusStopped = function() {
         return
     };
 
@@ -77,7 +77,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * in the same tab as 'Downloading' in the GUI
      * @return {boolean} isStatusQueue
      */
-    __TorrentName__.prototype.isStatusQueued = function() {
+    TorrentT.prototype.isStatusQueued = function() {
         return
     };
 
@@ -87,7 +87,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * shows up the 'Finished' tab in the GUI
      * @return {boolean} isStatusCompleted
      */
-    __TorrentName__.prototype.isStatusCompleted = function() {
+    TorrentT.prototype.isStatusCompleted = function() {
         return
     };
 
@@ -96,8 +96,8 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * shows up the 'Downloading' tab in the GUI
      * @return {boolean} isStatusDownloading
      */
-    __TorrentName__.prototype.isStatusDownloading = function() {
-        return
+    TorrentT.prototype.isStatusDownloading = function() {
+        return this.status === 4;
     };
 
     /**
@@ -105,8 +105,8 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * shows up the 'Seeding' tab in the GUI
      * @return {boolean} isStatusDownloading
      */
-    __TorrentName__.prototype.isStatusSeeding = function() {
-        return
+    TorrentT.prototype.isStatusSeeding = function() {
+        return this.status === 6;
     };
 
     /**
@@ -114,8 +114,8 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * shows up in the same tab as the 'Downloading' tab in the GUI.
      * @return {boolean} isStatusDownloading
      */
-    __TorrentName__.prototype.isStatusPaused = function() {
-        return
+    TorrentT.prototype.isStatusPaused = function() {
+        return this.status === 0;
     };
 
     /**
@@ -124,7 +124,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * this when having color issues.
      * @return {string} color
      */
-    /*__TorrentName__.prototype.statusColor = function () {};*/
+    /*TorrentT.prototype.statusColor = function () {};*/
 
     /**
      * Optionally returns the status of the torrent. The status is by default
@@ -132,10 +132,20 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * incorrect status messages in the GUI
      * @return {string} status
      */
-    /*__TorrentName__.prototype.statusText = function () { };*/
-
+    TorrentT.prototype.statusText = function () {
+        switch(this.status) {
+            case 4:
+                return 'Downloading';
+            case 0:
+                return 'Paused';
+            case 6:
+                return 'Uploading'
+            default:
+                return 'Not Specified'
+        }
+    }
     /**
      * Return the constructor function (only change the class name)
      */
-    return __TorrentName__;
+    return TorrentT;
 }]);
