@@ -119,7 +119,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             singleSelect(torrent);
         }
         $scope.contextMenu.show(event);
-        console.info("Right click context menu!");
     };
 
     $scope.numInFilter = function(status) {
