@@ -46,8 +46,6 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
             $(window).off("mousemove");
             if(!wasDragging) {
                 showSortingArrows(element);
-            } else {
-                console.error("Was dragging!");
             }
         });
     }
