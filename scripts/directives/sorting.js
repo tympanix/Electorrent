@@ -24,7 +24,6 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
             bindSortAction(column);
 
             if (colSort === sortKey) {
-                console.log("Default sort:", sortKey, sortOrder);
                 setSortingArrow(column, sortOrder);
                 $sort(sortKey, sortOrder);
             }
@@ -92,7 +91,6 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
         sortOrder = $window.localStorage.getItem('sort_desc');
 
         if (!sortOrder) {
-            console.log("Sort order init to true");
             sortOrder = true;
         } else {
             sortOrder = (sortOrder === 'true');
