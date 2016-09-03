@@ -113,6 +113,7 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bit
             submenu: [
                 {
                     label: 'Reload',
+                    visible: electron.program.debug,
                     accelerator: 'CmdOrCtrl+R',
                     click(item, focusedWindow) {
                         if (focusedWindow) focusedWindow.reload();
@@ -128,7 +129,8 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bit
                 },
                 {
                     label: 'Toggle Developer Tools',
-                    accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+                    visible: electron.program.debug,
+                    accelerator: 'Ctrl+Shift+I',
                     click(item, focusedWindow) {
                         if (focusedWindow)
                         focusedWindow.webContents.toggleDevTools();
