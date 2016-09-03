@@ -7,7 +7,8 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
         scope: {
             menu: '=',
             bind: '=',
-            click: '='
+            click: '=',
+            debug: '=?'
         },
         compile: compile
     };
@@ -27,6 +28,10 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
 
         element.append(list);
 
+        if (electron.program.debug) {
+            appendDebugItem(list, scope);
+        }
+
         scope.menu.forEach(function(item){
             if (item.menu) {
                 appendSubmenu(list, item, scope);
@@ -37,6 +42,17 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
 
         bindMenuActions(element);
 
+    }
+
+    function appendDebugItem(element, scope) {
+        if (typeof scope.debug !== 'function') return;
+
+        var debug = {
+            label: 'Debug',
+            icon: 'help',
+            click: scope.debug
+        }
+        appendMenuItem(element, debug, scope)
     }
 
     function appendMenuItem(element, item, scope) {
