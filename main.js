@@ -5,13 +5,19 @@ torrentApp.constant('$btclients', {
     'utorrent': {
         name: 'µTorrent',
         service: 'utorrentService',
-        icon: 'uTorrent',
+        icon: 'uTorrent'
     },
      'qbittorrent': {
         name: 'qBittorrent',
         service: 'qbittorrentService',
         icon: 'qBittorrent'
+    },
+    'transmission': {
+        name: 'Transmission',
+        service: 'transmissionService',
+        icon: 'uTorrent'
     }
+
 });
 
 // Configure the client
