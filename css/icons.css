@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'bittorrent';
   src:
-    url('fonts/bittorrent.ttf?cfikf1') format('truetype'),
-    url('fonts/bittorrent.woff?cfikf1') format('woff'),
-    url('fonts/bittorrent.svg?cfikf1#bittorrent') format('svg');
+    url('fonts/bittorrent.ttf?tbdk60') format('truetype'),
+    url('fonts/bittorrent.woff?tbdk60') format('woff'),
+    url('fonts/bittorrent.svg?tbdk60#bittorrent') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -23,10 +23,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.qBittorrent:before {
+.rtorrent:before {
+  content: "\e902";
+}
+.transmission:before {
+  content: "\e903";
+}
+.qbittorrent:before {
   content: "\e900";
 }
-.uTorrent:before {
+.utorrent:before {
   content: "\e901";
 }
 
