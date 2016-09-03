@@ -15,9 +15,47 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
      */
     const config = {
         ip: '',
-        port: ''
+        port: '',
+        session: undefined,
+        encoded: '',
     }
 
+/*    const httpConfig = {
+        headers:{
+            'Authorization':'Basic ' + config.encoded,
+            'X-Transmission-Session-Id': config.session
+        }
+    }
+*/
+    function url() {
+        var ip, port, path;
+        if (arguments.length <= 1){
+            ip = config.ip;
+            port = config.port;
+            path = arguments[0] || "";
+        } else {
+            ip = arguments[0]
+            port = arguments[1]
+            path = arguments[2] || "";
+        }
+        return `http://${ip}:${port}/transmission/rpc${path}`;
+    }
+
+    function updateSession(session) {
+        if (!session) {
+            console.error("No new session");
+            return;
+        }
+        console.info("New session", session);
+        config.session = session;
+    }
+
+    function saveConnection(ip, port, encoded, session) {
+        config.ip = ip;
+        config.port = port;
+        config.encoded = encoded;
+        config.session = session;
+    }
 
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
@@ -30,7 +68,32 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
      * @return {promise} connection
      */
     this.connect = function(ip, port, user, pass) {
-        return
+        var defer = $q.defer();
+        var encoded = new Buffer(`${user}:${pass}`).toString('base64');
+
+        $http.get(url(ip,port),{
+            timeout: 5000,
+            headers: {
+                'Authorization': "Basic " + encoded
+            }
+
+        }).success(function(str) {
+            var session = headers('X-Transmission-Session-Id');
+            saveConnection(ip, port, encoded, session);
+            defer.resolve(str);
+        }).error(function(err, status, headers, config, statustext){
+            if(status === 409){
+                var session = headers('X-Transmission-Session-Id');
+                saveConnection(ip, port, encoded, session);
+                console.log("Session has been saved", config.session);
+                defer.resolve(err);
+                return ;
+            }
+            defer.reject(err);
+
+        });
+
+        return defer.promise;
     }
 
     /**
@@ -47,12 +110,56 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
      * @return {promise} data
      */
     this.torrents = function() {
+        var defer = $q.defer();
+
+        // downloadedEver and uploadedEver continue to count the second time you download that torrent.
+        var fields = ['id','name','totalSize','percentDone', 'downloadedEver',
+        'uploadedEver', 'uploadRatio','rateUpload','rateDownload','eta','comment'
+        ,'peersConnected','maxConnectedPeers','peersGettingToUs','seedsGettingFromUs'
+        ,'queuePosition','status','addedDate','doneDate','downloadDir'];
+
+        var data = {
+
+            "arguments": {
+	               "fields": fields
+
+               },
+            "method": "torrent-get",
+	               "tag": 39693
+	     }
+
+        $http.post(url(),data,{
+            headers:{
+                'Authorization':'Basic ' + config.encoded,
+                'X-Transmission-Session-Id': config.session
+            }
+        }).success(function(data, status, headers) {
+            var session = headers('X-Transmission-Session-Id');
+            updateSession(session);
+            defer.resolve(processData(data));
+        }).error(function(err){
+            defer.reject(err);
+
+        });
+
+        return defer.promise;
+
+    }
+
+    function processData(data){
         var torrents = {
             labels: [],
             all: [],
             changed: [],
             deleted: []
         };
+        var newTorrents = data.arguments.torrents;
+        torrents.all = newTorrents.map(build);
+        return torrents;
+    }
+
+    function build(data){
+        return new TorrentT(data);
     }
 
     /**
