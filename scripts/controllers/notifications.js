@@ -18,7 +18,6 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
         data.notificationId = id;
         $scope.notifications.push(data);
         removeAlert(data, data.delay || 5000);
-        $scope.$apply();
     })
 
     function removeAlert(data, delay){

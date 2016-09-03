@@ -14,6 +14,8 @@ angular.module('torrentApp')
             build: -1
         };
 
+        console.log("Constructor", Torrent);
+
         function build(array) {
             var torrent = Object.create(Torrent.prototype);
             torrent = (Torrent.apply(torrent, array) || torrent);

@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$log", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $log, $bittorrent, $notify, config, AbstractTorrent) {
+angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config, AbstractTorrent) {
     const TIMEOUT = 2000;
     const LIMIT = 25;
 
@@ -42,7 +42,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         for (var i = 0; i < selected.length; i++){
             console.info(selected[i]);
         }
-        $scope.contextMenu.hide();
+        return $q.when();
     };
 
     $scope.activeOn = function(filter) {
