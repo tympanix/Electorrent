@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', function(AbstractTorrent) {
+angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentConfig', function(AbstractTorrent, rtorrentConfig) {
 
     /**
      * Constructor, with class name.
@@ -9,15 +9,19 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', function(Ab
      * and appending a single letter desribing the client to which it belongs.
      * (e.g. TorrentQ for qBittorrent, TorrentU for µTorrent... and so on)
      */
-    function TorrentR(data) {
+    function TorrentR(array) {
         /*
          * Please modify the constructor function parameters to
          * your liking for the best implementation. If data is obtained as an array from
          * the API one could list each function parameter in the same order as the array
          */
 
+        var data = buildData(array);
+
+        console.log("TorrentR", data);
+
         AbstractTorrent.call(this, {
-            hash: undefined, /* Hash (string): unique identifier for the torrent */
+            hash: data.hash, /* Hash (string): unique identifier for the torrent */
             name: undefined, /* Name (string): the name of the torrent */
             size: undefined, /* Size (integer): size of the file to be downloaded in bytes */
             percent: undefined, /* Percent (integer): completion in per-mille (100% = 1000)  */
@@ -26,8 +30,8 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', function(Ab
             ratio: undefined, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
             uploadSpeed: undefined,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: undefined, /* Download Speed (integer): bytes per second */
-            eta: undefined, /* ETA (integer): second to completion */
-            label: undefined, /* Label (string): group/category identification */
+            eta: undefined, /* ETA (integer): second to completion MISSING */
+            label: undefined, /* Label (string): group/category identification MISSING */
             peersConnected: undefined, /* Peers Connected (integer): number of peers connected */
             peersInSwarm: undefined, /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: undefined, /* Seeds Connected (integer): number of connected seeds */
@@ -45,6 +49,15 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', function(Ab
          */
         this.myAddtionalData = undefined;
 
+    }
+
+    function buildData(array) {
+        var data = {};
+        array.forEach(function(item, index) {
+            var key = rtorrentConfig[index];
+            data[key] = item
+        })
+        return data;
     }
 
     /*
