@@ -47,6 +47,12 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
          */
         this.data = data;
 
+        this.status = data.get_state
+        this.active = data.is_active
+        this.checked = data.is_hash_checked
+        this.checking = data.is_hash_checking
+        this.open = data.is_open
+
     }
 
     function buildData(array) {
@@ -80,7 +86,11 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {boolean} isStatusStopped
      */
     TorrentR.prototype.isStatusStopped = function() {
-        return
+        return (
+            this.state &&
+            !this.active &&
+            !this.open
+        );
     };
 
     /**
@@ -99,7 +109,12 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {boolean} isStatusCompleted
      */
     TorrentR.prototype.isStatusCompleted = function() {
-        return
+        return (
+            !this.state &&
+            !this.active &&
+            !this.open &&
+            this.percent >= 1000
+        )
     };
 
     /**
@@ -108,7 +123,11 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {boolean} isStatusDownloading
      */
     TorrentR.prototype.isStatusDownloading = function() {
-        return true;
+        return (
+            this.open &&
+            this.active &&
+            this.checked
+        )
     };
 
     /**
@@ -117,7 +136,11 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {boolean} isStatusDownloading
      */
     TorrentR.prototype.isStatusSeeding = function() {
-        return
+        return (
+            this.active &&
+            this.open &&
+            this.state
+        )
     };
 
     /**
@@ -126,7 +149,11 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {boolean} isStatusDownloading
      */
     TorrentR.prototype.isStatusPaused = function() {
-        return
+        return (
+            this.open &&
+            !this.active &&
+            !this.state
+        )
     };
 
     /**
