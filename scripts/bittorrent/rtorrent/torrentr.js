@@ -29,7 +29,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
             uploadSpeed: data.get_up_rate,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: data.get_down_rate, /* Download Speed (integer): bytes per second */
             eta: undefined, /* ETA (integer): second to completion MISSING */
-            label: undefined, /* Label (string): group/category identification MISSING */
+            label: data.get_custom1, /* Label (string): group/category identification MISSING */
             peersConnected: data.get_peers_complete, /* Peers Connected (integer): number of peers connected */
             peersInSwarm: data.get_peers_connected, /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: data.get, /* Seeds Connected (integer): number of connected seeds */
