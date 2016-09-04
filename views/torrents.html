@@ -2,6 +2,11 @@
 <div class="wrapper" ng-controller="torrentsController">
     <div class="torrent sidebar">
         <ul class="nav">
+            <li ng-click="filterByStatus('all')" ng-class="activeOn('all')">
+                <i class="ui large teal asterisk icon"></i>
+                All
+                <div class="ui torrent sort label">{{numInFilter('all')}}</div>
+            </li>
             <li ng-click="filterByStatus('downloading')" ng-class="activeOn('downloading')">
                 <i class="ui large blue arrow down icon"></i>
                 Downloading
@@ -18,7 +23,7 @@
                 <div class="ui torrent sort label">{{numInFilter('seeding')}}</div>
             </li>
             <li ng-click="filterByStatus('stopped')" ng-class="activeOn('stopped')">
-                <i class="ui large grey stop icon"></i>
+                <i class="ui large grey pause icon"></i>
                 Stopped
                 <div class="ui torrent sort label">{{numInFilter('stopped')}}</div>
             </li>
