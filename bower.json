@@ -26,6 +26,10 @@
     "angular-animate": "^1.5.7",
     "ngInfiniteScroll": "^1.2.2",
     "angular-table-resize": "^1.0.4",
-    "angular-marked": "^1.2.1"
+    "angular-marked": "^1.2.1",
+    "angular-xmlrpc": "^1.0.1"
+  },
+  "resolutions": {
+    "angular": "^1.5.6"
   }
 }
