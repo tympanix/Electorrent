@@ -273,6 +273,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     function statusFilter(torrent, status) {
         switch (status) {
+            case 'all': return true;
             case 'finished': return torrent.isStatusCompleted();
             case 'downloading': return torrent.isStatusDownloading() || torrent.isStatusPaused();
             case 'paused': return torrent.isStatusPaused();
