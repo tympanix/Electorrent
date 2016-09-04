@@ -78,4 +78,17 @@ Vagrant.configure("2") do |config|
 
       SHELL
   end
+
+  config.vm.define "rt" do |rt|
+      rt.vm.provision "shell", inline: <<-SHELL
+        apt-get update
+        apt-get install rtorrent nginx unzip -y
+        echo "scgi_port = 127.0.0.1:5000" > ~/.rtorrent.rc
+        cd /usr/share/nginx/html
+        sudo rm -rf *
+        sudo wget https://github.com/Novik/ruTorrent/archive/master.zip
+        sudo unzip master.zip
+        sudo mv ruTorrent-master/* .
+      SHELL
+  end
 end
