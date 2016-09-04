@@ -1,4 +1,4 @@
-var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll", "hc.marked"]);
+var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll", "hc.marked", "xml-rpc"]);
 
 // Register torrent clients
 torrentApp.constant('$btclients', {
@@ -11,6 +11,11 @@ torrentApp.constant('$btclients', {
         name: 'qBittorrent',
         service: 'qbittorrentService',
         icon: 'qbittorrent'
+    },
+    'rtorrent': {
+        name: 'rTorrent',
+        service: 'rtorrentService',
+        icon: 'rtorrent'
     }
 });
 

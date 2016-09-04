@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "TorrentT", "notificationService", function($http, $q, TorrentT, $notify) {
+angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "notificationService", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, $notify) {
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -14,8 +14,34 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "Torrent
      * Good practise is keeping a configuration object for your communication with the API
      */
     const config = {
+        version: undefined,
         ip: '',
         port: ''
+    }
+
+    const fields = rtorrentConfig.map(fieldTransform);
+
+    function url() {
+        var ip, port, path;
+        if (arguments.length === 1){
+            ip = config.ip;
+            port = config.port;
+            path = arguments[0] || '';
+        } else {
+            ip = arguments[0]
+            port = arguments[1]
+            path = arguments[2] || '';
+        }
+        return `http://${ip}:${port}${path}`;
+    }
+
+    function saveConnection(ip, port) {
+        config.ip = ip;
+        config.port = port;
+    }
+
+    function fieldTransform(field) {
+        return 'd.' + field + '=';
     }
 
 
@@ -30,7 +56,27 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "Torrent
      * @return {promise} connection
      */
     this.connect = function(ip, port, user, pass) {
-        return
+        var defer = $q.defer();
+
+        $xmlrpc.config({
+            hostName: url(ip, port),
+            pathName: "/RPC2"
+        })
+
+        var encoded = new Buffer(`${user}:${pass}`).toString('base64');
+        $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
+
+        $xmlrpc.callMethod('system.client_version')
+        .then(function(data) {
+            config.version = data;
+            console.log("Login success!", data);
+            defer.resolve();
+        }).catch(function(err) {
+            console.error("Login error", err);
+            defer.reject(err);
+        })
+
+        return defer.promise;
     }
 
     /**
@@ -47,12 +93,34 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "Torrent
      * @return {promise} data
      */
     this.torrents = function() {
+        var defer = $q.defer();
+
+        $xmlrpc.callMethod('d.multicall', ['main', ...fields])
+        .then(function(data) {
+            defer.resolve(processData(data));
+        }).catch(function(err) {
+            console.error("Torrent error", err);
+            defer.reject(err);
+        })
+
+        return defer.promise;
+    }
+
+    function processData(data) {
         var torrents = {
             labels: [],
             all: [],
             changed: [],
             deleted: []
         };
+
+        torrents.all = data.map(build);
+
+        return torrents
+    }
+
+    function build(array) {
+        return new TorrentR(array);
     }
 
     /**
