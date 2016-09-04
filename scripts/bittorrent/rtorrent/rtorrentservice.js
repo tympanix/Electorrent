@@ -154,6 +154,29 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         });
     }
 
+    function doAction(action, hashes) {
+        var defer = $q.defer();
+
+        var calls = []
+
+        hashes.forEach(function(hash) {
+            calls.push({
+                'methodName': action,
+                'params': [hash]
+            })
+        })
+
+        $xmlrpc.callMethod('system.multicall', [calls])
+        .then(function(data) {
+            defer.resolve(data);
+        }).catch(function(err) {
+            console.error("Action error", err);
+            defer.reject(err);
+        })
+
+        return defer.promise
+    }
+
     /**
      * Example action function. You will have to implement several of these to support the various
      * actions in your bittorrent client. Each action is supplied an array of the hashes on which
@@ -162,7 +185,27 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} actionIsDone
      */
     this.start = function(hashes) {
-        return
+        return doAction('d.start', hashes);
+    }
+
+    this.pause = function(hashes) {
+        return doAction('d.pause', hashes);
+    }
+
+    this.resume = function(hashes) {
+        return doAction('d.resume', hashes);
+    }
+
+    this.stop = function(hashes) {
+        return doAction('d.try_stop', hashes);
+    }
+
+    this.close = function(hashes) {
+        return doAction('d.close', hashes);
+    }
+
+    this.open = function(hashes) {
+        return doAction('d.open', hashes);
     }
 
     /**
@@ -181,31 +224,22 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
             label: 'Start',
             type: 'button',
             color: 'green',
-            click: this.start,
+            click: this.resume,
             icon: 'play'
         },
         {
             label: 'Pause',
             type: 'button',
-            color: 'red',
+            color: 'yellow',
             click: this.pause,
             icon: 'pause'
         },
         {
-            label: 'More',
-            type: 'dropdown',
-            color: 'blue',
-            icon: 'plus',
-            actions: [
-                {
-                    label: 'Pause All',
-                    click: this.pauseAll
-                },
-                {
-                    label: 'Resume All',
-                    click: this.resumeAll
-                }
-            ]
+            label: 'Stop',
+            type: 'button',
+            color: 'red',
+            click: this.close,
+            icon: 'stop'
         },
         {
             label: 'Labels',
