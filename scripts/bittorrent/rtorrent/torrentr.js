@@ -87,9 +87,10 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      */
     TorrentR.prototype.isStatusStopped = function() {
         return (
-            this.state &&
             !this.active &&
-            !this.open
+            !this.open &&
+            !this.checking &&
+            !this.checked
         );
     };
 
@@ -171,7 +172,21 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {string} status
      */
     TorrentR.prototype.statusText = function () {
-        return 'Downloading';
+        if (this.isStatusSeeding()){
+            return 'Seeding';
+        } else if (this.isStatusDownloading()){
+            return 'Downloading';
+        } else if (this.isStatusError()){
+            return 'Error';
+        } else if (this.isStatusCompleted()){
+            return 'Completed';
+        } else if (this.isStatusPaused()){
+            return 'Paused';
+        } else if (this.isStatusStopped()){
+            return 'Stopped';
+        } else {
+            return 'Unknown';
+        }
     };
 
     /**
