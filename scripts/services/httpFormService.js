@@ -27,7 +27,7 @@ angular.module('torrentApp').factory("httpFormService", function() {
         }
 
         // Serialize the buffer and clean it up for transportation.
-        return buffer.join("&").replace(/%20/g, "+");
+        return buffer.join("&")
     }
 
     function parseComponent(name, value) {
@@ -39,6 +39,7 @@ angular.module('torrentApp').factory("httpFormService", function() {
             var encoded = value.map(encodeURIComponent);
             return encoded.join('|');
         } else if (value !== null) {
+            console.log("Value!", encodeURIComponent(value));
             return encodeURIComponent(value)
         } else {
             return "";
