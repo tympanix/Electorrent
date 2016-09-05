@@ -19,7 +19,8 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         port: ''
     }
 
-    const fields = rtorrentConfig.map(fieldTransform);
+    const fields = rtorrentConfig.fields.map(fieldTransform);
+    const custom = rtorrentConfig.custom.map(customTransform);
 
     function url() {
         var ip, port, path;
@@ -42,6 +43,10 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
 
     function fieldTransform(field) {
         return 'd.' + field + '=';
+    }
+
+    function customTransform(custom) {
+        return 'd.get_custom=' + custom;
     }
 
 
@@ -95,7 +100,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     this.torrents = function() {
         var defer = $q.defer();
 
-        $xmlrpc.callMethod('d.multicall', ['main', ...fields])
+        $xmlrpc.callMethod('d.multicall', ['main', ...fields, ...custom])
         .then(function(data) {
             defer.resolve(processData(data));
         }).catch(function(err) {
