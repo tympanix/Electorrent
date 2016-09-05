@@ -196,7 +196,8 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return $http.post(url('/command/setCategory'), { hashes: hashes, category: category }, httpform)
     }
 
-    this.uploadTorrent = function(blob, filename) {
+    this.uploadTorrent = function(buffer, filename) {
+        var blob = new Blob([buffer], {type : 'application/x-bittorrent'})
         var formData = new FormData();
         formData.append('torrents', blob, filename);
 
