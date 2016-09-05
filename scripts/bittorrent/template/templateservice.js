@@ -70,14 +70,16 @@ angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__Torre
 
     /**
      * Add a torrent file with the .torrent extension to the client through the API. Should
-     * return a promise that the torrent was added sucessfully. File data is given as a blob
-     * more information here: https://developer.mozilla.org/en/docs/Web/API/Blob. You may use
+     * return a promise that the torrent was added sucessfully. File data is given as an nodejs buffer
+     * more information here: https://nodejs.org/api/buffer.html. You may use
      * the existing implementation as a helping hand
      * @param {blob} filedata
      * @param {string} filename
      * @return {promise} isAdded
      */
-    this.uploadTorrent = function(blob, filename) {
+    this.uploadTorrent = function(buffer, filename) {
+        var blob = new Blob([buffer], {type : 'application/x-bittorrent'})
+
         var formData = new FormData();
         formData.append('torrents', blob, filename);
 
