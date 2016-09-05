@@ -43,7 +43,6 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
 
     function updateSession(session) {
         if (!session) {
-            console.error("No new session");
             return;
         }
         console.info("New session", session);
@@ -116,16 +115,15 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
         var fields = ['id','name','totalSize','percentDone', 'downloadedEver',
         'uploadedEver', 'uploadRatio','rateUpload','rateDownload','eta','comment'
         ,'peersConnected','maxConnectedPeers','peersGettingToUs','seedsGettingFromUs'
-        ,'queuePosition','status','addedDate','doneDate','downloadDir'];
+        ,'queuePosition','status','addedDate','doneDate','downloadDir','recheckProgress'
+        , 'isFinished','priorities'];
 
         var data = {
 
             "arguments": {
 	               "fields": fields
-
                },
-            "method": "torrent-get",
-	               "tag": 39693
+            "method": "torrent-get"
 	     }
 
         $http.post(url(),data,{
@@ -154,7 +152,7 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
             deleted: []
         };
         var newTorrents = data.arguments.torrents;
-        torrents.all = newTorrents.map(build);
+        torrents.changed = newTorrents.map(build);
         return torrents;
     }
 
@@ -193,6 +191,44 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
         });
     }
 
+    function doAction(command, hashes, mutator, mutatorValue) {
+        // Check if mutator exists.
+        if(!mutator || !mutatorValue) {
+            var data = {
+                "arguments": {
+            	     "ids": hashes,
+                     mutator: mutatorValue
+                 },
+                "method": command
+            	 }
+        } else {
+            var data = {
+                "arguments": {
+            	     "ids": hashes
+                 },
+                "method": command
+            	 }
+        }
+
+
+
+        if(!Array.isArray(hashes)) {
+            return $notify.alert('Error', 'Action was passed incorrect arguments')
+        }
+
+        var promises = [];
+        hashes.forEach(function(hash) {
+            var req = $http.post(url(),data,{
+                headers:{
+                    'Authorization':'Basic ' + config.encoded,
+                    'X-Transmission-Session-Id': config.session
+                }
+            })
+            promises.push(req);
+        });
+        return $q.all(promises);
+    }
+
     /**
      * Example action function. You will have to implement several of these to support the various
      * actions in your bittorrent client. Each action is supplied an array of the hashes on which
@@ -201,8 +237,29 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
      * @return {promise} actionIsDone
      */
     this.start = function(hashes) {
-        return
+        return doAction('torrent-start', hashes);
     }
+
+    this.stop = function(hashes) {
+        return doAction('torrent-stop', hashes);
+    }
+
+    this.verify = function(hashes) {
+        return doAction('torrent-verify', hashes);
+    }
+
+    this.priorityLow = function(hashes) {
+        return doAction('torrent-set', hashes, 'priority-low', hashes);
+    }
+
+    this.priorityNormal = function(hashes) {
+        return doAction('torrent-set', hashes, 'priority-normal', hashes);
+    }
+
+    this.priorityHigh = function(hashes) {
+        return doAction('torrent-set', hashes, 'priority-high', hashes);
+    }
+
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
@@ -224,10 +281,10 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
             icon: 'play'
         },
         {
-            label: 'Pause',
+            label: 'Stop',
             type: 'button',
             color: 'red',
-            click: this.pause,
+            click: this.stop,
             icon: 'pause'
         },
         {
@@ -263,9 +320,37 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
      */
     this.contextMenu = [
         {
-            label: 'Recheck',
-            click: this.recheck,
+            label: 'Start',
+            click: this.start,
+            icon: 'play'
+        },
+        {
+            label: 'Pause',
+            click: this.stop,
+            icon: 'pause'
+        },
+        {
+            label: 'Verify',
+            click: this.verify,
             icon: 'checkmark'
+        },
+        {
+            label: 'Priority',
+            menu: [
+                {
+                    label: 'High',
+                    click: this.priorityHigh
+                },
+                {
+                    label: 'Normal',
+                    click: this.priorityNormal
+                },
+                {
+                    label: 'Low',
+                    click: this.priorityLow
+                }
+            ]
+
         },
         {
             label: 'Move Up Queue',
