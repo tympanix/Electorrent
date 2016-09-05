@@ -36,7 +36,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
             seedsInSwarm: undefined, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
             statusMessage: undefined, /* Status (string): the current status of the torrent (e.g. downloading)  */
-            dateAdded: undefined, /* Date Added (integer): number of milliseconds unix time */
+            dateAdded: data.custom_addtime * 1000, /* Date Added (integer): number of milliseconds unix time */
             dateCompleted: undefined, /* Date Completed (integer): number of milliseconds unix time */
             savePath: data.get_directory, /* Save Path (string): the path at which the downloaded content is saved */
         });
@@ -57,12 +57,17 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
     }
 
     function buildData(array) {
+        var fields = rtorrentConfig.fields.concat(rtorrentConfig.custom.map(customTransform))
         var data = {};
         array.forEach(function(item, index) {
-            var key = rtorrentConfig[index];
+            var key = fields[index];
             data[key] = item
         })
         return data;
+    }
+
+    function customTransform(custom) {
+        return 'custom_' + custom;
     }
 
     /*
