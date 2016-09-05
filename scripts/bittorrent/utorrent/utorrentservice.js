@@ -81,7 +81,8 @@ angular.module('torrentApp')
             }).get().$promise;
         }
 
-        this.uploadTorrent = function(blob, filename, dir, path) {
+        this.uploadTorrent = function(buffer, filename, dir, path) {
+            var blob = new Blob([buffer], {type : 'application/x-bittorrent'})
             var url = data.url + '?token=' + data.token + '&action=add-file&download_dir=' + encodeURIComponent(dir) + '&path=' + encodeURIComponent(path);
 
             var formData = new FormData();
