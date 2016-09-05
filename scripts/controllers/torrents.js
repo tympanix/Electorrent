@@ -218,7 +218,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.doAction = function(action, name, data) {
-        action(getSelectedHashes(), data)
+        action(selected, data)
             .then(function(){
                 console.log("Action " + name + " performed!");
                 $scope.update();
@@ -229,7 +229,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     };
 
     $scope.doContextAction = function(action, name) {
-        action(getSelectedHashes())
+        action(selected)
         .then(function(){
             console.log("Action " + name + " performed!");
             $scope.update();
