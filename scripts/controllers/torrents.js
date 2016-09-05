@@ -85,7 +85,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $scope.torrents = {};
         $scope.arrayTorrents = [];
         $scope.labels = [];
-        $scope.update();
+        $scope.update(true);
     }
 
     function stopTimer(){
@@ -198,8 +198,8 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         //console.log("Selected", selected);
     }
 
-    $scope.update = function() {
-        var q = $scope.$btclient.torrents()
+    $scope.update = function(fullupdate) {
+        var q = $scope.$btclient.torrents(fullupdate)
         q.then(function(torrents){
             newTorrents(torrents);
             deleteTorrents(torrents);
@@ -218,7 +218,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.doAction = function(action, name, data) {
-        action(getSelectedHashes(), data)
+        action(selected, data)
             .then(function(){
                 console.log("Action " + name + " performed!");
                 $scope.update();
@@ -229,7 +229,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     };
 
     $scope.doContextAction = function(action, name) {
-        action(getSelectedHashes())
+        action(selected)
         .then(function(){
             console.log("Action " + name + " performed!");
             $scope.update();
