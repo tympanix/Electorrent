@@ -110,20 +110,29 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return torrents;
     }
 
-    function doAction(command, hashes) {
-        if(!Array.isArray(hashes)) {
+    function doAction(command, torrents) {
+        if(!Array.isArray(torrents)) {
             return $notify.alert('Error', 'Action was passed incorrect arguments')
         }
+
+        var hashes = torrents.map(function(torrent) {
+            return torrent.hash
+        })
 
         var promises = [];
         hashes.forEach(function(hash) {
             var req = $http.post(`${url('/command')}/${command}`, {hash: hash}, httpform);
             promises.push(req);
         });
+
         return $q.all(promises);
     }
 
-    function doMultiAction(command, hashes) {
+    function doMultiAction(command, torrents) {
+        var hashes = torrents.map(function(torrent) {
+            return torrent.hash
+        })
+
         return $http.post(`${url('/command')}/${command}`, { hashes: hashes }, httpform);
     }
 
@@ -179,7 +188,11 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return $http.post(url('/command/download'), { urls: magnet }, httpform)
     }
 
-    this.setCategory = function(hashes, category) {
+    this.setCategory = function(torrents, category) {
+        var hashes = torrents.map(function(torrent) {
+            return torrent.hash
+        })
+
         return $http.post(url('/command/setCategory'), { hashes: hashes, category: category }, httpform)
     }
 
