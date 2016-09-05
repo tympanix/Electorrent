@@ -69,8 +69,10 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         return defer.promise;
     }
 
-    this.torrents = function() {
+    this.torrents = function(all) {
         var defer = $q.defer();
+
+        if (all === true) rid = 0;
 
         $http.get(url('/sync/maindata'), {
             params: {
