@@ -1,6 +1,6 @@
 angular.module('torrentApp').factory("rtorrentConfig", [function() {
 
-    return [
+    var fields = [
         'get_base_filename',
         'get_base_path',
         'get_bitfield',
@@ -71,5 +71,14 @@ angular.module('torrentApp').factory("rtorrentConfig", [function() {
         'is_pex_active',
         'is_private',
     ];
+
+    var custom = [
+        'addtime'
+    ]
+
+    return {
+        fields: fields,
+        custom: custom
+    }
 
 }])
