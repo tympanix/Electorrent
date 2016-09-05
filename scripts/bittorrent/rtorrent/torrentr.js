@@ -52,6 +52,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         this.checked = data.is_hash_checked
         this.checking = data.is_hash_checking
         this.open = data.is_open
+        this.complete = data.get_complete
 
     }
 
@@ -111,10 +112,8 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      */
     TorrentR.prototype.isStatusCompleted = function() {
         return (
-            !this.state &&
             !this.active &&
-            !this.open &&
-            this.percent >= 1000
+            this.complete
         )
     };
 
@@ -127,7 +126,8 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         return (
             this.open &&
             this.active &&
-            this.checked
+            this.checked &&
+            !this.complete
         )
     };
 
@@ -140,7 +140,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         return (
             this.active &&
             this.open &&
-            this.state
+            this.complete
         )
     };
 
@@ -153,7 +153,18 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         return (
             this.open &&
             !this.active &&
-            !this.state
+            !this.state &&
+            !this.complete
+        )
+    };
+
+
+    TorrentR.prototype.isStatusSeedPaused = function () {
+        return (
+            this.open &&
+            this.checked &&
+            this.complete &&
+            !this.active
         )
     };
 
@@ -163,7 +174,21 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * this when having color issues.
      * @return {string} color
      */
-    /*TorrentR.prototype.statusColor = function () {};*/
+    TorrentR.prototype.statusColor = function () {
+        if (this.isStatusSeeding()){
+            return 'orange';
+        } else if (this.isStatusDownloading()){
+            return 'blue';
+        } else if (this.isStatusError()){
+            return 'error';
+        } else if (this.isStatusPaused() || this.isStatusSeedPaused()){
+            return 'grey';
+        } else if (this.isStatusCompleted()){
+            return 'success';
+        } else {
+            return 'disabled';
+        }
+    };
 
     /**
      * Optionally returns the status of the torrent. The status is by default
@@ -174,6 +199,8 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
     TorrentR.prototype.statusText = function () {
         if (this.isStatusSeeding()){
             return 'Seeding';
+        } else if (this.isStatusSeedPaused()){
+            return 'Paused Seed';
         } else if (this.isStatusDownloading()){
             return 'Downloading';
         } else if (this.isStatusError()){
