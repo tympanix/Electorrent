@@ -141,7 +141,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function(magnet) {
-        return
+        return doAction('load_start', [magnet])
     }
 
     /**
@@ -154,15 +154,23 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} isAdded
      */
     this.uploadTorrent = function(blob, filename) {
-        var formData = new FormData();
-        formData.append('torrents', blob, filename);
+        // TODO: Submit torrent file as base 64
+        var defer = $q.defer();
 
-        return $http.post('__url__', formData, {
-            headers: { 'Content-Type': undefined },
-            transformRequest: function(data) {
-                return data;
-            }
-        });
+        var reader = new window.FileReader();
+        reader.readAsDataURL(blob);
+
+        reader.onloadend = function() {
+            var base64 = reader.result
+            doAction('load_raw_start', [{ base64: base64 }])
+            .then(function() {
+                defer.resolve()
+            }).catch(function() {
+                defer.reject()
+            })
+        }
+
+        return defer.promise;
     }
 
     function doAction(action, hashes) {
