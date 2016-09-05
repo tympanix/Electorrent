@@ -173,8 +173,12 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         return defer.promise;
     }
 
-    function doAction(action, hashes) {
+    function doAction(action, torrents) {
         var defer = $q.defer();
+
+        var hashes = torrents.map(function(torrent) {
+            return torrent.hash
+        })
 
         var calls = []
 
