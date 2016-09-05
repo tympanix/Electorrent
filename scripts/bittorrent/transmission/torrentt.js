@@ -15,7 +15,7 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
          * your liking for the best implementation. If data is obtained as an array from
          * the API one could list each function parameter in the same order as the array
          */
-
+         this.data = data;
         AbstractTorrent.call(this, {
             hash: data.id, /* Hash (string): unique identifier for the torrent */
             name: data.name, /* Name (string): the name of the torrent */
@@ -34,16 +34,25 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
             seedsInSwarm: data.seedsGettingFromUs, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: data.queuePosition, /* Queue (integer): the number in the download queue */
             statusMessage: '', /* Status (string): the current status of the torrent (e.g. downloading)  */
-            dateAdded: data.dateAdded, /* Date Added (integer): number of milliseconds unix time */
+            dateAdded: data.addedDate * 1000, /* Date Added (integer): number of milliseconds unix time */
             dateCompleted: data.doneDate, /* Date Completed (integer): number of milliseconds unix time */
             savePath: data.downloadDir, /* Save Path (string): the path at which the downloaded content is saved */
         });
+
+
 
         /*
          * Additional data that does not match the default scheme above
          * may be added as extra fields. This can be done in the manner below
          */
         this.status = data.status;
+
+        // Extra Field: Recheck Progress aka Verifying.
+        if(this.isStatusVerifying()) {
+            this.percent = data.recheckProgress * 1000;
+        }
+
+
 
     }
 
@@ -53,6 +62,12 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      */
     TorrentT.prototype = Object.create(AbstractTorrent.prototype);
 
+
+    /*
+    */
+    TorrentT.prototype.isStatusVerifying = function () {
+        return this.status === 2;
+    };
 
     /**
      * Returns whether this torrent is in an error state. Torrents in this group shows
@@ -69,7 +84,7 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusStopped
      */
     TorrentT.prototype.isStatusStopped = function() {
-        return
+        return this.status === 0 && this.percent !== 1000;
     };
 
     /**
@@ -88,7 +103,8 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusCompleted
      */
     TorrentT.prototype.isStatusCompleted = function() {
-        return
+        return this.percent === 1000 && this.status === 0;
+
     };
 
     /**
@@ -97,7 +113,7 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusDownloading
      */
     TorrentT.prototype.isStatusDownloading = function() {
-        return this.status === 4;
+        return this.status === 4 || this.status === 2;
     };
 
     /**
@@ -115,8 +131,10 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusDownloading
      */
     TorrentT.prototype.isStatusPaused = function() {
-        return this.status === 0;
+        return ;
     };
+
+
 
     /**
      * Optionally returns the color for the progress bar used as a class in CSS.
@@ -133,16 +151,23 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      * @return {string} status
      */
     TorrentT.prototype.statusText = function () {
-        switch(this.status) {
-            case 4:
-                return 'Downloading';
-            case 0:
-                return 'Paused';
-            case 6:
-                return 'Uploading'
-            default:
-                return 'Not Specified'
+
+        if (this.isStatusSeeding()){
+            return 'Seeding';
+        } else if (this.isStatusDownloading()){
+            return 'Downloading';
+        } else if (this.isStatusError()){
+            return 'Error';
+        } else if (this.isStatusCompleted()){
+            return 'Completed';
+        } else if (this.isStatusPaused()){
+            return 'Paused';
+        } else if (this.isStatusStopped()){
+            return 'Stopped';
+        } else {
+            return 'Unknown';
         }
+
     }
     /**
      * Return the constructor function (only change the class name)
