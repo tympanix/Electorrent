@@ -143,7 +143,11 @@ angular.module('torrentApp')
             });
         }
 
-        function doAction(action, hashes) {
+        function doAction(action, torrents) {
+            var hashes = torrents.map(function(torrent) {
+                return torrent.hash
+            })
+
             return $resource(data.url + '.' + '?action=:action&token=:token&t=:t', {
                 action: action,
                 hash: hashes,
@@ -153,62 +157,66 @@ angular.module('torrentApp')
             }).get().$promise;
         }
 
-        this.start = function(hashes) {
-            return doAction('start', hashes)
+        this.start = function(torrents) {
+            return doAction('start', torrents)
         }
 
-        this.stop = function(hashes) {
-            return doAction('stop', hashes)
+        this.stop = function(torrents) {
+            return doAction('stop', torrents)
         }
 
-        this.pause = function(hashes) {
-            return doAction('pause', hashes)
+        this.pause = function(torrents) {
+            return doAction('pause', torrents)
         }
 
-        this.remove = function(hashes) {
-            return doAction('remove', hashes)
+        this.remove = function(torrents) {
+            return doAction('remove', torrents)
         }
 
-        this.removedata = function(hashes) {
-            return doAction('removedata', hashes)
+        this.removedata = function(torrents) {
+            return doAction('removedata', torrents)
         }
 
-        this.removetorrent = function(hashes) {
-            return doAction('removetorrent', hashes)
+        this.removetorrent = function(torrents) {
+            return doAction('removetorrent', torrents)
         }
 
-        this.removedatatorrent = function(hashes) {
-            return doAction('removedatatorrent', hashes)
+        this.removedatatorrent = function(torrents) {
+            return doAction('removedatatorrent', torrents)
         }
 
-        this.forcestart = function(hashes) {
-            return doAction('forcestart', hashes)
+        this.forcestart = function(torrents) {
+            return doAction('forcestart', torrents)
         }
 
-        this.recheck = function(hashes) {
-            return doAction('recheck', hashes)
+        this.recheck = function(torrents) {
+            return doAction('recheck', torrents)
         }
 
-        this.queueup = function(hashes) {
-            return doAction('queueup', hashes)
+        this.queueup = function(torrents) {
+            return doAction('queueup', torrents)
         }
 
-        this.queuedown = function(hashes) {
-            return doAction('queuedown', hashes)
+        this.queuedown = function(torrents) {
+            return doAction('queuedown', torrents)
         }
 
-        this.getprops = function(hashes) {
-            return doAction('getprops', hashes)
+        this.getprops = function(torrents) {
+            return doAction('getprops', torrents)
         }
 
-        this.getFileDownloadUrl = function(torrent,file) {
+        this.getFileDownloadUrl = function(torrent, file) {
             if(torrent.streamId && this.settingsMap['webui.uconnect_enable'] && file.size === file.sizeDownloaded) {
                 return '/proxy?sid=' + torrent.streamId + '&file=' + file.hash + '&disposition=ATTACHMENT&service=DOWNLOAD&qos=0';
             }
             return undefined;
         }
 
-        this.setLabel = function(hashes, label) {
+        this.setLabel = function(torrents, label) {
+            var hashes = torrents.map(function(torrent) {
+                return torrent.hash
+            })
+
             var encodedQuery = '';
             var i;
             for (i = 0; i < hashes.length; i++) {

@@ -91,12 +91,13 @@ angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__Torre
 
     /**
      * Example action function. You will have to implement several of these to support the various
-     * actions in your bittorrent client. Each action is supplied an array of the hashes on which
-     * the action should be applied.
-     * @param {array} hashes
+     * actions in your bittorrent client. Each action is supplied an array of the torrents on which
+     * the action should be applied. The torrent object is the same type of object which you implemented
+     * alongside your service (e.g. TorrentU for µTorrent, TorrentQ for qBittorrent ect...)
+     * @param {array} torrents
      * @return {promise} actionIsDone
      */
-    this.start = function(hashes) {
+    this.start = function(torrents) {
         return
     }
 
