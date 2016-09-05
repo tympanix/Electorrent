@@ -1,6 +1,10 @@
 platform:
   - x64
 
+branches:
+  only:
+    - master
+
 environment:
   GH_TOKEN:
     secure: HdYHw9jv1Fk2RHmaZ5RKizMi6DD7Ckyu4cPZ7ZofydXaVA0fvCyGm7cSBAP+2PXp
