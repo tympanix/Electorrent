@@ -153,22 +153,16 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @param {string} filename
      * @return {promise} isAdded
      */
-    this.uploadTorrent = function(blob, filename) {
-        // TODO: Submit torrent file as base 64
+    this.uploadTorrent = function(buffer, filename) {
+        // TODO: Still not working!!!
         var defer = $q.defer();
 
-        var reader = new window.FileReader();
-        reader.readAsDataURL(blob);
-
-        reader.onloadend = function() {
-            var base64 = reader.result
-            doAction('load_raw_start', [{ base64: base64 }])
-            .then(function() {
-                defer.resolve()
-            }).catch(function() {
-                defer.reject()
-            })
-        }
+        doAction('load_raw_start', [buffer.toString('base64')])
+        .then(function() {
+            defer.resolve()
+        }).catch(function() {
+            defer.reject()
+        })
 
         return defer.promise;
     }
