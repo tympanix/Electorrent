@@ -85,7 +85,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $scope.torrents = {};
         $scope.arrayTorrents = [];
         $scope.labels = [];
-        $scope.update();
+        $scope.update(true);
     }
 
     function stopTimer(){
@@ -198,8 +198,8 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         //console.log("Selected", selected);
     }
 
-    $scope.update = function() {
-        var q = $scope.$btclient.torrents()
+    $scope.update = function(fullupdate) {
+        var q = $scope.$btclient.torrents(fullupdate)
         q.then(function(torrents){
             newTorrents(torrents);
             deleteTorrents(torrents);
