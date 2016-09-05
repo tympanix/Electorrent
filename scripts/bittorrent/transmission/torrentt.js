@@ -52,8 +52,6 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
             this.percent = data.recheckProgress * 1000;
         }
 
-
-
     }
 
     /*
@@ -151,7 +149,6 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      * @return {string} status
      */
     TorrentT.prototype.statusText = function () {
-
         if (this.isStatusSeeding()){
             return 'Seeding';
         } else if (this.isStatusDownloading()){
