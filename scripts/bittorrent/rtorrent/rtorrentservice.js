@@ -120,12 +120,18 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         };
 
         torrents.changed = data.map(build);
+        torrents.labels = torrents.changed.reduce(fetchLabels, [])
 
         return torrents
     }
 
     function build(array) {
         return new TorrentR(array);
+    }
+
+    function fetchLabels(prev, current) {
+        if (current.label) prev.push(current.label)
+        return prev
     }
 
     /**
