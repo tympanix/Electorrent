@@ -1,6 +1,7 @@
 'use strict';
 
-angular.module('torrentApp').service('transmissionService', ["$http", "$q", "TorrentT", "notificationService", function($http, $q, TorrentT, $notify) {
+angular.module('torrentApp')
+    .service('transmissionService', ["$http", "$q", "TorrentT", "notificationService", function($http, $q, TorrentT, $notify) {
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -19,6 +20,8 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
         session: undefined,
         encoded: '',
     }
+
+    var tempDeleted = [];
 
 /*    const httpConfig = {
         headers:{
@@ -42,11 +45,9 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
     }
 
     function updateSession(session) {
-        if (!session) {
-            return;
-        }
-        console.info("New session", session);
+        if (!session) return;
         config.session = session;
+        console.log("New session", config.session);
     }
 
     function saveConnection(ip, port, encoded, session) {
@@ -76,7 +77,7 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
                 'Authorization': "Basic " + encoded
             }
 
-        }).success(function(str) {
+        }).success(function(str, status, headers) {
             var session = headers('X-Transmission-Session-Id');
             saveConnection(ip, port, encoded, session);
             defer.resolve(str);
@@ -137,7 +138,6 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
             defer.resolve(processData(data));
         }).error(function(err){
             defer.reject(err);
-
         });
 
         return defer.promise;
@@ -167,8 +167,39 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function(magnet) {
-        return
+        var defer = $q.defer();
+
+        // Torrent-add
+        var data = {
+            "arguments": {
+                "filename": magnet
+            },
+            "method": "torrent-add"
+        }
+
+        return $http.post(url(), data, {
+            headers:{
+                'Authorization':'Basic ' + config.encoded,
+                'X-Transmission-Session-Id': config.session
+            }
+        }).success(function(responeData, status, headers){
+            var session = headers('X-Transmission-Session-Id');
+            updateSession(session);
+            if ('torrent-duplicate' in responseData.arguments) throw new Error('torrentDuplicate')
+            defer.resolve(processData(data));
+        }).catch(function(err){
+            if (err.message === 'torrentDuplicate'){
+                $notify.alert('Duplicate!',' This torrent is already added. Name: '
+                + responseData.arguments['torrent-duplicate'].name);
+            } else {
+                $notify.alert('Undefined error!', err.msg);
+            }
+
+        })
+
     }
+
+
 
     /**
      * Add a torrent file with the .torrent extension to the client through the API. Should
@@ -191,42 +222,37 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
         });
     }
 
-    function doAction(command, hashes, mutator, mutatorValue) {
-        // Check if mutator exists.
-        if(!mutator || !mutatorValue) {
-            var data = {
-                "arguments": {
-            	     "ids": hashes,
-                     mutator: mutatorValue
-                 },
-                "method": command
-            	 }
-        } else {
-            var data = {
-                "arguments": {
-            	     "ids": hashes
-                 },
-                "method": command
-            	 }
-        }
-
-
-
-        if(!Array.isArray(hashes)) {
+    function doAction(command, torrents, mutator, value) {
+        if (!Array.isArray(torrents)) {
             return $notify.alert('Error', 'Action was passed incorrect arguments')
         }
 
-        var promises = [];
-        hashes.forEach(function(hash) {
-            var req = $http.post(url(),data,{
-                headers:{
-                    'Authorization':'Basic ' + config.encoded,
-                    'X-Transmission-Session-Id': config.session
-                }
-            })
-            promises.push(req);
-        });
-        return $q.all(promises);
+        var torrents = torrents || [];
+
+        var hashes = torrents.map(function(torrent) {
+            return torrent.hash
+        })
+
+        var data = {
+            "arguments": {},
+            "method": command
+        }
+
+        if (hashes.length){
+            data.arguments.ids = hashes;
+        }
+
+        if (mutator) {
+            data.arguments[mutator] = value;
+        }
+
+        return $http.post(url(), data, {
+            headers: {
+                'Authorization': 'Basic ' + config.encoded,
+                'X-Transmission-Session-Id': config.session
+            }
+        })
+
     }
 
     /**
@@ -236,28 +262,44 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
      * @param {array} hashes
      * @return {promise} actionIsDone
      */
-    this.start = function(hashes) {
-        return doAction('torrent-start', hashes);
+    this.start = function(torrents) {
+        return doAction('torrent-start', torrents);
     }
 
-    this.stop = function(hashes) {
-        return doAction('torrent-stop', hashes);
+    this.stop = function(torrents) {
+        return doAction('torrent-stop', torrents);
     }
 
-    this.verify = function(hashes) {
-        return doAction('torrent-verify', hashes);
+    this.verify = function(torrents) {
+        return doAction('torrent-verify', torrents);
     }
 
-    this.priorityLow = function(hashes) {
-        return doAction('torrent-set', hashes, 'priority-low', hashes);
+    this.pauseAll = function() {
+        return doAction('torrent-stop');
     }
 
-    this.priorityNormal = function(hashes) {
-        return doAction('torrent-set', hashes, 'priority-normal', hashes);
+    this.resumeAll = function() {
+        return doAction('torrent-start');
     }
 
-    this.priorityHigh = function(hashes) {
-        return doAction('torrent-set', hashes, 'priority-high', hashes);
+    this.queueUp = function(torrents) {
+        return doAction('queue-move-up', torrents);
+    }
+
+    this.queueDown = function(torrents) {
+        return doAction('queue-move-down', torrents);
+    }
+
+    this.setCategory = function(torrents, label) {
+        return ;
+    }
+
+    this.remove = function(torrents) {
+        return doAction('torrent-remove', torrents)
+    }
+
+    this.removeAndLocal = function(torrents) {
+        return doAction('torrent-remove', torrents, 'delete-local-data', true)
     }
 
 
@@ -334,7 +376,7 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
             click: this.verify,
             icon: 'checkmark'
         },
-        {
+        /*{
             label: 'Priority',
             menu: [
                 {
@@ -351,7 +393,7 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
                 }
             ]
 
-        },
+        }*/,
         {
             label: 'Move Up Queue',
             click: this.queueUp,
@@ -364,8 +406,18 @@ angular.module('torrentApp').service('transmissionService', ["$http", "$q", "Tor
         },
         {
             label: 'Remove',
-            click: this.delete,
-            icon: 'remove'
+            menu: [
+                {
+                    label: 'Torrent',
+                    icon: 'remove',
+                    click: this.remove
+                },
+                {
+                    label: 'Torrent and Local Data',
+                    icon: 'remove',
+                    click: this.removeAndLocal
+                }
+            ]
         }
     ];
 
