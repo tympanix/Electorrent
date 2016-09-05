@@ -91,7 +91,8 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
             !this.active &&
             !this.open &&
             !this.checking &&
-            !this.checked
+            !this.checked &&
+            !this.complete
         );
     };
 
