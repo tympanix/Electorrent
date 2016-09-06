@@ -313,12 +313,38 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         //console.log("Torrents", torrents);
     }
 
+    function reassignSelected() {
+        var newSelected = []
+        selected.forEach(function(torrent){
+            var delegate = $scope.torrents[torrent.hash];
+            if (delegate){
+                delegate.selected = true
+                newSelected.push(delegate)
+            }
+        })
+        selected = newSelected
+        reassignLastSelected()
+    }
+
+    function reassignLastSelected() {
+        if(!lastSelected) return
+        var lastDelegate = $scope.torrents[lastSelected.hash];
+        if(lastDelegate) {
+            lastDelegate.selected = true
+            lastSelected = lastDelegate
+        } else {
+            lastSelected = null
+        }
+    }
+
     function newTorrents(torrents){
         if (torrents.all && torrents.all.length > 0) {
+            $scope.torrents = {};
             for (var i = 0; i < torrents.all.length; i++){
                 var torrent = torrents.all[i];
                 $scope.torrents[torrent.hash] = torrent;
             }
+            reassignSelected()
             refreshTorrents()
         }
     }
