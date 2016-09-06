@@ -338,7 +338,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     function newTorrents(torrents){
-        if (torrents.all && torrents.all.length > 0) {
+        if (torrents.all && torrents.all.length >= 0) {
             $scope.torrents = {};
             for (var i = 0; i < torrents.all.length; i++){
                 var torrent = torrents.all[i];
@@ -350,7 +350,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     function deleteTorrents(torrents){
-        if (torrents.deleted && torrents.deleted.length >= 0) {
+        if (torrents.deleted && torrents.deleted.length > 0) {
             for (var i = 0; i < torrents.deleted.length; i++) {
                 delete $scope.torrents[torrents.deleted[i]];
             }
