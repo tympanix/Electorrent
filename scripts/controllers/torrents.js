@@ -323,6 +323,18 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             }
         })
         selected = newSelected
+        reassignLastSelected()
+    }
+
+    function reassignLastSelected() {
+        if(!lastSelected) return
+        var lastDelegate = $scope.torrents[lastSelected.hash];
+        if(lastDelegate) {
+            lastDelegate.selected = true
+            lastSelected = lastDelegate
+        } else {
+            lastSelected = null
+        }
     }
 
     function newTorrents(torrents){
