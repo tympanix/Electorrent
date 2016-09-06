@@ -350,7 +350,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     function deleteTorrents(torrents){
-        if (torrents.deleted && torrents.deleted.length > 0) {
+        if (torrents.deleted && torrents.deleted.length >= 0) {
             for (var i = 0; i < torrents.deleted.length; i++) {
                 delete $scope.torrents[torrents.deleted[i]];
             }
