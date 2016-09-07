@@ -113,6 +113,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
 
     function processData(data) {
         var torrents = {
+            dirty: true,
             labels: [],
             all: [],
             changed: [],
