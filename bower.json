@@ -27,9 +27,9 @@
     "ngInfiniteScroll": "^1.2.2",
     "angular-table-resize": "^1.0.4",
     "angular-marked": "^1.2.1",
-    "angular-xmlrpc": "https://github.com/Tympanix/angular-xmlrpc.git#^1.0.2"
+    "angular-xmlrpc": "https://github.com/Tympanix/angular-xmlrpc.git#^1.0.3"
   },
   "resolutions": {
-    "angular": "^1.5.6"
+    "angular": "1.5.8"
   }
 }
