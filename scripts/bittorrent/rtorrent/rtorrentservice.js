@@ -168,7 +168,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         return defer.promise;
     }
 
-    function doAction(action, torrents) {
+    function doAction(action, torrents, param) {
         var defer = $q.defer();
 
         var hashes = torrents.map(function(torrent) {
@@ -178,10 +178,14 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         var calls = []
 
         hashes.forEach(function(hash) {
-            calls.push({
+            var call = {
                 'methodName': action,
                 'params': [hash]
-            })
+            }
+
+            if (param) call.params.push(param)
+
+            calls.push(call)
         })
 
         $xmlrpc.callMethod('system.multicall', [calls])
@@ -226,6 +230,11 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         return doAction('d.open', hashes);
     }
 
+    this.label = function(torrents, label) {
+        return doAction('d.set_custom1', torrents, label)
+    }
+
+
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
      * You may customize the GUI to your liking or to better accommodate the specific bittorrent client.
@@ -261,7 +270,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         },
         {
             label: 'Labels',
-            click: this.setCategory,
+            click: this.label,
             type: 'labels'
         }
     ]
