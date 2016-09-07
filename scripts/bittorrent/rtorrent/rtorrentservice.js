@@ -183,7 +183,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
                 'params': [hash]
             }
 
-            if (param) call.params.push(param)
+            if (param !== undefined) call.params.push(param)
 
             calls.push(call)
         })
@@ -256,7 +256,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     }
 
     this.priority.off = function(torrents) {
-        return doAction('d.set_priority', torrents, 1)
+        return doAction('d.set_priority', torrents, 0)
     }
 
 
