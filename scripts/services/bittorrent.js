@@ -38,8 +38,7 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
     this.uploadFromClipboard = function() {
         var magnet = electron.clipboard.readText();
-
-        // TODO: Lav et array med startværdier
+        
         var protocol = ['magnet', 'http'];
 
         var supported = protocol.some(function(protocol) {

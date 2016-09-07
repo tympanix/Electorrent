@@ -151,8 +151,7 @@ angular.module('torrentApp')
             changed: [],
             deleted: []
         };
-        var newTorrents = data.arguments.torrents;
-        torrents.changed = newTorrents.map(build);
+        torrents.all = data.arguments.torrents.map(build);
         return torrents;
     }
 
@@ -182,11 +181,11 @@ angular.module('torrentApp')
                 'Authorization':'Basic ' + config.encoded,
                 'X-Transmission-Session-Id': config.session
             }
-        }).success(function(responeData, status, headers){
+        }).success(function(responseData, status, headers){
             var session = headers('X-Transmission-Session-Id');
             updateSession(session);
             if ('torrent-duplicate' in responseData.arguments) throw new Error('torrentDuplicate')
-            defer.resolve(processData(data));
+            defer.resolve();
         }).catch(function(err){
             if (err.message === 'torrentDuplicate'){
                 $notify.alert('Duplicate!',' This torrent is already added. Name: '
@@ -210,24 +209,52 @@ angular.module('torrentApp')
      * @param {string} filename
      * @return {promise} isAdded
      */
-    this.uploadTorrent = function(blob, filename) {
-        var formData = new FormData();
-        formData.append('torrents', blob, filename);
+    this.uploadTorrent = function(buffer, filename) {
+        var blob = new Blob([buffer]);
 
-        return $http.post('__url__', formData, {
-            headers: { 'Content-Type': undefined },
-            transformRequest: function(data) {
-                return data;
+        // Convert blob file object to base64 encoded.
+        var base64data;
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = function() {
+            base64data = reader.result;
+           }
+        
+
+        // Torrent-add
+        var data = {
+           "arguments": {
+               "metainfo": base64data
+           },
+           "method": "torrent-add"
+           }
+
+        return $http.post(url(), data, {
+            headers: {
+                'Authorization': 'Basic ' + config.encoded,
+                'X-Transmission-Session-Id': config.session
             }
-        });
+        }).success(function(responseData, status, headers){
+            var session = headers('X-Transmission-Session-Id');
+            updateSession(session);
+            if ('torrent-duplicate' in responseData.arguments) throw new Error('torrentDuplicate')
+            defer.resolve();
+        }).catch(function(err){
+            if (err.message === 'torrentDuplicate'){
+                $notify.alert('Duplicate!',' This torrent is already added. Name: '
+                + responseData.arguments['torrent-duplicate'].name);
+            } else {
+                $notify.alert('Undefined error!', err.msg);
+            }
+
+        })
+
     }
 
     function doAction(command, torrents, mutator, value) {
         if (!Array.isArray(torrents)) {
             return $notify.alert('Error', 'Action was passed incorrect arguments')
         }
-
-        var torrents = torrents || [];
 
         var hashes = torrents.map(function(torrent) {
             return torrent.hash
@@ -255,6 +282,10 @@ angular.module('torrentApp')
 
     }
 
+    function doGlobalAction(command) {
+        doAction(command, []);
+    }
+
     /**
      * Example action function. You will have to implement several of these to support the various
      * actions in your bittorrent client. Each action is supplied an array of the hashes on which
@@ -275,11 +306,11 @@ angular.module('torrentApp')
     }
 
     this.pauseAll = function() {
-        return doAction('torrent-stop');
+        return doGlobalAction('torrent-stop');
     }
 
     this.resumeAll = function() {
-        return doAction('torrent-start');
+        return doGlobalAction('torrent-start');
     }
 
     this.queueUp = function(torrents) {
