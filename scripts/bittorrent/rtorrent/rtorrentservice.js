@@ -206,28 +206,28 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @param {array} hashes
      * @return {promise} actionIsDone
      */
-    this.start = function(hashes) {
-        return doAction('d.start', hashes);
+    this.start = function(torrents) {
+        return doAction('d.start', torrents);
     }
 
-    this.pause = function(hashes) {
-        return doAction('d.pause', hashes);
+    this.pause = function(torrents) {
+        return doAction('d.pause', torrents);
     }
 
-    this.resume = function(hashes) {
-        return doAction('d.resume', hashes);
+    this.resume = function(torrents) {
+        return doAction('d.resume', torrents);
     }
 
-    this.stop = function(hashes) {
-        return doAction('d.try_stop', hashes);
+    this.stop = function(torrents) {
+        return doAction('d.try_stop', torrents);
     }
 
-    this.close = function(hashes) {
-        return doAction('d.close', hashes);
+    this.close = function(torrents) {
+        return doAction('d.close', torrents);
     }
 
-    this.open = function(hashes) {
-        return doAction('d.open', hashes);
+    this.open = function(torrents) {
+        return doAction('d.open', torrents);
     }
 
     this.label = function(torrents, label) {
