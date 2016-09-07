@@ -155,14 +155,14 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} isAdded
      */
     this.uploadTorrent = function(buffer, filename) {
-        // TODO: Still not working!!!
         var defer = $q.defer();
 
-        doAction('load_raw_start', [buffer.toString('base64')])
-        .then(function() {
-            defer.resolve()
-        }).catch(function() {
-            defer.reject()
+        $xmlrpc.callMethod('load_raw_start', [buffer])
+        .then(function(data) {
+            defer.resolve(data);
+        }).catch(function(err) {
+            console.error("Action error", err);
+            defer.reject(err);
         })
 
         return defer.promise;
