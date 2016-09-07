@@ -121,7 +121,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         };
 
         torrents.all = data.map(build);
-        torrents.labels = torrents.changed.reduce(fetchLabels, [])
+        torrents.labels = torrents.all.reduce(fetchLabels, [])
 
         return torrents
     }
