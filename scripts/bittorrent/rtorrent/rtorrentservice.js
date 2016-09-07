@@ -61,7 +61,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} connection
      */
     this.connect = function(ip, port, user, pass) {
-        var defer = $q.defer();
 
         $xmlrpc.config({
             hostName: url(ip, port),
@@ -71,17 +70,14 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         var encoded = new Buffer(`${user}:${pass}`).toString('base64');
         $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
 
-        $xmlrpc.callMethod('system.client_version')
-        .then(function(data) {
-            config.version = data;
-            console.log("Login success!", data);
-            defer.resolve();
-        }).catch(function(err) {
-            console.error("Login error", err);
-            defer.reject(err);
-        })
-
-        return defer.promise;
+        return $xmlrpc.callMethod('system.client_version')
+            .then(function(data) {
+                config.version = data;
+                return $q.resolve('Sucessfully connected to rTorrent');
+            }).catch(function(err) {
+                console.error("Could not connect to rTorrent", err);
+                return $q.reject(err);
+            })
     }
 
     /**
@@ -98,17 +94,15 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} data
      */
     this.torrents = function() {
-        var defer = $q.defer();
 
-        $xmlrpc.callMethod('d.multicall', ['main', ...fields, ...custom])
-        .then(function(data) {
-            defer.resolve(processData(data));
-        }).catch(function(err) {
-            console.error("Torrent error", err);
-            defer.reject(err);
-        })
+        return $xmlrpc.callMethod('d.multicall', ['main', ...fields, ...custom])
+            .then(function(data) {
+                return $q.resolve(processData(data));
+            }).catch(function(err) {
+                console.error("Torrent error", err);
+                return $q.reject(err);
+            })
 
-        return defer.promise;
     }
 
     function processData(data) {
@@ -155,21 +149,18 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} isAdded
      */
     this.uploadTorrent = function(buffer, filename) {
-        var defer = $q.defer();
 
         $xmlrpc.callMethod('load_raw_start', [buffer])
         .then(function(data) {
-            defer.resolve(data);
+            return $q.resolve(data);
         }).catch(function(err) {
             console.error("Action error", err);
-            defer.reject(err);
+            return $q.reject(err);
         })
 
-        return defer.promise;
     }
 
     function doAction(action, torrents, param) {
-        var defer = $q.defer();
 
         var hashes = torrents.map(function(torrent) {
             return torrent.hash
@@ -188,15 +179,14 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
             calls.push(call)
         })
 
-        $xmlrpc.callMethod('system.multicall', [calls])
-        .then(function(data) {
-            defer.resolve(data);
-        }).catch(function(err) {
-            console.error("Action error", err);
-            defer.reject(err);
-        })
+        return $xmlrpc.callMethod('system.multicall', [calls])
+            .then(function(data) {
+                return $q.resolve(data);
+            }).catch(function(err) {
+                console.error("Action error", err);
+                return $q.reject(err);
+            })
 
-        return defer.promise
     }
 
     /**
