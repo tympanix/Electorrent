@@ -238,6 +238,27 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         return doAction('d.erase', torrents)
     }
 
+    this.recheck = function(torrents) {
+        return doAction('d.check_hash', torrents)
+    }
+
+    this.priority = {}
+    this.priority.high = function(torrents) {
+        return doAction('d.set_priority', torrents, 3)
+    }
+
+    this.priority.normal = function(torrents) {
+        return doAction('d.set_priority', torrents, 2)
+    }
+
+    this.priority.low = function(torrents) {
+        return doAction('d.set_priority', torrents, 1)
+    }
+
+    this.priority.off = function(torrents) {
+        return doAction('d.set_priority', torrents, 1)
+    }
+
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
@@ -294,14 +315,25 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
             icon: 'checkmark'
         },
         {
-            label: 'Move Up Queue',
-            click: this.queueUp,
-            icon: 'arrow up'
-        },
-        {
-            label: 'Move Queue Down',
-            click: this.queueDown,
-            icon: 'arrow down'
+            label: 'Priority',
+            menu: [
+                {
+                    label: 'High',
+                    click: this.priority.high
+                },
+                {
+                    label: 'Normal',
+                    click: this.priority.normal
+                },
+                {
+                    label: 'Low',
+                    click: this.priority.low
+                },
+                {
+                    label: 'Don\'t Download',
+                    click: this.priority.off
+                }
+            ]
         },
         {
             label: 'Remove',
