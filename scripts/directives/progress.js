@@ -29,11 +29,10 @@ angular.module("torrentApp").directive('progress', function() {
     }
 
     function link(scope, element /*, attrs*/ ) {
-        var torrent = scope.torrent;
 
         scope.$watch(function() {
-            return torrent.percent;
-        }, function() {
+            return scope.torrent;
+        }, function(torrent) {
             element.find('.bar').css('width', torrent.getPercentStr());
         });
     }
