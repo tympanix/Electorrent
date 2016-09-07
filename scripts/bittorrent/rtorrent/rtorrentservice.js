@@ -234,6 +234,10 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         return doAction('d.set_custom1', torrents, label)
     }
 
+    this.delete = function(torrents) {
+        return doAction('d.erase', torrents)
+    }
+
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
