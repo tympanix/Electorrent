@@ -198,17 +198,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         //console.log("Selected", selected);
     }
 
-    $scope.update = function(fullupdate) {
-        var q = $scope.$btclient.torrents(fullupdate)
-        q.then(function(torrents){
-            newTorrents(torrents);
-            deleteTorrents(torrents);
-            changeTorrents(torrents);
-            updateLabels(torrents);
-        });
-        return q;
-    };
-
     function getSelectedHashes(){
         var hashes = [];
         angular.forEach(selected, function(torrent){
@@ -337,8 +326,20 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         }
     }
 
+    $scope.update = function(fullupdate) {
+        var q = $scope.$btclient.torrents(fullupdate)
+        q.then(function(torrents){
+            newTorrents(torrents);
+            deleteTorrents(torrents);
+            changeTorrents(torrents);
+            updateLabels(torrents);
+        });
+
+        return q;
+    };
+
     function newTorrents(torrents){
-        if (torrents.all && torrents.all.length >= 0) {
+        if ((torrents.all && torrents.all.length > 0) || torrents.dirty === true) {
             $scope.torrents = {};
             for (var i = 0; i < torrents.all.length; i++){
                 var torrent = torrents.all[i];
