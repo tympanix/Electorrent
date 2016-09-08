@@ -157,8 +157,6 @@ angular.module('torrentApp')
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function(magnet) {
-        var defer = $q.defer();
-
         // Torrent-add
         var data = {
             "arguments": {
@@ -172,17 +170,18 @@ angular.module('torrentApp')
                 'Authorization':'Basic ' + config.encoded,
                 'X-Transmission-Session-Id': config.session
             }
-        }).success(function(responseData, status, headers){
-            var session = headers('X-Transmission-Session-Id');
+        }).then(function(response){
+            var session = response.headers('X-Transmission-Session-Id');
             updateSession(session);
-            if ('torrent-duplicate' in responseData.arguments) throw new Error('torrentDuplicate')
-            defer.resolve();
+            if ('torrent-duplicate' in response.data.arguments) return $q.reject('torrentDuplicate')
+            return $q.resolve();
         }).catch(function(err){
-            if (err.message === 'torrentDuplicate'){
+            if (err === 'torrentDuplicate'){
                 $notify.alert('Duplicate!',' This torrent is already added');
             } else {
-                $notify.alert('Undefined error!', err.msg);
+                $notify.alert('Undefined error!', err);
             }
+            return $q.reject()
 
         })
 
@@ -220,27 +219,28 @@ angular.module('torrentApp')
                "method": "torrent-add"
                }
 
-            return $http.post(url(), data, {
+            $http.post(url(), data, {
                 headers: {
                     'Authorization': 'Basic ' + config.encoded,
                     'X-Transmission-Session-Id': config.session
                 }
-            }).success(function(responseData, status, headers){
-                var session = headers('X-Transmission-Session-Id');
+            }).then(function(response){
+                var session = response.headers('X-Transmission-Session-Id');
                 updateSession(session);
-                if ('torrent-duplicate' in responseData.arguments) throw new Error('torrentDuplicate')
+                if ('torrent-duplicate' in response.data.arguments) return $q.reject('torrentDuplicate');
                 defer.resolve();
             }).catch(function(err){
-                if (err.message === 'torrentDuplicate'){
+                if (err === 'torrentDuplicate'){
                     $notify.alert('Duplicate!',' This torrent is already added.');
                 } else {
                     $notify.alert('Undefined error!', err.msg);
                 }
+                defer.reject();
 
             })
            }
 
-
+            return defer.promise;
 
     }
 
