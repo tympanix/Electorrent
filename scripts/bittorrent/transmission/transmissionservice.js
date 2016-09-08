@@ -21,15 +21,6 @@ angular.module('torrentApp')
         encoded: '',
     }
 
-    var tempDeleted = [];
-
-/*    const httpConfig = {
-        headers:{
-            'Authorization':'Basic ' + config.encoded,
-            'X-Transmission-Session-Id': config.session
-        }
-    }
-*/
     function url() {
         var ip, port, path;
         if (arguments.length <= 1){
@@ -81,7 +72,7 @@ angular.module('torrentApp')
             var session = headers('X-Transmission-Session-Id');
             saveConnection(ip, port, encoded, session);
             defer.resolve(str);
-        }).error(function(err, status, headers, config, statustext){
+        }).error(function(err, status, headers, config){
             if(status === 409){
                 var session = headers('X-Transmission-Session-Id');
                 saveConnection(ip, port, encoded, session);
@@ -114,10 +105,10 @@ angular.module('torrentApp')
 
         // downloadedEver and uploadedEver continue to count the second time you download that torrent.
         var fields = ['id','name','totalSize','percentDone', 'downloadedEver',
-        'uploadedEver', 'uploadRatio','rateUpload','rateDownload','eta','comment'
-        ,'peersConnected','maxConnectedPeers','peersGettingToUs','seedsGettingFromUs'
-        ,'queuePosition','status','addedDate','doneDate','downloadDir','recheckProgress'
-        , 'isFinished','priorities'];
+        'uploadedEver', 'uploadRatio','rateUpload','rateDownload','eta','comment',
+        'peersConnected','maxConnectedPeers','peersGettingToUs','seedsGettingFromUs',
+        'queuePosition','status','addedDate','doneDate','downloadDir','recheckProgress',
+        'isFinished','priorities'];
 
         var data = {
 
@@ -188,8 +179,7 @@ angular.module('torrentApp')
             defer.resolve();
         }).catch(function(err){
             if (err.message === 'torrentDuplicate'){
-                $notify.alert('Duplicate!',' This torrent is already added. Name: '
-                + responseData.arguments['torrent-duplicate'].name);
+                $notify.alert('Duplicate!',' This torrent is already added');
             } else {
                 $notify.alert('Undefined error!', err.msg);
             }
@@ -209,45 +199,48 @@ angular.module('torrentApp')
      * @param {string} filename
      * @return {promise} isAdded
      */
-    this.uploadTorrent = function(buffer, filename) {
+    this.uploadTorrent = function(buffer) {
+        var defer = $q.defer();
         var blob = new Blob([buffer]);
+        var base64data = '';
 
         // Convert blob file object to base64 encoded.
-        var base64data;
         var reader = new FileReader();
         reader.readAsDataURL(blob);
         reader.onloadend = function() {
-            base64data = reader.result;
+            /* The use of split is necessary because the reader returns the type of the data
+             * in the same string as the actual data, but we only need to send the actual data.*/
+            base64data = reader.result.split(',')[1];
+
+            // Torrent-add
+            var data = {
+               "arguments": {
+                   "metainfo": base64data
+               },
+               "method": "torrent-add"
+               }
+
+            return $http.post(url(), data, {
+                headers: {
+                    'Authorization': 'Basic ' + config.encoded,
+                    'X-Transmission-Session-Id': config.session
+                }
+            }).success(function(responseData, status, headers){
+                var session = headers('X-Transmission-Session-Id');
+                updateSession(session);
+                if ('torrent-duplicate' in responseData.arguments) throw new Error('torrentDuplicate')
+                defer.resolve();
+            }).catch(function(err){
+                if (err.message === 'torrentDuplicate'){
+                    $notify.alert('Duplicate!',' This torrent is already added.');
+                } else {
+                    $notify.alert('Undefined error!', err.msg);
+                }
+
+            })
            }
-        
 
-        // Torrent-add
-        var data = {
-           "arguments": {
-               "metainfo": base64data
-           },
-           "method": "torrent-add"
-           }
 
-        return $http.post(url(), data, {
-            headers: {
-                'Authorization': 'Basic ' + config.encoded,
-                'X-Transmission-Session-Id': config.session
-            }
-        }).success(function(responseData, status, headers){
-            var session = headers('X-Transmission-Session-Id');
-            updateSession(session);
-            if ('torrent-duplicate' in responseData.arguments) throw new Error('torrentDuplicate')
-            defer.resolve();
-        }).catch(function(err){
-            if (err.message === 'torrentDuplicate'){
-                $notify.alert('Duplicate!',' This torrent is already added. Name: '
-                + responseData.arguments['torrent-duplicate'].name);
-            } else {
-                $notify.alert('Undefined error!', err.msg);
-            }
-
-        })
 
     }
 
@@ -321,10 +314,6 @@ angular.module('torrentApp')
         return doAction('queue-move-down', torrents);
     }
 
-    this.setCategory = function(torrents, label) {
-        return ;
-    }
-
     this.remove = function(torrents) {
         return doAction('torrent-remove', torrents)
     }
@@ -375,11 +364,6 @@ angular.module('torrentApp')
                     click: this.resumeAll
                 }
             ]
-        },
-        {
-            label: 'Labels',
-            click: this.setCategory,
-            type: 'labels'
         }
     ]
 
@@ -424,7 +408,7 @@ angular.module('torrentApp')
                 }
             ]
 
-        }*/,
+        },*/
         {
             label: 'Move Up Queue',
             click: this.queueUp,
