@@ -34,6 +34,19 @@ angular.module('torrentApp')
             }
         }
 
+        this.torrentComplete = function(torrent) {
+            console.log("Sending notification!!!");
+
+            var torrentNotification = new Notification('Torrent Completed!', {
+                body: torrent.decodedName,
+                icon: 'img/electorrent-icon.png'
+            })
+
+            torrentNotification.onclick = () => {
+                console.log('Notification clicked')
+            }
+        }
+
         // Listen for incomming notifications from main process
         electron.ipc.on('notify', function(event, data){
             sendNotification(data.title, data.message, data.type || 'warning');
