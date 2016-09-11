@@ -21,7 +21,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.client = $scope.$btclient;
 
     $scope.filters = {
-        status: 'downloading'
+        status: 'all'
     };
 
     $rootScope.$on('show:draganddrop', function(event, show) {
@@ -338,13 +338,23 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         return q;
     };
 
+    function checkNotification(old, updated) {
+        if (!old || !updated) return
+        if (updated.percent === 1000 && old.percent < 1000) {
+            $notify.torrentComplete(old);
+        }
+    }
+
     function newTorrents(torrents){
         if ((torrents.all && torrents.all.length > 0) || torrents.dirty === true) {
-            $scope.torrents = {};
+            var torrentMap = {};
             for (var i = 0; i < torrents.all.length; i++){
                 var torrent = torrents.all[i];
-                $scope.torrents[torrent.hash] = torrent;
+                torrentMap[torrent.hash] = torrent;
+                var old = $scope.torrents[torrent.hash];
+                checkNotification(old, torrent);
             }
+            $scope.torrents = torrentMap;
             reassignSelected()
             refreshTorrents()
         }
@@ -364,8 +374,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             for (var i = 0; i < torrents.changed.length; i++) {
                 var torrent = torrents.changed[i];
                 var existing = $scope.torrents[torrent.hash];
+                checkNotification(existing, torrent);
 
-                if (existing){
+                if (existing) {
                     existing.update(torrent);
                 } else {
                     $scope.torrents[torrent.hash] = torrent;

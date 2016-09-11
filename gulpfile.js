@@ -41,7 +41,7 @@ gulp.task('build:app', function() {
 });
 
 gulp.task('build:static', function() {
-    return gulp.src(['./views/**/*', './lib/**/*', './css/fonts/**/**'], { base: './'})
+    return gulp.src(['./views/**/*', './lib/**/*', './css/fonts/**/*', './img/**/*'], { base: './'})
     .pipe(gulp.dest(OUT))
 })
 
