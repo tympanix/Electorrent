@@ -4,8 +4,23 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
 
     const config = electron.config;
 
-    this.settings = function() {
-        return config.settingsReference();
+    var settings = {
+        server: {
+            ip: '',
+            port: '',
+            user: '',
+            password: '',
+            type: '',
+        },
+        ui: {
+            resizeMode: '',
+            notifications: true
+        }
+    };
+
+    this.initSettings = function() {
+        var org = config.settingsReference();
+        angular.merge(settings, org)
     }
 
     // Angular wrapper for saving to config
@@ -24,15 +39,17 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
     }
 
     this.getAllSettings = function() {
-        return config.getAllSettings();
+        return settings;
     }
 
-    this.saveAllSettings = function(settings) {
+    this.saveAllSettings = function(newSettings) {
         var q = $q.defer();
+        angular.merge(settings, newSettings)
         config.saveAll(settings, function(err){
             if (err) q.reject(err)
             else q.resolve();
         });
+        console.log("Org settings", settings);
         return q.promise;
     }
 
