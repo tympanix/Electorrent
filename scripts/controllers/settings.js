@@ -31,8 +31,20 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     loadAllSettings();
 
+    $scope.$watch(function() {
+        return $scope.settings
+    }, function() {
+        console.log("Settings", $scope.settings);
+    });
+
     function loadAllSettings() {
-        $scope.settings = config.getAllSettings();
+        var settings = config.getAllSettings();
+
+        for(var k in settings) {
+            if(settings.hasOwnProperty(k)) {
+                $scope.settings[k] = settings[k];
+            }
+        }
 
         $scope.general = {
             magnets: electron.app.isDefaultProtocolClient('magnet')
@@ -53,6 +65,8 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     })
 
     function writeSettings() {
+        console.log("Settings to write", $scope.settings);
+        console.log("General", $scope.general);
         config.saveAllSettings($scope.settings)
             .then(function() {
                 $scope.close();
