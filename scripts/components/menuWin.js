@@ -130,12 +130,6 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bit
                     click() { electron.shell.openExternal('https://github.com/Tympanix/Electorrent'); }
                 },
                 {
-                    label: 'Test Notifications',
-                    click: function() {
-                        $notify.torrentComplete({ decodedName: 'Test' })
-                    }
-                },
-                {
                     label: 'Check For Updates',
                     click() { electron.updater.checkForUpdates(true) }
                 }
