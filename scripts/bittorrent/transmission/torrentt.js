@@ -46,6 +46,7 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
          * may be added as extra fields. This can be done in the manner below
          */
         this.status = data.status;
+        this.error = data.error;
 
         // Extra Field: Recheck Progress aka Verifying.
         if(this.isStatusVerifying()) {
@@ -73,7 +74,8 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusError
      */
     TorrentT.prototype.isStatusError = function() {
-        return
+        // Error = 0 means ok, 1 means tracker warn, 2 means tracker error, 3 local error.
+        return this.error !== 0;
     };
 
     /**
@@ -101,7 +103,7 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusCompleted
      */
     TorrentT.prototype.isStatusCompleted = function() {
-        return this.percent === 1000 && this.status === 0;
+        return this.percent === 1000 && this.status === 0 && this.error === 0;
 
     };
 
@@ -155,13 +157,13 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
             return 'Downloading';
         } else if (this.isStatusError()){
             return 'Error';
+        } else if (this.isStatusStopped()){
+            return 'Stopped';
         } else if (this.isStatusCompleted()){
             return 'Completed';
         } else if (this.isStatusPaused()){
             return 'Paused';
-        } else if (this.isStatusStopped()){
-            return 'Stopped';
-        } else {
+        }  else {
             return 'Unknown';
         }
 
