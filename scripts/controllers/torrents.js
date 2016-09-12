@@ -7,9 +7,11 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     var selected = [];
     var lastSelected = null;
     var timeout;
+    var reconnect;
 
     var settings = config.settings();
 
+    $scope.connectionLost = false;
     $scope.torrents = {};
     $scope.arrayTorrents = [];
     $scope.contextMenu = null;
@@ -72,13 +74,32 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         stopTimer();
     });
 
-    function startTimer(){
+    function startTimer(fullupdate){
         timeout = $timeout(function(){
             //console.info("Update!");
-            $scope.update().then(function(){
+            $scope.update(fullupdate)
+            .then(function(){
                 startTimer();
+                $scope.connectionLost = false;
+            }).catch(function() {
+                $scope.connectionLost = true;
+                startReconnect();
             });
         }, TIMEOUT);
+    }
+
+    function startReconnect() {
+        $notify.disableAll();
+        var data = config.getServer();
+        reconnect = $timeout(function() {
+            $scope.$btclient.connect(data.ip, data.port, data.user, data.password)
+            .then(function() {
+                $notify.enableAll();
+                startTimer(true);
+            }).catch(function() {
+                startReconnect()
+            })
+        }, TIMEOUT)
     }
 
     function resetAll() {
@@ -328,12 +349,12 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     $scope.update = function(fullupdate) {
         var q = $scope.$btclient.torrents(fullupdate)
-        q.then(function(torrents){
+        q.then(function(torrents) {
             newTorrents(torrents);
             deleteTorrents(torrents);
             changeTorrents(torrents);
             updateLabels(torrents);
-        });
+        })
 
         return q;
     };
