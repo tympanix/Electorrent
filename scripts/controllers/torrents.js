@@ -7,9 +7,11 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     var selected = [];
     var lastSelected = null;
     var timeout;
+    var reconnect;
 
-    var settings = config.settings();
+    var settings = config.getAllSettings();
 
+    $scope.connectionLost = false;
     $scope.torrents = {};
     $scope.arrayTorrents = [];
     $scope.contextMenu = null;
@@ -21,7 +23,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.client = $scope.$btclient;
 
     $scope.filters = {
-        status: 'downloading'
+        status: 'all'
     };
 
     $rootScope.$on('show:draganddrop', function(event, show) {
@@ -72,13 +74,32 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         stopTimer();
     });
 
-    function startTimer(){
+    function startTimer(fullupdate){
         timeout = $timeout(function(){
             //console.info("Update!");
-            $scope.update().then(function(){
+            $scope.update(fullupdate)
+            .then(function(){
                 startTimer();
+                $scope.connectionLost = false;
+            }).catch(function() {
+                $scope.connectionLost = true;
+                startReconnect();
             });
         }, TIMEOUT);
+    }
+
+    function startReconnect() {
+        $notify.disableAll();
+        var data = config.getServer();
+        reconnect = $timeout(function() {
+            $scope.$btclient.connect(data.ip, data.port, data.user, data.password)
+            .then(function() {
+                $notify.enableAll();
+                startTimer(true);
+            }).catch(function() {
+                startReconnect()
+            })
+        }, TIMEOUT)
     }
 
     function resetAll() {
@@ -328,23 +349,33 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     $scope.update = function(fullupdate) {
         var q = $scope.$btclient.torrents(fullupdate)
-        q.then(function(torrents){
+        q.then(function(torrents) {
             newTorrents(torrents);
             deleteTorrents(torrents);
             changeTorrents(torrents);
             updateLabels(torrents);
-        });
+        })
 
         return q;
     };
 
+    function checkNotification(old, updated) {
+        if (!old || !updated) return
+        if (updated.percent === 1000 && old.percent < 1000) {
+            $notify.torrentComplete(old);
+        }
+    }
+
     function newTorrents(torrents){
         if ((torrents.all && torrents.all.length > 0) || torrents.dirty === true) {
-            $scope.torrents = {};
+            var torrentMap = {};
             for (var i = 0; i < torrents.all.length; i++){
                 var torrent = torrents.all[i];
-                $scope.torrents[torrent.hash] = torrent;
+                torrentMap[torrent.hash] = torrent;
+                var old = $scope.torrents[torrent.hash];
+                checkNotification(old, torrent);
             }
+            $scope.torrents = torrentMap;
             reassignSelected()
             refreshTorrents()
         }
@@ -364,8 +395,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             for (var i = 0; i < torrents.changed.length; i++) {
                 var torrent = torrents.changed[i];
                 var existing = $scope.torrents[torrent.hash];
+                checkNotification(existing, torrent);
 
-                if (existing){
+                if (existing) {
                     existing.update(torrent);
                 } else {
                     $scope.torrents[torrent.hash] = torrent;

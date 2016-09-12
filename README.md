@@ -8,7 +8,9 @@
   <a href="https://github.com/Tympanix/Electorrent/releases/latest">
     <img src="https://img.shields.io/github/release/Tympanix/Electorrent.svg?maxAge=86400">
   </a>
-  <img src="https://img.shields.io/github/downloads/Tympanix/Electorrent/total.svg?maxAge=86400">
+  <a href="http://www.somsubhra.com/github-release-stats/?username=tympanix&repository=Electorrent">
+    <img src="https://img.shields.io/github/downloads/Tympanix/Electorrent/total.svg?maxAge=86400">
+  </a>
 </p>
 
 # Electorrent
