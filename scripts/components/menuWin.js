@@ -1,4 +1,4 @@
-angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bittorrent', function(electron, $rootScope, $bittorrent) {
+angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bittorrent', 'notificationService', function(electron, $rootScope, $bittorrent, $notify) {
 
     const template = [
         {

@@ -1,37 +1,42 @@
-angular.module("torrentApp").directive('checkbox', [function() {
-    return {
-        restrict: 'A',
-        scope: {
-            isChecked: '=',
-            onCheck: '&',
-            onUncheck: '&',
-            bind: '='
-        },
-        link: link
-    };
+'use strict'
 
-    function link(scope, element /*, attr*/){
-        $(element).checkbox({
-            onChecked: scope.onCheck,
-            onUnchecked: scope.onUncheck,
-            onChange: changeHandler(scope, element)
-        });
+angular.module("torrentApp").directive('toggle', function() {
 
-        scope.$watch(function() {return scope.isChecked; }, function(newValue){
-            if (newValue === true){
-                $(element).checkbox('check');
-            } else if (newValue === false){
-                $(element).checkbox('uncheck');
-            }
-        });
-    }
+    function controller() {
+        var vm = this;
 
-    function changeHandler(scope, element){
-        return function(){
-            if (scope.bind !== undefined){
-                scope.bind = $(element).checkbox('is checked');
-            }
+        // TODO: assert this is usefull ?
+        // if(angular.isUndefined(vm.ngModel)) { vm.ngModel = !!vm.ngModel; }
+
+        if (angular.isFunction(vm.checked)) { vm.ngModel = !!vm.checked(); }
+
+        vm.toggle = function() {
+            if (angular.isFunction(vm.disabled) && vm.disabled()) return;
+            vm.ngModel = !vm.ngModel;
         }
     }
 
-}]);
+    function link() {
+
+    }
+
+    return {
+        restrict: 'E',
+        replace: true,
+        transclude: true,
+        scope: {
+            checked: '&?',
+            disabled: '&?',
+            ngModel: '=ngModel'
+        },
+        controller: controller,
+        controllerAs: 'vm',
+        bindToController: true,
+        require: 'ngModel',
+        template: '<div class="ui toggle checkbox">' +
+            '<input type="checkbox" ng-model="vm.ngModel">' +
+            '<label ng-transclude></label>' +
+            '</div>',
+        link: link
+    };
+});
