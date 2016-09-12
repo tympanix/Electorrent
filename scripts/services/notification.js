@@ -1,7 +1,18 @@
 'use strict';
 
 angular.module('torrentApp')
-    .service('notificationService', ["$rootScope", "electron", function($rootScope, electron) {
+    .service('notificationService', ["$rootScope", "electron", "configService", function($rootScope, electron, config) {
+        var disableNotifications = false;
+
+        var settings = config.getAllSettings();
+
+        this.disableAll = function() {
+            disableNotifications = true;
+        }
+
+        this.enableAll = function() {
+            disableNotifications = false;
+        }
 
         this.alert = function(title, message) {
             sendNotification(title, message, "negative");
@@ -16,6 +27,7 @@ angular.module('torrentApp')
         }
 
         function sendNotification(title, message, type) {
+            if (disableNotifications) return;
             var notification = {
                 title: title,
                 message: message,
@@ -31,6 +43,24 @@ angular.module('torrentApp')
                 this.alert("Connection problem", "You entered an incorrent username/password")
             } else {
                 this.alert("Connection problem", "The connection could not be established")
+            }
+        }
+
+        this.torrentComplete = function(torrent) {
+            if (!settings.ui.notifications){
+                console.error("Notifications disabled");
+                return
+            } else {
+                console.info("Sending notification!");
+            }
+
+            var torrentNotification = new Notification('Torrent Completed!', {
+                body: torrent.decodedName,
+                icon: 'img/electorrent-icon.png'
+            })
+
+            torrentNotification.onclick = () => {
+                console.log('Notification clicked')
             }
         }
 
