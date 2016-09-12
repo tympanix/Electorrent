@@ -4,9 +4,7 @@
     <!-- Magnet links -->
     <div class="item">
         <div class="right floated middle aligned content">
-            <div checkbox class="ui toggle checkbox" bind="general.magnets" is-checked="general.magnets">
-                <input type="checkbox" tabindex="0" class="hidden">
-            </div>
+            <toggle ng-model="general.magnets"></toggle>
         </div>
         <i class="large magnet middle aligned icon"></i>
         <div class="middle aligned content">
@@ -35,6 +33,22 @@
             </div>
             <div class="description">
                 Changes how the torrent table behaves when resized
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="item">
+        <div class="right floated middle aligned content">
+            <toggle ng-model="settings.ui.notifications"></toggle>
+        </div>
+        <i class="large alarm middle aligned icon"></i>
+        <div class="middle aligned content">
+            <div class="header">
+                Notifications
+            </div>
+            <div class="description">
+                Enable desktop notifications
             </div>
         </div>
     </div>

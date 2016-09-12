@@ -1,18 +1,7 @@
 angular.module("torrentApp").controller("settingsController", ["$rootScope", "$scope", "$injector", "$bittorrent", "$btclients", "configService", "notificationService", "electron", function($rootScope, $scope, $injector, $bittorrent, $btclients, config, $notify, electron) {
 
     // External Settings reference
-    $scope.settings = {
-        server: {
-            ip: '',
-            port: '',
-            user: '',
-            password: '',
-            type: '',
-        },
-        ui: {
-            resizeMode: ''
-        }
-    };
+    $scope.settings = {};
 
     $scope.btclients = $btclients;
 
@@ -38,18 +27,11 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     });
 
     function loadAllSettings() {
-        var settings = config.getAllSettings();
-
-        for(var k in settings) {
-            if(settings.hasOwnProperty(k)) {
-                $scope.settings[k] = settings[k];
-            }
-        }
+        $scope.settings = config.getAllSettings();
 
         $scope.general = {
             magnets: electron.app.isDefaultProtocolClient('magnet')
         }
-
     }
 
     function subscribeToMagnets() {
