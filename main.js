@@ -1,4 +1,4 @@
-var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll", "hc.marked"]);
+var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll", "hc.marked", "xml-rpc"]);
 
 // Register torrent clients
 torrentApp.constant('$btclients', {
@@ -16,12 +16,19 @@ torrentApp.constant('$btclients', {
         name: 'Transmission',
         service: 'transmissionService',
         icon: 'transmission'
+    },
+    'rtorrent': {
+        name: 'rTorrent',
+        service: 'rtorrentService',
+        icon: 'rtorrent'
     }
 
 });
 
 // Configure the client
-torrentApp.run(["$rootScope", "$bittorrent", function($rootScope, $bittorrent){
+torrentApp.run(["$rootScope", "$bittorrent", "configService", function($rootScope, $bittorrent, config){
+    config.initSettings();
+    console.log("Init settings", config.getAllSettings());
     $rootScope.$btclient = $bittorrent.getClient();
 }]);
 

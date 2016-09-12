@@ -31,9 +31,9 @@ angular.module("torrentApp").directive('progress', function() {
     function link(scope, element /*, attrs*/ ) {
 
         scope.$watch(function() {
-            return scope.torrent;
+            return scope.torrent.percent;
         }, function(torrent) {
-            element.find('.bar').css('width', torrent.getPercentStr());
+            element.find('.bar').css('width', scope.torrent.getPercentStr());
         });
     }
 

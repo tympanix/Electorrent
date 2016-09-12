@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <div class="wrapper" ng-controller="torrentsController">
+    <div ng-if="connectionLost" class="popup">
+        <div class="content">
+            <h2 class="ui center aligned icon header">
+                <i class="plug icon"></i>
+                Connection Lost!
+            </h2>
+        </div>
+    </div>
     <div class="torrent sidebar">
         <ul class="nav">
             <li ng-click="filterByStatus('all')" ng-class="activeOn('all')">
