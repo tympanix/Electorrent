@@ -1,4 +1,4 @@
-angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bittorrent', function(electron, $rootScope, $bittorrent) {
+angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bittorrent', 'notificationService', function(electron, $rootScope, $bittorrent, $notify) {
 
     const template = [
         {
@@ -128,6 +128,12 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bit
                 {
                     label: 'Learn More',
                     click() { electron.shell.openExternal('https://github.com/Tympanix/Electorrent'); }
+                },
+                {
+                    label: 'Test Notifications',
+                    click: function() {
+                        $notify.torrentComplete({ decodedName: 'Test' })
+                    }
                 },
                 {
                     label: 'Check For Updates',
