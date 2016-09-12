@@ -38,8 +38,14 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
     this.uploadFromClipboard = function() {
         var magnet = electron.clipboard.readText();
+        
+        var protocol = ['magnet', 'http'];
 
-        if (!magnet.startsWith('magnet')) {
+        var supported = protocol.some(function(protocol) {
+            return magnet.startsWith(protocol);
+        })
+
+        if (!supported) {
             $notify.alert('Wait a minute?', 'Your clipboard doesn\'t contain a magnet link');
             return;
         }
