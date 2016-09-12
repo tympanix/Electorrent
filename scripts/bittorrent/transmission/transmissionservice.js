@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('torrentApp')
-    .service('transmissionService', ["$http", "$q", "TorrentT", "notificationService", function($http, $q, TorrentT, $notify) {
+    .service('transmissionService', ["$http", "$q", "TorrentT", "transmissionConfig", "notificationService", function($http, $q, TorrentT, transmissionConfig, $notify) {
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -20,6 +20,8 @@ angular.module('torrentApp')
         session: undefined,
         encoded: '',
     }
+
+    const fields = transmissionConfig.fields;
 
     function url() {
         var ip, port, path;
@@ -104,12 +106,14 @@ angular.module('torrentApp')
         var defer = $q.defer();
 
         // downloadedEver and uploadedEver continue to count the second time you download that torrent.
-        var fields = ['id','name','totalSize','percentDone', 'downloadedEver',
+
+
+        /*var fields = ['id','name','totalSize','percentDone', 'downloadedEver',
         'uploadedEver', 'uploadRatio','rateUpload','rateDownload','eta','comment',
         'peersConnected','maxConnectedPeers','peersGettingToUs','seedsGettingFromUs',
         'queuePosition','status','addedDate','doneDate','downloadDir','recheckProgress',
         'isFinished','priorities'];
-
+        */
         var data = {
 
             "arguments": {
@@ -391,24 +395,6 @@ angular.module('torrentApp')
             click: this.verify,
             icon: 'checkmark'
         },
-        /*{
-            label: 'Priority',
-            menu: [
-                {
-                    label: 'High',
-                    click: this.priorityHigh
-                },
-                {
-                    label: 'Normal',
-                    click: this.priorityNormal
-                },
-                {
-                    label: 'Low',
-                    click: this.priorityLow
-                }
-            ]
-
-        },*/
         {
             label: 'Move Up Queue',
             click: this.queueUp,
