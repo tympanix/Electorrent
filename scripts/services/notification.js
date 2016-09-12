@@ -2,6 +2,15 @@
 
 angular.module('torrentApp')
     .service('notificationService', ["$rootScope", "electron", function($rootScope, electron) {
+        var disableNotifications = false;
+
+        this.disableAll = function() {
+            disableNotifications = true;
+        }
+
+        this.enableAll = function() {
+            disableNotifications = false;
+        }
 
         this.alert = function(title, message) {
             sendNotification(title, message, "negative");
@@ -16,6 +25,7 @@ angular.module('torrentApp')
         }
 
         function sendNotification(title, message, type) {
+            if (disableNotifications) return;
             var notification = {
                 title: title,
                 message: message,
