@@ -53,7 +53,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         this.checking = data.is_hash_checking
         this.open = data.is_open
         this.complete = data.get_complete
-
+        this.message = data.get_message
     }
 
     function buildData(array) {
@@ -83,7 +83,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {boolean} isStatusError
      */
     TorrentR.prototype.isStatusError = function() {
-        return
+        return (!!this.message)
     };
 
     /**
@@ -183,10 +183,10 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
     TorrentR.prototype.statusColor = function () {
         if (this.isStatusSeeding()){
             return 'orange';
-        } else if (this.isStatusDownloading()){
-            return 'blue';
         } else if (this.isStatusError()){
             return 'error';
+        } else if (this.isStatusDownloading()){
+            return 'blue';
         } else if (this.isStatusPaused() || this.isStatusSeedPaused()){
             return 'grey';
         } else if (this.isStatusCompleted()){
@@ -205,12 +205,12 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
     TorrentR.prototype.statusText = function () {
         if (this.isStatusSeeding()){
             return 'Seeding';
+        } else if (this.isStatusError()){
+            return 'Error';
         } else if (this.isStatusSeedPaused()){
             return 'Paused Seed';
         } else if (this.isStatusDownloading()){
             return 'Downloading';
-        } else if (this.isStatusError()){
-            return 'Error';
         } else if (this.isStatusCompleted()){
             return 'Completed';
         } else if (this.isStatusPaused()){
