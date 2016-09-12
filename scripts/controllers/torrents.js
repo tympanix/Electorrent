@@ -9,7 +9,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     var timeout;
     var reconnect;
 
-    var settings = config.settings();
+    var settings = config.getAllSettings();
 
     $scope.connectionLost = false;
     $scope.torrents = {};
