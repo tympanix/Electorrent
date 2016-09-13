@@ -20,6 +20,8 @@ No more! Stop copy/pasting magnet links and uploading torrent files through a te
 Electorrent can connect to the following bittorrent clients:
 * [µTorrent](http://www.utorrent.com/)
 * [qBittorrent](http://www.qbittorrent.org/)
+* [Transmission](https://transmissionbt.com)
+* [rTorrent](https://rakshasa.github.io/rtorrent/)
 
 ## Downloads
 *Please note: I do not own code signing certificates which may results in anti-virus warnings!*
@@ -61,3 +63,8 @@ Electorrent can connect to the following bittorrent clients:
  * **What kind of technologies are used to build this?**
  
  The application is build around [Electron](http://electron.atom.io/), [AngularJS](https://angularjs.org/) and [SemanticUI](http://semantic-ui.com/)
+
+* **I can't connect to rTorrent what is wrong?**
+
+ When using rTorrent you have to configure your http server correctly. Electorrent will listen on _host_:_port_/RPC2. Follow [this guide](https://github.com/rakshasa/rtorrent/wiki/RPC-Setup-XMLRPC) to make sure you have it set up correctly
+
