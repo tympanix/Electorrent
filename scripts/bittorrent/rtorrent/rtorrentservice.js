@@ -136,7 +136,13 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function(magnet) {
-        return doAction('load_start', [magnet])
+
+        $xmlrpc.callMethod('load_start', [magnet])
+        .then(function(data) {
+            return $q.resolve(data);
+        }).catch(function(err) {
+            return $q.reject(err);
+        });
     }
 
     /**
