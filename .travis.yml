@@ -27,7 +27,7 @@ addons:
       - icnsutils
 
 node_js:
-  - "node"
+  - "6"
 
 env:
   global:
