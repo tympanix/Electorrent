@@ -173,7 +173,26 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
         }
     };
 
+    AbstractTorrent.prototype.manualStatusText = function () {
+        if (this.isStatusPaused()){
+            return 'Paused';
+        } else if (this.isStatusStopped()){
+            return 'Stopped';
+        } else if (this.isStatusSeeding()){
+            return 'Seeding';
+        } else if (this.isStatusDownloading()){
+            return 'Downloading';
+        } else if (this.isStatusError()){
+            return 'Error';
+        } else if (this.isStatusCompleted()){
+            return 'Finished';
+        } else {
+            return 'Unknown';
+        }
+    };
+
     AbstractTorrent.prototype.statusText = function () {
+        if (!this.statusMessage) return this.manualStatusText();
         return this.statusMessage.replace(statusRegex, '');
     };
 

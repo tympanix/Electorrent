@@ -87,7 +87,7 @@ angular.module('torrentApp').factory('TorrentU', ['AbstractTorrent', function(Ab
         this.rssFeedUrl = rssFeedUrl;
         this.appUpdateUrl = appUpdateUrl;
         this.additionalData = additionalData;
-        
+
     }
 
     // Inherit by prototypal inheritance
