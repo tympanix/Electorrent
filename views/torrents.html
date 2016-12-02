@@ -86,7 +86,7 @@
                     </thead>
                     <tbody>
                         <tr
-                            ng-repeat="torrent in arrayTorrents track by torrent.hash | limitTo:torrentLimit"
+                            ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit track by torrent.hash"
                             ng-class="{active: torrent.selected}"
                             ng-click="setSelected($event, torrent, $index)"
                             ng-right-click="showContextMenu($event, torrent, $index)"
