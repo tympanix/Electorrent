@@ -17,7 +17,7 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
     this.setClient = function(service) {
         $rootScope.$btclient = service;
-        console.log("Changed client to:", service.name || "<service missing name>");
+        console.info("Changed client to:", service.name || "<service missing name>");
     }
 
     function fetchClientAuto() {
@@ -38,7 +38,7 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
     this.uploadFromClipboard = function() {
         var magnet = electron.clipboard.readText();
-        
+
         var protocol = ['magnet', 'http'];
 
         var supported = protocol.some(function(protocol) {

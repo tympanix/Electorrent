@@ -123,7 +123,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.filterByLabel = function(label){
-        console.log("Filter by label", label);
         deselectAll();
         lastSelected = null;
         $scope.filters.label = label;
@@ -208,7 +207,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.setSelected = function(event, torrent, index) {
-        //$scope.labelsDrowdown.clear();
         if (event.ctrlKey || event.metaKey){
             toggleSelect(torrent);
         } else if (event.shiftKey){
@@ -216,7 +214,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         } else {
             singleSelect(torrent);
         }
-        //console.log("Selected", selected);
     }
 
     function getSelectedHashes(){
@@ -230,7 +227,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.doAction = function(action, name, data) {
         action(selected, data)
             .then(function(){
-                console.log("Action " + name + " performed!");
                 $scope.update();
             })
             .catch(function(err) {
@@ -241,7 +237,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.doContextAction = function(action, name) {
         action(selected)
         .then(function(){
-            console.log("Action " + name + " performed!");
             $scope.update();
         })
         .catch(function(err) {
@@ -320,7 +315,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         torrents = torrents.filter(torrentFilter());
         torrents = torrents.sort(torrentSorter());
         $scope.arrayTorrents = torrents;
-        //console.log("Torrents", torrents);
     }
 
     function reassignSelected() {

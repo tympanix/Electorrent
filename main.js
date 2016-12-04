@@ -28,7 +28,6 @@ torrentApp.constant('$btclients', {
 // Configure the client
 torrentApp.run(["$rootScope", "$bittorrent", "configService", function($rootScope, $bittorrent, config){
     config.initSettings();
-    console.log("Init settings", config.getAllSettings());
     $rootScope.$btclient = $bittorrent.getClient();
 }]);
 

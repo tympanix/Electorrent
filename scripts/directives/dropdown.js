@@ -40,10 +40,6 @@ angular.module("torrentApp").directive('dropdown', [function() {
             }
         }
 
-        // scope.$on('update:dropdown', function() {
-        //     console.log("UPDATING DROPDOWN!");
-        // });
-
     }
 
     function doAction(element, action) {
@@ -61,14 +57,12 @@ angular.module("torrentApp").directive('dropItem', [function() {
     }
 
     function link(scope, element, attr) {
-        console.log("Item", attr.value, scope);
         if (scope.bind === attr.value){
             var dropdown = $(element).closest('.dropdown');
             dropdown.dropdown('set selected', attr.value);
         }
 
         if (scope.$last) {
-            console.log("Last item", attr.value);
             scope.$emit('update:dropdown');
         }
     }

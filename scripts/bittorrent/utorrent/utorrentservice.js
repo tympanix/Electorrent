@@ -25,7 +25,7 @@ angular.module('torrentApp')
                 data.cid = response.data.torrentc;
             },
             responseError: function(response) {
-                console.log('error in interceptor', data, arguments, response);
+                console.error('error in interceptor', data, arguments, response);
             }
         };
 

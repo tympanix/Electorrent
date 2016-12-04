@@ -53,9 +53,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     // Listen for incomming torrent files from the main process
     electron.ipc.on('torrentfiles', function uploadTorrent(event, buffer, filename){
         $scope.$btclient.uploadTorrent(buffer, filename)
-            .then(function(data) {
-                console.log("Upload", data);
-            }).catch(function(err) {
+            .catch(function(err) {
                 console.error("Error", err);
             })
     })
@@ -95,8 +93,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     })
 
     $scope.$on('emit:new:settings', function(event, data) {
-        //event.stopPropagation();
-        console.log("Main recieved new settings", data);
         $scope.$broadcast('new:settings', data)
     })
 
