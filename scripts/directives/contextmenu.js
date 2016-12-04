@@ -146,13 +146,11 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
     function bindCloseOperations(element) {
         // Remove context menu when the user scrolls the main content
         $('.main-content').one('scroll', function() {
-            console.log("Scroll!");
             $(element).hide();
         });
 
         // Remove context menu on window resize
         $($window).one('resize', function(){
-            console.log("Resize!");
             $(element).hide();
         });
     }

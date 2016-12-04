@@ -40,7 +40,6 @@ angular.module('torrentApp')
     function updateSession(session) {
         if (!session) return;
         config.session = session;
-        console.log("New session", config.session);
     }
 
     function saveConnection(ip, port, encoded, session) {
@@ -78,7 +77,6 @@ angular.module('torrentApp')
             if(status === 409){
                 var session = headers('X-Transmission-Session-Id');
                 saveConnection(ip, port, encoded, session);
-                console.log("Session has been saved", config.session);
                 defer.resolve(err);
                 return ;
             }

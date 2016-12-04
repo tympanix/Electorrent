@@ -60,7 +60,7 @@ angular.module('torrentApp')
             })
 
             torrentNotification.onclick = () => {
-                console.log('Notification clicked')
+                console.info('Notification clicked')
             }
         }
 

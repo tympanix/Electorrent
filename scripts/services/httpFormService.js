@@ -39,7 +39,6 @@ angular.module('torrentApp').factory("httpFormService", function() {
             var encoded = value.map(encodeURIComponent);
             return encoded.join('|');
         } else if (value !== null) {
-            console.log("Value!", encodeURIComponent(value));
             return encodeURIComponent(value)
         } else {
             return "";

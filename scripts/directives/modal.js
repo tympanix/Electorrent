@@ -21,7 +21,6 @@ angular.module('torrentApp').directive('modal', function() {
     }
 
     function link(scope, element/*, attrs*/) {
-        //console.log("Link", element);
         $(element).modal({
             onDeny: function () {
                 return scope.deny();
