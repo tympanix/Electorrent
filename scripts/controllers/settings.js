@@ -22,8 +22,6 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     $scope.$watch(function() {
         return $scope.settings
-    }, function() {
-        console.log("Settings", $scope.settings);
     });
 
     function loadAllSettings() {
@@ -47,8 +45,6 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     })
 
     function writeSettings() {
-        console.log("Settings to write", $scope.settings);
-        console.log("General", $scope.general);
         config.saveAllSettings($scope.settings)
             .then(function() {
                 $scope.close();

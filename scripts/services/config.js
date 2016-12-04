@@ -49,7 +49,6 @@ angular.module('torrentApp').service('configService', ['electron', '$q', functio
             if (err) q.reject(err)
             else q.resolve();
         });
-        console.log("Org settings", settings);
         return q.promise;
     }
 
