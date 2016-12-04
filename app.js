@@ -1,6 +1,7 @@
 // The Electron module
 const electron = require('electron');
 const yargs = require('yargs');
+const util = require('util');
 
 // Handle Squirrel startup parameters
 if(require('electron-squirrel-startup')) return;
@@ -31,13 +32,17 @@ logger.verbose('Verbose logging enabled');
 let torrentWindow;
 
 function createTorrentWindow() {
-    // Create the browser window.
-    torrentWindow = new BrowserWindow({
+    var windowSettings = {
         show: false,
         width: 1200,
         height: 800,
         backgroundColor: '#ffffff'
-    });
+    }
+
+    Object.assign(windowSettings, config.get('windowsize'));
+
+    // Create the browser window.
+    torrentWindow = new BrowserWindow(windowSettings);
 
     torrentWindow.once('ready-to-show', () => {
         torrentWindow.show();
@@ -45,6 +50,12 @@ function createTorrentWindow() {
     });
 
     torrentWindow.loadURL(`file://${__dirname}/index.html`);
+
+    // Save window size when closing
+    torrentWindow.on('close', () => {
+        config.put('windowsize', torrentWindow.getBounds())
+        config.write();
+    })
 
     // Emitted when the window is closed.
     torrentWindow.on('closed', () => {
