@@ -1,11 +1,14 @@
-<div
-    dropdown
-    class="ui icon top left pointing dropdown button"
-    ng-class="{disabled: enabled}">
+<div dropdown class="ui icon top left pointing dropdown button" ng-class="{disabled: enabled}">
     <i class="tag icon"></i>
     <div class="menu">
+        <div class="ui icon search input">
+            <i class="search icon"></i>
+            <input type="text" placeholder="Search labels...">
+        </div>
+        <div class="divider"></div>
         <div class="header">Add Label</div>
-        <div class="item" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
+        <div class="scrolling menu">
+            <div class="item" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
+        <div>
     </div>
 </div>
-
