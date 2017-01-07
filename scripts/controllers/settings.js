@@ -3,6 +3,8 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     // External Settings reference
     $scope.settings = {};
 
+    $scope.server = {}
+
     $scope.btclients = $btclients;
 
     // Internal settings reference
@@ -26,6 +28,7 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     function loadAllSettings() {
         $scope.settings = config.getAllSettings();
+        $scope.server = $bittorrent.getServer();
 
         $scope.general = {
             magnets: electron.app.isDefaultProtocolClient('magnet')
@@ -49,9 +52,15 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
             .then(function() {
                 $scope.close();
                 $notify.ok("Saved Settings", "You settings has been updated")
-            })
-            .catch(function(err) {
+            }).catch(function(err) {
                 $notify.alert("Settings could not be saved", err)
+            })
+        config.updateServer($scope.server)
+            .then(function() {
+                $bittorrent.setServer($scope.server)
+                $notify.ok("Server saved", "Saved new server config")
+            }).catch(function() {
+                $notify.alert("Settings error", "Could not save new server")
             })
         subscribeToMagnets();
     }
@@ -63,24 +72,23 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     $scope.save = function() {
         $scope.connecting = true;
-        var ip = $scope.settings.server.ip;
-        var port = $scope.settings.server.port;
-        var user = $scope.settings.server.user;
-        var password = $scope.settings.server.password;
-        var client = $scope.settings.server.type;
+        var ip = $scope.server.ip;
+        var port = $scope.server.port;
+        var user = $scope.server.user;
+        var password = $scope.server.password;
+        var client = $scope.server.type;
 
         var btclient = $bittorrent.getClient(client);
 
         btclient.connect(ip, port, user, password)
             .then(function() {
                 writeSettings();
+
                 $bittorrent.setClient(btclient);
                 $rootScope.$broadcast('new:settings', $scope.settings)
-                //$scope.$emit('emit:new:settings', $scope.settings)
-                $scope.connecting = false;
-            })
-            .catch(function(err) {
+            }).catch(function(err) {
                 console.error("Oh noes!", err);
+            }).finally(function() {
                 $scope.connecting = false;
             })
     }
