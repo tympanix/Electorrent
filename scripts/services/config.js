@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('torrentApp').service('configService', ['electron', '$q', 'Server', function(electron, $q, Server) {
+angular.module('torrentApp').service('configService', ['$rootScope', 'notificationService', 'electron', '$q', 'Server', function($rootScope, $notify, electron, $q, Server) {
 
+    const MenuItem = electron.menuItem
     const config = electron.config;
 
     var settings = {
@@ -43,13 +44,23 @@ angular.module('torrentApp').service('configService', ['electron', '$q', 'Server
         return server.default === true
     }
 
-    function appendServer(server) {
+    this.appendServer = function(server) {
         settings.servers.push(server.json())
+        this.renderServerMenu()
     }
 
     this.getAllSettings = function() {
         return settings;
     }
+
+    this.setCurrentServerAsDefault = function() {
+        if (!$rootScope.$server) {
+            $notify.warning('Can\'t set default server', 'You need to chose a server to set it as default')
+        }
+        console.log("Set default", $rootScope.$server);
+        this.setDefault($rootScope.$server)
+    }
+
 
     this.setDefault = function(server) {
         let found = this.getServer(server.id)
@@ -58,7 +69,11 @@ angular.module('torrentApp').service('configService', ['electron', '$q', 'Server
             value.default = false
         })
         found.default = true
-        return this.saveAllSettings()
+        this.saveAllSettings().then(() => {
+            $notify.ok('Default server saved', 'You default server is now ' + server.getNameAtAddress())
+        }).catch(function() {
+            $notify.alert('I/O Error', 'Could not save default server. Local configuration file could not be written to?!')
+        })
     }
 
     this.saveAllSettings = function(newSettings) {
@@ -73,9 +88,9 @@ angular.module('torrentApp').service('configService', ['electron', '$q', 'Server
 
     this.saveServer = function(ip, port, user, password, client) {
         if(arguments.length === 1) {
-            appendServer(arguments[0]);
+            this.appendServer(arguments[0]);
         } else {
-            appendServer(new Server(ip, port, user, password, client))
+            this.appendServer(new Server(ip, port, user, password, client))
         }
         console.info("Servers:", settings.servers);
         return this.saveAllSettings()
@@ -93,8 +108,45 @@ angular.module('torrentApp').service('configService', ['electron', '$q', 'Server
         return settings.servers.find((server) => server.id === id)
     }
 
+    this.getServers = function() {
+        return settings.servers.map((data) => {
+            return new Server(data)
+        })
+    }
+
     this.getDefaultServer = function() {
         return settings.servers.find(isDefault)
+    }
+
+    function getMenu(name) {
+        let menu = electron.menu.getApplicationMenu()
+        return menu.items.find((menuItem) => menuItem.label === name)
+    }
+
+    this.renderServerMenu = function() {
+        let serverMenu = getMenu('Servers').submenu
+        serverMenu.clear()
+        serverMenu.append(new MenuItem({
+            label: 'Add new server...',
+            click: () => $rootScope.$broadcast('add:server'),
+        }))
+        serverMenu.append(new MenuItem({
+            label: 'Set current as default',
+            click: () => this.setCurrentServerAsDefault()
+        }))
+        serverMenu.append(new MenuItem({type: 'separator'}))
+        renderServerMenuOptions(serverMenu, this.getServers())
+    }
+
+    function renderServerMenuOptions(menu, servers) {
+        servers.forEach((server) => {
+            menu.append(new MenuItem({
+                label: server.getNameAtAddress(),
+                click: () => $rootScope.$broadcast('connect:server', server),
+                checked: server.id === $rootScope.$server.id,
+                type: 'radio'
+            }))
+        })
     }
 
 }]);

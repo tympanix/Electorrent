@@ -107,44 +107,7 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bit
         },
         {
             label: 'Servers',
-            submenu: [
-                {
-                    label: 'Add new server...',
-                    click() {
-                        $rootScope.$broadcast('add:server');
-                    }
-                },
-                {
-                    label: 'Set current as default',
-                    click() {
-                        $bittorrent.setCurrentServerAsDefault()
-                    }
-                },
-                {
-                    type: 'separator'
-                },
-                {
-                    label: 'Server 1',
-                    type: 'radio',
-                    checked: true,
-                },
-                {
-                    label: 'Server 2',
-                    type: 'radio',
-                },
-                {
-                    label: 'Server 3',
-                    type: 'radio',
-                },
-                {
-                    label: 'Server 4',
-                    type: 'radio',
-                },
-                {
-                    label: 'Server 5',
-                    type: 'radio',
-                }
-            ]
+            submenu: []
         },
         {
             label: 'Window',

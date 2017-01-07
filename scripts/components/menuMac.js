@@ -139,6 +139,10 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bit
             ]
         },
         {
+            label: 'Servers',
+            submenu: []
+        },
+        {
             label: 'Window',
             role: 'window',
             submenu: [

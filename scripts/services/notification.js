@@ -1,10 +1,8 @@
 'use strict';
 
 angular.module('torrentApp')
-    .service('notificationService', ["$rootScope", "electron", "configService", function($rootScope, electron, config) {
+    .service('notificationService', ["$rootScope", "electron", function($rootScope, electron) {
         var disableNotifications = false;
-
-        var settings = config.getAllSettings();
 
         this.disableAll = function() {
             disableNotifications = true;
@@ -47,13 +45,6 @@ angular.module('torrentApp')
         }
 
         this.torrentComplete = function(torrent) {
-            if (!settings.ui.notifications){
-                console.error("Notifications disabled");
-                return
-            } else {
-                console.info("Sending notification!");
-            }
-
             var torrentNotification = new Notification('Torrent Completed!', {
                 body: torrent.decodedName,
                 icon: 'img/electorrent-icon.png'

@@ -64,12 +64,14 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             })
     }
 
-    $scope.$on('start:torrents', function(){
-        console.log("Client (from torrents $rootscope)", $rootScope.$btclient)
-        console.log("Server (from torrents)", $scope.$server)
-        $scope.update();
+    $scope.$on('start:torrents', function(event, fullupdate){
+        $scope.update(!!fullupdate);
         startTimer();
     });
+
+    $scope.$on('clear:torrents', function(){
+        clearAll()
+    })
 
     $scope.$on('stop:torrents', function(){
         stopTimer();
@@ -107,10 +109,14 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         }, TIMEOUT)
     }
 
-    function resetAll() {
+    function clearAll() {
         $scope.torrents = {};
         $scope.arrayTorrents = [];
         $scope.labels = [];
+    }
+
+    function resetAll() {
+        clearAll()
         $scope.update(true);
         console.log("Reset!")
     }
@@ -364,7 +370,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     function checkNotification(old, updated) {
         if (!old || !updated) return
         if (updated.percent === 1000 && old.percent < 1000) {
-            $notify.torrentComplete(old);
+            if (settings.ui.notifications === true){
+                $notify.torrentComplete(old);
+            }
         }
     }
 

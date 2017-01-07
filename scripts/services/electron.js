@@ -15,7 +15,7 @@ angular.module('torrentApp').factory("electron", [function() {
     o.clipboard         = remote.clipboard;
     o.dialog            = remote.dialog;
     o.menu              = remote.Menu;
-    o.menuItem          = remote.menuItem;
+    o.menuItem          = remote.MenuItem;
     o.nativeImage       = remote.nativeImage;
     o.powerMonitor      = remote.powerMonitor;
     o.protocol          = remote.protocol;
