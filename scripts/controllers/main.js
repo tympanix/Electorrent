@@ -68,6 +68,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         page = null;
     }
 
+    function pageLoading() {
+        $scope.showLoading = true;
+    }
+
     function pageSettings(settingsPage){
         $scope.showLoading = false;
         if (settingsPage){
@@ -85,6 +89,22 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $scope.$broadcast('stop:torrents')
         $rootScope.$btclient = null
         pageWelcome()
+        $scope.$apply();
+    })
+
+    $scope.$on('connect:server', function(event, server) {
+        console.log("Connecting to server", server.getNameAtAddress());
+        pageLoading()
+        $scope.$broadcast('stop:torrents')
+        $scope.$broadcast('clear:torrents')
+        $rootScope.$btclient = null
+        $rootScope.$server = null
+        $bittorrent.setServer(server)
+
+        $timeout(function() {
+            connectToServer(server.ip, server.port, server.user, server.password)
+            $scope.$broadcast('start:torrents', true) // Full update
+        }, 250)
         $scope.$apply();
     })
 
