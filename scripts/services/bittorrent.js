@@ -20,17 +20,36 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
         console.info("Changed client to:", service.name || "<service missing name>");
     }
 
+    this.setServer = function(server) {
+        $rootScope.$btclient = this.getClient(server.client)
+        $rootScope.$server = server
+        console.info("Changed server to:", $rootScope.$server)
+        console.info("Changed client to:", $rootScope.$btclient)
+    }
+
+    this.setCurrentServerAsDefault = function() {
+        if (!$rootScope.$server) {
+            $notify.warning('Can\'t set default server', 'You need to chose a server to set it as default')
+        }
+        console.log("Set default", $rootScope.$server);
+        config.setDefault($rootScope.$server)
+    }
+
+    this.getServer = function() {
+        return $rootScope.$server
+    }
+
     function fetchClientAuto() {
-        var client = config.getServer().type;
-        return fetchClientManual(client);
+        var server = config.getDefaultServer();
+        if (!server) return
+        return fetchClientManual(server.client);
     }
 
     function fetchClientManual(name) {
         var client = $btclients[name];
 
         if (client){
-            var service = $injector.get(client.service);
-            return service;
+            return $injector.get(client.service);
         } else {
             console.error('Bittorrent client "' + name + '" not available');
         }

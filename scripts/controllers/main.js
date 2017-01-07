@@ -9,14 +9,17 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     var page = null;
 
     $rootScope.$on('ready', function() {
-        electron.updater.checkForUpdates();
+        if (!electron.program.debug) {
+            electron.updater.checkForUpdates();
+        }
 
         if (!$scope.$btclient) {
             pageWelcome();
             return;
         }
 
-        var data = config.getServer()
+        var data = config.getDefaultServer()
+        console.log("Default server", data)
         if (data){
             connectToServer(data.ip, data.port, data.user, data.password);
         } else {
@@ -26,9 +29,9 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     });
 
     function connectToServer(ip, port, user, password){
-        $scope.statusText = "Connecting to " + $scope.$btclient.name;
+        $scope.statusText = "Connecting to " + $rootScope.$btclient.name;
 
-        $scope.$btclient.connect(ip, port, user, password)
+        $rootScope.$btclient.connect(ip, port, user, password)
         .then(function(){
             pageTorrents();
             requestMagnetLinks();
@@ -46,13 +49,13 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     // Listen for incomming magnet links from the main process
     electron.ipc.on('magnet', function(event, data){
         data.forEach(function(magnet){
-            $scope.$btclient.addTorrentUrl(magnet);
+            $rootScope.$btclient.addTorrentUrl(magnet);
         })
     })
 
     // Listen for incomming torrent files from the main process
     electron.ipc.on('torrentfiles', function uploadTorrent(event, buffer, filename){
-        $scope.$btclient.uploadTorrent(buffer, filename)
+        $rootScope.$btclient.uploadTorrent(buffer, filename)
             .catch(function(err) {
                 console.error("Error", err);
             })
@@ -78,7 +81,15 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         page = PAGE_WELCOME;
     }
 
+    $scope.$on('add:server', function() {
+        $scope.$broadcast('stop:torrents')
+        $rootScope.$btclient = null
+        pageWelcome()
+        $scope.$apply();
+    })
+
     $scope.$on('show:settings', function() {
+        if (page === PAGE_WELCOME) return;
         page = PAGE_SETTINGS;
         $scope.$apply();
     })

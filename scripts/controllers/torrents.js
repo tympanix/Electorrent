@@ -20,7 +20,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.torrentLimit = LIMIT;
     $scope.labels = [];
     $scope.resizeMode = settings.ui.resizeMode;
-    $scope.client = $scope.$btclient;
 
     $scope.filters = {
         status: 'all'
@@ -56,19 +55,25 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.setLabel = function(label){
-        $scope.$btclient.setLabel(getSelectedHashes(), label)
+        $rootScope.$btclient.setLabel(getSelectedHashes(), label)
             .then(function() {
                 $scope.update();
             })
             .catch(function() {
-                $notify.alert("Could not set label", "The label could not be changes. Please go to settings and configure your connection");
+                $notify.alert("Could not set label", "The label could not be changed. Please go to settings and configure your connection");
             })
     }
 
     $scope.$on('start:torrents', function(){
+        console.log("Client (from torrents $rootscope)", $rootScope.$btclient)
+        console.log("Server (from torrents)", $scope.$server)
         $scope.update();
         startTimer();
     });
+
+    $scope.$on('stop:torrents', function(){
+        stopTimer();
+    })
 
     $scope.$on('show:settings', function(){
         stopTimer();
@@ -92,7 +97,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $notify.disableAll();
         var data = config.getServer();
         reconnect = $timeout(function() {
-            $scope.$btclient.connect(data.ip, data.port, data.user, data.password)
+            $rootScope.$btclient.connect(data.ip, data.port, data.user, data.password)
             .then(function() {
                 $notify.enableAll();
                 startTimer(true);
@@ -107,6 +112,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $scope.arrayTorrents = [];
         $scope.labels = [];
         $scope.update(true);
+        console.log("Reset!")
     }
 
     function stopTimer(){
@@ -230,7 +236,8 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
                 $scope.update();
             })
             .catch(function(err) {
-                $notify.alert("Invalid action", err);
+                console.error('Action error', err)
+                $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
             });
     };
 
@@ -240,7 +247,8 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             $scope.update();
         })
         .catch(function(err) {
-            $notify.alert("Invalid action", err);
+            console.error('Context action error', err)
+            $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
         })
     }
 
@@ -342,7 +350,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.update = function(fullupdate) {
-        var q = $scope.$btclient.torrents(fullupdate)
+        var q = $rootScope.$btclient.torrents(fullupdate)
         q.then(function(torrents) {
             newTorrents(torrents);
             deleteTorrents(torrents);

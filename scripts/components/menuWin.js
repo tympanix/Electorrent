@@ -1,4 +1,4 @@
-angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bittorrent', 'notificationService', function(electron, $rootScope, $bittorrent, $notify) {
+angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bittorrent', 'notificationService', 'configService', function(electron, $rootScope, $bittorrent, $notify, config) {
 
     const template = [
         {
@@ -97,12 +97,53 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bit
                 {
                     label: 'Toggle Developer Tools',
                     visible: electron.program.debug,
-                    accelerator: 'Alt+Command+I',
+                    accelerator: 'Ctrl+Shift+I',
                     click(item, focusedWindow) {
                         if (focusedWindow)
                         focusedWindow.webContents.toggleDevTools();
                     }
                 },
+            ]
+        },
+        {
+            label: 'Servers',
+            submenu: [
+                {
+                    label: 'Add new server...',
+                    click() {
+                        $rootScope.$broadcast('add:server');
+                    }
+                },
+                {
+                    label: 'Set current as default',
+                    click() {
+                        $bittorrent.setCurrentServerAsDefault()
+                    }
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Server 1',
+                    type: 'radio',
+                    checked: true,
+                },
+                {
+                    label: 'Server 2',
+                    type: 'radio',
+                },
+                {
+                    label: 'Server 3',
+                    type: 'radio',
+                },
+                {
+                    label: 'Server 4',
+                    type: 'radio',
+                },
+                {
+                    label: 'Server 5',
+                    type: 'radio',
+                }
             ]
         },
         {
