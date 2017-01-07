@@ -130,7 +130,7 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bit
                 {
                     label: 'Toggle Developer Tools',
                     visible: electron.program.debug,
-                    accelerator: 'Ctrl+Shift+I',
+                    accelerator: 'Alt+Command+I',
                     click(item, focusedWindow) {
                         if (focusedWindow)
                         focusedWindow.webContents.toggleDevTools();

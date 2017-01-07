@@ -1,10 +1,9 @@
-angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeout", "$bittorrent", "$btclients", "electron", "configService", "notificationService", function ($scope, $timeout, $bittorrent, $btclients, electron, config, $notify) {
+angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeout", "$bittorrent", "$btclients", "electron", "configService", "notificationService", "Server", function ($scope, $timeout, $bittorrent, $btclients, electron, config, $notify, Server) {
 
     $scope.connecting = false;
     $scope.btclients = $btclients;
 
     $scope.connect = function() {
-        $scope.connecting = true;
 
         var ip = $scope.ip || '';
         var port = $scope.port || '';
@@ -20,6 +19,8 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
             return;
         }
 
+        $scope.connecting = true;
+
         btclient.connect(ip, port, user, password).then(function() {
             $timeout(function(){
                 $bittorrent.setClient(btclient);
@@ -28,19 +29,20 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
         }).catch(function(err) {
             $timeout(function(){
                 console.error(err);
-                $scope.connecting = false;
             }, 500)
+        }).finally(function() {
+            $scope.connecting = false;
         })
     }
 
     function saveServer(ip, port, username, password, client){
-        config.saveServer(ip, port, username, password, client)
-        .then(function(){
+        let server = new Server(ip, port, username, password, client)
+
+        config.saveServer(server).then(function(){
+            $bittorrent.setServer(server)
             $scope.$emit('show:torrents');
             $notify.ok("Success!", "Hooray! Welcome to Electorrent")
-        })
-        .catch(function(){
-            $scope.connecting = false;
+        }).catch(function(){
             $notify.alert("Oops!", "Could not save settings?!")
         })
     }
