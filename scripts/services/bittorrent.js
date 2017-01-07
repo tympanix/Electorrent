@@ -27,14 +27,6 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
         console.info("Changed client to:", $rootScope.$btclient)
     }
 
-    this.setCurrentServerAsDefault = function() {
-        if (!$rootScope.$server) {
-            $notify.warning('Can\'t set default server', 'You need to chose a server to set it as default')
-        }
-        console.log("Set default", $rootScope.$server);
-        config.setDefault($rootScope.$server)
-    }
-
     this.getServer = function() {
         return $rootScope.$server
     }

@@ -28,22 +28,20 @@ torrentApp.constant('$btclients', {
 // Configure the client
 torrentApp.run(["$rootScope", "$bittorrent", "configService", function($rootScope, $bittorrent, config){
     config.initSettings();
-    console.log("Settings", config.getAllSettings())
-    $rootScope.$btclient = $bittorrent.getClient()
-    $rootScope.$server = config.getDefaultServer()
-    console.log("Btclient", $rootScope.$btclient)
+    $bittorrent.setServer(config.getDefaultServer())
 }]);
 
 // Set application menu
-torrentApp.run(['menuWin', 'menuMac', 'electron', function(menuWin, menuMac, electron){
-    var menu = null;
+torrentApp.run(['menuWin', 'menuMac', 'electron', 'configService', function(menuWin, menuMac, electron, config){
+    var menuTemplate = null;
 
-    if (process.platform === 'darwin') {
-        menu = menuMac;
+    if (electron.is.macOS()) {
+        menuTemplate = menuMac;
     } else {
-        menu = menuWin;
+        menuTemplate = menuWin;
     }
 
-    var appMenu = electron.menu.buildFromTemplate(menu);
+    var appMenu = electron.menu.buildFromTemplate(menuTemplate);
     electron.menu.setApplicationMenu(appMenu);
+    config.renderServerMenu()
 }]);
