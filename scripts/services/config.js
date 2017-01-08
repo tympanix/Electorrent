@@ -49,7 +49,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
     }
 
     this.appendServer = function(server) {
-        settings.servers.push(server.json())
+        settings.servers.push(server)
         this.renderServerMenu()
     }
 
@@ -108,6 +108,13 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         }
         console.info("Servers:", settings.servers);
         return this.saveAllSettings()
+    }
+
+    this.removeServer = function(server) {
+        settings.servers = settings.servers.filter((s) => {
+            return s.id !== server.id
+        })
+        this.renderServerMenu()
     }
 
     this.updateServer = function(update) {
