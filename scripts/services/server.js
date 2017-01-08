@@ -44,6 +44,10 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
         return $btclients[this.client].name
     };
 
+    Server.prototype.getIcon = function () {
+        return $btclients[this.client].icon
+    };
+
     Server.prototype.getNameAtAddress = function () {
         return this.getName() + " @ " + this.ip
     };

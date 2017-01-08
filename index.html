@@ -18,6 +18,13 @@
     <body ng-controller="mainController" ready-broadcast>
         <div class="main wrapper">
 
+            <!-- Loading Spinner -->
+            <div ng-if="showLoading">
+                <div class="ui active inverted dimmer">
+                    <div class="ui huge text loader">{{statusText}}</div>
+                </div>
+            </div>
+
             <!-- Notifications -->
             <div ng-include="'./views/notifications.html'"></div>
 
@@ -31,16 +38,14 @@
                 <div ng-include="'./views/welcome.html'"></div>
             </div>
 
+            <!-- Server Selection -->
+            <div ng-show="showServers()" class="overlay">
+                <div ng-include="'./views/servers.html'"></div>
+            </div>
+
             <!-- Torrents -->
             <div ng-show="showTorrents" drag-and-drop>
                 <div ng-include="'./views/torrents.html'"></div>
-            </div>
-
-            <!-- Loading Spinner -->
-            <div ng-if="showLoading">
-                <div class="ui active inverted dimmer">
-                    <div class="ui huge text loader">{{statusText}}</div>
-                </div>
             </div>
 
         </div>

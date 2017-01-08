@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<div class="wrapper">
+    <div class="ui middle aligned center aligned grid" style="height: 100vh;">
+        <div class="narrow column">
+            <h2 class="ui image header">
+                <div class="content">
+                    Connect to Server
+                </div>
+            </h2>
+
+            <div class="ui one fluid cards" ng-repeat="server in servers">
+                <div class="card">
+                    <div class="content">
+                        <div class="header">
+                            <i class="torrent icon" ng-class="server.getIcon()"></i>
+                            {{server.getName()}}
+                        </div>
+                        <div class="meta">
+                            {{server.getNameAtAddress()}}
+                        </div>
+                    </div>
+                    <div class="ui bottom attached green button" ng-click="connectToServer(server)">
+                        Connect
+                        <i class="icon right arrow"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
