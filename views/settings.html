@@ -12,6 +12,10 @@
                     <i class="ui large sitemap icon"></i>
                     Connection
                 </li>
+                <li ng-class="activeOn('servers')" ng-click="gotoPage('servers')">
+                    <i class="ui large server icon"></i>
+                    Servers
+                </li>
                 <li ng-class="activeOn('about')" ng-click="gotoPage('about')">
                     <i class="ui large at icon"></i>
                     About
@@ -26,6 +30,10 @@
 
                 <div ng-switch-when="connection">
                     <div ng-include="'./views/settings/connection.html'"></div>
+                </div>
+
+                <div ng-switch-when="servers">
+                    <div ng-include="'./views/settings/servers.html'"></div>
                 </div>
 
                 <div ng-switch-when="about">

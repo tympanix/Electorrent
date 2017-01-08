@@ -23,6 +23,10 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
     this.initSettings = function() {
         var org = config.settingsReference();
         angular.merge(settings, org)
+        settings.servers = settings.servers.map((server) => {
+            return new Server(server)
+        })
+        console.log("Settings", settings);
     }
 
     // Angular wrapper for saving to config
@@ -61,37 +65,35 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         this.setDefault($rootScope.$server)
     }
 
-    this.setSelectedServer = function(server) {
-        let serverMenu = getMenu('Servers')
-        if (!serverMenu) return
-        console.log("Menues!", serverMenu);
-        console.log("Setting selected to", server.id);
-        var radio = serverMenu[server.id]
-        if (radio) {
-            radio.checked = true
-        } else {
-            console.error("Could not set selected server!")
-        }
-    }
-
-    this.setDefault = function(server) {
+    this.setDefault = function(server, skipsave) {
         let found = this.getServer(server.id)
         if (!found) return
         settings.servers.forEach(function(value) {
             value.default = false
         })
         found.default = true
-        this.saveAllSettings().then(() => {
-            $notify.ok('Default server saved', 'You default server is now ' + server.getNameAtAddress())
-        }).catch(function() {
-            $notify.alert('I/O Error', 'Could not save default server. Local configuration file could not be written to?!')
+        if (!skipsave) {
+            this.saveAllSettings().then(() => {
+                $notify.ok('Default server saved', 'You default server is now ' + server.getNameAtAddress())
+            }).catch(function() {
+                $notify.alert('I/O Error', 'Could not save default server. Local configuration file could not be written to?!')
+            })
+        }
+    }
+
+    function settingsToJson() {
+        let copy = {}
+        angular.copy(settings, copy)
+        copy.servers = copy.servers.map((server) => {
+            return server.json()
         })
+        return copy
     }
 
     this.saveAllSettings = function(newSettings) {
         var q = $q.defer();
         angular.merge(settings, newSettings)
-        config.saveAll(settings, function(err) {
+        config.saveAll(settingsToJson(), function(err) {
             if(err) q.reject(err)
             else q.resolve();
         });
@@ -121,9 +123,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
     }
 
     this.getServers = function() {
-        return settings.servers.map((data) => {
-            return new Server(data)
-        })
+        return settings.servers
     }
 
     this.getDefaultServer = function() {
