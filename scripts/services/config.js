@@ -61,6 +61,18 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         this.setDefault($rootScope.$server)
     }
 
+    this.setSelectedServer = function(server) {
+        let serverMenu = getMenu('Servers')
+        if (!serverMenu) return
+        console.log("Menues!", serverMenu);
+        console.log("Setting selected to", server.id);
+        var radio = serverMenu[server.id]
+        if (radio) {
+            radio.checked = true
+        } else {
+            console.error("Could not set selected server!")
+        }
+    }
 
     this.setDefault = function(server) {
         let found = this.getServer(server.id)
@@ -142,6 +154,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         servers.forEach((server) => {
             menu.append(new MenuItem({
                 label: server.getNameAtAddress(),
+                id: server.id,
                 click: () => $rootScope.$broadcast('connect:server', server),
                 checked: server.id === $rootScope.$server.id,
                 type: 'radio'

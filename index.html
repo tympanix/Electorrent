@@ -22,7 +22,7 @@
             <div ng-include="'./views/notifications.html'"></div>
 
             <!-- Settings Screen -->
-            <div ng-show="showSettings()" class="overlay">
+            <div ng-if="showSettings()" class="overlay">
                 <div ng-include="'./views/settings.html'"></div>
             </div>
 

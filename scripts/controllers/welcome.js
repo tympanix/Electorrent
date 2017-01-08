@@ -3,6 +3,16 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
     $scope.connecting = false;
     $scope.btclients = $btclients;
 
+    console.log("Welcome parent scope", $scope.$parent)
+
+    function clearForm() {
+        $scope.ip = ''
+        $scope.port = ''
+        $scope.username = ''
+        $scope.password = ''
+        $scope.client = undefined
+    }
+
     $scope.connect = function() {
 
         var ip = $scope.ip || '';
@@ -38,9 +48,11 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
     function saveServer(ip, port, username, password, client){
         let server = new Server(ip, port, username, password, client)
 
+        $bittorrent.setServer(server)
+
         config.saveServer(server).then(function(){
-            $bittorrent.setServer(server)
             $scope.$emit('show:torrents');
+            clearForm()
             $notify.ok("Success!", "Hooray! Welcome to Electorrent")
         }).catch(function(){
             $notify.alert("Oops!", "Could not save settings?!")
