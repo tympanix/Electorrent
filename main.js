@@ -28,7 +28,6 @@ torrentApp.constant('$btclients', {
 // Configure the client
 torrentApp.run(["$rootScope", "$bittorrent", "configService", function($rootScope, $bittorrent, config){
     config.initSettings();
-    $bittorrent.setServer(config.getDefaultServer())
 }]);
 
 // Set application menu

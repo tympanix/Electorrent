@@ -24,17 +24,24 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
         if (settings.startup === 'default') {
             let server = config.getDefaultServer()
-            if ($rootScope.$server){
+            if (server){
                 connectToServer(server);
             } else {
                 pageServers();
                 $notify.ok('No default server', 'Please choose a server to connect to')
             }
-        } else if (settings.startup === 'ask') {
-            pageServers()
         } else if (settings.startup === 'latest') {
-            return
-            // TODO: Implemented latest server
+            let server = config.getRecentServer()
+            console.log("Connecting to last used", server);
+            if (server){
+                connectToServer(server)
+            } else {
+                pageServers()
+                $notify.ok('No recent servers', 'Please choose a server to connect to')
+            }
+        } else {
+            /* Ask or unknown*/
+            pageServers()
         }
     });
 
@@ -51,9 +58,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         .then(function(){
             pageTorrents();
             requestMagnetLinks();
-        })
-        .catch(function(){
+        }).catch(function(){
             pageSettings('connection');
+        }).finally(function() {
+            config.renderServerMenu()
         });
     }
 
@@ -82,7 +90,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $scope.showLoading = false;
         $scope.$broadcast('start:torrents');
         page = null;
-        console.log("SHOW TORRENTS!", page);
     }
 
     function pageLoading() {
