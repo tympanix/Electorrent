@@ -1,7 +1,11 @@
 
-angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "$bittorrent", "electron", "configService", function ($rootScope, $scope, $timeout, $bittorrent, electron, config) {
+angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "$bittorrent", "electron", "configService", "notificationService", function ($rootScope, $scope, $timeout, $bittorrent, electron, config, $notify) {
     const PAGE_SETTINGS = 'settings';
     const PAGE_WELCOME = 'welcome';
+    const PAGE_SERVERS = 'servers';
+
+    let settings = config.getAllSettings()
+    $scope.servers = config.getServers()
 
     $scope.showTorrents = false;
     $scope.showLoading = true;
@@ -13,25 +17,37 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
             electron.updater.checkForUpdates();
         }
 
-        if (!$scope.$btclient) {
+        if (!settings.servers.length) {
             pageWelcome();
             return;
         }
 
-        var data = config.getDefaultServer()
-        console.log("Default server", data)
-        if (data){
-            connectToServer(data.ip, data.port, data.user, data.password);
-        } else {
-            // First time starting application
-            pageWelcome();
+        if (settings.startup === 'default') {
+            let server = config.getDefaultServer()
+            if ($rootScope.$server){
+                connectToServer(server);
+            } else {
+                pageServers();
+                $notify.ok('No default server', 'Please choose a server to connect to')
+            }
+        } else if (settings.startup === 'ask') {
+            pageServers()
+        } else if (settings.startup === 'latest') {
+            return
+            // TODO: Implemented latest server
         }
     });
 
-    function connectToServer(ip, port, user, password){
+    $scope.connectToServer = function(server) {
+        connectToServer(server)
+    }
+
+    function connectToServer(server){
+        pageLoading()
+        $bittorrent.setServer(server)
         $scope.statusText = "Connecting to " + $rootScope.$btclient.name;
 
-        $rootScope.$btclient.connect(ip, port, user, password)
+        $rootScope.$btclient.connect(server.ip, server.port, server.user, server.password)
         .then(function(){
             pageTorrents();
             requestMagnetLinks();
@@ -66,6 +82,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $scope.showLoading = false;
         $scope.$broadcast('start:torrents');
         page = null;
+        console.log("SHOW TORRENTS!", page);
     }
 
     function pageLoading() {
@@ -78,6 +95,12 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
             $scope.$broadcast('settings:page', settingsPage);
         }
         page = PAGE_SETTINGS;
+    }
+
+    function pageServers() {
+        $scope.showLoading = false;
+        $scope.showTorrents = false;
+        page = PAGE_SERVERS;
     }
 
     function pageWelcome(){
@@ -102,7 +125,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $bittorrent.setServer(server)
 
         $timeout(function() {
-            connectToServer(server.ip, server.port, server.user, server.password)
+            connectToServer(server)
             $scope.$broadcast('start:torrents', true) // Full update
         }, 250)
         $scope.$apply();
@@ -110,6 +133,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     $scope.$on('show:settings', function() {
         if (page === PAGE_WELCOME) return;
+        if (page === PAGE_SERVERS) return;
         page = PAGE_SETTINGS;
         $scope.$apply();
     })
@@ -133,6 +157,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     $scope.showWelcome = function() {
         return page === PAGE_WELCOME;
+    }
+
+    $scope.showServers = function() {
+        return page === PAGE_SERVERS;
     }
 
 }]);
