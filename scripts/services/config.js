@@ -138,6 +138,16 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         return settings.servers.find(isDefault)
     }
 
+    this.getRecentServer = function() {
+        let maxServer = settings.servers[0]
+        settings.servers.forEach(function(server){
+            if (server.lastused > maxServer.lastused){
+                maxServer = server
+            }
+        })
+        return maxServer
+    }
+
     function getMenu(name) {
         let menu = electron.menu.getApplicationMenu()
         return menu.items.find((menuItem) => menuItem.label === name)
@@ -152,13 +162,21 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         }))
         serverMenu.append(new MenuItem({
             label: 'Set current as default',
-            click: () => this.setCurrentServerAsDefault()
+            click: () => this.setCurrentServerAsDefault(),
+            enabled: !!$rootScope.$server
         }))
         serverMenu.append(new MenuItem({type: 'separator'}))
         renderServerMenuOptions(serverMenu, this.getServers())
     }
 
     function renderServerMenuOptions(menu, servers) {
+        if (!$rootScope.$server) {
+            menu.append(new MenuItem({
+                label: 'Disabled...',
+                enabled: false
+            }))
+            return
+        }
         servers.forEach((server) => {
             menu.append(new MenuItem({
                 label: server.getNameAtAddress(),

@@ -58,7 +58,6 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         config.updateServer($scope.server)
             .then(function() {
                 $bittorrent.setServer($scope.server)
-                $notify.ok("Server saved", "Saved new server config")
             }).catch(function() {
                 $notify.alert("Settings error", "Could not save new server")
             })

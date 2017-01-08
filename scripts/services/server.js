@@ -15,6 +15,7 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
             this.user = user
             this.password = password
             this.client = client
+            this.lastused = -1
         }
     }
 
@@ -26,6 +27,7 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
         this.password = data.password
         this.client = data.client
         this.default = data.default
+        this.lastused = data.lastused
     };
 
     Server.prototype.json = function () {
@@ -36,7 +38,8 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
             user: this.user,
             password: this.password,
             client: this.client,
-            default: this.default
+            default: this.default,
+            lastused: this.lastused || -1
         }
     };
 
@@ -50,6 +53,10 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
 
     Server.prototype.getNameAtAddress = function () {
         return this.getName() + " @ " + this.ip
+    };
+
+    Server.prototype.updateLastUsed = function () {
+        this.lastused = new Date().getTime()
     };
 
     function generateGUID() {
