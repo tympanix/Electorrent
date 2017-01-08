@@ -22,9 +22,9 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     loadAllSettings();
 
-    $scope.$watch(function() {
-        return $scope.settings
-    });
+    // $scope.$watch(function() {
+    //     return $scope.settings
+    // });
 
     function loadAllSettings() {
         $scope.settings = config.getAllSettings();
@@ -97,6 +97,17 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         var value = '';
         if ($scope.page === page) value = 'active';
         return value;
+    }
+
+    $scope.toggleDefaultServer = function(server) {
+        if (server.default === true) {
+            config.setDefault(server, true /* Skip saving */)
+        }
+        console.log("Toggle default server", server);
+    }
+
+    $scope.testfunc = function() {
+        console.log("TEST FUNCTION");
     }
 
     $scope.gotoPage = function(page) {
