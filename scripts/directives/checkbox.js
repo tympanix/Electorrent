@@ -1,19 +1,32 @@
 'use strict'
+angular.module("torrentApp").controller('toggleController', ['$scope', function($scope){
+
+    if (angular.isFunction($scope.checked)) { $scope.ngModel = !!$scope.checked(); }
+
+    this.toggle = function() {
+        if (angular.isFunction($scope.disabled) && $scope.disabled()) return;
+        $scope.ngModel = !$scope.ngModel;
+    }
+
+}])
 
 angular.module("torrentApp").directive('toggle', function() {
 
     function controller() {
-        var vm = this;
+        // var vm = this;
+        //
+        // // TODO: assert this is usefull ?
+        // // if(angular.isUndefined(vm.ngModel)) { vm.ngModel = !!vm.ngModel; }
+        //
+        // if (angular.isFunction(vm.checked)) { vm.ngModel = !!vm.checked(); }
+        //
+        // vm.toggle = function() {
+        //     if (angular.isFunction(vm.disabled) && vm.disabled()) return;
+        //     vm.ngModel = !vm.ngModel;
+        // }
 
-        // TODO: assert this is usefull ?
-        // if(angular.isUndefined(vm.ngModel)) { vm.ngModel = !!vm.ngModel; }
 
-        if (angular.isFunction(vm.checked)) { vm.ngModel = !!vm.checked(); }
 
-        vm.toggle = function() {
-            if (angular.isFunction(vm.disabled) && vm.disabled()) return;
-            vm.ngModel = !vm.ngModel;
-        }
     }
 
     function link() {
@@ -25,6 +38,7 @@ angular.module("torrentApp").directive('toggle', function() {
         replace: true,
         transclude: true,
         scope: {
+            ngChange: '=?ngChange',
             checked: '&?',
             disabled: '&?',
             ngModel: '=ngModel'
@@ -34,7 +48,7 @@ angular.module("torrentApp").directive('toggle', function() {
         bindToController: true,
         require: 'ngModel',
         template: '<div class="ui toggle checkbox">' +
-            '<input type="checkbox" ng-model="vm.ngModel">' +
+            '<input type="checkbox" ng-model="vm.ngModel" ng-change="vm.ngChange">' +
             '<label ng-transclude></label>' +
             '</div>',
         link: link

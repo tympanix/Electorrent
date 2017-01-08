@@ -25,6 +25,7 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
         this.user = data.user
         this.password = data.password
         this.client = data.client
+        this.default = data.default
     };
 
     Server.prototype.json = function () {
@@ -34,7 +35,8 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
             port: this.port,
             user: this.user,
             password: this.password,
-            client: this.client
+            client: this.client,
+            default: this.default
         }
     };
 

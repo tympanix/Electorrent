@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<h1>Servers</h1>
+
+<table class="ui very basic table">
+  <thead>
+    <tr>
+      <th>Default</th>
+      <th>Client</th>
+      <th>IP Address</th>
+      <th>Username</th>
+      <th>Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="server in settings.servers">
+      <td class="collapsing">
+          <div class="ui toggle checkbox">
+              <input type="checkbox" ng-model="server.default" ng-change="toggleDefaultServer(server)"><label></label>
+          </div>
+      </td>
+      <td>{{server.getName()}}</td>
+      <td>{{server.ip}}</td>
+      <td>{{server.user}}</td>
+      <td class="collapsing center aligned">
+          <button class="circular mini red ui icon button">
+              <i class="icon remove"></i>
+          </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
