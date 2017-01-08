@@ -106,6 +106,14 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         console.log("Toggle default server", server);
     }
 
+    $scope.removeServer = function(server) {
+        if ($rootScope.$server === server) {
+            $notify.alert('Server in use', 'Can\'t remove a server that is currently being used')
+        } else {
+            config.removeServer(server)
+        }
+    }
+
     $scope.testfunc = function() {
         console.log("TEST FUNCTION");
     }
