@@ -6,6 +6,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
     const config = electron.config;
 
     var settings = {
+        startup: 'default',
         server: {
             ip: '',
             port: '',
