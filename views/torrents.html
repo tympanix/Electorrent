@@ -42,7 +42,7 @@
             </li>
         </ul>
         <div class="section">
-            <span>Filters</span>
+            <span>Labels</span>
             <a class="ui gray basic mini clear button" ng-click="filterByLabel()">Clear</a>
         </div>
         <ul class="filter label">
@@ -51,6 +51,19 @@
                 ng-click="filterByLabel(label)"
                 ng-class="{blue: activeLabel(label)}">
                     {{label}}
+                </div>
+            </li>
+        </ul>
+        <div class="section" ng-if="$btclient.enableTrackerSort">
+            <span>Trackers</span>
+            <a class="ui gray basic mini clear button" ng-click="filterByTracker()">Clear</a>
+        </div>
+        <ul class="filter label">
+            <li ng-repeat="tracker in trackers">
+                <div class="ui fluid torrent tag label"
+                ng-click="filterByTracker(tracker)"
+                ng-class="{blue: activeTracker(tracker)}">
+                    {{tracker}}
                 </div>
             </li>
         </ul>

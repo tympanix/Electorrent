@@ -26,7 +26,6 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
         server.updateLastUsed()
         config.saveAllSettings()
         console.info("Changed server to:", $rootScope.$server)
-        console.info("Changed client to:", $rootScope.$btclient)
     }
 
     this.getServer = function() {

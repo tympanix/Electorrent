@@ -2,6 +2,8 @@
 
 angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "notificationService", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, $notify) {
 
+    const URL_REGEX = /^(https?)\:\/\/((?:(?:[^:\/?#]+)+\.)?([^\.:\/?#]+\.([a-z]+)))(?:\:([0-9]+))?([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/
+
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
      * Best practise is naming your service starting with the client name in lower case followed by 'Service'
@@ -21,6 +23,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
 
     const fields = rtorrentConfig.fields.map(fieldTransform);
     const custom = rtorrentConfig.custom.map(customTransform);
+    const trackerfields = rtorrentConfig.trackers.map(trackerTransform);
 
     function url() {
         var ip, port, path;
@@ -43,6 +46,10 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
 
     function fieldTransform(field) {
         return 'd.' + field + '=';
+    }
+
+    function trackerTransform(field) {
+        return 't.' + field + '='
     }
 
     function customTransform(custom) {
@@ -94,10 +101,17 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} data
      */
     this.torrents = function() {
-
+        let torrents = null
         return $xmlrpc.callMethod('d.multicall', ['main', ...fields, ...custom])
             .then(function(data) {
-                return $q.resolve(processData(data));
+                torrents = processData(data)
+                return $q.resolve(torrents);
+            }).then(function(torrents) {
+                return getTrackers(torrents.all)
+            }).then(function(trackers) {
+                torrents.trackers = trackers
+                console.log('rTorrent', torrents);
+                return $q.resolve(torrents)
             }).catch(function(err) {
                 console.error("Torrent error", err);
                 return $q.reject(err);
@@ -115,9 +129,50 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         };
 
         torrents.all = data.map(build);
-        torrents.labels = torrents.all.reduce(fetchLabels, [])
+        torrents.labels = torrents.all.reduce(fetchLabels, []).map(decodeURIComponent)
 
         return torrents
+    }
+
+    function getTrackers(torrents) {
+        if (!torrents.length) return
+        let calls = []
+        torrents.forEach((torrent) => {
+            calls.push({'methodName': 't.multicall', 'params': [torrent.hash, '', ...trackerfields]})
+        })
+        return $xmlrpc.callMethod('system.multicall', [calls])
+            .then(function(data) {
+                console.log("Trackers", data);
+                let trackers = processTrackerData(torrents, data)
+                return $q.resolve(trackers)
+            })
+    }
+
+    function processTrackerData(torrents, data) {
+        let trackers = new Set()
+        let url = rtorrentConfig.trackers.indexOf('get_url')
+        torrents.forEach((torrent, index) => {
+            let tracker = data[index][0][0][url]
+            torrent.tracker = tracker
+            trackers.add(tracker)
+        })
+        return Array.from(trackers).map((tracker) => {
+            return parseUrl(tracker).hostname
+        })
+    }
+
+    function parseUrl(url) {
+        var match = url.match(URL_REGEX)
+        return match && {
+            protocol: match[1],
+            domain: match[2],
+            hostname: match[3],
+            extension: match[4],
+            port: match[5],
+            path: match[6],
+            params: match[7],
+            hash: match[8]
+        }
     }
 
     function build(array) {
@@ -255,6 +310,10 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         return doAction('d.set_priority', torrents, 0)
     }
 
+    /**
+     * Whether the client supports sorting by trackers or not
+     */
+    this.enableTrackerSort = true
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
