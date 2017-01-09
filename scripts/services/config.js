@@ -148,13 +148,13 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         return maxServer
     }
 
-    function getMenu(name) {
-        let menu = electron.menu.getApplicationMenu()
+    function getMenu(menu, name) {
         return menu.items.find((menuItem) => menuItem.label === name)
     }
 
     this.renderServerMenu = function() {
-        let serverMenu = getMenu('Servers').submenu
+        let menu = electron.menu.getApplicationMenu()
+        let serverMenu = getMenu(menu, 'Servers').submenu
         serverMenu.clear()
         serverMenu.append(new MenuItem({
             label: 'Add new server...',
@@ -167,6 +167,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         }))
         serverMenu.append(new MenuItem({type: 'separator'}))
         renderServerMenuOptions(serverMenu, this.getServers())
+        electron.menu.setApplicationMenu(menu)
     }
 
     function renderServerMenuOptions(menu, servers) {
@@ -186,6 +187,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
                 type: 'radio'
             }))
         })
+        console.log("Menu", menu);
     }
 
 }]);
