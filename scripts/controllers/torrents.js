@@ -19,6 +19,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.labelsDrowdown = null;
     $scope.torrentLimit = LIMIT;
     $scope.labels = [];
+    $scope.trackers = []
     $scope.resizeMode = settings.ui.resizeMode;
 
     $scope.filters = {
@@ -113,6 +114,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $scope.torrents = {};
         $scope.arrayTorrents = [];
         $scope.labels = [];
+        $scope.trackers = [];
     }
 
     function resetAll() {
@@ -144,6 +146,18 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     $scope.activeLabel = function(label) {
         return $scope.filters.label === label;
+    }
+
+    $scope.filterByTracker = function(tracker) {
+        deselectAll();
+        lastSelected = null;
+        $scope.filters.tracker = tracker;
+        $scope.torrentLimit = LIMIT;
+        refreshTorrents();
+    }
+
+    $scope.activeTracker = function(tracker) {
+        return $scope.filters.tracker === tracker;
     }
 
     $scope.showContextMenu = function(event, torrent /*, index*/) {
@@ -303,9 +317,10 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         }
     }
 
-    function torrentFilter(status, label){
+    function torrentFilter(status, label, tracker){
         var filterStatus = status || $scope.filters.status;
         var filterLabel = label || $scope.filters.label;
+        var filterTracker = tracker || $scope.filters.tracker;
 
         return function(torrent){
             var keep = [];
@@ -316,6 +331,10 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
             if (filterLabel) {
                 keep.push(torrent.label === filterLabel)
+            }
+
+            if (filterTracker) {
+                keep.push(torrent.tracker && torrent.tracker.includes(filterTracker))
             }
 
             return keep.every(function(shouldkeep) {
@@ -362,6 +381,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             deleteTorrents(torrents);
             changeTorrents(torrents);
             updateLabels(torrents);
+            updateTrackers(torrents);
         })
 
         return q;
@@ -423,6 +443,16 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             torrents.labels.forEach(function(label /*, index*/){
                 if (!$scope.labels.includes(label)) {
                     $scope.labels.push(label)
+                }
+            })
+        }
+    }
+
+    function updateTrackers(torrents) {
+        if (torrents.trackers && torrents.trackers.length > 0) {
+            torrents.trackers.forEach(function(tracker) {
+                if (!$scope.trackers.includes(tracker)) {
+                    $scope.trackers.push(tracker)
                 }
             })
         }

@@ -72,13 +72,29 @@ angular.module('torrentApp').factory("rtorrentConfig", [function() {
         'is_private',
     ];
 
+    var trackers = [
+        'get_group',
+        'get_id',
+        'get_min_interval',
+        'get_normal_interval',
+        'get_scrape_complete',
+        'get_scrape_downloaded',
+        'get_scrape_incomplete',
+        'get_scrape_time_last',
+        'get_type', /* Get the tracker type(1 = http, 2 = udp, 3 = dht)*/
+        'get_url',
+        'is_enabled', /* Get the status of the tracker(0 = disabled, 1 = enabled) */
+        'is_open' /* Get the status of the tracker(0 = closed, 1 = open) */
+    ]
+
     var custom = [
         'addtime'
     ]
 
     return {
         fields: fields,
-        custom: custom
+        custom: custom,
+        trackers: trackers
     }
 
 }])
