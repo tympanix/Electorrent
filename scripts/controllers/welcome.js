@@ -3,8 +3,6 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
     $scope.connecting = false;
     $scope.btclients = $btclients;
 
-    console.log("Welcome parent scope", $scope.$parent)
-
     function clearForm() {
         $scope.ip = ''
         $scope.port = ''

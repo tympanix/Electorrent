@@ -187,7 +187,6 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
                 type: 'radio'
             }))
         })
-        console.log("Menu", menu);
     }
 
 }]);
