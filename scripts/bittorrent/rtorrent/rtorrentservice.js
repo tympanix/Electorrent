@@ -110,7 +110,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
                 return getTrackers(torrents.all)
             }).then(function(trackers) {
                 torrents.trackers = trackers
-                console.log('rTorrent', torrents);
                 return $q.resolve(torrents)
             }).catch(function(err) {
                 console.error("Torrent error", err);
@@ -153,7 +152,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         let url = rtorrentConfig.trackers.indexOf('get_url')
         torrents.forEach((torrent, index) => {
             let tracker = data[index][0][0][url]
-            torrent.tracker = tracker
+            torrent.trackers = [tracker]
             trackers.add(tracker)
         })
         return Array.from(trackers).map((tracker) => {
@@ -313,7 +312,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     /**
      * Whether the client supports sorting by trackers or not
      */
-    this.enableTrackerSort = true
+    this.enableTrackerFilter = true
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.

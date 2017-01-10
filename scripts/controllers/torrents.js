@@ -334,7 +334,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             }
 
             if (filterTracker) {
-                keep.push(torrent.tracker && torrent.tracker.includes(filterTracker))
+                keep.push(torrent.trackers && torrent.trackers.some((tracker) => {
+                    return tracker && tracker.includes(filterTracker)
+                }))
             }
 
             return keep.every(function(shouldkeep) {

@@ -113,10 +113,6 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         }
     }
 
-    $scope.testfunc = function() {
-        console.log("TEST FUNCTION");
-    }
-
     $scope.gotoPage = function(page) {
         $scope.page = page;
     }
