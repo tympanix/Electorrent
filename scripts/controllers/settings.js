@@ -75,7 +75,7 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         var port = $scope.server.port;
         var user = $scope.server.user;
         var password = $scope.server.password;
-        var client = $scope.server.type;
+        var client = $scope.server.client;
 
         var btclient = $bittorrent.getClient(client);
 
