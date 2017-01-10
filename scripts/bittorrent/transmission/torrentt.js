@@ -47,6 +47,7 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
          */
         this.status = data.status;
         this.error = data.error;
+        this.trackers = data.trackers.map((tracker) => tracker.announce)
 
         // Extra Field: Recheck Progress aka Verifying.
         if(this.isStatusVerifying()) {
