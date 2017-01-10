@@ -3,6 +3,8 @@
 angular.module('torrentApp')
     .service('transmissionService', ["$http", "$q", "TorrentT", "transmissionConfig", "notificationService", function($http, $q, TorrentT, transmissionConfig, $notify) {
 
+    const URL_REGEX = /^(https?)\:\/\/((?:(?:[^:\/?#]+)+\.)?([^\.:\/?#]+\.([a-z]+)))(?:\:([0-9]+))?([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/
+
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
      * Best practise is naming your service starting with the client name in lower case followed by 'Service'
@@ -142,14 +144,38 @@ angular.module('torrentApp')
             labels: [],
             all: [],
             changed: [],
-            deleted: []
+            deleted: [],
+            trackers: []
         };
         torrents.all = data.arguments.torrents.map(build);
+        torrents.trackers = getTrackers(torrents.all)
         return torrents;
     }
 
     function build(data){
         return new TorrentT(data);
+    }
+
+    function getTrackers(torrents) {
+        let trackers = new Set()
+        torrents.forEach((torrent) => {
+            torrent.trackers.forEach((tracker) => trackers.add(tracker))
+        })
+        return Array.from(trackers).map((tracker) => parseUrl(tracker).hostname)
+    }
+
+    function parseUrl(url) {
+        var match = url.match(URL_REGEX)
+        return match && {
+            protocol: match[1],
+            domain: match[2],
+            hostname: match[3],
+            extension: match[4],
+            port: match[5],
+            path: match[6],
+            params: match[7],
+            hash: match[8]
+        }
     }
 
     /**
@@ -324,6 +350,10 @@ angular.module('torrentApp')
         return doAction('torrent-remove', torrents, 'delete-local-data', true)
     }
 
+    /**
+     * Whether the client supports sorting by trackers or not
+     */
+    this.enableTrackerFilter = true
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
