@@ -141,6 +141,7 @@ angular.module('torrentApp')
 
     function processData(data){
         var torrents = {
+            dirty: true,
             labels: [],
             all: [],
             changed: [],

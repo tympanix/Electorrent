@@ -41,32 +41,38 @@
                 <div class="ui torrent sort label">{{numInFilter('error')}}</div>
             </li>
         </ul>
-        <div class="section">
-            <span>Labels</span>
-            <a class="ui gray basic mini clear button" ng-click="filterByLabel()">Clear</a>
+        <div>
+            <div class="section">
+                <span>Labels</span>
+                <a class="ui gray basic mini clear button" ng-click="filterByLabel()">Clear</a>
+            </div>
+            <ul class="filter label">
+                <span ng-if="labels.length == 0" class="meta text">No labels...</span>
+                <li ng-repeat="label in labels">
+                    <div class="ui fluid torrent tag label"
+                    ng-click="filterByLabel(label)"
+                    ng-class="{blue: activeLabel(label)}">
+                        {{label}}
+                    </div>
+                </li>
+            </ul>
         </div>
-        <ul class="filter label">
-            <li ng-repeat="label in labels">
-                <div class="ui fluid torrent tag label"
-                ng-click="filterByLabel(label)"
-                ng-class="{blue: activeLabel(label)}">
-                    {{label}}
-                </div>
-            </li>
-        </ul>
-        <div class="section" ng-if="$btclient.enableTrackerFilter">
-            <span>Trackers</span>
-            <a class="ui gray basic mini clear button" ng-click="filterByTracker()">Clear</a>
+        <div ng-if="$btclient.enableTrackerFilter">
+            <div class="section">
+                <span>Trackers</span>
+                <a class="ui gray basic mini clear button" ng-click="filterByTracker()">Clear</a>
+            </div>
+            <ul class="filter label">
+                <span ng-if="trackers.length == 0" class="meta text">No trackers...</span>
+                <li ng-repeat="tracker in trackers">
+                    <div class="ui fluid torrent tag label"
+                    ng-click="filterByTracker(tracker)"
+                    ng-class="{blue: activeTracker(tracker)}">
+                        {{tracker}}
+                    </div>
+                </li>
+            </ul>
         </div>
-        <ul class="filter label">
-            <li ng-repeat="tracker in trackers">
-                <div class="ui fluid torrent tag label"
-                ng-click="filterByTracker(tracker)"
-                ng-class="{blue: activeTracker(tracker)}">
-                    {{tracker}}
-                </div>
-            </li>
-        </ul>
     </div>
 
     <div class="main-panel">

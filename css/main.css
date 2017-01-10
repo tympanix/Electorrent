@@ -208,6 +208,11 @@ html, body {
     width: 100%;
     z-index: 10000;
 }
+
+.meta.text {
+    color: #888888;
+    font-style: italic;
+}
 .transparent.overlay {
     background-color: rgba(0, 0, 0, 0.75);
 }
