@@ -141,7 +141,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         })
         return $xmlrpc.callMethod('system.multicall', [calls])
             .then(function(data) {
-                console.log("Trackers", data);
                 let trackers = processTrackerData(torrents, data)
                 return $q.resolve(trackers)
             })
