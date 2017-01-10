@@ -3,7 +3,7 @@
 <form class="ui form" id="loginForm" ng-class="{loading: connecting}" onsubmit="return false;">
     <div class="field">
         <label>Bittorrent Client</label>
-        <dropdown title="Client Program" ng-model="settings.server.type">
+        <dropdown title="Client Program" ng-model="server.client">
             <dropdown-group value="id" title="client.name" ng-repeat="(id, client) in btclients">
                 <i class="icon torrent big" ng-class="client.icon"></i>
                 {{client.name}}
