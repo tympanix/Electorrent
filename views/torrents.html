@@ -89,18 +89,11 @@
             <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
                 <table
                     id="torrentTable"
-                    resizeable
-                    mode="resizeMode"
                     container=".main-content"
                     class="ui single line unstackable selectable fixed compact torrent resize table">
-                    <thead sorting="changeSorting">
+                    <thead>
                         <tr>
-                            <th id="colName" sort="decodedName">Name</th>
-                            <th id="colSize" sort="size">Size</th>
-                            <th id="colDownSpeed" sort="downloadSpeed">Download</th>
-                            <th id="colProgress" sort="percent">Progress</th>
-                            <th id="colLabel" sort="label">Label</th>
-                            <th id="colAdded" sort="dateAdded">Date Added</th>
+                            <th ng-repeat="col in $btclient.columns track by $index">{{col.name}}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,23 +103,8 @@
                             ng-click="setSelected($event, torrent, $index)"
                             ng-right-click="showContextMenu($event, torrent, $index)"
                             repeat-done>
-                            <td>
-                                {{torrent.decodedName}}
-                            </td>
-                            <td>
-                                {{torrent.size | bytes}}
-                            </td>
-                            <td>
-                                {{torrent.downloadSpeed | speed:torrent}}
-                            </td>
-                            <td>
-                                <progress torrent="torrent"/>
-                            </td>
-                            <td>
-                                {{torrent.label}}
-                            </td>
-                            <td>
-                                {{torrent.dateAdded | date}}
+                            <td ng-repeat="col in $btclient.columns track by $index">
+                                {{col.value(torrent)}}
                             </td>
                         </tr>
                     </tbody>
