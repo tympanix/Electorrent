@@ -305,11 +305,12 @@ angular.module('torrentApp')
         }
 
         this.columns = [
-            new Column('Name', 'decodedName'),
-            new Column('Size', 'size', 'bytes'),
-            new Column('Down', 'downloadSpeed', 'speed'),
-            new Column('Label', 'label'),
-            new Column('Date Added', 'dateAdded', 'date')
+            new Column('Name', 'text', 'decodedName'),
+            new Column('Size', 'text', 'size', 'bytes'),
+            new Column('Down', 'text', 'downloadSpeed', 'speed'),
+            new Column('Progress', 'progress'),
+            new Column('Label', 'text', 'label'),
+            new Column('Date Added', 'text', 'dateAdded', 'date')
         ]
 
         this.actionHeader = [
