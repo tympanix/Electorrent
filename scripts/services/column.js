@@ -5,8 +5,9 @@ angular.module('torrentApp').factory('Column', ['$filter', function($filter) {
     /**
      * Constructor, with class name
      */
-    function Column(name, attribute, filtername) {
+    function Column(name, type, attribute, filtername) {
         this.name = name
+        this.type = type
         this.attribute = attribute
         this.filter = filtername && $filter(filtername)
     }
