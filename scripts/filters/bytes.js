@@ -20,11 +20,11 @@ angular.module("torrentApp").filter('bytes', function() {
         };
     });
 
-angular.module("torrentApp").filter('speed', ['bytesFilter', 'AbstractTorrent', function(bytes, AbstractTorrent) {
+angular.module("torrentApp").filter('speed', ['bytesFilter', function(bytes) {
     return function(bytesPerSecond, torrent) {
         var display = true;
 
-        if (torrent instanceof AbstractTorrent){
+        if (torrent){
             display = torrent.isStatusDownloading()
         }
 

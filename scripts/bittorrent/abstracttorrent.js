@@ -204,6 +204,22 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         }
     }
 
+    AbstractTorrent.COL_NAME = new Column('Name', 'text', 'decodedName')
+    AbstractTorrent.COL_SIZE = new Column('Size', 'text', 'size', 'bytes')
+    AbstractTorrent.COL_DOWNSPEED = new Column('Down', 'text', 'downloadSpeed', 'speed')
+    AbstractTorrent.COL_PROGRESS = new Column('Progress', 'progress')
+    AbstractTorrent.COL_LABEL = new Column('Label', 'text', 'label')
+    AbstractTorrent.COL_DATEADDED = new Column('Date Added', 'text', 'dateAdded', 'date')
+
+    AbstractTorrent.COLUMNS = [
+        AbstractTorrent.COL_NAME,
+        AbstractTorrent.COL_SIZE,
+        AbstractTorrent.COL_DOWNSPEED,
+        AbstractTorrent.COL_PROGRESS,
+        AbstractTorrent.COL_LABEL,
+        AbstractTorrent.COL_DATEADDED
+    ]
+
     function alphabetical(a, b) {
         var aLower = a.toLowerCase();
         var bLower = b.toLowerCase();
