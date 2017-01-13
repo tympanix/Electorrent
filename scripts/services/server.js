@@ -18,6 +18,7 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients',
             this.lastused = -1
             this.columns = defaultColumns()
         }
+        console.log("Columns", this.columns);
     }
 
     Server.prototype.fromJson = function (data) {
@@ -62,14 +63,31 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients',
         this.lastused = new Date().getTime()
     };
 
+    function zipsort(obj, sor) {
+        return function(a,b) {
+            let i = sor.indexOf(a.name)
+            let j = sor.indexOf(b.name)
+            if (i === j) {
+                return 0
+            } else if (i === -1) {
+                return 1
+            } else if (j === -1) {
+                return -1
+            } else {
+                return i - j
+            }
+        }
+    }
+
     function parseColumns(data) {
         if (!data || data.length === 0) return defaultColumns()
-        data.map((entry) => {
-            let column = Torrent.COLUMNS.find((column) => column.name === entry)
-            angular.copy(column, column)
-            column.enabled = true
-            return column
+        let columns = []
+        angular.copy(Torrent.COLUMNS, columns)
+        columns.sort(zipsort(columns, data))
+        columns.forEach((column) => {
+            column.enabled = data.some((entry) => (entry === column.name))
         })
+        return columns
     }
 
     function defaultColumns() {

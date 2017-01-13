@@ -72,6 +72,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     $scope.$on('clear:torrents', function(){
         clearAll()
+        $scope.filters = {
+            status: 'all'
+        };
     })
 
     $scope.$on('stop:torrents', function(){
