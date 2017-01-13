@@ -8,6 +8,7 @@ angular.module('torrentApp').factory('Column', ['$filter', function($filter) {
     function Column(name, type, attribute, filtername) {
         this.name = name
         this.type = type
+        this.enabled = false
         this.attribute = attribute
         this.filter = filtername && $filter(filtername)
     }

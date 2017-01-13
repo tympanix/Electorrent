@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').factory('Server', ['$btclients', function($btclients) {
+angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients', function(Torrent, $btclients) {
 
     /**
      * Constructor, with class name
@@ -16,6 +16,7 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
             this.password = password
             this.client = client
             this.lastused = -1
+            this.columns = defaultColumns()
         }
     }
 
@@ -28,6 +29,7 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
         this.client = data.client
         this.default = data.default
         this.lastused = data.lastused
+        this.columns = parseColumns(data.columns)
     };
 
     Server.prototype.json = function () {
@@ -39,7 +41,8 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
             password: this.password,
             client: this.client,
             default: this.default,
-            lastused: this.lastused || -1
+            lastused: this.lastused || -1,
+            columns: this.columns.filter((column) => column.enabled).map((column) => column.name)
         }
     };
 
@@ -58,6 +61,23 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
     Server.prototype.updateLastUsed = function () {
         this.lastused = new Date().getTime()
     };
+
+    function parseColumns(data) {
+        if (!data || data.length === 0) return defaultColumns()
+        data.map((entry) => {
+            let column = Torrent.COLUMNS.find((column) => column.name === entry)
+            angular.copy(column, column)
+            column.enabled = true
+            return column
+        })
+    }
+
+    function defaultColumns() {
+        let columns = []
+        angular.copy(Torrent.COLUMNS, columns)
+        columns.forEach((columns) => columns.enabled = true)
+        return columns
+    }
 
     function generateGUID() {
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
