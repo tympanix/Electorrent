@@ -130,11 +130,8 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $rootScope.$btclient = null
         $rootScope.$server = null
         $bittorrent.setServer(server)
-
-        $timeout(function() {
-            connectToServer(server)
-            $scope.$broadcast('start:torrents', true) // Full update
-        }, 250)
+        connectToServer(server)
+        $scope.$broadcast('start:torrents', true) // Full update
         $scope.$apply();
     })
 
