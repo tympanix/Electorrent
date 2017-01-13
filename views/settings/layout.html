@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<h1>Layout</h1>
+
+<table class="ui very basic table">
+  <thead>
+    <tr>
+      <th>Enabled</th>
+      <th>Name</th>
+    </tr>
+  </thead>
+  <tbody ui-sortable ng-model="$server.columns">
+    <tr ng-repeat="col in $server.columns">
+      <td class="collapsing">
+          <div class="ui checkbox">
+              <input type="checkbox" ng-model="col.enabled"><label></label>
+          </div>
+      </td>
+      <td>{{col.name}}</td>
+    </tr>
+  </tbody>
+</table>
