@@ -92,8 +92,8 @@
                     container=".main-content"
                     class="ui single line unstackable selectable fixed compact torrent resize table">
                     <thead>
-                        <tr>
-                            <th ng-repeat="col in $server.columns | filter:{enabled: true}">{{col.name}}</th>
+                        <tr sorting="changeSorting">
+                            <th ng-repeat="col in $server.columns | filter:{enabled: true}" sort="col.attribute">{{col.name}}</th>
                         </tr>
                     </thead>
                     <tbody>
