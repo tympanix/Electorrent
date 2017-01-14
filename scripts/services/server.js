@@ -18,7 +18,6 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients',
             this.lastused = -1
             this.columns = defaultColumns()
         }
-        console.log("Columns", this.columns);
     }
 
     Server.prototype.fromJson = function (data) {
