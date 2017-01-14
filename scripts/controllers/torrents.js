@@ -284,7 +284,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.changeSorting = function(sortName, descending) {
-        console.log("SORTING");
+        $scope.torrentLimit = LIMIT;
         $scope.filters.sort = sortName;
         $scope.filters.order = descending;
         refreshTorrents();
