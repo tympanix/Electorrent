@@ -25,13 +25,14 @@
     "jQuery": "^3.0.0",
     "angular-animate": "~1.5.9",
     "ngInfiniteScroll": "^1.2.2",
-    "angular-table-resize": "^1.0.4",
     "angular-marked": "^1.2.1",
     "angular-xmlrpc": "https://github.com/Tympanix/angular-xmlrpc.git#^1.0.3",
     "angular-ui-sortable": "^0.16.1",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "angular-table-resize": "https://github.com/Tympanix/angular-table-resize.git#v2.0"
   },
   "resolutions": {
-    "angular": "1.5.8"
+    "angular": "1.5.8",
+    "jquery": ">=3.1.x"
   }
 }
