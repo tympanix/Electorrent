@@ -45,7 +45,7 @@ angular.module("torrentApp").directive('dragAndDrop', ['$rootScope', '$document'
                 paths.push(files.item(i).path);
             }
 
-            electron.upload(paths);
+            electron.torrents.readFiles(paths);
             $rootScope.$emit('show:draganddrop', false);
         });
     }
