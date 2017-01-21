@@ -4,7 +4,7 @@ const yargs = require('yargs');
 const util = require('util');
 
 // Handle Squirrel startup parameters
-if(require('electron-squirrel-startup')) return;
+if (require('./lib/startup')) return
 
 // Electron modules
 const {app} = electron;
@@ -12,7 +12,7 @@ const {BrowserWindow} = electron;
 const {ipcMain} = electron;
 
 // Set up program arguments
-yargs.version(() => { return app.getVersion() })
+yargs.version(() => app.getVersion())
 yargs.help('h').alias('h', 'help')
 yargs.usage(`Electorrent ${app.getVersion()}`)
 yargs.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
@@ -23,6 +23,7 @@ const config = require('./lib/config');
 const updater = require('./lib/update');
 const logger = require('./lib/logger');
 const electorrent = require('./lib/electorrent');
+const torrents = require('./lib/torrents');
 
 // Log startup information
 logger.debug('Starting Electorrent in debug mode');
@@ -66,17 +67,26 @@ function createTorrentWindow() {
 }
 
 function sendMagnetLinks(args){
-    var magnetLinks = [];
-    args.forEach(function(val){
-        if (val.startsWith('magnet')){
-            magnetLinks.push(val);
-        }
-    })
+    var magnetLinks = args.filter((url) => url.startsWith('magnet'))
+    if (magnetLinks.length === 0) return
     torrentWindow.webContents.send('magnet', magnetLinks);
+}
+
+function sendTorrentFiles(args){
+    logger.info('Main searching for files in', args)
+    var torrentFiles = args.filter((path) => path.endsWith('.torrent'))
+    if (torrentFiles.length === 0) return
+    logger.info('Main seding torrent files', torrentFiles)
+    torrents.readFiles(torrentFiles)
 }
 
 ipcMain.on('send:magnets', function(){
     sendMagnetLinks(process.argv);
+})
+
+ipcMain.on('send:torrentfiles', function(){
+    logger.info('Main received send torrentfiles')
+    sendTorrentFiles(process.argv);
 })
 
 // If another instance of the app is allready running, execute this callback
@@ -84,7 +94,8 @@ var shouldQuit = app.makeSingleInstance(function(args /*, workingDirectory*/) {
     // Someone tried to run a second instance, we should focus our window
 
     if (torrentWindow) {
-        sendMagnetLinks(args);
+        sendMagnetLinks(args)
+        sendTorrentFiles(args)
         if (torrentWindow.isMinimized()) torrentWindow.restore();
         torrentWindow.focus();
     }

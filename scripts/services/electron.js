@@ -29,7 +29,7 @@ angular.module('torrentApp').factory("electron", [function() {
     o.updater           = remote.require('./lib/update.js');
     o.is                = remote.require('electron-is');
     o.program           = remote.require('yargs').argv;
-    o.upload            = remote.require('./lib/upload.js')
+    o.torrents          = remote.require('./lib/torrents.js')
 
     // Return object
     return o;

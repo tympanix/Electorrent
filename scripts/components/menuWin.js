@@ -8,7 +8,7 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bit
                     label: "Add Torrent...",
                     accelerator: "CmdOrCtrl+O",
                     click: function() {
-                        electron.upload();
+                        electron.torrents.browse();
                     }
                 },
                 {

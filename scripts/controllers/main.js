@@ -58,6 +58,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         .then(function(){
             pageTorrents();
             requestMagnetLinks();
+            requestTorrentFiles();
         }).catch(function(){
             pageSettings('connection');
         }).finally(function() {
@@ -70,6 +71,11 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         electron.ipc.send('send:magnets');
     }
 
+    function requestTorrentFiles() {
+        console.log("Requestion torrent files");
+        electron.ipc.send('send:torrentfiles')
+    }
+
     // Listen for incomming magnet links from the main process
     electron.ipc.on('magnet', function(event, data){
         data.forEach(function(magnet){
@@ -79,6 +85,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     // Listen for incomming torrent files from the main process
     electron.ipc.on('torrentfiles', function uploadTorrent(event, buffer, filename){
+        console.log("Got torrent file", filename);
         $rootScope.$btclient.uploadTorrent(buffer, filename)
             .catch(function(err) {
                 console.error("Error", err);
