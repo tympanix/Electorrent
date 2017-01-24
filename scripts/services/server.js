@@ -92,7 +92,6 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients',
     function defaultColumns() {
         let columns = []
         angular.copy(Torrent.COLUMNS, columns)
-        columns.forEach((columns) => columns.enabled = true)
         return columns
     }
 

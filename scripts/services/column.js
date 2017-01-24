@@ -5,12 +5,18 @@ angular.module('torrentApp').factory('Column', ['$filter', function($filter) {
     /**
      * Constructor, with class name
      */
-    function Column(name, type, attribute, filtername) {
+    function Column({
+        name,
+        type = 'text',
+        enabled = true,
+        attribute,
+        filter
+    }) {
         this.name = name
         this.type = type
-        this.enabled = false
+        this.enabled = enabled
         this.attribute = attribute
-        this.filter = filtername && $filter(filtername)
+        this.filter = filter && $filter(filter)
     }
 
     Column.prototype.value = function (torrent) {
