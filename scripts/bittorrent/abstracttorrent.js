@@ -204,17 +204,19 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         }
     }
 
-    AbstractTorrent.COL_NAME = new Column('Name', 'text', 'decodedName')
-    AbstractTorrent.COL_SIZE = new Column('Size', 'text', 'size', 'bytes')
-    AbstractTorrent.COL_DOWNSPEED = new Column('Down', 'text', 'downloadSpeed', 'speed')
-    AbstractTorrent.COL_PROGRESS = new Column('Progress', 'progress', 'percent')
-    AbstractTorrent.COL_LABEL = new Column('Label', 'text', 'label')
-    AbstractTorrent.COL_DATEADDED = new Column('Date Added', 'text', 'dateAdded', 'date')
+    AbstractTorrent.COL_NAME = new Column({name: 'Name', attribute: 'decodedName'})
+    AbstractTorrent.COL_SIZE = new Column({name: 'Size', attribute: 'size', filter: 'bytes'})
+    AbstractTorrent.COL_DOWNSPEED = new Column({name: 'Down', attribute: 'downloadSpeed', filter: 'speed'})
+    AbstractTorrent.COL_UPSPEED = new Column({name: 'Up', attribute: 'uploadSpeed', filter: 'speed'})
+    AbstractTorrent.COL_PROGRESS = new Column({name: 'Progress', type: 'progress', attribute: 'percent'})
+    AbstractTorrent.COL_LABEL = new Column({name: 'Label', attribute: 'label'})
+    AbstractTorrent.COL_DATEADDED = new Column({name: 'Date Added', attribute: 'dateAdded', filter: 'date'})
 
     AbstractTorrent.COLUMNS = [
         AbstractTorrent.COL_NAME,
         AbstractTorrent.COL_SIZE,
         AbstractTorrent.COL_DOWNSPEED,
+        AbstractTorrent.COL_UPSPEED,
         AbstractTorrent.COL_PROGRESS,
         AbstractTorrent.COL_LABEL,
         AbstractTorrent.COL_DATEADDED
