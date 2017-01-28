@@ -34,6 +34,7 @@
   "devDependencies": {
     "bower": "^1.7.9",
     "electron-builder": "^11.4.4",
+    "electron-builder-squirrel-windows": "^11.6.1",
     "electron-connect": "^0.4.8",
     "electron-is": "^2.1.0",
     "electron-prebuilt": "^1.4.13",
