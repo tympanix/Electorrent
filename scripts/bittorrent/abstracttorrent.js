@@ -247,6 +247,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     AbstractTorrent.COL_SEEDS = new Column({name: 'Seeds', attribute: 'seedsText', enabled: false})
     AbstractTorrent.COL_QUEUE = new Column({name: 'Queue', attribute: 'queueText', enabled: false})
     AbstractTorrent.COL_ETA = new Column({name: 'ETA', attribute: 'etaText', filter: 'date', enabled: false})
+    AbstractTorrent.COL_RATIO = new Column({name: 'Ratio', attribute: 'ratio', enabled: false})
 
     AbstractTorrent.COLUMNS = [
         AbstractTorrent.COL_NAME,
@@ -259,7 +260,8 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         AbstractTorrent.COL_PEERS,
         AbstractTorrent.COL_SEEDS,
         AbstractTorrent.COL_QUEUE,
-        AbstractTorrent.COL_ETA
+        AbstractTorrent.COL_ETA,
+        AbstractTorrent.COL_RATIO
     ]
 
     function alphabetical(a, b) {

@@ -25,7 +25,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
             downloaded: data.get_bytes_done, /* Downloaded (integer): number of bytes */
             percent: data.get_bytes_done / data.get_size_bytes * 1000, /* Percent (integer): completion in per-mille (100% = 1000)  */
             uploaded: data.get_up_total, /* Uploaded (integer): number of bytes */
-            ratio: data.get_ratio, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
+            ratio: data.get_ratio / 1000, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
             uploadSpeed: data.get_up_rate,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: data.get_down_rate, /* Download Speed (integer): bytes per second */
             eta: undefined, /* ETA (integer): second to completion MISSING */
