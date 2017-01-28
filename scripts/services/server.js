@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').factory('Server', ['$btclients', function($btclients) {
+angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients', function(Torrent, $btclients) {
 
     /**
      * Constructor, with class name
@@ -16,6 +16,7 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
             this.password = password
             this.client = client
             this.lastused = -1
+            this.columns = defaultColumns()
         }
     }
 
@@ -28,6 +29,7 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
         this.client = data.client
         this.default = data.default
         this.lastused = data.lastused
+        this.columns = parseColumns(data.columns)
     };
 
     Server.prototype.json = function () {
@@ -39,7 +41,8 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
             password: this.password,
             client: this.client,
             default: this.default,
-            lastused: this.lastused || -1
+            lastused: this.lastused || -1,
+            columns: this.columns.filter((column) => column.enabled).map((column) => column.name)
         }
     };
 
@@ -58,6 +61,39 @@ angular.module('torrentApp').factory('Server', ['$btclients', function($btclient
     Server.prototype.updateLastUsed = function () {
         this.lastused = new Date().getTime()
     };
+
+    function zipsort(obj, sor) {
+        return function(a,b) {
+            let i = sor.indexOf(a.name)
+            let j = sor.indexOf(b.name)
+            if (i === j) {
+                return 0
+            } else if (i === -1) {
+                return 1
+            } else if (j === -1) {
+                return -1
+            } else {
+                return i - j
+            }
+        }
+    }
+
+    function parseColumns(data) {
+        if (!data || data.length === 0) return defaultColumns()
+        let columns = []
+        angular.copy(Torrent.COLUMNS, columns)
+        columns.sort(zipsort(columns, data))
+        columns.forEach((column) => {
+            column.enabled = data.some((entry) => (entry === column.name))
+        })
+        return columns
+    }
+
+    function defaultColumns() {
+        let columns = []
+        angular.copy(Torrent.COLUMNS, columns)
+        return columns
+    }
 
     function generateGUID() {
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
