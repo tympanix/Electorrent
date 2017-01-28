@@ -1,37 +1,78 @@
 angular.module("torrentApp").directive('sorting', ['$window', function($window) {
 
-    var $last;
-    var $sort;
+    return {
+        restrict: 'A',
+        bindToController: true,
+        scope: {
+            sorting: '='
+        },
+        controller: controller
+    };
 
-    var sortKey;
-    var sortOrder;
+    function controller() {
+        console.log("Sorting func main", this.sorting);
+
+        this.sortKey = getSavedSortKey()
+        this.sortOrder = getSavedSortOrder()
+
+        this.save = function(key, order) {
+            $window.localStorage.setItem('sort_key', key);
+            $window.localStorage.setItem('sort_desc', order);
+        }
+    }
+
+    function getSavedSortKey() {
+        let sortKey = $window.localStorage.getItem('sort_key');
+        if (!sortKey || typeof sortKey !== 'string') {
+            return 'dateAdded';
+        } else {
+            return sortKey
+        }
+    }
+
+    function getSavedSortOrder() {
+        let sortOrder = $window.localStorage.getItem('sort_desc');
+        if (!sortOrder) {
+            return true;
+        } else {
+            return (sortOrder === 'true');
+        }
+    }
+
+}]);
+
+angular.module("torrentApp").directive('sort', [function() {
 
     return {
         restrict: 'A',
-        scope: true,
+        require: '^^sorting',
+        scope: {
+            sort: '='
+        },
         link: link
     };
 
-    function link(scope, element, attr) {
-        $sort = scope.$parent.$eval(attr.sorting);
+    function link(scope, element, attr, ctrl) {
 
-        load();
+        console.log('Scope', scope);
+        console.log('Sort func', ctrl.sorting)
+        console.log('Element', element);
+        console.log('Controller', ctrl);
+        console.log('Sort by', ctrl.sortKey);
+        console.log('Sort order', ctrl.sortOrder);
 
-        $(element).find('th').each(function(index, element) {
-            var column = $(element);
-            var colSort = column.attr('sort');
-            column.append('<i class="ui sorting icon"></i>');
-            bindSortAction(column);
+        var column = $(element);
+        column.append('<i class="ui sorting icon"></i>');
+        bindSortAction(scope, column, ctrl);
 
-            if (colSort === sortKey) {
-                setSortingArrow(column, sortOrder);
-                $sort(sortKey, sortOrder);
-            }
-        });
+        if (scope.sort === ctrl.sortKey) {
+            setSortingArrow(scope, column, ctrl, ctrl.sortOrder);
+            ctrl.sorting(scope.sort, ctrl.sortOrder);
+        }
 
     }
 
-    function bindSortAction(element) {
+    function bindSortAction(scope, element, ctrl) {
         var isDragging = false
 
         element.mousedown(function() {
@@ -45,28 +86,27 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
             isDragging = false;
             $(window).off("mousemove");
             if(!wasDragging) {
-                showSortingArrows(element);
+                showSortingArrows(scope, element, ctrl);
             }
         });
     }
 
-    function showSortingArrows(element) {
+    function showSortingArrows(scope, element, ctrl) {
         if(element.is('.sortdown, .sortup')) {
             element.toggleClass('sortdown sortup');
         } else {
-            if ($last) $last.removeClass('sortdown sortup');
+            if (ctrl.last) ctrl.last.removeClass('sortdown sortup');
             element.addClass('sortdown')
-            $last = element;
+            ctrl.last = element;
         }
 
-        var sort = element.attr('sort');
         var desc = element.hasClass('sortdown');
-        $sort(sort, desc);
-        save(sort, desc);
+        ctrl.sorting(scope.sort, desc);
+        ctrl.save(scope.sort, desc);
     }
 
-    function setSortingArrow(element, sortDesc) {
-        if ($last) $last.removeClass('sortdown sortup');
+    function setSortingArrow(scope, element, ctrl, sortDesc) {
+        if (ctrl.last) ctrl.last.removeClass('sortdown sortup');
 
         if (sortDesc === true) {
             element.addClass('sortdown')
@@ -76,27 +116,7 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
             element.removeClass('sortdown sortup')
         }
 
-        $last = element;
-    }
-
-    function save(sort, desc) {
-        $window.localStorage.setItem('sort_key', sort);
-        $window.localStorage.setItem('sort_desc', desc);
-    }
-
-    function load() {
-        sortKey = $window.localStorage.getItem('sort_key');
-        sortOrder = $window.localStorage.getItem('sort_desc');
-
-        if (!sortOrder) {
-            sortOrder = true;
-        } else {
-            sortOrder = (sortOrder === 'true');
-        }
-
-        if (typeof sortKey !== 'string') {
-            sortKey = 'dateAdded';
-        }
+        ctrl.last = element;
     }
 
 }]);
