@@ -20,11 +20,10 @@ angular.module('torrentApp').factory('Column', ['$filter', function($filter) {
     }
 
     Column.prototype.value = function (torrent) {
-        if (this.filter) {
-            return this.filter(torrent[this.attribute])
-        } else {
-            return torrent[this.attribute]
-        }
+        var value = torrent[this.attribute]
+        if (angular.isFunction(value)) value = value.apply(torrent)
+        if (this.filter) value = this.filter(value)
+        return value
     };
 
     /**

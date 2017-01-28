@@ -196,6 +196,38 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         return this.statusMessage.replace(statusRegex, '');
     };
 
+    AbstractTorrent.prototype.seedsText = function () {
+        if (Number.isInteger(this.seedsConnected) && Number.isInteger(this.seedsInSwarm)) {
+            return this.seedsConnected + ' of ' + this.seedsInSwarm
+        } else {
+            return ''
+        }
+    }
+
+    AbstractTorrent.prototype.peersText = function() {
+        if (Number.isInteger(this.peersConnected) && Number.isInteger(this.peersInSwarm)) {
+            return this.peersConnected + ' of ' + this.peersInSwarm
+        } else {
+            return ''
+        }
+    }
+
+    AbstractTorrent.prototype.queueText = function() {
+        if (Number.isInteger(this.torrentQueueOrder) && this.torrentQueueOrder >= 0) {
+            return this.torrentQueueOrder
+        } else {
+            return ''
+        }
+    }
+
+    AbstractTorrent.prototype.etaText = function() {
+        if (Number.isInteger(this.eta) && this.eta > 0) {
+            return this.eta
+        } else {
+            return ''
+        }
+    }
+
     AbstractTorrent.sort = function(attribute) {
         switch (attribute) {
             case 'decodedName': return alphabetical
@@ -211,6 +243,10 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     AbstractTorrent.COL_PROGRESS = new Column({name: 'Progress', type: 'progress', attribute: 'percent'})
     AbstractTorrent.COL_LABEL = new Column({name: 'Label', attribute: 'label'})
     AbstractTorrent.COL_DATEADDED = new Column({name: 'Date Added', attribute: 'dateAdded', filter: 'date'})
+    AbstractTorrent.COL_PEERS = new Column({name: 'Peers', attribute: 'peersText', enabled: false})
+    AbstractTorrent.COL_SEEDS = new Column({name: 'Seeds', attribute: 'seedsText', enabled: false})
+    AbstractTorrent.COL_QUEUE = new Column({name: 'Queue', attribute: 'queueText', enabled: false})
+    AbstractTorrent.COL_ETA = new Column({name: 'ETA', attribute: 'etaText', filter: 'date', enabled: false})
 
     AbstractTorrent.COLUMNS = [
         AbstractTorrent.COL_NAME,
@@ -219,7 +255,11 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         AbstractTorrent.COL_UPSPEED,
         AbstractTorrent.COL_PROGRESS,
         AbstractTorrent.COL_LABEL,
-        AbstractTorrent.COL_DATEADDED
+        AbstractTorrent.COL_DATEADDED,
+        AbstractTorrent.COL_PEERS,
+        AbstractTorrent.COL_SEEDS,
+        AbstractTorrent.COL_QUEUE,
+        AbstractTorrent.COL_ETA
     ]
 
     function alphabetical(a, b) {
