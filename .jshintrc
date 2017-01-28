@@ -90,6 +90,7 @@
     "globals"       : {
         "angular": false,
         "$": false,
-        "moment": false
+        "moment": false,
+        "_": false
     }
 }

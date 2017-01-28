@@ -72,6 +72,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     $scope.$on('clear:torrents', function(){
         clearAll()
+        $scope.filters = {
+            status: 'all'
+        };
     })
 
     $scope.$on('stop:torrents', function(){
@@ -83,6 +86,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     });
 
     function startTimer(fullupdate){
+        if (timeout) {
+            $timeout.cancel(timeout)
+        }
         timeout = $timeout(function(){
             //console.info("Update!");
             $scope.update(fullupdate)
@@ -281,6 +287,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.changeSorting = function(sortName, descending) {
+        $scope.torrentLimit = LIMIT;
         $scope.filters.sort = sortName;
         $scope.filters.order = descending;
         refreshTorrents();

@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('torrentApp')
-    .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "notificationService", function($http, $resource, $log, $q, Torrent, $notify) {
+    .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "notificationService", "Column", function($http, $resource, $log, $q, Torrent, $notify, Column) {
 
         this.name = 'µTorrent';
 
@@ -303,6 +303,15 @@ angular.module('torrentApp')
             return buildVersionStr();
 
         }
+
+        this.columns = [
+            new Column('Name', 'text', 'decodedName'),
+            new Column('Size', 'text', 'size', 'bytes'),
+            new Column('Down', 'text', 'downloadSpeed', 'speed'),
+            new Column('Progress', 'progress'),
+            new Column('Label', 'text', 'label'),
+            new Column('Date Added', 'text', 'dateAdded', 'date')
+        ]
 
         this.actionHeader = [
             {

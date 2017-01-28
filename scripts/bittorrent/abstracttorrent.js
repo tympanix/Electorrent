@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').factory('AbstractTorrent', function() {
+angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Column) {
 
     const statusRegex = /[^a-zA-Z(): ]/g;
 
@@ -204,6 +204,24 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
         }
     }
 
+    AbstractTorrent.COL_NAME = new Column({name: 'Name', attribute: 'decodedName'})
+    AbstractTorrent.COL_SIZE = new Column({name: 'Size', attribute: 'size', filter: 'bytes'})
+    AbstractTorrent.COL_DOWNSPEED = new Column({name: 'Down', attribute: 'downloadSpeed', filter: 'speed'})
+    AbstractTorrent.COL_UPSPEED = new Column({name: 'Up', attribute: 'uploadSpeed', filter: 'speed'})
+    AbstractTorrent.COL_PROGRESS = new Column({name: 'Progress', type: 'progress', attribute: 'percent'})
+    AbstractTorrent.COL_LABEL = new Column({name: 'Label', attribute: 'label'})
+    AbstractTorrent.COL_DATEADDED = new Column({name: 'Date Added', attribute: 'dateAdded', filter: 'date'})
+
+    AbstractTorrent.COLUMNS = [
+        AbstractTorrent.COL_NAME,
+        AbstractTorrent.COL_SIZE,
+        AbstractTorrent.COL_DOWNSPEED,
+        AbstractTorrent.COL_UPSPEED,
+        AbstractTorrent.COL_PROGRESS,
+        AbstractTorrent.COL_LABEL,
+        AbstractTorrent.COL_DATEADDED
+    ]
+
     function alphabetical(a, b) {
         var aLower = a.toLowerCase();
         var bLower = b.toLowerCase();
@@ -218,4 +236,4 @@ angular.module('torrentApp').factory('AbstractTorrent', function() {
      * Return the constructor function
      */
     return AbstractTorrent;
-});
+}]);

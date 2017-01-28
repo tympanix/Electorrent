@@ -5,19 +5,23 @@
         <div class="settings sidebar">
             <ul class="nav">
                 <li ng-class="activeOn('general')" ng-click="gotoPage('general')">
-                    <i class="ui large settings icon"></i>
+                    <i class="large settings icon"></i>
                     General Settings
                 </li>
                 <li ng-class="activeOn('connection')" ng-click="gotoPage('connection')">
-                    <i class="ui large sitemap icon"></i>
+                    <i class="large sitemap icon"></i>
                     Connection
                 </li>
+                <li ng-class="activeOn('layout')" ng-click="gotoPage('layout')">
+                    <i class="large list layout icon"></i>
+                    Layout
+                </li>
                 <li ng-class="activeOn('servers')" ng-click="gotoPage('servers')">
-                    <i class="ui large server icon"></i>
+                    <i class="large server icon"></i>
                     Servers
                 </li>
                 <li ng-class="activeOn('about')" ng-click="gotoPage('about')">
-                    <i class="ui large at icon"></i>
+                    <i class="large at icon"></i>
                     About
                 </li>
             </ul>
@@ -30,6 +34,10 @@
 
                 <div ng-switch-when="connection">
                     <div ng-include="'./views/settings/connection.html'"></div>
+                </div>
+
+                <div ng-switch-when="layout">
+                    <div ng-include="'./views/settings/layout.html'"></div>
                 </div>
 
                 <div ng-switch-when="servers">

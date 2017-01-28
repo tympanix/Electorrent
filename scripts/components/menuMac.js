@@ -58,7 +58,7 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bit
                     label: "Add Torrent...",
                     accelerator: "CmdOrCtrl+O",
                     click: function() {
-                        electron.upload();
+                        electron.torrents.browse();
                     }
                 },
                 {
