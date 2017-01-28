@@ -1,5 +1,6 @@
 angular.module("torrentApp").filter('date', function() {
     return function(epochtime) {
+        if (epochtime === '') return ''
         return moment(epochtime).fromNow();
     };
 });
