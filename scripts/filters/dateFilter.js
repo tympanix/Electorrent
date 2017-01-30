@@ -5,6 +5,13 @@ angular.module("torrentApp").filter('date', function() {
     };
 });
 
+angular.module("torrentApp").filter('eta', function() {
+    return function(seconds) {
+        if (seconds < 1) return ''
+        return moment().to(moment().add(seconds, 'seconds'), true)
+    };
+});
+
 angular.module("torrentApp").filter('releaseDate', function() {
     return function(date) {
         if (!date){
