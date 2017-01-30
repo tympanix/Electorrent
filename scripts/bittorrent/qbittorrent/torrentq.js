@@ -46,12 +46,13 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             seedsConnected: data.seeds,
             seedsInSwarm: data.seeds_total || data.num_complete,
             torrentQueueOrder: data.priority,
-            statusMessage: data.state,
+            statusMessage: undefined, // Not supplied
             dateAdded: (data.addition_date || data.added_on) * 1000 || undefined,
             dateCompleted: (data.completion_date || data.completion_on) * 1000 || undefined,
             savePath: data.savePath,
         });
 
+        this.state = data.state
         this.creationDate = data.creation_date;
         this.pieceSize = data.piece_size;
         this.comment = data.comment;
@@ -83,7 +84,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
 
     TorrentQ.prototype.getStatus = function() {
         var args = Array.prototype.slice.call(arguments);
-        return (args.indexOf(this.statusMessage) > -1);
+        return (args.indexOf(this.state) > -1);
     }
 
     TorrentQ.prototype.isStatusError = function() {
@@ -106,40 +107,6 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
     };
     TorrentQ.prototype.isStatusPaused = function() {
         return this.getStatus('pausedDL');
-    };
-
-    TorrentQ.prototype.statusColor = function () {
-        if (this.isStatusSeeding()){
-            return 'orange';
-        } else if (this.isStatusDownloading()){
-            return 'blue';
-        } else if (this.isStatusError()){
-            return 'error';
-        } else if (this.isStatusCompleted()){
-            return 'success';
-        } else if (this.isStatusPaused()){
-            return 'grey';
-        } else {
-            return 'disabled';
-        }
-    };
-
-    TorrentQ.prototype.statusText = function () {
-        if (this.isStatusSeeding()){
-            return 'Seeding';
-        } else if (this.isStatusDownloading()){
-            return 'Downloading';
-        } else if (this.isStatusError()){
-            return 'Error';
-        } else if (this.isStatusCompleted()){
-            return 'Completed';
-        } else if (this.isStatusPaused()){
-            return 'Paused';
-        } else if (this.isStatusStopped()){
-            return 'Stopped';
-        } else {
-            return 'Unknown';
-        }
     };
 
     /**
