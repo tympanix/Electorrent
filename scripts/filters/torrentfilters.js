@@ -7,3 +7,17 @@ angular.module("torrentApp").filter('torrentQueue', function() {
         }
     };
 });
+
+angular.module("torrentApp").filter('torrentRatio', function() {
+    function isNumeric(number) {
+        return !isNaN(parseFloat(number)) && isFinite(number);
+    }
+
+    return function(ratio) {
+        if (isNumeric(ratio)) {
+            return ratio.toFixed(2)
+        } else {
+            return ''
+        }
+    }
+});
