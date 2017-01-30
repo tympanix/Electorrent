@@ -221,8 +221,8 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         switch (attribute) {
             case 'decodedName': return alphabetical
             case 'label': return alphabetical
-            case 'torrentQueueOrder': return queueSort
-            case 'eta': return queueSort
+            case 'torrentQueueOrder': return naturalNumberAsc
+            case 'eta': return naturalNumberAsc
             default: return numerical
         }
     }
@@ -265,7 +265,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         return b - a;
     }
 
-    function queueSort(a, b){
+    function naturalNumberAsc(a, b){
         if (a < 1) return 1
         if (b < 1) return -1
         return a - b
