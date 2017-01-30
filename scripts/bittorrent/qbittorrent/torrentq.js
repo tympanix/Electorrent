@@ -73,8 +73,6 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
         this.reannounce = data.reannounce;
         this.upSpeedAvg = data.up_speed_avg;
         this.forceStart = data.force_start;
-        this.leechersInSwarm = data.num_incomplete;
-        this.leechersConnected = data.num_leechs;
         this.sequentialDownload = data.seq_dl;
 
     }

@@ -97,8 +97,6 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
             deleted: []
         };
 
-        console.log(data.torrents);
-
         torrents.labels = data.categories;
 
         if(data.full_update) {
