@@ -238,7 +238,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     AbstractTorrent.COL_SEEDS = new Column({name: 'Seeds', attribute: 'seedsText', enabled: false})
     AbstractTorrent.COL_QUEUE = new Column({name: 'Queue', attribute: 'torrentQueueOrder', filter: 'torrentQueue', enabled: false})
     AbstractTorrent.COL_ETA = new Column({name: 'ETA', attribute: 'eta', filter: 'eta', enabled: false})
-    AbstractTorrent.COL_RATIO = new Column({name: 'Ratio', attribute: 'ratio', enabled: false})
+    AbstractTorrent.COL_RATIO = new Column({name: 'Ratio', attribute: 'ratio', filter: 'torrentRatio', enabled: false})
 
     AbstractTorrent.COLUMNS = [
         AbstractTorrent.COL_NAME,
