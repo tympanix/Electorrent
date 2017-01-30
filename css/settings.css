@@ -9,3 +9,8 @@
 .settings.sidebar .nav .active {
     font-weight: 700;
 }
+
+.sort.handle {
+  vertical-align: middle;
+  cursor: move;
+}
