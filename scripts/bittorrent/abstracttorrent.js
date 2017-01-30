@@ -220,19 +220,12 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         }
     }
 
-    AbstractTorrent.prototype.etaText = function() {
-        if (Number.isInteger(this.eta) && this.eta > 0) {
-            return this.eta
-        } else {
-            return ''
-        }
-    }
-
     AbstractTorrent.sort = function(attribute) {
         switch (attribute) {
             case 'decodedName': return alphabetical
             case 'label': return alphabetical
             case 'torrentQueueOrder': return queueSort
+            case 'eta': return queueSort
             default: return numerical
         }
     }
@@ -247,7 +240,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     AbstractTorrent.COL_PEERS = new Column({name: 'Peers', attribute: 'peersText', enabled: false})
     AbstractTorrent.COL_SEEDS = new Column({name: 'Seeds', attribute: 'seedsText', enabled: false})
     AbstractTorrent.COL_QUEUE = new Column({name: 'Queue', attribute: 'torrentQueueOrder', filter: 'torrentQueue', enabled: false})
-    AbstractTorrent.COL_ETA = new Column({name: 'ETA', attribute: 'etaText', filter: 'date', enabled: false})
+    AbstractTorrent.COL_ETA = new Column({name: 'ETA', attribute: 'eta', filter: 'eta', enabled: false})
     AbstractTorrent.COL_RATIO = new Column({name: 'Ratio', attribute: 'ratio', enabled: false})
 
     AbstractTorrent.COLUMNS = [
