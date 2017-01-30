@@ -146,13 +146,6 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         throw new Error('isStatusStopped not implemented');
     };
 
-    AbstractTorrent.prototype.getQueueStr = function() {
-        if(this.torrentQueueOrder === -1) {
-            return '*';
-        }
-        return this.torrentQueueOrder;
-    };
-
     AbstractTorrent.prototype.getPercentStr = function() {
         return(this.percent / 10).toFixed(0) + '%';
     };
@@ -162,6 +155,8 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
             return 'grey';
         } else if (this.isStatusSeeding()){
             return 'orange';
+        } else if (this.isStatusQueued()){
+            return 'yellow'
         } else if (this.isStatusDownloading()){
             return 'blue';
         } else if (this.isStatusError()){
@@ -180,6 +175,8 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
             return 'Stopped';
         } else if (this.isStatusSeeding()){
             return 'Seeding';
+        } else if (this.isStatusQueued()){
+            return 'Queued';
         } else if (this.isStatusDownloading()){
             return 'Downloading';
         } else if (this.isStatusError()){
