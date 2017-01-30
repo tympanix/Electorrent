@@ -20,6 +20,10 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     $scope.connecting = false;
     $scope.page = 'general';
 
+    $scope.layoutSortOptions = {
+        handle: '.sort.handle'
+    }
+
     loadAllSettings();
 
     // $scope.$watch(function() {
