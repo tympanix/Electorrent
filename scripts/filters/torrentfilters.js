@@ -15,7 +15,7 @@ angular.module("torrentApp").filter('torrentRatio', function() {
 
     return function(ratio) {
         if (isNumeric(ratio)) {
-            return ratio.toFixed(2)
+            return parseFloat(ratio).toFixed(2)
         } else {
             return ''
         }
