@@ -65,16 +65,24 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             })
     }
 
+    $scope.renderDone = function() {
+        $timeout(function() {
+            $scope.$emit('hide:loading')
+        }, 50)
+    }
+
     $scope.$on('start:torrents', function(event, fullupdate){
         $scope.update(!!fullupdate);
         startTimer();
     });
 
-    $scope.$on('clear:torrents', function(){
+    $scope.$on('wipe:torrents', function(){
+        $scope.connectionLost = false;
         clearAll()
         $scope.filters = {
             status: 'all'
         };
+        $notify.enableAll()
     })
 
     $scope.$on('stop:torrents', function(){
@@ -86,15 +94,15 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     });
 
     function startTimer(fullupdate){
-        if (timeout) {
-            $timeout.cancel(timeout)
-        }
+        if (reconnect) $timeout.cancel(reconnect)
+        if (timeout) $timeout.cancel(timeout)
         timeout = $timeout(function(){
             $scope.update(fullupdate)
             .then(function(){
                 startTimer();
                 $scope.connectionLost = false;
             }).catch(function() {
+                console.log("TIMER STOP");
                 $scope.connectionLost = true;
                 startReconnect();
             });
