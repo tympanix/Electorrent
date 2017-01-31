@@ -105,7 +105,7 @@
                             ng-class="{active: torrent.selected}"
                             ng-click="setSelected($event, torrent, $index)"
                             ng-right-click="showContextMenu($event, torrent, $index)"
-                            repeat-done>
+                            repeat-done="renderDone">
                             <td ng-repeat="col in $server.columns | filter:{enabled: true}" ng-switch="col.type">
                                 <span ng-switch-when="text">{{col.value(torrent)}}</span>
                                 <span ng-switch-when="progress"><progress torrent="torrent"/></span>
