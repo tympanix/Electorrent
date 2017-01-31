@@ -168,6 +168,11 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $scope.$broadcast('new:settings', data)
     })
 
+    $scope.$on('loading', function(event, message) {
+        $scope.statusText = message
+        $scope.showLoading = true;
+    })
+
     $scope.showSettings = function(){
         return page === PAGE_SETTINGS;
     }

@@ -86,7 +86,7 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         btclient.connect(ip, port, user, password)
             .then(function() {
                 writeSettings();
-
+                $scope.$emit('loading', 'Applying Settings')
                 $bittorrent.setClient(btclient);
                 $rootScope.$broadcast('new:settings', $scope.settings)
             }).catch(function(err) {
