@@ -213,6 +213,9 @@ html, body {
     color: #888888;
     font-style: italic;
 }
+.ui.inverted.solid.dimmer {
+    background-color: #F0F0F0;
+}
 .transparent.overlay {
     background-color: rgba(0, 0, 0, 0.75);
 }

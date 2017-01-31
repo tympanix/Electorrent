@@ -55,6 +55,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
         $rootScope.$btclient.connect(server.ip, server.port, server.user, server.password)
         .then(function(){
+            $scope.statusText = "Loading Torrents"
             pageTorrents();
             requestMagnetLinks();
             requestTorrentFiles();
@@ -91,7 +92,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     function pageTorrents(){
         $scope.showTorrents = true;
-        $scope.showLoading = false;
+        //$scope.showLoading = false;
         $scope.$broadcast('start:torrents');
         page = null;
     }
@@ -128,14 +129,18 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     $scope.$on('connect:server', function(event, server) {
         console.log("Connecting to server", server.getNameAtAddress());
-        pageLoading()
+        $scope.statusText = "Connecting to " + server.getName();
         $scope.$broadcast('stop:torrents')
-        $scope.$broadcast('clear:torrents')
-        $rootScope.$btclient = null
-        $rootScope.$server = null
-        $bittorrent.setServer(server)
-        connectToServer(server)
-        $scope.$broadcast('start:torrents', true) // Full update
+        pageLoading()
+
+        $timeout(function() {
+            $scope.$broadcast('wipe:torrents')
+            $rootScope.$btclient = null
+            $rootScope.$server = null
+            $bittorrent.setServer(server)
+            connectToServer(server)
+            $scope.$broadcast('start:torrents', true) // Full update
+        }, 50)
         $scope.$apply();
     })
 
@@ -144,6 +149,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         if (page === PAGE_SERVERS) return;
         page = PAGE_SETTINGS;
         $scope.$apply();
+    })
+
+    $scope.$on('hide:loading', function() {
+        $scope.showLoading = false;
     })
 
     $scope.$on('show:welcome', function() {

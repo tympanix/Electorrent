@@ -1,9 +1,10 @@
-angular.module("torrentApp").directive('repeatDone', [function() {
+angular.module("torrentApp").directive('repeatDone', ['$timeout', function($timeout) {
     return function(scope, element, attrs) {
-        element.bind('$create', function(/*event*/) {
-            if (scope.$first) {
-                scope.$eval(attrs.repeatDone);
-            }
-        });
+        if (scope.$last) {
+            $timeout(function() {
+                let callback = scope.$eval(attrs.repeatDone);
+                if (angular.isFunction(callback)) callback()
+            }, 0)
+        }
     }
 }]);
