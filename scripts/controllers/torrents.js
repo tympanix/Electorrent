@@ -90,7 +90,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             $timeout.cancel(timeout)
         }
         timeout = $timeout(function(){
-            //console.info("Update!");
             $scope.update(fullupdate)
             .then(function(){
                 startTimer();
@@ -126,7 +125,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     function resetAll() {
         clearAll()
         $scope.update(true);
-        console.log("Reset!")
     }
 
     function stopTimer(){

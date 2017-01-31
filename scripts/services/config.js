@@ -27,7 +27,6 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         settings.servers = settings.servers.map((server) => {
             return new Server(server)
         })
-        console.log("Settings", settings);
     }
 
     // Angular wrapper for saving to config
@@ -62,7 +61,6 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         if (!$rootScope.$server) {
             $notify.warning('Can\'t set default server', 'You need to chose a server to set it as default')
         }
-        console.log("Set default", $rootScope.$server);
         this.setDefault($rootScope.$server)
     }
 
@@ -107,7 +105,6 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         } else {
             this.appendServer(new Server(ip, port, user, password, client))
         }
-        console.info("Servers:", settings.servers);
         return this.saveAllSettings()
     }
 
@@ -122,7 +119,6 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         let server = this.getServer(update.id);
         if(!server) return $q.reject('Server with id ' + update.id + ' not found')
         angular.merge(server, update)
-        console.info("Servers:", settings.servers);
         return this.saveAllSettings()
     }
 
