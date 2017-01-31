@@ -148,11 +148,15 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
 
     function processTrackerData(torrents, data) {
         let trackers = new Set()
-        let url = rtorrentConfig.trackers.indexOf('get_url')
+
         torrents.forEach((torrent, index) => {
-            let tracker = data[index][0][0][url]
-            torrent.trackers = [tracker]
-            trackers.add(tracker)
+            let trackerArray = _.map(data[index][0], function(trackerData) {
+                return _.object(rtorrentConfig.trackers, trackerData)
+            })
+            torrent.addTrackerData(trackerArray)
+            _.every(_.pluck(trackerArray, 'get_url'), function(trackerUrl) {
+                trackers.add(trackerUrl)
+            })
         })
         return Array.from(trackers).map((tracker) => {
             return parseUrl(tracker).hostname
@@ -208,15 +212,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} isAdded
      */
     this.uploadTorrent = function(buffer, filename) {
-
-        $xmlrpc.callMethod('load_raw_start', [buffer])
-        .then(function(data) {
-            return $q.resolve(data);
-        }).catch(function(err) {
-            console.error("Action error", err);
-            return $q.reject(err);
-        })
-
+        return $xmlrpc.callMethod('load_raw_start', [buffer])
     }
 
     function doAction(action, torrents, param) {

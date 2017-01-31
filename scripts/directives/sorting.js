@@ -10,7 +10,6 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
     };
 
     function controller() {
-        console.log("Sorting func main", this.sorting);
 
         this.sortKey = getSavedSortKey()
         this.sortOrder = getSavedSortOrder()
@@ -53,13 +52,6 @@ angular.module("torrentApp").directive('sort', [function() {
     };
 
     function link(scope, element, attr, ctrl) {
-
-        console.log('Scope', scope);
-        console.log('Sort func', ctrl.sorting)
-        console.log('Element', element);
-        console.log('Controller', ctrl);
-        console.log('Sort by', ctrl.sortKey);
-        console.log('Sort order', ctrl.sortOrder);
 
         var column = $(element);
         column.append('<i class="ui sorting icon"></i>');

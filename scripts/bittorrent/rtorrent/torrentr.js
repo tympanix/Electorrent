@@ -30,9 +30,9 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
             downloadSpeed: data.get_down_rate, /* Download Speed (integer): bytes per second */
             eta: undefined, /* ETA (integer): second to completion MISSING */
             label: decodeURIComponent(data.get_custom1 || ''), /* Label (string): group/category identification MISSING */
-            peersConnected: data.get_peers_complete, /* Peers Connected (integer): number of peers connected */
-            peersInSwarm: data.get_peers_connected, /* Peers In Swarm (integer): number of peers in the swarm */
-            seedsConnected: data.get, /* Seeds Connected (integer): number of connected seeds */
+            peersConnected: data.get_peers_accounted, /* Peers Connected (integer): number of peers connected */
+            peersInSwarm: undefined, /* Peers In Swarm (integer): number of peers in the swarm */
+            seedsConnected: data.get_peers_complete, /* Seeds Connected (integer): number of connected seeds */
             seedsInSwarm: undefined, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
             statusMessage: undefined, /* Status (string): the current status of the torrent (e.g. downloading)  */
@@ -54,6 +54,8 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         this.open = data.is_open
         this.complete = data.get_complete
         this.message = data.get_message
+
+        this.eta = data.get_left_bytes / this.downloadSpeed
     }
 
     function buildData(array) {
@@ -75,6 +77,16 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * Do NOT implement any prototypal features above this line!
      */
     TorrentR.prototype = Object.create(AbstractTorrent.prototype);
+
+    TorrentR.prototype.addTrackerData = function(trackerArray) {
+        this.peersInSwarm = _.reduce(_.pluck(trackerArray, 'get_scrape_incomplete'), sum, 0)
+        this.seedsInSwarm = _.reduce(_.pluck(trackerArray, 'get_scrape_complete'), sum, 0)
+        this.trackers = _.pluck(trackerArray, 'get_url')
+    }
+
+    function sum(sum, item) {
+        return sum + item
+    }
 
 
     /**
