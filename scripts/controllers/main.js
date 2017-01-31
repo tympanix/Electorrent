@@ -32,7 +32,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
             }
         } else if (settings.startup === 'latest') {
             let server = config.getRecentServer()
-            console.log("Connecting to last used", server);
             if (server){
                 connectToServer(server)
             } else {
@@ -72,7 +71,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     }
 
     function requestTorrentFiles() {
-        console.log("Requestion torrent files");
         electron.ipc.send('send:torrentfiles')
     }
 
@@ -85,11 +83,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     // Listen for incomming torrent files from the main process
     electron.ipc.on('torrentfiles', function uploadTorrent(event, buffer, filename){
-        console.log("Got torrent file", filename);
-        $rootScope.$btclient.uploadTorrent(buffer, filename)
-            .catch(function(err) {
-                console.error("Error", err);
-            })
+        $rootScope.$btclient.uploadTorrent(buffer, filename).catch(function(err) {
+            $notify.alert('Upload Torrent', 'The torrent could not be uploaded')
+            console.error("Error", err);
+        })
     })
 
     function pageTorrents(){

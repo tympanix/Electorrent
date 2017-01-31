@@ -10,8 +10,7 @@ angular.module("torrentApp").filter('eta', function() {
     var MONTH_IN_SECONDS = 60*60*24*30
 
     return function(seconds) {
-        if (seconds < 1) return ''
-        if (seconds > MONTH_IN_SECONDS) return ''
+        if (!seconds || seconds < 1 || seconds > MONTH_IN_SECONDS) return ''
         return moment().to(moment().add(seconds, 'seconds'), true)
     };
 });
