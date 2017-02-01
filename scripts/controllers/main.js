@@ -1,8 +1,13 @@
 
 angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "$bittorrent", "electron", "configService", "notificationService", function ($rootScope, $scope, $timeout, $bittorrent, electron, config, $notify) {
+    const MAX_LOADING_TIME = 10000 // 10 seconds
+    const TRANSITION_TIME = 100 // 100 milliseconds
+
     const PAGE_SETTINGS = 'settings';
     const PAGE_WELCOME = 'welcome';
     const PAGE_SERVERS = 'servers';
+
+    let loadingTimer
 
     let settings = config.getAllSettings()
     $scope.servers = config.getServers()
@@ -102,9 +107,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     }
 
     function pageSettings(settingsPage){
+        $scope.$broadcast('setting:load')
         $scope.showLoading = false;
         if (settingsPage){
-            $scope.$broadcast('settings:page', settingsPage);
+            $scope.$broadcast('settings:page', settingsPage, true /*force*/);
         }
         page = PAGE_SETTINGS;
     }
@@ -133,25 +139,30 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $scope.$broadcast('stop:torrents')
         pageLoading()
 
+        // Timeout for aesthetic reasons
         $timeout(function() {
             $scope.$broadcast('wipe:torrents')
             $rootScope.$btclient = null
             $rootScope.$server = null
             $bittorrent.setServer(server)
             connectToServer(server)
-            $scope.$broadcast('start:torrents', true) // Full update
-        }, 50)
+            $scope.$broadcast('start:torrents', true /*full update*/)
+        }, TRANSITION_TIME)
         $scope.$apply();
     })
 
     $scope.$on('show:settings', function() {
         if (page === PAGE_WELCOME) return;
         if (page === PAGE_SERVERS) return;
+        $scope.$broadcast('setting:load')
         page = PAGE_SETTINGS;
         $scope.$apply();
     })
 
     $scope.$on('hide:loading', function() {
+        if (loadingTimer) {
+            $timeout.cancel(loadingTimer)
+        }
         $scope.showLoading = false;
     })
 
@@ -171,6 +182,12 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     $scope.$on('loading', function(event, message) {
         $scope.statusText = message
         $scope.showLoading = true;
+
+        // Max loading time is 5s
+        loadingTimer = $timeout(function() {
+            $scope.showLoading = false;
+            $notify.alert('Loading took too long', 'There seems to be something wrong with loading')
+        }, MAX_LOADING_TIME)
     })
 
     $scope.showSettings = function(){

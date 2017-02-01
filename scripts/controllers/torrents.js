@@ -68,7 +68,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.renderDone = function() {
         $timeout(function() {
             $scope.$emit('hide:loading')
-        }, 50)
+        }, 100)
     }
 
     $scope.$on('start:torrents', function(event, fullupdate){
@@ -132,7 +132,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     function resetAll() {
         clearAll()
-        $scope.update(true);
+        $scope.update(true)
     }
 
     function stopTimer(){
@@ -391,15 +391,20 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     $scope.update = function(fullupdate) {
         var q = $rootScope.$btclient.torrents(fullupdate)
-        q.then(function(torrents) {
+        return q.then(function(torrents) {
             newTorrents(torrents);
             deleteTorrents(torrents);
             changeTorrents(torrents);
             updateLabels(torrents);
             updateTrackers(torrents);
+        }).then(function() {
+            if (!$scope.arrayTorrents || $scope.arrayTorrents.length === 0) {
+                $scope.renderDone()
+            }
+        }).catch(function(err) {
+            $scope.renderDone()
+            return $q.reject(err)
         })
-
-        return q;
     };
 
     function checkNotification(old, updated) {
