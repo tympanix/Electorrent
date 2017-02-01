@@ -22,15 +22,19 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="magnet icon"></i>
-                Magnet Links
+                <i class="text height icon"></i>
+                Display Size
             </div>
             <div class="description">
-                Enabling this makes Electorrent the default program for magnet links
+                Adjust for your screen size
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="general.magnets"></toggle>
+            <dropdown class="fluid" title="Display Size" ng-model="settings.ui.displaySize">
+                <dropdown-group data-value="small">Small</dropdown-group>
+                <dropdown-group data-value="normal">Normal</dropdown-group>
+                <dropdown-group data-value="large">Large</dropdown-group>
+            </dropdown>
         </div>
     </div>
     <div class="ui card">
@@ -49,6 +53,34 @@
                 <dropdown-group data-value="OverflowResizer">Overflow</dropdown-group>
                 <dropdown-group data-value="BasicResizer">Basic</dropdown-group>
             </dropdown>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="magnet icon"></i>
+                Magnet Links
+            </div>
+            <div class="description">
+                Enabling this makes Electorrent the default program for magnet links
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="general.magnets"></toggle>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="cubes icon"></i>
+                Compact Listings
+            </div>
+            <div class="description">
+                Minimize space when listing torrents
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.ui.displayCompact"></toggle>
         </div>
     </div>
     <div class="ui card">
