@@ -89,17 +89,18 @@
             <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
                 <table
                     id="torrentTable"
+                    ng-class="{'compact': displayCompact}"
                     resizable profile="$server.id"
                     columns="$server.columns"
                     mode="resizeMode"
                     container=".main-content"
-                    class="ui single line unstackable selectable fixed compact torrent resize table">
+                    class="ui single line unstackable selectable fixed torrent resize table">
                     <thead>
                         <tr sorting="changeSorting">
                             <th ng-repeat="col in $server.columns | filter:{enabled: true}" resize="col.attribute" sort="col.attribute">{{col.name}}</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="zoom" ng-class="displaySize">
                         <tr
                             ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit track by torrent.hash"
                             ng-class="{active: torrent.selected}"

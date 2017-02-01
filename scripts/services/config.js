@@ -16,7 +16,9 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         },
         ui: {
             resizeMode: '',
-            notifications: true
+            notifications: true,
+            displaySize: 'normal',
+            displayCompact: false
         },
         servers: []
     };

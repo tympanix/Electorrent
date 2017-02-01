@@ -10,6 +10,18 @@ html, body {
 .main.wrapper {
     background-color: #F0F0F0;
 }
+.zoom.normal {
+    font-size: 1rem;
+}
+.zoom.large {
+    font-size: 1.15rem;
+}
+.zoom.small {
+    font-size: 0.85rem;
+}
+.zoom.compact td {
+    padding: .25em .7em;
+}
 .wrapper .sidebar, .main-panel {
     overflow: auto;
     max-height: 100%;
@@ -153,6 +165,12 @@ html, body {
     cursor: default !important;
 }
 
+.ui.torrent.table td {
+    padding: 0.5em 0.7em;
+}
+.ui.torrent.table.compact td {
+    padding: 0.25em 0.7em;
+}
 .torrent.table thead th.sortup,
 .torrent.table thead th.sortdown {
     padding-right: 25px !important;
@@ -170,15 +188,16 @@ html, body {
     cursor: default;
     -webkit-user-select: none !important;
 }
-.torrent.progress {
+.ui.torrent.progress {
     margin: 0 !important;
     overflow: hidden;
+    font-size: inherit;
 }
 .torrent.progress label {
     position: absolute;
     width: 100%;
     height: 100%;
-    line-height: 24.5px;
+    line-height: 1.75em;
     text-align: center;
     z-index: 1;
     color: rgba(255, 255, 255, .9);
