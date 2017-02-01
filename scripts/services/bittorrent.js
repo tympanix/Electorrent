@@ -1,12 +1,13 @@
 'use strict';
 
-angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', '$btclients', 'configService', 'notificationService', 'electron', function($rootScope, $injector, $btclients, config, $notify, electron){
+angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', '$btclients', 'notificationService', 'electron', function($rootScope, $injector, $btclients, $notify, electron){
 
-    this.getClient = function(clientName) {
-        if (clientName) {
-            return fetchClientManual(clientName);
+    this.getClient = function(name) {
+        var client = $btclients[name];
+        if (client){
+            return $injector.get(client.service);
         } else {
-            return fetchClientAuto();
+            console.error('Bittorrent client "' + name + '" not available');
         }
     }
 
@@ -17,34 +18,17 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
     this.setClient = function(service) {
         $rootScope.$btclient = service;
-        console.info("Changed client to:", service.name || "<service missing name>");
+        console.info("Changed client to:", service.name || "<unknown>");
     }
 
     this.setServer = function(server) {
         $rootScope.$btclient = this.getClient(server.client)
         $rootScope.$server = server
         server.updateLastUsed()
-        config.saveAllSettings()
     }
 
     this.getServer = function() {
         return $rootScope.$server
-    }
-
-    function fetchClientAuto() {
-        var server = config.getDefaultServer();
-        if (!server) return
-        return fetchClientManual(server.client);
-    }
-
-    function fetchClientManual(name) {
-        var client = $btclients[name];
-
-        if (client){
-            return $injector.get(client.service);
-        } else {
-            console.error('Bittorrent client "' + name + '" not available');
-        }
     }
 
     this.uploadFromClipboard = function() {

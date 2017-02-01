@@ -1,4 +1,6 @@
-angular.module("torrentApp").controller("settingsController", ["$rootScope", "$scope", "$injector", "$bittorrent", "$btclients", "configService", "notificationService", "electron", function($rootScope, $scope, $injector, $bittorrent, $btclients, config, $notify, electron) {
+angular.module("torrentApp").controller("settingsController", ["$rootScope", "$scope", "$injector", "$q", "$bittorrent", "$btclients", "configService", "notificationService", "electron", function($rootScope, $scope, $injector, $q, $bittorrent, $btclients, config, $notify, electron) {
+
+    let serverCopy
 
     // External Settings reference
     $scope.settings = {};
@@ -26,13 +28,10 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     loadAllSettings();
 
-    // $scope.$watch(function() {
-    //     return $scope.settings
-    // });
-
     function loadAllSettings() {
         $scope.settings = config.getAllSettings();
         $scope.server = $bittorrent.getServer();
+        serverCopy = angular.copy($scope.server)
 
         $scope.general = {
             magnets: electron.app.isDefaultProtocolClient('magnet')
@@ -47,25 +46,19 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         }
     }
 
-    $scope.$on('show:settings', function() {
+    $scope.$on('setting:load', function() {
+        console.info("Loading settings");
         loadAllSettings();
     })
 
     function writeSettings() {
-        config.saveAllSettings($scope.settings)
-            .then(function() {
-                $scope.close();
-                $notify.ok("Saved Settings", "You settings has been updated")
-            }).catch(function(err) {
-                $notify.alert("Settings could not be saved", err)
-            })
-        config.updateServer($scope.server)
-            .then(function() {
-                $bittorrent.setServer($scope.server)
-            }).catch(function() {
-                $notify.alert("Settings error", "Could not save new server")
-            })
-        subscribeToMagnets();
+        return config.saveAllSettings($scope.settings)
+        .then(function() {
+            subscribeToMagnets();
+        }).catch(function(err) {
+            $notify.alert("Settings could not be saved", err)
+            return $q.reject(err)
+        })
     }
 
     $scope.close = function() {
@@ -73,27 +66,36 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         loadAllSettings();
     }
 
-    $scope.save = function() {
+    function saveServer() {
+        console.log("Force?", $scope.force);
+        if ($scope.server.equals(serverCopy) && $scope.server.isConnected) return
+        serverCopy = angular.copy($scope.server)
         $scope.connecting = true;
-        var ip = $scope.server.ip;
-        var port = $scope.server.port;
-        var user = $scope.server.user;
-        var password = $scope.server.password;
-        var client = $scope.server.client;
+        console.log("Saving server");
+        return $scope.server.connect().then(function() {
+            return config.updateServer($scope.server)
+        })
+    }
 
-        var btclient = $bittorrent.getClient(client);
+    $scope.save = function() {
+        $scope.$emit('loading', 'Applying Settings')
+        console.log("Changes?", !$scope.server.equals(serverCopy));
 
-        btclient.connect(ip, port, user, password)
-            .then(function() {
-                writeSettings();
-                $scope.$emit('loading', 'Applying Settings')
-                $bittorrent.setClient(btclient);
-                $rootScope.$broadcast('new:settings', $scope.settings)
-            }).catch(function(err) {
-                console.error("Oh noes!", err);
-            }).finally(function() {
-                $scope.connecting = false;
-            })
+        $q.when().then(function() {
+            return saveServer()
+        }).then(function() {
+            console.log("Writing settings");
+            return writeSettings()
+        }).then(function() {
+            $scope.close();
+            $rootScope.$broadcast('new:settings', $scope.settings)
+            $notify.ok("Saved Settings", "You settings has been updated")
+        }).catch(function(err) {
+            $scope.$emit('hide:loading')
+            console.error("Settings Error", err);
+        }).finally(function() {
+            $scope.connecting = false;
+        })
     }
 
     $scope.activeOn = function(page) {
@@ -120,7 +122,8 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         $scope.page = page;
     }
 
-    $scope.$on('settings:page', function(event, page){
+    $scope.$on('settings:page', function(event, page, force){
+        $scope.force = force || false
         $scope.gotoPage(page);
     })
 

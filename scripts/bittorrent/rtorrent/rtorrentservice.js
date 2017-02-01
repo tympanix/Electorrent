@@ -82,7 +82,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
                 config.version = data;
                 return $q.resolve('Sucessfully connected to rTorrent');
             }).catch(function(err) {
-                console.error("Could not connect to rTorrent", err);
+                console.error(err, err);
                 return $q.reject(err);
             })
     }

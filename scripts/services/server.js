@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients', function(Torrent, $btclients) {
+angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notificationService', '$bittorrent', '$btclients', function(Torrent, $q, $notify, $bittorrent, $btclients) {
 
     /**
      * Constructor, with class name
@@ -18,6 +18,7 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients',
             this.lastused = -1
             this.columns = defaultColumns()
         }
+        this.isConnected = false
     }
 
     Server.prototype.fromJson = function (data) {
@@ -61,6 +62,30 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$btclients',
     Server.prototype.updateLastUsed = function () {
         this.lastused = new Date().getTime()
     };
+
+    Server.prototype.connect = function () {
+        let self = this
+        this.service = $bittorrent.getClient(this.client);
+        return this.service.connect(this.ip, this.port, this.user, this.password).catch(function(response, msg) {
+            self.isConnected = false
+            $notify.alertAuth(response, msg);
+            return $q.reject(response, this)
+        }).then(function() {
+            self.isConnected = true
+            $bittorrent.setClient(self.service);
+            return $q.resolve()
+        })
+    };
+
+    Server.prototype.equals = function(other) {
+        return (
+            this.ip === other.ip &&
+            this.port === other.port &&
+            this.user === other.user &&
+            this.password === other.password &&
+            this.client === other.client
+        )
+    }
 
     function zipsort(obj, sor) {
         return function(a,b) {

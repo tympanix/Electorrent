@@ -70,20 +70,17 @@ angular.module('torrentApp')
             headers: {
                 'Authorization': "Basic " + encoded
             }
-
-        }).success(function(str, status, headers) {
-            var session = headers('X-Transmission-Session-Id');
+        }).then(function(response) {
+            var session = response.headers('X-Transmission-Session-Id');
             saveConnection(ip, port, encoded, session);
-            defer.resolve(str);
-        }).error(function(err, status, headers, config){
+            defer.resolve(response);
+        }).catch(function(response){
             if(status === 409){
-                var session = headers('X-Transmission-Session-Id');
+                var session = response.headers('X-Transmission-Session-Id');
                 saveConnection(ip, port, encoded, session);
-                defer.resolve(err);
-                return ;
+                return defer.resolve(response);
             }
-            defer.reject(err);
-
+            defer.reject(response);
         });
 
         return defer.promise;
