@@ -63,9 +63,8 @@ angular.module('torrentApp')
                 } else {
                     loading.reject('Could not find token');
                 }
-            }).error(function(err, status) {
-                $notify.alertAuth(err, status);
-                loading.reject('Could not connect to µTorrent');
+            }).catch(function(err) {
+                loading.reject(err)
             });
 
             return loading.promise;

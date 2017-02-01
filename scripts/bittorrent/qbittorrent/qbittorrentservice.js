@@ -48,22 +48,21 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         var defer = $q.defer();
 
         $http.post(url(ip, port, '/login'), { username: user, password: pass}, httpform)
-        .success(function(data) {
-            if(data === 'Ok.') {
+        .then(function(response) {
+            if(response.data === 'Ok.') {
                 saveConnection(ip, port);
-                defer.resolve('qBittorrent login successfull');
+                defer.resolve(response);
             } else {
-                $notify.alert("Opps!", "Wrong username/password");
+                defer.reject(response, 401)
                 defer.reject('Wrong username/password');
             }
         })
-        .error(function(err, status) {
-            if (status === 403) {
-                $notify.alert('qBittorrent says:', err)
+        .catch(function(response) {
+            if (response.status === 403) {
+                defer.reject(response, 'qBittorrent says', response.data)
             } else {
-                $notify.alertAuth(err, status);
+                defer.reject(response);
             }
-            defer.reject('Could not connect to qBittorrent');
         });
 
         return defer.promise;
