@@ -228,17 +228,17 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     }
 
     AbstractTorrent.COL_NAME = new Column({name: 'Name', attribute: 'decodedName'})
-    AbstractTorrent.COL_SIZE = new Column({name: 'Size', attribute: 'size', filter: 'bytes'})
-    AbstractTorrent.COL_DOWNSPEED = new Column({name: 'Down', attribute: 'downloadSpeed', filter: 'speed'})
-    AbstractTorrent.COL_UPSPEED = new Column({name: 'Up', attribute: 'uploadSpeed', filter: 'speed'})
-    AbstractTorrent.COL_PROGRESS = new Column({name: 'Progress', type: 'progress', attribute: 'percent'})
+    AbstractTorrent.COL_SIZE = new Column({name: 'Size', attribute: 'size'})
+    AbstractTorrent.COL_DOWNSPEED = new Column({name: 'Down', attribute: 'downloadSpeed'})
+    AbstractTorrent.COL_UPSPEED = new Column({name: 'Up', attribute: 'uploadSpeed'})
+    AbstractTorrent.COL_PROGRESS = new Column({name: 'Progress', attribute: 'percent'})
     AbstractTorrent.COL_LABEL = new Column({name: 'Label', attribute: 'label'})
-    AbstractTorrent.COL_DATEADDED = new Column({name: 'Date Added', attribute: 'dateAdded', filter: 'date'})
+    AbstractTorrent.COL_DATEADDED = new Column({name: 'Date Added', attribute: 'dateAdded'})
     AbstractTorrent.COL_PEERS = new Column({name: 'Peers', attribute: 'peersText', enabled: false})
     AbstractTorrent.COL_SEEDS = new Column({name: 'Seeds', attribute: 'seedsText', enabled: false})
-    AbstractTorrent.COL_QUEUE = new Column({name: 'Queue', attribute: 'torrentQueueOrder', filter: 'torrentQueue', enabled: false})
-    AbstractTorrent.COL_ETA = new Column({name: 'ETA', attribute: 'eta', filter: 'eta', enabled: false})
-    AbstractTorrent.COL_RATIO = new Column({name: 'Ratio', attribute: 'ratio', filter: 'torrentRatio', enabled: false})
+    AbstractTorrent.COL_QUEUE = new Column({name: 'Queue', attribute: 'torrentQueueOrder', enabled: false})
+    AbstractTorrent.COL_ETA = new Column({name: 'ETA', attribute: 'eta', enabled: false})
+    AbstractTorrent.COL_RATIO = new Column({name: 'Ratio', attribute: 'ratio', enabled: false})
 
     AbstractTorrent.COLUMNS = [
         AbstractTorrent.COL_NAME,
