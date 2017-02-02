@@ -86,7 +86,7 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="alarm icon"></i>
+                <i class="announcement icon"></i>
                 Notifications
             </div>
             <div class="description">
@@ -95,6 +95,20 @@
         </div>
         <div class="center aligned extra content">
             <toggle ng-model="settings.ui.notifications"></toggle>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="paint brush icon"></i>
+                Clean Names
+            </div>
+            <div class="description">
+                Clean torrent names by replacing punctuation marks ect.
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.ui.cleanNames"></toggle>
         </div>
     </div>
 </div>
