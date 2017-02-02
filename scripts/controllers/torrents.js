@@ -23,6 +23,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.resizeMode = settings.ui.resizeMode;
     $scope.displaySize = settings.ui.displaySize;
     $scope.displayCompact = settings.ui.displayCompact;
+    $scope.cleanNames = settings.ui.cleanNames;
 
     $scope.filters = {
         status: 'all'
@@ -37,6 +38,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $scope.resizeMode = data.ui.resizeMode;
         $scope.displaySize = data.ui.displaySize;
         $scope.displayCompact = data.ui.displayCompact;
+        $scope.cleanNames = data.ui.cleanNames;
         resetAll();
     });
 
