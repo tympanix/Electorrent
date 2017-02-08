@@ -23,7 +23,8 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     $scope.page = 'general';
 
     $scope.layoutSortOptions = {
-        handle: '.sort.handle'
+        handle: '.sort.handle',
+        'ui-floating': true
     }
 
     loadAllSettings();

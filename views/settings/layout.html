@@ -4,24 +4,24 @@
 <table class="ui very basic table">
     <thead>
         <tr>
-            <th>Order</th>
-            <th>Enabled</th>
-            <th>Name</th>
+            <th class="two wide">Order</th>
+            <th class="two wide">Enabled</th>
+            <th class="twelve wide">Name</th>
         </tr>
     </thead>
     <tbody ui-sortable="layoutSortOptions" ng-model="$server.columns">
         <tr ng-repeat="col in $server.columns">
-            <td class="collapsing center aligned">
+            <td style="min-width: 12em">
                 <div class="sort handle">
                     <i class="ui grey maximize icon"></i>
                 </div>
             </td>
-            <td class="collapsing">
+            <td style="min-width: 12em">
               <div class="ui checkbox">
                   <input type="checkbox" ng-model="col.enabled"><label></label>
               </div>
             </td>
-            <td>{{col.name}}</td>
+            <td style="width: 100%">{{col.name}}</td>
         </tr>
     </tbody>
 </table>
