@@ -7,6 +7,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
 
     var settings = {
         startup: 'default',
+        refreshRate: 2000,
         server: {
             ip: '',
             port: '',
