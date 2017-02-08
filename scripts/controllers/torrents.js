@@ -1,7 +1,6 @@
 "use strict";
 
 angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config, AbstractTorrent) {
-    const TIMEOUT = 2000;
     const LIMIT = 25;
 
     var selected = [];
@@ -10,6 +9,8 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     var reconnect;
 
     var settings = config.getAllSettings();
+
+    var refreshRate = settings.refreshRate || 2000;
 
     $scope.connectionLost = false;
     $scope.torrents = {};
@@ -39,6 +40,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $scope.displaySize = data.ui.displaySize;
         $scope.displayCompact = data.ui.displayCompact;
         $scope.cleanNames = data.ui.cleanNames;
+        refreshRate = data.refreshRate
         resetAll();
     });
 
@@ -112,7 +114,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
                 $scope.connectionLost = true;
                 startReconnect();
             });
-        }, TIMEOUT);
+        }, refreshRate);
     }
 
     function startReconnect() {
@@ -126,7 +128,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             }).catch(function() {
                 startReconnect()
             })
-        }, TIMEOUT)
+        }, refreshRate)
     }
 
     function clearAll() {
