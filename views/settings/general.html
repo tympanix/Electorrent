@@ -49,9 +49,8 @@
         </div>
         <div class="center aligned extra content">
             <dropdown class="fluid" title="Resize Mode" ng-model="settings.ui.resizeMode">
-                <dropdown-group data-value="FixedResizer">Fixed</dropdown-group>
                 <dropdown-group data-value="OverflowResizer">Overflow</dropdown-group>
-                <dropdown-group data-value="BasicResizer">Basic</dropdown-group>
+                <dropdown-group data-value="BasicResizer">Static</dropdown-group>
             </dropdown>
         </div>
     </div>
@@ -67,9 +66,9 @@
         </div>
         <div class="center aligned extra content">
             <dropdown class="fluid" title="Resize Mode" ng-model="settings.refreshRate">
-                <dropdown-group data-value="1000">Fast</dropdown-group>
-                <dropdown-group data-value="2000">Default</dropdown-group>
-                <dropdown-group data-value="4000">Slow</dropdown-group>
+                <dropdown-group data-value="1000">Fast (1 second)</dropdown-group>
+                <dropdown-group data-value="2000">Default (2 seconds)</dropdown-group>
+                <dropdown-group data-value="4000">Slow (4 seconds)</dropdown-group>
             </dropdown>
         </div>
     </div>
@@ -122,7 +121,7 @@
                 Clean Names
             </div>
             <div class="description">
-                Clean torrent names by replacing punctuation marks ect.
+                Clean torrent names thus making them more readable replacing punctuation marks ect.
             </div>
         </div>
         <div class="center aligned extra content">
