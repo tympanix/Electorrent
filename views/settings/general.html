@@ -58,6 +58,24 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
+                <i class="refresh icon"></i>
+                Synchronization Speed
+            </div>
+            <div class="description">
+                How often should information be pulled from the torrent client?
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="Resize Mode" ng-model="settings.refreshRate">
+                <dropdown-group data-value="1000">Fast</dropdown-group>
+                <dropdown-group data-value="2000">Default</dropdown-group>
+                <dropdown-group data-value="4000">Slow</dropdown-group>
+            </dropdown>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
                 <i class="magnet icon"></i>
                 Magnet Links
             </div>
