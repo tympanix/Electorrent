@@ -97,7 +97,7 @@
                     class="ui single line unstackable selectable fixed torrent resize table">
                     <thead>
                         <tr sorting="changeSorting">
-                            <th ng-repeat="col in $server.columns | filter:{enabled: true}" resize="col.attribute" sort="col.attribute">{{::col.name}}</th>
+                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.attribute" resize="col.attribute" sort="col.attribute">{{::col.name}}</th>
                         </tr>
                     </thead>
                     <tbody class="zoom" ng-class="displaySize">
@@ -107,7 +107,7 @@
                             ng-click="setSelected($event, torrent, $index)"
                             ng-right-click="showContextMenu($event, torrent, $index)"
                             repeat-done="renderDone">
-                            <td ng-repeat="col in $server.columns | filter:{enabled: true}" ng-switch="col.attribute">
+                            <td ng-repeat="col in $server.columns | filter:{enabled: true} track by col.attribute" ng-switch="col.attribute">
                                 <span ng-switch-when="decodedName">{{cleanNames ? torrent.decodedName : torrent.name}}</span>
                                 <span ng-switch-when="size">{{torrent.size | bytes}}</span>
                                 <span ng-switch-when="downloadSpeed">{{torrent.downloadSpeed | speed}}</span>
