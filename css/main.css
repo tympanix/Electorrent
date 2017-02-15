@@ -192,6 +192,7 @@ html, body {
     margin: 0 !important;
     overflow: hidden;
     font-size: inherit;
+    -webkit-transform: translate3d(0, 0, 0); /* macOS fix */
 }
 .torrent.progress label {
     position: absolute;
