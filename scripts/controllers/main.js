@@ -61,7 +61,9 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $rootScope.$btclient.connect(server.ip, server.port, server.user, server.password)
         .then(function(){
             $scope.statusText = "Loading Torrents"
+            config.updateServer(server)
             pageTorrents();
+            $scope.$broadcast('start:torrents', true /*full update*/)
             requestMagnetLinks();
             requestTorrentFiles();
         }).catch(function(){
@@ -144,9 +146,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
             $scope.$broadcast('wipe:torrents')
             $rootScope.$btclient = null
             $rootScope.$server = null
-            $bittorrent.setServer(server)
             connectToServer(server)
-            $scope.$broadcast('start:torrents', true /*full update*/)
         }, TRANSITION_TIME)
         $scope.$apply();
     })
