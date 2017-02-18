@@ -76,7 +76,6 @@ angular.module("torrentApp").directive('sort', [function() {
 
     function link(scope, element, attr, ctrl) {
         scope.sort = scope.$eval(attr.sort);
-        console.log("Sort", attr.sort, scope.sort)
 
         scope.update = function() {
             if (scope.sort === ctrl.sortKey) {
