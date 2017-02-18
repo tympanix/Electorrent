@@ -4,24 +4,49 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
         restrict: 'A',
         bindToController: true,
         scope: {
+            mode: '=',
             sorting: '='
         },
-        controller: controller
+        controller: controller,
+        link: link
     };
 
     function controller() {
-
-        this.sortKey = getSavedSortKey()
-        this.sortOrder = getSavedSortOrder()
+        
+        this.updateSettings = function() {
+            this.sortKey = getSavedSortKey(this)
+            this.sortOrder = getSavedSortOrder(this)
+        }
 
         this.save = function(key, order) {
-            $window.localStorage.setItem('sort_key', key);
-            $window.localStorage.setItem('sort_desc', order);
+            $window.localStorage.setItem('sort_key.'+this.mode, key);
+            $window.localStorage.setItem('sort_desc.'+this.mode, order);
         }
+
+        this.updateSettings()
+
     }
 
-    function getSavedSortKey() {
-        let sortKey = $window.localStorage.getItem('sort_key');
+    function link(scope, element, attr, ctrl) {
+        function update(){
+            $(element).find('*[sort]').each(function(i, col){
+                var scope = angular.element(col).scope()
+                scope.update()
+            })
+        }
+
+        scope.$watch(function() {
+            return ctrl.mode
+        }, function(newMode, oldMode) {
+            if (newMode !== oldMode) {
+                ctrl.updateSettings()
+                update()
+            }
+        })
+    }
+
+    function getSavedSortKey(ctrl) {
+        let sortKey = $window.localStorage.getItem('sort_key.'+ctrl.mode);
         if (!sortKey || typeof sortKey !== 'string') {
             return 'dateAdded';
         } else {
@@ -29,8 +54,8 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
         }
     }
 
-    function getSavedSortOrder() {
-        let sortOrder = $window.localStorage.getItem('sort_desc');
+    function getSavedSortOrder(ctrl) {
+        let sortOrder = $window.localStorage.getItem('sort_desc.'+ctrl.mode);
         if (!sortOrder) {
             return true;
         } else {
@@ -45,23 +70,25 @@ angular.module("torrentApp").directive('sort', [function() {
     return {
         restrict: 'A',
         require: '^^sorting',
-        scope: {
-            sort: '='
-        },
+        scope: false,
         link: link
     };
 
     function link(scope, element, attr, ctrl) {
+        scope.sort = scope.$eval(attr.sort);
+        console.log("Sort", attr.sort, scope.sort)
+
+        scope.update = function() {
+            if (scope.sort === ctrl.sortKey) {
+                setSortingArrow(scope, column, ctrl, ctrl.sortOrder);
+                ctrl.sorting(scope.sort, ctrl.sortOrder);
+            }
+        }
 
         var column = $(element);
         column.append('<i class="ui sorting icon"></i>');
         bindSortAction(scope, column, ctrl);
-
-        if (scope.sort === ctrl.sortKey) {
-            setSortingArrow(scope, column, ctrl, ctrl.sortOrder);
-            ctrl.sorting(scope.sort, ctrl.sortOrder);
-        }
-
+        scope.update()
     }
 
     function bindSortAction(scope, element, ctrl) {
