@@ -68,11 +68,9 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     }
 
     function saveServer() {
-        console.log("Force?", $scope.force);
         if ($scope.server.equals(serverCopy) && $scope.server.isConnected) return
         serverCopy = angular.copy($scope.server)
         $scope.connecting = true;
-        console.log("Saving server");
         return $scope.server.connect().then(function() {
             return config.updateServer($scope.server)
         })
@@ -80,12 +78,10 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     $scope.save = function() {
         $scope.$emit('loading', 'Applying Settings')
-        console.log("Changes?", !$scope.server.equals(serverCopy));
 
         $q.when().then(function() {
             return saveServer()
         }).then(function() {
-            console.log("Writing settings");
             return writeSettings()
         }).then(function() {
             $scope.close();

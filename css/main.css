@@ -146,6 +146,9 @@ html, body {
     /*overflow-y: auto;*/
     overflow-y: overlay; /* Chrome scrollbar on top */
 }
+.ui.welcome.form.loading:before {
+    background: rgba(240,240,240,0.8);
+}
 .torrent.table {
     border-radius: 0;
     margin: 0;

@@ -8,35 +8,35 @@
                         Welcome to Electorrent
                     </div>
                 </h2>
-                <form class="ui large form" id="loginForm" ng-class="{loading: connecting}" ng-submit="connect()" onsubmit="return false;">
+                <form class="ui large welcome form" id="loginForm" ng-class="{loading: connecting}" ng-submit="connect()" onsubmit="return false;">
                     <div class="two fields">
                         <div class="field">
                             <div class="ui left icon input">
                                 <i class="world icon"></i>
-                                <input type="text" name="ip" ng-model="ip" placeholder="IP Address">
+                                <input type="text" name="ip" ng-model="server.ip" placeholder="IP Address">
                             </div>
                         </div>
                         <div class="field">
                             <div class="ui left icon input">
                                 <i class="sitemap icon"></i>
-                                <input type="number" name="port" ng-model="port" placeholder="Port">
+                                <input type="number" name="port" ng-model="server.port" placeholder="Port">
                             </div>
                         </div>
                     </div>
                     <div class="field">
                         <div class="ui left icon input">
                             <i class="user icon"></i>
-                            <input type="text" name="username" ng-model="username" placeholder="Username">
+                            <input type="text" name="username" ng-model="server.user" placeholder="Username">
                         </div>
                     </div>
                     <div class="field">
                         <div class="ui left icon input">
                             <i class="lock icon"></i>
-                            <input type="password" name="password" ng-model="password" placeholder="Password">
+                            <input type="password" name="password" ng-model="server.password" placeholder="Password">
                         </div>
                     </div>
                     <div class="field">
-                        <dropdown title="Client Program" ng-model="client">
+                        <dropdown title="Client Program" ng-model="server.client">
                             <dropdown-group value="id" title="client.name" ng-repeat="(id, client) in btclients">
                                 <i class="icon torrent big" ng-class="client.icon"></i>
                                 {{client.name}}
