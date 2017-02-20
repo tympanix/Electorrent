@@ -65,6 +65,12 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
 
     Server.prototype.connect = function () {
         let self = this
+
+        if (!this.client) {
+            $notify.alert("Opps!", "Please select a client to connect to!")
+            return $q.reject()
+        }
+
         this.service = $bittorrent.getClient(this.client);
         return this.service.connect(this.ip, this.port, this.user, this.password).catch(function(response, msg) {
             self.isConnected = false
@@ -72,7 +78,8 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
             return $q.reject(response, this)
         }).then(function() {
             self.isConnected = true
-            $bittorrent.setClient(self.service);
+            //$bittorrent.setClient(self.service);
+            $bittorrent.setServer(self)
             return $q.resolve()
         })
     };
