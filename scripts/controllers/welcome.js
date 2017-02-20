@@ -2,42 +2,23 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
 
     $scope.connecting = false;
     $scope.btclients = $btclients;
+    $scope.server = new Server()
 
     function clearForm() {
-        $scope.ip = ''
-        $scope.port = ''
-        $scope.username = ''
-        $scope.password = ''
-        $scope.client = undefined
+        $scope.server = new Server()
     }
 
     $scope.connect = function() {
-
-        var ip = $scope.ip || '';
-        var port = $scope.port || '';
-        var user = $scope.username || '';
-        var password = $scope.password || '';
-        var client = $scope.client || '';
-
-        var btclient = $bittorrent.getClient(client);
-
-        if (!btclient) {
-            $notify.alert("Opps!", "Please select a client to connect to!")
-            $scope.connecting = false;
-            return;
-        }
-
         $scope.connecting = true;
 
-        btclient.connect(ip, port, user, password).then(function() {
-            $timeout(function(){
-                $bittorrent.setClient(btclient);
-                saveServer(ip, port, user, password, client);
-            }, 500)
+        $scope.server.connect().then(function() {
+            return config.saveServer($scope.server)
+        }).then(function(){
+            $scope.$emit('connect:server', $scope.server)
+            clearForm()
+            $notify.ok("Success!", "Hooray! Welcome to Electorrent")
         }).catch(function(err) {
-            $timeout(function(){
-                console.error(err);
-            }, 500)
+            console.error(err);
         }).finally(function() {
             $scope.connecting = false;
         })

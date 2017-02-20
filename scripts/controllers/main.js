@@ -106,6 +106,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     function pageLoading() {
         $scope.showLoading = true;
+        $
     }
 
     function pageSettings(settingsPage){
@@ -140,7 +141,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $scope.statusText = "Connecting to " + server.getName();
         $scope.$broadcast('stop:torrents')
         pageLoading()
-
+        pageTorrents()
         // Timeout for aesthetic reasons
         $timeout(function() {
             $scope.$broadcast('wipe:torrents')
