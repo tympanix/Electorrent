@@ -2,7 +2,7 @@
 
 angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "notificationService", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, $notify) {
 
-    const URL_REGEX = /^(https?|udp)\:\/\/((?:(?:[^:\/?#]+)+\.)?([^\.:\/?#]+\.([a-z]+)))(?:\:([0-9]+))?([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/
+    const URL_REGEX = /^([a-z]+)\:\/\/((?:(?:[^:\/?#]+)+\.)?([^\.:\/?#]+\.([a-z]+)))(?:\:([0-9]+))?([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -154,13 +154,15 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
                 return _.object(rtorrentConfig.trackers, trackerData)
             })
             torrent.addTrackerData(trackerArray)
-            _.every(_.pluck(trackerArray, 'get_url'), function(trackerUrl) {
+            _.each(_.pluck(trackerArray, 'get_url'), function(trackerUrl) {
                 trackers.add(trackerUrl)
             })
         })
-        return Array.from(trackers).map((tracker) => {
-            return parseUrl(tracker).hostname
+        var trackerArray = Array.from(trackers).map((tracker) => {
+            var urlInfo = parseUrl(tracker)
+            return urlInfo && urlInfo.hostname
         })
+        return _.compact(trackerArray)
     }
 
     function parseUrl(url) {

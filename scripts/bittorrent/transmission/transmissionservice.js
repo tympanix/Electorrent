@@ -3,7 +3,7 @@
 angular.module('torrentApp')
     .service('transmissionService', ["$http", "$q", "TorrentT", "transmissionConfig", "notificationService", function($http, $q, TorrentT, transmissionConfig, $notify) {
 
-    const URL_REGEX = /^(https?)\:\/\/((?:(?:[^:\/?#]+)+\.)?([^\.:\/?#]+\.([a-z]+)))(?:\:([0-9]+))?([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/
+    const URL_REGEX = /^([a-z]+)\:\/\/((?:(?:[^:\/?#]+)+\.)?([^\.:\/?#]+\.([a-z]+)))(?:\:([0-9]+))?([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -159,7 +159,11 @@ angular.module('torrentApp')
         torrents.forEach((torrent) => {
             torrent.trackers.forEach((tracker) => trackers.add(tracker))
         })
-        return Array.from(trackers).map((tracker) => parseUrl(tracker).hostname)
+        var trackerArray = Array.from(trackers).map(function(tracker) {
+            var urlInfo = parseUrl(tracker)
+            return urlInfo && urlInfo.hostname
+        })
+        return _.compact(trackerArray)
     }
 
     function parseUrl(url) {
