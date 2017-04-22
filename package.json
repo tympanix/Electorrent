@@ -1,8 +1,8 @@
 {
   "name": "electorrent",
   "productName": "Electorrent",
-  "version": "2.0.1",
-  "description": "An Electron/Node/AngularJS remote client app for uTorrent server",
+  "version": "2.0.2",
+  "description": "A thin client for your torrenting needs",
   "main": "app.js",
   "scripts": {
     "start": "electron --debug .",
