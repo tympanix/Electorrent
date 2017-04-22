@@ -75,7 +75,7 @@ angular.module('torrentApp')
             saveConnection(ip, port, encoded, session);
             defer.resolve(response);
         }).catch(function(response){
-            if(status === 409){
+            if(response.status === 409){
                 var session = response.headers('X-Transmission-Session-Id');
                 saveConnection(ip, port, encoded, session);
                 return defer.resolve(response);
