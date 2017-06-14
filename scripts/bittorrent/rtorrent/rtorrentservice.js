@@ -2,7 +2,7 @@
 
 angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "notificationService", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, $notify) {
 
-    const URL_REGEX = /^([a-z]+)\:\/\/((?:(?:[^:\/?#]+)+\.)?([^\.:\/?#]+\.([a-z]+)))(?:\:([0-9]+))?([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/
+    const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9]+\.)*((?:[a-z0-9]+\.)[a-z]+)/
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -159,24 +159,14 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
             })
         })
         var trackerArray = Array.from(trackers).map((tracker) => {
-            var urlInfo = parseUrl(tracker)
-            return urlInfo && urlInfo.hostname
+            return parseUrl(tracker)
         })
         return _.compact(trackerArray)
     }
 
     function parseUrl(url) {
         var match = url.match(URL_REGEX)
-        return match && {
-            protocol: match[1],
-            domain: match[2],
-            hostname: match[3],
-            extension: match[4],
-            port: match[5],
-            path: match[6],
-            params: match[7],
-            hash: match[8]
-        }
+        return match && match[1]
     }
 
     function build(array) {
