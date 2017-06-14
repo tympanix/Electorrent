@@ -9,44 +9,61 @@
                     </div>
                 </h2>
                 <form class="ui large welcome form" id="loginForm" ng-class="{loading: connecting}" ng-submit="connect()" onsubmit="return false;">
-                    <div class="two fields">
-                        <div class="field">
+                    <div class="fields">
+                        <div class="ten wide field">
                             <div class="ui left icon input">
                                 <i class="world icon"></i>
                                 <input type="text" name="ip" ng-model="server.ip" placeholder="IP Address">
                             </div>
                         </div>
+                        <div class="six wide field">
+                            <dropdown title="Protocol" class="fluid" ng-model="server.proto">
+                                <dropdown-group value="http" title="http">
+                                    http
+                                </dropdown-group>
+                                <dropdown-group value="https" title="https">
+                                    https
+                                </dropdown-group>
+                            </dropdown>
+                        </div>
+                    </div>
+                    <div class="two fields">
                         <div class="field">
+                            <div class="ui left icon input">
+                                <i class="user icon"></i>
+                                <input type="text" name="username" ng-model="server.user" placeholder="Username">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="ui left icon input">
+                                <i class="lock icon"></i>
+                                <input type="password" name="password" ng-model="server.password" placeholder="Password">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <dropdown title="Client Program" class="fluid" ng-model="server.client" ng-change="setPath()">
+                            <dropdown-group value="id" title="client.name" ng-repeat="(id, client) in btclients">
+                                <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}}
+                            </dropdown-group>
+                        </dropdown>
+                    </div>
+                    <div class="fields">
+                        <div class="six wide field">
                             <div class="ui left icon input">
                                 <i class="sitemap icon"></i>
                                 <input type="number" name="port" ng-model="server.port" placeholder="Port">
                             </div>
                         </div>
-                    </div>
-                    <div class="field">
-                        <div class="ui left icon input">
-                            <i class="user icon"></i>
-                            <input type="text" name="username" ng-model="server.user" placeholder="Username">
+                        <div class="ten wide field">
+                            <div class="ui left icon input">
+                                <i class="linkify icon"></i>
+                                <input type="text" name="path" ng-model="server.path" placeholder="Path">
+                            </div>
                         </div>
                     </div>
-                    <div class="field">
-                        <div class="ui left icon input">
-                            <i class="lock icon"></i>
-                            <input type="password" name="password" ng-model="server.password" placeholder="Password">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <dropdown title="Client Program" ng-model="server.client">
-                            <dropdown-group value="id" title="client.name" ng-repeat="(id, client) in btclients">
-                                <i class="icon torrent big" ng-class="client.icon"></i>
-                                {{client.name}}
-                            </dropdown-group>
-                        </dropdown>
-                    </div>
-
                     <button class="ui fluid large green labeled icon submit button">
-                        <i class="checkmark icon"></i>
-                        Connect
+                        <i class="checkmark icon"></i> Connect
                     </button>
                 </form>
             </div>

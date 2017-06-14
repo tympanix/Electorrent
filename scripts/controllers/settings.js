@@ -62,6 +62,21 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         })
     }
 
+    $scope.setPath = function() {
+      if ($scope.pathPristine) {
+        $scope.server.setPath()
+      }
+    }
+
+    $scope.resetPath = function() {
+      $scope.server.setPath()
+      $scope.pathPristine = true
+    }
+
+    $scope.lockPath = function() {
+      $scope.pathPristine = false
+    }
+
     $scope.close = function() {
         $scope.$emit('show:torrents');
         loadAllSettings();

@@ -57,6 +57,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     }
 
 
+
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
      * should return a promise that the connection was successfull. A standard http timeout of 5 seconds
@@ -67,14 +68,14 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @param {string} password
      * @return {promise} connection
      */
-    this.connect = function(ip, port, user, pass) {
+    this.connect = function(server) {
 
         $xmlrpc.config({
-            hostName: url(ip, port),
-            pathName: "/RPC2"
+            hostName: server.url(),
+            pathName: ""
         })
 
-        var encoded = new Buffer(`${user}:${pass}`).toString('base64');
+        var encoded = new Buffer(`${server.user}:${server.password}`).toString('base64');
         $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
 
         return $xmlrpc.callMethod('system.client_version')
@@ -86,6 +87,15 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
                 return $q.reject(err);
             })
     }
+
+    /**
+     * Returns the default path for the service. Should start with a slash.
+     @return {string} the default path
+     */
+    this.defaultPath = function() {
+      return "/RPC2"
+    }
+
 
     /**
      * Return any new information about torrents to be rendered in the GUI. Should return a

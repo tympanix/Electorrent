@@ -119,9 +119,13 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     function startReconnect() {
         $notify.disableAll();
-        var data = config.getServer();
+        var server = config.getServer();
+        if (!server) {
+          console.error("No server")
+          return
+        }
         reconnect = $timeout(function() {
-            $rootScope.$btclient.connect(data.ip, data.port, data.user, data.password)
+            $rootScope.$btclient.connect(server)
             .then(function() {
                 $notify.enableAll();
                 startTimer(true);
@@ -271,7 +275,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.doAction = function(action, name, data) {
-        action(selected, data)
+        action.call($rootScope.$btclient, selected, data)
             .then(function(){
                 $scope.update();
             })
@@ -282,7 +286,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     };
 
     $scope.doContextAction = function(action, name) {
-        action(selected)
+        action.call($rootScope.$btclient, selected)
         .then(function(){
             $scope.update();
         })
