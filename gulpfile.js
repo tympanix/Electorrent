@@ -13,7 +13,7 @@ const CLEAN = ['!' + OUT + '/package.json', '!' + OUT + '/node_modules', OUT + '
 gulp.task('serve', function () {
 
     // Start browser process
-    electron.start('--debug');
+    electron.start();
 
     // Restart browser process
     gulp.watch(['app.js', 'lib/*.js'], electron.restart);

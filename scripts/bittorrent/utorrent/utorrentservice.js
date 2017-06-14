@@ -3,6 +3,7 @@
 angular.module('torrentApp')
     .service('utorrentService', ["$http", "$resource", "$log", "$q", "TorrentU", "notificationService", "Column", function($http, $resource, $log, $q, Torrent, $notify, Column) {
 
+        this.server = undefined
         this.name = 'µTorrent';
 
         var data = {
@@ -38,27 +39,38 @@ angular.module('torrentApp')
             return false;
         }
 
-        function url(ip, port) {
-            return `http://${ip}:${port}/gui/`;
+        this.url = function(path) {
+            return `${this.server.url()}${path || ''}`;
         }
 
-        function saveConnection(ip, port, username, password) {
+        this.saveConnection = function(url, username, password) {
             data.username = username;
             data.password = password;
-            data.url = url(ip, port);
+            data.url = url;
         }
 
-        this.connect = function(ip, port, user, pass) {
-            var loading = $q.defer();
+        /**
+         * Returns the default path for the service. Should start with a slash.
+         @return {string} the default path
+         */
+        this.defaultPath = function() {
+          return "/gui"
+        }
 
-            var encoded = new Buffer(`${user}:${pass}`).toString('base64');
+
+        this.connect = function(server) {
+            var loading = $q.defer();
+            this.server = server
+            let self = this
+
+            var encoded = new Buffer(`${server.user}:${server.password}`).toString('base64');
             $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
 
-            $http.get(url(ip, port) + 'token.html?t=' + Date.now(), {
+            $http.get(this.url() + '/token.html?t=' + Date.now(), {
                 timeout: 5000
             }).success(function(str) {
                 if (extractTokenFromHTML(str)) {
-                    saveConnection(ip, port, user, pass);
+                    self.saveConnection(server.url(), server.user, server.password);
                     loading.resolve(data.token);
                 } else {
                     loading.reject('Could not find token');
@@ -71,7 +83,7 @@ angular.module('torrentApp')
         }
 
         this.addTorrentUrl = function(url, dir, path) {
-            return $resource(data.url + '.' + '?token=:token&action=add-url&s=:url&download_dir=:dir&path=:path&t=:t', {
+            return $resource(data.url + '/.' + '?token=:token&action=add-url&s=:url&download_dir=:dir&path=:path&t=:t', {
                 token: data.token,
                 t: Date.now(),
                 url: url,
@@ -129,7 +141,7 @@ angular.module('torrentApp')
         }
 
         function _torrents() {
-            return $resource(data.url + '.' + '?:action:data&token=:token&cid=:cid:opt&t=:t', {
+            return $resource(data.url + '/.' + '?:action:data&token=:token&cid=:cid:opt&t=:t', {
                 token: data.token,
                 cid: data.cid,
                 t: Date.now()
@@ -153,7 +165,7 @@ angular.module('torrentApp')
                 return torrent.hash
             })
 
-            return $resource(data.url + '.' + '?action=:action&token=:token&t=:t', {
+            return $resource(data.url + '/.' + '?action=:action&token=:token&t=:t', {
                 action: action,
                 hash: hashes,
                 token: data.token,
@@ -264,7 +276,7 @@ angular.module('torrentApp')
         }
 
         this.getDownloadDirectories = function() {
-            return $resource(data.url + '.' + '?token=:token&action=list-dirs&t=:t', {
+            return $resource(data.url + '/.' + '?token=:token&action=list-dirs&t=:t', {
                 token: data.token,
                 t: Date.now()
             }, {
@@ -279,7 +291,7 @@ angular.module('torrentApp')
         }
 
         this.filePriority = function() {
-            return $resource(data.url + '.' + '?token=:token&action=setprio&hash=:hash&t=:t&p=:priority', {
+            return $resource(data.url + '/.' + '?token=:token&action=setprio&hash=:hash&t=:t&p=:priority', {
                 token: data.token,
                 t: Date.now()
             }, {

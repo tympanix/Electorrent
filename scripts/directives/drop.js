@@ -25,8 +25,9 @@ angular.module('torrentApp').controller('DropDownController', ['$scope', functio
     };
 
     this.update_model = function(title, value) {
-        if($scope.model !== value)
+        if($scope.model !== value) {
             $scope.model = value;
+        }
     };
 
     this.update_title = function(value) {
@@ -61,7 +62,8 @@ angular.module('torrentApp').controller('DropDownController', ['$scope', functio
         scope: {
             title: '@',
             open: '@',
-            model: '=ngModel'
+            model: '=ngModel',
+            change: '&?ngChange'
         },
         template: '<div class="{{ dropdown_class }}">' +
             '<div class="{{text_class}}">{{ title }}</div>' +
@@ -90,6 +92,7 @@ angular.module('torrentApp').controller('DropDownController', ['$scope', functio
             scope.$watch('model', function(value) {
                 // update title or reset the original title if its empty
                 DropDownController.update_title(value);
+                if (scope.change) scope.change()
             });
 
             /*

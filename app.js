@@ -2,14 +2,15 @@
 const electron = require('electron');
 const yargs = require('yargs');
 const util = require('util');
+const client = require('electron-connect').client;
 
 // Handle Squirrel startup parameters
-if (require('./lib/startup')) return
+if(require('./lib/startup')) return
 
 // Electron modules
-const {app} = electron;
-const {BrowserWindow} = electron;
-const {ipcMain} = electron;
+const { app } = electron;
+const { BrowserWindow } = electron;
+const { ipcMain } = electron;
 
 // Set up program arguments
 yargs.version(() => app.getVersion())
@@ -64,53 +65,56 @@ function createTorrentWindow() {
         torrentWindow = null;
     });
 
+    // Connect to server process
+    client.create(torrentWindow);
+
 }
 
-function sendMagnetLinks(args){
+function sendMagnetLinks(args) {
     var magnetLinks = args.filter((url) => url.startsWith('magnet'))
-    if (magnetLinks.length === 0) return
+    if(magnetLinks.length === 0) return
     torrentWindow.webContents.send('magnet', magnetLinks);
 }
 
-function sendTorrentFiles(args){
+function sendTorrentFiles(args) {
     logger.info('Main searching for files in', args)
     var torrentFiles = args.filter((path) => path.endsWith('.torrent'))
-    if (torrentFiles.length === 0) return
+    if(torrentFiles.length === 0) return
     logger.info('Main seding torrent files', torrentFiles)
     torrents.readFiles(torrentFiles)
 }
 
-ipcMain.on('send:magnets', function(){
+ipcMain.on('send:magnets', function() {
     sendMagnetLinks(process.argv);
 })
 
-ipcMain.on('send:torrentfiles', function(){
+ipcMain.on('send:torrentfiles', function() {
     logger.info('Main received send torrentfiles')
     sendTorrentFiles(process.argv);
 })
 
 // If another instance of the app is allready running, execute this callback
-var shouldQuit = app.makeSingleInstance(function(args /*, workingDirectory*/) {
+var shouldQuit = app.makeSingleInstance(function(args /*, workingDirectory*/ ) {
     // Someone tried to run a second instance, we should focus our window
 
-    if (torrentWindow) {
+    if(torrentWindow) {
         sendMagnetLinks(args)
         sendTorrentFiles(args)
-        if (torrentWindow.isMinimized()) torrentWindow.restore();
+        if(torrentWindow.isMinimized()) torrentWindow.restore();
         torrentWindow.focus();
     }
     return true;
 
 });
 
-if (shouldQuit) {
+if(shouldQuit) {
     app.quit();
     return;
 }
 
 // Handle magnet links on MacOS
 app.on('open-url', function(event, url) {
-    if (torrentWindow) {
+    if(torrentWindow) {
         sendMagnetLinks([url]);
     } else {
         process.argv.push(url);
@@ -129,7 +133,7 @@ app.on('ready', function() {
 app.on('window-all-closed', () => {
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
+    if(process.platform !== 'darwin') {
         app.quit();
     }
 });
@@ -137,7 +141,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (torrentWindow === null) {
+    if(torrentWindow === null) {
         createTorrentWindow();
     }
 });
