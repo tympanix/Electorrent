@@ -5,6 +5,8 @@ angular.module('torrentApp')
 
     const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9]+\.)*((?:[a-z0-9]+\.)[a-z]+)/
 
+    this.server = undefined
+
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
      * Best practise is naming your service starting with the client name in lower case followed by 'Service'
@@ -25,18 +27,8 @@ angular.module('torrentApp')
 
     const fields = transmissionConfig.fields;
 
-    function url() {
-        var ip, port, path;
-        if (arguments.length <= 1){
-            ip = config.ip;
-            port = config.port;
-            path = arguments[0] || "";
-        } else {
-            ip = arguments[0]
-            port = arguments[1]
-            path = arguments[2] || "";
-        }
-        return `http://${ip}:${port}/transmission/rpc${path}`;
+    this.url = function(path) {
+        return `${this.server.url()}${path || ''}`;
     }
 
     function updateSession(session) {
@@ -44,12 +36,18 @@ angular.module('torrentApp')
         config.session = session;
     }
 
-    function saveConnection(ip, port, encoded, session) {
-        config.ip = ip;
-        config.port = port;
-        config.encoded = encoded;
+    this.saveSession = function(session) {
         config.session = session;
     }
+
+    /**
+     * Returns the default path for the service. Should start with a slash.
+     @return {string} the default path
+     */
+    this.defaultPath = function() {
+      return "/transmission/rpc"
+    }
+
 
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
@@ -61,23 +59,26 @@ angular.module('torrentApp')
      * @param {string} password
      * @return {promise} connection
      */
-    this.connect = function(ip, port, user, pass) {
+    this.connect = function(server) {
+        this.server = server
+        let self = this
         var defer = $q.defer();
-        var encoded = new Buffer(`${user}:${pass}`).toString('base64');
+        var encoded = new Buffer(`${server.user}:${server.password}`).toString('base64');
+        config.encoded = encoded
 
-        $http.get(url(ip,port),{
+        $http.get(this.url(),{
             timeout: 5000,
             headers: {
                 'Authorization': "Basic " + encoded
             }
         }).then(function(response) {
             var session = response.headers('X-Transmission-Session-Id');
-            saveConnection(ip, port, encoded, session);
+            self.saveSession(session);
             defer.resolve(response);
         }).catch(function(response){
             if(response.status === 409){
                 var session = response.headers('X-Transmission-Session-Id');
-                saveConnection(ip, port, encoded, session);
+                self.saveSession(session);
                 return defer.resolve(response);
             }
             defer.reject(response);
@@ -119,7 +120,7 @@ angular.module('torrentApp')
             "method": "torrent-get"
 	     }
 
-        $http.post(url(),data,{
+        $http.post(this.url(), data, {
             headers:{
                 'Authorization':'Basic ' + config.encoded,
                 'X-Transmission-Session-Id': config.session
@@ -185,7 +186,7 @@ angular.module('torrentApp')
             "method": "torrent-add"
         }
 
-        return $http.post(url(), data, {
+        return $http.post(this.url(), data, {
             headers:{
                 'Authorization':'Basic ' + config.encoded,
                 'X-Transmission-Session-Id': config.session
@@ -219,6 +220,7 @@ angular.module('torrentApp')
      * @return {promise} isAdded
      */
     this.uploadTorrent = function(buffer) {
+        let self = this
         var defer = $q.defer();
         var blob = new Blob([buffer]);
         var base64data = '';
@@ -239,7 +241,7 @@ angular.module('torrentApp')
                "method": "torrent-add"
                }
 
-            $http.post(url(), data, {
+            $http.post(self.url(), data, {
                 headers: {
                     'Authorization': 'Basic ' + config.encoded,
                     'X-Transmission-Session-Id': config.session
@@ -264,7 +266,7 @@ angular.module('torrentApp')
 
     }
 
-    function doAction(command, torrents, mutator, value) {
+    this.doAction = function(command, torrents, mutator, value) {
         if (!Array.isArray(torrents)) {
             return $notify.alert('Error', 'Action was passed incorrect arguments')
         }
@@ -286,7 +288,7 @@ angular.module('torrentApp')
             data.arguments[mutator] = value;
         }
 
-        return $http.post(url(), data, {
+        return $http.post(this.url(), data, {
             headers: {
                 'Authorization': 'Basic ' + config.encoded,
                 'X-Transmission-Session-Id': config.session
@@ -295,8 +297,8 @@ angular.module('torrentApp')
 
     }
 
-    function doGlobalAction(command) {
-        doAction(command, []);
+    this.doGlobalAction = function(command) {
+        this.doAction(command, []);
     }
 
     /**
@@ -307,39 +309,39 @@ angular.module('torrentApp')
      * @return {promise} actionIsDone
      */
     this.start = function(torrents) {
-        return doAction('torrent-start', torrents);
+        return this.doAction('torrent-start', torrents);
     }
 
     this.stop = function(torrents) {
-        return doAction('torrent-stop', torrents);
+        return this.doAction('torrent-stop', torrents);
     }
 
     this.verify = function(torrents) {
-        return doAction('torrent-verify', torrents);
+        return this.doAction('torrent-verify', torrents);
     }
 
     this.pauseAll = function() {
-        return doGlobalAction('torrent-stop');
+        return this.doGlobalAction('torrent-stop');
     }
 
     this.resumeAll = function() {
-        return doGlobalAction('torrent-start');
+        return this.doGlobalAction('torrent-start');
     }
 
     this.queueUp = function(torrents) {
-        return doAction('queue-move-up', torrents);
+        return this.doAction('queue-move-up', torrents);
     }
 
     this.queueDown = function(torrents) {
-        return doAction('queue-move-down', torrents);
+        return this.doAction('queue-move-down', torrents);
     }
 
     this.remove = function(torrents) {
-        return doAction('torrent-remove', torrents)
+        return this.doAction('torrent-remove', torrents)
     }
 
     this.removeAndLocal = function(torrents) {
-        return doAction('torrent-remove', torrents, 'delete-local-data', true)
+        return this.doAction('torrent-remove', torrents, 'delete-local-data', true)
     }
 
     /**

@@ -26,18 +26,17 @@
   },
   "author": "Tympanix",
   "dependencies": {
-    "electron-connect": "^0.4.8",
     "electron-regedit": "^1.0.5",
     "q": "^1.4.1",
     "winreg": "^1.2.2"
   },
   "devDependencies": {
     "bower": "^1.8.0",
+    "electron": "^1.6.0",
     "electron-builder": "^17.0.0",
     "electron-builder-squirrel-windows": "^17.0.0",
-    "electron-connect": "^0.6.0",
+    "electron-connect": "^0.6.1",
     "electron-is": "^2.4.0",
-    "electron": "^1.6.0",
     "electron-squirrel-startup": "^1.0.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",

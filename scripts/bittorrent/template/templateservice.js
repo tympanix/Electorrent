@@ -59,6 +59,14 @@ angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__Torre
     }
 
     /**
+     * Returns the default path for the service. Should start with a slash.
+     @return {string} the default path
+     */
+    this.defaultPath = function() {
+      return "/defaultPath"
+    }
+
+    /**
      * Add a torrent to the client by sending a magnet link to the API. Should return
      * a promise that the torrent has been added successfully to the client.
      * @param {string} magnetURL

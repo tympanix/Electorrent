@@ -58,7 +58,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $bittorrent.setServer(server)
         $scope.statusText = "Connecting to " + $rootScope.$btclient.name;
 
-        $rootScope.$btclient.connect(server.ip, server.port, server.user, server.password)
+        $rootScope.$btclient.connect(server)
         .then(function(){
             $scope.statusText = "Loading Torrents"
             config.updateServer(server)
@@ -149,7 +149,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
             $rootScope.$server = null
             connectToServer(server)
         }, TRANSITION_TIME)
-        $scope.$apply();
     })
 
     $scope.$on('show:settings', function() {
