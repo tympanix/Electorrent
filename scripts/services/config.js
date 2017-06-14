@@ -180,7 +180,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         }
         servers.forEach((server) => {
             menu.append(new MenuItem({
-                label: server.getNameAtAddress(),
+                label: server.getDisplayName(),
                 id: server.id,
                 click: () => $rootScope.$broadcast('connect:server', server),
                 checked: server.id === $rootScope.$server.id,

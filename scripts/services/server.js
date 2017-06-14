@@ -26,6 +26,7 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
         }
 
         Server.prototype.fromJson = function(data) {
+            this.name = data.name
             this.id = data.id
             this.ip = data.ip
             this.proto = data.proto || "http"
@@ -41,6 +42,7 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
 
         Server.prototype.json = function() {
             return {
+                name: this.name,
                 id: this.id,
                 ip: this.ip,
                 proto: this.proto,
@@ -65,6 +67,10 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
 
         Server.prototype.getNameAtAddress = function() {
             return this.getName() + " @ " + this.ip
+        };
+
+        Server.prototype.getDisplayName = function () {
+          return this.name || this.getNameAtAddress()
         };
 
         Server.prototype.updateLastUsed = function() {
