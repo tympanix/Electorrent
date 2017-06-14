@@ -3,6 +3,7 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
     $scope.connecting = false;
     $scope.btclients = $btclients;
     $scope.server = new Server()
+    $scope.advanced = false
 
     function clearForm() {
         $scope.server = new Server()
