@@ -1,31 +1,55 @@
 <!DOCTYPE html>
 <h1>Servers</h1>
-
 <table class="ui very basic table">
-  <thead>
-    <tr>
-      <th>Default</th>
-      <th>Client</th>
-      <th>IP Address</th>
-      <th>Username</th>
-      <th>Delete</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr ng-repeat="server in settings.servers">
-      <td class="collapsing">
-          <div class="ui toggle checkbox">
-              <input type="checkbox" ng-model="server.default" ng-change="toggleDefaultServer(server)"><label></label>
-          </div>
-      </td>
-      <td>{{server.getName()}}</td>
-      <td>{{server.ip}}</td>
-      <td>{{server.user}}</td>
-      <td class="collapsing center aligned">
-          <button class="circular red ui icon mini button" ng-click="removeServer(server)">
-              <i class="icon remove"></i>
-          </button>
-      </td>
-    </tr>
-  </tbody>
+    <thead>
+        <tr>
+            <th>Default</th>
+            <th>Client</th>
+            <th>IP Address</th>
+            <th>Protocol</th>
+            <th>Port</th>
+            <th>Path</th>
+            <th>Username</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="server in settings.servers">
+            <td class="collapsing">
+                <div class="ui toggle checkbox">
+                    <input type="checkbox" ng-model="server.default" ng-change="toggleDefaultServer(server)">
+                    <label></label>
+                </div>
+            </td>
+            <td>{{server.getName()}}</td>
+            <td>{{server.ip}}</td>
+            <td>
+                <div ng-switch="server.proto">
+                    <div class="" ng-switch-when="http">
+                        <div class="ui label">
+                            <i class="unlock alternate icon"></i> {{server.proto}}
+                        </div>
+                    </div>
+                    <div class="" ng-switch-when="https">
+                        <div class="ui label">
+                            <i class="green lock icon"></i> {{server.proto}}
+                        </div>
+                    </div>
+                    <div class="" ng-switch-default>
+                        <div class="ui label">
+                            <i class="help icon"></i> {{server.proto}}
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>{{server.port}}</td>
+            <td>{{server.path}}</td>
+            <td>{{server.user}}</td>
+            <td class="collapsing center aligned">
+                <button class="circular red ui icon mini button" ng-click="removeServer(server)">
+                    <i class="icon remove"></i>
+                </button>
+            </td>
+        </tr>
+    </tbody>
 </table>
