@@ -315,6 +315,10 @@ html, body {
   margin: 0 -.5em 0 !important;
 }
 
+.ui .form .field .checkbox {
+  margin-top: 1em;
+}
+
 /*#########################################*/
 /* Notifications */
 /*#########################################*/

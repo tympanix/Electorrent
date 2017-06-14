@@ -58,7 +58,13 @@
                         <div class="ten wide field">
                             <div class="ui left icon input">
                                 <i class="linkify icon"></i>
-                                <input type="text" name="path" ng-model="server.path" placeholder="Path">
+                                <input type="text" ng-disabled="!advanced" name="path" ng-model="server.path" placeholder="Path">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="ui checkbox">
+                                <input type="checkbox" ng-model="advanced" name="example">
+                                <label></label>
                             </div>
                         </div>
                     </div>
