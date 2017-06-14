@@ -113,7 +113,7 @@ html, body {
     background-color: #FFF;
     line-height: 50px;
     border-bottom: 1px solid #CECECE;
-    z-index: 1000;
+    z-index: 200;
     overflow: visible !important;
 }
 .container > .content {
@@ -219,7 +219,7 @@ html, body {
 .torrent.context.menu {
     display: none;
     position: absolute;
-    z-index: 1000;
+    z-index: 300;
 }
 .torrent.context.menu .ui.vertical.menu {
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
@@ -229,7 +229,7 @@ html, body {
     background-color: #F0F0F0;
     height: 100%;
     width: 100%;
-    z-index: 10000;
+    z-index: 500;
 }
 
 .meta.text {

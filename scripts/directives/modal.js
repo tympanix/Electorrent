@@ -31,7 +31,8 @@ angular.module('torrentApp').directive('modal', function() {
             onHidden: function () {
                 clearForm(element);
             },
-            closable: false
+            closable: false,
+            duration: 150
         });
 
         scope.$on("$destroy", function() {
