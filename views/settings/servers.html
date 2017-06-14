@@ -8,8 +8,8 @@
             <th>IP Address</th>
             <th>Protocol</th>
             <th>Port</th>
-            <th>Path</th>
             <th>Username</th>
+            <th>Rename</th>
             <th>Delete</th>
         </tr>
     </thead>
@@ -43,8 +43,12 @@
                 </div>
             </td>
             <td>{{server.port}}</td>
-            <td>{{server.path}}</td>
             <td>{{server.user}}</td>
+            <td class="collapsing center aligned">
+                <button class="circular blue ui icon mini button" ng-click="openRenameModal(server)">
+                    <i class="icon tag"></i>
+                </button>
+            </td>
             <td class="collapsing center aligned">
                 <button class="circular red ui icon mini button" ng-click="removeServer(server)">
                     <i class="icon remove"></i>
@@ -53,3 +57,11 @@
         </tr>
     </tbody>
 </table>
+
+<modal
+    title="Rename Server"
+    approve="renameServer()"
+    data="renameData"
+    id="renameModal"
+    template-url="./views/modals/rename.html">
+</modal>

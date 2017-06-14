@@ -14,6 +14,11 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         magnet: false
     }
 
+    $scope.renameData = {
+      server: undefined,
+      name: ""
+    }
+
     $scope.appVersion = electron.app.getVersion()
     $scope.nodeVersion = process.versions.node;
     $scope.chromeVersion = process.versions.chrome;
@@ -66,6 +71,21 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
       if ($scope.pathPristine) {
         $scope.server.setPath()
       }
+    }
+
+    $scope.openRenameModal = function(server) {
+      $scope.renameData.server = server
+      $scope.renameData.name = server.getDisplayName()
+      $('#renameModal').modal('show');
+    }
+
+    $scope.renameServer = function() {
+      if (!$scope.renameData.name) {
+        return false
+      }
+      $scope.renameData.server.name = $scope.renameData.name
+      config.renderServerMenu()
+      return true
     }
 
     $scope.resetPath = function() {
