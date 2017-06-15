@@ -7,7 +7,7 @@ branches:
 
 environment:
   GH_TOKEN:
-    secure: HdYHw9jv1Fk2RHmaZ5RKizMi6DD7Ckyu4cPZ7ZofydXaVA0fvCyGm7cSBAP+2PXp
+    secure: pBC9MniqBLQ3ejxutDYFGYeIU13oDK7pFfqiQf+IWCIOkMdB0ystwFLIx7tJ/fRV
 
 cache:
   - node_modules
