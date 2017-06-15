@@ -1,8 +1,7 @@
 // The Electron module
 const electron = require('electron');
 const yargs = require('yargs');
-const util = require('util');
-const client = require('electron-connect').client;
+const is = require('electron-is');
 
 // Handle Squirrel startup parameters
 if(require('./lib/startup')) return
@@ -66,7 +65,10 @@ function createTorrentWindow() {
     });
 
     // Connect to server process
-    client.create(torrentWindow);
+    if (is.dev()) {
+      let client = require('electron-connect').client;
+      client.create(torrentWindow);
+    }
 
 }
 
