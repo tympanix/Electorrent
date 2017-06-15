@@ -35,6 +35,12 @@ angular.module('torrentApp').directive('modal', function() {
             duration: 150
         });
 
+        scope.applyAndClose = function() {
+          if (scope.approve()) {
+            $(element).modal('hide')
+          }
+        }
+
         scope.$on("$destroy", function() {
             element.remove();
         });
