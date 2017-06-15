@@ -31,10 +31,11 @@ Electorrent can connect to the following bittorrent clients:
 
 ## Features
 * Connects to your favorite torrent client
-* Handles the magnet link protocol when visiting websites
+* Handles the magnet link protocol when browsing websites
 * Upload local torrent files by browsing your filesystem (Ctrl/Cmd+O)
 * Drag-and-drop support for torrent files
 * Paste magnet links directly from your clipboard (Ctrl/Cmd+I)
+* Multiple servers
 * Native desktop notifications
 * Easy one click installer using Squirrel framework
 * Automatic updates straight from the GitHub repository!
