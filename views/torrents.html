@@ -97,7 +97,7 @@
                     class="ui single line unstackable selectable fixed torrent resize table">
                     <thead>
                         <tr sorting="changeSorting" mode="$server.id">
-                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name" resize="col.name" sort="col.name">{{::col.name}}</th>
+                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name" resize="col.attribute" sort="col.attribute">{{::col.name}}</th>
                         </tr>
                     </thead>
                     <tbody class="zoom" ng-class="displaySize" torrent-body columns="$server.columns">
