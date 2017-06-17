@@ -8,11 +8,13 @@ angular.module('torrentApp').factory('Column', [function() {
     function Column({
         name,
         enabled = true,
-        attribute
+        attribute,
+        template = ''
     }) {
         this.name = name
         this.enabled = enabled
         this.attribute = attribute
+        this.template = template
     }
 
     /**

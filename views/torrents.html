@@ -97,31 +97,17 @@
                     class="ui single line unstackable selectable fixed torrent resize table">
                     <thead>
                         <tr sorting="changeSorting" mode="$server.id">
-                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.attribute" resize="col.attribute" sort="col.attribute">{{::col.name}}</th>
+                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name" resize="col.attribute" sort="col.attribute">{{::col.name}}</th>
                         </tr>
                     </thead>
-                    <tbody class="zoom" ng-class="displaySize">
+                    <tbody class="zoom" ng-class="displaySize" torrent-body columns="$server.columns">
                         <tr
                             ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit track by torrent.hash"
                             ng-class="{active: torrent.selected}"
                             ng-click="setSelected($event, torrent, $index)"
                             ng-right-click="showContextMenu($event, torrent, $index)"
-                            repeat-done="renderDone">
-                            <td ng-repeat="col in $server.columns | filter:{enabled: true} track by col.attribute" ng-switch="col.attribute">
-                                <span ng-switch-when="decodedName">{{cleanNames ? torrent.decodedName : torrent.name}}</span>
-                                <span ng-switch-when="size">{{torrent.size | bytes}}</span>
-                                <span ng-switch-when="downloadSpeed">{{torrent.downloadSpeed | speed}}</span>
-                                <span ng-switch-when="uploadSpeed">{{torrent.uploadSpeed | speed}}</span>
-                                <span ng-switch-when="percent"><progress torrent="torrent"/></span>
-                                <span ng-switch-when="label">{{torrent.label}}</span>
-                                <span ng-switch-when="dateAdded">{{torrent.dateAdded | date}}</span>
-                                <span ng-switch-when="peersText">{{torrent.peersText()}}</span>
-                                <span ng-switch-when="seedsText">{{torrent.seedsText()}}</span>
-                                <span ng-switch-when="torrentQueueOrder">{{torrent.torrentQueueOrder | torrentQueue}}</span>
-                                <span ng-switch-when="eta">{{torrent.eta | eta}}</span>
-                                <span ng-switch-when="ratio">{{torrent.ratio | torrentRatio}}</span>
-                                <span ng-switch-default>Missing</span>
-                            </td>
+                            repeat-done="renderDone"
+                            torrent-row="torrent">
                         </tr>
                     </tbody>
                 </table>
