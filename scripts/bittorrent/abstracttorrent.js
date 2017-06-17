@@ -227,18 +227,86 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
         }
     }
 
-    AbstractTorrent.COL_NAME = new Column({name: 'Name', attribute: 'decodedName'})
-    AbstractTorrent.COL_SIZE = new Column({name: 'Size', attribute: 'size'})
-    AbstractTorrent.COL_DOWNSPEED = new Column({name: 'Down', attribute: 'downloadSpeed'})
-    AbstractTorrent.COL_UPSPEED = new Column({name: 'Up', attribute: 'uploadSpeed'})
-    AbstractTorrent.COL_PROGRESS = new Column({name: 'Progress', attribute: 'percent'})
-    AbstractTorrent.COL_LABEL = new Column({name: 'Label', attribute: 'label'})
-    AbstractTorrent.COL_DATEADDED = new Column({name: 'Date Added', attribute: 'dateAdded'})
-    AbstractTorrent.COL_PEERS = new Column({name: 'Peers', attribute: 'peersText', enabled: false})
-    AbstractTorrent.COL_SEEDS = new Column({name: 'Seeds', attribute: 'seedsText', enabled: false})
-    AbstractTorrent.COL_QUEUE = new Column({name: 'Queue', attribute: 'torrentQueueOrder', enabled: false})
-    AbstractTorrent.COL_ETA = new Column({name: 'ETA', attribute: 'eta', enabled: false})
-    AbstractTorrent.COL_RATIO = new Column({name: 'Ratio', attribute: 'ratio', enabled: false})
+    AbstractTorrent.COL_NAME = new Column({
+      name: 'Name',
+      template: '{{cleanNames ? torrent.decodedName : torrent.name}}',
+      attribute: 'decodedName',
+      sort: alphabetical
+    })
+
+    AbstractTorrent.COL_SIZE = new Column({
+      name: 'Size',
+      template: '{{torrent.size | bytes}}',
+      attribute: 'size'
+    })
+
+    AbstractTorrent.COL_DOWNSPEED = new Column({
+      name: 'Down',
+      template: '{{torrent.downloadSpeed | speed}}',
+      attribute: 'downloadSpeed'
+    })
+
+    AbstractTorrent.COL_UPSPEED = new Column({
+      name: 'Up',
+      template: '{{torrent.uploadSpeed | speed}}',
+      attribute: 'uploadSpeed'
+    })
+
+    AbstractTorrent.COL_PROGRESS = new Column({
+      name: 'Progress',
+      template: '<div progress="torrent"></div>',
+      attribute: 'percent'
+    })
+
+    AbstractTorrent.COL_LABEL = new Column({
+      name: 'Label',
+      template: '{{torrent.label}}',
+      attribute: 'label',
+      sort: alphabetical
+    })
+
+    AbstractTorrent.COL_DATEADDED = new Column({
+      name: 'Date Added',
+      template: '{{torrent.dateAdded | date}}',
+      attribute: 'dateAdded'
+    })
+
+    AbstractTorrent.COL_PEERS = new Column({
+      name: 'Peers',
+      enabled: false,
+      teplate: '{{torrent.peersText()}}',
+      attribute: 'peersText'
+    })
+
+    AbstractTorrent.COL_SEEDS = new Column({
+      name: 'Seeds',
+      enabled: false,
+      template: '{{torrent.seedsText()}}',
+      attribute: 'seedsText'
+    })
+
+    AbstractTorrent.COL_QUEUE = new Column({
+      name: 'Queue',
+      enabled: false,
+      template: '{{torrent.torrentQueueOrder | torrentQueue}}',
+      attribute: 'torrentQueueOrder',
+      sort: naturalNumberAsc
+    })
+
+    AbstractTorrent.COL_ETA = new Column({
+      name: 'ETA',
+      enabled: false,
+      template: '{{torrent.eta | eta}}',
+      attribute: 'eta',
+      sort: naturalNumberAsc
+    })
+
+    AbstractTorrent.COL_RATIO = new Column({
+      name: 'Ratio',
+      enabled: false,
+      template: '{{torrent.ratio | torrentRatio}}',
+      attribute: 'ratio'
+    })
 
     AbstractTorrent.COLUMNS = [
         AbstractTorrent.COL_NAME,
