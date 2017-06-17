@@ -110,7 +110,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
                 startTimer();
                 $scope.connectionLost = false;
             }).catch(function() {
-                console.log("TIMER STOP");
+                $notify.alert("Connection lost", "Trying to reconnect")
                 $scope.connectionLost = true;
                 startReconnect();
             });
@@ -119,15 +119,14 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     function startReconnect() {
         $notify.disableAll();
-        var server = config.getServer();
-        if (!server) {
-          console.error("No server")
-          return
-        }
         reconnect = $timeout(function() {
-            $rootScope.$btclient.connect(server)
+            $rootScope.$server.connect()
             .then(function() {
+                return $scope.update(true)
+            }).then(function() {
                 $notify.enableAll();
+                $notify.ok("Reconnected", "The connection has been reestablished")
+                $scope.connectionLost = false;
                 startTimer(true);
             }).catch(function() {
                 startReconnect()
