@@ -9,8 +9,7 @@
             <th>Protocol</th>
             <th>Port</th>
             <th>Username</th>
-            <th>Rename</th>
-            <th>Delete</th>
+            <th class="center aligned">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -45,11 +44,12 @@
             <td>{{server.port}}</td>
             <td>{{server.user}}</td>
             <td class="collapsing center aligned">
+                <button ng-disabled="$first" class="circular green ui icon mini button" ng-click="moveServerUp(server)">
+                    <i class="icon arrow up"></i>
+                </button>
                 <button class="circular blue ui icon mini button" ng-click="openRenameModal(server)">
                     <i class="icon tag"></i>
                 </button>
-            </td>
-            <td class="collapsing center aligned">
                 <button class="circular red ui icon mini button" ng-click="removeServer(server)">
                     <i class="icon remove"></i>
                 </button>
