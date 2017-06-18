@@ -6,9 +6,12 @@
     <div class="content">
         <form class="ui form" ng-submit="applyAndClose()">
             <div class="field">
-                <div class="ui left icon input">
+                <div class="ui left icon action input">
                     <i class="user icon"></i>
                     <input type="text" name="servername" maxlength="36" ng-model="data.name" placeholder="Server Name">
+                    <a class="ui icon button" ng-click="data.reset()">
+                        <i class="refresh icon"></i>
+                    </a>
                 </div>
             </div>
         </form>
