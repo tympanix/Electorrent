@@ -1,0 +1,17 @@
+/* Notifications in the upper right corner */
+.notifications {
+    z-index: 100000;
+}
+/* Settings, welcome, choose-a-server ect. */
+.overlay {
+    z-index: 500;
+}
+/* Disconnect, drag-and-drop ect. */
+.popup {
+    z-index: 400;
+}
+/* Right click menu */
+.context.menu {
+    z-index: 300;
+}
+
