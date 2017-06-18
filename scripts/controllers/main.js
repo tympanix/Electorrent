@@ -55,6 +55,9 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     function connectToServer(server){
         pageLoading()
+        $scope.$broadcast('stop:torrents')
+        $rootScope.$btclient = null
+        $rootScope.$server = null
         $bittorrent.setServer(server)
         $scope.statusText = "Connecting to " + $rootScope.$btclient.name;
 
@@ -62,6 +65,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         .then(function(){
             $scope.statusText = "Loading Torrents"
             config.updateServer(server)
+            $scope.$broadcast('wipe:torrents')
             pageTorrents();
             $scope.$broadcast('start:torrents', true /*full update*/)
             requestMagnetLinks();
@@ -106,7 +110,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
 
     function pageLoading() {
         $scope.showLoading = true;
-        $
     }
 
     function pageSettings(settingsPage){
@@ -137,18 +140,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     })
 
     $scope.$on('connect:server', function(event, server) {
-        console.log("Connecting to server", server.getNameAtAddress());
-        $scope.statusText = "Connecting to " + server.getName();
-        $scope.$broadcast('stop:torrents')
-        pageLoading()
-        pageTorrents()
-        // Timeout for aesthetic reasons
-        $timeout(function() {
-            $scope.$broadcast('wipe:torrents')
-            $rootScope.$btclient = null
-            $rootScope.$server = null
-            connectToServer(server)
-        }, TRANSITION_TIME)
+        connectToServer(server)
     })
 
     $scope.$on('show:settings', function() {
