@@ -76,7 +76,20 @@
     </div>
 
     <div class="main-panel">
-        <div action-header actions="$btclient.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
+        <div class="action header">
+            <div class="actions left">
+                <div action-header actions="$btclient.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
+            </div>
+            <div class="actions right">
+                <div class="ui fluid search">
+                    <div class="ui icon input">
+                        <input search class="prompt" type="text" placeholder="Search torrents..."
+                            ng-model="filters.search" ng-change="filterBySearch()" ng-model-options="filters.options">
+                        <i class="search icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="main-content">
             <div ng-if="showDragAndDrop" class="popup">
                 <div class="content">

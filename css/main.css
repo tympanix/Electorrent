@@ -116,6 +116,24 @@ html, body {
     z-index: 200;
     overflow: visible !important;
 }
+.action.header > div {
+  display: inline-block;
+}
+.action.header .actions.left {
+  float: left;
+}
+.action.header .actions.right {
+  overflow: hidden;
+  width: auto;
+  display: block;
+}
+.action.header .actions.right .input {
+  width: 100%;
+  float: right;
+  max-width: 250px;
+  min-width: 50px;
+  margin: 6px 0;
+}
 .container > .content {
     position: absolute;
     right: 0;
