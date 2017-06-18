@@ -33,21 +33,6 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         })
     }
 
-    // Angular wrapper for saving to config
-    function put(key, value) {
-        var q = $q.defer();
-        config.put(key, value, function(err) {
-            if(err) q.reject(err)
-            else q.resolve();
-        });
-        return q.promise;
-    }
-
-    // Angular wrapper for getting config
-    function get(value) {
-        return config.get(value);
-    }
-
     function isDefault(server) {
         return server.default === true
     }
