@@ -294,7 +294,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             });
     };
 
-    $scope.doContextAction = function(action, name) {
+    $scope.doContextAction = function(action) {
         action.call($rootScope.$btclient, selected)
         .then(function(){
             $scope.update();

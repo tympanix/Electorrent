@@ -1,7 +1,6 @@
 
 angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "$bittorrent", "electron", "configService", "notificationService", function ($rootScope, $scope, $timeout, $bittorrent, electron, config, $notify) {
     const MAX_LOADING_TIME = 10000 // 10 seconds
-    const TRANSITION_TIME = 100 // 100 milliseconds
 
     const PAGE_SETTINGS = 'settings';
     const PAGE_WELCOME = 'welcome';
@@ -56,6 +55,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     function connectToServer(server){
         pageLoading()
         $scope.$broadcast('stop:torrents')
+        $scope.$broadcast('wipe:torrents')
         $rootScope.$btclient = null
         $rootScope.$server = null
         $bittorrent.setServer(server)
@@ -65,7 +65,6 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         .then(function(){
             $scope.statusText = "Loading Torrents"
             config.updateServer(server)
-            $scope.$broadcast('wipe:torrents')
             pageTorrents();
             $scope.$broadcast('start:torrents', true /*full update*/)
             requestMagnetLinks();
