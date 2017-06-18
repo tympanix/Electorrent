@@ -1,5 +1,11 @@
 var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll", "hc.marked", "xml-rpc", "ui.sortable"]);
 
+// Configure the application
+torrentApp.config(['$animateProvider', function($animateProvider) {
+        $animateProvider.classNameFilter(/\banimated\b|\btransition\b/);
+    }
+]);
+
 // Register torrent clients
 torrentApp.constant('$btclients', {
     'utorrent': {
