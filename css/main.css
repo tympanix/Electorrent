@@ -302,7 +302,7 @@ html, body {
 }
 .overlay.ng-hide-add-active, .overlay.ng-hide-remove-active {
     /* the transition is defined in the active class */
-    -webkit-transition: 0.24s cubic-bezier(.24, .78, .35, .99) all;
+    -webkit-transition: 0.10s cubic-bezier(.24, .78, .35, .99) all;
 }
 .overlay.ng-hide-add {
     opacity: 1;
