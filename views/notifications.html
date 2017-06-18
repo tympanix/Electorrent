@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <div ng-controller="notificationsController">
     <div class="notifications container">
-        <div class="notification" ng-repeat="notification in notifications">
+        <div class="animated notification" ng-repeat="notification in notifications">
             <div class="ui message" ng-class="notification.type">
                 <i class="close icon" ng-click="close($index)"></i>
                 <div class="header">
