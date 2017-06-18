@@ -17,7 +17,6 @@ angular.module("torrentApp").directive('actionHeader', ['$rootScope', '$compile'
 
     function compile(element) {
         actionHeader = element;
-        element.addClass('action header');
         return link;
     }
 

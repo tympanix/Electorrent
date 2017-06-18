@@ -27,7 +27,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.cleanNames = settings.ui.cleanNames;
 
     $scope.filters = {
-        status: 'all'
+        status: 'all',
+        search: '',
+        options: { debounce: 150 }
     };
 
     $rootScope.$on('show:draganddrop', function(event, show) {
@@ -155,6 +157,14 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         deselectAll();
         lastSelected = null;
         $scope.filters.status = status;
+        $scope.torrentLimit = LIMIT;
+        refreshTorrents();
+    }
+
+    $scope.filterBySearch = function(search){
+        search = search || $scope.filters.search
+        deselectAll()
+        lastSelected = null;
         $scope.torrentLimit = LIMIT;
         refreshTorrents();
     }
@@ -341,30 +351,51 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         }
     }
 
-    function torrentFilter(status, label, tracker){
+    function trackerFilter(filterTracker) {
+      return function(torrent) {
+        return torrent.trackers && torrent.trackers.some((tracker) => {
+          return tracker && tracker.includes(filterTracker)
+        })
+      }
+    }
+
+    function searchFilter(search) {
+      return function(torrent) {
+        return torrent.name.toLowerCase().includes(search.toLowerCase())
+      }
+    }
+
+    function torrentFilter(status, label, tracker, search){
         var filterStatus = status || $scope.filters.status;
         var filterLabel = label || $scope.filters.label;
         var filterTracker = tracker || $scope.filters.tracker;
+        var filterSearch = search || $scope.filters.search;
+
+        var filters = [];
+
+        if (filterStatus) {
+            filters.push(function(torrent) {
+              return statusFilter(torrent, filterStatus)
+            });
+        }
+
+        if (filterLabel) {
+            filters.push(function(torrent) {
+              return torrent.label === filterLabel
+            })
+        }
+
+        if (filterSearch) {
+            filters.push(searchFilter(filterSearch))
+        }
+
+        if (filterTracker) {
+            filters.push(trackerFilter(filterTracker))
+        }
 
         return function(torrent){
-            var keep = [];
-
-            if (filterStatus) {
-                keep.push(statusFilter(torrent, filterStatus));
-            }
-
-            if (filterLabel) {
-                keep.push(torrent.label === filterLabel)
-            }
-
-            if (filterTracker) {
-                keep.push(torrent.trackers && torrent.trackers.some((tracker) => {
-                    return tracker && tracker.includes(filterTracker)
-                }))
-            }
-
-            return keep.every(function(shouldkeep) {
-                return shouldkeep;
+            return filters.every(function(filter) {
+                return filter(torrent);
             });
         }
     }
