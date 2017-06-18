@@ -171,6 +171,12 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         electron.menu.setApplicationMenu(menu)
     }
 
+    function serverAccelerator(index) {
+      if (index > 0 && index <= 10) {
+        return 'CmdOrCtrl+'+ (index % 10)
+      }
+    }
+
     function renderServerMenuOptions(menu, servers) {
         if (!$rootScope.$server) {
             menu.append(new MenuItem({
@@ -182,7 +188,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         servers.forEach((server, index) => {
             menu.append(new MenuItem({
                 label: server.getDisplayName(),
-                accelerator: 'CmdOrCtrl+'+(index+1),
+                accelerator: serverAccelerator(index+1),
                 id: server.id,
                 click: () => $rootScope.$broadcast('connect:server', server),
                 checked: server.id === $rootScope.$server.id,
