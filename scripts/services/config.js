@@ -158,6 +158,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
         serverMenu.clear()
         serverMenu.append(new MenuItem({
             label: 'Add new server...',
+            accelerator: 'CmdOrCtrl+N',
             click: () => $rootScope.$broadcast('add:server'),
         }))
         serverMenu.append(new MenuItem({
@@ -178,9 +179,10 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
             }))
             return
         }
-        servers.forEach((server) => {
+        servers.forEach((server, index) => {
             menu.append(new MenuItem({
                 label: server.getDisplayName(),
+                accelerator: 'CmdOrCtrl+'+(index+1),
                 id: server.id,
                 click: () => $rootScope.$broadcast('connect:server', server),
                 checked: server.id === $rootScope.$server.id,
