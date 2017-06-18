@@ -298,7 +298,7 @@ html, body {
 .overlay.ng-hide-add, .overlay.ng-hide-remove {
     /* this is required as of 1.3x to properly
     apply all styling in a show/hide animation */
-    -webkit-transition: 0s cubic-bezier(.24, .78, .35, .99) all;
+    -webkit-transition: 0.10s cubic-bezier(.24, .78, .35, .99) all;
 }
 .overlay.ng-hide-add-active, .overlay.ng-hide-remove-active {
     /* the transition is defined in the active class */
