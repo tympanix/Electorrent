@@ -16,7 +16,10 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     $scope.renameData = {
       server: undefined,
-      name: ""
+      name: "",
+      reset: function() {
+        this.name = this.server.getNameAtAddress()
+      }
     }
 
     $scope.appVersion = electron.app.getVersion()
