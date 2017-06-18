@@ -88,6 +88,15 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
       return true
     }
 
+    $scope.moveServerUp = function(server) {
+      var index = $scope.settings.servers.indexOf(server)
+      if (index && index > 0) {
+        var tmp = $scope.settings.servers[index-1]
+        $scope.settings.servers[index-1] = server
+        $scope.settings.servers[index] = tmp
+      }
+    }
+
     $scope.resetPath = function() {
       $scope.server.setPath()
       $scope.pathPristine = true
@@ -120,6 +129,7 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
             return writeSettings()
         }).then(function() {
             $scope.close();
+            config.renderServerMenu()
             $rootScope.$broadcast('new:settings', $scope.settings)
             $notify.ok("Saved Settings", "You settings has been updated")
         }).catch(function(err) {
