@@ -130,40 +130,44 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
             return $http.post(`${this.url('/command')}/${command}`);
         }
 
-        this.pause = function(hashes) {
-            return this.doAction('pause', hashes);
+        this.pause = function(torrents) {
+            return this.doAction('pause', torrents);
         }
 
-        this.start = function(hashes) {
-            return this.doAction('resume', hashes);
+        this.start = function(torrents) {
+            return this.doAction('resume', torrents);
         }
 
-        this.delete = function(hashes) {
-            return this.doMultiAction('delete', hashes);
+        this.delete = function(torrents) {
+            return this.doMultiAction('delete', torrents);
         }
 
-        this.deleteWithData = function(hashes) {
-            return this.doMultiAction('deletePerm', hashes);
+        this.deleteWithData = function(torrents) {
+            return this.doMultiAction('deletePerm', torrents);
         }
 
-        this.recheck = function(hashes) {
-            return this.doAction('recheck', hashes);
+        this.recheck = function(torrents) {
+            return this.doAction('recheck', torrents);
         }
 
-        this.queueUp = function(hashes) {
-            return this.doMultiAction('increasePrio', hashes);
+        this.queueUp = function(torrents) {
+            return this.doMultiAction('increasePrio', torrents);
         }
 
-        this.queueDown = function(hashes) {
-            return this.doMultiAction('decreasePrio', hashes);
+        this.queueDown = function(torrents) {
+            return this.doMultiAction('decreasePrio', torrents);
         }
 
-        this.queueTop = function(hashes) {
-            return this.doMultiAction('topPrio', hashes);
+        this.queueTop = function(torrents) {
+            return this.doMultiAction('topPrio', torrents);
         }
 
-        this.queueBottom = function(hashes) {
-            return this.doMultiAction('bottomPrio', hashes);
+        this.queueBottom = function(torrents) {
+            return this.doMultiAction('bottomPrio', torrents);
+        }
+
+        this.sequentialDownload = function(torrents) {
+            return this.doMultiAction('toggleSequentialDownload', torrents)
         }
 
         this.pauseAll = function() {
@@ -300,6 +304,13 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
                 label: 'Queue Bottom',
                 click: this.queueBottom,
                 icon: 'chevron circle down'
+            },
+            {
+                label: 'Sequential Download',
+                click: this.sequentialDownload,
+                check: function(torrent) {
+                    return torrent.sequentialDownload
+                }
             },
             {
                 label: 'Remove',

@@ -22,6 +22,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.torrentLimit = LIMIT;
     $scope.labels = [];
     $scope.trackers = []
+    $scope.selected = selected
 
     $scope.filters = {
         status: 'all',
@@ -190,7 +191,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         if (!torrent.selected){
             singleSelect(torrent);
         }
-        $scope.contextMenu.show(event);
+        $scope.contextMenu.show(event, selected);
     };
 
     $scope.numInFilter = function(status) {
