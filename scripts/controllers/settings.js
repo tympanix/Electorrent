@@ -38,13 +38,22 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     loadAllSettings();
 
     function loadAllSettings() {
-        $scope.settings = config.getAllSettings();
-        $scope.server = $bittorrent.getServer();
+        $scope.settings = config.getAllSettingsCopy();
+        loadServerReference()
+
         serverCopy = angular.copy($scope.server)
 
         $scope.general = {
             magnets: electron.app.isDefaultProtocolClient('magnet')
         }
+    }
+
+    function loadServerReference() {
+      if ($rootScope.$server) {
+        $scope.server = $scope.settings.servers.find(function(s) {
+          return s.id === $rootScope.$server.id
+        });
+      }
     }
 
     function subscribeToMagnets() {

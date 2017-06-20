@@ -90,7 +90,7 @@
                 </div>
             </div>
         </div>
-        <div class="main-content">
+        <div class="main-content" fixed-header="settings.ui.fixedHeader">
             <div ng-if="showDragAndDrop" class="popup">
                 <div class="content">
                     <h2 class="ui center aligned icon header">
@@ -102,18 +102,13 @@
             <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
                 <table
                     id="torrentTable"
-                    ng-class="{'compact': displayCompact}"
+                    ng-class="{'compact': settings.ui.displayCompact}"
                     resizable profile="$server.id"
                     columns="$server.columns"
-                    mode="resizeMode"
+                    mode="settings.ui.resizeMode"
                     container=".main-content"
                     class="ui single line unstackable selectable fixed torrent resize table">
-                    <thead>
-                        <tr sorting="changeSorting" mode="$server.id">
-                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name" resize="col.attribute" sort="col.attribute">{{::col.name}}</th>
-                        </tr>
-                    </thead>
-                    <tbody class="zoom" ng-class="displaySize" torrent-body columns="$server.columns">
+                    <tbody class="zoom" ng-class="settings.ui.displaySize" torrent-body columns="$server.columns">
                         <tr
                             ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit track by torrent.hash"
                             ng-class="{active: torrent.selected}"
@@ -123,6 +118,11 @@
                             torrent-row="torrent">
                         </tr>
                     </tbody>
+                    <thead>
+                        <tr sorting="changeSorting" mode="$server.id">
+                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name" resize="col.attribute" sort="col.attribute">{{::col.name}}</th>
+                        </tr>
+                    </thead>
                 </table>
             </div>
         </div>
