@@ -175,9 +175,11 @@ angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__Torre
      * Represents the actions available in the context menu. Can be customized to your liking or
      * to better accommodate your bittorrent client. Every action must have a click function implemented.
      * Each element has an:
-     *      label [string]: The name of the action
-     *      click [function]: The function to be executed when clicked
-     *      icon [string]: The icon of the action. See here: http://semantic-ui.com/elements/icon.html
+     *      label [string]:     The name of the action
+     *      click [function]:   The function to be executed when clicked
+     *      icon [string]:      The icon of the action. See here: http://semantic-ui.com/elements/icon.html
+     *      check [function]:   Displays a checkbox instead of an icon. The function is a predicate which
+     *                          has to hold for all selected torrents, for the checkbox to be checked.
      */
     this.contextMenu = [
         {

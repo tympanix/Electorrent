@@ -49,7 +49,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             statusMessage: undefined, // Not supplied
             dateAdded: (data.addition_date || data.added_on) * 1000 || undefined,
             dateCompleted: (data.completion_date || data.completion_on) * 1000 || undefined,
-            savePath: data.savePath,
+            savePath: data.save_path,
         });
 
         this.state = data.state
