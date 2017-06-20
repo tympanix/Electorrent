@@ -128,5 +128,12 @@
         </div>
     </div>
 
-    <context-menu bind="contextMenu" menu="$btclient.contextMenu" click="doContextAction" debug="debug" id="contextmenu"></context-menu>
+    <context-menu
+        id="contextmenu"
+        items="selected"
+        bind="contextMenu"
+        menu="$btclient.contextMenu"
+        click="doContextAction"
+        debug="debug">
+    </context-menu>
 </div>

@@ -272,6 +272,11 @@ html, body {
     margin: 10vmin;
     padding: 0px;
 }
+.menu .item .checkbox {
+    float: right;
+    margin: 0 0 0 .5em;
+    width: 1.18em;
+}
 
 ::-webkit-scrollbar {
     background: none;

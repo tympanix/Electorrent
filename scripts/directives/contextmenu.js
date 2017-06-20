@@ -1,6 +1,7 @@
 angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document', '$window', 'electron', function($rootScope, $document, $window, electron) {
 
     var contextMenu = null;
+    var checkboxes = []
 
     return {
         restrict: 'E',
@@ -8,7 +9,8 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
             menu: '=',
             bind: '=',
             click: '=',
-            debug: '=?'
+            debug: '=?',
+            items: '='
         },
         compile: compile
     };
@@ -23,6 +25,7 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
         if (!scope.menu) return;
 
         element.empty();
+        checkboxes = []
 
         var list = angular.element('<div class="ui vertical menu"></div>');
 
@@ -60,6 +63,8 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
 
         if (item.icon) {
             addIcon(menuItem, item.icon);
+        } else if (item.check) {
+            addCheckbox(menuItem, item.check);
         }
 
         menuItem.bind('click', function() {
@@ -69,6 +74,19 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
 
         menuItem.append(item.label);
         element.append(menuItem);
+    }
+
+    function addCheckbox(item, predicate) {
+        var check = angular.element('<div class="ui checkbox"></div>')
+        var checkbox = angular.element('<input type="checkbox">')
+        var label = angular.element('<label></label>')
+        check.append(checkbox)
+        check.append(label)
+        item.append(check)
+        checkboxes.push({
+            checkbox: checkbox[0],
+            predicate: predicate
+        })
     }
 
     function addIcon(item, iconName) {
@@ -115,8 +133,8 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
 
         // Bind show function to scope variable
         scope.bind = {
-            show: showContextMenu(element),
-            hide: hideContextMenu(element)
+            show: showContextMenu(scope, element),
+            hide: hideContextMenu(scope, element)
         };
 
         // Remove context menu when user clicks anywhere not in the context menu
@@ -143,6 +161,13 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
         });
     }
 
+    function updateCheckboxes(scope, items) {
+        checkboxes.forEach(item => {
+            item.checkbox.checked =
+                items.every(i => item.predicate(i))
+        })
+    }
+
     function bindCloseOperations(element) {
         // Remove context menu when the user scrolls the main content
         $('.main-content').one('scroll', function() {
@@ -155,9 +180,10 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
         });
     }
 
-    function showContextMenu(element){
-        return function(event){
+    function showContextMenu(scope, element){
+        return function(event, items){
             bindCloseOperations(element);
+            updateCheckboxes(scope, items)
 
             var totWidth = $(window).width();
             var totHeight = $(window).height();
@@ -182,7 +208,7 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
         };
     }
 
-    function hideContextMenu(element) {
+    function hideContextMenu(scope, element) {
         return function(){
             $(element).hide();
         };
