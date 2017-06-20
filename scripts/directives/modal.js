@@ -31,6 +31,9 @@ angular.module('torrentApp').directive('modal', function() {
             onHidden: function () {
                 clearForm(element);
             },
+            onShow: function() {
+                $(element).modal('refresh')
+            },
             closable: false,
             duration: 150
         });
