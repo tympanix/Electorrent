@@ -21,3 +21,14 @@ angular.module("torrentApp").filter('torrentRatio', function() {
         }
     }
 });
+
+angular.module("torrentApp").filter('torrentTracker', function() {
+    const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/
+
+    return function(tracker) {
+        if (!tracker) return ''
+        var match = tracker.match(URL_REGEX)
+        if (!match) return ''
+        return match[1]
+    }
+});

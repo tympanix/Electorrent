@@ -229,44 +229,51 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
 
     AbstractTorrent.COL_NAME = new Column({
       name: 'Name',
+      enabled: true,
       template: '{{cleanNames ? torrent.decodedName : torrent.name}}',
       attribute: 'decodedName',
-      sort: alphabetical
+      sort: Column.ALPHABETICAL
     })
 
     AbstractTorrent.COL_SIZE = new Column({
       name: 'Size',
+      enabled: true,
       template: '{{torrent.size | bytes}}',
       attribute: 'size'
     })
 
     AbstractTorrent.COL_DOWNSPEED = new Column({
       name: 'Down',
+      enabled: true,
       template: '{{torrent.downloadSpeed | speed}}',
       attribute: 'downloadSpeed'
     })
 
     AbstractTorrent.COL_UPSPEED = new Column({
       name: 'Up',
+      enabled: true,
       template: '{{torrent.uploadSpeed | speed}}',
       attribute: 'uploadSpeed'
     })
 
     AbstractTorrent.COL_PROGRESS = new Column({
       name: 'Progress',
+      enabled: true,
       template: '<div progress="torrent"></div>',
       attribute: 'percent'
     })
 
     AbstractTorrent.COL_LABEL = new Column({
       name: 'Label',
+      enabled: true,
       template: '{{torrent.label}}',
       attribute: 'label',
-      sort: alphabetical
+      sort: Column.ALPHABETICAL
     })
 
     AbstractTorrent.COL_DATEADDED = new Column({
       name: 'Date Added',
+      enabled: true,
       template: '{{torrent.dateAdded | date}}',
       attribute: 'dateAdded'
     })
@@ -290,7 +297,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
       enabled: false,
       template: '{{torrent.torrentQueueOrder | torrentQueue}}',
       attribute: 'torrentQueueOrder',
-      sort: naturalNumberAsc
+      sort: Column.NATURAL_NUMBER_ASC
     })
 
     AbstractTorrent.COL_ETA = new Column({
@@ -298,7 +305,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
       enabled: false,
       template: '{{torrent.eta | eta}}',
       attribute: 'eta',
-      sort: naturalNumberAsc
+      sort: Column.NATURAL_NUMBER_ASC
     })
 
     AbstractTorrent.COL_RATIO = new Column({
