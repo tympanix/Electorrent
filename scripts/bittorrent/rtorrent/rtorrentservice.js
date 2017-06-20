@@ -318,8 +318,8 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     this.extraColumns = [
         new Column({
             name: 'Tracker',
-            attribute: 'trackers',
-            template: '{{ torrent.trackers[0] | torrentTracker }}',
+            attribute: 'tracker',
+            template: '{{ torrent.tracker | torrentTracker }}',
             sort: Column.ALPHABETICAL
         })
     ]

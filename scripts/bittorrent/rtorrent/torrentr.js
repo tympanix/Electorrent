@@ -82,7 +82,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         this.peersInSwarm = _.reduce(_.pluck(trackerArray, 'get_scrape_incomplete'), sum, 0)
         this.seedsInSwarm = _.reduce(_.pluck(trackerArray, 'get_scrape_complete'), sum, 0)
         this.trackers = _.pluck(trackerArray, 'get_url')
-        //this.tracker = $filter('torrentTracker')(this.trackers && this.trackers[0])
+        this.tracker = this.trackers && this.trackers[0]
     }
 
     function sum(sum, item) {
