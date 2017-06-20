@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('search', ['$document', function($document) {
+angular.module("torrentApp").directive('search', ['$rootScope', '$document', function($rootScope, $document) {
     return {
         restrict: 'A',
         link: link
@@ -6,12 +6,9 @@ angular.module("torrentApp").directive('search', ['$document', function($documen
 
 
     function link(scope, element /*, attrs*/ ) {
-        $document.on('keyup', function(e) {
-          var key = String.fromCharCode(e.which);
-          if (e.ctrlKey && key === 'F') {
+        $rootScope.$on('search:torrent', () => {
             element.focus()
-          }
-        })
+        });
     }
 
 }]);

@@ -54,6 +54,13 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bit
                     type: 'separator'
                 },
                 {
+                    label: 'Find',
+                    accelerator: 'CmdOrCtrl+F',
+                    click() {
+                        $rootScope.$broadcast('search:torrent');
+                    }
+                },
+                {
                     label: 'Cut',
                     accelerator: 'CmdOrCtrl+X',
                     role: 'cut'
