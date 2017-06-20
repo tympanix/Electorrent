@@ -91,6 +91,7 @@
         "angular": false,
         "$": false,
         "moment": false,
-        "_": false
+        "_": false,
+        "Fuse": false
     }
 }

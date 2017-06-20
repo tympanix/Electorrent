@@ -43,7 +43,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         ]
     };
 
-    var fuse = new Fuse($scope.arrayTorrents, fuseOptions); // "list" is the item array
+    var fuse = new Fuse($scope.arrayTorrents, fuseOptions)
 
     $rootScope.$on('show:draganddrop', function(event, show) {
         $scope.showDragAndDrop = show;
