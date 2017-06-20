@@ -40,7 +40,7 @@ angular.module("torrentApp").directive('torrentBody', ['$document', '$compile', 
       }
     }
 
-    function compile(element) {
+    function compile(/*element, attr, ctrl*/) {
         return link;
     }
 
@@ -49,14 +49,14 @@ angular.module("torrentApp").directive('torrentBody', ['$document', '$compile', 
 
       scope.$watch(function() {
         return ctrl.columns
-      }, function(newVal, oldVal) {
+      }, function() {
         ctrl.render()
       }, true)
     }
 
 }]);
 
-angular.module("torrentApp").directive('torrentRow', ['$compile', function($compile) {
+angular.module("torrentApp").directive('torrentRow', [function() {
     return {
         restrict: 'A',
         require: '^^torrentBody',
@@ -66,14 +66,12 @@ angular.module("torrentApp").directive('torrentRow', ['$compile', function($comp
         }
     };
 
-    function compile(element, attr, ctrl) {
+    function compile(/*element, attr, ctrl*/) {
       return link
     }
 
     function link(scope, element, attr, ctrl){
       scope.render = function() {
-        //let link = $compile(ctrl.$template)
-        //var content = link(scope)
         ctrl.$link(scope, function(clone) {
           element.append(clone)
         })
