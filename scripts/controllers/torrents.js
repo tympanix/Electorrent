@@ -171,7 +171,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.filterBySearch = function(search){
-        search = search || $scope.filters.search
+        $scope.isSearching = true
         deselectAll()
         lastSelected = null;
         $scope.torrentLimit = LIMIT;
@@ -426,6 +426,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         torrents = torrents.filter(torrentFilter());
         torrents = fuzzySearch(torrents);
         torrents = torrents.sort(torrentSorter());
+        $scope.isSearching = false
         $scope.arrayTorrents = torrents;
     }
 
