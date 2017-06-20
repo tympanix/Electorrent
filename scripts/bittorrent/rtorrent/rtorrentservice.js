@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "notificationService", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, $notify) {
+angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "notificationService", "Column", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, $notify, Column) {
 
-    const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9]+\.)*((?:[a-z0-9]+\.)[a-z]+)/
+    const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -310,6 +310,19 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * Whether the client supports sorting by trackers or not
      */
     this.enableTrackerFilter = true
+
+    /**
+     * Provides the option to include extra columns for displaying data. This may concern columns
+     * which are specific to this client. The extra columns will be merged with the default columns.
+     */
+    this.extraColumns = [
+        new Column({
+            name: 'Tracker',
+            attribute: 'trackers',
+            template: '{{ torrent.trackers[0] | torrentTracker }}',
+            sort: Column.ALPHABETICAL
+        })
+    ]
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.

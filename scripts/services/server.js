@@ -20,7 +20,7 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
                 this.client = client
                 this.path = path
                 this.lastused = -1
-                this.columns = defaultColumns()
+                this.columns = this.defaultColumns()
             }
             this.isConnected = false
         }
@@ -37,7 +37,7 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
             this.path = data.path || ''
             this.default = data.default
             this.lastused = data.lastused
-            this.columns = parseColumns(data.columns)
+            this.columns = this.parseColumns(data.columns)
         };
 
         Server.prototype.json = function() {
@@ -159,10 +159,9 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
             }
         }
 
-        function parseColumns(data) {
-            if(!data || data.length === 0) return defaultColumns()
-            let columns = []
-            angular.copy(Torrent.COLUMNS, columns)
+        Server.prototype.parseColumns = function(data) {
+            let columns = this.defaultColumns()
+            if(!data || data.length === 0) return columns
             columns.sort(zipsort(columns, data))
             columns.forEach((column) => {
                 column.enabled = data.some((entry) => (entry === column.name))
@@ -170,11 +169,24 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
             return columns
         }
 
-        function defaultColumns() {
+        Server.prototype.defaultColumns = function() {
             let columns = []
             angular.copy(Torrent.COLUMNS, columns)
+            columns = this.addCustomColumns(columns)
             return columns
         }
+
+        Server.prototype.addCustomColumns = function (columns) {
+            if (this.client) {
+                let client = $bittorrent.getClient(this.client)
+                columns = _.union(columns, client.extraColumns)
+            }
+            return columns
+        };
+
+        Server.prototype.bootstrap = function () {
+            this.columns = this.addCustomColumns(this.columns)
+        };
 
         function generateGUID() {
             return s4() + s4() + '-' + s4() + '-' + s4() + '-' +

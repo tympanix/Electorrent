@@ -7,7 +7,7 @@ angular.module('torrentApp').factory('Column', [function() {
      */
     function Column({
         name,
-        enabled = true,
+        enabled = false,
         attribute,
         template = ''
     }) {
@@ -15,6 +15,22 @@ angular.module('torrentApp').factory('Column', [function() {
         this.enabled = enabled
         this.attribute = attribute
         this.template = template
+    }
+
+    Column.ALPHABETICAL = function(a, b) {
+        var aLower = a.toLowerCase();
+        var bLower = b.toLowerCase();
+        return aLower.localeCompare(bLower);
+    }
+
+    Column.NUMERICAL = function(a, b){
+        return b - a;
+    }
+
+    Column.NATURAL_NUMBER_ASC = function(a, b){
+        if (a < 1) return 1
+        if (b < 1) return -1
+        return a - b
     }
 
     /**
