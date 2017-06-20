@@ -9,12 +9,14 @@ angular.module('torrentApp').factory('Column', [function() {
         name,
         enabled = false,
         attribute,
-        template = ''
+        template = '',
+        sort = Column.NUMERICAL
     }) {
         this.name = name
         this.enabled = enabled
         this.attribute = attribute
         this.template = template
+        this.sort = sort
     }
 
     Column.ALPHABETICAL = function(a, b) {

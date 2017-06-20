@@ -317,7 +317,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         var sort = $scope.filters.sort || 'dateAdded';
         var desc = $scope.filters.order;
 
-        var sorter = AbstractTorrent.sort(sort);
+        let column = $rootScope.$server.columns.find(c => c.attribute === sort)
+        let sorter = column.sort
+        //var sorter = AbstractTorrent.sort(sort);
 
         var descSort = function(a, b) {
             return sorter(a[sort], b[sort]);
