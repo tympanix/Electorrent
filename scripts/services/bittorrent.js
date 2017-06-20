@@ -31,6 +31,10 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
         return $rootScope.$server
     }
 
+    this.getServerCopy = function() {
+        return angular.copy($rootScope.$server)
+    }
+
     this.uploadFromClipboard = function() {
         var magnet = electron.clipboard.readText();
 

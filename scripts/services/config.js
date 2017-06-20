@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('configService', ['$rootScope', 'notificationService', 'electron', '$q', 'Server', function($rootScope, $notify, electron, $q, Server) {
+angular.module('torrentApp').service('configService', ['$rootScope', '$bittorrent', 'notificationService', 'electron', '$q', 'Server', function($rootScope, $bittorrent, $notify, electron, $q, Server) {
 
     const MenuItem = electron.menuItem
     const config = electron.config;
@@ -8,19 +8,13 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
     var settings = {
         startup: 'default',
         refreshRate: 2000,
-        server: {
-            ip: '',
-            port: '',
-            user: '',
-            password: '',
-            type: '',
-        },
         ui: {
             resizeMode: '',
             notifications: true,
             displaySize: 'normal',
             displayCompact: false,
-            cleanNames: true
+            cleanNames: true,
+            fixedHeader: false
         },
         servers: []
     };
@@ -44,6 +38,10 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
 
     this.getAllSettings = function() {
         return settings;
+    }
+
+    this.getAllSettingsCopy = function() {
+      return angular.copy(settings)
     }
 
     this.setCurrentServerAsDefault = function() {
@@ -81,11 +79,24 @@ angular.module('torrentApp').service('configService', ['$rootScope', 'notificati
     this.saveAllSettings = function(newSettings) {
         var q = $q.defer();
         angular.merge(settings, newSettings)
+        console.log("Settings!", settings)
+        console.log("Server!", $rootScope.$server)
         config.saveAll(settingsToJson(), function(err) {
             if(err) q.reject(err)
-            else q.resolve();
+            else q.resolve()
         });
-        return q.promise;
+        return q.promise.then(function() {
+            updateServerReference()
+        });
+    }
+
+    function updateServerReference() {
+      if (!$rootScope.$server) return
+      let server = settings.servers.find(function(s) {
+          return s.id === $rootScope.$server.id
+      })
+      if (!server) return
+      $bittorrent.setServer(server)
     }
 
     this.saveServer = function(ip, port, user, password, client) {

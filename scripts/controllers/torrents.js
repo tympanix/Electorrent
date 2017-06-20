@@ -12,6 +12,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
 
     var refreshRate = settings.refreshRate || 2000;
 
+    $scope.settings = config.getAllSettings();
     $scope.connectionLost = false;
     $scope.torrents = {};
     $scope.arrayTorrents = [];
@@ -21,10 +22,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.torrentLimit = LIMIT;
     $scope.labels = [];
     $scope.trackers = []
-    $scope.resizeMode = settings.ui.resizeMode;
-    $scope.displaySize = settings.ui.displaySize;
-    $scope.displayCompact = settings.ui.displayCompact;
-    $scope.cleanNames = settings.ui.cleanNames;
 
     $scope.filters = {
         status: 'all',
@@ -38,10 +35,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     })
 
     $scope.$on('new:settings', function(event, data) {
-        $scope.resizeMode = data.ui.resizeMode;
-        $scope.displaySize = data.ui.displaySize;
-        $scope.displayCompact = data.ui.displayCompact;
-        $scope.cleanNames = data.ui.cleanNames;
         refreshRate = data.refreshRate
         resetAll();
     });
