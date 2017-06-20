@@ -9,8 +9,7 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
             menu: '=',
             bind: '=',
             click: '=',
-            debug: '=?',
-            items: '='
+            debug: '=?'
         },
         compile: compile
     };

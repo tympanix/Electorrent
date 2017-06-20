@@ -21,8 +21,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.labelsDrowdown = null;
     $scope.torrentLimit = LIMIT;
     $scope.labels = [];
-    $scope.trackers = []
-    $scope.selected = selected
+    $scope.trackers = [];
 
     $scope.filters = {
         status: 'all',
