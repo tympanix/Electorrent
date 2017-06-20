@@ -112,6 +112,17 @@ angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__Torre
     }
 
     /**
+     * Whether the client supports sorting by trackers or not
+     */
+    this.enableTrackerFilter = true
+
+    /**
+     * Provides the option to include extra columns for displaying data. This may concern columns
+     * which are specific to this client. The extra columns will be merged with the default columns.
+     */
+    this.extraColumns = []
+
+    /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
      * You may customize the GUI to your liking or to better accommodate the specific bittorrent client.
      * Every action must have a click function that corresponds to an action like the one showed above.
