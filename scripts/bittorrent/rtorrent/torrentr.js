@@ -2,6 +2,8 @@
 
 angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentConfig', '$filter', function(AbstractTorrent, rtorrentConfig, $filter) {
 
+    let hostName = $filter('torrentTracker')
+
     /**
      * Constructor, with class name.
      * Replace all occurences of __TorrentName__ (including underscores) with
@@ -82,7 +84,7 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         this.peersInSwarm = _.reduce(_.pluck(trackerArray, 'get_scrape_incomplete'), sum, 0)
         this.seedsInSwarm = _.reduce(_.pluck(trackerArray, 'get_scrape_complete'), sum, 0)
         this.trackers = _.pluck(trackerArray, 'get_url')
-        this.tracker = this.trackers && this.trackers[0]
+        this.tracker = hostName(this.trackers && this.trackers[0])
     }
 
     function sum(sum, item) {
