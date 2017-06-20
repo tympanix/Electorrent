@@ -81,7 +81,7 @@
                 <div action-header actions="$btclient.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
             </div>
             <div class="actions right">
-                <div class="ui fluid search">
+                <div class="ui fluid search" ng-class="{loading: isSearching}">
                     <div class="ui icon input">
                         <input search class="prompt" type="text" placeholder="Search torrents..."
                             ng-model="filters.search" ng-change="filterBySearch()" ng-model-options="filters.options">
