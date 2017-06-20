@@ -29,6 +29,22 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         options: { debounce: 150 }
     };
 
+    var fuseOptions = {
+        tokenize: true,
+        matchAllTokens: true,
+        findAllMatches: true,
+        threshold: 0.15,
+        location: 0,
+        distance: 100,
+        maxPatternLength: 32,
+        minMatchCharLength: 1,
+        keys: [
+            "decodedName"
+        ]
+    };
+
+    var fuse = new Fuse($scope.arrayTorrents, fuseOptions); // "list" is the item array
+
     $rootScope.$on('show:draganddrop', function(event, show) {
         $scope.showDragAndDrop = show;
         $scope.$apply();
@@ -380,9 +396,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
             })
         }
 
-        if (filterSearch) {
-            filters.push(searchFilter(filterSearch))
-        }
+        // if (filterSearch) {
+        //     filters.push(searchFilter(filterSearch))
+        // }
 
         if (filterTracker) {
             filters.push(trackerFilter(filterTracker))
@@ -395,9 +411,20 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         }
     }
 
+    function fuzzySearch(torrents, search) {
+        if ($scope.filters.search) {
+            search = search || $scope.filters.search
+            fuse.setCollection(torrents)
+            return fuse.search(search)
+        } else {
+            return torrents
+        }
+    }
+
     function refreshTorrents(){
         var torrents = fetchTorrents();
         torrents = torrents.filter(torrentFilter());
+        torrents = fuzzySearch(torrents);
         torrents = torrents.sort(torrentSorter());
         $scope.arrayTorrents = torrents;
     }
