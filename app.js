@@ -1,6 +1,7 @@
 // The Electron module
 const electron = require('electron');
 const yargs = require('yargs');
+const path = require('path');
 const is = require('electron-is');
 
 // Handle Squirrel startup parameters
@@ -37,7 +38,8 @@ function createTorrentWindow() {
         show: false,
         width: 1200,
         height: 800,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        icon: path.join(__dirname, 'img/icons/256x256.png')
     }
 
     Object.assign(windowSettings, config.get('windowsize'));
