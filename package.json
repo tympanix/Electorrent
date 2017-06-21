@@ -49,12 +49,16 @@
     "yargs": "^4.8.1"
   },
   "build": {
+    "artifactName": "${productName}-${version}.${ext}",
     "appId": "com.github.tympanix.electorrent",
     "mac": {
       "category": "public.app-category.utilities"
     },
     "win": {
       "target": "squirrel"
+    },
+    "linux": {
+      "icon": "img/icons"
     },
     "extraFiles": [
       "resources"
