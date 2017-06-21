@@ -39,7 +39,7 @@ function createTorrentWindow() {
         width: 1200,
         height: 800,
         backgroundColor: '#ffffff',
-        icon: path.join(__dirname, 'img/icons/256x256.png')
+        icon: path.join(__dirname, 'img/icons/32x32.png')
     }
 
     Object.assign(windowSettings, config.get('windowsize'));
