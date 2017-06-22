@@ -1,13 +1,8 @@
 angular.module("torrentApp").filter('date', function() {
-    function timeAgo(epochtime) {
+    return function(epochtime) {
         if (epochtime === '') return ''
         return moment(epochtime).fromNow();
-    };
-
-    timeAgo.$stateful = true;
-
-    return timeAgo
-
+    }
 });
 
 angular.module("torrentApp").filter('eta', function() {
