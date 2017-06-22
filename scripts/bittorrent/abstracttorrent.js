@@ -281,15 +281,15 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     AbstractTorrent.COL_PEERS = new Column({
       name: 'Peers',
       enabled: false,
-      teplate: '{{torrent.peersText()}}',
-      attribute: 'peersText'
+      template: '{{torrent.peersText()}}',
+      attribute: 'peersConnected'
     })
 
     AbstractTorrent.COL_SEEDS = new Column({
       name: 'Seeds',
       enabled: false,
       template: '{{torrent.seedsText()}}',
-      attribute: 'seedsText'
+      attribute: 'seedsConnected'
     })
 
     AbstractTorrent.COL_QUEUE = new Column({
