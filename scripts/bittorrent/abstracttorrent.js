@@ -274,7 +274,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     AbstractTorrent.COL_DATEADDED = new Column({
       name: 'Date Added',
       enabled: true,
-      template: '{{torrent.dateAdded | date}}',
+      template: '<span time="torrent.dateAdded"></span>',
       attribute: 'dateAdded'
     })
 
