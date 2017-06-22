@@ -39,7 +39,7 @@ function createTorrentWindow() {
         width: 1200,
         height: 800,
         backgroundColor: '#ffffff',
-        icon: path.join(__dirname, 'img/icons/32x32.png')
+        icon: getApplicationIcon()
     }
 
     Object.assign(windowSettings, config.get('windowsize'));
@@ -72,6 +72,16 @@ function createTorrentWindow() {
       client.create(torrentWindow);
     }
 
+}
+
+function getApplicationIcon() {
+    if (is.linux()) {
+        return path.join(__dirname, 'build/png/128x128.png')
+    } else if (is.windows()) {
+        return path.join(__dirname, 'build/icon.ico')
+    } else if (is.macOS()) {
+        return path.join(__dirname, 'build/icon.icns')
+    }
 }
 
 function sendMagnetLinks(args) {
