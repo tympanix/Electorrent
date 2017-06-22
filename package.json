@@ -57,7 +57,7 @@
       "target": "squirrel"
     },
     "linux": {
-      "icon": "img/icons"
+      "icon": "build/png"
     },
     "extraFiles": [
       "resources"
