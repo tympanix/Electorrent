@@ -28,10 +28,10 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
             downloadSpeed: data.rateDownload, /* Download Speed (integer): bytes per second */
             eta: data.eta, /* ETA (integer): second to completion */
             label: data.comment, /* Label (string): group/category identification */
-            peersConnected: data.peersConnected, /* Peers Connected (integer): number of peers connected */
-            peersInSwarm: data.maxConnectedPeers, /* Peers In Swarm (integer): number of peers in the swarm */
-            seedsConnected: data.peersGettingToUs, /* Seeds Connected (integer): number of connected seeds */
-            seedsInSwarm: data.seedsGettingFromUs, /* Seeds In Swarm (integer): number of connected seeds in swarm */
+            peersConnected: data.peersSendingToUs, /* Peers Connected (integer): number of peers connected */
+            peersInSwarm: data.peersConnected, /* Peers In Swarm (integer): number of peers in the swarm */
+            seedsConnected: data.peersGettingFromUs, /* Seeds Connected (integer): number of connected seeds */
+            seedsInSwarm: data.peersConnected, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: data.queuePosition, /* Queue (integer): the number in the download queue */
             statusMessage: '', /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: data.addedDate * 1000, /* Date Added (integer): number of milliseconds unix time */
