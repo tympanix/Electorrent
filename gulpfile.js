@@ -8,7 +8,7 @@ const runSequence = require('run-sequence');
 const run = require('gulp-run');
 
 const OUT = "./app";
-const CLEAN = ['!' + OUT + '/package.json', '!' + OUT + '/node_modules', OUT + '/*'];
+const CLEAN = [`!${OUT}/package.json`, `!${OUT}/node_modules`, `${OUT}/*`];
 
 gulp.task('serve', function () {
 
@@ -41,7 +41,7 @@ gulp.task('build:app', function() {
 });
 
 gulp.task('build:static', function() {
-    return gulp.src(['./views/**/*', './lib/**/*', './css/fonts/**/*', './img/**/*'], { base: './'})
+    return gulp.src(['./views/**/*', './lib/**/*', './css/fonts/**/*', './img/**/*', './build/**/*'], { base: './'})
     .pipe(gulp.dest(OUT))
 })
 
