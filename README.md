@@ -37,6 +37,7 @@ Electorrent can connect to the following bittorrent clients:
 * Paste magnet links directly from your clipboard (Ctrl/Cmd+I)
 * Multiple servers
 * Native desktop notifications
+* Fuzzy searching of torrents
 * Easy one click installer using Squirrel framework
 * Automatic updates straight from the GitHub repository!
 
