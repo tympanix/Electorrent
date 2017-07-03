@@ -61,6 +61,12 @@
     },
     "extraFiles": [
       "resources"
-    ]
+    ],
+    "fileAssociations": [{
+      "ext": "torrent",
+      "name": "Bittorrent Document",
+      "role": "Viewer",
+      "description": "Torrent Files"
+    }]
   }
 }
