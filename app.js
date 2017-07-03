@@ -135,6 +135,15 @@ app.on('open-url', function(event, url) {
     }
 });
 
+// Handle file associations on MacOS
+app.on('open-file', function(event, path) {
+    if (torrentWindow) {
+        sendTorrentFiles([path]);
+    } else {
+        process.argv.push(path);
+    }
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
