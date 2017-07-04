@@ -60,11 +60,9 @@ angular.module("torrentApp").directive('torrentRow', [function() {
     return {
         restrict: 'A',
         require: '^^torrentBody',
-        compile: compile,
-        scope: {
-          torrent: "=torrentRow"
-        }
-    };
+        scope: false,
+        compile: compile
+    }
 
     function compile(/*element, attr, ctrl*/) {
       return link
