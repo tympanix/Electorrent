@@ -230,7 +230,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     AbstractTorrent.COL_NAME = new Column({
       name: 'Name',
       enabled: true,
-      template: '{{cleanNames ? torrent.decodedName : torrent.name}}',
+      template: '{{settings.ui.cleanNames ? torrent.decodedName : torrent.name}}',
       attribute: 'decodedName',
       sort: Column.ALPHABETICAL
     })
