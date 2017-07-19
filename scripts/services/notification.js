@@ -61,7 +61,9 @@ angular.module('torrentApp')
 
         // Listen for incomming notifications from main process
         electron.ipc.on('notify', function(event, data){
-            sendNotification(data.title, data.message, data.type || 'warning');
+            $rootScope.$apply(function() {
+                sendNotification(data.title, data.message, data.type || 'warning');
+            })
         })
 
     }]);
