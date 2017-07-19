@@ -16,6 +16,10 @@ angular.module("torrentApp").directive('progress', function() {
     function link(scope, element /*, attrs*/ ) {
         var bar = element.find('.bar')
 
+        function updateProgress() {
+            bar.css('width', scope.torrent.getPercentStr());
+        }
+
         scope.class = function(){
             return scope.torrent.statusColor();
         }
@@ -30,9 +34,13 @@ angular.module("torrentApp").directive('progress', function() {
 
         scope.$watch(function() {
             return scope.torrent.percent;
-        }, function(torrent) {
-            bar.css('width', scope.torrent.getPercentStr());
+        }, function(newPercent, oldPercent) {
+            if (newPercent !== oldPercent) {
+                updateProgress()
+            }
         });
+
+        updateProgress()
     }
 
 });

@@ -90,7 +90,7 @@
                 </div>
             </div>
         </div>
-        <div class="main-content" fixed-header="settings.ui.fixedHeader">
+        <div class="main-content" fixed-header="settings.ui.fixedHeader" limit-bind="torrentLimit">
             <div ng-if="showDragAndDrop" class="popup">
                 <div class="content">
                     <h2 class="ui center aligned icon header">
@@ -99,7 +99,7 @@
                     </h2>
                 </div>
             </div>
-            <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="2">
+            <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="0.5">
                 <table
                     id="torrentTable"
                     ng-class="{'compact': settings.ui.displayCompact}"
@@ -115,6 +115,7 @@
                             ng-click="setSelected($event, torrent, $index)"
                             ng-right-click="showContextMenu($event, torrent, $index)"
                             repeat-done="renderDone"
+                            limit-source
                             torrent-row>
                         </tr>
                     </tbody>
