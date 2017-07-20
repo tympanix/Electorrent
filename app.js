@@ -5,12 +5,13 @@ const path = require('path');
 const is = require('electron-is');
 
 // Handle Squirrel startup parameters
-if(require('./lib/startup')) return
+if (require('./lib/startup')) return
 
 // Electron modules
 const { app } = electron;
 const { BrowserWindow } = electron;
 const { ipcMain } = electron;
+const { session } = electron;
 
 // Set up program arguments
 yargs.version(() => app.getVersion())
@@ -150,6 +151,16 @@ app.on('open-file', function(event, path) {
 app.on('ready', function() {
     createTorrentWindow();
     updater.initialise(torrentWindow);
+
+    // Remove unnecessary headers from web requests
+    session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+        let {requestHeaders} = details
+        requestHeaders = Object.assign(requestHeaders, {
+            Referer: undefined,
+            Origin: undefined
+        })
+        callback({requestHeaders})
+    })
 });
 
 // Quit when all windows are closed.
