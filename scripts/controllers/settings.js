@@ -143,7 +143,7 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
             $scope.close();
             config.renderServerMenu()
             $rootScope.$broadcast('new:settings', $scope.settings)
-            $notify.ok("Saved Settings", "You settings has been updated")
+            $notify.ok("Saved Settings", "Your settings have been updated")
         }).catch(function(err) {
             $scope.$emit('hide:loading')
             console.error("Settings Error", err);
