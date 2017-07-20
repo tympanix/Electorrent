@@ -155,10 +155,8 @@ app.on('ready', function() {
     // Remove unnecessary headers from web requests
     session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
         let {requestHeaders} = details
-        requestHeaders = Object.assign(requestHeaders, {
-            Referer: undefined,
-            Origin: undefined
-        })
+        delete requestHeaders.Referer
+        delete requestHeaders.Origin
         callback({requestHeaders})
     })
 });
