@@ -35,7 +35,7 @@ Electorrent can connect to the following bittorrent clients:
 * Upload local torrent files by browsing your filesystem (Ctrl/Cmd+O)
 * Drag-and-drop support for torrent files
 * Paste magnet links directly from your clipboard (Ctrl/Cmd+I)
-* Multiple servers
+* Qick swap between multiple server configuration
 * Native desktop notifications
 * Fuzzy searching of torrents
 * Easy one click installer using Squirrel framework
@@ -69,5 +69,5 @@ Electorrent can connect to the following bittorrent clients:
 
 * **I can't connect to rTorrent what is wrong?**
 
- When using rTorrent you have to configure your http server correctly. Electorrent will listen on _host_:_port_/RPC2. Follow [this guide](https://github.com/rakshasa/rtorrent/wiki/RPC-Setup-XMLRPC) to make sure you have it set up correctly
+ When using rTorrent you have to configure your http server correctly. Follow [this guide](https://github.com/rakshasa/rtorrent/wiki/RPC-Setup-XMLRPC) to make sure you have it set up correctly
 
