@@ -7,11 +7,6 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
         this.name = 'qBittorrent';
         this.server = undefined;
 
-        const boundaryHyphens = 29;
-        const hyphen = '-';
-        const boundaryUniqueNumber = 6688794727912;
-        const httpBoundary = hyphen.repeat(boundaryHyphens).concat(boundaryUniqueNumber);
-
         var rid = 0;
 
         const httpform = {
@@ -210,25 +205,6 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
                     return data;
                 }
             });
-        }
-
-        function httpPostTorrentData(magnet) {
-            var r = [];
-            r.push(httpBoundary);
-
-            httpDataAddPart(r, 'urls', magnet);
-            httpDataAddPart(r, 'savepath', '');
-            httpDataAddPart(r, 'cookie', '');
-            httpDataAddPart(r, 'label', '', true);
-
-            return r.join('\n');
-        }
-
-        function httpDataAddPart(r, part, data) {
-            r.push(`Content-Disposition: form-data; name="${part}"`)
-            r.push('');
-            r.push(data);
-            r.push(httpBoundary);
         }
 
         function buildAll(torrents) {
