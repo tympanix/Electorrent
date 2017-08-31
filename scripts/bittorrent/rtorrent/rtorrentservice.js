@@ -25,25 +25,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     const custom = rtorrentConfig.custom.map(customTransform);
     const trackerfields = rtorrentConfig.trackers.map(trackerTransform);
 
-    function url() {
-        var ip, port, path;
-        if (arguments.length === 1){
-            ip = config.ip;
-            port = config.port;
-            path = arguments[0] || '';
-        } else {
-            ip = arguments[0]
-            port = arguments[1]
-            path = arguments[2] || '';
-        }
-        return `http://${ip}:${port}${path}`;
-    }
-
-    function saveConnection(ip, port) {
-        config.ip = ip;
-        config.port = port;
-    }
-
     function fieldTransform(field) {
         return 'd.' + field + '=';
     }
@@ -213,11 +194,11 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @param {string} filename
      * @return {promise} isAdded
      */
-    this.uploadTorrent = function(buffer, filename) {
+    this.uploadTorrent = function(buffer /*, filename*/) {
         return $xmlrpc.callMethod('load_raw_start', [buffer])
     }
 
-    function doAction(action, torrents, param) {
+    function doAction(actions, torrents, params) {
 
         var hashes = torrents.map(function(torrent) {
             return torrent.hash
@@ -226,14 +207,21 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         var calls = []
 
         hashes.forEach(function(hash) {
-            var call = {
-                'methodName': action,
-                'params': [hash]
+            if (!Array.isArray(actions)) {
+                actions = [actions]
+                params = [params]
             }
 
-            if (param !== undefined) call.params.push(param)
+            actions.forEach(function(action, idx) {
+                var call = {
+                    'methodName': action,
+                    'params': [hash]
+                }
 
-            calls.push(call)
+                if (params[idx] !== undefined) call.params.push(params[idx])
+
+                calls.push(call)
+            })
         })
 
         return $xmlrpc.callMethod('system.multicall', [calls])
@@ -283,6 +271,14 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
 
     this.delete = function(torrents) {
         return doAction('d.erase', torrents)
+    }
+
+    this.deleteAndErase = function(torrents) {
+        return doAction(
+            ['d.set_custom5', 'd.delete_tied', 'd.erase'],
+            torrents,
+            ['1', undefined, undefined]
+        )
     }
 
     this.recheck = function(torrents) {
@@ -403,6 +399,11 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
             label: 'Remove',
             click: this.delete,
             icon: 'remove'
+        },
+        {
+            label: 'Remove and Delete',
+            click: this.deleteAndErase,
+            icon: 'trash'
         }
     ];
 
