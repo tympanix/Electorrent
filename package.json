@@ -32,9 +32,9 @@
   },
   "devDependencies": {
     "bower": "^1.8.0",
-    "electron": "^1.6.11",
-    "electron-builder": "^18.6.2",
-    "electron-builder-squirrel-windows": "^19.3.0",
+    "electron": "^1.7.5",
+    "electron-builder": "^19.27.2",
+    "electron-builder-squirrel-windows": "^19.25.0",
     "electron-connect": "^0.6.1",
     "electron-is": "^2.4.0",
     "electron-squirrel-startup": "^1.0.0",
@@ -62,11 +62,13 @@
     "extraFiles": [
       "resources"
     ],
-    "fileAssociations": [{
-      "ext": "torrent",
-      "name": "Bittorrent Document",
-      "role": "Viewer",
-      "description": "Torrent Files"
-    }]
+    "fileAssociations": [
+      {
+        "ext": "torrent",
+        "name": "Bittorrent Document",
+        "role": "Viewer",
+        "description": "Torrent Files"
+      }
+    ]
   }
 }
