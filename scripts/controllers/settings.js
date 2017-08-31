@@ -160,7 +160,11 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     $scope.toggleDefaultServer = function(server) {
         if (server.default === true) {
-            config.setDefault(server, true /* Skip saving */)
+            $scope.settings.servers.forEach(function(_server) {
+                if (server !== _server) {
+                    _server.default = false;
+                }
+            })
         }
     }
 
