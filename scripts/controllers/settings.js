@@ -9,6 +9,8 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     $scope.btclients = $btclients;
 
+    $scope.is = electron.is;
+
     // Internal settings reference
     $scope.general = {
         magnet: false
