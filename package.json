@@ -57,7 +57,12 @@
       "target": "squirrel"
     },
     "linux": {
-      "icon": "build/png"
+      "icon": "build/png",
+      "category": "Network;FileTransfer;P2P;",
+      "desktop": {
+        "MimeType": "application/x-bittorrent;x-scheme-handler/magnet;",
+        "Keywords": "p2p;bittorrent;"
+      }
     },
     "extraFiles": [
       "resources"
