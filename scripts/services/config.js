@@ -16,7 +16,8 @@ angular.module('torrentApp').service('configService', ['$rootScope', '$bittorren
             cleanNames: true,
             fixedHeader: false
         },
-        servers: []
+        servers: [],
+        certificates: []
     };
 
     this.initSettings = function() {
@@ -104,6 +105,11 @@ angular.module('torrentApp').service('configService', ['$rootScope', '$bittorren
       })
       if (!server) return
       $bittorrent.setServer(server)
+    }
+
+    this.trustCertificate = function(cert) {
+        settings.certificates.push(cert.fingerprint)
+        return this.saveAllSettings()
     }
 
     this.saveServer = function(ip, port, user, password, client) {
