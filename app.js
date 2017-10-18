@@ -12,6 +12,7 @@ const { app } = electron;
 const { BrowserWindow } = electron;
 const { ipcMain } = electron;
 const { session } = electron;
+const { dialog }  = electron;
 
 // Set up program arguments
 yargs.version(() => app.getVersion())
@@ -160,6 +161,19 @@ app.on('ready', function() {
         callback({requestHeaders})
     })
 });
+
+// Handle self-signed/untrusted certificates
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+    let certs = config.get('certificates') || []
+
+    if (certs.find(c => c === certificate.fingerprint)) {
+        event.preventDefault()
+        callback(true)
+    } else {
+        torrentWindow.webContents.send('certificate-error', certificate);
+        callback(false)
+    }
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

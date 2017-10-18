@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("notificationsController", ["$scope", "$rootScope", "$timeout", "electron", "$http", function($scope, $rootScope, $timeout, electron, $http) {
+angular.module("torrentApp").controller("notificationsController", ["$scope", "$rootScope", "$timeout", "electron", "configService", "$http", function($scope, $rootScope, $timeout, electron, config, $http) {
 
     var id = 0;
 
@@ -64,6 +64,17 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
             electron.autoUpdater.quitAndInstall();
         }
 
+    }
+
+    electron.ipc.on('certificate-error', function(event, certificate) {
+        $scope.certificate = certificate
+        $timeout(function(){
+          $('#certificateModal').modal('show')
+        })
+    })
+
+    $scope.installCertificate = function() {
+        config.trustCertificate($scope.certificate)
     }
 
 }]);
