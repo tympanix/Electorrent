@@ -25,3 +25,12 @@ angular.module("torrentApp").filter('releaseDate', function() {
         return moment(date, moment.ISO_8601).format("MMMM Do YYYY, HH:mm");
     }
 })
+
+angular.module("torrentApp").filter('epoch', function() {
+    return function(epoch) {
+        if (!epoch) {
+            return 'Unknown date'
+        }
+        return moment(epoch*1000).format("MMMM Do YYYY, HH:mm");
+    }
+})

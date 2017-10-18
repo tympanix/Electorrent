@@ -96,3 +96,6 @@ app/*
 
 # Visual Studio code
 .vscode
+
+# Yarn
+yarn.lock

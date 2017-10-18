@@ -1,0 +1,49 @@
+<div class="ui small modal">
+    <i class="close icon"></i>
+    <div class="header">
+        Untrusted Certificate
+    </div>
+    <div class="content">
+        <p>By trusting this certificate you accept the implications it can have on your security and understand
+        the consequences of doing so. Never trust a certificate which you do not know the origin of.</p>
+
+        <div class="ui horizontal small list">
+            <div class="item">
+                <i class="address card outline big icon"></i>
+                <div class="content">
+                    <div class="ui sub header">Issuer</div>
+                    <span ng-if="data.issuerCert">
+                        {{data.issuer.commonName}} {{data.issuer.country}}
+                    </span>
+                    <span ng-if="!data.issuerCert">
+                        <a>Self signed</a>
+                    </span>
+                </div>
+            </div>
+            <div class="item">
+                <i class="checked calendar big icon"></i>
+                <div class="content">
+                    <div class="ui sub header">Valid from</div>
+                    {{data.validStart | epoch}}
+                </div>
+            </div>
+            <div class="item">
+                <i class="delete calendar big icon"></i>
+                <div class="content">
+                    <div class="ui sub header">Expiry</div>
+                    {{data.validExpiry | epoch}}
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="actions">
+        <a class="ui red deny button">
+            Cancel
+        </a>
+        <button type="submit" class="ui black ok right labeled icon button">
+            Trust
+            <i class="address card icon"></i>
+        </button>
+    </div>
+</div>
