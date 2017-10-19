@@ -98,7 +98,7 @@ angular.module('torrentApp')
             var formData = new FormData();
             formData.append('torrent_file', blob, filename);
 
-            return $http.post(data.url , formData, {
+            return $http.post(data.url + '/.', formData, {
                 params: {
                     token: data.token,
                     action: 'add-file',
@@ -239,7 +239,7 @@ angular.module('torrentApp')
             for (i = 0; i < hashes.length; i++) {
                 encodedQuery += '&' + ['hash=' + hashes[i], 's=label', 'v=' + encodeURIComponent(label)].join('&');
             }
-            return $http.get(data.url + '?token=' + data.token + '&action=setprops' + encodedQuery, {
+            return $http.get(data.url + '/.' + '?token=' + data.token + '&action=setprops' + encodedQuery, {
                 params: {
                     t: Date.now()
                 }
