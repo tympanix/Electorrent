@@ -10,26 +10,16 @@ angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__Torre
      */
     this.name = '__displayName__';
 
-    /*
-     * Good practise is keeping a configuration object for your communication with the API
-     */
-    const config = {
-        ip: '',
-        port: ''
-    }
-
 
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
      * should return a promise that the connection was successfull. A standard http timeout of 5 seconds
-     * must be implemented. When successfull the service should save login details for later use.
-     * @param {string} ip
-     * @param {integer} port
-     * @param {string} user
-     * @param {string} password
+     * must be implemented. When successfull the service should save login details for later use. Check out
+     * the helper function on the `server` object. Especially the `url()` function is useful.
+     * @param {server} server
      * @return {promise} connection
      */
-    this.connect = function(ip, port, user, pass) {
+    this.connect = function(server) {
         return
     }
 
