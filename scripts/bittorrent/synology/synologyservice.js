@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__TorrentName__", "notificationService", function($http, $q, __TorrentName__, $notify) {
+angular.module('torrentApp').service('synologyService', ["$http", "$q", "TorrentS", "notificationService", function($http, $q, TorrentS, $notify) {
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -8,28 +8,26 @@ angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__Torre
      * (remember capital 'S' e.g qbittorrentService for qBittorrent, utorrentService for µTorrent ect.).
      * The real name of your client for display purposes can be changes in the field 'this.name' below.
      */
-    this.name = '__displayName__';
-
-    /*
-     * Good practise is keeping a configuration object for your communication with the API
-     */
-    const config = {
-        ip: '',
-        port: ''
-    }
+    this.name = 'Synology Download Station';
 
 
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
      * should return a promise that the connection was successfull. A standard http timeout of 5 seconds
-     * must be implemented. When successfull the service should save login details for later use.
-     * @param {string} ip
-     * @param {integer} port
-     * @param {string} user
-     * @param {string} password
+     * must be implemented. When successfull the service should save login details for later use. Check out
+     * the helper function on the `server` object. Especially the `url()` function is useful.
+     * @param {server} server
      * @return {promise} connection
      */
-    this.connect = function(ip, port, user, pass) {
+    this.connect = function(server) {
+        this.server = server
+
+        // Before login, API information is required on SYNO.Auth API.
+        
+
+
+
+
         return
     }
 
