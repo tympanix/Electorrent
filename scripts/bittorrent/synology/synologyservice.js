@@ -28,7 +28,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
                 Probably return some error message to user if it is not up and running.
         */
 
-        /* Before login, API information is required on SYNO.Auth API.
+        /*
+           Before login, API information is required on SYNO.Auth API.
            Grab the DownloadStation API information as well.
         */
         $http.get(this.url() + "webapi/query.cgi?api=SYNO.API.Info&version=1&method=query&query=SYNO.API.Auth,SYNO.DownloadStation.Task")
@@ -38,7 +39,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
 
         })
 
-        /* Login request.
+        /*
+           Login request.
            TODO: Should probably get the version and auth path from the previous Auth API request.
         */
         $http.get(this.url() + "webapi/auth.cgi?api=SYNO.API.Auth&version=2&method=login&account=" +
@@ -50,7 +52,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
 
 
 
-        return
+        return defer.promise;
     }
 
     /**
