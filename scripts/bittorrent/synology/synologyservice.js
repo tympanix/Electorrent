@@ -21,9 +21,31 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.connect = function(server) {
         this.server = server
+        var defer = $q.defer();
 
-        // Before login, API information is required on SYNO.Auth API.
-        
+        /*
+          TODO: Remember to check that the Download Station is actually running before continuing.
+                Probably return some error message to user if it is not up and running.
+        */
+
+        /* Before login, API information is required on SYNO.Auth API.
+           Grab the DownloadStation API information as well.
+        */
+        $http.get(this.url() + "webapi/query.cgi?api=SYNO.API.Info&version=1&method=query&query=SYNO.API.Auth,SYNO.DownloadStation.Task")
+        .then(function(response) {
+
+          // Get the Auth path and supported version information from the response. (JSON).
+
+        })
+
+        /* Login request.
+           TODO: Should probably get the version and auth path from the previous Auth API request.
+        */
+        $http.get(this.url() + "webapi/auth.cgi?api=SYNO.API.Auth&version=2&method=login&account=" +
+          this.user + "&passwd=" + this.password + "&session=DownloadStation&format=cookie")
+          .then(function(response) {
+
+          })
 
 
 
