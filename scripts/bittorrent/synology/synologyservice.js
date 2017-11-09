@@ -10,6 +10,9 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.name = 'Synology Download Station';
 
+    // Session ID set by logging in in connection().
+    // TODO: Check that this variable needs to be in this scope or if it can be placed further in.
+    var sid;
 
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
@@ -32,26 +35,38 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
            Before login, API information is required on SYNO.Auth API.
            Grab the DownloadStation API information as well.
         */
+        var auth_path;
+        var auth_version;
+        var dl_path;
+        var dl_version;
+
+
         $http.get(this.url() + "webapi/query.cgi?api=SYNO.API.Info&version=1&method=query&query=SYNO.API.Auth,SYNO.DownloadStation.Task")
-        .then(function(response) {
+        .then(function(response) {return response.data.SYNO;}).then(function(syno) {
 
-          // Get the Auth path and supported version information from the response. (JSON).
+          /*
+            TODO: Remember to check that the call return OK status etc.
+            Catchs etc.
+           */
 
+          // Grabbing data for login.
+          auth_path = syno.API.Auth.path;
+          auth_version = syno.API.Auth.maxVersion;
+          dl_path = syno.DownloadStation.Task.path;
+          dl_version = syno.DownloadStation.Task.maxVersion;
+
+
+
+          // Lets login!
+          return $http.get(this.url() + "webapi/" + auth_path + "?api=SYNO.API.Auth&version=" + auth_version + "&method=login&account=" +
+          this.user + "&passwd=" + this.password + "&session=DownloadStation&format=sid")
+        }).then(function(response) {
+          /*
+          TODO: Remember to check for OK status, catch etc.
+           */
+          sid = response.data.sid;
+          return defer.resolve(response);
         })
-
-        /*
-           Login request.
-           TODO: Should probably get the version and auth path from the previous Auth API request.
-        */
-        $http.get(this.url() + "webapi/auth.cgi?api=SYNO.API.Auth&version=2&method=login&account=" +
-          this.user + "&passwd=" + this.password + "&session=DownloadStation&format=cookie")
-          .then(function(response) {
-
-          })
-
-
-
-
         return defer.promise;
     }
 
