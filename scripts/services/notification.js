@@ -34,11 +34,11 @@ angular.module('torrentApp')
             $rootScope.$emit('notification', notification);
         }
 
-        this.alertAuth = function(response, code, msg){
-            if (typeof response !== 'object') {
+        this.alertAuth = function(response, code){
+            if (typeof response === 'string') {
+                this.alert('Connection problem', response)
+            } else if (typeof response !== 'object') {
                 this.alert("Connection problem", "The connection could not be established")
-            } else if (typeof msg === 'string') {
-                this.alert(code, msg)
             } else if (response.status === -1){
                 this.alert("Connection problem", "The connection to the server timed out!")
             } else if (response.status === 401 || code === 401){
