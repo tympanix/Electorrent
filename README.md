@@ -19,7 +19,7 @@ No more! Stop copy/pasting magnet links and uploading torrent files through a te
 ## Support
 Electorrent can connect to the following bittorrent clients:
 * [µTorrent](http://www.utorrent.com/)
-* [qBittorrent](http://www.qbittorrent.org/)
+* [qBittorrent](http://www.qbittorrent.org/) (v3.2.x and above)
 * [Transmission](https://transmissionbt.com)
 * [rTorrent](https://rakshasa.github.io/rtorrent/)
 
