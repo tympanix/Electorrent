@@ -35,12 +35,18 @@ angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource"
                         defer.resolve(response);
                     } else {
                         defer.reject(response, 401)
-                        defer.reject('Wrong username/password');
                     }
                 })
                 .catch(function(response) {
                     if(response.status === 403) {
                         defer.reject(response, 'qBittorrent says', response.data)
+                    } else if (response.status === 401) {
+                        var auth = response.headers('WWW-Authenticate')
+                        if (auth.includes('Web UI Access')) {
+                          defer.reject('Please update qBittorrent to v3.2.x or newer')
+                        } else {
+                          defer.reject(response)
+                        }
                     } else {
                         defer.reject(response);
                     }
