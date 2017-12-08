@@ -14,6 +14,32 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     // TODO: Check that this variable needs to be in this scope or if it can be placed further in.
     var sid;
 
+    // Params - Initialized as default values for this domain.
+    var params =  {
+      "api": "SYNO.API.Auth",
+      "version": "1",
+      "method": "login",
+      "query": "",
+      "account": this.user,
+      "passwd": this.passwd,
+      "session": "DownloadStation",
+      "format": "sid"
+    }
+
+    function config(api, version, method, query) {
+      return {
+        params: Object.assign(params, {
+          api: api,
+          version: version,
+          method: method,
+          query: query
+        })
+      }
+    }
+
+
+
+
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
      * should return a promise that the connection was successfull. A standard http timeout of 5 seconds
@@ -40,8 +66,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         var dl_path;
         var dl_version;
 
-
-        $http.get(this.url() + "webapi/query.cgi?api=SYNO.API.Info&version=1&method=query&query=SYNO.API.Auth,SYNO.DownloadStation.Task")
+        $http.get(this.url() + "webapi/query.cgi", config("SYNO.API.Info", "1", "query", "SYNO.API.Auth,SYNO.DownloadStation.Task"))
         .then(function(response) {return response.data.SYNO;}).then(function(syno) {
 
           /*
@@ -54,12 +79,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
           auth_version = syno.API.Auth.maxVersion;
           dl_path = syno.DownloadStation.Task.path;
           dl_version = syno.DownloadStation.Task.maxVersion;
-
-
-
           // Lets login!
-          return $http.get(this.url() + "webapi/" + auth_path + "?api=SYNO.API.Auth&version=" + auth_version + "&method=login&account=" +
-          this.user + "&passwd=" + this.password + "&session=DownloadStation&format=sid")
+          return $http.get(this.url() + "webapi/" + auth_path, config("SYNO.API.Auth", auth_version, "login"))
         }).then(function(response) {
           /*
           TODO: Remember to check for OK status, catch etc.
@@ -110,7 +131,12 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function(magnet) {
-        return
+      // Contradicts API documentation by using GET instead of POST. However, POST doesn't work.
+      return $http.get(this.url() + "/webapi/DownloadStation/task.cgi?uri=" + magnet, config("SYNO.DownloadStation.Task", "1", "create", "")
+    ).then(function(response){
+
+    })
+
     }
 
     /**
