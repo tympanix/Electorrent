@@ -137,14 +137,14 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.addTorrentUrl = function(magnet) {
       // Contradicts API documentation by using GET instead of POST. However, POST doesn't work.
       return $http.get(this.url() + "/webapi/DownloadStation/task.cgi?uri=" + magnet, config("SYNO.DownloadStation.Task", "1", "create", "")
-      ).then(function(response){
-      // Check response for success.
-      if (isSuccess(response)) {
-        return $q.resolve();
-      }
-      // Create failed, reject with the error code provided
-      return $q.reject("Create a DownloadStation task with the provided url failed. Error: " + response.error);
-      })
+        ).then(function(response){
+          // Check response for success.
+          if (isSuccess(response)) {
+            return $q.resolve();
+          }
+          // Create failed, reject with the error code provided
+          return $q.reject("Create a DownloadStation task with the provided url failed. Error: " + response.error);
+        })
     }
 
     /**
