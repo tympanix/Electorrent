@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', function(AbstractTorrent) {
+angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(AbstractTorrent) {
 
     /**
      * Constructor, with class name.
@@ -9,7 +9,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * and appending a single letter desribing the client to which it belongs.
      * (e.g. TorrentQ for qBittorrent, TorrentU for µTorrent... and so on)
      */
-    function __TorrentName__(data) {
+    function TorrentS(data) {
         /*
          * Please modify the constructor function parameters to
          * your liking for the best implementation. If data is obtained as an array from
@@ -51,7 +51,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * Inherit by prototypal inheritance. Leave this line as is (only rename class name).
      * Do NOT implement any prototypal features above this line!
      */
-    __TorrentName__.prototype = Object.create(AbstractTorrent.prototype);
+    TorrentS.prototype = Object.create(AbstractTorrent.prototype);
 
 
     /**
@@ -59,7 +59,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * up in the 'Error' tab in the GUI
      * @return {boolean} isStatusError
      */
-    __TorrentName__.prototype.isStatusError = function() {
+    TorrentS.prototype.isStatusError = function() {
         return
     };
 
@@ -68,7 +68,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * the 'Stopped' tab to the left in the GUI
      * @return {boolean} isStatusStopped
      */
-    __TorrentName__.prototype.isStatusStopped = function() {
+    TorrentS.prototype.isStatusStopped = function() {
         return
     };
 
@@ -77,7 +77,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * in the same tab as 'Downloading' in the GUI
      * @return {boolean} isStatusQueue
      */
-    __TorrentName__.prototype.isStatusQueued = function() {
+    TorrentS.prototype.isStatusQueued = function() {
         return
     };
 
@@ -87,7 +87,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * shows up the 'Finished' tab in the GUI
      * @return {boolean} isStatusCompleted
      */
-    __TorrentName__.prototype.isStatusCompleted = function() {
+    TorrentS.prototype.isStatusCompleted = function() {
         return
     };
 
@@ -96,7 +96,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * shows up the 'Downloading' tab in the GUI
      * @return {boolean} isStatusDownloading
      */
-    __TorrentName__.prototype.isStatusDownloading = function() {
+    TorrentS.prototype.isStatusDownloading = function() {
         return
     };
 
@@ -105,7 +105,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * shows up the 'Seeding' tab in the GUI
      * @return {boolean} isStatusDownloading
      */
-    __TorrentName__.prototype.isStatusSeeding = function() {
+    TorrentS.prototype.isStatusSeeding = function() {
         return
     };
 
@@ -114,7 +114,7 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
      * shows up in the same tab as the 'Downloading' tab in the GUI.
      * @return {boolean} isStatusDownloading
      */
-    __TorrentName__.prototype.isStatusPaused = function() {
+    TorrentS.prototype.isStatusPaused = function() {
         return
     };
 
@@ -137,5 +137,5 @@ angular.module('torrentApp').factory('__TorrentName__', ['AbstractTorrent', func
     /**
      * Return the constructor function (only change the class name)
      */
-    return __TorrentName__;
+    return TorrentS;
 }]);
