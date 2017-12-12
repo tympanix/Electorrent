@@ -1,6 +1,7 @@
 'use strict';
 
-angular.module('torrentApp').service('synologyService', ["$http", "$q", "TorrentS", "notificationService", function($http, $q, TorrentS, $notify) {
+angular.module('torrentApp').service('synologyService', ["$http", "$q", "TorrentS", "notificationService", function(
+    $http, $q, TorrentS, $notify) {
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -14,35 +15,42 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     // TODO: Check that this variable needs to be in this scope or if it can be placed further in.
     var sid;
 
+    // TODO: Documentation update.
     // Params - Initialized as default values for this domain.
-    var params =  {
-      "api": "SYNO.API.Auth",
-      "version": "1",
-      "method": "login",
-      "query": "",
-      "account": this.user,
-      "passwd": this.passwd,
-      "session": "DownloadStation",
-      "format": "sid"
+    var params = {
+        "api": "SYNO.API.Auth",
+        "version": "1",
+        "method": "login",
+        "query": "",
+        "account": this.user,
+        "passwd": this.passwd,
+        "session": "DownloadStation",
+        "format": "sid"
     }
 
+    // TODO: Documentation for this.
     function config(api, version, method, query) {
-      return {
-        params: Object.assign(params, {
-          api: api,
-          version: version,
-          method: method,
-          query: query
-        })
-      }
+        return {
+            params: Object.assign(params, {
+                api: api,
+                version: version,
+                method: method,
+                query: query
+            })
+        }
     }
 
+    /**
+     * Simple function without any explanation needed for the technical aspect
+     * of it. However the function is needed an easy way of interpreting whether a call
+     * to the SYNO API was successful or not.
+     * This is only checkable in the response field "success".
+     * @param  {String}  body Response body from a SYNO API call.
+     * @return {Boolean}      Selfexplanatory.
+     */
     function isSuccess(body) {
-      return body.success === "true"
+        return body.success === "true"
     }
-
-
-
 
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
@@ -53,6 +61,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      * @return {promise} connection
      */
     this.connect = function(server) {
+        console.error("Hellooooo!")
         this.server = server
         var defer = $q.defer();
 
@@ -70,28 +79,29 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         var dl_path;
         var dl_version;
 
-        $http.get(this.url() + "webapi/query.cgi", config("SYNO.API.Info", "1", "query", "SYNO.API.Auth,SYNO.DownloadStation.Task"))
-        .then(function(response) {return response.data.SYNO;}).then(function(syno) {
-
-          /*
-            TODO: Remember to check that the call return OK status etc.
-            Catchs etc.
-           */
-
-          // Grabbing data for login.
-          auth_path = syno.API.Auth.path;
-          auth_version = syno.API.Auth.maxVersion;
-          dl_path = syno.DownloadStation.Task.path;
-          dl_version = syno.DownloadStation.Task.maxVersion;
-          // Lets login!
-          return $http.get(this.url() + "webapi/" + auth_path, config("SYNO.API.Auth", auth_version, "login"))
-        }).then(function(response) {
-          /*
-          TODO: Remember to check for OK status, catch etc.
-           */
-          sid = response.data.sid;
-          return defer.resolve(response);
-        })
+        $http.get(this.url() + "webapi/query.cgi", config("SYNO.API.Info", "1", "query",
+                "SYNO.API.Auth,SYNO.DownloadStation.Task"))
+            .then(function(response) {
+                if (!isSuccess(response.body)) {
+                    $q.reject("Getting initial API information from Auth and DownloadStation failed. Error: " + response.error);
+                }
+                return response.data.SYNO;
+            }).then(function(syno) {
+                // Grabbing data for login.
+                auth_path = syno.API.Auth.path;
+                auth_version = syno.API.Auth.maxVersion;
+                dl_path = syno.DownloadStation.Task.path;
+                dl_version = syno.DownloadStation.Task.maxVersion;
+                // Lets login!
+                return $http.get(this.url() + "webapi/" + auth_path, config("SYNO.API.Auth",
+                    auth_version, "login"))
+            }).then(function(response) {
+                if (isSuccess(response.body)) {
+                    sid = response.data.sid;
+                    return defer.resolve(response);
+                }
+                return $q.reject("Login failed. Error: " + response.error);
+            })
         return defer.promise;
     }
 
@@ -125,7 +135,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      @return {string} the default path
      */
     this.defaultPath = function() {
-      return "/defaultPath"
+        return ""
     }
 
     /**
@@ -135,15 +145,16 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function(magnet) {
-      // Contradicts API documentation by using GET instead of POST. However, POST doesn't work.
-      return $http.get(this.url() + "/webapi/DownloadStation/task.cgi?uri=" + magnet, config("SYNO.DownloadStation.Task", "1", "create", "")
-        ).then(function(response){
-          // Check response for success.
-          if (isSuccess(response)) {
-            return $q.resolve();
-          }
-          // Create failed, reject with the error code provided
-          return $q.reject("Create a DownloadStation task with the provided url failed. Error: " + response.error);
+        // Contradicts API documentation by using GET instead of POST. However, POST doesn't work.
+        return $http.get(this.url() + "/webapi/DownloadStation/task.cgi?uri=" + magnet,
+            config("SYNO.DownloadStation.Task", "1", "create", "")).then(function(response) {
+            // Check response for success.
+            if(isSuccess(response)) {
+                return $q.resolve();
+            }
+            // Create failed, reject with the error code provided
+            return $q.reject(
+                "Create a DownloadStation task with the provided URL failed. Error: " + response.error);
         })
     }
 
@@ -157,13 +168,17 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      * @return {promise} isAdded
      */
     this.uploadTorrent = function(buffer, filename) {
-        var blob = new Blob([buffer], {type : 'application/x-bittorrent'})
+        var blob = new Blob([buffer], {
+            type: 'application/x-bittorrent'
+        })
 
         var formData = new FormData();
         formData.append('torrents', blob, filename);
 
         return $http.post('__url__', formData, {
-            headers: { 'Content-Type': undefined },
+            headers: {
+                'Content-Type': undefined
+            },
             transformRequest: function(data) {
                 return data;
             }
@@ -224,8 +239,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
             type: 'dropdown',
             color: 'blue',
             icon: 'plus',
-            actions: [
-                {
+            actions: [{
                     label: 'Pause All',
                     click: this.pauseAll
                 },
