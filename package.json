@@ -26,7 +26,6 @@
   "dependencies": {
     "electron-regedit": "^1.0.5",
     "q": "^1.4.1",
-    "through2": "^2.0.3",
     "winreg": "^1.2.2"
   },
   "devDependencies": {
@@ -46,6 +45,7 @@
     "request": "^2.74.0",
     "run-sequence": "^1.2.2",
     "semver": "^5.3.0",
+    "through2": "^2.0.3",
     "winston": "^2.2.0",
     "yargs": "^4.8.1"
   },
