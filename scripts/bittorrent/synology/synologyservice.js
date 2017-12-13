@@ -31,12 +31,13 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     // TODO: Documentation for this.
     function config(api, version, method, query) {
         return {
-            params: Object.assign(params, {
+            params: Object.assign({}, params, {
                 api: api,
                 version: version,
                 method: method,
                 query: query
-            })
+            }),
+            timeout: 5000
         }
     }
 
@@ -62,7 +63,6 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.connect = function(server) {
         this.server = server;
-        var defer = $q.defer();
         var self = this;
         params.account = server.user;
         params.passwd = server.password;
@@ -79,17 +79,18 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         var auth_version;
         var dl_path;
         var dl_version;
-        $http.get(this.server.url() + "/webapi/query.cgi", config("SYNO.API.Info", "1", "query",
+
+        return $http.get(this.server.url() + "/webapi/query.cgi", config("SYNO.API.Info", "1", "query",
                 "SYNO.API.Auth,SYNO.DownloadStation.Task"))
             .then(function(response) {
                 if (!isSuccess(response.data)) {
                     return $q.reject("Getting initial API information from Auth and DownloadStation failed. Error: " + response.data.error);
                 }
+
                 return {
                     auth: response.data.data["SYNO.API.Auth"],
                     task: response.data.data["SYNO.DownloadStation.Task"]
                 };
-
             }).then(function(data) {
                 // Grabbing data for login.
                 auth_path = data.auth.path;
@@ -103,11 +104,11 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
             }).then(function(response) {
                 if (isSuccess(response.data)) {
                     sid = response.data.sid;
-                    return defer.resolve(response);
+                    return $q.resolve(response);
                 }
+
                 return $q.reject("Login failed. Error: " + response.data.error);
             })
-        return defer.promise;
     }
 
     /**
