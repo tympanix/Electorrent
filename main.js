@@ -31,7 +31,7 @@ torrentApp.constant('$btclients', {
     'synology': {
         name: 'Synology Download Station',
         service: 'synologyService',
-        icon: 'rtorrent'
+        icon: 'downloadstation'
     }
 
 });
