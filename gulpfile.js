@@ -5,7 +5,8 @@ const electron = require('electron-connect').server.create();
 const useref = require('gulp-useref');
 const clean = require('gulp-clean');
 const runSequence = require('run-sequence');
-const run = require('gulp-run');
+const less = require('gulp-less');
+const path = require('path');
 
 const OUT = "./app";
 const CLEAN = [`!${OUT}/package.json`, `!${OUT}/node_modules`, `${OUT}/*`];
@@ -50,14 +51,38 @@ gulp.task('build:assets' , function () {
     .pipe(gulp.dest(OUT + '/css/themes/default/assets'))
 });
 
+const semantic = './bower_components/semantic/src'
+
+gulp.task('src:semantic', function() {
+  return gulp.src([
+    path.join(semantic, '**'),
+    '!'+path.join(semantic, 'themes/**'),
+    '!'+path.join(semantic, 'themes/')
+  ]).pipe(gulp.dest('css/semantic'))
+})
+
+gulp.task('themes:semantic', function() {
+  let themes = ['default']
+  return gulp.src(themes.map(t => path.join(semantic, 'themes', t, '/**')),
+   {base: path.join(semantic, 'themes')})
+    .pipe(gulp.dest('css/themes'))
+})
+
+gulp.task('semantic', ['src:semantic', 'themes:semantic'])
+
+gulp.task('build:less', ['semantic'], function() {
+  return gulp.src('css/semantic/semantic.less')
+    .pipe(less({
+      paths: [semantic],
+      globalVars: {
+        "@renderTheme": 'default'
+      }
+    }))
+    .pipe(gulp.dest(`${OUT}/css`))
+})
+
 gulp.task('build', function() {
-    runSequence('build:clean', ['build:concat', 'build:app', 'build:assets', 'build:static']);
+    runSequence('build:clean', ['build:concat', 'build:app', 'build:assets', 'build:static', 'build:less']);
 });
 
-gulp.task('pack:win64', ['build'], function(){
-    return run('electron-packager ./dist Electorrent --icon=./icon.ico --platform=win32 --arch=x64 --out=./build --overwrite').exec()
-});
-
-gulp.task('pack:win32', ['build'], function(){
-    return run('electron-packager ./dist Electorrent --icon=./icon.ico --platform=win32 --arch=ia32 --out=./build --overwrite').exec()
-});
+gulp.task('install', ['semantic'])

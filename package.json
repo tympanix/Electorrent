@@ -7,13 +7,11 @@
   "scripts": {
     "start": "electron --debug .",
     "build": "gulp build",
-    "install": "bower install",
-    "postinstall": "install-app-deps",
+    "install": "bower install && gulp install",
+    "postinstall": "electron-builder install-app-deps",
     "pack": "build --dir",
     "predist": "gulp build",
     "dist": "build",
-    "dist:win": "build --win --x64",
-    "dist:mac": "build --mac",
     "prerelease": "gulp build",
     "release": "build"
   },
@@ -28,6 +26,7 @@
   "dependencies": {
     "electron-regedit": "^1.0.5",
     "q": "^1.4.1",
+    "through2": "^2.0.3",
     "winreg": "^1.2.2"
   },
   "devDependencies": {
@@ -40,8 +39,10 @@
     "electron-squirrel-startup": "^1.0.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
+    "gulp-less": "^3.3.2",
     "gulp-run": "^1.7.1",
     "gulp-useref": "^3.1.0",
+    "merge-stream": "^1.0.1",
     "request": "^2.74.0",
     "run-sequence": "^1.2.2",
     "semver": "^5.3.0",
