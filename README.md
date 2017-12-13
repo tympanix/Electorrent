@@ -14,12 +14,12 @@
 </p>
 
 # Electorrent
-No more! Stop copy/pasting magnet links and uploading torrent files through a tedious webinterface. Electorrent is your new dekstop remote torrenting application. Remote control your NAS, VPS, seedbox - you name it.
+No more! Stop copy/pasting magnet links and uploading torrent files through a tedious webinterface. Electorrent is your new desktop remote torrenting application. Remote control your NAS, VPS, seedbox - you name it.
 
 ## Support
 Electorrent can connect to the following bittorrent clients:
 * [µTorrent](http://www.utorrent.com/)
-* [qBittorrent](http://www.qbittorrent.org/)
+* [qBittorrent](http://www.qbittorrent.org/) (v3.2.x and above)
 * [Transmission](https://transmissionbt.com)
 * [rTorrent](https://rakshasa.github.io/rtorrent/)
 
