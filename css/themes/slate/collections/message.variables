@@ -1,0 +1,2 @@
+@background: @gray;
+@boxShadow: none;

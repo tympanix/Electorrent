@@ -1,0 +1,36 @@
+.text.primary,
+.text.primary:hover {
+  color: @primaryColor;
+}
+
+.text.positive,
+.text.positive:hover {
+  color: @positiveColor;
+}
+
+.text.negative,
+.text.negative:hover {
+  color: @negativeColor;
+}
+
+.text.warning,
+.text.warning:hover {
+  color: @warningColor;
+}
+
+.text.info,
+.text.info:hover {
+  color: @infoColor;
+}
+
+legend {
+  color: #fff;
+}
+
+pre .code {
+  color: @gray-light !important;
+}
+
+.ui.rating .icon:not(.active) {
+  color: @gray-light !important;
+}

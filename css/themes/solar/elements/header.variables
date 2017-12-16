@@ -1,0 +1,2 @@
+@blockBackground: @gray-base;
+@attachedBackground: @gray-dark;

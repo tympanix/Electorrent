@@ -1,0 +1,4 @@
+@itemLinkColor: @textColor;
+@itemLinkHoverColor: #fff;
+@itemHeaderLinkColor: @textColor;
+@itemDescriptionColor: rgba(255, 255, 255, 0.50);

@@ -1,0 +1,2 @@
+@background: lighten(@gray-darker, 10%);
+@descriptionColor: @gray-lighter;

@@ -1,0 +1,3 @@
+.ui.active.search.dropdown input.search:focus + .text {
+  color: @gray-dark !important;
+}

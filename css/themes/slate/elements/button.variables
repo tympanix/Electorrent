@@ -1,0 +1,10 @@
+@textColor: #fff;
+@backgroundColor: @gray-dark;
+@primaryTextColor: #fff;
+@positiveTextColor: #fff;
+@negativeTextColor: #fff;
+@hoverBackgroundColor: lighten(@gray-dark, 5%);
+@basicHoverBackground: lighten(@gray-dark, 10%);
+@activeBackgroundColor: @gray;
+@textShadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+@borderColor: rgba(0, 0, 0, 0.6);

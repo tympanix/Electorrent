@@ -1,0 +1,9 @@
+@textColor: #fff;
+@backgroundColor: @gray;
+@basicHoverBackground: @gray-base;
+@hoverBackgroundColor: @gray-base;
+@focusColorBackgroundColor: @gray-base;
+@activeBackgroundColor: @gray-dark;
+@boxShadow: none;
+@downBackgroundColor: @gray-darker;
+@basicDownBackground: @gray-darker;

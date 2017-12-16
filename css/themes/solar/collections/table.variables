@@ -1,0 +1,17 @@
+@stripedBackground: @gray-dark;
+@activeBackgroundColor: darken(@gray, 15%);
+@activeColor: @gray-light;
+@borderColor: lighten(@gray-dark, 5%);
+
+@positiveColor: #2AA198;
+@warningColor: #CB4B16;
+@negativeColor: #D33682;
+@warningBackgroundColor: darken(@warningColor, 15%);
+@positiveBackgroundColor: darken(@positiveColor, 15%);
+@negativeBackgroundColor: darken(@negativeColor, 15%);
+
+@background: darken(@gray-dark, 3%);
+@headerBackground: lighten(@gray-darker, 5%);
+@definitionPageBackground: @pageBackground;
+@internalBorderColor: lighten(@gray-dark, 5%);
+@footerBackground: @gray-dark;
