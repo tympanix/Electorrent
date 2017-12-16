@@ -81,6 +81,18 @@ gulp.task('build:less', ['semantic'], function() {
     .pipe(gulp.dest(`${OUT}/css`))
 })
 
+gulp.task('styles', function() {
+  return gulp.src('css/styles.less')
+    .pipe(less({
+      globalVars: {
+        "@renderTheme": 'default'
+      }
+    }))
+    .pipe(gulp.dest(`${OUT}/css`))
+})
+
+gulp.task('theme', ['build:less', 'styles'])
+
 gulp.task('build', function() {
     runSequence('build:clean', ['build:concat', 'build:app', 'build:assets', 'build:static', 'build:less']);
 });

@@ -1,0 +1,39 @@
+h1, h2, h3, h4, h5, h6, .ui.header {
+  color: #c8c8c8;
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+// '.text' class is newly defined
+.text.primary,
+.text.primary:hover {
+  color: @primaryColor;
+}
+
+.text.positive,
+.text.positive:hover {
+  color: @positiveColor;
+}
+
+.text.negative,
+.text.negative:hover {
+  color: @negativeColor;
+}
+
+.text.warning,
+.text.warning:hover {
+  color: @warningColor;
+}
+
+.text.info,
+.text.info:hover {
+  color: @infoColor;
+}
+
+// code color
+pre .code {
+  color: @gray-light !important;
+}
+
+.ui.rating i.icon {
+  color: @gray-light !important;
+}

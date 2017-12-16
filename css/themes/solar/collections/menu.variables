@@ -1,0 +1,33 @@
+@itemTextColor: @textColor;
+@background: @gray-dark;
+@border: transparent;
+@hoverItemTextColor: rgba(255,255,255,.75);
+@activeItemTextColor: #fff;
+@activeItemBackground: darken(@gray-darker, 5%);
+@labelTextColor: #fff;
+@labelBackground: @gray-dark;
+@invertedBackground: darken(@primaryColor, 15%);
+@invertedItemTextColor: rgba(255,255,255,.5);
+@invertedHoverColor: rgba(255,255,255,.75);
+@invertedActiveColor: #fff;
+@invertedMenuPressedBackground: rgba(255,255,255,.5);
+@hoverItemBackground: transparent;
+@diabledTextColor: @gray;
+@tabularBorderColor: @gray-dark;
+@tabularActiveColor: #fff;
+@paginationActiveTextColor: rgba(255,255,255,.75);
+@paginationActiveBackground: @gray-dark;
+
+@subMenuTextColor: rbga(0, 0, 0, .1);
+@dropdownBackground: @gray-dark;
+
+@hoverItemBackground: rgba(0, 0, 0, .7);
+@pressedItemBackground: rgba(0, 0, 0, .75);
+@activeHoverItemBackground: rgba(0, 0, 0, .75);
+@verticalItemBackground: @gray-darker;
+
+@tabularActiveBackground: @gray-dark;
+
+@secondaryActiveItemBackground: darken(@gray-darker, 5%);
+@secondaryHoverItemBackground: darken(@gray-darker, 5%);
+@secondaryActiveHoverItemBackground: darken(@gray-darker, 5%);

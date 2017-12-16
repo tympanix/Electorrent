@@ -1,0 +1,2 @@
+@headerLinkColor: #fff;
+@descriptionColor: @gray-lighter;

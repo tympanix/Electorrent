@@ -1,0 +1,8 @@
+.ui.table tr.warning,
+.ui.table td.warning,
+.ui.table tr.positive,
+.ui.table td.positive,
+.ui.table tr.negative,
+.ui.table td.negative {
+  color: @gray-light !important;
+}

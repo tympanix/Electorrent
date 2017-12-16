@@ -1,0 +1,2 @@
+@styledTitleColor: white;
+@styledBackground: @gray-light;

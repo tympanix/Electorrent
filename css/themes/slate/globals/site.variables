@@ -1,0 +1,52 @@
+@gray-base: #000;
+@gray-darker: #272B30;
+@gray-dark: #3A3F44;
+@gray: #52575C;
+@gray-light: #7A8288;
+@gray-lighter: #999;
+@primaryColor: @gray-light;
+@positiveColor: #62c462;
+@warningColor: #f89406;
+@negativeColor: #ee5f5b;
+@pageBackground: @gray-darker;
+@linkColor: #fff;
+@linkHoverColor: #fff;
+@padding-base-vertical: 8px;
+@padding-large-vertical: 14px;
+@inputColor: @gray-darker;
+@invertedDisabledTextColor: #ccc;
+@disabledBorderColor: rgba(0, 0, 0, 0.6);
+@positiveTextColor: #fff;
+@positiveBackgroundColor: #62c462;
+@infoTextColor: #fff;
+@infoBackgroundColor: @infoColor;
+@warningTextColor: #fff;
+@warningBackgroundColor: #f89406;
+@warningBorderColor: darken(spin(@warningBackgroundColor, -10), 3%);
+@negativeTextColor: #fff;
+@negativeBackgroundColor: #ee5f5b;
+@negativeBorderColor: darken(spin(@negativeBackgroundColor, -10), 3%);
+
+
+@darkTextColor               : rgba(255, 255, 255, 0.85);
+@invertedMutedTextColor              : rgba(0, 0, 0, 0.6);
+@invertedLightTextColor              : rgba(0, 0, 0, 0.4);
+
+@invertedUnselectedTextColor         : rgba(0, 0, 0, 0.4);
+@invertedHoveredTextColor            : rgba(0, 0, 0, 0.8);
+@invertedPressedTextColor            : rgba(0, 0, 0, 0.9);
+@invertedSelectedTextColor           : rgba(0, 0, 0, 0.95);
+@invertedDisabledTextColor           : rgba(0, 0, 0, 0.2);
+
+@textColor           : rgba(255, 255, 255, 0.9);
+@mutedTextColor      : rgba(255, 255, 255, 0.8);
+@lightTextColor      : rgba(255, 255, 255, 0.7);
+@unselectedTextColor : rgba(255, 255, 255, 0.5);
+@hoveredTextColor    : rgba(255, 255, 255, 1);
+@pressedTextColor    : rgba(255, 255, 255, 1);
+@selectedTextColor   : rgba(255, 255, 255, 1);
+@disabledTextColor   : rgba(255, 255, 255, 0.2);
+
+@borderColor: @gray;
+
+@inputPlaceholderColor: @gray-lighter;

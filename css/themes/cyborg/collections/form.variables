@@ -1,0 +1,2 @@
+@formErrorColor: @gray-lighter;
+@inputErrorFocusColor: @formErrorColor;

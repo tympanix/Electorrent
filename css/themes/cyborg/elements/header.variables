@@ -1,0 +1,19 @@
+@textColor: #fff;
+@subHeaderColor: @gray-light;
+
+@hugeFontSize: 56px;
+@largeFontSize: 45px;
+@mediumFontSize: 24px;
+@smallFontSize: 20px;
+@tinyFontSize: 16px;
+
+@h1: 56px;
+@h2: 45px;
+@h3: 24px;
+@h4: 20px;
+@h5: 16px;
+
+@blockBackground: @gray-base;
+@blockBorder: @blockBorderWidth solid @gray-dark;
+@attachedBackground: @gray-base;
+@attachedBorder: @blockBorderWidth solid @gray-dark;
