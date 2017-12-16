@@ -1,0 +1,8 @@
+@sliderLineColor: @gray;
+@toggleLaneBackground: @gray;
+@radioActiveBulletColor: @gray-base;
+@radioFocusBulletColor: @gray-base;
+@radioActiveFocusBulletColor: @gray-base;
+@bulletColor: @gray-base;
+@checkboxActiveCheckColor: @gray-base;
+@checkboxActiveFocusCheckColor: @gray-base;

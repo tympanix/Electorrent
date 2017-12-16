@@ -1,0 +1,6 @@
+@menuBackground: @gray-dark;
+@itemColor: @textColor;
+@hoveredItemColor: rgba(255,255,255,.75);
+@hoveredItemBackground: @gray-darker;
+@pointingArrowBackground: none;
+@selectionBackground: @gray-dark;

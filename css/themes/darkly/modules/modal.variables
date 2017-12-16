@@ -1,0 +1,5 @@
+@contentBackground: @gray-dark;
+@headerBorder: @gray;
+@background: @gray-dark;
+@headerBackground: @gray-dark;
+@actionBackground: @gray-dark;
