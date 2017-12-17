@@ -27,6 +27,6 @@
 @secondaryHoverItemBackground: darken(@gray-darker, 5%);
 @secondaryActiveHoverItemBackground: darken(@gray-darker, 5%);
 
-@border: 1px solid rgba(0, 0, 0, 0.5);
+@border: 1px solid @borderColor;
 @boxShadow: none;
 @textMenuItemColor: @gray;
