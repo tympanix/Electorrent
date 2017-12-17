@@ -1,6 +1,7 @@
 html, body {
     overflow: hidden;
     -webkit-user-select: none;
+    color: @textColor;
 }
 .wrapper {
     position: relative;
@@ -36,7 +37,7 @@ html, body {
     display: block;
     z-index: 1;
     overflow-x: hidden;
-    border-right: 1px solid #CECECE;
+    border-right: 1px solid @borderColor;
 }
 .sidebar + div {
     position: relative;
@@ -47,7 +48,7 @@ html, body {
     overflow: hidden;
 }
 .torrent.sidebar {
-    background-color: #FFF;
+    background-color: @pageForeground;
 }
 .sidebar .nav {
     margin: 0px;
@@ -62,10 +63,10 @@ html, body {
     cursor: pointer;
 }
 .sidebar .nav li.active {
-    background: #F5F5F5 !important;
+    background: @highlightBackground !important;
 }
 .sidebar .nav li:hover {
-    background: #F5F5F5 !important;
+    background: @highlightBackground !important;
 }
 .sidebar .nav + .divider {
     margin-top: 0;
@@ -74,9 +75,8 @@ html, body {
     padding: 12px;
     padding-left: 24px;
     padding-right: 24px;
-    /*background-color: #F5F5F5;*/
-    border-top: 1px solid #CECECE;
-    border-bottom: 1px solid #CECECE;
+    border-top: 1px solid @borderColor;
+    border-bottom: 1px solid @borderColor;
     font-weight: 700;
     font-style: normal;
 
@@ -93,7 +93,7 @@ html, body {
     cursor: pointer;
 }
 .torrent.tag {
-    background-color: #F5F5F5;
+    background-color: @highlightBackground;
 }
 .torrent.tag .detail {
     float: right;
@@ -104,15 +104,15 @@ html, body {
     margin: -4px;
 }
 .main-panel {
-    background: rgba(247, 247, 248, 1);
+    /*background: rgba(247, 247, 248, 1);*/
 }
 .main-panel .action.header {
     white-space: nowrap;
     height: 50px;
     padding: 0 7px;
-    background-color: #FFF;
+    background-color: @pageForeground;
     line-height: 50px;
-    border-bottom: 1px solid #CECECE;
+    border-bottom: 1px solid @borderColor;
     overflow: visible !important;
 }
 .action.header > div {
@@ -152,7 +152,7 @@ html, body {
     left: 0;
     height: 65px;
     padding: 1rem;
-    border-top: 1px solid #CECECE;
+    border-top: 1px solid @borderColor;
     text-align: right;
     background-color: #f9fafb;
     overflow: hidden;

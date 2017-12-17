@@ -9,6 +9,8 @@
 @warningColor: #f89406;
 @negativeColor: #ee5f5b;
 @pageBackground: @gray-darker;
+@pageForeground: lighten(@gray-darker, 5%);
+@highlightBackground: @gray;
 @linkColor: #fff;
 @linkHoverColor: #fff;
 @padding-base-vertical: 8px;

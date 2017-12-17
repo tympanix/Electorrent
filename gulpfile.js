@@ -75,7 +75,7 @@ gulp.task('build:less', ['semantic'], function() {
     .pipe(less({
       paths: [semantic],
       globalVars: {
-        "@renderTheme": 'light'
+        "@renderTheme": 'slate'
       }
     }))
     .pipe(gulp.dest(`${OUT}/css`))
@@ -85,7 +85,7 @@ gulp.task('styles', function() {
   return gulp.src('css/styles.less')
     .pipe(less({
       globalVars: {
-        "@renderTheme": 'light'
+        "@renderTheme": 'slate'
       }
     }))
     .pipe(gulp.dest(`${OUT}/css`))
