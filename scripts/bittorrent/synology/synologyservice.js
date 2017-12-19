@@ -15,6 +15,12 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     // TODO: Check that this variable needs to be in this scope or if it can be placed further in.
     var sid;
 
+    // API vars.
+    var auth_path;
+    var auth_version;
+    var dl_path;
+    var dl_version;
+
     // TODO: Documentation update.
     // Params - Initialized as default values for this domain.
     var params = {
@@ -25,7 +31,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         "account": "",
         "passwd": "",
         "session": "DownloadStation",
-        "format": "sid"
+        "format": "sid",
+        "additional": "detail,file"
     }
 
     // TODO: Documentation for this.
@@ -70,16 +77,6 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
           TODO: Remember to check that the Download Station is actually running before continuing.
                 Probably return some error message to user if it is not up and running.
         */
-
-        /*
-           Before login, API information is required on SYNO.Auth API.
-           Grab the DownloadStation API information as well.
-        */
-        var auth_path;
-        var auth_version;
-        var dl_path;
-        var dl_version;
-
         return $http.get(this.server.url() + "/webapi/query.cgi", config("SYNO.API.Info", "1", "query",
                 "SYNO.API.Auth,SYNO.DownloadStation.Task"))
             .then(function(response) {
@@ -92,7 +89,9 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
                     task: response.data.data["SYNO.DownloadStation.Task"]
                 };
             }).then(function(data) {
-                // Grabbing data for login.
+                /* Before login, API information is required on SYNO.Auth API.
+                   Grab the DownloadStation API information as well.
+                */
                 auth_path = data.auth.path;
                 auth_version = data.auth.maxVersion;
                 dl_path = data.task.path;
@@ -129,7 +128,13 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.torrents = function() {
         // Retrieve info of all torrents in DownloadStation
-        return $http.get(this.server.url() + "/webapi/")
+        return $http.get(this.server.url() + "/webapi/" + dl_path, config("SYNO.DownloadStation.Task", dl_version, "list"))
+            .then(function(response) {
+                    if (!isSuccess(response.data)) {
+                        return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
+                    }
+                    
+            })
 
 
         var torrents = {
