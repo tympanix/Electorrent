@@ -1,9 +1,0 @@
-@background: darken(@gray-darker, 4%);
-@headerBackground: @gray-darker;
-@footerBackground: @gray-darker;
-@definitionPageBackground: @pageBackground;
-@activeBackgroundColor: lighten(@gray-darker, 5%);
-@stripedBackground: darken(darken(@gray-darker, 4%), 6%);
-@activeBackgroundHover: @gray-dark;
-@borderColor: lighten(@gray-darker, 5%);
-@internalBorderColor: lighten(@gray-darker, 2%);

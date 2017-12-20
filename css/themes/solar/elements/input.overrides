@@ -1,3 +1,0 @@
-.ui.menu .ui.transparent.input input {
-  color: @gray !important;
-}

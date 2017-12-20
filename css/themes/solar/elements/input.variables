@@ -1,4 +1,0 @@
-@background: #A9BDBD;
-@border: rgba(0, 0, 0, .15);
-@placeholderColor: #657B83;
-@focusBackground: @gray;

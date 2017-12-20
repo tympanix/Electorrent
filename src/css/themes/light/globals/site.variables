@@ -1,0 +1,6 @@
+/*-------------------
+        Page
+--------------------*/
+@pageBackground      : #F0F0F0;
+@pageForeground      : @white;
+@highlightBackground : #F5F5F5;

@@ -1,5 +1,0 @@
-@background: @gray-darker;
-@border: 1px solid @gray-dark;
-@descriptionColor: white;
-@boxShadow: none;
-@headerColor: #fff;

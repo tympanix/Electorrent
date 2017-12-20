@@ -1,5 +1,0 @@
-@color: #fff;
-@backgroundColor: @primaryColor;
-@labelActiveTextColor: @primaryColor;
-@ribbonShadowColor: @primaryColor;
-@labelHoverTextColor: black;

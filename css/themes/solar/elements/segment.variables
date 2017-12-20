@@ -1,4 +1,0 @@
-@background: @pageBackground;
-@secondaryBackground: @background;
-@tertiaryBackground:  @background;
-@attachedBorder: 1px solid lighten(@gray-dark, 5%);
