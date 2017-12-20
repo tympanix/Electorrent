@@ -5,7 +5,6 @@ const gulp = require('gulp');
 const {server} = require('electron-connect')
 const useref = require('gulp-useref');
 const clean = require('gulp-clean');
-const rename = require('gulp-rename');
 const run = require('run-sequence');
 const util = require('gulp-util');
 const less = require('gulp-less');

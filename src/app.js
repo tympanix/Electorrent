@@ -12,7 +12,6 @@ const { app } = electron;
 const { BrowserWindow } = electron;
 const { ipcMain } = electron;
 const { session } = electron;
-const { dialog }  = electron;
 
 // Set up program arguments
 yargs.version(() => app.getVersion())
