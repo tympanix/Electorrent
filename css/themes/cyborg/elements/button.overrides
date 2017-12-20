@@ -1,3 +1,0 @@
-.ui.inverted.button:hover {
-  background: @background;
-}

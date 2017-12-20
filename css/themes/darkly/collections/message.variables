@@ -1,9 +1,0 @@
-@background: @gray-dark;
-@boxShadow: none;
-@textColor: #fff;
-@boderColor: rgba(0, 0, 0, .1);
-
-@successHeaderColor: #fff;
-@warningHeaderColor: #fff;
-@errorHeaderColor: #fff;
-@infoHeaderColor: #fff;

@@ -1,5 +1,0 @@
-@backgroundColor: #586e75;
-@labelActiveTextColor: #fff;
-@labelActiveBackgroundColor: #586e75;
-@ribbonShadowColor: @backgroundColor;
-@labelHoverBackgroundColor: lighten(#586e75, 5%);
