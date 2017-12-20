@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html ng-app="torrentApp">
-    <head>
+    <head ng-controller="themeController">
         <meta charset="UTF-8">
         <title>Electorrent</title>
 
-        <link rel="stylesheet" href="css/themes/dark.css">
+        <link rel="stylesheet" href="css/themes/light.css">
+        <link rel="stylesheet" ng-href="css/themes/{{theme}}.css">
 
         <!-- build:css css/vendor.css -->
         <link rel="stylesheet" href="../bower_components/angular-table-resize/dist/table-resize.min.css">
@@ -86,6 +87,7 @@
 
         <!-- Controllers -->
         <script src="scripts/controllers/main.js" charset="utf-8"></script>
+        <script src="scripts/controllers/theme.js" charset="utf-8"></script>
         <script src="scripts/controllers/torrents.js" charset="utf-8"></script>
         <script src="scripts/controllers/settings.js" charset="utf-8"></script>
         <script src="scripts/controllers/welcome.js" charset="utf-8"></script>

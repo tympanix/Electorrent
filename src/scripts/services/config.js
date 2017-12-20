@@ -14,7 +14,8 @@ angular.module('torrentApp').service('configService', ['$rootScope', '$bittorren
             displaySize: 'normal',
             displayCompact: false,
             cleanNames: true,
-            fixedHeader: false
+            fixedHeader: false,
+            theme: 'light'
         },
         servers: [],
         certificates: []
