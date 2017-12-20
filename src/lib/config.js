@@ -4,12 +4,10 @@ const {app} = require('electron');
 var data = null;
 
 var defaultSettings = {
-    server: {
-
-    },
     ui: {
         resizeMode: 'FixedResizer',
-        notifications: true
+        notifications: true,
+        theme: 'light'
     }
 };
 

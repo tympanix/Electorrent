@@ -31,8 +31,9 @@ gulp.task('serve', function () {
     gulp.watch('src/lib/*.js', () => run('build:lib', electron.restart))
 
     // Reload renderer process
-    gulp.watch(['src/*.html', 'src/scripts/**'], () => run('build:concat', electron.reload));
+    gulp.watch(['src/*.html', 'src/scripts/**'], () => run('build:useref', electron.reload));
     gulp.watch(['src/views/**/*'], () => run('build:views', electron.reload));
+    gulp.watch(['src/css/**/*'], () => run('build:less', electron.reload));
 });
 
 gulp.task('default', ['serve']);
@@ -42,7 +43,7 @@ gulp.task('clean', function() {
     .pipe(clean());
 });
 
-gulp.task('build:concat', function() {
+gulp.task('build:useref', function() {
     return gulp.src('src/*.html')
     .pipe(useref({
       dev: function(content) {
@@ -96,7 +97,7 @@ gulp.task('build:semantic', ['semantic:src', 'semantic:default'])
 
 gulp.task('build:static', ['build:app', 'build:views', 'build:lib', 'build:others', 'build:assets'])
 
-gulp.task('build:less', ['build:semantic'], function() {
+gulp.task('build:less', function() {
   let dir = 'src/css/themes'
   let themes = fs.readdirSync(dir)
     .filter(function(file) {
@@ -119,6 +120,10 @@ gulp.task('build:less', ['build:semantic'], function() {
   return merge(tasks)
 })
 
-gulp.task('build', ['build:concat', 'build:static', 'build:less']);
+gulp.task('build:styles', ['build:semantic'], function() {
+  gulp.start('build:less')
+})
+
+gulp.task('build', ['build:useref', 'build:static', 'build:styles']);
 
 gulp.task('install', ['semantic'])
