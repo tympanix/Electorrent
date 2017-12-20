@@ -9,6 +9,7 @@ const rename = require('gulp-rename');
 const run = require('run-sequence');
 const util = require('gulp-util');
 const less = require('gulp-less');
+const concat = require('gulp-concat');
 const path = require('path');
 const merge = require('merge-stream');
 
@@ -36,7 +37,7 @@ gulp.task('serve', function () {
 
 gulp.task('default', ['serve']);
 
-gulp.task('build:clean', function() {
+gulp.task('clean', function() {
     return gulp.src(CLEAN, {read: false})
     .pipe(clean());
 });
@@ -76,9 +77,7 @@ gulp.task('build:assets' , function () {
     .pipe(gulp.dest(OUT + '/css/themes/default/assets'))
 });
 
-gulp.task('build:static', ['build:app', 'build:views', 'build:lib', 'build:others', 'build:assets'])
-
-gulp.task('src:semantic', function() {
+gulp.task('semantic:src', function() {
   return gulp.src([
     path.join(semantic, '**'),
     '!'+path.join(semantic, 'themes/**'),
@@ -86,27 +85,18 @@ gulp.task('src:semantic', function() {
   ]).pipe(gulp.dest('src/css/semantic'))
 })
 
-gulp.task('themes:semantic', function() {
+gulp.task('semantic:default', function() {
   let themes = ['default']
   return gulp.src(themes.map(t => path.join(semantic, 'themes', t, '/**')),
    {base: path.join(semantic, 'themes')})
     .pipe(gulp.dest('src/css/themes'))
 })
 
-gulp.task('semantic', ['src:semantic', 'themes:semantic'])
+gulp.task('build:semantic', ['semantic:src', 'semantic:default'])
 
-gulp.task('build:less', ['semantic'], function() {
-  return gulp.src('src/css/semantic/semantic.less')
-    .pipe(less({
-      paths: [semantic],
-      globalVars: {
-        "@renderTheme": 'dark'
-      }
-    }))
-    .pipe(gulp.dest(`${OUT}/css`))
-})
+gulp.task('build:static', ['build:app', 'build:views', 'build:lib', 'build:others', 'build:assets'])
 
-gulp.task('themes:all', ['semantic'], function() {
+gulp.task('build:less', ['build:semantic'], function() {
   let dir = 'src/css/themes'
   let themes = fs.readdirSync(dir)
     .filter(function(file) {
@@ -115,33 +105,19 @@ gulp.task('themes:all', ['semantic'], function() {
     })
 
   let tasks = themes.map(function(theme) {
-    return gulp.src('src/css/semantic/semantic.less')
+    return gulp.src(['src/css/semantic/semantic.less', 'src/css/styles.less'])
       .pipe(less({
         paths: [semantic],
         globalVars: {
           "@renderTheme": theme
         }
       }))
-      .pipe(rename({
-        basename: theme
-      }))
+      .pipe(concat(theme + '.css'))
       .pipe(gulp.dest(path.join(OUT, 'css', 'themes')))
   })
 
   return merge(tasks)
 })
-
-gulp.task('styles', function() {
-  return gulp.src('src/css/styles.less')
-    .pipe(less({
-      globalVars: {
-        "@renderTheme": 'dark'
-      }
-    }))
-    .pipe(gulp.dest(`${OUT}/css`))
-})
-
-gulp.task('theme', ['build:less', 'styles'])
 
 gulp.task('build', ['build:concat', 'build:static', 'build:less']);
 
