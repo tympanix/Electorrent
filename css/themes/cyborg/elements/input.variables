@@ -1,4 +1,0 @@
-@border: @gray-dark;
-@placeholderColor: @gray-light;
-@borderWidth: 0;
-@focusColor: black;

@@ -1,3 +1,0 @@
-@background: @gray-darker;
-@attachedBorder: @borderWidth solid @gray-dark;
-@stackedPageBackground: lighten(@pageBackground, 5%);

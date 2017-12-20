@@ -1,5 +1,0 @@
-/*-------------------
-        Page
---------------------*/
-@pageBackground      : #F0F0F0;
-@pageForeground      : @white;

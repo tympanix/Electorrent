@@ -1,4 +1,0 @@
-@background: @gray-dark;
-@arrowBackground: @gray-dark;
-@borderColor: lighten(@gray-dark, 6%); 
-@arrowColor: @borderColor;

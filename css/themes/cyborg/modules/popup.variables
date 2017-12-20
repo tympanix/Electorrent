@@ -1,6 +1,0 @@
-@tooltipBackground: lighten(@pageBackground, 5%);
-@background: lighten(@pageBackground, 5%);
-@borderColor: @gray-dark; 
-@arrowColor: @borderColor;
-@arrowBackground: @background;
-@color: white;
