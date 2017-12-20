@@ -6,6 +6,7 @@ const {server} = require('electron-connect')
 const useref = require('gulp-useref');
 const clean = require('gulp-clean');
 const rename = require('gulp-rename');
+const run = require('run-sequence');
 const util = require('gulp-util');
 const less = require('gulp-less');
 const path = require('path');
@@ -25,10 +26,12 @@ gulp.task('serve', function () {
     electron.start('--debug');
 
     // Restart browser process
-    gulp.watch(['src/app.js', 'src/lib/*.js'], electron.restart);
+    gulp.watch('src/app.js', () => run('build:app', electron.restart))
+    gulp.watch('src/lib/*.js', () => run('build:lib', electron.restart))
 
     // Reload renderer process
-    gulp.watch(['src/**/*.{html,cs,js}'], electron.reload);
+    gulp.watch(['src/*.html', 'src/scripts/**'], () => run('build:concat', electron.reload));
+    gulp.watch(['src/views/**/*'], () => run('build:views', electron.reload));
 });
 
 gulp.task('default', ['serve']);
@@ -49,12 +52,22 @@ gulp.task('build:concat', function() {
 });
 
 gulp.task('build:app', function() {
-    return gulp.src(['src/app.js'])
+  return gulp.src('src/app.js')
     .pipe(gulp.dest(OUT));
 });
 
-gulp.task('build:static', function() {
-    return gulp.src(['src/views/**/*', 'src/lib/**/*', 'src/css/fonts/**/*', 'src/img/**/*', 'build/**/*'], { base: 'src'})
+gulp.task('build:views', function() {
+  return gulp.src('src/views/**/*', {base: 'src'})
+    .pipe(gulp.dest(OUT))
+})
+
+gulp.task('build:lib', function() {
+  return gulp.src('src/lib/**/*', {base: 'src'})
+    .pipe(gulp.dest(OUT))
+})
+
+gulp.task('build:others', function() {
+  return gulp.src(['src/css/fonts/**/*', 'src/img/**/*', 'build/**/*'], {base: 'src'})
     .pipe(gulp.dest(OUT))
 })
 
@@ -62,6 +75,8 @@ gulp.task('build:assets' , function () {
     return gulp.src('./bower_components/semantic/dist/themes/default/assets/**')
     .pipe(gulp.dest(OUT + '/css/themes/default/assets'))
 });
+
+gulp.task('build:static', ['build:app', 'build:views', 'build:lib', 'build:others', 'build:assets'])
 
 gulp.task('src:semantic', function() {
   return gulp.src([
@@ -128,6 +143,6 @@ gulp.task('styles', function() {
 
 gulp.task('theme', ['build:less', 'styles'])
 
-gulp.task('build', ['build:concat', 'build:app', 'build:assets', 'build:static', 'build:less']);
+gulp.task('build', ['build:concat', 'build:static', 'build:less']);
 
 gulp.task('install', ['semantic'])
