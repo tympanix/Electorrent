@@ -7,6 +7,7 @@
 @pressedTextColor    : rgba(255, 255, 255, 1);
 @selectedTextColor   : rgba(255, 255, 255, 1);
 @disabledTextColor   : rgba(255, 255, 255, 0.2);
+@highlightColor      : @selectedTextColor;
 
 /* Form input */
 @focusedFormBorderColor: #446f90;
@@ -15,6 +16,8 @@
 @inputColor: @white;
 @selectionTextColor: @textColor;
 @solidInternalBorderColor: lighten(@gray-darker, 10%);
+@focusColor: @white;
+@inputHighlightColor: @white;
 
 /* Page background and primary colors */
 @gray-base: #000;
