@@ -133,7 +133,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
                     if (!isSuccess(response.data)) {
                         return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
                     }
-                    
+                    processData(response);
+
             })
 
 
@@ -143,6 +144,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
             changed: [],
             deleted: []
         };
+
     }
 
 
