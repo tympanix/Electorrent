@@ -1,0 +1,1 @@
+@background: darken(@pageBackground, 5%);
