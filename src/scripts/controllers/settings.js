@@ -7,6 +7,8 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
 
     $scope.server = {}
 
+    $scope.themes = electron.themes()
+
     $scope.btclients = $btclients;
 
     $scope.is = electron.is;
