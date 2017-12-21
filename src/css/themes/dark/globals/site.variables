@@ -26,10 +26,10 @@
 @gray: #52575C;
 @gray-light: #7A8288;
 @gray-lighter: #999;
-@primaryColor: @gray-light;
 @positiveColor: #62c462;
 @warningColor: #f89406;
 @negativeColor: #ee5f5b;
+@solidBorderColor: @gray;
 @pageBackground: @gray-darker;
 @pageMiddleground: lighten(@gray-darker, 2.5%);
 @pageForeground: lighten(@gray-darker, 5%);
