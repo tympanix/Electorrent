@@ -1,6 +1,7 @@
 html, body {
     overflow: hidden;
     -webkit-user-select: none;
+    color: @textColor;
 }
 .wrapper {
     position: relative;
@@ -8,7 +9,7 @@ html, body {
     height: 100vh;
 }
 .main.wrapper {
-    background-color: #F0F0F0;
+    background-color: @pageBackground;
 }
 .zoom.normal {
     font-size: 1rem;
@@ -36,18 +37,18 @@ html, body {
     display: block;
     z-index: 1;
     overflow-x: hidden;
-    border-right: 1px solid #CECECE;
+    border-right: 1px solid @borderColor;
 }
 .sidebar + div {
     position: relative;
     z-index: 2;
     float: right;
-    width: calc(100% - 260px);
+    width: calc(~"100% - 260px");
     min-height: 100%;
     overflow: hidden;
 }
 .torrent.sidebar {
-    background-color: #FFF;
+    background-color: @pageForeground;
 }
 .sidebar .nav {
     margin: 0px;
@@ -62,10 +63,10 @@ html, body {
     cursor: pointer;
 }
 .sidebar .nav li.active {
-    background: #F5F5F5 !important;
+    background: @highlightBackground !important;
 }
 .sidebar .nav li:hover {
-    background: #F5F5F5 !important;
+    background: @highlightBackground !important;
 }
 .sidebar .nav + .divider {
     margin-top: 0;
@@ -74,9 +75,8 @@ html, body {
     padding: 12px;
     padding-left: 24px;
     padding-right: 24px;
-    /*background-color: #F5F5F5;*/
-    border-top: 1px solid #CECECE;
-    border-bottom: 1px solid #CECECE;
+    border-top: 1px solid @borderColor;
+    border-bottom: 1px solid @borderColor;
     font-weight: 700;
     font-style: normal;
 
@@ -93,7 +93,7 @@ html, body {
     cursor: pointer;
 }
 .torrent.tag {
-    background color: #F5F5F5;
+    background-color: @highlightBackground;
 }
 .torrent.tag .detail {
     float: right;
@@ -104,15 +104,15 @@ html, body {
     margin: -4px;
 }
 .main-panel {
-    background: rgba(247, 247, 248, 1);
+    /*background: rgba(247, 247, 248, 1);*/
 }
 .main-panel .action.header {
     white-space: nowrap;
     height: 50px;
     padding: 0 7px;
-    background-color: #FFF;
+    background-color: @pageForeground;
     line-height: 50px;
-    border-bottom: 1px solid #CECECE;
+    border-bottom: 1px solid @borderColor;
     overflow: visible !important;
 }
 .action.header > div {
@@ -138,7 +138,7 @@ html, body {
     right: 0;
     left: 0;
     min-width: 300px;
-    height: calc(100% - 65px);
+    height: calc(~"100% - 65px");
     padding: 21px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -152,13 +152,13 @@ html, body {
     left: 0;
     height: 65px;
     padding: 1rem;
-    border-top: 1px solid #CECECE;
+    border-top: 1px solid @borderColor;
     text-align: right;
-    background-color: #f9fafb;
+    background-color: @pageMiddleground;
     overflow: hidden;
 }
 .main-panel .main-content {
-    height: calc(100% - 50px);
+    height: calc(~"100% - 50px");
     overflow-x: hidden;
     /*overflow-y: auto;*/
     overflow-y: overlay; /* Chrome scrollbar on top */
@@ -242,7 +242,7 @@ html, body {
 }
 .overlay {
     position: absolute;
-    background-color: #F0F0F0;
+    background-color: @pageBackground;
     height: 100%;
     width: 100%;
 }
@@ -252,7 +252,7 @@ html, body {
     font-style: italic;
 }
 .ui.inverted.solid.dimmer {
-    background-color: #F0F0F0;
+    background-color: @pageBackground;
 }
 .transparent.overlay {
     background-color: rgba(0, 0, 0, 0.75);
@@ -481,7 +481,7 @@ html, body {
         transform: scale(1.2);
     }
     100% {
-        opacity 1;
+        opacity: 1;
         transform: scale(1);
     }
 }
