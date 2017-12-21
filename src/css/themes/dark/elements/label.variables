@@ -1,0 +1,3 @@
+@backgroundColor: @gray-dark;
+@labelActiveBackgroundColor: @gray-light;
+@ribbonShadowColor: @gray-dark;

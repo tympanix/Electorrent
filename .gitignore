@@ -99,3 +99,8 @@ app/*
 
 # Yarn
 yarn.lock
+
+# SemanticUI
+src/css/semantic/*
+!src/css/semantic/theme.config
+src/css/themes/default

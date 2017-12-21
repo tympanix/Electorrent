@@ -1,0 +1,13 @@
+@menuBackground: @gray-dark;
+@itemColor: @textColor;
+@hoveredItemColor: #fff;
+@hoveredItemBackground: darken(@gray-dark, 3.5%);
+@activeItemColor: #fff;
+@activeItemBackground: lighten(@gray-dark, 1.5%);
+@selectedBackground: lighten(@gray-dark, 1.5%);
+@selectionTextUnderlayColor: white;
+@menuHeaderColor: @textColor;
+@pointingArrowBackground: darken(@gray-dark, 5%);
+@pointingArrowBoxShadow: none;
+@selectionTextColor: @textColor;
+@selectionVisibleTextColor: @white;
