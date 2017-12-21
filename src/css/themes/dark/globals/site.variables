@@ -1,3 +1,22 @@
+/* Text colors */
+@textColor           : rgba(255, 255, 255, 0.9);
+@mutedTextColor      : rgba(255, 255, 255, 0.8);
+@lightTextColor      : rgba(255, 255, 255, 0.7);
+@unselectedTextColor : rgba(255, 255, 255, 0.5);
+@hoveredTextColor    : rgba(255, 255, 255, 1);
+@pressedTextColor    : rgba(255, 255, 255, 1);
+@selectedTextColor   : rgba(255, 255, 255, 1);
+@disabledTextColor   : rgba(255, 255, 255, 0.2);
+
+/* Form input */
+@focusedFormBorderColor: #446f90;
+@focusedFormMutedBorderColor: #446f90;
+@inputBackground: @gray-darker;
+@inputColor: @white;
+@selectionTextColor: @textColor;
+@solidInternalBorderColor: lighten(@gray-darker, 10%);
+
+/* Page background and primary colors */
 @gray-base: #000;
 @gray-darker: #272B30;
 @gray-dark: #3A3F44;
@@ -9,13 +28,13 @@
 @warningColor: #f89406;
 @negativeColor: #ee5f5b;
 @pageBackground: @gray-darker;
+@pageMiddleground: lighten(@gray-darker, 2.5%);
 @pageForeground: lighten(@gray-darker, 5%);
 @highlightBackground: @gray;
 @linkColor: #fff;
 @linkHoverColor: #fff;
 @padding-base-vertical: 8px;
 @padding-large-vertical: 14px;
-@inputColor: @gray-darker;
 @invertedDisabledTextColor: #ccc;
 @disabledBorderColor: rgba(0, 0, 0, 0.6);
 @positiveTextColor: #fff;
@@ -39,15 +58,6 @@
 @invertedPressedTextColor            : rgba(0, 0, 0, 0.9);
 @invertedSelectedTextColor           : rgba(0, 0, 0, 0.95);
 @invertedDisabledTextColor           : rgba(0, 0, 0, 0.2);
-
-@textColor           : rgba(255, 255, 255, 0.9);
-@mutedTextColor      : rgba(255, 255, 255, 0.8);
-@lightTextColor      : rgba(255, 255, 255, 0.7);
-@unselectedTextColor : rgba(255, 255, 255, 0.5);
-@hoveredTextColor    : rgba(255, 255, 255, 1);
-@pressedTextColor    : rgba(255, 255, 255, 1);
-@selectedTextColor   : rgba(255, 255, 255, 1);
-@disabledTextColor   : rgba(255, 255, 255, 0.2);
 
 @borderColor: @gray;
 

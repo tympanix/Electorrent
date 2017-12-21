@@ -1,4 +1,4 @@
-@background: lighten(@gray-darker, 5%);
-@border: none;
+@background: @pageForeground;
 @descriptionColor: white;
-@boxShadow: none;
+@solidBorderColor: @grey;
+@extraDivider: 1px solid rgba(255, 255, 255, 0.05);
