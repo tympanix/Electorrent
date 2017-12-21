@@ -12,6 +12,6 @@
 @checkboxActiveBackground: @pageBackground;
 @checkboxColor: @white;
 
-@checkboxFocusBackground: lighten(@pageBackground, 1%);
-@checkboxActiveBackground: lighten(@pageBackground, 1%);
-@checkboxActiveFocusBackground: lighten(@pageBackground, 1%);
+@checkboxFocusBackground: darken(@pageBackground, 2%);
+@checkboxActiveBackground: @pageBackground;
+@checkboxActiveFocusBackground: darken(@pageBackground, 2%);
