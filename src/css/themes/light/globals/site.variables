@@ -3,4 +3,5 @@
 --------------------*/
 @pageBackground      : #F0F0F0;
 @pageForeground      : @white;
+@pageMiddleground    : #F9FAFB;
 @highlightBackground : #F5F5F5;
