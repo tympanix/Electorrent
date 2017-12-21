@@ -12,10 +12,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.name = 'Synology Download Station';
 
     // Session ID set by logging in in connection().
-    // TODO: Check that this variable needs to be in this scope or if it can be placed further in.
-    var sid;
-
-    // API vars.
+        // API vars.
     var auth_path;
     var auth_version;
     var dl_path;
@@ -24,15 +21,16 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     // TODO: Documentation update.
     // Params - Initialized as default values for this domain.
     var params = {
-        "api": "SYNO.API.Auth",
+        "api": "",
         "version": "1",
-        "method": "login",
+        "method": "",
         "query": "",
         "account": "",
         "passwd": "",
         "session": "DownloadStation",
         "format": "sid",
-        "additional": "detail,file"
+        "additional": "detail, file",
+        "sid": ""
     }
 
     // TODO: Documentation for this.
@@ -102,7 +100,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
                     auth_version, "login"))
             }).then(function(response) {
                 if (isSuccess(response.data)) {
-                    sid = response.data.sid;
+                    params.sid = response.data.sid;
                     return $q.resolve(response);
                 }
 
@@ -133,11 +131,14 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
                     if (!isSuccess(response.data)) {
                         return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
                     }
-                    processData(response);
-
+                    processData(response.data);
+                    console.log("succes");
+                    $q.resolve("YES");
             })
+    }
 
 
+    function processData(data) {
         var torrents = {
             labels: [],
             all: [],
@@ -145,10 +146,10 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
             deleted: []
         };
 
-    }
 
 
-    function processData(data) {
+
+
 
     }
 
