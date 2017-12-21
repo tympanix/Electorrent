@@ -1,0 +1,17 @@
+// @sliderLineColor: @gray;
+@toggleLaneBackground: @gray;
+// @toggleOnLaneColor: @primaryColor;
+// @radioActiveBulletColor: @gray-base;
+// @radioFocusBulletColor: @gray-base;
+// @radioActiveFocusBulletColor: @gray-base;
+// @bulletColor: @gray-base;
+// @checkboxActiveFocusCheckColor: @gray-base;
+
+@checkboxBackground: @pageBackground;
+
+@checkboxActiveBackground: @pageBackground;
+@checkboxColor: @white;
+
+@checkboxFocusBackground: darken(@pageBackground, 2%);
+@checkboxActiveBackground: @pageBackground;
+@checkboxActiveFocusBackground: darken(@pageBackground, 2%);

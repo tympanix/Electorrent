@@ -1,0 +1,12 @@
+@backgroundColor: @gray-darker;
+
+@titleColor: @gray-lighter;
+@descriptionColor: @gray-light;
+
+@activeBackground: darken(@gray-darker, 5%);
+@activeColor: @white;
+@hoverBackground: @gray-dark;
+@activeHoverBackground: @gray-dark;
+
+@disabledColor: darken(@white, 30%);
+@disabledBackground: @gray;

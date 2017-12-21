@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<h1>General Settings</h1>
+<div class="ui three doubling stackable cards">
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="asterisk icon"></i>
+                Startup Connection
+            </div>
+            <div class="description">
+                Configure which server to connect to when starting the application
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="Connection Mode" ng-model="settings.startup">
+                <dropdown-group data-value="default">Default</dropdown-group>
+                <dropdown-group data-value="ask">Ask</dropdown-group>
+                <dropdown-group data-value="latest">Latest</dropdown-group>
+            </dropdown>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="theme icon"></i>
+                Theme
+            </div>
+            <div class="description">
+                Changes the overall theme of the application
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="Theme" ng-model="settings.ui.theme">
+                <dropdown-group ng-repeat="theme in themes" title="theme.theme" value="theme.basename"></dropdown-group>
+            </dropdown>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="text height icon"></i>
+                Display Size
+            </div>
+            <div class="description">
+                Adjust for your screen size
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="Display Size" ng-model="settings.ui.displaySize">
+                <dropdown-group data-value="small">Small</dropdown-group>
+                <dropdown-group data-value="normal">Normal</dropdown-group>
+                <dropdown-group data-value="large">Large</dropdown-group>
+            </dropdown>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="expand icon"></i>
+                Table Resize Style
+            </div>
+            <div class="description">
+                Changes how the torrent table behaves when resized
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="Resize Mode" ng-model="settings.ui.resizeMode">
+                <dropdown-group data-value="FixedResizer">Static</dropdown-group>
+                <dropdown-group data-value="OverflowResizer">Overflow</dropdown-group>
+                <dropdown-group data-value="BasicResizer">Relative</dropdown-group>
+            </dropdown>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="refresh icon"></i>
+                Synchronization Speed
+            </div>
+            <div class="description">
+                How often should information be pulled from the torrent client?
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="Resize Mode" ng-model="settings.refreshRate">
+                <dropdown-group data-value="1000">Fast (1 second)</dropdown-group>
+                <dropdown-group data-value="2000">Default (2 seconds)</dropdown-group>
+                <dropdown-group data-value="4000">Slow (4 seconds)</dropdown-group>
+            </dropdown>
+        </div>
+    </div>
+    <div class="ui card" ng-if="!is.linux()">
+        <div class="content">
+            <div class="header">
+                <i class="magnet icon"></i>
+                Magnet Links
+            </div>
+            <div class="description">
+                Enabling this makes Electorrent the default program for magnet links
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="general.magnets"></toggle>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="cubes icon"></i>
+                Compact Listings
+            </div>
+            <div class="description">
+                Minimize space when listing torrents
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.ui.displayCompact"></toggle>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="announcement icon"></i>
+                Notifications
+            </div>
+            <div class="description">
+                Enable desktop notifications when torrents finishes
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.ui.notifications"></toggle>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="paint brush icon"></i>
+                Clean Names
+            </div>
+            <div class="description">
+                Clean torrent names thus making them more readable replacing punctuation marks ect.
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.ui.cleanNames"></toggle>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="pin icon"></i>
+                Fixed Header
+            </div>
+            <div class="description">
+                Always keep the column headers shown when scrolling throught torrents.
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.ui.fixedHeader"></toggle>
+        </div>
+    </div>
+</div>
