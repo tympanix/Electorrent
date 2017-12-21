@@ -1,8 +1,17 @@
-@sliderLineColor: @gray;
+// @sliderLineColor: @gray;
 @toggleLaneBackground: @gray;
-@radioActiveBulletColor: @gray-base;
-@radioFocusBulletColor: @gray-base;
-@radioActiveFocusBulletColor: @gray-base;
-@bulletColor: @gray-base;
-@checkboxActiveCheckColor: @gray-base;
-@checkboxActiveFocusCheckColor: @gray-base;
+// @toggleOnLaneColor: @primaryColor;
+// @radioActiveBulletColor: @gray-base;
+// @radioFocusBulletColor: @gray-base;
+// @radioActiveFocusBulletColor: @gray-base;
+// @bulletColor: @gray-base;
+// @checkboxActiveFocusCheckColor: @gray-base;
+
+@checkboxBackground: @pageBackground;
+
+@checkboxActiveBackground: @pageBackground;
+@checkboxColor: @white;
+
+@checkboxFocusBackground: lighten(@pageBackground, 1%);
+@checkboxActiveBackground: lighten(@pageBackground, 1%);
+@checkboxActiveFocusBackground: lighten(@pageBackground, 1%);
