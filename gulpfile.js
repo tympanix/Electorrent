@@ -125,4 +125,4 @@ gulp.task('build:styles', ['build:semantic'], function() {
 
 gulp.task('build', ['build:useref', 'build:static', 'build:styles']);
 
-gulp.task('install', ['semantic'])
+gulp.task('install', ['build:semantic'])
