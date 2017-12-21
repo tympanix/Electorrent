@@ -29,7 +29,8 @@
 @positiveColor: #62c462;
 @warningColor: #f89406;
 @negativeColor: #ee5f5b;
-@solidBorderColor: @gray;
+@solidBorderColor: fadeout(@gray, 10%);
+@borderColor: fadeout(@gray, 10%);
 @pageBackground: @gray-darker;
 @pageMiddleground: lighten(@gray-darker, 2.5%);
 @pageForeground: lighten(@gray-darker, 5%);
@@ -61,7 +62,5 @@
 @invertedPressedTextColor            : rgba(0, 0, 0, 0.9);
 @invertedSelectedTextColor           : rgba(0, 0, 0, 0.95);
 @invertedDisabledTextColor           : rgba(0, 0, 0, 0.2);
-
-@borderColor: @gray;
 
 @inputPlaceholderColor: @gray-lighter;
