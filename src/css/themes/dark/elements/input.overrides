@@ -1,5 +1,1 @@
-// input text color inside menu
-.ui.menu .ui.transparent.input input,
-.ui.menu .ui.transparent.input i.icon {
-  color: @gray-lighter !important;
-}
+
