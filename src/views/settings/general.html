@@ -22,6 +22,22 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
+                <i class="theme icon"></i>
+                Theme
+            </div>
+            <div class="description">
+                Changes the overall theme of the application
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="Theme" ng-model="settings.ui.theme">
+                <dropdown-group ng-repeat="theme in themes" title="theme.theme" value="theme.basename"></dropdown-group>
+            </dropdown>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
                 <i class="text height icon"></i>
                 Display Size
             </div>

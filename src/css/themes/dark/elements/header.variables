@@ -1,0 +1,3 @@
+@textColor: #c8c8c8;
+@blockBackground: @gray-darker;
+@attachedBackground: @gray-darker;

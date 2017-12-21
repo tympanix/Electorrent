@@ -1,19 +1,14 @@
 <!DOCTYPE html>
 <html ng-app="torrentApp">
-    <head>
+    <head ng-controller="themeController">
         <meta charset="UTF-8">
         <title>Electorrent</title>
 
-        <!-- build:css css/vendor.css -->
-        <link rel="stylesheet" href="bower_components/semantic/dist/semantic.min.css">
-        <link rel="stylesheet" href="bower_components/angular-table-resize/dist/table-resize.min.css">
-        <!-- endbuild -->
+        <link rel="stylesheet" href="css/themes/light.css">
+        <link rel="stylesheet" ng-href="css/themes/{{theme}}.css">
 
-        <!-- build:css css/styles.css -->
-        <link rel="stylesheet" href="css/main.css" charset="utf-8">
-        <link rel="stylesheet" href="css/zindex.css" charset="utf-8">
-        <link rel="stylesheet" href="css/settings.css" charset="utf-8">
-        <link rel="stylesheet" href="css/icons.css" charset="utf-8">
+        <!-- build:css css/vendor.css -->
+        <link rel="stylesheet" href="../bower_components/angular-table-resize/dist/table-resize.min.css">
         <!-- endbuild -->
     </head>
     <body ng-controller="mainController" ready-broadcast>
@@ -62,22 +57,22 @@
         </script>
 
         <!-- build:js ./scripts/vendor.js -->
-        <script src="bower_components/jquery/dist/jquery.min.js"></script>
-        <script src="bower_components/angular/angular.js" charset="utf-8"></script>
-        <script src="bower_components/angular-resource/angular-resource.min.js" charset="utf-8"></script>
-        <script src="bower_components/angular-animate/angular-animate.js" charset="utf-8"></script>
-        <script src="bower_components/angular-table-resize/dist/angular-table-resize.js" charset="utf-8"></script>
-        <script src="bower_components/ngInfiniteScroll/build/ng-infinite-scroll.min.js" charset="utf-8"></script>
-        <script src="bower_components/moment/moment.js" charset="utf-8"></script>
-        <script src="bower_components/semantic/dist/semantic.min.js" charset="utf-8"></script>
-        <script src="bower_components/marked/lib/marked.js" charset="utf-8"></script>
-        <script src="bower_components/angular-marked/dist/angular-marked.js" charset="utf-8"></script>
-        <script src="bower_components/angular-xmlrpc/src/xmlrpc.js" charset="utf-8"></script>
-        <script src="bower_components/jquery-ui/jquery-ui.js" charset="utf-8"></script>
-        <script src="bower_components/angular-ui-sortable/sortable.js" charset="utf-8"></script>
-        <script src="bower_components/underscore/underscore.js" charset="utf-8"></script>
-        <script src="bower_components/base64-js/base64js.min.js" charset="utf-8"></script>
-        <script src="bower_components/fuse.js/dist/fuse.js" charset="utf-8"></script>
+        <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="../bower_components/angular/angular.js" charset="utf-8"></script>
+        <script src="../bower_components/angular-resource/angular-resource.min.js" charset="utf-8"></script>
+        <script src="../bower_components/angular-animate/angular-animate.js" charset="utf-8"></script>
+        <script src="../bower_components/angular-table-resize/dist/angular-table-resize.js" charset="utf-8"></script>
+        <script src="../bower_components/ngInfiniteScroll/build/ng-infinite-scroll.min.js" charset="utf-8"></script>
+        <script src="../bower_components/moment/moment.js" charset="utf-8"></script>
+        <script src="../bower_components/semantic/dist/semantic.min.js" charset="utf-8"></script>
+        <script src="../bower_components/marked/lib/marked.js" charset="utf-8"></script>
+        <script src="../bower_components/angular-marked/dist/angular-marked.js" charset="utf-8"></script>
+        <script src="../bower_components/angular-xmlrpc/src/xmlrpc.js" charset="utf-8"></script>
+        <script src="../bower_components/jquery-ui/jquery-ui.js" charset="utf-8"></script>
+        <script src="../bower_components/angular-ui-sortable/sortable.js" charset="utf-8"></script>
+        <script src="../bower_components/underscore/underscore.js" charset="utf-8"></script>
+        <script src="../bower_components/base64-js/base64js.min.js" charset="utf-8"></script>
+        <script src="../bower_components/fuse.js/dist/fuse.js" charset="utf-8"></script>
         <!-- endbuild -->
 
         <!-- Insert this line after script imports -->
@@ -92,6 +87,7 @@
 
         <!-- Controllers -->
         <script src="scripts/controllers/main.js" charset="utf-8"></script>
+        <script src="scripts/controllers/theme.js" charset="utf-8"></script>
         <script src="scripts/controllers/torrents.js" charset="utf-8"></script>
         <script src="scripts/controllers/settings.js" charset="utf-8"></script>
         <script src="scripts/controllers/welcome.js" charset="utf-8"></script>
@@ -152,7 +148,7 @@
         <script src="scripts/components/menuMac.js" charset="utf-8"></script>
         <!-- endbuild -->
 
-        <!-- build:remove -->
+        <!-- build:dev -->
         <!-- Connect to server process -->
         <script>
             require('electron-connect').client.create()
