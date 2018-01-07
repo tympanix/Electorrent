@@ -15,28 +15,30 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
          * your liking for the best implementation. If data is obtained as an array from
          * the API one could list each function parameter in the same order as the array
          */
+         var detail = data.additional.detail;
+         var trans = data.additional.transfer;
 
         AbstractTorrent.call(this, {
-            hash: undefined, /* Hash (string): unique identifier for the torrent */
-            name: undefined, /* Name (string): the name of the torrent */
-            size: undefined, /* Size (integer): size of the file to be downloaded in bytes */
+            hash: data.id, /* Hash (string): unique identifier for the torrent */
+            name: data.title, /* Name (string): the name of the torrent */
+            size: data.size, /* Size (integer): size of the file to be downloaded in bytes */
             percent: undefined, /* Percent (integer): completion in per-mille (100% = 1000)  */
-            downloaded: undefined, /* Downloaded (integer): number of bytes */
-            uploaded: undefined, /* Uploaded (integer): number of bytes */
+            downloaded: trans.size_downloaded, /* Downloaded (integer): number of bytes */
+            uploaded: trans.size_uploaded, /* Uploaded (integer): number of bytes */
             ratio: undefined, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
-            uploadSpeed: undefined,  /* Upload Speed (integer): bytes per second */
-            downloadSpeed: undefined, /* Download Speed (integer): bytes per second */
+            uploadSpeed: trans.speed_upload,  /* Upload Speed (integer): bytes per second */
+            downloadSpeed: trans.speed_download, /* Download Speed (integer): bytes per second */
             eta: undefined, /* ETA (integer): second to completion */
             label: undefined, /* Label (string): group/category identification */
-            peersConnected: undefined, /* Peers Connected (integer): number of peers connected */
+            peersConnected: detail.connected_peers, /* Peers Connected (integer): number of peers connected */
             peersInSwarm: undefined, /* Peers In Swarm (integer): number of peers in the swarm */
-            seedsConnected: undefined, /* Seeds Connected (integer): number of connected seeds */
+            seedsConnected: detail.connected_seeders, /* Seeds Connected (integer): number of connected seeds */
             seedsInSwarm: undefined, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
-            statusMessage: undefined, /* Status (string): the current status of the torrent (e.g. downloading)  */
-            dateAdded: undefined, /* Date Added (integer): number of milliseconds unix time */
-            dateCompleted: undefined, /* Date Completed (integer): number of milliseconds unix time */
-            savePath: undefined, /* Save Path (string): the path at which the downloaded content is saved */
+            statusMessage: data.status, /* Status (string): the current status of the torrent (e.g. downloading)  */
+            dateAdded: detail.create_time, /* Date Added (integer): number of milliseconds unix time */
+            dateCompleted: detail.completed_time, /* Date Completed (integer): number of milliseconds unix time */
+            savePath: detail.destination, /* Save Path (string): the path at which the downloaded content is saved */
         });
 
         /*
