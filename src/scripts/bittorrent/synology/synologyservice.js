@@ -28,9 +28,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         "account": "",
         "passwd": "",
         "session": "DownloadStation",
-        "format": "sid",
-        "additional": "detail, file",
-        "sid": ""
+        "additional": "detail,transfer"
     }
 
     // TODO: Documentation for this.
@@ -100,10 +98,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
                     auth_version, "login"))
             }).then(function(response) {
                 if (isSuccess(response.data)) {
-                    params.sid = response.data.sid;
                     return $q.resolve(response);
                 }
-
                 return $q.reject("Login failed. Error: " + response.data.error);
             })
     }
@@ -131,9 +127,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
                     if (!isSuccess(response.data)) {
                         return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
                     }
-                    processData(response.data);
-                    console.log("succes");
-                    $q.resolve("YES");
+                    return $q.resolve(processData(response.data.data));
             })
     }
 
@@ -145,13 +139,19 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
             changed: [],
             deleted: []
         };
-
-
-
-
-
-
+        // data is JSON formatted and contains "tasks" : array of json objects containing each individual torrent information.
+        var tasks = data.tasks;
+        torrents.all = tasks.map(build);
+        console.log(torrents.all);
+        return torrents;
     }
+
+    // Takes a raw JSON object (torrent info) and converts it to a TorrentS object.
+    function build(data) {
+        return new TorrentS(data)
+    }
+
+
 
     /**
      * Returns the default path for the service. Should start with a slash.
