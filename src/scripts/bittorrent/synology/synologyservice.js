@@ -132,6 +132,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     }
 
 
+    //TODO: Finish
     function processData(data) {
         var torrents = {
             labels: [],
@@ -142,7 +143,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         // data is JSON formatted and contains "tasks" : array of json objects containing each individual torrent information.
         var tasks = data.tasks;
         torrents.all = tasks.map(build);
-        console.log(torrents.all);
+
         return torrents;
     }
 
@@ -217,6 +218,16 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      * @return {promise} actionIsDone
      */
     this.start = function(torrents) {
+        // Retreive the ID's of the torrents (TorrentS.hash)
+        // TODO: Use Array.Join(",") to join the array elements.
+
+        
+
+
+
+
+
+
         return
     }
 
