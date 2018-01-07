@@ -22,7 +22,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
             hash: data.id, /* Hash (string): unique identifier for the torrent */
             name: data.title, /* Name (string): the name of the torrent */
             size: data.size, /* Size (integer): size of the file to be downloaded in bytes */
-            percent: undefined, /* Percent (integer): completion in per-mille (100% = 1000)  */
+            percent: (trans.size_downloaded / data.size) * 1000, /* Percent (integer): completion in per-mille (100% = 1000)  */
             downloaded: trans.size_downloaded, /* Downloaded (integer): number of bytes */
             uploaded: trans.size_uploaded, /* Uploaded (integer): number of bytes */
             ratio: undefined, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
@@ -36,8 +36,8 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
             seedsInSwarm: undefined, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
             statusMessage: data.status, /* Status (string): the current status of the torrent (e.g. downloading)  */
-            dateAdded: detail.create_time, /* Date Added (integer): number of milliseconds unix time */
-            dateCompleted: detail.completed_time, /* Date Completed (integer): number of milliseconds unix time */
+            dateAdded: detail.create_time * 1000, /* Date Added (integer): number of milliseconds unix time */
+            dateCompleted: detail.completed_time * 1000, /* Date Completed (integer): number of milliseconds unix time */
             savePath: detail.destination, /* Save Path (string): the path at which the downloaded content is saved */
         });
 
@@ -117,7 +117,8 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusDownloading
      */
     TorrentS.prototype.isStatusPaused = function() {
-        return
+        return this.status === "paused";
+
     };
 
     /**
