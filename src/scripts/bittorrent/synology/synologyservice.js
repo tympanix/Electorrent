@@ -210,6 +210,27 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         });
     }
 
+    // TODO: Delete needs extra implementation.
+    /**
+     * doAction contains the standard implementation for manipulating with torrents in the Synology WebAPI.
+     * @param  {string} action Selfexplanatory, can be start, pause or delete.
+     * @return {promise}       [description]
+     */
+    this.doAction = function(action, torrents) {
+        // Retreive the ID's of the torrents (TorrentS.hash)
+        var ids = torrents.map(t => t.hash);
+        var ids_str = ids.join(",");
+
+        return $http.get(this.server.url() + "/webapi/DownloadStation/task.cgi?api=SYNO.DownloadStation.Task&version=1&method=" + action + "&id=" + ids_str)
+                .then(function(response) {
+                    if (isSuccess(response.data)) {
+                        //TODO: Check for error message on the individual torrents resumed.
+                        return $q.resolve();
+                    }
+                    return $q.reject("Error in " + action + " action");
+                })
+    }
+
     /**
      * Example action function. You will have to implement several of these to support the various
      * actions in your bittorrent client. Each action is supplied an array of the torrents on which
@@ -219,17 +240,15 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      * @return {promise} actionIsDone
      */
     this.start = function(torrents) {
-        // Retreive the ID's of the torrents (TorrentS.hash)
-        var ids = torrents.map(t => t.hash);
-        var ids_str = ids.join(",");
-        return $http.get(this.server.url() + "/webapi/DownloadStation/task.cgi?api=SYNO.DownloadStation.Task&version=1&method=resume&id=" + ids_str)
-                .then(function(response) {
-                    if (isSuccess(response.data)) {
-                        //TODO: Check for error message on the individual torrents resumed.
-                        return $q.resolve();
-                    }
-                    return $q.reject("Error in resuming/starting torrent(s)");
-                })
+        return this.doAction("resume", torrents);
+    }
+
+    this.pause = function(torrents) {
+        return this.doAction("pause", torrents);
+    }
+
+    this.delete = function(torrents) {
+        return this.doAction("delete", torrents);
     }
 
 
