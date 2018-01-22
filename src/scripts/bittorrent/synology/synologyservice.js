@@ -159,6 +159,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      @return {string} the default path
      */
     this.defaultPath = function() {
+        // TODO: Add default path.
         return ""
     }
 
@@ -219,17 +220,19 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.start = function(torrents) {
         // Retreive the ID's of the torrents (TorrentS.hash)
-        // TODO: Use Array.Join(",") to join the array elements.
-
-        
-
-
-
-
-
-
-        return
+        var ids = torrents.map(t => t.hash);
+        var ids_str = ids.join(",");
+        return $http.get(this.server.url() + "/webapi/DownloadStation/task.cgi?api=SYNO.DownloadStation.Task&version=1&method=resume&id=" + ids_str)
+                .then(function(response) {
+                    if (isSuccess(response.data)) {
+                        //TODO: Check for error message on the individual torrents resumed.
+                        return $q.resolve();
+                    }
+                    return $q.reject("Error in resuming/starting torrent(s)");
+                })
     }
+
+
 
     /**
      * Whether the client supports sorting by trackers or not
