@@ -127,7 +127,21 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * this when having color issues.
      * @return {string} color
      */
-    /*__TorrentName__.prototype.statusColor = function () {};*/
+    TorrentS.prototype.statusColor = function () {
+        if (this.isStatusError()) {
+            return 'error';
+        } else if (this.isStatusStopped()) {
+            return 'grey';
+        } else if (this.isStatusCompleted()) {
+            return 'success';
+        } else if (this.isStatusDownloading()) {
+            return 'blue';
+        } else if (this.isStatusSeeding()) {
+            return 'orange';
+        } else {
+            return 'disabled';
+        }
+    };
 
     /**
      * Optionally returns the status of the torrent. The status is by default

@@ -73,28 +73,29 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
           TODO: Remember to check that the Download Station is actually running before continuing.
                 Probably return some error message to user if it is not up and running.
         */
-        return $http.get(this.server.url() + "/webapi/query.cgi", config("SYNO.API.Info", "1", "query",
+        return $http.get(this.server.url() + "/query.cgi", config("SYNO.API.Info", "1", "query",
                 "SYNO.API.Auth,SYNO.DownloadStation.Task"))
             .then(function(response) {
-                if (!isSuccess(response.data)) {
-                    return $q.reject("Getting initial API information from Auth and DownloadStation failed. Error: " + response.data.error);
+                if (isSuccess(response.data)) {
+                    return {
+                        auth: response.data.data["SYNO.API.Auth"],
+                        task: response.data.data["SYNO.DownloadStation.Task"]
+                    };
                 }
+                return $q.reject("Getting initial API information from Auth and DownloadStation failed. Error: " + response.data.error);
 
-                return {
-                    auth: response.data.data["SYNO.API.Auth"],
-                    task: response.data.data["SYNO.DownloadStation.Task"]
-                };
+
             }).then(function(data) {
                 /* Before login, API information is required on SYNO.Auth API.
                    Grab the DownloadStation API information as well.
                 */
-                auth_path = data.auth.path;
+                auth_path = "/" + data.auth.path;
                 auth_version = data.auth.maxVersion;
-                dl_path = data.task.path;
+                dl_path = "/" + data.task.path;
                 dl_version = data.task.maxVersion;
 
                 // Lets login!
-                return $http.get(self.server.url() + "/webapi/" + auth_path, config("SYNO.API.Auth",
+                return $http.get(self.server.url() + auth_path, config("SYNO.API.Auth",
                     auth_version, "login"))
             }).then(function(response) {
                 if (isSuccess(response.data)) {
@@ -122,12 +123,12 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.torrents = function() {
         // Retrieve info of all torrents in DownloadStation
-        return $http.get(this.server.url() + "/webapi/" + dl_path, config("SYNO.DownloadStation.Task", dl_version, "list"))
+        return $http.get(this.server.url() + dl_path, config("SYNO.DownloadStation.Task", dl_version, "list"))
             .then(function(response) {
-                    if (!isSuccess(response.data)) {
-                        return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
+                    if (isSuccess(response.data)) {
+                        return $q.resolve(processData(response.data.data));
                     }
-                    return $q.resolve(processData(response.data.data));
+                    return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
             })
     }
 
@@ -135,6 +136,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     //TODO: Finish
     function processData(data) {
         var torrents = {
+            dirty: true,
             labels: [],
             all: [],
             changed: [],
@@ -159,8 +161,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      @return {string} the default path
      */
     this.defaultPath = function() {
-        // TODO: Add default path.
-        return ""
+        return "/webapi";
     }
 
     /**
@@ -171,7 +172,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.addTorrentUrl = function(magnet) {
         // Contradicts API documentation by using GET instead of POST. However, POST doesn't work.
-        return $http.get(this.server.url() + "/webapi/DownloadStation/task.cgi?uri=" + magnet,
+        return $http.get(this.server.url() + "/DownloadStation/task.cgi?uri=" + magnet,
             config("SYNO.DownloadStation.Task", "1", "create", "")).then(function(response) {
             // Check response for success.
             if(isSuccess(response.data)) {
@@ -210,7 +211,6 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         });
     }
 
-    // TODO: Delete needs extra implementation.
     /**
      * doAction contains the standard implementation for manipulating with torrents in the Synology WebAPI.
      * @param  {string} action Selfexplanatory, can be start, pause or delete.
@@ -221,7 +221,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         var ids = torrents.map(t => t.hash);
         var ids_str = ids.join(",");
 
-        return $http.get(this.server.url() + "/webapi/DownloadStation/task.cgi?api=SYNO.DownloadStation.Task&version=1&method=" + action + "&id=" + ids_str)
+        return $http.get(this.server.url() + "/DownloadStation/task.cgi?api=SYNO.DownloadStation.Task&version=1&method=" + action + "&id=" + ids_str)
                 .then(function(response) {
                     if (isSuccess(response.data)) {
                         //TODO: Check for error message on the individual torrents resumed.
