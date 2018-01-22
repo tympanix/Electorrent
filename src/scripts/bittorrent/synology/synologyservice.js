@@ -286,9 +286,16 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         {
             label: 'Pause',
             type: 'button',
-            color: 'red',
+            color: 'yellow',
             click: this.pause,
             icon: 'pause'
+        },
+        {
+            label: 'Delete',
+            type: 'button',
+            color: 'red',
+            click: this.delete,
+            icon: 'remove'
         },
         {
             label: 'More',
