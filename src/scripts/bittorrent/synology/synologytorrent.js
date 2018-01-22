@@ -62,7 +62,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusError
      */
     TorrentS.prototype.isStatusError = function() {
-        return
+        return this.statusMessage === "error";
     };
 
     /**
@@ -71,7 +71,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusStopped
      */
     TorrentS.prototype.isStatusStopped = function() {
-        return
+        return this.statusMessage === "paused";
     };
 
     /**
@@ -90,7 +90,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusCompleted
      */
     TorrentS.prototype.isStatusCompleted = function() {
-        return
+        return this.statusMessage === "finished";
     };
 
     /**
@@ -99,7 +99,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusDownloading
      */
     TorrentS.prototype.isStatusDownloading = function() {
-        return
+        return this.statusMessage === "downloading";
     };
 
     /**
@@ -108,7 +108,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusDownloading
      */
     TorrentS.prototype.isStatusSeeding = function() {
-        return
+        return this.statusMessage === "seeding";
     };
 
     /**
@@ -117,7 +117,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusDownloading
      */
     TorrentS.prototype.isStatusPaused = function() {
-        return this.status === "paused";
+        return
 
     };
 
