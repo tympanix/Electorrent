@@ -17,6 +17,20 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
          */
          var detail = data.additional.detail;
          var trans = data.additional.transfer;
+         var track = data.additional.tracker;
+         var peers = 0;
+         var seeds = 0;
+         var trackCount = function(track) {
+             if (!track) {
+                 return 0;
+             }
+             var p = track.map(t => t.peers);
+             var s = track.map(t => t.seeds);
+             peers = p.reduce( (acc, curr) => acc + curr);
+             seeds = s.reduce( (acc, curr) => acc + curr);
+         }
+         trackCount(track);
+
 
         AbstractTorrent.call(this, {
             hash: data.id, /* Hash (string): unique identifier for the torrent */
@@ -25,21 +39,22 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
             percent: (trans.size_downloaded / data.size) * 1000, /* Percent (integer): completion in per-mille (100% = 1000)  */
             downloaded: trans.size_downloaded, /* Downloaded (integer): number of bytes */
             uploaded: trans.size_uploaded, /* Uploaded (integer): number of bytes */
-            ratio: undefined, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
+            ratio: (trans.size_uploaded / trans.size_downloaded), /* Ratio (integer): integer i per-mille (1:1 = 1000) */
             uploadSpeed: trans.speed_upload,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: trans.speed_download, /* Download Speed (integer): bytes per second */
             eta: undefined, /* ETA (integer): second to completion */
-            label: undefined, /* Label (string): group/category identification */
+            label: '', /* Label (string): group/category identification */
             peersConnected: detail.connected_peers, /* Peers Connected (integer): number of peers connected */
-            peersInSwarm: undefined, /* Peers In Swarm (integer): number of peers in the swarm */
+            peersInSwarm: peers, /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: detail.connected_seeders, /* Seeds Connected (integer): number of connected seeds */
-            seedsInSwarm: undefined, /* Seeds In Swarm (integer): number of connected seeds in swarm */
-            torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
+            seedsInSwarm: seeds, /* Seeds In Swarm (integer): number of connected seeds in swarm */
+            torrentQueueOrder: 0, /* Queue (integer): the number in the download queue */
             statusMessage: data.status, /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: detail.create_time * 1000, /* Date Added (integer): number of milliseconds unix time */
             dateCompleted: detail.completed_time * 1000, /* Date Completed (integer): number of milliseconds unix time */
             savePath: detail.destination, /* Save Path (string): the path at which the downloaded content is saved */
         });
+
 
         /*
          * Additional data that does not match the default scheme above
