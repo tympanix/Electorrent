@@ -28,7 +28,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         "account": "",
         "passwd": "",
         "session": "DownloadStation",
-        "additional": "detail,transfer"
+        "additional": "detail,transfer,tracker"
     }
 
     // TODO: Documentation for this.
@@ -246,7 +246,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         return this.doAction("pause", torrents);
     }
 
-    this.delete = function(torrents) {
+    this.remove = function(torrents) {
         return this.doAction("delete", torrents);
     }
 
@@ -288,34 +288,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
             color: 'yellow',
             click: this.pause,
             icon: 'pause'
-        },
-        {
-            label: 'Delete',
-            type: 'button',
-            color: 'red',
-            click: this.delete,
-            icon: 'remove'
-        },
-        {
-            label: 'More',
-            type: 'dropdown',
-            color: 'blue',
-            icon: 'plus',
-            actions: [{
-                    label: 'Pause All',
-                    click: this.pauseAll
-                },
-                {
-                    label: 'Resume All',
-                    click: this.resumeAll
-                }
-            ]
-        },
-        {
-            label: 'Labels',
-            click: this.setCategory,
-            type: 'labels'
         }
+
     ]
 
     /**
@@ -335,18 +309,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
             icon: 'checkmark'
         },
         {
-            label: 'Move Up Queue',
-            click: this.queueUp,
-            icon: 'arrow up'
-        },
-        {
-            label: 'Move Queue Down',
-            click: this.queueDown,
-            icon: 'arrow down'
-        },
-        {
-            label: 'Remove',
-            click: this.delete,
+            label: 'Remove Torrent',
+            click: this.remove,
             icon: 'remove'
         }
     ];
