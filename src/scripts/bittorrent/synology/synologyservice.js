@@ -154,8 +154,6 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         return new TorrentS(data)
     }
 
-
-
     /**
      * Returns the default path for the service. Should start with a slash.
      @return {string} the default path
@@ -199,16 +197,17 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         })
 
         var formData = new FormData();
-        formData.append('torrents', blob, filename);
+        formData.append('api', "SYNO.DownloadStation.Task");
+        formData.append('version', dl_version);
+        formData.append('method', "create");
+        formData.append('file', blob, filename);
 
-        return $http.post('__url__', formData, {
-            headers: {
-                'Content-Type': undefined
-            },
-            transformRequest: function(data) {
-                return data;
-            }
-        });
+        return $http.post(this.server.url() + "/DownloadStation/task.cgi", formData, {
+                headers: { 'Content-Type': undefined },
+                transformRequest: function(data) {
+                    return data;
+                }
+        })
     }
 
     /**
