@@ -133,7 +133,10 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     }
 
 
-    //TODO: Documentation
+    /*
+    Take all the data retrieved by torrents() and create TorrentS objects from it.
+    Uses dirty tag since Synology gives all data for all torrents in the system back at once and not in groups like "deleted".
+     */
     function processData(data) {
         var torrents = {
             dirty: true,
@@ -145,7 +148,6 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         // data is JSON formatted and contains "tasks" : array of json objects containing each individual torrent information.
         var tasks = data.tasks;
         torrents.all = tasks.map(build);
-
         return torrents;
     }
 
