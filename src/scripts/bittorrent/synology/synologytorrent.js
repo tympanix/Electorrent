@@ -20,23 +20,19 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
          var detail = data.additional.detail;
          var trans = data.additional.transfer;
          var track = data.additional.tracker;
-         var peers = 0;
-         var seeds = 0;
 
          // Calculates the total amount of peers and seeds over all connected trackers.
-         var trackCount = function(track) {
+         // Takes a map function from peersInSwarm and seedsInSwarm to get the correct numbers.
+         function trackCount(mapFun) {
              if (!track) {
                  return 0;
              }
-             var p = track.map(t => t.peers);
-             var s = track.map(t => t.seeds);
-             peers = p.reduce( (acc, curr) => acc + curr);
-             seeds = s.reduce( (acc, curr) => acc + curr);
+             var numArr = track.map(mapFun)
+             return numArr.reduce( (acc, curr) => acc + curr);
          }
-         trackCount(track);
 
          // Roughly calculates the ETA each update from the server.
-         var etaCalc = function() {
+         function etaCalc() {
              var remain = data.size - trans.size_downloaded;
              return remain / trans.speed_download;
          }
@@ -54,9 +50,9 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
             eta: etaCalc(), /* ETA (integer): second to completion */
             label: '', /* Label (string): group/category identification */
             peersConnected: detail.connected_peers, /* Peers Connected (integer): number of peers connected */
-            peersInSwarm: peers, /* Peers In Swarm (integer): number of peers in the swarm */
+            peersInSwarm: trackCount(function(t) {return t.peers}), /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: detail.connected_seeders, /* Seeds Connected (integer): number of connected seeds */
-            seedsInSwarm: seeds, /* Seeds In Swarm (integer): number of connected seeds in swarm */
+            seedsInSwarm: trackCount(function(t) {return t.seeds}), /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: 0, /* Queue (integer): the number in the download queue */
             statusMessage: data.status, /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: detail.create_time * 1000, /* Date Added (integer): number of milliseconds unix time */
