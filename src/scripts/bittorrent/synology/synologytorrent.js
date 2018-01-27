@@ -31,7 +31,6 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
          }
          trackCount(track);
 
-
         AbstractTorrent.call(this, {
             hash: data.id, /* Hash (string): unique identifier for the torrent */
             name: data.title, /* Name (string): the name of the torrent */
@@ -86,7 +85,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusStopped
      */
     TorrentS.prototype.isStatusStopped = function() {
-        return this.statusMessage === "paused";
+        return (this.statusMessage === "paused") && (this.percent !== 1000);
     };
 
     /**
@@ -105,7 +104,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * @return {boolean} isStatusCompleted
      */
     TorrentS.prototype.isStatusCompleted = function() {
-        return this.statusMessage === "finished";
+        return (this.statusMessage === "finished") || ((this.statusMessage === "paused") && (this.percent === 1000)) ;
     };
 
     /**
@@ -164,7 +163,21 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
      * incorrect status messages in the GUI
      * @return {string} status
      */
-    /*__TorrentName__.prototype.statusText = function () { };*/
+    TorrentS.prototype.statusText = function () {
+        if (this.isStatusError()) {
+            return 'Error';
+        } else if (this.isStatusStopped()) {
+            return 'Paused';
+        } else if (this.isStatusCompleted()) {
+            return 'Finished';
+        } else if (this.isStatusDownloading()) {
+            return 'Downloading';
+        } else if (this.isStatusSeeding()) {
+            return 'Seeding';
+        } else {
+            return 'Unknown Error';
+        }
+    };
 
     /**
      * Return the constructor function (only change the class name)

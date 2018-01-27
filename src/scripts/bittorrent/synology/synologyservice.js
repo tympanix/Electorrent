@@ -133,7 +133,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     }
 
 
-    //TODO: Finish
+    //TODO: Documentation
     function processData(data) {
         var torrents = {
             dirty: true,
@@ -255,7 +255,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     /**
      * Whether the client supports sorting by trackers or not
      */
-    this.enableTrackerFilter = true
+    this.enableTrackerFilter = false
 
     /**
      * Provides the option to include extra columns for displaying data. This may concern columns
@@ -303,11 +303,6 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      *                          has to hold for all selected torrents, for the checkbox to be checked.
      */
     this.contextMenu = [
-        {
-            label: 'Recheck',
-            click: this.recheck,
-            icon: 'checkmark'
-        },
         {
             label: 'Remove Torrent',
             click: this.remove,
