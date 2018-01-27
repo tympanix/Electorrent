@@ -15,11 +15,15 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
          * your liking for the best implementation. If data is obtained as an array from
          * the API one could list each function parameter in the same order as the array
          */
+
+         // Information variables.
          var detail = data.additional.detail;
          var trans = data.additional.transfer;
          var track = data.additional.tracker;
          var peers = 0;
          var seeds = 0;
+
+         // Calculates the total amount of peers and seeds over all connected trackers.
          var trackCount = function(track) {
              if (!track) {
                  return 0;
@@ -31,6 +35,12 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
          }
          trackCount(track);
 
+         // Roughly calculates the ETA each update from the server.
+         var etaCalc = function() {
+             var remain = data.size - trans.size_downloaded;
+             return remain / trans.speed_download;
+         }
+
         AbstractTorrent.call(this, {
             hash: data.id, /* Hash (string): unique identifier for the torrent */
             name: data.title, /* Name (string): the name of the torrent */
@@ -41,7 +51,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
             ratio: (trans.size_uploaded / trans.size_downloaded), /* Ratio (integer): integer i per-mille (1:1 = 1000) */
             uploadSpeed: trans.speed_upload,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: trans.speed_download, /* Download Speed (integer): bytes per second */
-            eta: undefined, /* ETA (integer): second to completion */
+            eta: etaCalc(), /* ETA (integer): second to completion */
             label: '', /* Label (string): group/category identification */
             peersConnected: detail.connected_peers, /* Peers Connected (integer): number of peers connected */
             peersInSwarm: peers, /* Peers In Swarm (integer): number of peers in the swarm */
