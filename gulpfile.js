@@ -6,13 +6,12 @@ const {server} = require('electron-connect')
 const useref = require('gulp-useref');
 const clean = require('gulp-clean');
 const run = require('run-sequence');
-const util = require('gulp-util');
 const less = require('gulp-less');
 const concat = require('gulp-concat');
 const path = require('path');
 const merge = require('merge-stream');
 
-const PROD = process.env.NODE_ENV === 'production' || !!util.env.production
+const PROD = process.env.NODE_ENV === 'production'
 const OUT = "./app";
 const CLEAN = [`!${OUT}/package.json`, `!${OUT}/node_modules`, `${OUT}/*`];
 const semantic = './bower_components/semantic/src'
