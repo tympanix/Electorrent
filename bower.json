@@ -22,7 +22,7 @@
     "angular-resource": "~1.5.9",
     "semantic": "^2.2.2",
     "moment": "momentjs#^2.13.0",
-    "jQuery": "^3.0.0",
+    "jquery": "^3.0.0",
     "angular-animate": "~1.5.9",
     "ngInfiniteScroll": "^1.2.2",
     "angular-marked": "^1.2.1",
