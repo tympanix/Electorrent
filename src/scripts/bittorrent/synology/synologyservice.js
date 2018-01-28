@@ -107,10 +107,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.connect = function(server) {
         this.server = server;
         var self = this;
-        /*
-          TODO: Remember to check that the Download Station is actually running before continuing.
-                Probably return some error message to user if it is not up and running.
-        */
+        
         return $http.get(this.server.url() + "/query.cgi", config('query'))
             .then(function(response) {
                 if (isSuccess(response.data)) {
