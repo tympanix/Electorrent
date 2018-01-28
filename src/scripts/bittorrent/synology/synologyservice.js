@@ -11,36 +11,76 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.name = 'Synology Download Station';
 
-    // Session ID set by logging in in connection().
-        // API vars.
-    var auth_path;
-    var auth_version;
-    var dl_path;
-    var dl_version;
+    // API vars.
+    var authPath;
+    var authVersion;
+    var dlPath;
+    var dlVersion;
+    var taskPath = "/DownloadStation/task.cgi";
 
-    // TODO: Documentation update.
-    // Params - Initialized as default values for this domain.
-    var params = {
-        "api": "",
-        "version": "1",
-        "method": "",
-        "query": "",
-        "account": "",
-        "passwd": "",
-        "session": "DownloadStation",
-        "additional": "detail,transfer,tracker"
-    }
+    var SYN_TIMEOUT = 6000;
+    var API_INFO = "SYNO.API.Info";
+    var API_TASK = "SYNO.DownloadStation.Task";
+    var API_AUTH = "SYNO.API.Auth";
 
-    // TODO: Documentation for this.
-    function config(api, version, method, query) {
-        return {
-            params: Object.assign({}, params, {
-                api: api,
-                version: version,
-                method: method,
-                query: query
-            }),
-            timeout: 6000
+    /**
+     * The config function is in charge of supplying config objects with
+     * exactly the parameters needed for various HTTP GET calls.
+     * For example, calling with the choice of 'auth' and acc and pwd in args
+     * yields a matching config object in accordance to the Synology API Documentation.
+     * @param  {string} choice The choice of what kind of config object is desired.
+     * @param  {array} args   Arbitrary arguments for the config objects.
+     * @return {object}       A config object for a HTTP GET call.
+     */
+    function config(choice, args) {
+        switch (choice) {
+            case 'query':
+                return {
+                    params: {
+                        "api": API_INFO,
+                        "version": "1",
+                        "method": "query",
+                        "query": "SYNO.API.Auth,SYNO.DownloadStation.Task"},
+                    timeout: SYN_TIMEOUT
+                };
+            case 'auth':
+                return {
+                    params: {
+                        "api": API_AUTH,
+                        "version": authVersion,
+                        "method": "login",
+                        "account": args[0],
+                        "passwd": args[1],
+                        "session": "DownloadStation"},
+                    timeout: SYN_TIMEOUT
+                };
+            case 'torrents':
+                return {
+                    params: {
+                        "api": API_TASK,
+                        "version": dlVersion,
+                        "method": "list",
+                        "additional": "detail,transfer,tracker"},
+                    timeout: SYN_TIMEOUT
+                };
+            case 'tUrl':
+                return {
+                    params: {
+                        "api": API_TASK,
+                        "version": dlVersion,
+                        "method": "create",
+                        "uri": args[0]},
+                    timeout: SYN_TIMEOUT
+                };
+            case 'action':
+                return {
+                    params: {
+                        "api": API_TASK,
+                        "version": dlVersion,
+                        "method": args[0],
+                        "id": args[1]},
+                    timeout: SYN_TIMEOUT
+                };
         }
     }
 
@@ -67,36 +107,30 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.connect = function(server) {
         this.server = server;
         var self = this;
-        params.account = server.user;
-        params.passwd = server.password;
         /*
           TODO: Remember to check that the Download Station is actually running before continuing.
                 Probably return some error message to user if it is not up and running.
         */
-        return $http.get(this.server.url() + "/query.cgi", config("SYNO.API.Info", "1", "query",
-                "SYNO.API.Auth,SYNO.DownloadStation.Task"))
+        return $http.get(this.server.url() + "/query.cgi", config('query'))
             .then(function(response) {
                 if (isSuccess(response.data)) {
                     return {
-                        auth: response.data.data["SYNO.API.Auth"],
-                        task: response.data.data["SYNO.DownloadStation.Task"]
+                        auth: response.data.data[API_AUTH],
+                        task: response.data.data[API_TASK]
                     };
                 }
                 return $q.reject("Getting initial API information from Auth and DownloadStation failed. Error: " + response.data.error);
-
-
             }).then(function(data) {
                 /* Before login, API information is required on SYNO.Auth API.
                    Grab the DownloadStation API information as well.
                 */
-                auth_path = "/" + data.auth.path;
-                auth_version = data.auth.maxVersion;
-                dl_path = "/" + data.task.path;
-                dl_version = data.task.maxVersion;
+                authPath = "/" + data.auth.path;
+                authVersion = data.auth.maxVersion;
+                dlPath = "/" + data.task.path;
+                dlVersion = data.task.maxVersion;
 
                 // Lets login!
-                return $http.get(self.server.url() + auth_path, config("SYNO.API.Auth",
-                    auth_version, "login"))
+                return $http.get(self.server.url() + authPath, config('auth', [server.user, server.password]))
             }).then(function(response) {
                 if (isSuccess(response.data)) {
                     return $q.resolve(response);
@@ -123,12 +157,12 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.torrents = function() {
         // Retrieve info of all torrents in DownloadStation
-        return $http.get(this.server.url() + dl_path, config("SYNO.DownloadStation.Task", dl_version, "list"))
+        return $http.get(this.server.url() + dlPath, config('torrents'))
             .then(function(response) {
-                    if (isSuccess(response.data)) {
-                        return $q.resolve(processData(response.data.data));
-                    }
-                    return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
+                if (isSuccess(response.data)) {
+                    return $q.resolve(processData(response.data.data));
+                }
+                return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
             })
     }
 
@@ -172,15 +206,15 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      */
     this.addTorrentUrl = function(magnet) {
         // Contradicts API documentation by using GET instead of POST. However, POST doesn't work.
-        return $http.get(this.server.url() + "/DownloadStation/task.cgi?uri=" + magnet,
-            config("SYNO.DownloadStation.Task", "1", "create", "")).then(function(response) {
-            // Check response for success.
-            if(isSuccess(response.data)) {
-                return $q.resolve();
-            }
-            // Create failed, reject with the error code provided
-            return $q.reject(
-                "Create a DownloadStation task with the provided URL failed. Error: " + response.data.error);
+        return $http.get(this.server.url() + taskPath, config('tUrl', [magnet]))
+            .then(function(response) {
+                // Check response for success.
+                if(isSuccess(response.data)) {
+                    return $q.resolve();
+                }
+                // Create failed, reject with the error code provided
+                return $q.reject(
+                    "Create a DownloadStation task with the provided URL failed. Error: " + response.data.error);
         })
     }
 
@@ -199,12 +233,12 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         })
 
         var formData = new FormData();
-        formData.append('api', "SYNO.DownloadStation.Task");
-        formData.append('version', dl_version);
+        formData.append('api', API_TASK);
+        formData.append('version', dlVersion);
         formData.append('method', "create");
         formData.append('file', blob, filename);
 
-        return $http.post(this.server.url() + "/DownloadStation/task.cgi", formData, {
+        return $http.post(this.server.url() + taskPath, formData, {
                 headers: { 'Content-Type': undefined },
                 transformRequest: function(data) {
                     return data;
@@ -222,7 +256,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         var ids = torrents.map(t => t.hash);
         var ids_str = ids.join(",");
 
-        return $http.get(this.server.url() + "/DownloadStation/task.cgi?api=SYNO.DownloadStation.Task&version=1&method=" + action + "&id=" + ids_str)
+        return $http.get(this.server.url() + taskPath, config('action', [action, ids_str]))
                 .then(function(response) {
                     if (isSuccess(response.data)) {
                         //TODO: Check for error message on the individual torrents resumed.
@@ -251,8 +285,6 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.remove = function(torrents) {
         return this.doAction("delete", torrents);
     }
-
-
 
     /**
      * Whether the client supports sorting by trackers or not
