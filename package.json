@@ -29,10 +29,10 @@
     "winreg": "^1.2.2"
   },
   "devDependencies": {
-    "bower": "^1.8.0",
-    "electron": "^1.7.10",
-    "electron-builder": "^19.49.0",
-    "electron-builder-squirrel-windows": "^19.25.0",
+    "bower": "^1.8.2",
+    "electron": "^1.7.11",
+    "electron-builder": "^19.55.2",
+    "electron-builder-squirrel-windows": "^19.55.2",
     "electron-connect": "^0.6.1",
     "electron-is": "^2.4.0",
     "electron-squirrel-startup": "^1.0.0",
@@ -44,7 +44,6 @@
     "gulp-rename": "^1.2.2",
     "gulp-run": "^1.7.1",
     "gulp-useref": "^3.1.0",
-    "gulp-util": "^3.0.8",
     "merge-stream": "^1.0.1",
     "request": "^2.74.0",
     "run-sequence": "^1.2.2",
