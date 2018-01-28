@@ -1,15 +1,15 @@
 <p align="center">
   <img src="assets/electron-icon.png" width="256">
-</p> 
+</p>
 <p align="center">
-  <a href="https://travis-ci.org/Tympanix/Electorrent">
-    <img src="https://travis-ci.org/Tympanix/Electorrent.svg?branch=master">
+  <a href="https://travis-ci.org/tympanix/Electorrent">
+    <img src="https://travis-ci.org/tympanix/Electorrent.svg?branch=master">
   </a>
-  <a href="https://github.com/Tympanix/Electorrent/releases/latest">
-    <img src="https://img.shields.io/github/release/Tympanix/Electorrent.svg?maxAge=86400">
+  <a href="https://github.com/tympanix/Electorrent/releases/latest">
+    <img src="https://img.shields.io/github/release/tympanix/Electorrent.svg?maxAge=86400">
   </a>
   <a href="http://www.somsubhra.com/github-release-stats/?username=tympanix&repository=Electorrent">
-    <img src="https://img.shields.io/github/downloads/Tympanix/Electorrent/total.svg?maxAge=86400">
+    <img src="https://img.shields.io/github/downloads/tympanix/Electorrent/total.svg?maxAge=86400">
   </a>
 </p>
 
@@ -43,31 +43,30 @@ Electorrent can connect to the following bittorrent clients:
 
 ## Screenshots
 <p align="center">
-  <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen0-win.png?raw=true">
+  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen0-win.png?raw=true">
     <img src="assets/screen0-win.png" width="75%">
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen1-win.png?raw=true">
+  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen1-win.png?raw=true">
     <img src="assets/screen1-win.png" width="75%">
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/Tympanix/Electorrent/blob/master/assets/screen2-win.png?raw=true">
+  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen2-win.png?raw=true">
     <img src="assets/screen2-win.png" width="75%">
   </a>
-</p> 
+</p>
 
 ## FAQ
  * **Your program sucks. It doesn't support my bittorrent client**
- 
+
  What an opportunity! Now open an issue telling me which bittorrent client you would like to see next :)
- 
+
  * **What kind of technologies are used to build this?**
- 
+
  The application is build around [Electron](http://electron.atom.io/), [AngularJS](https://angularjs.org/) and [SemanticUI](http://semantic-ui.com/)
 
 * **I can't connect to rTorrent what is wrong?**
 
  When using rTorrent you have to configure your http server correctly. Follow [this guide](https://github.com/rakshasa/rtorrent/wiki/RPC-Setup-XMLRPC) to make sure you have it set up correctly
-
