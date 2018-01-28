@@ -28,7 +28,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
                  return 0;
              }
              var numArr = track.map(mapFun)
-             return numArr.reduce( (acc, curr) => acc + curr);
+             return numArr.reduce((acc, curr) => acc + curr);
          }
 
          // Roughly calculates the ETA each update from the server.
@@ -50,9 +50,9 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
             eta: etaCalc(), /* ETA (integer): second to completion */
             label: '', /* Label (string): group/category identification */
             peersConnected: detail.connected_peers, /* Peers Connected (integer): number of peers connected */
-            peersInSwarm: trackCount(function(t) {return t.peers}), /* Peers In Swarm (integer): number of peers in the swarm */
+            peersInSwarm: trackCount(t => t.peers), /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: detail.connected_seeders, /* Seeds Connected (integer): number of connected seeds */
-            seedsInSwarm: trackCount(function(t) {return t.seeds}), /* Seeds In Swarm (integer): number of connected seeds in swarm */
+            seedsInSwarm: trackCount(t => t.seeds), /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: 0, /* Queue (integer): the number in the download queue */
             statusMessage: data.status, /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: detail.create_time * 1000, /* Date Added (integer): number of milliseconds unix time */
@@ -181,7 +181,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
         } else if (this.isStatusSeeding()) {
             return 'Seeding';
         } else {
-            return 'Unknown Error';
+            return 'Waiting';
         }
     };
 
