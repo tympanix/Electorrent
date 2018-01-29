@@ -85,25 +85,64 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     }
 
     // Error objects that maps error codes to error information.
+    var comErr = {
+        100: "Unknown error.",
+        101: "Invalid parameter.",
+        102: "The requested API does not exist.",
+        103: "The requested method does not exist.",
+        104: "The requested version does not support the functionality.",
+        105: "The logged in session does not have permission.",
+        106: "Session timeout.",
+        107: "Session interrupted by duplicate login."
+    }
+
     var authErr = {
-        "400": "No such account or incorrect password.",
-        "401": "Account disabled.",
-        "402": "Permission denied.",
-        "403": "2-step verfication code required.",
-        "404": "Faield to authenticate 2-step verification code."
+        400: "No such account or incorrect password.",
+        401: "Account disabled.",
+        402: "Permission denied.",
+        403: "2-step verfication code required.",
+        404: "Faield to authenticate 2-step verification code."
     }
 
     var taskErr = {
-        "400": "File upload failed.",
-        "401": "Max number of tasks reached.",
-        "402": "Destination denied.",
-        "403": "Destination does not exist.",
-        "404": "Invalid task id.",
-        "405": "Invalid task action.",
-        "406": "No default destination.",
-        "407": "Set destination failed.",
-        "408": "File does not exist."
+        400: "File upload failed.",
+        401: "Max number of tasks reached.",
+        402: "Destination denied.",
+        403: "Destination does not exist.",
+        404: "Invalid task id.",
+        405: "Invalid task action.",
+        406: "No default destination.",
+        407: "Set destination failed.",
+        408: "File does not exist."
     };
+
+    function handleError(response) {
+        var data = response.data;
+
+        // Common or Authentication errors.
+        if (data.hasOwnProperty('error')) {
+            var code = data.error.code;
+            if (comErr.hasOwnProperty(code)) {
+                $notify.alert('Common Error!', comErr[code]);
+            } else if (authErr.hasOwnProperty(code)) {
+                $notify.alert('Authentication Error!', authErr[code]);
+            }
+        }
+
+        // Task errors.
+        if (Array.isArray(data.data)) {
+            var errs = data.data.map(o => o.error);
+            var singErr = errs.filter(c => c > 0);
+
+            if (singErr.length === 1) {
+                $notify.alert('Task Error!', taskErr[singErr[0]]);
+            } else if (singErr.length > 1) {
+                $notify.alert('Multiple Task Errors!', 'There were multiple errors associated with the task requested.');
+            }
+        }
+        return response;
+    }
+
 
     /**
      * Simple function without any explanation needed for the technical aspect
@@ -130,6 +169,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         var self = this;
 
         return $http.get(this.server.url() + "/query.cgi", config('query'))
+            .then(handleError)
             .then(function(response) {
                 if (isSuccess(response.data)) {
                     return {
@@ -149,7 +189,8 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
 
                 // Lets login!
                 return $http.get(self.server.url() + authPath, config('auth', [server.user, server.password]))
-            }).then(function(response) {
+            }).then(handleError)
+              .then(function(response) {
                 if (isSuccess(response.data)) {
                     return $q.resolve(response);
                 }
@@ -176,6 +217,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.torrents = function() {
         // Retrieve info of all torrents in DownloadStation
         return $http.get(this.server.url() + dlPath, config('torrents'))
+            .then(handleError)
             .then(function(response) {
                 if (isSuccess(response.data)) {
                     return $q.resolve(processData(response.data.data));
@@ -225,6 +267,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.addTorrentUrl = function(magnet) {
         // Contradicts API documentation by using GET instead of POST. However, POST doesn't work.
         return $http.get(this.server.url() + taskPath, config('tUrl', [magnet]))
+            .then(handleError)
             .then(function(response) {
                 // Check response for success.
                 if(isSuccess(response.data)) {
@@ -272,16 +315,13 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.doAction = function(action, torrents) {
         // Retreive the ID's of the torrents (TorrentS.hash)
         var ids = torrents.map(t => t.hash);
-        var ids_str = ids.join(",");
+        var idsStr = ids.join(",");
 
-        return $http.get(this.server.url() + taskPath, config('action', [action, ids_str]))
-                .then(function(response) {
-                    if (isSuccess(response.data)) {
-                        //TODO: Check for error message on the individual torrents resumed.
-                        return $q.resolve();
-                    }
-                    return $q.reject("Error in " + action + " action");
-                })
+        return $http.get(this.server.url() + taskPath, config('action', [action, idsStr]))
+            .then(handleError)
+            .then(function(response) {
+                    return $q.resolve();
+            })
     }
 
     /**
