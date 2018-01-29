@@ -29,11 +29,11 @@ angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__Torre
      * very frequently. You can find a template of the data to be returned in the function.
      * Whenever boolean fullupdate is true this function should return a full list of all
      * the information from the client.
-     * Returnet information will have the following format:
+     * Returned information will have the following format:
      *      labels {array}: array of string of each label
      *      all {array}: array of objects inherited from 'AbstractTorrent' that are not currently known.
      *              This means they have just been added or never seen before since the last startup.
-     *      changed {array}: array of objects inherited from 'AbstractTorrent' that have allready been seend before.
+     *      changed {array}: array of objects inherited from 'AbstractTorrent' that have already been send before.
      *              This means they may contain partial information in which case they ar merged with any present infomation.
      *      deleted {array}: array of string containg the hashes of which torrents to be removed from the list in the GUI.
      * @param {boolean} fullupdate
