@@ -84,6 +84,27 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         }
     }
 
+    // Error objects that maps error codes to error information.
+    var authErr = {
+        "400": "No such account or incorrect password.",
+        "401": "Account disabled.",
+        "402": "Permission denied.",
+        "403": "2-step verfication code required.",
+        "404": "Faield to authenticate 2-step verification code."
+    }
+
+    var taskErr = {
+        "400": "File upload failed.",
+        "401": "Max number of tasks reached.",
+        "402": "Destination denied.",
+        "403": "Destination does not exist.",
+        "404": "Invalid task id.",
+        "405": "Invalid task action.",
+        "406": "No default destination.",
+        "407": "Set destination failed.",
+        "408": "File does not exist."
+    };
+
     /**
      * Simple function without any explanation needed for the technical aspect
      * of it. However the function is needed an easy way of interpreting whether a call
@@ -107,7 +128,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
     this.connect = function(server) {
         this.server = server;
         var self = this;
-        
+
         return $http.get(this.server.url() + "/query.cgi", config('query'))
             .then(function(response) {
                 if (isSuccess(response.data)) {
