@@ -1,4 +1,4 @@
-var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "ngTableResize", "infinite-scroll", "hc.marked", "xml-rpc", "ui.sortable"]);
+var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "xml-rpc", "ui.sortable"]);
 
 // Configure the application
 torrentApp.config(['$animateProvider', function($animateProvider) {
