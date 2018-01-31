@@ -26,10 +26,10 @@
     "angular-animate": "~1.5.9",
     "ngInfiniteScroll": "^1.2.2",
     "angular-marked": "^1.2.1",
-    "angular-xmlrpc": "https://github.com/Tympanix/angular-xmlrpc.git#master",
+    "angular-xmlrpc": "https://github.com/tympanix/angular-xmlrpc.git#master",
     "angular-ui-sortable": "^0.16.1",
     "underscore": "^1.8.3",
-    "angular-table-resize": "https://github.com/Tympanix/angular-table-resize.git#v2.0",
+    "angular-table-resize": "^2.0.0",
     "base64-js": "^1.2.0",
     "fuse.js": "^3.0.5"
   },

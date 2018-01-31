@@ -103,10 +103,11 @@
                 <table
                     id="torrentTable"
                     ng-class="{'compact': settings.ui.displayCompact}"
-                    resizable profile="$server.id"
+                    rz-table
+                    rz-profile="$server.id"
+                    rz-mode="settings.ui.resizeMode"
+                    rz-container=".main-content"
                     columns="$server.columns"
-                    mode="settings.ui.resizeMode"
-                    container=".main-content"
                     class="ui single line unstackable selectable fixed torrent resize table">
                     <tbody class="zoom" ng-class="settings.ui.displaySize" torrent-body columns="$server.columns">
                         <tr
@@ -121,7 +122,10 @@
                     </tbody>
                     <thead>
                         <tr sorting="changeSorting" mode="$server.id">
-                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name" resize="col.attribute" sort="col.attribute">{{::col.name}}</th>
+                            <th ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name"
+                                rz-col="col.attribute" sort="col.attribute">
+                              {{::col.name}}
+                            </th>
                         </tr>
                     </thead>
                 </table>
