@@ -24,7 +24,7 @@ angular.module('torrentApp').factory('TorrentS', ['AbstractTorrent', function(Ab
          // Calculates the total amount of peers and seeds over all connected trackers.
          // Takes a map function from peersInSwarm and seedsInSwarm to get the correct numbers.
          function trackCount(mapFun) {
-             if (!track) {
+             if (!track || track.length === 0) {
                  return 0;
              }
              var numArr = track.map(mapFun)
