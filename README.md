@@ -22,6 +22,7 @@ Electorrent can connect to the following bittorrent clients:
 * [qBittorrent](http://www.qbittorrent.org/) (v3.2.x and above)
 * [Transmission](https://transmissionbt.com)
 * [rTorrent](https://rakshasa.github.io/rtorrent/)
+* [Synology Download Station](https://www.synology.com/en-global/knowledgebase/DSM/help/DownloadStation/DownloadStation_desc)
 
 ## Downloads
 *Please note: I do not own code signing certificates which may results in anti-virus warnings!*
