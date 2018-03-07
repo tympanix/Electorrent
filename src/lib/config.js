@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const {app} = require('electron');
+const {app, dialog, shell} = require('electron');
 var data = null;
 
 var defaultSettings = {
@@ -15,6 +15,31 @@ const dataFilePath = path.join(app.getPath('userData'), 'config.json');
 
 load();
 
+function deleteConfig() {
+    if (fs.existsSync(dataFilePath)) {
+        fs.unlinkSync(dataFilePath)
+    }
+}
+
+function showCorruptDialog() {
+    let button = dialog.showMessageBox({
+        type: "error",
+        buttons: ["Delete Configuration", "Open Folder", "Exit"],
+        defaultId: 2,
+        title: "Corrupt configuration",
+        message: "The configuration file could not be loaded",
+        detail: "This may be due to your configuration file being corrupt. Deleting the corrupt configuration file will most likely solve the problem. However your settings will be permanently gone."
+    })
+    if (button === 0 /* delete */) {
+        deleteConfig()
+    } else if (button === 1 /* open folder */) {
+        shell.showItemInFolder(dataFilePath)
+        app.exit()
+    } else {
+        app.exit()
+    }
+}
+
 function load() {
     if (data !== null) {
         return;
@@ -25,7 +50,19 @@ function load() {
         return;
     }
 
-    data = JSON.parse(fs.readFileSync(dataFilePath, 'utf-8'));
+    file = fs.readFileSync(dataFilePath, 'utf-8')
+
+    try {
+        data = JSON.parse(file);
+    } catch(e) {
+        if (app.isReady()) {
+            showCorruptDialog()
+        } else {
+            app.on('ready', function() {
+                showCorruptDialog()
+            })
+        }
+    }
 }
 
 function save(callback) {
@@ -96,7 +133,7 @@ exports.saveAll = function(settings, callback) {
 exports.get = function (key) {
     load();
     var value = null;
-    if (key in data) {
+    if (data && key in data) {
         value = copy(data[key]);
     }
     return value;
