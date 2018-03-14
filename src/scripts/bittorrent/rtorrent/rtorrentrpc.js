@@ -20,7 +20,12 @@ angular.module('torrentApp').service('rtorrentRpc', ['$q', function($q) {
         var error = data[1]
         var value = data[2]
 
-        _callbacks[id] && _callbacks[id](error, value)
+        if (!_callbacks[id]) {
+            return console.error("No callback found for worker")
+        }
+
+        _callbacks[id](error, value)
+        delete _callbacks[id]
     })
 
     function define(func) {
@@ -43,7 +48,7 @@ angular.module('torrentApp').service('rtorrentRpc', ['$q', function($q) {
     }
 
     const METHODS = [
-        'newClient',
+        'instantiate',
         'get',
         'getXmlrpc',
         'getMulticall',
