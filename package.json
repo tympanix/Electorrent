@@ -20,9 +20,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Tympanix/Electorrent.git"
+    "url": "https://github.com/tympanix/Electorrent.git"
   },
-  "author": "Tympanix",
+  "author": "tympanix",
   "dependencies": {
     "electron-regedit": "^1.0.5",
     "q": "^1.4.1",

@@ -32,6 +32,7 @@ gulp.task('serve', function () {
     gulp.watch(['src/*.html', 'src/scripts/**'], () => run('build:useref', electron.reload));
     gulp.watch(['src/views/**/*'], () => run('build:views', electron.reload));
     gulp.watch(['src/css/**/*'], () => run('build:less', electron.reload));
+    gulp.watch(['src/scripts/workers/*.js'], () => run('build:workers', electron.reload));
 });
 
 gulp.task('default', ['serve']);
@@ -59,6 +60,11 @@ gulp.task('build:app', function() {
 gulp.task('build:views', function() {
   return gulp.src('src/views/**/*', {base: 'src'})
     .pipe(gulp.dest(OUT))
+})
+
+gulp.task('build:workers', function() {
+    return gulp.src('src/scripts/workers/*.js', {base: 'src'})
+        .pipe(gulp.dest(OUT))
 })
 
 gulp.task('build:lib', function() {
@@ -93,7 +99,7 @@ gulp.task('semantic:default', function() {
 
 gulp.task('build:semantic', ['semantic:src', 'semantic:default'])
 
-gulp.task('build:static', ['build:app', 'build:views', 'build:lib', 'build:others', 'build:assets'])
+gulp.task('build:static', ['build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers'])
 
 gulp.task('build:less', function() {
   let dir = 'src/css/themes'
