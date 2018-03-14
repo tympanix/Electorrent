@@ -90,6 +90,10 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
             return `${this.proto}://${this.ip}:${this.port}${this.cleanPath()}`
         };
 
+        Server.prototype.host = function() {
+            return `${this.proto}://${this.ip}`
+        }
+
         function trim(s, mask) {
             /*jshint bitwise: false*/
             while(~mask.indexOf(s[0])) {

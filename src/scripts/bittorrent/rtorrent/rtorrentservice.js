@@ -1,6 +1,8 @@
 'use strict';
 
-angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "notificationService", "Column", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, $notify, Column) {
+angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "rtorrentRpc", "notificationService", "Column", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, rtorrentRpc, $notify, Column) {
+
+    const Rtorrent = require('electron').remote.require('node-rtorrent')
 
     const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/
 
@@ -20,6 +22,9 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         ip: '',
         port: ''
     }
+
+    // Save the rtorrent instance here
+    var rtorrent = null
 
     const fields = rtorrentConfig.fields.map(fieldTransform);
     const custom = rtorrentConfig.custom.map(customTransform);
@@ -51,22 +56,24 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      */
     this.connect = function(server) {
 
-        $xmlrpc.config({
-            hostName: server.url(),
-            pathName: ""
+        return rtorrentRpc.newClient({
+            host: server.ip,
+            port: server.port,
+            path: server.cleanPath(),
+            user: server.user,
+            pass: server.password
+        }).then(function() {
+            return rtorrentRpc.get('system.client_version', [])
         })
 
-        var encoded = new Buffer(`${server.user}:${server.password}`).toString('base64');
-        $http.defaults.headers.common.Authorization = 'Basic ' + encoded;
 
-        return $xmlrpc.callMethod('system.client_version')
-            .then(function(data) {
-                config.version = data;
-                return $q.resolve('Sucessfully connected to rTorrent');
-            }).catch(function(err) {
-                console.error(err, err);
-                return $q.reject(err);
-            })
+            // .then(function(data) {
+            //     config.version = data;
+            //     return $q.resolve('Sucessfully connected to rTorrent');
+            // }).catch(function(err) {
+            //     console.error(err, err);
+            //     return $q.reject(err);
+            // })
     }
 
     /**
@@ -92,20 +99,31 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} data
      */
     this.torrents = function() {
-        let torrents = null
-        return $xmlrpc.callMethod('d.multicall', ['main', ...fields, ...custom])
+        var defer = $q.defer()
+
+        rtorrentRpc.getTorrents()
             .then(function(data) {
-                torrents = processData(data)
-                return $q.resolve(torrents);
-            }).then(function(torrents) {
-                return getTrackers(torrents.all)
-            }).then(function(trackers) {
-                torrents.trackers = trackers
-                return $q.resolve(torrents)
-            }).catch(function(err) {
-                console.error("Torrent error", err);
-                return $q.reject(err);
+                console.log(data)
+            }).catch(function(error) {
+                console.log(error)
             })
+        // let torrents = null
+        // return $xmlrpc.callMethod('d.multicall', ['main', ...fields, ...custom])
+        //     .then(function(data) {
+        //         torrents = processData(data)
+        //         return $q.resolve(torrents);
+        //     }).then(function(torrents) {
+        //         return getTrackers(torrents.all)
+        //     }).then(function(trackers) {
+        //         torrents.trackers = trackers
+        //         return $q.resolve(torrents)
+        //     }).catch(function(err) {
+        //         console.error("Torrent error", err);
+        //         return $q.reject(err);
+        //     })
+
+        defer.resolve({});
+        return defer.promise
 
     }
 
