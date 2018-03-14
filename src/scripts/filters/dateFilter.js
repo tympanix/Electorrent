@@ -1,7 +1,7 @@
 angular.module("torrentApp").filter('date', function() {
     const BT_EPOCH = 994032000000 /* July 2nd 2001, release of bittorrent */
     return function(epochtime) {
-        if (epochtime === '') return ''
+        if (!epochtime) return ''
         if (epochtime < BT_EPOCH) return ''
         return moment(epochtime).fromNow();
     }
