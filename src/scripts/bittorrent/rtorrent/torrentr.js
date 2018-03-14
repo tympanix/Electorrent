@@ -11,53 +11,49 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * and appending a single letter desribing the client to which it belongs.
      * (e.g. TorrentQ for qBittorrent, TorrentU for µTorrent... and so on)
      */
-    function TorrentR(array) {
+    function TorrentR(data) {
         /*
          * Please modify the constructor function parameters to
          * your liking for the best implementation. If data is obtained as an array from
          * the API one could list each function parameter in the same order as the array
          */
 
-        var data = buildData(array);
-
         AbstractTorrent.call(this, {
-            hash: data.get_hash, /* Hash (string): unique identifier for the torrent */
-            name: data.get_name, /* Name (string): the name of the torrent */
-            size: data.get_size_bytes, /* Size (integer): size of the file to be downloaded in bytes */
-            downloaded: data.get_bytes_done, /* Downloaded (integer): number of bytes */
-            percent: data.get_bytes_done / data.get_size_bytes * 1000, /* Percent (integer): completion in per-mille (100% = 1000)  */
-            uploaded: data.get_up_total, /* Uploaded (integer): number of bytes */
-            ratio: data.get_ratio / 1000, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
-            uploadSpeed: data.get_up_rate,  /* Upload Speed (integer): bytes per second */
-            downloadSpeed: data.get_down_rate, /* Download Speed (integer): bytes per second */
+            hash: data.hash, /* Hash (string): unique identifier for the torrent */
+            name: data.name, /* Name (string): the name of the torrent */
+            size: data.size, /* Size (integer): size of the file to be downloaded in bytes */
+            downloaded: data.down_total, /* Downloaded (integer): number of bytes */
+            percent: data.down_total / data.size * 1000, /* Percent (integer): completion in per-mille (100% = 1000)  */
+            uploaded: data.up_total, /* Uploaded (integer): number of bytes */
+            ratio: data.ratio, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
+            uploadSpeed: data.up_rate,  /* Upload Speed (integer): bytes per second */
+            downloadSpeed: data.down_rate, /* Download Speed (integer): bytes per second */
             eta: undefined, /* ETA (integer): second to completion MISSING */
-            label: decodeURIComponent(data.get_custom1 || ''), /* Label (string): group/category identification MISSING */
-            peersConnected: data.get_peers_accounted, /* Peers Connected (integer): number of peers connected */
+            label: data.label, /* Label (string): group/category identification MISSING */
+            peersConnected: data.leechers, /* Peers Connected (integer): number of peers connected */
             peersInSwarm: undefined, /* Peers In Swarm (integer): number of peers in the swarm */
-            seedsConnected: data.get_peers_complete, /* Seeds Connected (integer): number of connected seeds */
+            seedsConnected: data.seeders, /* Seeds Connected (integer): number of connected seeds */
             seedsInSwarm: undefined, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
             statusMessage: undefined, /* Status (string): the current status of the torrent (e.g. downloading)  */
-            dateAdded: data.custom_addtime * 1000, /* Date Added (integer): number of milliseconds unix time */
-            dateCompleted: undefined, /* Date Completed (integer): number of milliseconds unix time */
-            savePath: data.get_directory, /* Save Path (string): the path at which the downloaded content is saved */
+            dateAdded: data.addtime * 1000, /* Date Added (integer): number of milliseconds unix time */
+            dateCompleted: data.completed, /* Date Completed (integer): number of milliseconds unix time */
+            savePath: data.directory, /* Save Path (string): the path at which the downloaded content is saved */
         });
 
         /*
          * Additional data that does not match the default scheme above
          * may be added as extra fields. This can be done in the manner below
          */
-        this.data = data;
-
         this.status = data.get_state
-        this.active = data.is_active
-        this.checked = data.is_hash_checked
-        this.checking = data.is_hash_checking
-        this.open = data.is_open
-        this.complete = data.get_complete
-        this.message = data.get_message
+        this.active = data.active
+        this.checked = data.hashed
+        this.checking = data.hashing
+        this.open = data.open
+        this.complete = data.complete
+        this.message = data.message
 
-        this.eta = data.get_left_bytes / this.downloadSpeed
+        this.eta = data.left_bytes / this.downloadSpeed
     }
 
     function buildData(array) {
@@ -189,6 +185,10 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         )
     };
 
+    TorrentR.prototype.isStatusChecking = function() {
+        return !!this.checking
+    }
+
     /**
      * Optionally returns the color for the progress bar used as a class in CSS.
      * Colors are decided by default using the status functions above. Only implement
@@ -196,7 +196,9 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {string} color
      */
     TorrentR.prototype.statusColor = function () {
-        if (this.isStatusSeeding()){
+        if (this.isStatusChecking()){
+            return 'grey';
+        } else if (this.isStatusSeeding()){
             return 'orange';
         } else if (this.isStatusError()){
             return 'error';
@@ -218,7 +220,9 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
      * @return {string} status
      */
     TorrentR.prototype.statusText = function () {
-        if (this.isStatusSeeding()){
+        if (this.isStatusChecking()) {
+            return 'Checking';
+        } else if (this.isStatusSeeding()){
             return 'Seeding';
         } else if (this.isStatusError()){
             return 'Error';

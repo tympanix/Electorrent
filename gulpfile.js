@@ -29,10 +29,13 @@ gulp.task('serve', function () {
     gulp.watch('src/lib/*.js', () => run('build:lib', electron.restart))
 
     // Reload renderer process
-    gulp.watch(['src/*.html', 'src/scripts/**'], () => run('build:useref', electron.reload));
-    gulp.watch(['src/views/**/*'], () => run('build:views', electron.reload));
-    gulp.watch(['src/css/**/*'], () => run('build:less', electron.reload));
-    gulp.watch(['src/scripts/workers/*.js'], () => run('build:workers', electron.reload));
+    gulp.watch(['src/*.html', 'src/scripts/**'], () => run('build:useref', electron.reload))
+    gulp.watch(['src/views/**/*'], () => run('build:views', electron.reload))
+    gulp.watch(['src/css/**/*'], () => run('build:less', electron.reload))
+    gulp.watch(['src/scripts/workers/*.js'], () => run('build:workers', electron.reload))
+
+    // Watch dependencies
+    gulp.watch(['app/node_modules/node-rtorrent/*.js'], electron.restart)
 });
 
 gulp.task('default', ['serve']);

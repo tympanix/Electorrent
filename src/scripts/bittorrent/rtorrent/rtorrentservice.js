@@ -1,8 +1,9 @@
 'use strict';
 
-angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "rtorrentRpc", "notificationService", "Column", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, rtorrentRpc, $notify, Column) {
+angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "rtorrentRpc", "notificationService", "Column", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, rtorrentRpc_old, $notify, Column) {
 
-    const Rtorrent = require('electron').remote.require('node-rtorrent')
+    const Rtorrent = require('node-rtorrent')
+    const { Remote } = require('./lib/worker')
 
     const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/
 
@@ -23,25 +24,8 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         port: ''
     }
 
-    // Save the rtorrent instance here
-    var rtorrent = null
-
-    const fields = rtorrentConfig.fields.map(fieldTransform);
-    const custom = rtorrentConfig.custom.map(customTransform);
-    const trackerfields = rtorrentConfig.trackers.map(trackerTransform);
-
-    function fieldTransform(field) {
-        return 'd.' + field + '=';
-    }
-
-    function trackerTransform(field) {
-        return 't.' + field + '='
-    }
-
-    function customTransform(custom) {
-        return 'd.get_custom=' + custom;
-    }
-
+    let rtorrent = null
+    let worker = new Worker('scripts/workers/rtorrent.js')
 
 
     /**
@@ -56,24 +40,18 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      */
     this.connect = function(server) {
 
-        return rtorrentRpc.newClient({
+        rtorrent = new Remote(Rtorrent.prototype, worker)
+
+        return rtorrent.instantiate({
             host: server.ip,
             port: server.port,
             path: server.cleanPath(),
             user: server.user,
             pass: server.password
         }).then(function() {
-            return rtorrentRpc.get('system.client_version', [])
+            return rtorrent.get('system.client_version', [])
         })
 
-
-            // .then(function(data) {
-            //     config.version = data;
-            //     return $q.resolve('Sucessfully connected to rTorrent');
-            // }).catch(function(err) {
-            //     console.error(err, err);
-            //     return $q.reject(err);
-            // })
     }
 
     /**
@@ -99,13 +77,21 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} data
      */
     this.torrents = function() {
-        var defer = $q.defer()
+        var torrents = {
+            dirty: true,
+            labels: [],
+            all: [],
+            changed: [],
+            deleted: []
+        };
 
-        rtorrentRpc.getTorrents()
+        return rtorrent.getTorrents()
             .then(function(data) {
-                console.log(data)
-            }).catch(function(error) {
-                console.log(error)
+                torrents.all = data.map(d => new TorrentR(d))
+                return torrents
+            }).catch(function(err) {
+                console.error(err)
+                throw new Error(err)
             })
         // let torrents = null
         // return $xmlrpc.callMethod('d.multicall', ['main', ...fields, ...custom])
@@ -121,9 +107,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         //         console.error("Torrent error", err);
         //         return $q.reject(err);
         //     })
-
-        defer.resolve({});
-        return defer.promise
 
     }
 
@@ -260,64 +243,44 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} actionIsDone
      */
     this.start = function(torrents) {
-        return doAction('d.start', torrents);
-    }
-
-    this.pause = function(torrents) {
-        return doAction('d.pause', torrents);
-    }
-
-    this.resume = function(torrents) {
-        return doAction('d.resume', torrents);
+        return rtorrent.start(torrents.map(t => t.hash))
     }
 
     this.stop = function(torrents) {
-        return doAction('d.try_stop', torrents);
-    }
-
-    this.close = function(torrents) {
-        return doAction('d.close', torrents);
-    }
-
-    this.open = function(torrents) {
-        return doAction('d.open', torrents);
+        return rtorrent.stop(torrents.map(t => t.hash))
     }
 
     this.label = function(torrents, label) {
-        return doAction('d.set_custom1', torrents, label)
+        return rtorrent.setLabel(torrents.map(t => t.hash), label)
     }
 
-    this.delete = function(torrents) {
-        return doAction('d.erase', torrents)
+    this.remove = function(torrents) {
+        return rtorrent.remove(torrents.map(t => t.hash))
     }
 
     this.deleteAndErase = function(torrents) {
-        return doAction(
-            ['d.set_custom5', 'd.delete_tied', 'd.erase'],
-            torrents,
-            ['1', undefined, undefined]
-        )
+        return rtorrent.removeAndErase(torrents.map(t => t.hash))
     }
 
     this.recheck = function(torrents) {
-        return doAction('d.check_hash', torrents)
+        return rtorrent.recheck(torrents.map(t => t.hash))
     }
 
     this.priority = {}
     this.priority.high = function(torrents) {
-        return doAction('d.set_priority', torrents, 3)
+        return rtorrent.setPriorityHigh(torrents.map(t => t.hash))
     }
 
     this.priority.normal = function(torrents) {
-        return doAction('d.set_priority', torrents, 2)
+        return rtorrent.setPriorityNormal(torrents.map(t => t.hash))
     }
 
     this.priority.low = function(torrents) {
-        return doAction('d.set_priority', torrents, 1)
+        return rtorrent.setPriorityLow(torrents.map(t => t.hash))
     }
 
     this.priority.off = function(torrents) {
-        return doAction('d.set_priority', torrents, 0)
+        return rtorrent.setPriorityOff(torrents.map(t => t.hash))
     }
 
     /**
@@ -354,21 +317,14 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
             label: 'Start',
             type: 'button',
             color: 'green',
-            click: this.resume,
+            click: this.start,
             icon: 'play'
-        },
-        {
-            label: 'Pause',
-            type: 'button',
-            color: 'yellow',
-            click: this.pause,
-            icon: 'pause'
         },
         {
             label: 'Stop',
             type: 'button',
             color: 'red',
-            click: this.close,
+            click: this.stop,
             icon: 'stop'
         },
         {
@@ -415,7 +371,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
         },
         {
             label: 'Remove',
-            click: this.delete,
+            click: this.remove,
             icon: 'remove'
         },
         {
