@@ -3,4 +3,4 @@
  * performance ciritical tasks to a new thread.
  */
 const { InstanceWorker } = require('../../lib/worker')
-new InstanceWorker(require('node-rtorrent'), self)
+new InstanceWorker(require('@electorrent/node-rtorrent'), self)

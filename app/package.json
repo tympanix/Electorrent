@@ -28,10 +28,10 @@
   },
   "homepage": "https://github.com/tympanix/Electorrent#readme",
   "dependencies": {
+    "@electorrent/node-rtorrent": "^1.0.5",
     "electron-is": "^2.4.0",
     "electron-regedit": "^1.0.5",
     "electron-squirrel-startup": "^1.0.0",
-    "node-rtorrent": "^1.1.0",
     "q": "^1.5.1",
     "request": "^2.74.0",
     "semver": "^5.3.0",
