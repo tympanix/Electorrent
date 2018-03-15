@@ -227,7 +227,8 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         return selected.length === 0;
     }
 
-    function toggleSelect(torrent){
+    function toggleSelect(target){
+        var torrent = $scope.torrents[target.hash]
         if (!torrent.selected){
             selected.push(torrent);
         } else {
@@ -246,9 +247,11 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         selected = [];
     }
 
-    function singleSelect(torrent){
+    function singleSelect(target){
         deselectAll();
-        torrent.selected = true;
+        var torrent = $scope.torrents[target.hash]
+        if (!torrent) return
+        torrent.selected = true
         selected.push(torrent);
         lastSelected = torrent;
     }
@@ -317,11 +320,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     function fetchTorrents(){
-        var results = [];
-        angular.forEach($scope.torrents, function(torrent /*, hash*/) {
-            results.push(torrent);
-        });
-        return results;
+        return Array.from(Object.values($scope.torrents))
     }
 
     $scope.changeSorting = function(sortName, descending) {
@@ -449,7 +448,6 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         if(!lastSelected) return
         var lastDelegate = $scope.torrents[lastSelected.hash];
         if(lastDelegate) {
-            lastDelegate.selected = true
             lastSelected = lastDelegate
         } else {
             lastSelected = null
