@@ -8,8 +8,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     let rtorrent = null
     let worker = new Worker('scripts/workers/rtorrent.js')
 
-    const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/
-
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
      * Best practise is naming your service starting with the client name in lower case followed by 'Service'
@@ -86,81 +84,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
                 console.error(err)
                 throw new Error(err)
             })
-        // let torrents = null
-        // return $xmlrpc.callMethod('d.multicall', ['main', ...fields, ...custom])
-        //     .then(function(data) {
-        //         torrents = processData(data)
-        //         return $q.resolve(torrents);
-        //     }).then(function(torrents) {
-        //         return getTrackers(torrents.all)
-        //     }).then(function(trackers) {
-        //         torrents.trackers = trackers
-        //         return $q.resolve(torrents)
-        //     }).catch(function(err) {
-        //         console.error("Torrent error", err);
-        //         return $q.reject(err);
-        //     })
-
-    }
-
-    function processData(data) {
-        var torrents = {
-            dirty: true,
-            labels: [],
-            all: [],
-            changed: [],
-            deleted: []
-        };
-
-        torrents.all = data.map(build);
-        torrents.labels = torrents.all.reduce(fetchLabels, []).map(decodeURIComponent)
-
-        return torrents
-    }
-
-    function getTrackers(torrents) {
-        if (!torrents.length) return
-        let calls = []
-        torrents.forEach((torrent) => {
-            calls.push({'methodName': 't.multicall', 'params': [torrent.hash, '', ...trackerfields]})
-        })
-        return $xmlrpc.callMethod('system.multicall', [calls])
-            .then(function(data) {
-                let trackers = processTrackerData(torrents, data)
-                return $q.resolve(trackers)
-            })
-    }
-
-    function processTrackerData(torrents, data) {
-        let trackers = new Set()
-
-        torrents.forEach((torrent, index) => {
-            let trackerArray = _.map(data[index][0], function(trackerData) {
-                return _.object(rtorrentConfig.trackers, trackerData)
-            })
-            torrent.addTrackerData(trackerArray)
-            _.each(_.pluck(trackerArray, 'get_url'), function(trackerUrl) {
-                trackers.add(trackerUrl)
-            })
-        })
-        var trackerArray = Array.from(trackers).map((tracker) => {
-            return parseUrl(tracker)
-        })
-        return _.compact(trackerArray)
-    }
-
-    function parseUrl(url) {
-        var match = url.match(URL_REGEX)
-        return match && match[1]
-    }
-
-    function build(array) {
-        return new TorrentR(array);
-    }
-
-    function fetchLabels(prev, current) {
-        if (current.label) prev.push(current.label)
-        return prev
     }
 
     /**
@@ -185,42 +108,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     this.uploadTorrent = function(buffer /*, filename*/) {
         buffer = Buffer.from(buffer)
         return rtorrent.loadFileContent(buffer)
-    }
-
-    function doAction(actions, torrents, params) {
-
-        var hashes = torrents.map(function(torrent) {
-            return torrent.hash
-        })
-
-        var calls = []
-
-        hashes.forEach(function(hash) {
-            if (!Array.isArray(actions)) {
-                actions = [actions]
-                params = [params]
-            }
-
-            actions.forEach(function(action, idx) {
-                var call = {
-                    'methodName': action,
-                    'params': [hash]
-                }
-
-                if (params[idx] !== undefined) call.params.push(params[idx])
-
-                calls.push(call)
-            })
-        })
-
-        return $xmlrpc.callMethod('system.multicall', [calls])
-            .then(function(data) {
-                return $q.resolve(data);
-            }).catch(function(err) {
-                console.error("Action error", err);
-                return $q.reject(err);
-            })
-
     }
 
     /**
