@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "rtorrentRpc", "notificationService", "Column", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, rtorrentRpc_old, $notify, Column) {
+angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "TorrentR", "rtorrentConfig", "rtorrentRpc", "notificationService", "Column", function($http, $q, TorrentR, rtorrentConfig, rtorrentRpc_old, $notify, Column) {
 
     const Rtorrent = require('@electorrent/node-rtorrent')
     const { Remote } = require('./lib/worker')

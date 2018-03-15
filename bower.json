@@ -26,7 +26,6 @@
     "angular-animate": "~1.5.9",
     "ngInfiniteScroll": "^1.2.2",
     "angular-marked": "^1.2.1",
-    "angular-xmlrpc": "https://github.com/tympanix/angular-xmlrpc.git#master",
     "angular-ui-sortable": "^0.16.1",
     "underscore": "^1.8.3",
     "angular-table-resize": "^2.0.1",

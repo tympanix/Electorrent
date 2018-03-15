@@ -5,6 +5,8 @@ const gulp = require('gulp');
 const {server} = require('electron-connect')
 const useref = require('gulp-useref');
 const clean = require('gulp-clean');
+const sourcemaps = require('gulp-sourcemaps')
+const lazypipe = require('lazypipe')
 const run = require('run-sequence');
 const less = require('gulp-less');
 const concat = require('gulp-concat');
@@ -45,17 +47,17 @@ gulp.task('default', ['serve']);
 
 gulp.task('clean', function() {
     return gulp.src(CLEAN, {read: false})
-    .pipe(clean());
+        .pipe(clean());
 });
 
 gulp.task('build:useref', function() {
+    var conf = {dev: c => PROD ? '' : c}
+    var maps = lazypipe().pipe(sourcemaps.init, { loadMaps: true})
+
     return gulp.src('src/*.html')
-    .pipe(useref({
-      dev: function(content) {
-        return PROD ? '' : content
-      }
-    }))
-    .pipe(gulp.dest(OUT))
+        .pipe(useref(conf, maps))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(OUT))
 });
 
 gulp.task('build:app', function() {
@@ -64,8 +66,8 @@ gulp.task('build:app', function() {
 });
 
 gulp.task('build:views', function() {
-  return gulp.src('src/views/**/*', {base: 'src'})
-    .pipe(gulp.dest(OUT))
+    return gulp.src('src/views/**/*', {base: 'src'})
+        .pipe(gulp.dest(OUT))
 })
 
 gulp.task('build:workers', function() {
@@ -74,8 +76,8 @@ gulp.task('build:workers', function() {
 })
 
 gulp.task('build:lib', function() {
-  return gulp.src('src/lib/**/*', {base: 'src'})
-    .pipe(gulp.dest(OUT))
+    return gulp.src('src/lib/**/*', {base: 'src'})
+        .pipe(gulp.dest(OUT))
 })
 
 gulp.task('build:others', function() {
