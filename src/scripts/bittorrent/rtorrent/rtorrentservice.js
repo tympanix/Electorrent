@@ -2,7 +2,7 @@
 
 angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc", "TorrentR", "rtorrentConfig", "rtorrentRpc", "notificationService", "Column", function($http, $q, $xmlrpc, TorrentR, rtorrentConfig, rtorrentRpc_old, $notify, Column) {
 
-    const Rtorrent = require('node-rtorrent')
+    const Rtorrent = require('@electorrent/node-rtorrent')
     const { Remote } = require('./lib/worker')
 
     let rtorrent = null
@@ -78,7 +78,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
 
         return rtorrent.getTorrentsExtra()
             .then(function(data) {
-                console.log(data)
                 torrents.all = data.torrents.map(d => new TorrentR(d))
                 torrents.trackers = data.trackers
                 torrents.labels = data.labels
