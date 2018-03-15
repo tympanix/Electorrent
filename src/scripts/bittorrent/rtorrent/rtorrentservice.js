@@ -39,7 +39,8 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "Torrent
             port: server.port,
             path: server.cleanPath(),
             user: server.user,
-            pass: server.password
+            pass: server.password,
+            ssl: server.isHTTPS(),
         }).then(function() {
             return rtorrent.get('system.client_version', [])
         })

@@ -90,8 +90,8 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
             return `${this.proto}://${this.ip}:${this.port}${this.cleanPath()}`
         };
 
-        Server.prototype.host = function() {
-            return `${this.proto}://${this.ip}`
+        Server.prototype.isHTTPS = function() {
+            return this.proto === 'https'
         }
 
         function trim(s, mask) {
