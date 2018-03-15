@@ -4,9 +4,12 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
 
     const Rtorrent = require('@electorrent/node-rtorrent')
     const { Remote } = require('./lib/worker')
+    const worker = new Worker('scripts/workers/rtorrent.js')
 
+    /*
+     * Global reference to the rtorrent remote web worker instance
+     */
     let rtorrent = null
-    let worker = new Worker('scripts/workers/rtorrent.js')
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
