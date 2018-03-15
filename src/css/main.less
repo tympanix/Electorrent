@@ -164,7 +164,7 @@ html, body {
     overflow-y: overlay; /* Chrome scrollbar on top */
 }
 .ui.welcome.form.loading:before {
-    background: rgba(240,240,240,0.8);
+    background: fadeout(@pageBackground, 25%);
 }
 .torrent.table {
     border-radius: 0;
@@ -242,7 +242,7 @@ html, body {
 }
 .overlay {
     position: absolute;
-    background-color: @pageBackground;
+    background-color: @overlayBackground;
     height: 100%;
     width: 100%;
 }

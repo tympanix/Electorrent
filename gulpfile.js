@@ -37,7 +37,7 @@ gulp.task('serve', function () {
     gulp.watch(['src/scripts/workers/*.js'], () => run('build:workers', electron.reload))
 
     // Watch dependencies
-    gulp.watch(['app/node_modules/node-rtorrent/*.js'], electron.restart)
+    gulp.watch(['app/node_modules/@electorrent/node-rtorrent/*.js'], electron.restart)
 
     // Watch frontend dependencies
     gulp.watch(['bower_components/angular-table-resize/dist/*'], () => run('build:useref', electron.reload))

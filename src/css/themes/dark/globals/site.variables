@@ -34,6 +34,7 @@
 @pageBackground: @gray-darker;
 @pageMiddleground: lighten(@gray-darker, 2.5%);
 @pageForeground: lighten(@gray-darker, 5%);
+@overlayBackground: @pageBackground;
 @highlightBackground: @gray;
 @linkColor: #fff;
 @linkHoverColor: #fff;
