@@ -31,9 +31,9 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
             eta: undefined, /* ETA (integer): second to completion MISSING */
             label: data.label, /* Label (string): group/category identification MISSING */
             peersConnected: data.leechers, /* Peers Connected (integer): number of peers connected */
-            peersInSwarm: undefined, /* Peers In Swarm (integer): number of peers in the swarm */
+            peersInSwarm: data.leechers_total, /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: data.seeders, /* Seeds Connected (integer): number of connected seeds */
-            seedsInSwarm: undefined, /* Seeds In Swarm (integer): number of connected seeds in swarm */
+            seedsInSwarm: data.seeders_total, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
             statusMessage: undefined, /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: data.addtime * 1000, /* Date Added (integer): number of milliseconds unix time */
@@ -52,6 +52,8 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         this.open = data.open
         this.complete = data.complete
         this.message = data.message
+        this.tracker = data.tracker
+        this.trackers = data.trackers
 
         this.eta = data.left_bytes / this.downloadSpeed
     }

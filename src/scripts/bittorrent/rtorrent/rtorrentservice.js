@@ -5,6 +5,9 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
     const Rtorrent = require('node-rtorrent')
     const { Remote } = require('./lib/worker')
 
+    let rtorrent = null
+    let worker = new Worker('scripts/workers/rtorrent.js')
+
     const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/
 
     /*
@@ -14,18 +17,6 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * The real name of your client for display purposes can be changes in the field 'this.name' below.
      */
     this.name = 'rTorrent';
-
-    /*
-     * Good practise is keeping a configuration object for your communication with the API
-     */
-    const config = {
-        version: undefined,
-        ip: '',
-        port: ''
-    }
-
-    let rtorrent = null
-    let worker = new Worker('scripts/workers/rtorrent.js')
 
 
     /**
@@ -85,9 +76,12 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
             deleted: []
         };
 
-        return rtorrent.getTorrents()
+        return rtorrent.getTorrentsExtra()
             .then(function(data) {
-                torrents.all = data.map(d => new TorrentR(d))
+                console.log(data)
+                torrents.all = data.torrents.map(d => new TorrentR(d))
+                torrents.trackers = data.trackers
+                torrents.labels = data.labels
                 return torrents
             }).catch(function(err) {
                 console.error(err)
@@ -177,13 +171,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function(magnet) {
-
-        $xmlrpc.callMethod('load_start', [magnet])
-        .then(function(data) {
-            return $q.resolve(data);
-        }).catch(function(err) {
-            return $q.reject(err);
-        });
+        return rtorrent.loadLink(magnet)
     }
 
     /**
@@ -196,7 +184,8 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "xmlrpc"
      * @return {promise} isAdded
      */
     this.uploadTorrent = function(buffer /*, filename*/) {
-        return $xmlrpc.callMethod('load_raw_start', [buffer])
+        buffer = Buffer.from(buffer)
+        return rtorrent.loadFileContent(buffer)
     }
 
     function doAction(actions, torrents, params) {
