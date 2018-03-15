@@ -40,7 +40,10 @@ function createTorrentWindow() {
         width: 1200,
         height: 800,
         backgroundColor: '#ffffff',
-        icon: getApplicationIcon()
+        icon: getApplicationIcon(),
+        webPreferences: {
+            nodeIntegrationInWorker: true
+        },
     }
 
     Object.assign(windowSettings, config.get('windowsize'));
