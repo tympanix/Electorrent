@@ -5,7 +5,7 @@
   "description": "A thin client for your torrenting needs",
   "main": "app/app.js",
   "scripts": {
-    "start": "electron --debug app",
+    "start": "gulp",
     "build": "gulp build",
     "install": "bower install && gulp install",
     "postinstall": "electron-builder install-app-deps",

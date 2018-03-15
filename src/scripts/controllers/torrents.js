@@ -22,6 +22,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.torrentLimit = LIMIT;
     $scope.labels = [];
     $scope.trackers = [];
+    $scope.guiBusy = true;
 
     $scope.filters = {
         status: 'all',
@@ -85,6 +86,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.renderDone = function() {
+        $scope.guiBusy = false
         $timeout(function() {
             $scope.$emit('hide:loading')
         }, 100)
