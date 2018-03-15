@@ -93,7 +93,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.$on('start:torrents', function(event, fullupdate){
-        $scope.update(!!fullupdate);
+        $scope.update(!!fullupdate).then(function() {
+            $scope.$apply();
+        });
         startTimer();
     });
 
@@ -298,9 +300,9 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.doAction = function(action, name, data) {
-        action.call($rootScope.$btclient, selected, data)
+        return action.call($rootScope.$btclient, selected, data)
             .then(function(){
-                $scope.update();
+                return $scope.update();
             })
             .catch(function(err) {
                 console.error('Action error', err)
@@ -309,14 +311,14 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     };
 
     $scope.doContextAction = function(action) {
-        action.call($rootScope.$btclient, selected)
-        .then(function(){
-            $scope.update();
-        })
-        .catch(function(err) {
-            console.error('Context action error', err)
-            $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
-        })
+        return action.call($rootScope.$btclient, selected)
+            .then(function(){
+                return $scope.update();
+            })
+            .catch(function(err) {
+                console.error('Context action error', err)
+                $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
+            })
     }
 
     function fetchTorrents(){
@@ -455,7 +457,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.update = function(fullupdate) {
-        var q = $rootScope.$btclient.torrents(fullupdate)
+        var q = $rootScope.$btclient.torrents(!!fullupdate)
         return q.then(function(torrents) {
             newTorrents(torrents);
             deleteTorrents(torrents);

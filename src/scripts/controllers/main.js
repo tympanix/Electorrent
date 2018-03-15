@@ -65,8 +65,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         .then(function(){
             $scope.statusText = "Loading Torrents"
             config.updateServer(server)
-            pageTorrents();
-            $scope.$broadcast('start:torrents', true /*full update*/)
+            pageTorrents(true /* full update */);
             requestMagnetLinks();
             requestTorrentFiles();
         }).catch(function(){
@@ -100,10 +99,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         })
     })
 
-    function pageTorrents(){
+    function pageTorrents(fullupdate){
         $scope.showTorrents = true;
         //$scope.showLoading = false;
-        $scope.$broadcast('start:torrents');
+        $scope.$broadcast('start:torrents', fullupdate);
         page = null;
     }
 
