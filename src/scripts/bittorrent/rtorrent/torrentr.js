@@ -1,8 +1,7 @@
 'use strict';
 
-angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentConfig', '$filter', function(AbstractTorrent, rtorrentConfig, $filter) {
+angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', function(AbstractTorrent) {
 
-    let hostName = $filter('torrentTracker')
 
     /**
      * Constructor, with class name.
@@ -58,36 +57,12 @@ angular.module('torrentApp').factory('TorrentR', ['AbstractTorrent', 'rtorrentCo
         this.eta = data.left_bytes / this.downloadSpeed
     }
 
-    function buildData(array) {
-        var fields = rtorrentConfig.fields.concat(rtorrentConfig.custom.map(customTransform))
-        var data = {};
-        array.forEach(function(item, index) {
-            var key = fields[index];
-            data[key] = item
-        })
-        return data;
-    }
-
-    function customTransform(custom) {
-        return 'custom_' + custom;
-    }
 
     /*
      * Inherit by prototypal inheritance. Leave this line as is (only rename class name).
      * Do NOT implement any prototypal features above this line!
      */
     TorrentR.prototype = Object.create(AbstractTorrent.prototype);
-
-    TorrentR.prototype.addTrackerData = function(trackerArray) {
-        this.peersInSwarm = _.reduce(_.pluck(trackerArray, 'get_scrape_incomplete'), sum, 0)
-        this.seedsInSwarm = _.reduce(_.pluck(trackerArray, 'get_scrape_complete'), sum, 0)
-        this.trackers = _.pluck(trackerArray, 'get_url')
-        this.tracker = hostName(this.trackers && this.trackers[0])
-    }
-
-    function sum(sum, item) {
-        return sum + item
-    }
 
 
     /**
