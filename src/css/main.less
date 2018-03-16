@@ -226,8 +226,13 @@ html, body {
 }
 .torrent.progress .bar {
     min-width: 0;
+    width: 100%;
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
+
+    &.idle {
+        transition: none;
+    }
 }
 .torrent.sort.label {
     float: right;
