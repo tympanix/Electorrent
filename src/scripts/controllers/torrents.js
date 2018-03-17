@@ -93,9 +93,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.$on('start:torrents', function(event, fullupdate){
-        $scope.update(!!fullupdate).then(function() {
-            $scope.$apply();
-        });
+        $scope.update(!!fullupdate);
         startTimer();
     });
 

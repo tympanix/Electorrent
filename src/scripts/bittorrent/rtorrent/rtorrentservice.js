@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "TorrentR", "notificationService", "Column", function($http, $q, TorrentR, $notify, Column) {
+angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote", "TorrentR", "notificationService", "Column", function($http, $q, $remote, TorrentR, $notify, Column) {
 
     const Rtorrent = require('@electorrent/node-rtorrent')
     const { Remote } = require('./lib/worker')
@@ -32,7 +32,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "Torrent
      */
     this.connect = function(server) {
 
-        rtorrent = new Remote(Rtorrent.prototype, worker)
+        rtorrent = new $remote(Rtorrent.prototype, worker)
 
         return rtorrent.instantiate({
             host: server.ip,
