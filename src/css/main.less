@@ -188,11 +188,33 @@ html, body {
     cursor: default !important;
 }
 
-.ui.torrent.table td {
-    padding: 0.5em 0.7em;
+.ui.torrent.table {
+    tr td {
+        &:first-child {
+            padding-left: 0.75em;
+        }
+        padding: 0.45em 0.30em;
+    }
+    tr th {
+        &:first-child {
+            padding-left: 0.75em;
+        }
+        padding: 0.75em 0.30em;
+    }
 }
-.ui.torrent.table.compact td {
-    padding: 0.25em 0.7em;
+.ui.torrent.table.compact {
+    tr td {
+        &:first-child {
+            padding-left: 0.75em;
+        }
+        padding: 0.25em 0.30em;
+    }
+    tr th {
+        &:first-child {
+            padding-left: 0.75em;
+        }
+        padding: 0.5em 0.30em;
+    }
 }
 .torrent.table thead th.sortup,
 .torrent.table thead th.sortdown {
