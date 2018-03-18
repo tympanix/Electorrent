@@ -1,10 +1,11 @@
-angular.module("torrentApp").controller("notificationsController", ["$scope", "$rootScope", "$timeout", "electron", "configService", "$http", function($scope, $rootScope, $timeout, electron, config, $http) {
+angular.module("torrentApp").controller("notificationsController", ["$scope", "$rootScope", "$timeout", "electron", "configService", "$http",
+    function($scope, $rootScope, $timeout, electron, config, $http) {
 
     var id = 0;
 
     $scope.updateData = {
         releaseDate: "Just now...",
-        updateUrl: "http://www.update.this.app.com"
+        updateUrl: "https://github.com/tympanix/Electorrent/releases"
     };
 
     $scope.notifications = [];
@@ -63,14 +64,79 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
         } else {
             electron.autoUpdater.quitAndInstall();
         }
-
     }
 
-    electron.ipc.on('certificate-error', function(event, certificate) {
-        $scope.certificate = certificate
+    function showCertModal() {
         $timeout(function(){
           $('#certificateModal').modal('show')
-        })
+        }, 0)
+    }
+
+    /*
+     * Event for certificate validation of certificates from NodeJS based clients.
+     * The format of the certificates is that of NodeJS's TLS module
+     * https://nodejs.org/api/tls.html#tls_tlssocket_getpeercertificate_detailed
+     */
+    electron.ipc.on('certificate-modal-node', function(event, cert, server) {
+        $scope.installCertificate = function() {
+            console.log("TRUSTED CERTIFICATE")
+        }
+        $scope.certificate = {
+            selfSigned: !cert.issuerCertificate,
+            issuer: {
+                country: cert.issuer.C,
+                state: cert.issuer.ST,
+                organization: cert.issuer.O,
+                organizationUnit: cert.issuer.OU,
+                commonName: cert.issuer.CN,
+            },
+            subject: {
+                country: cert.subject.C,
+                state: cert.subject.ST,
+                organization: cert.subject.O,
+                organizationUnit: cert.subject.OU,
+                commonName: cert.subject.CN,
+            },
+            fingerprint: cert.fingerprint,
+            validFrom: new Date(cert.valid_from).getTime() / 1000,
+            validTo: new Date(cert.valid_to).getTime() / 1000,
+            serialNumber: cert.serialNumber,
+        }
+        showCertModal()
+    })
+
+    /*
+     * Event for certficate validation of certificates from Chrome based
+     * clients. The format of the certificate is that of Electron's. This
+     * handler is used for legacy support, for clients not ported to NodeJS.
+     * https://electronjs.org/docs/api/structures/certificate
+     */
+    electron.ipc.on('certificate-error', function(event, cert, server) {
+        $scope.installCertificate = function() {
+            config.trustCertificate(cert)
+        }
+        $scope.certificate = {
+            selfSigned: !cert.issuerCert,
+            issuer: {
+                country: cert.issuer.country,
+                state: cert.issuer.state,
+                organization: cert.issuer.organizations && cert.issuer.organizations[0],
+                organizationUnit: cert.issuer.organizationUnits && cert.issuer.organizationUnits[0],
+                commonName: cert.issuer.commonName,
+            },
+            subject: {
+                country: cert.subject.country,
+                state: cert.subject.state,
+                organization: cert.subject.organizations && cert.subject.organizations[0],
+                organizationUnit: cert.subject.organizationUnits && cert.subject.organizationUnits[0],
+                commonName: cert.subject.commonName,
+            },
+            fingerprint: cert.fingerprint,
+            validFrom: cert.validStart,
+            validTo: cert.validExpiry,
+            serialNumber: cert.serialNumber,
+        }
+        showCertModal()
     })
 
     $scope.installCertificate = function() {

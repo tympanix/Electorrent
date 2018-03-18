@@ -13,13 +13,23 @@ class InstanceWorker {
     }
 
     _callback(id) {
-        return function(error, value) {
-            if (error) {
-                this._worker.postMessage([id, error.toString(), null])
+        return function(err, value) {
+            if (err) {
+                this._worker.postMessage([id, this._error(err), null])
             } else {
                 this._worker.postMessage([id, null, value])
             }
         }.bind(this)
+    }
+
+    _error(err) {
+        let _err = {}
+        for (let k of Object.getOwnPropertyNames(err)) {
+            if (typeof err[k] !== 'function') {
+                _err[k] = err[k]
+            }
+        }
+        return _err
     }
 
     instantiate() {

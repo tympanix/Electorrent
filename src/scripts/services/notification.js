@@ -2,6 +2,8 @@
 
 angular.module('torrentApp')
     .service('notificationService', ["$rootScope", "electron", function($rootScope, electron) {
+        const ERR_SELF_SIGNED_CERT = "DEPTH_ZERO_SELF_SIGNED_CERT"
+
         var disableNotifications = false;
 
         this.disableAll = function() {
@@ -34,15 +36,17 @@ angular.module('torrentApp')
             $rootScope.$emit('notification', notification);
         }
 
-        this.alertAuth = function(response, code){
-            if (typeof response === 'string') {
-                this.alert('Connection problem', response)
-            } else if (typeof response !== 'object') {
+        this.alertAuth = function(err, code){
+            if (typeof err === 'string') {
+                this.alert('Connection problem', err)
+            } else if (typeof err !== 'object') {
                 this.alert("Connection problem", "The connection could not be established")
-            } else if (response.status === -1){
+            } else if (err.status === -1){
                 this.alert("Connection problem", "The connection to the server timed out!")
-            } else if (response.status === 401 || code === 401){
+            } else if (err.status === 401 || code === 401){
                 this.alert("Connection problem", "You entered an incorrent username/password")
+            } else if (err.code === ERR_SELF_SIGNED_CERT) {
+                this.alert("Certificate Error", "Self signed certificate not trusted")
             } else {
                 this.alert("Connection problem", "The connection could not be established")
             }

@@ -25,12 +25,13 @@ angular.module('torrentApp').factory("electron", [function() {
     o.autoUpdater       = remote.autoUpdater;
 
     // Custom resources
-    o.config            = remote.require('./lib/config.js');
-    o.updater           = remote.require('./lib/update.js');
+    o.config            = remote.require('./lib/config');
+    o.updater           = remote.require('./lib/update');
     o.is                = remote.require('electron-is');
     o.program           = remote.require('yargs').argv;
-    o.torrents          = remote.require('./lib/torrents.js');
-    o.themes            = remote.require('./lib/themes.js');
+    o.torrents          = remote.require('./lib/torrents');
+    o.themes            = remote.require('./lib/themes');
+    o.ca                = remote.require('./lib/certificates')
 
     // Return object
     return o;

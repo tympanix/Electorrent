@@ -1,8 +1,13 @@
 'use strict';
 
-angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notificationService', '$bittorrent',
-    '$btclients',
-    function(Torrent, $q, $notify, $bittorrent, $btclients) {
+angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'electron', 'notificationService', '$bittorrent', '$btclients',
+    function(Torrent, $q, electron, $notify, $bittorrent, $btclients) {
+        const certificate = electron.ca
+
+        /*
+         * Well known error values used for error handling
+         */
+        const ERR_SELF_SIGNED_CERT = "DEPTH_ZERO_SELF_SIGNED_CERT"
 
         /**
          * Constructor, with class name
@@ -123,10 +128,15 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'notifi
             }
 
             let service = $bittorrent.getClient(this.client);
-            return service.connect(this).catch(function(response, msg) {
+            return service.connect(this).catch(function(err, msg) {
                 self.isConnected = false
-                $notify.alertAuth(response, msg);
-                return $q.reject(response, this)
+                $notify.alertAuth(err, msg)
+                if (err.code === ERR_SELF_SIGNED_CERT) {
+                    certificate.get(self.json(), function(err, cert) {
+                        console.log("Got cert:", cert)
+                    })
+                }
+                return $q.reject(err, this)
             }).then(function() {
                 self.isConnected = true
                 //$bittorrent.setClient(self.service);

@@ -41,7 +41,18 @@ angular.module('torrentApp').factory('$remote', ['$q', function($q) {
             delete this._callbacks[id]
         }
 
+        _error(errObj) {
+            let msg = errObj.message && errObj.message.replace(/^Error: /, "")
+            let err = new Error(msg || 'An unknown worker error occured')
+            for (let k of Object.getOwnPropertyNames(errObj)) {
+                err[k] = errObj[k]
+            }
+            console.log("Code from main!", err.code)
+            return err
+        }
+
         _define(func) {
+            let self = this
             if (this[func]) {
                 throw new Error("Duplicate method definition")
             }
@@ -50,9 +61,9 @@ angular.module('torrentApp').factory('$remote', ['$q', function($q) {
                 var defer = $q.defer()
 
                 var id = _ID++
-                this._callbacks[id] = function(error, data) {
-                    if (error) {
-                        defer.reject(new Error(error.replace(/^Error: /, "")))
+                this._callbacks[id] = function(err, data) {
+                    if (err) {
+                        defer.reject(self._error(err))
                     } else {
                         defer.resolve(data)
                     }
