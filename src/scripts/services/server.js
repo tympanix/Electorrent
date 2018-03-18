@@ -1,8 +1,7 @@
 'use strict';
 
-angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'electron', 'notificationService', '$bittorrent', '$btclients',
-    function(Torrent, $q, electron, $notify, $bittorrent, $btclients) {
-        const certificate = electron.ca
+angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$rootScope', '$q', 'electron', 'notificationService', '$bittorrent', '$btclients',
+    function(Torrent, $rootScope, $q, electron, $notify, $bittorrent, $btclients) {
 
         /*
          * Well known error values used for error handling
@@ -42,6 +41,7 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'electr
             this.path = data.path || ''
             this.default = data.default
             this.lastused = data.lastused
+            this.certificate = data.certificate
             this.columns = this.parseColumns(data.columns)
         };
 
@@ -58,7 +58,8 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'electr
                 path: this.path,
                 default: this.default,
                 lastused: this.lastused || -1,
-                columns: this.columns.filter((column) => column.enabled).map((column) => column.name)
+                certificate: this.certificate,
+                columns: this.columns.filter((column) => column.enabled).map((column) => column.name),
             }
         };
 
@@ -132,8 +133,8 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'electr
                 self.isConnected = false
                 $notify.alertAuth(err, msg)
                 if (err.code === ERR_SELF_SIGNED_CERT) {
-                    certificate.get(self.json(), function(err, cert) {
-                        console.log("Got cert:", cert)
+                    return self.askForCertificate().then(function() {
+                        return self.connect()
                     })
                 }
                 return $q.reject(err, this)
@@ -144,6 +145,35 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$q', 'electr
                 return $q.resolve()
             })
         };
+
+        Server.prototype.askForCertificate = function() {
+            let self = this
+            let defer = $q.defer()
+
+            electron.ca.get(self.json(), function(err, cert) {
+                if (err) {
+                    defer.reject(err)
+                } else {
+                    let ok = $rootScope.$on('certificate-installed', function(e, id, fingerprint) {
+                        self.certificate = fingerprint
+                        defer.resolve()
+                        ok(); bad();
+                    })
+                    let bad = $rootScope.$on('certificate-denied', function(e) {
+                        defer.reject('Certificate rejected by user')
+                        ok(); bad();
+                    })
+                }
+            })
+
+            return defer.promise
+        }
+
+        Server.prototype.getCertificate = function() {
+            if (this.certificate) {
+                return electron.ca.loadCertificate(this.certificate)
+            }
+        }
 
         Server.prototype.equals = function(other) {
             return(

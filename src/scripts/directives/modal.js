@@ -10,7 +10,10 @@ angular.module('torrentApp').directive('modal', function() {
             icon: '@',
             approve: '&',
             deny: '&',
-            data: '='
+            hidden: '&',
+            show: '&',
+            after: '=',
+            data: '=',
         },
         restrict: 'E',
         link: link
@@ -21,17 +24,27 @@ angular.module('torrentApp').directive('modal', function() {
     }
 
     function link(scope, element/*, attrs*/) {
+        var accepted = false
+
         $(element).modal({
             onDeny: function () {
-                return scope.deny();
+                accepted = false
+                return scope.deny()
             },
             onApprove: function () {
-                return scope.approve();
+                accepted = true
+                return scope.approve()
             },
             onHidden: function () {
-                clearForm(element);
+                clearForm(element)
+                scope.after && scope.after(accepted)
+                return scope.hidden()
             },
             onShow: function() {
+                accepted = false
+                scope.show()
+            },
+            onVisible: function() {
                 $(element).modal('refresh')
             },
             closable: false,

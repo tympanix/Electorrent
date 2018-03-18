@@ -1,7 +1,27 @@
+const https = require('https')
+const fs = require('fs')
+const path = require('path')
+const { app } = require('electron')
+
 const config = require('./config')
 const electorrent = require('./electorrent')
 
-var https = require('https')
+const CERT_DIR = path.join(app.getPath('userData'), 'certs')
+
+function ensureDir() {
+    try {
+        if (!fs.existsSync(CERT_DIR)) {
+            fs.mkdirSync(CERT_DIR)
+        }
+    } catch (e) {
+        console.error(err)
+    }
+}
+
+/*
+ * Make sure the certificate directory exists
+ */
+ensureDir()
 
 function isEmpty(object) {
     for (var prop in object) {
@@ -45,10 +65,7 @@ function get(server, callback) {
             callback(new Error('The website did not provide a certificate'))
         } else {
             let torrentWindow = electorrent.getWindow()
-            torrentWindow.webContents.send('certificate-modal-node', certificate);
-            if (certificate.raw) {
-                certificate.pemEncoded = pemEncode(certificate.raw.toString('base64'), 64)
-            }
+            torrentWindow.webContents.send('certificate-modal-node', certificate, server);
             callback(null, certificate)
         }
     })
@@ -60,6 +77,32 @@ function get(server, callback) {
     req.end()
 }
 
+function installCertificate(cert, callback) {
+    if (!cert.raw) {
+        return callback(new Error('Could not install invalid certificate'))
+    }
+
+    const pemData = pemEncode(cert.raw.toString('base64'), 64)
+    const fingerprint = cert.fingerprint.split(":").join("").toLowerCase()
+
+    const pemFilename = path.join(CERT_DIR, `${fingerprint}.crt`)
+    fs.writeFile(pemFilename, pemData, (err) => callback(err, fingerprint))
+}
+
+function loadCertificate(fingerprint) {
+    const certPath = path.join(CERT_DIR, `${fingerprint}.crt`)
+    if (!fs.existsSync(certPath)) {
+        return
+    }
+    try {
+        return fs.readFileSync(certPath)
+    } catch (e) {
+        return
+    }
+}
+
 module.exports = {
-    get: get
+    get: get,
+    installCertificate: installCertificate,
+    loadCertificate: loadCertificate,
 }

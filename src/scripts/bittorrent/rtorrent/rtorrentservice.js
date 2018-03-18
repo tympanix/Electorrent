@@ -34,6 +34,8 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
 
         rtorrent = new $remote(Rtorrent.prototype, worker)
 
+        let ca = server.getCertificate()
+
         return rtorrent.instantiate({
             host: server.ip,
             port: server.port,
@@ -41,6 +43,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
             user: server.user,
             pass: server.password,
             ssl: server.isHTTPS(),
+            ca: ca,
         }).then(function() {
             return rtorrent.get('system.client_version', [])
         })

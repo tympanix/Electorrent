@@ -47,7 +47,6 @@ angular.module('torrentApp').factory('$remote', ['$q', function($q) {
             for (let k of Object.getOwnPropertyNames(errObj)) {
                 err[k] = errObj[k]
             }
-            console.log("Code from main!", err.code)
             return err
         }
 

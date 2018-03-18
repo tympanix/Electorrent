@@ -4,6 +4,7 @@ const {app, dialog, shell} = require('electron');
 var data = null;
 
 var defaultSettings = {
+    servers: [],
     ui: {
         resizeMode: 'FixedResizer',
         notifications: true,
@@ -11,13 +12,13 @@ var defaultSettings = {
     }
 };
 
-const dataFilePath = path.join(app.getPath('userData'), 'config.json');
+const CONF_PATH = path.join(app.getPath('userData'), 'config.json');
 
 load();
 
 function deleteConfig() {
-    if (fs.existsSync(dataFilePath)) {
-        fs.unlinkSync(dataFilePath)
+    if (fs.existsSync(CONF_PATH)) {
+        fs.unlinkSync(CONF_PATH)
     }
 }
 
@@ -33,7 +34,7 @@ function showCorruptDialog() {
     if (button === 0 /* delete */) {
         deleteConfig()
     } else if (button === 1 /* open folder */) {
-        shell.showItemInFolder(dataFilePath)
+        shell.showItemInFolder(CONF_PATH)
         app.exit()
     } else {
         app.exit()
@@ -45,12 +46,12 @@ function load() {
         return;
     }
 
-    if (!fs.existsSync(dataFilePath)) {
+    if (!fs.existsSync(CONF_PATH)) {
         data = copy(defaultSettings);
         return;
     }
 
-    file = fs.readFileSync(dataFilePath, 'utf-8')
+    file = fs.readFileSync(CONF_PATH, 'utf-8')
 
     try {
         data = JSON.parse(file);
@@ -66,11 +67,11 @@ function load() {
 }
 
 function save(callback) {
-    fs.writeFile(dataFilePath, JSON.stringify(data, null, 4), callback);
+    fs.writeFile(CONF_PATH, JSON.stringify(data, null, 4), callback);
 }
 
 function saveSync() {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 4));
+    fs.writeFileSync(CONF_PATH, JSON.stringify(data, null, 4));
 }
 
 function copy(object) {
@@ -137,6 +138,28 @@ exports.get = function (key) {
         value = copy(data[key]);
     }
     return value;
+}
+
+exports.getServer = function(id) {
+    load();
+    return data.servers.find(s => s.id === id)
+}
+
+exports.saveServer = function(server, callback) {
+    load();
+    let ok = false
+    data.servers = data.servers.map(s => {
+        if (s.id === server.id) {
+            ok = true
+            return Object.assign(s, server)
+        } else {
+            return s
+        }
+    })
+    if (!ok) {
+        return callback(new Error("Could not save server. Server not found"))
+    }
+    save(callback)
 }
 
 exports.unset = function (key, callback) {
