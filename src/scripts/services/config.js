@@ -78,17 +78,11 @@ angular.module('torrentApp').service('configService', ['$rootScope', '$bittorren
         return copy
     }
 
-    this.filterServers = function(servers) {
-        settings.servers = settings.servers.filter(function (s) {
-            return servers.find(sx => sx.id === s.id)
-        })
-    }
 
     this.saveAllSettings = function(newSettings) {
         var q = $q.defer();
         if (newSettings) {
-            angular.merge(settings, newSettings)
-            this.filterServers(newSettings.servers)
+            Object.assign(settings, newSettings)
         }
         config.saveAll(settingsToJson(), function(err) {
             if(err) q.reject(err)

@@ -177,7 +177,7 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     }
 
     $scope.removeServer = function(server) {
-        if ($rootScope.$server === server) {
+        if ($rootScope.$server.id === server.id) {
             $notify.alert('Server in use', 'Can\'t remove a server that is currently being used')
         } else {
             $scope.settings.servers = $scope.settings.servers.filter((s) => {
