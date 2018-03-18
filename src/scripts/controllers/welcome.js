@@ -5,14 +5,6 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
     $scope.server = new Server()
     $scope.advanced = false
 
-    // Debugging
-    $scope.server.ip = 'localhost'
-    $scope.server.port = 443
-    $scope.server.user = 'admin'
-    $scope.server.password = 'admin'
-    $scope.server.client = 'rtorrent'
-    $scope.server.proto = 'https'
-
     function clearForm() {
         $scope.server = new Server()
     }
