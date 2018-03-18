@@ -61,8 +61,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $bittorrent.setServer(server)
         $scope.statusText = "Connecting to " + $rootScope.$btclient.name;
 
-        $rootScope.$btclient.connect(server)
-        .then(function(){
+        server.connect(server).then(function(){
             $scope.statusText = "Loading Torrents"
             config.updateServer(server)
             pageTorrents(true /* full update */);
@@ -147,6 +146,10 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $scope.$broadcast('setting:load')
         page = PAGE_SETTINGS;
         $scope.$apply();
+    })
+
+    $scope.$on('show:servers', function() {
+        pageServers()
     })
 
     $scope.$on('hide:loading', function() {

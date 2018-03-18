@@ -123,8 +123,12 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     }
 
     $scope.close = function() {
-        $scope.$emit('show:torrents');
-        loadAllSettings();
+        if ($scope.server.isConnected) {
+            $scope.$emit('show:torrents');
+            loadAllSettings();
+        } else {
+            $scope.$emit('show:servers')
+        }
     }
 
     function saveServer() {
