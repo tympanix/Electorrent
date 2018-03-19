@@ -36,9 +36,10 @@ Electorrent can connect to the following bittorrent clients:
 * Upload local torrent files by browsing your filesystem (Ctrl/Cmd+O)
 * Drag-and-drop support for torrent files
 * Paste magnet links directly from your clipboard (Ctrl/Cmd+I)
-* Qick swap between multiple server configuration
+* Quickly change between multiple server configurations
 * Native desktop notifications
 * Fuzzy searching of torrents
+* Built in certificate trust system (for self-signed certificates)
 * Easy one click installer using Squirrel framework
 * Automatic updates straight from the GitHub repository!
 
