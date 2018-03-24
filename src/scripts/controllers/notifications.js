@@ -81,9 +81,10 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
             $scope.installCertificate = function() {
                 electron.ca.installCertificate(cert, function(err, fingerprint) {
                     if (err) {
-                        $rootScope.$emit('certificate-denied')
+                        $rootScope.$emit('certificate-modal', false)
                         $notify.alert("Could not install certificate", err.toString())
                     } else {
+                        $rootScope.$emit('certificate-modal', server.id, fingerprint)
                         $rootScope.$broadcast('certificate-installed', server.id, fingerprint)
                         $notify.ok("Certificate installed", "The certificate has been trusted for this server to use")
                     }
@@ -153,7 +154,7 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
 
         $scope.certificateResult = function(accepted) {
             if (!accepted) {
-                $rootScope.$emit('certificate-denied')
+                $rootScope.$emit('certificate-modal', false)
             }
         }
 

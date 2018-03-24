@@ -154,14 +154,14 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$rootScope',
                 if (err) {
                     defer.reject(err)
                 } else {
-                    let ok = $rootScope.$on('certificate-installed', function(e, id, fingerprint) {
-                        self.certificate = fingerprint
-                        defer.resolve()
-                        ok(); bad();
-                    })
-                    let bad = $rootScope.$on('certificate-denied', function(e) {
-                        defer.reject('Certificate rejected by user')
-                        ok(); bad();
+                    let unsubscribe = $rootScope.$on('certificate-modal', function(e, id, fingerprint) {
+                        unsubscribe()
+                        if (id) {
+                          self.certificate = fingerprint
+                          defer.resolve()
+                        } else {
+                          defer.reject()
+                        }
                     })
                 }
             })
