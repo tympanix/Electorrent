@@ -176,14 +176,15 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$rootScope',
         }
 
         Server.prototype.equals = function(other) {
-            return(
+            return (
                 this.ip === other.ip &&
                 this.proto === other.proto &&
                 this.port === other.port &&
                 this.user === other.user &&
                 this.password === other.password &&
                 this.client === other.client &&
-                this.path === other.path
+                this.path === other.path &&
+                this.certificate === this.certificate
             )
         }
 
