@@ -31,17 +31,17 @@ Electorrent can connect to the following bittorrent clients:
 * [Linux](https://electorrent.herokuapp.com/download/linux)
 
 ## Features
-* Connects to your favorite torrent client
-* Handles the magnet link protocol when browsing websites
-* Upload local torrent files by browsing your filesystem (Ctrl/Cmd+O)
-* Drag-and-drop support for torrent files
-* Paste magnet links directly from your clipboard (Ctrl/Cmd+I)
-* Quickly change between multiple server configurations
-* Native desktop notifications
-* Fuzzy searching of torrents
-* Built in certificate trust system (for self-signed certificates)
-* Easy one click installer using Squirrel framework
-* Automatic updates straight from the GitHub repository!
+- [x] Connects to your favorite torrent client
+- [x] Handles the magnet link protocol when browsing websites
+- [x] Upload local torrent files by browsing your filesystem (Ctrl/Cmd+O)
+- [x] Drag-and-drop support for torrent files
+- [x] Paste magnet links directly from your clipboard (Ctrl/Cmd+I)
+- [x] Quickly change between multiple server configurations
+- [x] Native desktop notifications
+- [x] Fuzzy searching of torrents
+- [x] Built in certificate trust system (for self-signed certificates)
+- [x] Easy one click installer using Squirrel framework
+- [x] Automatic updates straight from the GitHub repository!
 
 ## Screenshots
 <p align="center">
