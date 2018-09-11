@@ -8,6 +8,8 @@ class InstanceWorker {
         this._factory = factory
         this._instance = null
         this._worker.onmessage = this._onMessage.bind(this)
+        this._worker.onmessageerror = this._onmessageerror.bind(this)
+        this._worker.onerror = this._onerror.bind(this)
         this._callback = this._callback.bind(this)
     }
 
@@ -24,7 +26,7 @@ class InstanceWorker {
     _error(err) {
         let _err = {}
         for (let k of Object.getOwnPropertyNames(err)) {
-            if (typeof err[k] !== 'function') {
+            if (typeof err[k] === 'string') {
                 _err[k] = err[k]
             }
         }
@@ -35,6 +37,14 @@ class InstanceWorker {
         this._instance = new this._factory(...arguments)
         let cb = arguments[arguments.length - 1]
         cb(null, true)
+    }
+
+    _onmessageerror(msg) {
+      throw new Error("message error in worker thread")
+    }
+
+    _onerror(msg) {
+      throw new Error("error in worker thread")
     }
 
     _onMessage(msg) {

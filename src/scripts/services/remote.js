@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').factory('$remote', ['$q', function($q) {
+angular.module('torrentApp').factory('$remote', ['$q', '$timeout', function($q, $timeout) {
 
     let _ID = 0
 
@@ -11,6 +11,14 @@ angular.module('torrentApp').factory('$remote', ['$q', function($q) {
             this._prototype = prototype
             this._worker = worker
             this._worker.onmessage = this._eventListener.bind(this)
+
+            this._worker.onmessageerror = function() {
+              throw new Error("message error from web worker remote")
+            }
+            this._worker.onerror = function() {
+              throw new Error("error from web worker remote")
+            }
+
             this._callbacks = {}
 
             for (var fn in this._prototype) {
@@ -59,8 +67,13 @@ angular.module('torrentApp').factory('$remote', ['$q', function($q) {
             this[func] = function() {
                 var defer = $q.defer()
 
+                var timeout = setTimeout(function() {
+                    defer.reject(new Error("no answer from thread"))
+                }, 10000)
+
                 var id = _ID++
                 this._callbacks[id] = function(err, data) {
+                    clearTimeout(timeout)
                     if (err) {
                         defer.reject(self._error(err))
                     } else {
