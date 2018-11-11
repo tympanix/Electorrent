@@ -164,10 +164,17 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $timeout.cancel(timeout);
     }
 
+    function toggleFilter(filter, val) {
+        if (filter === val) {
+           filter = undefined;
+        }
+        filter = val;
+    }
+
     $scope.filterByStatus = function(status){
         deselectAll();
         lastSelected = null;
-        $scope.filters.status = status;
+        toggleFilter($scope.filters.status, status);
         $scope.torrentLimit = LIMIT;
         refreshTorrents();
     }
@@ -183,7 +190,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.filterByLabel = function(label){
         deselectAll();
         lastSelected = null;
-        $scope.filters.label = label;
+        toggleFilter($scope.filters.label, label);
         $scope.torrentLimit = LIMIT;
         refreshTorrents();
     }
@@ -195,7 +202,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     $scope.filterByTracker = function(tracker) {
         deselectAll();
         lastSelected = null;
-        $scope.filters.tracker = tracker;
+        toggleFilter($scope.filters.tracker, tracker);
         $scope.torrentLimit = LIMIT;
         refreshTorrents();
     }
