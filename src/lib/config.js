@@ -109,7 +109,9 @@ function copyArray(_obj){
 exports.put = function (key, value, callback) {
     load();
     data[key] = value;
-    save(callback);
+    if (callback != undefined) {
+        save(callback);
+    }
 }
 
 exports.getAllSettings = function() {
@@ -128,7 +130,9 @@ exports.write = function() {
 exports.saveAll = function(settings, callback) {
     load();
     data = settings;
-    save(callback)
+    if (callback != undefined) {
+        save(callback)
+    }
 }
 
 exports.get = function (key) {

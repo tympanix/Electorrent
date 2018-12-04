@@ -112,23 +112,21 @@ ipcMain.on('send:torrentfiles', function() {
 })
 
 // If another instance of the app is allready running, execute this callback
-var shouldQuit = app.makeSingleInstance(function(args /*, workingDirectory*/ ) {
-    // Someone tried to run a second instance, we should focus our window
-
-    if(torrentWindow) {
-        sendMagnetLinks(args)
-        sendTorrentFiles(args)
-        if(torrentWindow.isMinimized()) torrentWindow.restore();
-        torrentWindow.focus();
-    }
-    return true;
-
-});
-
-if(shouldQuit) {
+if (!app.requestSingleInstanceLock()) {
     app.quit();
     return;
-}
+} else {
+    app.on('second-instance', function(event, args, /*workingDirectory*/) {
+        // Someone tried to run a second instance, we should focus our window
+
+        if(torrentWindow) {
+            sendMagnetLinks(args)
+            sendTorrentFiles(args)
+            if(torrentWindow.isMinimized()) torrentWindow.restore();
+            torrentWindow.focus();
+        }
+    })
+};
 
 // Handle magnet links on MacOS
 app.on('open-url', function(event, url) {
