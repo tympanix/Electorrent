@@ -79,7 +79,11 @@ angular.module('torrentApp').service('qbittorrentService', ["$q", "$remote", "To
             deleted: []
         };
 
-        torrents.labels = data.categories;
+        if (Array.isArray(data.categories)) {
+            torrents.labels = data.categories
+        } else if (typeof data.categories === 'object') {
+            torrents.labels = Object.values(data.categories).map(c => c.name)
+        }
 
         if(data.full_update) {
             torrents.all = buildAll(data.torrents);
@@ -196,6 +200,10 @@ angular.module('torrentApp').service('qbittorrentService', ["$q", "$remote", "To
 
     this.deleteAndRemove = function(torrents) {
         return qbittorrent.deleteAndRemove(torrents.map(t => t.hash))
+    }
+
+    this.setCategory = function(torrents, category) {
+        return qbittorrent.setCategory(torrents.map(t => t.hash), category)
     }
 
     /**
