@@ -104,7 +104,8 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
         return this.getStatus('uploading', 'stalledUP')
     };
     TorrentQ.prototype.isStatusPaused = function() {
-        return this.getStatus('pausedDL');
+        /* qBittorrent only has started and stopped torrents */
+        return false
     };
 
     /**
