@@ -34,7 +34,7 @@ angular.module('torrentApp').factory('$remote', ['$q', '$timeout', function($q, 
             var data = msg.data
 
             if (data.length !== 3) {
-                return console.error("Invalid response from rtorrent worker")
+                return console.error("Invalid response from worker")
             }
 
             var id = data[0]

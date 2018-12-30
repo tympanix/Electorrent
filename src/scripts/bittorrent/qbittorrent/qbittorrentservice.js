@@ -1,310 +1,303 @@
 'use strict';
 
-angular.module('torrentApp').service('qbittorrentService', ["$http", "$resource", "$log", "$q", "TorrentQ",
-    "notificationService", "httpFormService",
-    function($http, $resource, $log, $q, Torrent, $notify, httpFormService) {
+angular.module('torrentApp').service('qbittorrentService', ["$q", "$remote", "TorrentQ", "notificationService", function($q, $remote, Torrent, $notify) {
 
-        this.name = 'qBittorrent';
-        this.server = undefined;
+    const QBittorrent = require('@electorrent/node-qbittorrent')
+    const worker = new Worker('scripts/workers/qbittorrent.js')
 
-        var rid = 0;
+    /*
+     * Global reference to the qbittorrent remote web worker instance
+     */
+    let qbittorrent = null
 
-        const httpform = {
-            withCredentials: true,
-            transformRequest: httpFormService,
-            timeout: 5000,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
+
+    /*
+     * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
+     * Best practise is naming your service starting with the client name in lower case followed by 'Service'
+     * (remember capital 'S' e.g qbittorrentService for qBittorrent, utorrentService for µTorrent ect.).
+     * The real name of your client for display purposes can be changes in the field 'this.name' below.
+     */
+    this.name = 'qBittorrent';
+
+
+    /**
+     * Connect to the server upon initial startup, changing connection settings ect. The function
+     * should return a promise that the connection was successfull. A standard http timeout of 5 seconds
+     * must be implemented. When successfull the service should save login details for later use. Check out
+     * the helper function on the `server` object. Especially the `url()` function is useful.
+     * @param {server} server
+     * @return {promise} connection
+     */
+    this.connect = function(server) {
+        qbittorrent = new $remote(QBittorrent.prototype, worker)
+
+        let ca = server.getCertificate()
+
+        return qbittorrent.instantiate({
+            host: server.ip,
+            port: server.port,
+            path: server.cleanPath(),
+            user: server.user,
+            pass: server.password,
+            ca: ca,
+        }).then(function() {
+            return qbittorrent.login()
+        })
+    }
+
+    /**
+     * Return any new information about torrents to be rendered in the GUI. Should return a
+     * promise with the required information to be updated. Will be executed by controllers
+     * very frequently. You can find a template of the data to be returned in the function.
+     * Whenever boolean fullupdate is true this function should return a full list of all
+     * the information from the client.
+     * Returned information will have the following format:
+     *      labels {array}: array of string of each label
+     *      all {array}: array of objects inherited from 'AbstractTorrent' that are not currently known.
+     *              This means they have just been added or never seen before since the last startup.
+     *      changed {array}: array of objects inherited from 'AbstractTorrent' that have already been send before.
+     *              This means they may contain partial information in which case they ar merged with any present infomation.
+     *      deleted {array}: array of string containg the hashes of which torrents to be removed from the list in the GUI.
+     * @param {boolean} fullupdate
+     * @return {promise} data
+     */
+    this.torrents = function(fullupdate) {
+        let promise = fullupdate ? qbittorrent.reset() : $q.when()
+
+        return promise.then(() => {
+            return qbittorrent.syncMaindata()
+        }).then((data) => {
+            return processData(data)
+        })
+    }
+
+    function processData(data) {
+        var torrents = {
+            labels: [],
+            all: [],
+            changed: [],
+            deleted: []
         };
 
-        this.url = function(path) {
-            return `${this.server.url()}${path}`;
+        torrents.labels = data.categories;
+
+        if(data.full_update) {
+            torrents.all = buildAll(data.torrents);
+        } else {
+            torrents.changed = buildAll(data.torrents);
         }
 
-        this.connect = function(server) {
-            this.server = server
-            var defer = $q.defer();
+        torrents.deleted = data.torrents_removed || [];
+        return torrents;
+    }
 
-            $http.post(this.url('/login'), {
-                    username: server.user,
-                    password: server.password
-                }, httpform)
-                .then(function(response) {
-                    if(response.data === 'Ok.') {
-                        defer.resolve(response);
-                    } else {
-                        defer.reject(response, 401)
-                    }
-                })
-                .catch(function(response) {
-                    if(response.status === 403) {
-                        defer.reject(response, 'qBittorrent says', response.data)
-                    } else if (response.status === 401) {
-                        var auth = response.headers('WWW-Authenticate')
-                        if (auth.includes('Web UI Access')) {
-                          defer.reject('Please update qBittorrent to v3.2.x or newer')
-                        } else {
-                          defer.reject(response)
-                        }
-                    } else {
-                        defer.reject(response);
-                    }
-                });
+    function buildAll(torrents) {
+        if(!torrents) return [];
 
-            return defer.promise;
-        }
+        var torrentArray = []
 
-        this.torrents = function(all) {
-            var defer = $q.defer();
+        Object.keys(torrents).map(function(hash) {
+            var torrent = new Torrent(hash, torrents[hash]);
+            torrentArray.push(torrent);
+        });
 
-            if(all === true) rid = 0;
+        return torrentArray;
+    }
 
-            $http.get(this.url('/sync/maindata'), {
-                params: {
-                    rid: rid
+    /**
+     * Returns the default path for the service. Should start with a slash.
+     @return {string} the default path
+     */
+    this.defaultPath = function() {
+      return "/"
+    }
+
+    /**
+     * Add a torrent to the client by sending a magnet link to the API. Should return
+     * a promise that the torrent has been added successfully to the client.
+     * @param {string} magnetURL
+     * @return {promise} isAdded
+     */
+    this.addTorrentUrl = function(magnet) {
+        return qbittorrent.addTorrentURL(magnet, {})
+    }
+
+    /**
+     * Add a torrent file with the .torrent extension to the client through the API. Should
+     * return a promise that the torrent was added sucessfully. File data is given as an nodejs buffer
+     * more information here: https://nodejs.org/api/buffer.html. You may use
+     * the existing implementation as a helping hand
+     * @param {blob} filedata
+     * @param {string} filename
+     * @return {promise} isAdded
+     */
+    this.uploadTorrent = function(buffer, filename) {
+        buffer = Buffer.from(buffer)
+        return qbittorrent.addTorrentFileContent(buffer, filename, {})
+    }
+
+    /**
+     * Whether the client supports sorting by trackers or not
+     */
+    this.enableTrackerFilter = false
+
+    /**
+     * Provides the option to include extra columns for displaying data. This may concern columns
+     * which are specific to this client. The extra columns will be merged with the default columns.
+     */
+    this.extraColumns = []
+
+    /*
+     * Actions
+     */
+    this.resume = function(torrents) {
+        return qbittorrent.resume(torrents.map(t => t.hash))
+    }
+
+    this.resumeAll = function(torrents) {
+        return qbittorrent.resumeAll()
+    }
+
+    this.pause = function(torrents) {
+        return qbittorrent.pause(torrents.map(t => t.hash))
+    }
+
+    this.pauseAll = function(torrents) {
+        return qbittorrent.pauseAll()
+    }
+
+    this.recheck = function(torrents) {
+        return qbittorrent.recheck(torrents.map(t => t.hash))
+    }
+
+    this.increasePrio = function(torrents) {
+        return qbittorrent.increasePrio(torrents.map(t => t.hash))
+    }
+
+    this.decreasePrio = function(torrents) {
+        return qbittorrent.decreasePrio(torrents.map(t => t.hash))
+    }
+
+    this.topPrio = function(torrents) {
+        return qbittorrent.topPrio(torrents.map(t => t.hash))
+    }
+
+    this.bottomPrio = function(torrents) {
+        return qbittorrent.bottomPrio(torrents.map(t => t.hash))
+    }
+
+    this.toggleSequentialDownload = function(torrents) {
+        return qbittorrent.toggleSequentialDownload(torrents.map(t => t.hash))
+    }
+
+    this.delete = function(torrents) {
+        return qbittorrent.delete(torrents.map(t => t.hash))
+    }
+
+    this.deleteAndRemove = function(torrents) {
+        return qbittorrent.deleteAndRemove(torrents.map(t => t.hash))
+    }
+
+    /**
+     * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
+     * You may customize the GUI to your liking or to better accommodate the specific bittorrent client.
+     * Every action must have a click function that corresponds to an action like the one showed above.
+     * An object in the array should consist of the following information:
+     *      label [string]: Name of the button/element
+     *      type [string]: Can be 'button' or 'dropdown' or 'labels'
+     *      color [string]: Can be 'red', 'orange', 'yellow', 'olive', 'green', 'teal', 'blue', 'violet', 'purple', 'pink', 'brown', 'grey', 'black'
+     *      click [function]: The function to be executed when the when the button/element is pressed
+     *      icon [string]: The icon of the button. See here: http://semantic-ui.com/elements/icon.html
+     */
+    this.actionHeader = [{
+            label: 'Start',
+            type: 'button',
+            color: 'green',
+            click: this.resume,
+            icon: 'play'
+        },
+        {
+            label: 'Pause',
+            type: 'button',
+            color: 'red',
+            click: this.pause,
+            icon: 'pause'
+        },
+        {
+            label: 'More',
+            type: 'dropdown',
+            color: 'blue',
+            icon: 'plus',
+            actions: [{
+                    label: 'Pause All',
+                    click: this.pauseAll
                 },
-                withCredentials: true
-            }).success(function(data) {
-                defer.resolve(processData(data));
-            }).catch(function(err) {
-                console.error(err);
-                defer.reject(err);
-            })
-
-            return defer.promise;
-        }
-
-        function processData(data) {
-            var torrents = {
-                labels: [],
-                all: [],
-                changed: [],
-                deleted: []
-            };
-
-            torrents.labels = data.categories;
-
-            if(data.full_update) {
-                torrents.all = buildAll(data.torrents);
-            } else {
-                torrents.changed = buildAll(data.torrents);
-            }
-
-            torrents.deleted = data.torrents_removed || [];
-            rid = data.rid;
-            return torrents;
-        }
-
-        this.doAction = function(command, torrents) {
-            let self = this
-            if(!Array.isArray(torrents)) {
-                return $notify.alert('Error', 'Action was passed incorrect arguments')
-            }
-
-            var hashes = torrents.map(function(torrent) {
-                return torrent.hash
-            })
-
-            var promises = [];
-            hashes.forEach(function(hash) {
-                var req = $http.post(`${self.url('/command')}/${command}`, {
-                    hash: hash
-                }, httpform);
-                promises.push(req);
-            });
-
-            return $q.all(promises);
-        }
-
-        this.doMultiAction = function(command, torrents) {
-            var hashes = torrents.map(function(torrent) {
-                return torrent.hash
-            })
-
-            return $http.post(`${this.url('/command')}/${command}`, {
-                hashes: hashes
-            }, httpform);
-        }
-
-        this.doGlobalAction = function(command) {
-            return $http.post(`${this.url('/command')}/${command}`);
-        }
-
-        this.pause = function(torrents) {
-            return this.doAction('pause', torrents);
-        }
-
-        this.start = function(torrents) {
-            return this.doAction('resume', torrents);
-        }
-
-        this.delete = function(torrents) {
-            return this.doMultiAction('delete', torrents);
-        }
-
-        this.deleteWithData = function(torrents) {
-            return this.doMultiAction('deletePerm', torrents);
-        }
-
-        this.recheck = function(torrents) {
-            return this.doAction('recheck', torrents);
-        }
-
-        this.queueUp = function(torrents) {
-            return this.doMultiAction('increasePrio', torrents);
-        }
-
-        this.queueDown = function(torrents) {
-            return this.doMultiAction('decreasePrio', torrents);
-        }
-
-        this.queueTop = function(torrents) {
-            return this.doMultiAction('topPrio', torrents);
-        }
-
-        this.queueBottom = function(torrents) {
-            return this.doMultiAction('bottomPrio', torrents);
-        }
-
-        this.sequentialDownload = function(torrents) {
-            return this.doMultiAction('toggleSequentialDownload', torrents)
-        }
-
-        this.pauseAll = function() {
-            return this.doGlobalAction('pauseAll')
-        }
-
-        this.resumeAll = function() {
-            return this.doGlobalAction('resumeAll')
-        }
-
-        this.addTorrentUrl = function(magnet) {
-            return $http.post(this.url('/command/download'), {
-                urls: magnet
-            }, httpform)
-        }
-
-        this.setCategory = function(torrents, category) {
-            var hashes = torrents.map(function(torrent) {
-                return torrent.hash
-            })
-
-            return $http.post(this.url('/command/setCategory'), {
-                hashes: hashes,
-                category: category
-            }, httpform)
-        }
-
-        this.uploadTorrent = function(buffer, filename) {
-            var blob = new Blob([buffer], {
-                type: 'application/x-bittorrent'
-            })
-            var formData = new FormData();
-            formData.append('torrents', blob, filename);
-
-            return $http.post(this.url('/command/upload'), formData, {
-                headers: {
-                    'Content-Type': undefined
-                },
-                transformRequest: function(data) {
-                    return data;
+                {
+                    label: 'Resume All',
+                    click: this.resumeAll
                 }
-            });
+            ]
+        },
+        {
+            label: 'Labels',
+            click: this.setCategory,
+            type: 'labels'
         }
+    ]
 
-        function buildAll(torrents) {
-            if(!torrents) return [];
-
-            var torrentArray = []
-
-            Object.keys(torrents).map(function(hash) {
-                var torrent = new Torrent(hash, torrents[hash]);
-                torrentArray.push(torrent);
-            });
-
-            return torrentArray;
+    /**
+     * Represents the actions available in the context menu. Can be customized to your liking or
+     * to better accommodate your bittorrent client. Every action must have a click function implemented.
+     * Each element has an:
+     *      label [string]:     The name of the action
+     *      click [function]:   The function to be executed when clicked
+     *      icon [string]:      The icon of the action. See here: http://semantic-ui.com/elements/icon.html
+     *      check [function]:   Displays a checkbox instead of an icon. The function is a predicate which
+     *                          has to hold for all selected torrents, for the checkbox to be checked.
+     */
+    this.contextMenu = [{
+            label: 'Recheck',
+            click: this.recheck,
+            icon: 'checkmark'
+        },
+        {
+            label: 'Move Up Queue',
+            click: this.increasePrio,
+            icon: 'arrow up'
+        },
+        {
+            label: 'Move Queue Down',
+            click: this.decreasePrio,
+            icon: 'arrow down'
+        },
+        {
+            label: 'Queue Top',
+            click: this.topPrio,
+            icon: 'chevron circle up'
+        },
+        {
+            label: 'Queue Bottom',
+            click: this.bottomPrio,
+            icon: 'chevron circle down'
+        },
+        {
+            label: 'Sequential Download',
+            click: this.toggleSequentialDownload,
+            check: function(torrent) {
+                return torrent.sequentialDownload
+            }
+        },
+        {
+            label: 'Remove',
+            click: this.delete,
+            icon: 'remove'
+        },
+        {
+            label: 'Remove And Delete',
+            click: this.deleteAndRemove,
+            icon: 'trash'
         }
-
-        this.actionHeader = [{
-                label: 'Start',
-                type: 'button',
-                color: 'green',
-                click: this.start,
-                icon: 'play'
-            },
-            {
-                label: 'Pause',
-                type: 'button',
-                color: 'red',
-                click: this.pause,
-                icon: 'pause'
-            },
-            {
-                label: 'More',
-                type: 'dropdown',
-                color: 'blue',
-                icon: 'plus',
-                actions: [{
-                        label: 'Pause All',
-                        click: this.pauseAll
-                    },
-                    {
-                        label: 'Resume All',
-                        click: this.resumeAll
-                    }
-                ]
-            },
-            {
-                label: 'Labels',
-                click: this.setCategory,
-                type: 'labels'
-            }
-        ]
-
-        this.contextMenu = [{
-                label: 'Recheck',
-                click: this.recheck,
-                icon: 'checkmark'
-            },
-            {
-                label: 'Move Up Queue',
-                click: this.queueUp,
-                icon: 'arrow up'
-            },
-            {
-                label: 'Move Queue Down',
-                click: this.queueDown,
-                icon: 'arrow down'
-            },
-            {
-                label: 'Queue Top',
-                click: this.queueTop,
-                icon: 'chevron circle up'
-            },
-            {
-                label: 'Queue Bottom',
-                click: this.queueBottom,
-                icon: 'chevron circle down'
-            },
-            {
-                label: 'Sequential Download',
-                click: this.sequentialDownload,
-                check: function(torrent) {
-                    return torrent.sequentialDownload
-                }
-            },
-            {
-                label: 'Remove',
-                click: this.delete,
-                icon: 'remove'
-            },
-            {
-                label: 'Remove And Delete',
-                click: this.deleteWithData,
-                icon: 'trash'
-            }
-        ];
+    ];
 
     }
 ]);

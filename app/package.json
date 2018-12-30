@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/tympanix/Electorrent#readme",
   "dependencies": {
+    "@electorrent/node-qbittorrent": "^1.0.0",
     "@electorrent/node-rtorrent": "^1.2.1",
     "electron-is": "^2.4.0",
     "electron-regedit": "^1.0.5",

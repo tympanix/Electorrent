@@ -16,11 +16,15 @@ class InstanceWorker {
     _callback(id) {
         return function(err, value) {
             if (err) {
-                this._worker.postMessage([id, this._error(err), null])
+                this._worker.postMessage([id, this.__parse_safe(err), null])
             } else {
-                this._worker.postMessage([id, null, value])
+                this._worker.postMessage([id, null, this.__parse_safe(value)])
             }
         }.bind(this)
+    }
+
+    __parse_safe(value) {
+        return JSON.parse(JSON.stringify(value, (_,v) => v === undefined ? null : v))
     }
 
     _error(err) {
