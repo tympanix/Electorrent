@@ -147,7 +147,7 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
     };
 
     AbstractTorrent.prototype.getPercentStr = function() {
-        return(this.percent / 10).toFixed(0) + '%';
+        return(Number((this.percent || 0) / 10)).toFixed(0) + '%';
     };
 
     AbstractTorrent.prototype.statusColor = function () {

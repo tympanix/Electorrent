@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('progress', function() {
+angular.module("torrentApp").directive('progress', ['$timeout', function($timeout) {
     return {
         scope: {
             torrent: '=progress',
@@ -21,7 +21,7 @@ angular.module("torrentApp").directive('progress', function() {
             if (scope.torrent.percent < 1000 || oldPercent < 1000) {
                 bar.css('width', scope.torrent.getPercentStr());
                 if (idle) {
-                    setTimeout(function() {
+                    $timeout(function() {
                         bar.removeClass('idle')
                         idle = false
                     })
@@ -52,4 +52,4 @@ angular.module("torrentApp").directive('progress', function() {
         updateProgress()
     }
 
-});
+}]);

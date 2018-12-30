@@ -33,7 +33,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             hash: hash,
             name: data.name,
             size: data.size || data.total_size,
-            percent: data.progress * 1000 || undefined,
+            percent: data.progress * 1000 || 0,
             downloaded: data.total_downloaded,
             uploaded: data.total_uploaded,
             ratio: data.share_ration || data.ratio,
