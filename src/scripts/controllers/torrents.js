@@ -455,8 +455,12 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.update = function(fullupdate) {
+        var serverId = $rootScope.$server.id
         var q = $rootScope.$btclient.torrents(!!fullupdate)
         return q.then(function(torrents) {
+            if (serverId !== $rootScope.$server.id) {
+                return $q.resolve()
+            }
             newTorrents(torrents);
             deleteTorrents(torrents);
             changeTorrents(torrents);
