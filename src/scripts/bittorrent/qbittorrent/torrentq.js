@@ -33,7 +33,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             hash: hash,
             name: data.name,
             size: data.size || data.total_size,
-            percent: data.progress * 1000 || 0,
+            percent: data.progress && (data.progress * 1000),
             downloaded: data.total_downloaded,
             uploaded: data.total_uploaded,
             ratio: data.share_ration || data.ratio,
@@ -86,19 +86,19 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
     }
 
     TorrentQ.prototype.isStatusError = function() {
-        return this.getStatus('error');
+        return this.getStatus('error')
     };
     TorrentQ.prototype.isStatusStopped = function() {
-        return this.getStatus('paused', 'pausedUP', 'pausedDL') && !this.isStatusCompleted();
+        return this.getStatus('paused', 'pausedUP', 'pausedDL') && !this.isStatusCompleted()
     };
     TorrentQ.prototype.isStatusQueued = function() {
-        return this.getStatus('queuedUP', 'queuedDL');
+        return this.getStatus('queuedUP', 'queuedDL')
     };
     TorrentQ.prototype.isStatusCompleted = function() {
-        return (this.percent === 1000) || this.getStatus('checkingUP');
+        return (this.percent === 1000) || this.getStatus('checkingUP')
     };
     TorrentQ.prototype.isStatusDownloading = function() {
-        return this.getStatus('downloading', 'checkingDL', 'stalledDL', 'metaDL')
+        return this.getStatus('downloading', 'stalledDL', 'metaDL') || this.isStatusChecking()
     };
     TorrentQ.prototype.isStatusSeeding = function() {
         return this.getStatus('uploading', 'stalledUP')
@@ -106,6 +106,19 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
     TorrentQ.prototype.isStatusPaused = function() {
         /* qBittorrent only has started and stopped torrents */
         return false
+    };
+
+    /* Additional custom states */
+    TorrentQ.prototype.isStatusChecking = function() {
+        return this.getStatus('checkingDL', 'checkingUP', 'checkingResumeData')
+    }
+
+    TorrentQ.prototype.manualStatusText = function () {
+        if (this.isStatusChecking()) {
+            return 'Checking'
+        } else {
+            return AbstractTorrent.prototype.manualStatusText.call(this)
+        }
     };
 
     /**
