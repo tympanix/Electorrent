@@ -5,6 +5,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
     const PAGE_SETTINGS = 'settings';
     const PAGE_WELCOME = 'welcome';
     const PAGE_SERVERS = 'servers';
+    const PAGE_TORRENTS = 'torrents';
 
     let loadingTimer
 
@@ -47,6 +48,12 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
             pageServers()
         }
     });
+
+    $scope.$on('menu:selectall', function(event) {
+        if (page === PAGE_TORRENTS) {
+            $scope.$broadcast('select:torrents')
+        }
+    })
 
     $scope.connectToServer = function(server) {
         connectToServer(server)
@@ -102,7 +109,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         $scope.showTorrents = true;
         //$scope.showLoading = false;
         $scope.$broadcast('start:torrents', fullupdate);
-        page = null;
+        page = PAGE_TORRENTS;
     }
 
     function pageLoading() {

@@ -114,6 +114,20 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         stopTimer();
     });
 
+    $scope.$on('select:torrents', function(){
+        selectAll()
+    })
+
+    function selectAll() {
+        deselectAll()
+        for (var i = 0; i < $scope.arrayTorrents.length; i++){
+            var torrent = $scope.arrayTorrents[i]
+            torrent.selected = true;
+            selected.push(torrent)
+        }
+        $scope.$apply()
+    }
+
     function startTimer(fullupdate){
         if (reconnect) $timeout.cancel(reconnect)
         if (timeout) $timeout.cancel(timeout)

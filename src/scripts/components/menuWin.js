@@ -78,7 +78,13 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bit
                 {
                     label: 'Select All',
                     accelerator: 'CmdOrCtrl+A',
-                    role: 'selectall'
+                    click() {
+                        if (document.activeElement.nodeName === 'INPUT') {
+                            electron.remote.getCurrentWebContents().selectAll()
+                        } else {
+                            $rootScope.$broadcast('menu:selectall')
+                        }
+                    },
                 },
             ]
         },
