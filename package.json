@@ -1,6 +1,5 @@
 {
   "name": "electorrent",
-  "productName": "Electorrent",
   "version": "2.5.1",
   "description": "A thin client for your torrenting needs",
   "main": "app/app.js",
@@ -56,6 +55,7 @@
     "yargs": "^4.8.1"
   },
   "build": {
+    "productName": "Electorrent",
     "appId": "com.github.tympanix.electorrent",
     "mac": {
       "category": "public.app-category.utilities"
