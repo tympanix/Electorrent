@@ -32,6 +32,11 @@ torrentApp.constant('$btclients', {
         name: 'Synology Download Station',
         service: 'synologyService',
         icon: 'downloadstation'
+    },
+    'deluge': {
+        name: 'Deluge',
+        service: 'delugeService',
+        icon: 'utorrent',
     }
 
 });
