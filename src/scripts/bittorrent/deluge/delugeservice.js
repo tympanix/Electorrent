@@ -65,7 +65,8 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
                 labels: [],
                 all: [],
                 changed: [],
-                deleted: []
+                deleted: [],
+                dirty: true,
             };
 
             for (const hash of Object.keys(data.torrents)) {
@@ -91,7 +92,7 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function(magnet) {
-        return
+        return deluge.addTorrentURL(magnet, {})
     }
 
     /**
@@ -104,17 +105,7 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
      * @return {promise} isAdded
      */
     this.uploadTorrent = function(buffer, filename) {
-        var blob = new Blob([buffer], {type : 'application/x-bittorrent'})
-
-        var formData = new FormData();
-        formData.append('torrents', blob, filename);
-
-        return $http.post('__url__', formData, {
-            headers: { 'Content-Type': undefined },
-            transformRequest: function(data) {
-                return data;
-            }
-        });
+        return deluge.addTorrent(buffer, {})
     }
 
     /**
@@ -125,20 +116,53 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
      * @param {array} torrents
      * @return {promise} actionIsDone
      */
-    this.start = function(torrents) {
-        return
+    this.resume = function(torrents) {
+        return deluge.resume(torrents.map(t => t.hash))
+    }
+
+    this.pause = function(torrents) {
+        return deluge.pause(torrents.map(t => t.hash))
+    }
+
+    this.verify = function(torrents) {
+        return deluge.verify(torrents.map(t => t.hash))
+    }
+
+    this.remove = function(torrents) {
+        return deluge.remove(torrents.map(t => t.hash))
+    }
+
+    this.removeAndDelete = function(torrents) {
+        return deluge.removeAndDelete(torrents.map(t => t.hash))
+    }
+
+    this.queueUp = function(torrents) {
+        return deluge.queueUp(torrents.map(t => t.hash))
+    }
+
+    this.queueDown = function(torrents) {
+        return deluge.queueDown(torrents.map(t => t.hash))
+    }
+
+    this.queueTop = function(torrents) {
+        return deluge.queueTop(torrents.map(t => t.hash))
+    }
+
+    this.queueBottom = function(torrents) {
+        return deluge.queueBottom(torrents.map(t => t.hash))
     }
 
     /**
      * Whether the client supports sorting by trackers or not
      */
-    this.enableTrackerFilter = true
+    this.enableTrackerFilter = false
 
     /**
      * Provides the option to include extra columns for displaying data. This may concern columns
      * which are specific to this client. The extra columns will be merged with the default columns.
      */
     this.extraColumns = []
+
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
@@ -156,7 +180,7 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
             label: 'Start',
             type: 'button',
             color: 'green',
-            click: this.start,
+            click: this.resume,
             icon: 'play'
         },
         {
@@ -166,27 +190,6 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
             click: this.pause,
             icon: 'pause'
         },
-        {
-            label: 'More',
-            type: 'dropdown',
-            color: 'blue',
-            icon: 'plus',
-            actions: [
-                {
-                    label: 'Pause All',
-                    click: this.pauseAll
-                },
-                {
-                    label: 'Resume All',
-                    click: this.resumeAll
-                }
-            ]
-        },
-        {
-            label: 'Labels',
-            click: this.setCategory,
-            type: 'labels'
-        }
     ]
 
     /**
@@ -201,12 +204,12 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
      */
     this.contextMenu = [
         {
-            label: 'Recheck',
-            click: this.recheck,
+            label: 'Verify',
+            click: this.verify,
             icon: 'checkmark'
         },
         {
-            label: 'Move Up Queue',
+            label: 'Move Queue Up',
             click: this.queueUp,
             icon: 'arrow up'
         },
@@ -216,10 +219,25 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
             icon: 'arrow down'
         },
         {
+            label: 'Queue Top',
+            click: this.queueTop,
+            icon: 'chevron circle up'
+        },
+        {
+            label: 'Queue Bottom',
+            click: this.queueBottom,
+            icon: 'chevron circle down'
+        },
+        {
             label: 'Remove',
-            click: this.delete,
+            click: this.remove,
             icon: 'remove'
-        }
+        },
+        {
+            label: 'Remove and delete',
+            click: this.removeAndDelete,
+            icon: 'trash'
+        },
     ];
 
 }]);
