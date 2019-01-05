@@ -33,7 +33,7 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
         let ca = server.getCertificate()
 
         return deluge.instantiate({
-            host: server.ip,
+            host: server.url(),
             port: server.port,
             path: server.cleanPath(),
             pass: server.password,
@@ -69,7 +69,7 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
                 dirty: true,
             };
 
-            for (const hash of Object.keys(data.torrents)) {
+            for (const hash of Object.keys(data.torrents || {})) {
                 torrents.all.push(new TorrentD(hash, data.torrents[hash]))
             }
 
