@@ -16,23 +16,27 @@ class InstanceWorker {
     _callback(id) {
         return function(err, value) {
             if (err) {
-                this._worker.postMessage([id, this.__parse_safe(err), null])
+                this._worker.postMessage([id, this.__parse_error(err), null])
             } else {
                 this._worker.postMessage([id, null, this.__parse_safe(value)])
             }
         }.bind(this)
     }
 
-    __parse_safe(value) {
-        return JSON.parse(JSON.stringify(value, (_,v) => v === undefined ? null : v))
+    __parse_safe(o) {
+        return JSON.parse(JSON.stringify(o, (_,v) => v === undefined ? null : v))
     }
 
-    _error(err) {
+    __parse_error(err) {
         let _err = {}
-        for (let k of Object.getOwnPropertyNames(err)) {
-            if (typeof err[k] === 'string') {
-                _err[k] = err[k]
+        let o = err
+        while (o) {
+            for (let k of Object.getOwnPropertyNames(o)) {
+                if (typeof err[k] === 'string') {
+                    _err[k] = err[k]
+                }
             }
+            o = Object.getPrototypeOf(o)
         }
         return _err
     }

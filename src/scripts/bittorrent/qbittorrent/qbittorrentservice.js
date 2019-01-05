@@ -34,7 +34,7 @@ angular.module('torrentApp').service('qbittorrentService', ["$q", "$remote", "To
         let ca = server.getCertificate()
 
         return qbittorrent.instantiate({
-            host: server.ip,
+            host: server.url(),
             port: server.port,
             path: server.cleanPath(),
             user: server.user,
