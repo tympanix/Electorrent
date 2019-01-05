@@ -38,6 +38,7 @@
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-concat": "^2.6.1",
+    "gulp-iconfont": "^10.0.2",
     "gulp-if": "^2.0.2",
     "gulp-less": "^3.5.0",
     "gulp-rename": "^1.3.0",
