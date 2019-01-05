@@ -5,17 +5,24 @@ angular.module('torrentApp')
         
         const ERR_SELF_SIGNED_CERT = 'DEPTH_ZERO_SELF_SIGNED_CERT'
         const ERR_TLS_CERT_ALTNAME_INVALID = 'ERR_TLS_CERT_ALTNAME_INVALID'
+        const CERT_HAS_EXPIRED = 'CERT_HAS_EXPIRED'
 
         const ERR_CODES = {
             ERR_SELF_SIGNED_CERT: {
-                title: 'Certificate error',
+                title: 'Untrusted certificate',
                 msg: 'Self signed certificate is not trusted with this server',
             },
-            ERR_TLS_CERT_ALTNAME_INVALID : {
+            ERR_TLS_CERT_ALTNAME_INVALID: {
                 title: 'Certificate error',
-                msg: 'The certificate is not useable with this server because the\
-                common name of the certificate does not match the hostname of the server',
+                msg: 'The certificate is not useable with this server\
+                because the common name of the certificate does not match\
+                the hostname of the server',
             },
+            CERT_HAS_EXPIRED: {
+                title: 'Certificate expired',
+                msg: 'The certificate for this server has expired\
+                and is therefore not trusted',
+            }
         }
 
         var disableNotifications = false;
