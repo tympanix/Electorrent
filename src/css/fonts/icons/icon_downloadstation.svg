@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="256px"
+	 height="256px" viewBox="0 0 256 256" style="enable-background:new 0 0 256 256;" xml:space="preserve">
+<g id="uTorrent_Icon">
+</g>
+<g id="qBittorrent_Icon">
+</g>
+<g id="Transmission_Icon">
+</g>
+<g id="rTorrent_Icon">
+</g>
+<g id="DownloadStation_Icon">
+	<polygon id="Big_Arrow_2_" points="84.4,165.1 78.2,158.6 82.7,150.9 88.9,140.3 92.4,134.3 99.2,134.3 116.1,134.3 116.1,67.6 
+		116.1,63.5 118.7,60.2 124.4,53.1 128,48.6 133.7,48.6 149.9,48.6 149.9,24 142.5,15.1 53.4,15.1 45.9,24.7 45.9,109.6 6.9,109.6 
+		0,120.2 98.3,230.2 121.4,203.7 	"/>
+	<polygon id="Little_Arrow_2_" points="256,156.9 249.1,147.2 219.5,147.2 219.5,68.1 214.6,60.6 133.8,60.6 128.1,67.6 
+		128.1,146.3 99.3,146.3 93.1,156.9 174,241.2 	"/>
+</g>
+</svg>
