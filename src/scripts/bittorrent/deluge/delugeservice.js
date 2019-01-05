@@ -40,6 +40,9 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
             ca: ca,
         }).then(function() {
             return deluge.login()
+        }).then(function() {
+            // Connect to server #0 by default
+            return deluge.connect(0)
         })
     }
 
