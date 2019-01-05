@@ -37,8 +37,12 @@ torrentApp.constant('$btclients', {
 });
 
 // Configure the client
-torrentApp.run(["$rootScope", "$bittorrent", "configService", function($rootScope, $bittorrent, config){
-    config.initSettings();
+torrentApp.run(["electron", "configService", function(electron, config){
+    try {
+        config.initSettings();
+    } catch {
+        electron.ipc.send('settings:corrupt')
+    }
 }]);
 
 // Set application menu

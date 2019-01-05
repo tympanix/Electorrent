@@ -112,6 +112,10 @@ ipcMain.on('send:torrentfiles', function() {
     sendTorrentFiles(process.argv);
 })
 
+ipcMain.on('settings:corrupt', function() {
+    config.showCorruptDialog()
+})
+
 // If another instance of the app is allready running, execute this callback
 if (!app.requestSingleInstanceLock()) {
     app.quit();

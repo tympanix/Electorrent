@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const {app, dialog, shell} = require('electron');
+const electorrent = require('./electorrent')
 var data = null;
 
 var defaultSettings = {
@@ -23,14 +24,22 @@ function deleteConfig() {
 }
 
 function showCorruptDialog() {
-    let button = dialog.showMessageBox({
+    let window = electorrent.getWindow()
+    const config = {
         type: "error",
         buttons: ["Delete Configuration", "Open Folder", "Exit"],
         defaultId: 2,
         title: "Corrupt configuration",
         message: "The configuration file could not be loaded",
         detail: "This may be due to your configuration file being corrupt. Deleting the corrupt configuration file will most likely solve the problem. However your settings will be permanently gone."
-    })
+    }
+    let button = -1
+    if (window) {
+        button = dialog.showMessageBox(window, config)
+    } else {
+        button = dialog.showMessageBox(config)
+    }
+    
     if (button === 0 /* delete */) {
         deleteConfig()
     } else if (button === 1 /* open folder */) {
@@ -105,6 +114,8 @@ function copyArray(_obj){
     }
     return copyArray;
 }
+
+exports.showCorruptDialog = showCorruptDialog
 
 exports.put = function (key, value, callback) {
     load();
