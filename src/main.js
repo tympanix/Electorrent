@@ -36,7 +36,7 @@ torrentApp.constant('$btclients', {
     'deluge': {
         name: 'Deluge',
         service: 'delugeService',
-        icon: 'utorrent',
+        icon: 'deluge',
     }
 
 });
