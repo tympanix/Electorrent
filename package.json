@@ -1,6 +1,6 @@
 {
   "name": "electorrent",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "A thin client for your torrenting needs",
   "main": "app/app.js",
   "scripts": {

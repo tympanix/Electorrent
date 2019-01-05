@@ -40,7 +40,7 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
             uploadSpeed: data.up_speed || data.upspeed,
             downloadSpeed: data.dl_speed || data.dlspeed,
             eta: data.eta,
-            label: data.category,
+            label: data.category || data.label,
             peersConnected: data.num_leechs,
             peersInSwarm: data.num_incomplete,
             seedsConnected: data.num_seeds,

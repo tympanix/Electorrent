@@ -7,7 +7,7 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
         if (client){
             return $injector.get(client.service);
         } else {
-            console.error('Bittorrent client "' + name + '" not available');
+            throw new Error('Bittorrent client "' + name + '" not available');
         }
     }
 

@@ -2,7 +2,21 @@
 
 angular.module('torrentApp')
     .service('notificationService', ["$rootScope", "electron", function($rootScope, electron) {
-        const ERR_SELF_SIGNED_CERT = "DEPTH_ZERO_SELF_SIGNED_CERT"
+        
+        const ERR_SELF_SIGNED_CERT = 'DEPTH_ZERO_SELF_SIGNED_CERT'
+        const ERR_TLS_CERT_ALTNAME_INVALID = 'ERR_TLS_CERT_ALTNAME_INVALID'
+
+        const ERR_CODES = {
+            ERR_SELF_SIGNED_CERT: {
+                title: 'Certificate error',
+                msg: 'Self signed certificate is not trusted with this server',
+            },
+            ERR_TLS_CERT_ALTNAME_INVALID : {
+                title: 'Certificate error',
+                msg: 'The certificate is not useable with this server because the\
+                common name of the certificate does not match the hostname of the server',
+            },
+        }
 
         var disableNotifications = false;
 
@@ -45,8 +59,8 @@ angular.module('torrentApp')
                 this.alert("Connection problem", "The connection to the server timed out!")
             } else if (err.status === 401 || code === 401){
                 this.alert("Connection problem", "You entered an incorrent username/password")
-            } else if (err.code === ERR_SELF_SIGNED_CERT) {
-                this.alert("Certificate Error", "Self signed certificate not trusted")
+            } else if (err.code && ERR_CODES.hasOwnProperty(err.code)) {
+                this.alert(ERR_CODES[err.code].title, ERR_CODES[err.code].msg)
             } else {
                 this.alert("Connection problem", "The connection could not be established")
             }

@@ -42,6 +42,7 @@ function createTorrentWindow() {
         backgroundColor: '#ffffff',
         icon: getApplicationIcon(),
         webPreferences: {
+            nodeIntegration: true,
             nodeIntegrationInWorker: true
         },
     }
@@ -109,6 +110,10 @@ ipcMain.on('send:magnets', function() {
 ipcMain.on('send:torrentfiles', function() {
     logger.info('Main received send torrentfiles')
     sendTorrentFiles(process.argv);
+})
+
+ipcMain.on('settings:corrupt', function() {
+    config.showCorruptDialog()
 })
 
 // If another instance of the app is allready running, execute this callback
