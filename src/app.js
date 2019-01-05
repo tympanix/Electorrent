@@ -42,6 +42,7 @@ function createTorrentWindow() {
         backgroundColor: '#ffffff',
         icon: getApplicationIcon(),
         webPreferences: {
+            nodeIntegration: true,
             nodeIntegrationInWorker: true
         },
     }
