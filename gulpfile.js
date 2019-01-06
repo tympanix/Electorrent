@@ -17,7 +17,7 @@ const iconfont = require('gulp-iconfont');
 const PROD = process.env.NODE_ENV === 'production'
 const OUT = "./app";
 const CLEAN = [`!${OUT}/package.json`, `!${OUT}/node_modules`, `${OUT}/*`];
-const semantic = './bower_components/semantic/src'
+const SEMANTIC = './bower_components/semantic/src'
 
 gulp.task('serve', function () {
     let electron = server.create({
@@ -120,16 +120,16 @@ gulp.task('build:assets' , function () {
 
 gulp.task('semantic:src', function() {
   return gulp.src([
-    path.join(semantic, '**'),
-    '!'+path.join(semantic, 'themes/**'),
-    '!'+path.join(semantic, 'themes/')
-  ]).pipe(gulp.dest('src/css/semantic'))
+    path.join(SEMANTIC, '**'),
+    '!'+path.join(SEMANTIC, 'themes/**'),
+    '!'+path.join(SEMANTIC, 'themes/')
+  ], {base: SEMANTIC}).pipe(gulp.dest('src/css/semantic'))
 })
 
 gulp.task('semantic:default', function() {
   let themes = ['default']
-  return gulp.src(themes.map(t => path.join(semantic, 'themes', t, '/**')),
-   {base: path.join(semantic, 'themes')})
+  return gulp.src(themes.map(t => path.join(SEMANTIC, 'themes', t, '**')),
+   {base: path.join(SEMANTIC, 'themes')})
     .pipe(gulp.dest('src/css/themes'))
 })
 
@@ -148,7 +148,7 @@ gulp.task('build:less', function() {
   let tasks = themes.map(function(theme) {
     return gulp.src(['src/css/semantic/semantic.less', 'src/css/styles.less'])
       .pipe(less({
-        paths: [semantic],
+        paths: [SEMANTIC],
         globalVars: {
           "@renderTheme": theme
         }
