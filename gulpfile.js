@@ -42,14 +42,14 @@ gulp.task('serve', function () {
 
     // Watch frontend dependencies
     gulp.watch(['bower_components/angular-table-resize/dist/*'], () => run('build:useref', electron.reload))
-});
+})
 
-gulp.task('default', ['serve']);
+gulp.task('default', gulp.parallel('serve'));
 
 gulp.task('clean', function() {
     return gulp.src(CLEAN, {read: false})
         .pipe(clean());
-});
+})
 
 gulp.task('build:useref', function() {
     var conf = {dev: c => PROD ? '' : c}
@@ -59,12 +59,12 @@ gulp.task('build:useref', function() {
         .pipe(useref(conf, maps))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(OUT))
-});
+})
 
 gulp.task('build:app', function() {
   return gulp.src('src/app.js')
     .pipe(gulp.dest(OUT));
-});
+})
 
 gulp.task('build:views', function() {
     return gulp.src('src/views/**/*', {base: 'src'})
@@ -116,7 +116,7 @@ gulp.task('build:others', function() {
 gulp.task('build:assets' , function () {
     return gulp.src('./bower_components/semantic/dist/themes/default/assets/**')
     .pipe(gulp.dest(OUT + '/css/themes/default/assets'))
-});
+})
 
 gulp.task('semantic:src', function() {
   return gulp.src([
@@ -133,9 +133,9 @@ gulp.task('semantic:default', function() {
     .pipe(gulp.dest('src/css/themes'))
 })
 
-gulp.task('build:semantic', ['semantic:src', 'semantic:default'])
+gulp.task('build:semantic', gulp.parallel('semantic:src', 'semantic:default'))
 
-gulp.task('build:static', ['build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers'])
+gulp.task('build:static', gulp.parallel('build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers'))
 
 gulp.task('build:less', function() {
   let dir = 'src/css/themes'
@@ -160,10 +160,8 @@ gulp.task('build:less', function() {
   return merge(tasks)
 })
 
-gulp.task('build:styles', ['build:semantic', 'build:fonts'], function() {
-  gulp.start('build:less')
-})
+gulp.task('build:styles', gulp.series(gulp.parallel('build:semantic', 'build:fonts'), 'build:less'))
 
-gulp.task('build', ['build:useref', 'build:static', 'build:styles']);
+gulp.task('build', gulp.parallel('build:useref', 'build:static', 'build:styles'));
 
-gulp.task('install', ['build:semantic'])
+gulp.task('install', gulp.parallel('build:semantic'))
