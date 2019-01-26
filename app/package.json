@@ -1,7 +1,7 @@
 {
   "name": "electorrent",
   "productName": "Electorrent",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "A thin client for your torrenting needs",
   "main": "app.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tympanix/Electorrent.git"
+    "url": "git+https://github.com/tympanix/Electorrent.git"
   },
   "keywords": [
     "Electorrent",
