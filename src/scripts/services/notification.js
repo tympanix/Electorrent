@@ -6,6 +6,7 @@ angular.module('torrentApp')
         const ERR_SELF_SIGNED_CERT = 'DEPTH_ZERO_SELF_SIGNED_CERT'
         const ERR_TLS_CERT_ALTNAME_INVALID = 'ERR_TLS_CERT_ALTNAME_INVALID'
         const CERT_HAS_EXPIRED = 'CERT_HAS_EXPIRED'
+        const UNABLE_TO_VERIFY_LEAF_SIGNATURE = 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
 
         const ERR_CODES = {
             ERR_SELF_SIGNED_CERT: {
@@ -22,6 +23,11 @@ angular.module('torrentApp')
                 title: 'Certificate expired',
                 msg: 'The certificate for this server has expired\
                 and is therefore not trusted',
+            },
+            UNABLE_TO_VERIFY_LEAF_SIGNATURE: {
+                title: 'Invalid certificate chain',
+                msg: 'The certificate could not be verified because the certificate\
+                chain is invalid. Consolidate your webserver TLS configuration'
             }
         }
 
