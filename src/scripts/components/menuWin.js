@@ -1,5 +1,13 @@
 angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bittorrent', 'notificationService', 'configService', function(electron, $rootScope, $bittorrent, $notify, config) {
 
+    Mousetrap.bind('ctrl+a', function() {
+        if (document.activeElement.nodeName === 'INPUT') {
+            electron.remote.getCurrentWebContents().selectAll()
+        } else {
+            $rootScope.$broadcast('menu:selectall')
+        }
+    })
+
     const template = [
         {
             label: 'File',

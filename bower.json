@@ -30,7 +30,8 @@
     "underscore": "^1.8.3",
     "angular-table-resize": "^2.0.1",
     "base64-js": "^1.2.0",
-    "fuse.js": "^3.0.5"
+    "fuse.js": "^3.0.5",
+    "mousetrap": "^1.6.2"
   },
   "resolutions": {
     "angular": "1.5.8",
