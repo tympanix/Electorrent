@@ -3,6 +3,7 @@
 - [ ] qBittorrent
 - [ ] Transmission
 - [ ] rTorrent
+- [ ] Deluge
 
 **Client Version:**
 
