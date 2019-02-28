@@ -71,6 +71,7 @@
             </dropdown>
         </div>
     </div>
+
     <div class="ui card">
         <div class="content">
             <div class="header">
@@ -117,6 +118,7 @@
             <toggle ng-model="settings.ui.displayCompact"></toggle>
         </div>
     </div>
+
     <div class="ui card">
         <div class="content">
             <div class="header">
@@ -130,7 +132,8 @@
         <div class="center aligned extra content">
             <toggle ng-model="settings.ui.notifications"></toggle>
         </div>
-    </div>
+    </div> 
+
     <div class="ui card">
         <div class="content">
             <div class="header">
@@ -159,4 +162,49 @@
             <toggle ng-model="settings.ui.fixedHeader"></toggle>
         </div>
     </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="bug icon"></i>
+                Debug Mode
+            </div>
+            <div class="description">
+                Debug mode enables the developer console
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.debugMode"></toggle>
+        </div>
+    </div>
+
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="upload icon"></i>
+                Automatic Updates
+            </div>
+            <div class="description">
+                Automatically search for updates when the application starts
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.automaticUpdates"></toggle>
+        </div>
+    </div>
+
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
+                <i class="trash icon"></i>
+                Delete Torrent Files
+            </div>
+            <div class="description">
+                Automatically delete torrent files once uploaded to a server
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <toggle ng-model="settings.autoRemoveTorrents"></toggle>
+        </div>
+    </div>
+
 </div>

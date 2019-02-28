@@ -6,6 +6,9 @@ var data = null;
 
 var defaultSettings = {
     servers: [],
+    automaticUpdates: true,
+    debugMode: false,
+    autoRemoveTorrents: false,
     ui: {
         resizeMode: 'FixedResizer',
         notifications: true,

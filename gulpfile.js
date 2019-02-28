@@ -7,7 +7,6 @@ const useref = require('gulp-useref');
 const clean = require('gulp-clean');
 const sourcemaps = require('gulp-sourcemaps')
 const lazypipe = require('lazypipe')
-const run = require('run-sequence');
 const less = require('gulp-less');
 const concat = require('gulp-concat');
 const path = require('path');
@@ -28,20 +27,20 @@ gulp.task('serve', function () {
     electron.start('--debug');
 
     // Restart browser process
-    gulp.watch('src/app.js', () => run('build:app', electron.restart))
-    gulp.watch('src/lib/*.js', () => run('build:lib', electron.restart))
+    gulp.watch('src/app.js', gulp.series('build:app', electron.restart))
+    gulp.watch('src/lib/*.js', gulp.series('build:lib', electron.restart))
 
     // Reload renderer process
-    gulp.watch(['src/*.html', 'src/scripts/**', 'src/main.js'], () => run('build:useref', electron.reload))
-    gulp.watch(['src/views/**/*'], () => run('build:views', electron.reload))
-    gulp.watch(['src/css/**/*'], () => run('build:less', electron.reload))
-    gulp.watch(['src/scripts/workers/*.js'], () => run('build:workers', electron.reload))
+    gulp.watch(['src/*.html', 'src/scripts/**', 'src/main.js'], gulp.series('build:useref', electron.reload))
+    gulp.watch(['src/views/**/*'], gulp.series('build:views', electron.reload))
+    gulp.watch(['src/css/**/*'], gulp.series('build:less', electron.reload))
+    gulp.watch(['src/scripts/workers/*.js'], gulp.series('build:workers', electron.reload))
 
     // Watch dependencies
     gulp.watch(['app/node_modules/@electorrent/node-rtorrent/*.js'], electron.restart)
 
     // Watch frontend dependencies
-    gulp.watch(['bower_components/angular-table-resize/dist/*'], () => run('build:useref', electron.reload))
+    gulp.watch(['bower_components/angular-table-resize/dist/*'], gulp.series('build:useref', electron.reload))
 })
 
 gulp.task('default', gulp.parallel('serve'));
