@@ -23,6 +23,7 @@ Electorrent can connect to the following bittorrent clients:
 * [Transmission](https://transmissionbt.com)
 * [rTorrent](https://rakshasa.github.io/rtorrent/)
 * [Synology Download Station](https://www.synology.com/en-global/knowledgebase/DSM/help/DownloadStation/DownloadStation_desc)
+* [Deluge](https://deluge-torrent.org/)
 
 ## Downloads
 *Please note: I do not own code signing certificates which may results in anti-virus warnings!*
