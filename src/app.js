@@ -133,6 +133,9 @@ if (!app.requestSingleInstanceLock()) {
     })
 };
 
+// Set to true in electorrent 9
+app.allowRendererProcessReuse = false
+
 // Handle magnet links on MacOS
 app.on('open-url', function(event, url) {
     if(torrentWindow) {

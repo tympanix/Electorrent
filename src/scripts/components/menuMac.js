@@ -1,5 +1,5 @@
 angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bittorrent', function(electron, $rootScope, $bittorrent) {
-    const name = electron.app.getName();
+    const name = electron.app.name;
 
     const template = [
         {
