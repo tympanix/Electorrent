@@ -65,7 +65,14 @@
       "category": "public.app-category.utilities"
     },
     "win": {
-      "target": "squirrel"
+      "target": "squirrel",
+      "publish": ["github"]
+    },
+    "dmg": {
+      "publish": ["github"]
+    },
+    "pkg": {
+      "publish": ["github"]
     },
     "linux": {
       "icon": "build/png",
@@ -73,7 +80,14 @@
       "desktop": {
         "MimeType": "application/x-bittorrent;x-scheme-handler/magnet;",
         "Keywords": "p2p;bittorrent;"
-      }
+      },
+      "target": ["snap", "AppImage"]
+    },
+    "snap": {
+      "publish": ["github"] 
+    },
+    "appImage": {
+      "publish": ["github"]
     },
     "extraFiles": [
       "resources"
@@ -85,7 +99,6 @@
         "role": "Viewer",
         "description": "Torrent Files"
       }
-    ],
-    "publish": [{"provider": "github"}]
+    ]
   }
 }
