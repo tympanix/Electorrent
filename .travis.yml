@@ -1,7 +1,7 @@
 language: node_js
 
 sudo: required
-dist: trusty
+dist: bionic
 
 os:
   - linux
@@ -25,7 +25,6 @@ addons:
       - graphicsmagick
       - libgnome-keyring-dev
       - icnsutils
-      - snapcraft
 
 node_js:
   - "8"
