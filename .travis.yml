@@ -25,6 +25,7 @@ addons:
       - graphicsmagick
       - libgnome-keyring-dev
       - icnsutils
+      - snapcraft
 
 node_js:
   - "8"
