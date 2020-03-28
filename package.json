@@ -25,6 +25,7 @@
   "dependencies": {
     "electron-regedit": "^1.0.5",
     "fsevents": "^2.1.2",
+    "less": "^2.7.3",
     "node-gyp": "^6.1.0",
     "q": "^1.5.1",
     "winreg": "^1.2.2"
@@ -42,7 +43,7 @@
     "gulp-concat": "^2.6.1",
     "gulp-iconfont": "^10.0.3",
     "gulp-if": "^2.0.2",
-    "gulp-less": "^3.5.0",
+    "gulp-less": "^4.0.1",
     "gulp-rename": "^1.4.0",
     "gulp-run": "^1.7.1",
     "gulp-sourcemaps": "^2.6.5",
