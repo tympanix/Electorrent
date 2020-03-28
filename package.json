@@ -30,8 +30,8 @@
   "devDependencies": {
     "bower": "^1.8.8",
     "electron": "^8.2.0",
-    "electron-builder": "^20.38.5",
-    "electron-builder-squirrel-windows": "^20.39.0",
+    "electron-builder": "^22.4.1",
+    "electron-builder-squirrel-windows": "^22.4.1",
     "electron-connect": "^0.6.3",
     "electron-is": "^2.4.1",
     "electron-squirrel-startup": "^1.0.0",
