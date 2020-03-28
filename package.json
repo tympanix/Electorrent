@@ -3,6 +3,7 @@
   "version": "2.7.0",
   "description": "A thin client for your torrenting needs",
   "main": "app/app.js",
+  "license": "GPL-3.0",
   "scripts": {
     "start": "gulp",
     "build": "gulp build",
@@ -23,10 +24,8 @@
   },
   "author": "tympanix",
   "dependencies": {
-    "electron-regedit": "^1.0.5",
-    "fsevents": "^2.1.2",
+    "electron-regedit": "^1.1.0",
     "less": "^2.7.3",
-    "node-gyp": "^6.1.0",
     "q": "^1.5.1",
     "winreg": "^1.2.2"
   },
@@ -52,6 +51,7 @@
     "lazypipe": "^1.0.2",
     "merge-stream": "^1.0.1",
     "request": "^2.88.2",
+    "rollup": "^2.2.0",
     "run-sequence": "^1.2.2",
     "semver": "^5.7.1",
     "through2": "^2.0.5",
