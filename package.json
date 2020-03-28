@@ -10,9 +10,9 @@
     "postinstall": "electron-builder install-app-deps",
     "pack": "build --dir",
     "predist": "gulp build",
-    "dist": "build",
+    "dist": "electron-builder",
     "prerelease": "gulp build",
-    "release": "build"
+    "release": "electron-builder"
   },
   "keywords": [
     "utorrent"
@@ -24,6 +24,8 @@
   "author": "tympanix",
   "dependencies": {
     "electron-regedit": "^1.0.5",
+    "fsevents": "^2.1.2",
+    "node-gyp": "^6.1.0",
     "q": "^1.5.1",
     "winreg": "^1.2.2"
   },
@@ -35,7 +37,7 @@
     "electron-connect": "^0.6.3",
     "electron-is": "^2.4.1",
     "electron-squirrel-startup": "^1.0.0",
-    "gulp": "^4.0.0",
+    "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
     "gulp-concat": "^2.6.1",
     "gulp-iconfont": "^10.0.3",
@@ -48,9 +50,9 @@
     "hoek": "^5.0.4",
     "lazypipe": "^1.0.2",
     "merge-stream": "^1.0.1",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "run-sequence": "^1.2.2",
-    "semver": "^5.6.0",
+    "semver": "^5.7.1",
     "through2": "^2.0.5",
     "winston": "^2.4.4",
     "yargs": "^4.8.1"
