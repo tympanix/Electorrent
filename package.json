@@ -57,48 +57,5 @@
     "through2": "^2.0.5",
     "winston": "^2.4.4",
     "yargs": "^4.8.1"
-  },
-  "build": {
-    "productName": "Electorrent",
-    "appId": "com.github.tympanix.electorrent",
-    "mac": {
-      "category": "public.app-category.utilities"
-    },
-    "win": {
-      "target": "squirrel",
-      "publish": ["github"]
-    },
-    "dmg": {
-      "publish": ["github"]
-    },
-    "pkg": {
-      "publish": ["github"]
-    },
-    "linux": {
-      "icon": "build/png",
-      "category": "Network;FileTransfer;P2P;",
-      "desktop": {
-        "MimeType": "application/x-bittorrent;x-scheme-handler/magnet;",
-        "Keywords": "p2p;bittorrent;"
-      },
-      "target": ["snap", "AppImage"]
-    },
-    "snap": {
-      "publish": ["github"] 
-    },
-    "appImage": {
-      "publish": ["github"]
-    },
-    "extraFiles": [
-      "resources"
-    ],
-    "fileAssociations": [
-      {
-        "ext": "torrent",
-        "name": "Bittorrent Document",
-        "role": "Viewer",
-        "description": "Torrent Files"
-      }
-    ]
   }
 }
