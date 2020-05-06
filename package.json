@@ -24,7 +24,7 @@
   },
   "author": "tympanix",
   "dependencies": {
-    "electron-regedit": "^1.1.0",
+    "electron-regedit": "^2.0.0",
     "less": "^2.7.3",
     "q": "^1.5.1",
     "winreg": "^1.2.2"
