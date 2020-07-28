@@ -222,14 +222,16 @@ angular.module('torrentApp').service('qbittorrentService', ["$q", "$remote", "To
             type: 'button',
             color: 'green',
             click: this.resume,
-            icon: 'play'
+            icon: 'play',
+            role: 'resume'
         },
         {
             label: 'Pause',
             type: 'button',
             color: 'red',
             click: this.pause,
-            icon: 'pause'
+            icon: 'pause',
+            role: 'stop'
         },
         {
             label: 'More',
@@ -303,7 +305,8 @@ angular.module('torrentApp').service('qbittorrentService', ["$q", "$remote", "To
         {
             label: 'Remove And Delete',
             click: this.deleteAndRemove,
-            icon: 'trash'
+            icon: 'trash',
+            role: 'delete',
         }
     ];
 

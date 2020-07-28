@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<div class="wrapper" ng-controller="torrentsController">
+<div id="page-torrents" class="wrapper" ng-controller="torrentsController">
     <div ng-if="connectionLost" class="popup animated">
         <div class="content">
             <h2 class="ui center aligned icon header">
@@ -78,7 +78,7 @@
     <div class="main-panel">
         <div class="action header">
             <div class="actions left">
-                <div action-header actions="$btclient.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
+                <div id="torrent-action-header" action-header actions="$btclient.actionHeader" labels="labels" enabled="noneSelected()" click="doAction"></div>
             </div>
             <div class="actions right">
                 <div class="ui fluid search" ng-class="{loading: isSearching}">

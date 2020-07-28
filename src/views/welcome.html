@@ -1,78 +1,108 @@
 <!DOCTYPE html>
-<div class="wrapper" ng-controller="welcomeController">
-    <div class="ui middle aligned center aligned grid" style="height: 100vh;">
-        <div class="narrow column">
-            <div>
-                <h2 class="ui image header">
-                    <div class="content">
-                        Welcome to Electorrent
-                    </div>
-                </h2>
-                <form class="ui large welcome form" id="loginForm" ng-class="{loading: connecting}" ng-submit="connect()" onsubmit="return false;">
-                    <div class="fields">
-                        <div class="ten wide field">
-                            <div class="ui left icon input">
-                                <i class="world icon"></i>
-                                <input type="text" name="ip" ng-model="server.ip" placeholder="IP Address">
-                            </div>
-                        </div>
-                        <div class="six wide field">
-                            <dropdown title="Protocol" class="fluid" ng-model="server.proto">
-                                <dropdown-group value="http" title="http">
-                                    http
-                                </dropdown-group>
-                                <dropdown-group value="https" title="https">
-                                    https
-                                </dropdown-group>
-                            </dropdown>
-                        </div>
-                    </div>
-                    <div class="two fields">
-                        <div class="field">
-                            <div class="ui left icon input">
-                                <i class="user icon"></i>
-                                <input type="text" name="username" ng-model="server.user" placeholder="Username">
-                            </div>
-                        </div>
-                        <div class="field">
-                            <div class="ui left icon input">
-                                <i class="lock icon"></i>
-                                <input type="password" name="password" ng-model="server.password" placeholder="Password">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <dropdown title="Client Program" class="fluid" ng-model="server.client" ng-change="setPath()">
-                            <dropdown-group value="id" title="client.name" ng-repeat="(id, client) in btclients">
-                                <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}}
-                            </dropdown-group>
-                        </dropdown>
-                    </div>
-                    <div class="fields">
-                        <div class="six wide field">
-                            <div class="ui left icon input">
-                                <i class="sitemap icon"></i>
-                                <input type="number" name="port" ng-model="server.port" placeholder="Port">
-                            </div>
-                        </div>
-                        <div class="ten wide field">
-                            <div class="ui left icon input">
-                                <i class="linkify icon"></i>
-                                <input type="text" ng-disabled="!advanced" name="path" ng-model="server.path" placeholder="Path">
-                            </div>
-                        </div>
-                        <div class="field">
-                            <div class="ui checkbox">
-                                <input type="checkbox" ng-model="advanced" name="example">
-                                <label></label>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="ui fluid large green labeled icon submit button">
-                        <i class="checkmark icon"></i> Connect
-                    </button>
-                </form>
+<div id="page-welcome" class="wrapper" ng-controller="welcomeController">
+  <div class="ui middle aligned center aligned grid" style="height: 100vh;">
+    <div class="narrow column">
+      <div>
+        <h2 class="ui image header">
+          <div class="content">
+            Welcome to Electorrent
+          </div>
+        </h2>
+        <form
+          class="ui large welcome form"
+          id="loginForm"
+          ng-class="{loading: connecting}"
+          ng-submit="connect()"
+          onsubmit="return false;"
+        >
+          <div class="fields">
+            <div class="ten wide field">
+              <div class="ui left icon input">
+                <i class="world icon"></i>
+                <input type="text" id="connection-host" name="ip" ng-model="server.ip" placeholder="IP Address" />
+              </div>
             </div>
-        </div>
+            <div class="six wide field">
+              <dropdown title="Protocol" id="connection-proto" class="fluid" ng-model="server.proto">
+                <dropdown-group value="http" id="connection-proto-http" title="http">
+                  http
+                </dropdown-group>
+                <dropdown-group value="https" id="connection-proto-https" title="https">
+                  https
+                </dropdown-group>
+              </dropdown>
+            </div>
+          </div>
+          <div class="two fields">
+            <div class="field">
+              <div class="ui left icon input">
+                <i class="user icon"></i>
+                <input type="text" id="connection-user" name="username" ng-model="server.user" placeholder="Username" />
+              </div>
+            </div>
+            <div class="field">
+              <div class="ui left icon input">
+                <i class="lock icon"></i>
+                <input
+                  type="password"
+                  id="connection-password"
+                  name="password"
+                  ng-model="server.password"
+                  placeholder="Password"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <dropdown
+              title="Client Program"
+              id="connection-client"
+              class="fluid"
+              ng-model="server.client"
+              ng-change="setPath()"
+            >
+              <dropdown-group
+                value="id"
+                id="connection-client-{{id}}"
+                title="client.name"
+                ng-repeat="(id, client) in btclients"
+              >
+                <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}} {{$index}}
+              </dropdown-group>
+            </dropdown>
+          </div>
+          <div class="fields">
+            <div class="six wide field">
+              <div class="ui left icon input">
+                <i class="sitemap icon"></i>
+                <input type="number" name="port" id="connection-port" ng-model="server.port" placeholder="Port" />
+              </div>
+            </div>
+            <div class="ten wide field">
+              <div class="ui left icon input">
+                <i class="linkify icon"></i>
+                <input
+                  type="text"
+                  ng-disabled="!advanced"
+                  id="connection-path"
+                  name="path"
+                  ng-model="server.path"
+                  placeholder="Path"
+                />
+              </div>
+            </div>
+            <div class="field">
+              <div class="ui checkbox">
+                <input type="checkbox" id="connection-advanced" ng-model="advanced" name="example" />
+                <label></label>
+              </div>
+            </div>
+          </div>
+          <button id="connection-submit" class="ui fluid large green labeled icon submit button">
+            <i class="checkmark icon"></i> Connect
+          </button>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
