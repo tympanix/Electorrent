@@ -7,13 +7,13 @@
   "scripts": {
     "start": "gulp",
     "build": "gulp build",
-    "install": "bower install && gulp install",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "bower --allow-root install && gulp install && electron-builder install-app-deps",
     "pack": "build --dir",
     "predist": "gulp build",
     "dist": "electron-builder",
     "prerelease": "gulp build",
-    "release": "electron-builder"
+    "release": "electron-builder",
+    "test": "mocha --bail tests/test.js"
   },
   "keywords": [
     "utorrent"
@@ -30,8 +30,12 @@
     "winreg": "^1.2.2"
   },
   "devDependencies": {
+    "@wdio/sync": "^6.3.6",
     "bower": "^1.8.8",
-    "electron": "^8.2.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "dockerode": "^3.2.1",
+    "electron": "^9.1.2",
     "electron-builder": "^22.4.1",
     "electron-builder-squirrel-windows": "^22.4.1",
     "electron-connect": "^0.6.3",
@@ -50,10 +54,12 @@
     "hoek": "^5.0.4",
     "lazypipe": "^1.0.2",
     "merge-stream": "^1.0.1",
+    "mocha": "^8.1.0",
     "request": "^2.88.2",
     "rollup": "^2.2.0",
     "run-sequence": "^1.2.2",
     "semver": "^5.7.1",
+    "spectron": "^11.1.0",
     "through2": "^2.0.5",
     "winston": "^2.4.4",
     "yargs": "^4.8.1"

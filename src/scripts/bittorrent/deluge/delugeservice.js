@@ -184,14 +184,16 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
             type: 'button',
             color: 'green',
             click: this.resume,
-            icon: 'play'
+            icon: 'play',
+            role: 'resume'
         },
         {
             label: 'Pause',
             type: 'button',
             color: 'red',
             click: this.pause,
-            icon: 'pause'
+            icon: 'pause',
+            role: 'stop'
         },
     ]
 
@@ -239,7 +241,8 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
         {
             label: 'Remove and delete',
             click: this.removeAndDelete,
-            icon: 'trash'
+            icon: 'trash',
+            role: 'delete'
         },
     ];
 

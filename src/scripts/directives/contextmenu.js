@@ -60,6 +60,10 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
     function appendMenuItem(element, item, scope) {
         var menuItem = angular.element('<a class="item"></a>');
 
+        if (item.role) {
+            menuItem.attr('data-role', item.role)
+        }
+
         if (item.icon) {
             addIcon(menuItem, item.icon);
         } else if (item.check) {

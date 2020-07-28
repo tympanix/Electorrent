@@ -1,0 +1,25 @@
+<div class="ui tiny modal">
+  <i class="close icon"></i>
+  <div class="header">
+    New Label
+  </div>
+  <div class="content">
+    <form class="ui form" ng-submit="applyAndClose()">
+      <div class="field">
+        <div class="ui left icon action input">
+          <i class="tag icon"></i>
+          <input type="text" name="label" maxlength="36" ng-model="data.label" placeholder="Label Name" />
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="actions">
+    <a class="ui black deny button">
+      Cancel
+    </a>
+    <button type="submit" class="ui positive right labeled icon button">
+      Apply Label
+      <i class="tag icon"></i>
+    </button>
+  </div>
+</div>

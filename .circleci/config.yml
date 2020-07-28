@@ -1,0 +1,91 @@
+version: 2.1
+
+orbs:
+  browser-tools: circleci/browser-tools@1.1.1
+
+jobs:
+  build:
+    docker:
+      - image: node:12-buster
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run: npm run postinstall
+      - run: npm run build
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - tests
+            - node_modules
+            - package.json
+            - app
+  test-qbittorrent:
+    docker:
+      - image: circleci/node:12-browsers
+      - image: linuxserver/qbittorrent
+    steps:
+      - attach_workspace:
+          at: ./
+      - run: npm test -- -g qbittorrent
+  test-transmission:
+    docker:
+      - image: circleci/node:12-browsers
+      - image: linuxserver/transmission
+        environment:
+          USER: username
+          PASS: password
+    steps:
+      - attach_workspace:
+          at: ./
+      - run: npm test -- -g transmission
+  test-rtorrent:
+    docker:
+      - image: circleci/node:12-browsers
+      - image: linuxserver/rutorrent
+    steps:
+      - attach_workspace:
+          at: ./
+      - run: npm test -- -g rtorrent
+  test-deluge:
+    docker:
+      - image: circleci/node:12-browsers
+      - image: spritsail/deluge:1.3.15 
+    steps:
+      - attach_workspace:
+          at: ./
+      - run: npm test -- -g deluge
+  test-utorrent:
+    docker:
+      - image: circleci/node:12-browsers
+      - image: ekho/utorrent
+    steps:
+      - attach_workspace:
+          at: ./
+      - run: npm test -- -g utorrent
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test-qbittorrent:
+          requires:
+            - build
+      - test-transmission:
+          requires:
+            - build
+      - test-rtorrent:
+          requires:
+            - build
+      - test-deluge:
+          requires:
+            - build
+      - test-utorrent:
+          requires:
+            - build

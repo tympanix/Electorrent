@@ -1,15 +1,21 @@
-'use strict';
+"use strict";
 
-angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote", "TorrentR", "notificationService", "Column", function($http, $q, $remote, TorrentR, $notify, Column) {
-
-    const Rtorrent = require('@electorrent/node-rtorrent')
-    const { Remote } = require('./lib/worker')
-    const worker = new Worker('scripts/workers/rtorrent.js')
+angular.module("torrentApp").service("rtorrentService", [
+  "$http",
+  "$q",
+  "$remote",
+  "TorrentR",
+  "notificationService",
+  "Column",
+  function ($http, $q, $remote, TorrentR, $notify, Column) {
+    const Rtorrent = require("@electorrent/node-rtorrent");
+    const { Remote } = require("./lib/worker");
+    const worker = new Worker("scripts/workers/rtorrent.js");
 
     /*
      * Global reference to the rtorrent remote web worker instance
      */
-    let rtorrent = null
+    let rtorrent = null;
 
     /*
      * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
@@ -17,8 +23,7 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
      * (remember capital 'S' e.g qbittorrentService for qBittorrent, utorrentService for µTorrent ect.).
      * The real name of your client for display purposes can be changes in the field 'this.name' below.
      */
-    this.name = 'rTorrent';
-
+    this.name = "rTorrent";
 
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
@@ -30,34 +35,33 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
      * @param {string} password
      * @return {promise} connection
      */
-    this.connect = function(server) {
+    this.connect = function (server) {
+      rtorrent = new $remote(Rtorrent.prototype, worker);
 
-        rtorrent = new $remote(Rtorrent.prototype, worker)
+      let ca = server.getCertificate();
 
-        let ca = server.getCertificate()
-
-        return rtorrent.instantiate({
-            host: server.ip,
-            port: server.port,
-            path: server.cleanPath(),
-            user: server.user,
-            pass: server.password,
-            ssl: server.isHTTPS(),
-            ca: ca,
-        }).then(function() {
-            return rtorrent.get('system.client_version', [])
+      return rtorrent
+        .instantiate({
+          host: server.ip,
+          port: server.port,
+          path: server.cleanPath(),
+          user: server.user,
+          pass: server.password,
+          ssl: server.isHTTPS(),
+          ca: ca,
         })
-
-    }
+        .then(function () {
+          return rtorrent.get("system.client_version", []);
+        });
+    };
 
     /**
      * Returns the default path for the service. Should start with a slash.
      @return {string} the default path
      */
-    this.defaultPath = function() {
-      return "/RPC2"
-    }
-
+    this.defaultPath = function () {
+      return "/RPC2";
+    };
 
     /**
      * Return any new information about torrents to be rendered in the GUI. Should return a
@@ -72,26 +76,28 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
      *      deleted {array}: array of string containg the hashes of which torrents to be removed from the list in the GUI.
      * @return {promise} data
      */
-    this.torrents = function() {
-        var torrents = {
-            dirty: true,
-            labels: [],
-            all: [],
-            changed: [],
-            deleted: []
-        };
+    this.torrents = function () {
+      var torrents = {
+        dirty: true,
+        labels: [],
+        all: [],
+        changed: [],
+        deleted: [],
+      };
 
-        return rtorrent.getTorrentsExtra()
-            .then(function(data) {
-                torrents.all = data.torrents.map(d => new TorrentR(d))
-                torrents.trackers = data.trackers
-                torrents.labels = data.labels
-                return torrents
-            }).catch(function(err) {
-                console.error(err)
-                throw new Error(err)
-            })
-    }
+      return rtorrent
+        .getTorrentsExtra()
+        .then(function (data) {
+          torrents.all = data.torrents.map((d) => new TorrentR(d));
+          torrents.trackers = data.trackers;
+          torrents.labels = data.labels;
+          return torrents;
+        })
+        .catch(function (err) {
+          console.error(err);
+          throw new Error(err);
+        });
+    };
 
     /**
      * Add a torrent to the client by sending a magnet link to the API. Should return
@@ -99,9 +105,9 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
      * @param {string} magnetURL
      * @return {promise} isAdded
      */
-    this.addTorrentUrl = function(magnet) {
-        return rtorrent.loadLink(magnet)
-    }
+    this.addTorrentUrl = function (magnet) {
+      return rtorrent.loadLink(magnet);
+    };
 
     /**
      * Add a torrent file with the .torrent extension to the client through the API. Should
@@ -112,10 +118,10 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
      * @param {string} filename
      * @return {promise} isAdded
      */
-    this.uploadTorrent = function(buffer /*, filename*/) {
-        buffer = Buffer.from(buffer)
-        return rtorrent.loadFileContent(buffer)
-    }
+    this.uploadTorrent = function (buffer /*, filename*/) {
+      buffer = Buffer.from(buffer);
+      return rtorrent.loadFileContent(buffer);
+    };
 
     /**
      * Example action function. You will have to implement several of these to support the various
@@ -124,64 +130,67 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
      * @param {array} hashes
      * @return {promise} actionIsDone
      */
-    this.start = function(torrents) {
-        return rtorrent.start(torrents.map(t => t.hash))
-    }
+    this.start = function (torrents) {
+      return rtorrent.start(torrents.map((t) => t.hash));
+    };
 
-    this.stop = function(torrents) {
-        return rtorrent.stop(torrents.map(t => t.hash))
-    }
+    this.stop = function (torrents) {
+      return rtorrent.stop(torrents.map((t) => t.hash));
+    };
 
-    this.label = function(torrents, label) {
-        return rtorrent.setLabel(torrents.map(t => t.hash), label)
-    }
+    this.label = function (torrents, label) {
+      return rtorrent.setLabel(
+        torrents.map((t) => t.hash),
+        label
+      );
+    };
 
-    this.remove = function(torrents) {
-        return rtorrent.remove(torrents.map(t => t.hash))
-    }
+    this.remove = function (torrents) {
+      return rtorrent.remove(torrents.map((t) => t.hash));
+    };
 
-    this.deleteAndErase = function(torrents) {
-        return rtorrent.removeAndErase(torrents.map(t => t.hash))
-    }
+    this.deleteAndErase = function (torrents) {
+      return rtorrent.removeAndErase(torrents.map((t) => t.hash));
+    };
 
-    this.recheck = function(torrents) {
-        return rtorrent.recheck(torrents.map(t => t.hash))
-    }
+    this.recheck = function (torrents) {
+      return rtorrent.recheck(torrents.map((t) => t.hash));
+    };
 
-    this.priority = {}
-    this.priority.high = function(torrents) {
-        return rtorrent.setPriorityHigh(torrents.map(t => t.hash))
-    }
+    this.priority = {};
+    this.priority.high = function (torrents) {
+      return rtorrent.setPriorityHigh(torrents.map((t) => t.hash));
+    };
 
-    this.priority.normal = function(torrents) {
-        return rtorrent.setPriorityNormal(torrents.map(t => t.hash))
-    }
+    this.priority.normal = function (torrents) {
+      return rtorrent.setPriorityNormal(torrents.map((t) => t.hash));
+    };
 
-    this.priority.low = function(torrents) {
-        return rtorrent.setPriorityLow(torrents.map(t => t.hash))
-    }
+    this.priority.low = function (torrents) {
+      return rtorrent.setPriorityLow(torrents.map((t) => t.hash));
+    };
 
-    this.priority.off = function(torrents) {
-        return rtorrent.setPriorityOff(torrents.map(t => t.hash))
-    }
+    this.priority.off = function (torrents) {
+      return rtorrent.setPriorityOff(torrents.map((t) => t.hash));
+    };
 
     /**
      * Whether the client supports sorting by trackers or not
      */
-    this.enableTrackerFilter = true
+    this.enableTrackerFilter = true;
 
     /**
      * Provides the option to include extra columns for displaying data. This may concern columns
      * which are specific to this client. The extra columns will be merged with the default columns.
      */
     this.extraColumns = [
-        new Column({
-            name: 'Tracker',
-            attribute: 'tracker',
-            template: '{{ torrent.tracker }}',
-            sort: Column.ALPHABETICAL
-        })
-    ]
+      new Column({
+        name: "Tracker",
+        attribute: "tracker",
+        template: "{{ torrent.tracker }}",
+        sort: Column.ALPHABETICAL,
+      }),
+    ];
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
@@ -195,26 +204,28 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
      *      icon [string]: The icon of the button. See here: http://semantic-ui.com/elements/icon.html
      */
     this.actionHeader = [
-        {
-            label: 'Start',
-            type: 'button',
-            color: 'green',
-            click: this.start,
-            icon: 'play'
-        },
-        {
-            label: 'Stop',
-            type: 'button',
-            color: 'red',
-            click: this.stop,
-            icon: 'stop'
-        },
-        {
-            label: 'Labels',
-            click: this.label,
-            type: 'labels'
-        }
-    ]
+      {
+        label: "Start",
+        type: "button",
+        color: "green",
+        click: this.start,
+        icon: "play",
+        role: "resume",
+      },
+      {
+        label: "Stop",
+        type: "button",
+        color: "red",
+        click: this.stop,
+        icon: "stop",
+        role: "stop",
+      },
+      {
+        label: "Labels",
+        click: this.label,
+        type: "labels",
+      },
+    ];
 
     /**
      * Represents the actions available in the context menu. Can be customized to your liking or
@@ -225,42 +236,43 @@ angular.module('torrentApp').service('rtorrentService', ["$http", "$q", "$remote
      *      icon [string]: The icon of the action. See here: http://semantic-ui.com/elements/icon.html
      */
     this.contextMenu = [
-        {
-            label: 'Recheck',
-            click: this.recheck,
-            icon: 'checkmark'
-        },
-        {
-            label: 'Priority',
-            menu: [
-                {
-                    label: 'High',
-                    click: this.priority.high
-                },
-                {
-                    label: 'Normal',
-                    click: this.priority.normal
-                },
-                {
-                    label: 'Low',
-                    click: this.priority.low
-                },
-                {
-                    label: 'Don\'t Download',
-                    click: this.priority.off
-                }
-            ]
-        },
-        {
-            label: 'Remove',
-            click: this.remove,
-            icon: 'remove'
-        },
-        {
-            label: 'Remove and Delete',
-            click: this.deleteAndErase,
-            icon: 'trash'
-        }
+      {
+        label: "Recheck",
+        click: this.recheck,
+        icon: "checkmark",
+      },
+      {
+        label: "Priority",
+        menu: [
+          {
+            label: "High",
+            click: this.priority.high,
+          },
+          {
+            label: "Normal",
+            click: this.priority.normal,
+          },
+          {
+            label: "Low",
+            click: this.priority.low,
+          },
+          {
+            label: "Don't Download",
+            click: this.priority.off,
+          },
+        ],
+      },
+      {
+        label: "Remove",
+        click: this.remove,
+        icon: "remove",
+      },
+      {
+        label: "Remove and Delete",
+        click: this.deleteAndErase,
+        icon: "trash",
+        role: "delete",
+      },
     ];
-
-}]);
+  },
+]);

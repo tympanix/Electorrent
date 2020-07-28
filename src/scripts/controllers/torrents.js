@@ -312,7 +312,8 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
     }
 
     $scope.doAction = function(action, name, data) {
-        return action.call($rootScope.$btclient, selected, data)
+        var args = Array.from(arguments).slice(3)
+        return action.call($rootScope.$btclient, selected, data, ...args)
             .then(function(){
                 return $scope.update();
             })

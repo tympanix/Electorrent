@@ -40,7 +40,6 @@ function createTorrentWindow() {
         width: 1200,
         height: 800,
         backgroundColor: '#ffffff',
-        icon: getApplicationIcon(),
         webPreferences: {
             nodeIntegration: true,
             nodeIntegrationInWorker: true
@@ -73,8 +72,8 @@ function createTorrentWindow() {
 
     // Connect to server process
     if (is.dev()) {
-      let client = require('electron-connect').client;
-      client.create(torrentWindow);
+    //   let client = require('electron-connect').client;
+    //   client.create(torrentWindow);
     }
 
 }
