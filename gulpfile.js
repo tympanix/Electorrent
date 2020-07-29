@@ -34,6 +34,7 @@ gulp.task('serve', function () {
     gulp.watch(['src/*.html', 'src/scripts/**', 'src/main.js'], gulp.series('build:useref', electron.reload))
     gulp.watch(['src/views/**/*'], gulp.series('build:views', electron.reload))
     gulp.watch(['src/css/**/*'], gulp.series('build:less', electron.reload))
+    gulp.watch(['src/scripts/**/*'], gulp.series('build:useref'), electron.reload)
     gulp.watch(['src/scripts/workers/*.js'], gulp.series('build:workers', electron.reload))
 
     // Watch dependencies

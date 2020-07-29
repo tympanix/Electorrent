@@ -124,8 +124,8 @@ angular.module("torrentApp").directive("actionHeader", [
 
       dropdown.attr("data-role", "labels");
 
-      scope.addLabel = function (label) {
-        scope.click(item.click, item.label + " " + label, label);
+      scope.addLabel = function (label, create) {
+        scope.click(item.click, item.label + " " + label, label, create);
       };
 
       $compile(dropdown)(scope);
