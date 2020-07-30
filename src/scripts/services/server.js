@@ -16,11 +16,11 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$rootScope',
                 this.fromJson(arguments[0])
             } else {
                 this.id = generateGUID()
-                this.ip = ip
+                this.ip = ip || ''
                 this.proto = proto
                 this.port = port
-                this.user = user
-                this.password = password
+                this.user = user || ''
+                this.password = password || ''
                 this.client = client
                 this.path = path
                 this.lastused = -1
@@ -32,11 +32,11 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$rootScope',
         Server.prototype.fromJson = function(data) {
             this.name = data.name
             this.id = data.id
-            this.ip = data.ip
+            this.ip = data.ip || ''
             this.proto = data.proto || "http"
             this.port = data.port
-            this.user = data.user
-            this.password = data.password
+            this.user = data.user || ''
+            this.password = data.password || ''
             this.client = data.client
             this.path = data.path || ''
             this.default = data.default
