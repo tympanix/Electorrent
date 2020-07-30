@@ -2,6 +2,8 @@ const fs = require("fs");
 const Application = require("spectron").Application;
 const path = require("path");
 const Docker = require("dockerode");
+const http = require("http");
+const https = require("https");
 
 var docker = new Docker();
 
@@ -11,22 +13,69 @@ if (process.platform === "win32") {
   electronPath += ".cmd";
 }
 
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
+function httpget(options) {
+  return new Promise((resolve, reject) => {
+    let req = http.get(options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+      res.on("end", () => {
+        resolve(res);
+      });
+    });
+
+    req.on("error", (err) => {
+      reject(err);
+    });
+  });
+}
+
+function pullImage(image = "node", version = "latest") {
+  let imageName = `${image}:${version}`;
+  console.log(`=> Pulling ${imageName}`);
+  return new Promise((resolve, reject) => {
+    docker.pull(imageName, (err, stream) => {
+      let message = "";
+      if (err) return reject(err);
+      stream.on("data", (data) => (message += data));
+      stream.on("end", () => resolve(message));
+      stream.on("error", (err) => reject(err));
+    });
+  });
+}
+
 var appPath = path.join(__dirname, "..", "app");
-exports.testclient = function ({ client, dockerContainer, username, password, host, port }) {
+exports.testclient = function ({
+  client,
+  dockerContainer,
+  username = "admin",
+  password = "admin",
+  host = "127.0.0.1",
+  port = 8080,
+  containerPort = 8080,
+  acceptHttpStatus = 200,
+  timeout = 10 * 1000,
+}) {
   describe(`test ${client}`, function () {
     let app;
     let container;
-    this.timeout(20000);
+    this.timeout(500 * 1000);
 
     before(async function () {
+      await pullImage(dockerContainer);
+      console.log("Pulled image");
+      portMap = `${containerPort}/tcp`;
       container = await docker.createContainer({
         Image: dockerContainer,
         Env: ["PUID=1000", "PGID=1000", "TZ=Europe/London", "WEBUI_PORT=8080"],
         HostConfig: {
           PortBindings: {
-            "8080/tcp": [
+            [portMap]: [
               {
-                HostPort: "8080",
+                HostPort: port.toString(),
               },
             ],
           },
@@ -40,6 +89,23 @@ exports.testclient = function ({ client, dockerContainer, username, password, ho
           deprecationWarnings: false,
         },
       });
+      let i = 0;
+      while (true) {
+        if (i > 50) {
+          throw Error("Service never started");
+        }
+        try {
+          let res = await httpget(`http://${host}:${port}`);
+          console.log("Polling http:", res.statusCode);
+          if (res.statusCode === acceptHttpStatus) {
+            break;
+          }
+        } catch (err) {
+          console.log("... waiting for serivce");
+        }
+        await sleep(500);
+        i++;
+      }
       return app.start();
     });
 
@@ -86,9 +152,18 @@ exports.testclient = function ({ client, dockerContainer, username, password, ho
       let data = fs.readFileSync(path.join(__dirname, "data", filename));
       app.webContents.send("torrentfiles", data, path.basename(filename));
 
-      await app.client.waitForExist(query, 2500);
+      await app.client.waitForExist(query, 10 * 1000);
       let torrent = await app.client.getText(query);
       await torrent[0].should.contain("ubuntu");
+    });
+
+    it("wait for download to begin", async function () {
+      const query = "#torrentTable tbody tr";
+
+      await app.client.waitUntil(async () => {
+        let torrent = await app.client.getText(query);
+        return torrent.includes("Downloading");
+      }, timeout);
     });
 
     it("stop the torrent", async function () {
@@ -100,7 +175,7 @@ exports.testclient = function ({ client, dockerContainer, username, password, ho
       await app.client.waitUntil(async () => {
         let torrent = await app.client.getText(query);
         return torrent.includes("Stopped");
-      });
+      }, timeout);
     });
 
     it("resume the torrent", async function () {
@@ -112,7 +187,7 @@ exports.testclient = function ({ client, dockerContainer, username, password, ho
       await app.client.waitUntil(async () => {
         let torrent = await app.client.getText(query);
         return torrent.includes("Downloading");
-      }, 2500);
+      }, timeout);
     });
 
     it("apply new label", async function () {
@@ -132,7 +207,9 @@ exports.testclient = function ({ client, dockerContainer, username, password, ho
       await app.client.waitUntil(async () => {
         let torrent = await app.client.getText(query);
         return torrent.includes(testlabel);
-      }, 2500);
+      }, timeout);
+
+      await sleep(1000);
     });
 
     it("ensure label entry in dropdown", async function () {
