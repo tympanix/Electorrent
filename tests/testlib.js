@@ -33,11 +33,10 @@ function httpget(options) {
   });
 }
 
-function pullImage(image = "node", version = "latest") {
-  let imageName = `${image}:${version}`;
-  console.log(`=> Pulling ${imageName}`);
+function pullImage(image) {
+  console.log(`=> Pulling ${image}`);
   return new Promise((resolve, reject) => {
-    docker.pull(imageName, (err, stream) => {
+    docker.pull(image, (err, stream) => {
       let message = "";
       if (err) return reject(err);
       stream.on("data", (data) => (message += data));
@@ -58,6 +57,9 @@ exports.testclient = function ({
   containerPort = 8080,
   acceptHttpStatus = 200,
   timeout = 10 * 1000,
+  stopLabel = "Stopped",
+  downloadLabel = "Downloading",
+  skipTests = [],
 }) {
   describe(`test ${client}`, function () {
     let app;
@@ -162,7 +164,7 @@ exports.testclient = function ({
 
       await app.client.waitUntil(async () => {
         let torrent = await app.client.getText(query);
-        return torrent.includes("Downloading");
+        return torrent.includes(downloadLabel);
       }, timeout);
     });
 
@@ -174,7 +176,7 @@ exports.testclient = function ({
 
       await app.client.waitUntil(async () => {
         let torrent = await app.client.getText(query);
-        return torrent.includes("Stopped");
+        return torrent.includes(stopLabel);
       }, timeout);
     });
 
@@ -186,92 +188,100 @@ exports.testclient = function ({
 
       await app.client.waitUntil(async () => {
         let torrent = await app.client.getText(query);
-        return torrent.includes("Downloading");
+        return torrent.includes(downloadLabel);
       }, timeout);
     });
 
-    it("apply new label", async function () {
-      const query = "#torrentTable tbody tr";
-      const labels = "#torrent-action-header div[data-role=labels]";
-      const testlabel = "testlabel123";
+    describe("test labels", function () {
+      before(function () {
+        if (skipTests.includes("labels")) return this.skip();
+      });
 
-      await app.client
-        .click(query)
-        .click(labels)
-        .waitForVisible(labels + " > div.menu")
-        .click(labels + " div[data-role=new-label]")
-        .waitForVisible("#newLabelModal")
-        .setValue("#newLabelModal input[name=label]", testlabel)
-        .click("#newLabelModal button[type=submit]");
+      it("apply new label", async function () {
+        const query = "#torrentTable tbody tr";
+        const labels = "#torrent-action-header div[data-role=labels]";
+        const testlabel = "testlabel123";
 
-      await app.client.waitUntil(async () => {
-        let torrent = await app.client.getText(query);
-        return torrent.includes(testlabel);
-      }, timeout);
+        await app.client
+          .click(query)
+          .click(labels)
+          .waitForVisible(labels + " > div.menu")
+          .click(labels + " div[data-role=new-label]")
+          .waitForVisible("#newLabelModal")
+          .setValue("#newLabelModal input[name=label]", testlabel)
+          .click("#newLabelModal button[type=submit]");
 
-      await sleep(1000);
-    });
+        await app.client.waitUntil(async () => {
+          let torrent = await app.client.getText(query);
+          return torrent.includes(testlabel);
+        }, timeout);
 
-    it("ensure label entry in dropdown", async function () {
-      const query = "#torrentTable tbody tr";
-      const labels = "#torrent-action-header div[data-role=labels]";
-      const testlabel = "testlabel123";
+        await sleep(1000);
+      });
 
-      await app.client
-        .click(query)
-        .click(labels)
-        .waitForExist(labels + ` div[data-label='${testlabel}']`);
+      it("ensure label entry in dropdown", async function () {
+        const query = "#torrentTable tbody tr";
+        const labels = "#torrent-action-header div[data-role=labels]";
+        const testlabel = "testlabel123";
 
-      await app.client.getText(labels + ` div[data-label='${testlabel}']`).should.eventually.contain(testlabel);
+        await app.client
+          .click(query)
+          .click(labels)
+          .waitForExist(labels + ` div[data-label='${testlabel}']`);
 
-      await app.client.click(labels);
-    });
+        await app.client.getText(labels + ` div[data-label='${testlabel}']`).should.eventually.contain(testlabel);
 
-    it("apply another new label", async function () {
-      const query = "#torrentTable tbody tr";
-      const labels = "#torrent-action-header div[data-role=labels]";
-      const testlabel = "someotherlabel123";
+        await app.client.click(labels);
+      });
 
-      await app.client
-        .click(query)
-        .click(labels)
-        .waitForVisible(labels + " > div.menu")
-        .click(labels + " div[data-role=new-label]")
-        .waitForVisible("#newLabelModal")
-        .setValue("#newLabelModal input[name=label]", testlabel)
-        .click("#newLabelModal button[type=submit]");
+      it("apply another new label", async function () {
+        const query = "#torrentTable tbody tr";
+        const labels = "#torrent-action-header div[data-role=labels]";
+        const testlabel = "someotherlabel123";
 
-      await app.client.waitUntil(async () => {
-        let torrent = await app.client.getText(query);
-        return torrent.includes(testlabel);
+        await app.client
+          .click(query)
+          .click(labels)
+          .waitForVisible(labels + " > div.menu")
+          .click(labels + " div[data-role=new-label]")
+          .waitForVisible("#newLabelModal")
+          .setValue("#newLabelModal input[name=label]", testlabel)
+          .click("#newLabelModal button[type=submit]");
+
+        await app.client.waitUntil(async () => {
+          let torrent = await app.client.getText(query);
+          return torrent.includes(testlabel);
+        });
+      });
+
+      it("change back to previous label", async function () {
+        const query = "#torrentTable tbody tr";
+        const labels = "#torrent-action-header div[data-role=labels]";
+        const testlabel = "testlabel123";
+
+        await app.client
+          .click(query)
+          .click(labels)
+          .waitForVisible(labels + " > div.menu")
+          .click(labels + ` div[data-label='${testlabel}']`);
+
+        await app.client.waitUntil(async () => {
+          let torrent = await app.client.getText(query);
+          return torrent.includes(testlabel);
+        });
       });
     });
 
-    it("change back to previous label", async function () {
-      const query = "#torrentTable tbody tr";
-      const labels = "#torrent-action-header div[data-role=labels]";
-      const testlabel = "testlabel123";
-
-      await app.client
-        .click(query)
-        .click(labels)
-        .waitForVisible(labels + " > div.menu")
-        .click(labels + ` div[data-label='${testlabel}']`);
-
-      await app.client.waitUntil(async () => {
-        let torrent = await app.client.getText(query);
-        return torrent.includes(testlabel);
+    describe("clean up", function () {
+      it("delete torrent", async function () {
+        const query = "#torrentTable tbody tr";
+        await app.client
+          .waitForExist(query)
+          .rightClick(query)
+          .waitForExist("#contextmenu")
+          .click("#contextmenu a[data-role=delete]")
+          .waitForExist(query, 2500, true);
       });
-    });
-
-    it("delete torrent", async function () {
-      const query = "#torrentTable tbody tr";
-      await app.client
-        .waitForExist(query)
-        .rightClick(query)
-        .waitForExist("#contextmenu")
-        .click("#contextmenu a[data-role=delete]")
-        .waitForExist(query, 2500, true);
     });
   });
 };
