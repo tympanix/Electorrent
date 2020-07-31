@@ -207,7 +207,7 @@ angular.module("torrentApp").service("qbittorrentService", [ "$q", "$remote", "T
     this.setCategory = function (torrents, category, create) {
       var promise = $q.when();
       if (create === true) {
-        promise.then(() => qbittorrent.createCategory(category, ""));
+        promise = promise.then(() => qbittorrent.createCategory(category, ""));
       }
       var hashes = torrents.map((t) => t.hash);
       return promise.then(() => qbittorrent.setCategory(hashes, category));
