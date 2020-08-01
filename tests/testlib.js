@@ -4,6 +4,7 @@ const path = require("path");
 const Docker = require("dockerode");
 const http = require("http");
 const https = require("https");
+const sync = require("@wdio/sync").default;
 
 var docker = new Docker();
 
@@ -64,10 +65,12 @@ exports.testclient = function ({
   describe(`test ${client}`, function () {
     let app;
     let container;
+    let $;
+    let $$;
     this.timeout(500 * 1000);
 
     before(async function () {
-      await pullImage(dockerContainer);
+      //await pullImage(dockerContainer);
       console.log("Pulled image");
       portMap = `${containerPort}/tcp`;
       container = await docker.createContainer({
@@ -122,74 +125,102 @@ exports.testclient = function ({
     });
 
     it("open the app", function () {
-      return app.client.waitUntilWindowLoaded().getWindowCount().should.eventually.equal(1);
+      $ = app.client.$.bind(app.client);
+      $$ = app.client.$$.bind(app.client);
+
+      console.log($.constructor.name);
+      return app.client.waitUntilWindowLoaded();
     });
 
     it("tests the title", function () {
-      return app.client.waitUntilWindowLoaded().getTitle().should.eventually.equal("Electorrent");
+      //return app.client.waitUntilWindowLoaded().getTitle().should.eventually.equal("Electorrent");
     });
 
-    it("login to the client", async function () {
-      await app.client
-        .setValue("#connection-host", host)
-        .click("#connection-proto")
-        .waitForExist("#connection-proto-http")
-        .click("#connection-proto-http")
-        .setValue("#connection-user", username)
-        .setValue("#connection-password", password)
-        .click("#connection-client")
-        .waitForExist(`#connection-client-${client}`)
-        .click(`#connection-client-${client}`)
-        .setValue("#connection-port", port)
-        .click("#connection-submit");
+    it("login to the client", () => {
+      return sync(() => {
+        $("#connection-host").setValue(host);
+        $("#connection-proto").click();
+        $("#connection-proto-http").waitForExist();
+        $("#connection-proto-http").click();
+        $("#connection-user").setValue(username);
+        $("#connection-password").setValue(password);
+        $("#connection-client").click();
+        $(`#connection-client-${client}`).waitForExist();
+        $(`#connection-client-${client}`).click();
+        $("#connection-port").setValue(port);
+        $("#connection-submit").click();
 
-      await app.client.waitForVisible("#page-torrents", 5 * 1000);
+        $("#page-torrents").waitForDisplayed({ timeout });
+      });
     });
 
-    it("upload torrent file", async function () {
-      const query = "#torrentTable tbody tr td";
+    it("upload torrent file", () => {
+      return sync(() => {
+        const query = "#torrentTable tbody tr td";
 
-      await app.client.waitForExist(query, 500, true);
-      let filename = "ubuntu-20.04-live-server-amd64.iso.torrent";
-      let data = fs.readFileSync(path.join(__dirname, "data", filename));
-      app.webContents.send("torrentfiles", data, path.basename(filename));
+        console.log("Wait for empty list...");
+        $(query).waitForExist({ timeout: 500, reverse: true });
+        let filename = "ubuntu-20.04-live-server-amd64.iso.torrent";
+        console.log("Reading data...");
+        let data = fs.readFileSync(path.join(__dirname, "data", filename));
+        app.webContents.send("torrentfiles", data, path.basename(filename));
+        console.log("Uploaded torrent...");
 
-      await app.client.waitForExist(query, 10 * 1000);
-      let torrent = await app.client.getText(query);
-      await torrent[0].should.contain("ubuntu");
+        $(query).waitForExist({ timeout });
+        let torrent = $$(query).map((v) => v.getText());
+        torrent[0].should.contain("ubuntu");
+      });
     });
 
-    it("wait for download to begin", async function () {
-      const query = "#torrentTable tbody tr";
+    it("wait for download to begin", () => {
+      return sync(() => {
+        const query = "#torrentTable tbody tr";
 
-      await app.client.waitUntil(async () => {
-        let torrent = await app.client.getText(query);
-        return torrent.includes(downloadLabel);
-      }, timeout);
+        $(query).waitUntil(
+          async function () {
+            return (await this.getText()).includes(downloadLabel);
+          },
+          { timeout }
+        );
+      });
     });
 
-    it("stop the torrent", async function () {
+    it("stop the torrent", () => {
       const query = "#torrentTable tbody tr";
       const button = "#torrent-action-header a[data-role=stop]";
 
-      await app.client.waitForExist(query).click(query).waitForEnabled(button).click(button);
+      return sync(() => {
+        $(query).waitForExist();
+        $(query).click();
+        $(button).waitForEnabled();
+        $(button).click();
 
-      await app.client.waitUntil(async () => {
-        let torrent = await app.client.getText(query);
-        return torrent.includes(stopLabel);
-      }, timeout);
+        $(query).waitUntil(
+          async function () {
+            return (await this.getText()).includes(stopLabel);
+          },
+          { timeout }
+        );
+      });
     });
 
-    it("resume the torrent", async function () {
+    it("resume the torrent", () => {
       const query = "#torrentTable tbody tr";
       const button = "#torrent-action-header a[data-role=resume]";
 
-      await app.client.waitForExist(query).click(query).waitForEnabled(button).click(button);
+      return sync(() => {
+        $(query).waitForExist();
+        $(query).click();
+        $(button).waitForEnabled();
+        $(button).click();
 
-      await app.client.waitUntil(async () => {
-        let torrent = await app.client.getText(query);
-        return torrent.includes(downloadLabel);
-      }, timeout);
+        $(query).waitUntil(
+          async function () {
+            return (await this.getText()).includes(downloadLabel);
+          },
+          { timeout }
+        );
+      });
     });
 
     describe("test labels", function () {
@@ -202,36 +233,37 @@ exports.testclient = function ({
         const labels = "#torrent-action-header div[data-role=labels]";
         const testlabel = "testlabel123";
 
-        await app.client
-          .click(query)
-          .click(labels)
-          .waitForVisible(labels + " > div.menu")
-          .click(labels + " div[data-role=new-label]")
-          .waitForVisible("#newLabelModal")
-          .setValue("#newLabelModal input[name=label]", testlabel)
-          .click("#newLabelModal button[type=submit]");
+        return sync(() => {
+          $(query).click();
+          $(labels).click();
+          $(labels + " > div.menu").waitForDisplayed();
+          $(labels + " div[data-role=new-label]").click();
+          $("#newLabelModal").waitForDisplayed();
+          $("#newLabelModal input[name=label]").setValue(testlabel);
+          $("#newLabelModal button[type=submit]").click();
 
-        await app.client.waitUntil(async () => {
-          let torrent = await app.client.getText(query);
-          return torrent.includes(testlabel);
-        }, timeout);
-
-        await sleep(1000);
+          $(query).waitUntil(
+            async function () {
+              return (await this.getText()).includes(testlabel);
+            },
+            { timeout }
+          );
+        });
       });
 
-      it("ensure label entry in dropdown", async function () {
+      it("ensure label entry in dropdown", function () {
         const query = "#torrentTable tbody tr";
         const labels = "#torrent-action-header div[data-role=labels]";
         const testlabel = "testlabel123";
+        const labelBtn = labels + ` div[data-label='${testlabel}']`;
 
-        await app.client
-          .click(query)
-          .click(labels)
-          .waitForExist(labels + ` div[data-label='${testlabel}']`);
-
-        await app.client.getText(labels + ` div[data-label='${testlabel}']`).should.eventually.contain(testlabel);
-
-        await app.client.click(labels);
+        return sync(() => {
+          $(query).click();
+          $(labels).click();
+          $(labelBtn).waitForExist();
+          $(labelBtn).getText().should.contain(testlabel);
+          $(labels).click();
+        });
       });
 
       it("apply another new label", async function () {
@@ -239,18 +271,21 @@ exports.testclient = function ({
         const labels = "#torrent-action-header div[data-role=labels]";
         const testlabel = "someotherlabel123";
 
-        await app.client
-          .click(query)
-          .click(labels)
-          .waitForVisible(labels + " > div.menu")
-          .click(labels + " div[data-role=new-label]")
-          .waitForVisible("#newLabelModal")
-          .setValue("#newLabelModal input[name=label]", testlabel)
-          .click("#newLabelModal button[type=submit]");
+        return sync(() => {
+          $(query).click();
+          $(labels).click();
+          $(labels + " > div.menu").waitForDisplayed();
+          $(labels + " div[data-role=new-label]").click();
+          $("#newLabelModal").waitForDisplayed();
+          $("#newLabelModal input[name=label]").setValue(testlabel);
+          $("#newLabelModal button[type=submit]").click();
 
-        await app.client.waitUntil(async () => {
-          let torrent = await app.client.getText(query);
-          return torrent.includes(testlabel);
+          $(query).waitUntil(
+            async function () {
+              return (await this.getText()).includes(testlabel);
+            },
+            { timeout }
+          );
         });
       });
 
@@ -259,15 +294,18 @@ exports.testclient = function ({
         const labels = "#torrent-action-header div[data-role=labels]";
         const testlabel = "testlabel123";
 
-        await app.client
-          .click(query)
-          .click(labels)
-          .waitForVisible(labels + " > div.menu")
-          .click(labels + ` div[data-label='${testlabel}']`);
+        return sync(() => {
+          $(query).click();
+          $(labels).click();
+          $(labels + " > div.menu").waitForDisplayed();
+          $(labels + ` div[data-label='${testlabel}']`).click();
 
-        await app.client.waitUntil(async () => {
-          let torrent = await app.client.getText(query);
-          return torrent.includes(testlabel);
+          $(query).waitUntil(
+            async function () {
+              return (await this.getText()).includes(testlabel);
+            },
+            { timeout }
+          );
         });
       });
     });
@@ -275,12 +313,25 @@ exports.testclient = function ({
     describe("clean up", function () {
       it("delete torrent", async function () {
         const query = "#torrentTable tbody tr";
-        await app.client
-          .waitForExist(query)
-          .rightClick(query)
-          .waitForExist("#contextmenu")
-          .click("#contextmenu a[data-role=delete]")
-          .waitForExist(query, 2500, true);
+        const button = "#contextmenu a[data-role=delete]";
+
+        return sync(() => {
+          $(query).waitForExist();
+          $(query).click({ button: "right" });
+          $("#contextmenu").waitForExist();
+
+          let visible = $(button).isDisplayed();
+
+          if (!visible) {
+            let submenu = $(button).$("..").$("..");
+            submenu.moveTo();
+            let firstItem = submenu.$(".item:first-child");
+            firstItem.moveTo();
+          }
+
+          $("#contextmenu a[data-role=delete]").click();
+          $(query).waitForExist({ timeout, reverse: true });
+        });
       });
     });
   });

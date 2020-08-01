@@ -31,11 +31,12 @@
     "winreg": "^1.2.2"
   },
   "devDependencies": {
+    "@wdio/sync": "^6.3.6",
     "bower": "^1.8.8",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "dockerode": "^3.2.1",
-    "electron": "^8.2.0",
+    "electron": "^9.1.2",
     "electron-builder": "^22.4.1",
     "electron-builder-squirrel-windows": "^22.4.1",
     "electron-connect": "^0.6.3",
@@ -54,12 +55,12 @@
     "hoek": "^5.0.4",
     "lazypipe": "^1.0.2",
     "merge-stream": "^1.0.1",
-    "mocha": "^8.0.1",
+    "mocha": "^8.1.0",
     "request": "^2.88.2",
     "rollup": "^2.2.0",
     "run-sequence": "^1.2.2",
     "semver": "^5.7.1",
-    "spectron": "^10.0.0",
+    "spectron": "^11.1.0",
     "through2": "^2.0.5",
     "winston": "^2.4.4",
     "yargs": "^4.8.1"
