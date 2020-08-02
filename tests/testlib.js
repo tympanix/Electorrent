@@ -192,7 +192,7 @@ exports.testclient = function ({
 
       it("change back to previous label", async function () {
         let t = tapp.torrents[0];
-        t.changeLabel("testlabel123");
+        await t.changeLabel("testlabel123");
       });
     });
 

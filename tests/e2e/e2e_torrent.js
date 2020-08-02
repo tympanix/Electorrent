@@ -83,6 +83,8 @@ class Torrent {
       this.$("#newLabelModal").waitForDisplayed();
       this.$("#newLabelModal input[name=label]").setValue(labelName);
       this.$("#newLabelModal button[type=submit]").click();
+      this.$("#newLabelModal").waitForDisplayed({ reverse: true });
+      this.$(labels + " > div.menu").waitForDisplayed({ reverse: true });
     });
 
     await this.browser.waitUntil(async () => {
@@ -99,6 +101,7 @@ class Torrent {
       this.$(labels).click();
       this.$(labels + " > div.menu").waitForDisplayed();
       this.$(labels + ` div[data-label='${labelName}']`).click();
+      this.$(labels + " > div.menu").waitForDisplayed({ reverse: true });
     });
 
     await this.browser.waitUntil(async () => {
@@ -119,7 +122,7 @@ class Torrent {
     return sync(() => {
       this.$(this.query).waitForExist();
       this.$(this.query).click({ button: "right" });
-      this.$("#contextmenu").waitForExist();
+      this.$("#contextmenu").waitForDisplayed();
 
       let visible = this.$(button).isDisplayed();
       if (!visible) {
@@ -129,7 +132,9 @@ class Torrent {
         firstItem.moveTo();
       }
 
+      this.$(button).waitForEnabled();
       this.$(button).click();
+      this.$("#contextmenu").waitForExist({ reverse: false });
     });
   }
 }
