@@ -26,8 +26,9 @@ angular.module("torrentApp").directive('torrentBody', ['$document', '$compile', 
         })
         let template = ""
         this.$renderColumns.forEach(function(c) {
-          template = template + `<td>${c.template}</td>`
+          template = template + `<td data-col="${c.attribute}">${c.template}</td>`
         })
+        
         this.$template = template
         this.$link = $compile(this.$template)
       }

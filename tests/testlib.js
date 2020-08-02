@@ -4,6 +4,7 @@ const path = require("path");
 const Docker = require("dockerode");
 const http = require("http");
 const https = require("https");
+const e2e = require("./e2e");
 const sync = require("@wdio/sync").default;
 
 var docker = new Docker();
@@ -67,6 +68,7 @@ exports.testclient = function ({
     let container;
     let $;
     let $$;
+    let tapp;
     this.timeout(500 * 1000);
 
     before(async function () {
@@ -111,7 +113,11 @@ exports.testclient = function ({
         await sleep(500);
         i++;
       }
-      return app.start();
+      await app.start();
+      $ = app.client.$.bind(app.client);
+      $$ = app.client.$$.bind(app.client);
+      tapp = new e2e.App(app);
+      await app.client.setTimeout({ implicit: 0 });
     });
 
     after(async function () {
@@ -125,102 +131,44 @@ exports.testclient = function ({
     });
 
     it("open the app", function () {
-      $ = app.client.$.bind(app.client);
-      $$ = app.client.$$.bind(app.client);
-
-      console.log($.constructor.name);
       return app.client.waitUntilWindowLoaded();
     });
 
-    it("tests the title", function () {
-      //return app.client.waitUntilWindowLoaded().getTitle().should.eventually.equal("Electorrent");
+    it("tests the title", async function () {
+      return sync(() => {
+        app.client.waitUntilWindowLoaded();
+        app.client.getTitle().should.equal("Electorrent");
+      });
     });
 
     it("login to the client", () => {
-      return sync(() => {
-        $("#connection-host").setValue(host);
-        $("#connection-proto").click();
-        $("#connection-proto-http").waitForExist();
-        $("#connection-proto-http").click();
-        $("#connection-user").setValue(username);
-        $("#connection-password").setValue(password);
-        $("#connection-client").click();
-        $(`#connection-client-${client}`).waitForExist();
-        $(`#connection-client-${client}`).click();
-        $("#connection-port").setValue(port);
-        $("#connection-submit").click();
-
-        $("#page-torrents").waitForDisplayed({ timeout });
+      return tapp.login({
+        username: username,
+        password: password,
+        host: host,
+        port: port,
+        client: client,
       });
     });
 
-    it("upload torrent file", () => {
-      return sync(() => {
-        const query = "#torrentTable tbody tr td";
-
-        console.log("Wait for empty list...");
-        $(query).waitForExist({ timeout: 500, reverse: true });
-        let filename = "ubuntu-20.04-live-server-amd64.iso.torrent";
-        console.log("Reading data...");
-        let data = fs.readFileSync(path.join(__dirname, "data", filename));
-        app.webContents.send("torrentfiles", data, path.basename(filename));
-        console.log("Uploaded torrent...");
-
-        $(query).waitForExist({ timeout });
-        let torrent = $$(query).map((v) => v.getText());
-        torrent[0].should.contain("ubuntu");
-      });
+    it("upload torrent file", async () => {
+      let filename = "ubuntu-20.04-live-server-amd64.iso.torrent";
+      let hash = "c44f931b1a3986851242d755d0ac46e9fa3c5d32";
+      await tapp.uploadTorrent({ filename, hash });
     });
 
     it("wait for download to begin", () => {
-      return sync(() => {
-        const query = "#torrentTable tbody tr";
-
-        $(query).waitUntil(
-          async function () {
-            return (await this.getText()).includes(downloadLabel);
-          },
-          { timeout }
-        );
-      });
+      return tapp.torrents[0].waitForState(downloadLabel);
     });
 
-    it("stop the torrent", () => {
-      const query = "#torrentTable tbody tr";
-      const button = "#torrent-action-header a[data-role=stop]";
-
-      return sync(() => {
-        $(query).waitForExist();
-        $(query).click();
-        $(button).waitForEnabled();
-        $(button).click();
-
-        $(query).waitUntil(
-          async function () {
-            return (await this.getText()).includes(stopLabel);
-          },
-          { timeout }
-        );
-      });
+    it("stop the torrent", async () => {
+      let t = tapp.torrents[0];
+      await t.stop({ state: stopLabel });
     });
 
-    it("resume the torrent", () => {
-      const query = "#torrentTable tbody tr";
-      const button = "#torrent-action-header a[data-role=resume]";
-
-      return sync(() => {
-        $(query).waitForExist();
-        $(query).click();
-        $(button).waitForEnabled();
-        $(button).click();
-
-        $(query).waitUntil(
-          async function () {
-            return (await this.getText()).includes(downloadLabel);
-          },
-          { timeout }
-        );
-      });
+    it("resume the torrent", async () => {
+      let t = tapp.torrents[0];
+      await t.resume({ state: downloadLabel });
     });
 
     describe("test labels", function () {
@@ -229,109 +177,30 @@ exports.testclient = function ({
       });
 
       it("apply new label", async function () {
-        const query = "#torrentTable tbody tr";
-        const labels = "#torrent-action-header div[data-role=labels]";
-        const testlabel = "testlabel123";
-
-        return sync(() => {
-          $(query).click();
-          $(labels).click();
-          $(labels + " > div.menu").waitForDisplayed();
-          $(labels + " div[data-role=new-label]").click();
-          $("#newLabelModal").waitForDisplayed();
-          $("#newLabelModal input[name=label]").setValue(testlabel);
-          $("#newLabelModal button[type=submit]").click();
-
-          $(query).waitUntil(
-            async function () {
-              return (await this.getText()).includes(testlabel);
-            },
-            { timeout }
-          );
-        });
+        let t = tapp.torrents[0];
+        await t.newLabel("testlabel123");
       });
 
       it("ensure label entry in dropdown", function () {
-        const query = "#torrentTable tbody tr";
-        const labels = "#torrent-action-header div[data-role=labels]";
-        const testlabel = "testlabel123";
-        const labelBtn = labels + ` div[data-label='${testlabel}']`;
-
-        return sync(() => {
-          $(query).click();
-          $(labels).click();
-          $(labelBtn).waitForExist();
-          $(labelBtn).getText().should.contain(testlabel);
-          $(labels).click();
-        });
+        return tapp.waitForLabelInDropdown("testlabel123");
       });
 
       it("apply another new label", async function () {
-        const query = "#torrentTable tbody tr";
-        const labels = "#torrent-action-header div[data-role=labels]";
-        const testlabel = "someotherlabel123";
-
-        return sync(() => {
-          $(query).click();
-          $(labels).click();
-          $(labels + " > div.menu").waitForDisplayed();
-          $(labels + " div[data-role=new-label]").click();
-          $("#newLabelModal").waitForDisplayed();
-          $("#newLabelModal input[name=label]").setValue(testlabel);
-          $("#newLabelModal button[type=submit]").click();
-
-          $(query).waitUntil(
-            async function () {
-              return (await this.getText()).includes(testlabel);
-            },
-            { timeout }
-          );
-        });
+        let t = tapp.torrents[0];
+        await t.newLabel("someotherlabel123");
       });
 
       it("change back to previous label", async function () {
-        const query = "#torrentTable tbody tr";
-        const labels = "#torrent-action-header div[data-role=labels]";
-        const testlabel = "testlabel123";
-
-        return sync(() => {
-          $(query).click();
-          $(labels).click();
-          $(labels + " > div.menu").waitForDisplayed();
-          $(labels + ` div[data-label='${testlabel}']`).click();
-
-          $(query).waitUntil(
-            async function () {
-              return (await this.getText()).includes(testlabel);
-            },
-            { timeout }
-          );
-        });
+        let t = tapp.torrents[0];
+        t.changeLabel("testlabel123");
       });
     });
 
-    describe("clean up", function () {
+    describe("clean up", async function () {
       it("delete torrent", async function () {
-        const query = "#torrentTable tbody tr";
-        const button = "#contextmenu a[data-role=delete]";
-
-        return sync(() => {
-          $(query).waitForExist();
-          $(query).click({ button: "right" });
-          $("#contextmenu").waitForExist();
-
-          let visible = $(button).isDisplayed();
-
-          if (!visible) {
-            let submenu = $(button).$("..").$("..");
-            submenu.moveTo();
-            let firstItem = submenu.$(".item:first-child");
-            firstItem.moveTo();
-          }
-
-          $("#contextmenu a[data-role=delete]").click();
-          $(query).waitForExist({ timeout, reverse: true });
-        });
+        let torrent = tapp.torrents[0];
+        await torrent.clickContextMenu("delete");
+        await torrent.waitForGone();
       });
     });
   });
