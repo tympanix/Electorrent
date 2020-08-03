@@ -7,9 +7,9 @@ const { Torrent } = require("./e2e_torrent");
  * Class to perform various app-related actions with WebDriverIO
  */
 class App {
-  constructor(app) {
-    this.app = app;
-    this.browser = app.client;
+  constructor(spectron) {
+    this.spectron = spectron;
+    this.browser = this.spectron.client;
     this.$ = this.browser.$.bind(this.browser);
     this.$$ = this.browser.$$.bind(this.browser);
     this.torrents = [];
@@ -35,10 +35,10 @@ class App {
   }
 
   async uploadTorrent({ filename, hash }) {
-    let torrent = new Torrent({ hash: hash, app: this.app });
+    let torrent = new Torrent({ hash: hash, spectron: this.spectron, app: this });
     await torrent.isExisting().should.eventually.be.false;
     let data = fs.readFileSync(path.join(__dirname, "..", "data", filename));
-    this.app.webContents.send("torrentfiles", data, path.basename(filename));
+    this.spectron.webContents.send("torrentfiles", data, path.basename(filename));
     await torrent.waitForExist();
     await torrent.isExisting().should.eventually.be.true;
     this.torrents.push(torrent);
@@ -51,23 +51,48 @@ class App {
 
     return sync(() => {
       this.$(labels).click();
-      this.$(labelBtn).waitForExist();
+      this.$(labelBtn).waitForDisplayed();
       this.$(labelBtn).getText().should.contain(labelName);
       this.$(labels).click();
+      this.$(labelBtn).waitForDisplayed({ reverse: true });
     });
   }
 
   async getTorrents() {
     const table = "#torrentTable tbody tr";
     return sync(() => {
-      return this.$$(table).map((e) => new Torrent({ hash: e.getAttribute("data-hash"), app: this.app }));
+      return this.$$(table).map(
+        (e) => new Torrent({ hash: e.getAttribute("data-hash"), spectron: this.spectron, app: this })
+      );
     });
   }
 
   async getSelectedTorrents() {
     const table = "#torrentTable tbody tr.active";
     return sync(() => {
-      return this.$$(table).map((e) => new Torrent({ hash: e.getAttribute("data-hash"), app: this.app }));
+      return this.$$(table).map(
+        (e) => new Torrent({ hash: e.getAttribute("data-hash"), spectron: this.spectron, app: this })
+      );
+    });
+  }
+
+  async filterLabel(labelName) {
+    const label = `#torrent-sidebar-labels li[data-label="${labelName}"]`;
+    const clear = `#torrent-sidebar-labels [data-role="labels-clear"]`;
+
+    return sync(() => {
+      if (labelName === undefined) {
+        this.$(clear).click();
+      } else {
+        this.$(label).click();
+      }
+    });
+  }
+
+  async getAllSidebarLabels() {
+    const labels = `#torrent-sidebar-labels li`;
+    return sync(() => {
+      return this.$$(labels).map((e) => e.getAttribute("data-label"));
     });
   }
 }

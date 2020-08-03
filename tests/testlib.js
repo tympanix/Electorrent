@@ -161,9 +161,19 @@ exports.testclient = function ({
       return tapp.torrents[0].waitForState(downloadLabel);
     });
 
+    it("torrent should be in downloading tab", () => {
+      let t = tapp.torrents[0];
+      return t.checkInState(["all", "downloading"]);
+    });
+
     it("stop the torrent", async () => {
       let t = tapp.torrents[0];
       await t.stop({ state: stopLabel });
+    });
+
+    it("check torrent in stopped tab", () => {
+      let t = tapp.torrents[0];
+      return t.checkInState(["all", "stopped"]);
     });
 
     it("resume the torrent", async () => {
@@ -177,22 +187,27 @@ exports.testclient = function ({
       });
 
       it("apply new label", async function () {
+        const label = "testlabel123";
         let t = tapp.torrents[0];
-        await t.newLabel("testlabel123");
+        await t.newLabel(label);
+        await tapp.waitForLabelInDropdown(label);
+        await tapp.getAllSidebarLabels().should.eventually.have.length(1)
       });
 
-      it("ensure label entry in dropdown", function () {
-        return tapp.waitForLabelInDropdown("testlabel123");
+      it("apply another new label", async () => {
+        const label = "someotherlabel123";
+        let t = tapp.torrents[0];
+        await t.newLabel(label);
+        await tapp.waitForLabelInDropdown(label);
+        await t.checkInFilterLabel(label);
+        await tapp.getAllSidebarLabels().should.eventually.have.length(2)
       });
 
-      it("apply another new label", async function () {
+      it("change back to previous label", async () => {
+        const label = "testlabel123";
         let t = tapp.torrents[0];
-        await t.newLabel("someotherlabel123");
-      });
-
-      it("change back to previous label", async function () {
-        let t = tapp.torrents[0];
-        await t.changeLabel("testlabel123");
+        await t.changeLabel(label);
+        await t.checkInFilterLabel(label);
       });
     });
 

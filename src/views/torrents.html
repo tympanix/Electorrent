@@ -10,55 +10,55 @@
   </div>
   <div class="torrent sidebar">
     <ul class="nav">
-      <li ng-click="filterByStatus('all')" ng-class="activeOn('all')">
+      <li data-state="all" ng-click="filterByStatus('all')" ng-class="activeOn('all')">
         <i class="ui large teal asterisk icon"></i>
         All
         <div class="ui torrent sort label">{{numInFilter('all')}}</div>
       </li>
-      <li ng-click="filterByStatus('downloading')" ng-class="activeOn('downloading')">
+      <li data-state="downloading" ng-click="filterByStatus('downloading')" ng-class="activeOn('downloading')">
         <i class="ui large blue arrow down icon"></i>
         Downloading
         <div class="ui torrent sort label">{{numInFilter('downloading')}}</div>
       </li>
-      <li ng-click="filterByStatus('finished')" ng-class="activeOn('finished')">
+      <li data-state="finished" ng-click="filterByStatus('finished')" ng-class="activeOn('finished')">
         <i class="ui large green checkmark icon"></i>
         Finished
         <div class="ui torrent sort label">{{numInFilter('finished')}}</div>
       </li>
-      <li ng-click="filterByStatus('seeding')" ng-class="activeOn('seeding')">
+      <li data-state="seeding" ng-click="filterByStatus('seeding')" ng-class="activeOn('seeding')">
         <i class="ui large orange arrow up icon"></i>
         Seeding
         <div class="ui torrent sort label">{{numInFilter('seeding')}}</div>
       </li>
-      <li ng-click="filterByStatus('stopped')" ng-class="activeOn('stopped')">
+      <li data-state="stopped" ng-click="filterByStatus('stopped')" ng-class="activeOn('stopped')">
         <i class="ui large grey pause icon"></i>
         Stopped
         <div class="ui torrent sort label">{{numInFilter('stopped')}}</div>
       </li>
-      <li ng-click="filterByStatus('error')" ng-class="activeOn('error')">
+      <li data-state="error" ng-click="filterByStatus('error')" ng-class="activeOn('error')">
         <i class="ui large red remove icon"></i>
         Failed
         <div class="ui torrent sort label">{{numInFilter('error')}}</div>
       </li>
     </ul>
-    <div>
+    <div id="torrent-sidebar-labels">
       <div class="section">
         <span>Labels</span>
-        <a class="ui gray basic mini clear button" ng-click="filterByLabel()">Clear</a>
+        <a data-role="labels-clear" class="ui gray basic mini clear button" ng-click="filterByLabel()">Clear</a>
       </div>
       <ul class="filter label">
         <span ng-if="labels.length == 0" class="meta text">No labels...</span>
-        <li ng-repeat="label in labels">
+        <li data-label="{{label}}" ng-repeat="label in labels">
           <div class="ui fluid torrent tag label" ng-click="filterByLabel(label)" ng-class="{blue: activeLabel(label)}">
             {{label}}
           </div>
         </li>
       </ul>
     </div>
-    <div ng-if="$btclient.enableTrackerFilter">
+    <div id="torrent-sidebar-trackers" ng-if="$btclient.enableTrackerFilter">
       <div class="section">
         <span>Trackers</span>
-        <a class="ui gray basic mini clear button" ng-click="filterByTracker()">Clear</a>
+        <a data-role="trackers-clear" class="ui gray basic mini clear button" ng-click="filterByTracker()">Clear</a>
       </div>
       <ul class="filter label">
         <span ng-if="trackers.length == 0" class="meta text">No trackers...</span>
