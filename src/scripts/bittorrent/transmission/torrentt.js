@@ -17,7 +17,7 @@ angular.module('torrentApp').factory('TorrentT', ['AbstractTorrent', function(Ab
          */
          this.data = data;
         AbstractTorrent.call(this, {
-            hash: data.id, /* Hash (string): unique identifier for the torrent */
+            hash: data.hashString, /* Hash (string): unique identifier for the torrent */
             name: data.name, /* Name (string): the name of the torrent */
             size: data.totalSize, /* Size (integer): size of the file to be downloaded in bytes */
             percent: data.percentDone * 1000, /* Percent (integer): completion in per-mille (100% = 1000)  */
