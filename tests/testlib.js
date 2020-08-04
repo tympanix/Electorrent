@@ -96,11 +96,11 @@ exports.testclient = function ({
           deprecationWarnings: false,
         },
         chromeDriverArgs: [
-          "--headless",
-          "--disable-gpu",
-          "--no-sandbox",
-          "--disable-extensions",
-          "--disable-dev-shm-usage",
+          "headless",
+          "disable-gpu",
+          "no-sandbox",
+          "disable-extensions",
+          "disable-dev-shm-usage",
         ],
       });
       let i = 0;
