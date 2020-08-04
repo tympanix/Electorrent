@@ -10,10 +10,6 @@ os:
   - linux
   - osx
 
-branches:
-  only:
-  - master
-
 cache:
   directories:
   - node_modules
