@@ -72,7 +72,7 @@ exports.testclient = function ({
     this.timeout(500 * 1000);
 
     before(async function () {
-      //await pullImage(dockerContainer);
+      await pullImage(dockerContainer);
       console.log("Pulled image");
       portMap = `${containerPort}/tcp`;
       container = await docker.createContainer({
