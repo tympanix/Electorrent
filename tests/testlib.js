@@ -95,6 +95,11 @@ exports.testclient = function ({
         webdriverOptions: {
           deprecationWarnings: false,
         },
+        chromeDriverArgs: [
+          '--no-sandbox',
+          '--whitelisted-ips=',
+          '--disable-dev-shm-usage'
+        ],
       });
       let i = 0;
       while (true) {
