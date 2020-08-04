@@ -1,7 +1,7 @@
 language: node_js
 
 sudo: required
-dist: bionic
+dist: trusty
 
 services:
   - docker
@@ -12,11 +12,11 @@ os:
 
 cache:
   directories:
-  - node_modules
-  - app/node_modules
-  - $HOME/.electron
-  - $HOME/.cache
-  - $HOME/.npm
+    - node_modules
+    - app/node_modules
+    - $HOME/.electron
+    - $HOME/.cache
+    - $HOME/.npm
 
 addons:
   apt:
@@ -25,6 +25,7 @@ addons:
       - libgnome-keyring-dev
       - icnsutils
       - xvfb
+  chrome: stable
 
 node_js:
   - "12"
