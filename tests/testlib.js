@@ -96,9 +96,11 @@ exports.testclient = function ({
           deprecationWarnings: false,
         },
         chromeDriverArgs: [
-          '--no-sandbox',
-          '--whitelisted-ips=',
-          '--disable-dev-shm-usage'
+          "--headless",
+          "--disable-gpu",
+          "--no-sandbox",
+          "--disable-extensions",
+          "--disable-dev-shm-usage",
         ],
       });
       let i = 0;
@@ -196,7 +198,7 @@ exports.testclient = function ({
         let t = tapp.torrents[0];
         await t.newLabel(label);
         await tapp.waitForLabelInDropdown(label);
-        await tapp.getAllSidebarLabels().should.eventually.have.length(1)
+        await tapp.getAllSidebarLabels().should.eventually.have.length(1);
       });
 
       it("apply another new label", async () => {
@@ -205,7 +207,7 @@ exports.testclient = function ({
         await t.newLabel(label);
         await tapp.waitForLabelInDropdown(label);
         await t.checkInFilterLabel(label);
-        await tapp.getAllSidebarLabels().should.eventually.have.length(2)
+        await tapp.getAllSidebarLabels().should.eventually.have.length(2);
       });
 
       it("change back to previous label", async () => {
