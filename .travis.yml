@@ -1,6 +1,6 @@
 language: node_js
 
-sudo: required
+sudo: false
 dist: focal
 
 services:
