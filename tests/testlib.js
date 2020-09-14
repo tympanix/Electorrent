@@ -97,9 +97,6 @@ exports.testclient = function ({
           deprecationWarnings: false,
         },
         chromeDriverArgs: [
-          '--no-sandbox',
-          '--headless',
-          '--disable-dev-shm-usage'
         ],
       });
       let i = 0;
