@@ -25,6 +25,7 @@ addons:
       - libgnome-keyring-dev
       - icnsutils
       - xvfb
+      - chromium-browser
   chrome: stable
 
 node_js:
