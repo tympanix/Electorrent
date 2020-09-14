@@ -24,7 +24,7 @@ addons:
       - graphicsmagick
       - icnsutils
       - xvfb
-  chrome: beta
+  chrome: stable
 
 node_js:
   - "12"
