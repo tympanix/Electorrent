@@ -97,6 +97,7 @@ exports.testclient = function ({
           deprecationWarnings: false,
         },
         chromeDriverArgs: [
+          '--no-sandbox'
         ],
       });
       let i = 0;
