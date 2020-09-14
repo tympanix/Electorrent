@@ -12,12 +12,16 @@ global.before(function () {
 testlib.testclient({
   client: "transmission",
   dockerContainer: "linuxserver/transmission",
+  dockerEnv: {
+    USER: 'username',
+    PASS: 'password'
+  },
   host: "127.0.0.1",
   port: 8080,
   containerPort: 9091,
   username: "username",
   password: "password",
-  acceptHttpStatus: 301,
+  acceptHttpStatus: 401,
   skipTests: ["labels"]
 });
 

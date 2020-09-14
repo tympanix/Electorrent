@@ -52,6 +52,7 @@ var appPath = path.join(__dirname, "..", "app");
 exports.testclient = function ({
   client,
   dockerContainer,
+  dockerEnv = {},
   username = "admin",
   password = "admin",
   host = "127.0.0.1",
@@ -77,7 +78,7 @@ exports.testclient = function ({
       portMap = `${containerPort}/tcp`;
       container = await docker.createContainer({
         Image: dockerContainer,
-        Env: ["PUID=1000", "PGID=1000", "TZ=Europe/London", "WEBUI_PORT=8080"],
+        Env: Object.keys(dockerEnv).map(v => `${v}=${dockerEnv[v]}`),
         HostConfig: {
           PortBindings: {
             [portMap]: [
@@ -96,12 +97,6 @@ exports.testclient = function ({
           deprecationWarnings: false,
         },
         chromeDriverArgs: [
-          "--headless",
-          "--disable-gpu",
-          "--no-sandbox",
-          "--disable-extensions",
-          "--disable-dev-shm-usage",
-          "--remote-debugging-port=9515"
         ],
       });
       let i = 0;
@@ -138,7 +133,8 @@ exports.testclient = function ({
       }
     });
 
-    it("open the app", function () {
+    it("open the app", async function () {
+      await sleep(5000)
       return app.client.waitUntilWindowLoaded();
     });
 
