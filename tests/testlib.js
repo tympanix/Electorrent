@@ -80,6 +80,7 @@ exports.testclient = function ({
         Image: dockerContainer,
         Env: Object.keys(dockerEnv).map(v => `${v}=${dockerEnv[v]}`),
         HostConfig: {
+          AutoRemove: true,
           PortBindings: {
             [portMap]: [
               {
@@ -130,7 +131,6 @@ exports.testclient = function ({
       }
       if (container) {
         await container.stop();
-        await container.remove();
       }
     });
 
