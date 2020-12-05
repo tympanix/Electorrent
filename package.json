@@ -50,10 +50,12 @@
     "hoek": "^5.0.4",
     "lazypipe": "^1.0.2",
     "merge-stream": "^1.0.1",
+    "mocha": "^8.2.1",
     "request": "^2.88.2",
     "rollup": "^2.2.0",
     "run-sequence": "^1.2.2",
     "semver": "^5.7.1",
+    "spectron": "^10.0.1",
     "through2": "^2.0.5",
     "winston": "^2.4.4",
     "yargs": "^4.8.1"
