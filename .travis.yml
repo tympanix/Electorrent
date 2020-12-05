@@ -37,10 +37,8 @@ env:
 jobs:
   include:
     - stage: test
-      name: test
       install: npm install & npm run build
       script: npm test
     - stage: release
-      name: release
       install: npm install & npm run build
       script: npm run release
