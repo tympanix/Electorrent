@@ -97,14 +97,6 @@ exports.testclient = function ({
         webdriverOptions: {
           deprecationWarnings: false,
         },
-        webdriverOptions: {
-          logLevel: "trace"
-        },
-        chromeDriverArgs: [
-          'no-sandbox',
-          'headless',
-          'disable-gpu'
-        ],
       });
       let i = 0;
       while (true) {
