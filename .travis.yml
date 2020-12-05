@@ -37,10 +37,10 @@ jobs:
       script: npm test
       os: linux
     - stage: release
-      install: npm install && npm run build
-      script: npm run release
       os: linux
       install: npm install && npm run build
       script: npm run release
-      os: osx
+    - os: osx
+      install: npm install && npm run build
+      script: npm run release
 
