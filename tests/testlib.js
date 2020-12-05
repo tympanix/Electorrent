@@ -98,7 +98,9 @@ exports.testclient = function ({
           deprecationWarnings: false,
         },
         chromeDriverArgs: [
-          '--no-sandbox'
+          'no-sandbox',
+          'headless',
+          'disable-gpu'
         ],
       });
       let i = 0;
