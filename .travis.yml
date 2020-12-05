@@ -22,10 +22,13 @@ cache:
 addons:
   apt:
     packages:
+addons:
+  apt:
+    packages:
       - graphicsmagick
       - icnsutils
       - xvfb
-  chrome: stable
+      - google-chrome-stable
 
 node_js:
   - "12"
