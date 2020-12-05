@@ -30,7 +30,7 @@ class App {
       this.$("#connection-port").setValue(port);
       this.$("#connection-submit").click();
 
-      this.$("#page-torrents").waitForDisplayed({ timeout: this.timeout });
+      this.$("#page-torrents").waitForDisplayed({ timeout: 10000 });
     });
   }
 
