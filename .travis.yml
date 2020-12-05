@@ -7,10 +7,6 @@ services:
   - docker
   - xvfb
 
-os:
-  - linux
-  - osx
-
 cache:
   directories:
     - node_modules
@@ -42,8 +38,10 @@ jobs:
   include:
     - stage: Test
       script: npm test
+      os:
+        - linux
     - stage: Release
       script: npm run release
-  exclude:
-    - stage: Test
-      os: osx
+      os:
+        - linux
+        - osx
