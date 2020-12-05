@@ -6,6 +6,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "start": "gulp",
+    "test": "mocha",
     "build": "gulp build",
     "install": "bower install && gulp install",
     "postinstall": "electron-builder install-app-deps",
