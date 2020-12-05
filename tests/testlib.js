@@ -97,6 +97,9 @@ exports.testclient = function ({
         webdriverOptions: {
           deprecationWarnings: false,
         },
+        webdriverOptions: {
+          logLevel: "trace"
+        },
         chromeDriverArgs: [
           'no-sandbox',
           'headless',
