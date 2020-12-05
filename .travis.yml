@@ -40,12 +40,13 @@ install:
 
 jobs:
   include:
-    - stage: Test
+    - stage: test
       name: test
       script: npm test
-    - stage: Release
+    - stage: release
       name: release
       script: npm run release
   exclude:
-    - name: test
+    - stage: test
+      name: test
       os: osx
