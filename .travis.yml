@@ -46,7 +46,3 @@ jobs:
     - stage: release
       name: release
       script: npm run release
-  exclude:
-    - stage: test
-      name: test
-      os: osx
