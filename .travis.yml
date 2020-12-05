@@ -22,9 +22,6 @@ cache:
 addons:
   apt:
     packages:
-addons:
-  apt:
-    packages:
       - graphicsmagick
       - icnsutils
       - xvfb
