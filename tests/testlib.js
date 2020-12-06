@@ -6,6 +6,7 @@ const http = require("http");
 const https = require("https");
 const e2e = require("./e2e");
 const sync = require("@wdio/sync").default;
+const Rtorrent = require("@electorrent/node-rtorrent")
 
 var docker = new Docker();
 
@@ -131,93 +132,23 @@ exports.testclient = function ({
       }
     });
 
-    it("open the app", async function () {
-      return app.client.waitUntilWindowLoaded();
-    });
+    it("test login page", async function() {
+      let r = new Rtorrent({
+        port: 8080,
+        user: "admin",
+        pass: "admin",
+      })
 
-    it("tests the title", async function () {
-      return sync(() => {
-        app.client.waitUntilWindowLoaded();
-        app.client.getTitle().should.equal("Electorrent");
-      });
-    });
+      for (i = 0; i < 10; i++) {
+        await new Promise((resolve, reject) => {
+          r.get("system.client_version", [], function (err, v) {
+            console.log(arguments)
+            resolve()
+          });
+        })
+        await sleep(2000)
+      }
+    })
 
-    it("login to the client", async () => {
-      return tapp.login({
-        username: username,
-        password: password,
-        host: host,
-        port: port,
-        client: client,
-      });
-    });
-
-    it("upload torrent file", async () => {
-      let filename = "ubuntu-20.04-live-server-amd64.iso.torrent";
-      let hash = "c44f931b1a3986851242d755d0ac46e9fa3c5d32";
-      await tapp.uploadTorrent({ filename, hash });
-    });
-
-    it("wait for download to begin", () => {
-      return tapp.torrents[0].waitForState(downloadLabel);
-    });
-
-    it("torrent should be in downloading tab", () => {
-      let t = tapp.torrents[0];
-      return t.checkInState(["all", "downloading"]);
-    });
-
-    it("stop the torrent", async () => {
-      let t = tapp.torrents[0];
-      await t.stop({ state: stopLabel });
-    });
-
-    it("check torrent in stopped tab", () => {
-      let t = tapp.torrents[0];
-      return t.checkInState(["all", "stopped"]);
-    });
-
-    it("resume the torrent", async () => {
-      let t = tapp.torrents[0];
-      await t.resume({ state: downloadLabel });
-    });
-
-    describe("test labels", function () {
-      before(function () {
-        if (skipTests.includes("labels")) return this.skip();
-      });
-
-      it("apply new label", async function () {
-        const label = "testlabel123";
-        let t = tapp.torrents[0];
-        await t.newLabel(label);
-        await tapp.waitForLabelInDropdown(label);
-        await tapp.getAllSidebarLabels().should.eventually.have.length(1);
-      });
-
-      it("apply another new label", async () => {
-        const label = "someotherlabel123";
-        let t = tapp.torrents[0];
-        await t.newLabel(label);
-        await tapp.waitForLabelInDropdown(label);
-        await t.checkInFilterLabel(label);
-        await tapp.getAllSidebarLabels().should.eventually.have.length(2);
-      });
-
-      it("change back to previous label", async () => {
-        const label = "testlabel123";
-        let t = tapp.torrents[0];
-        await t.changeLabel(label);
-        await t.checkInFilterLabel(label);
-      });
-    });
-
-    describe("clean up", async function () {
-      it("delete torrent", async function () {
-        let torrent = tapp.torrents[0];
-        await torrent.clickContextMenu("delete");
-        await torrent.waitForGone();
-      });
-    });
   });
 };

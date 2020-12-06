@@ -31,6 +31,7 @@
     "winreg": "^1.2.2"
   },
   "devDependencies": {
+    "@electorrent/node-rtorrent": "^1.2.1",
     "@wdio/sync": "^6.3.6",
     "bower": "^1.8.8",
     "chai": "^4.2.0",
