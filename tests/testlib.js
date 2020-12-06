@@ -143,7 +143,8 @@ exports.testclient = function ({
       });
     });
 
-    it("login to the client", () => {
+    it("login to the client", async () => {
+      await sleep(5000)
       return tapp.login({
         username: username,
         password: password,
