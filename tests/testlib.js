@@ -132,7 +132,6 @@ exports.testclient = function ({
     });
 
     it("open the app", async function () {
-      await sleep(5000)
       return app.client.waitUntilWindowLoaded();
     });
 
@@ -144,7 +143,6 @@ exports.testclient = function ({
     });
 
     it("login to the client", async () => {
-      await sleep(5000)
       return tapp.login({
         username: username,
         password: password,

@@ -30,8 +30,25 @@ class App {
       this.$("#connection-port").setValue(port);
       this.$("#connection-submit").click();
 
-      this.$("#page-torrents").waitForDisplayed({ timeout: 10000 });
+      let err = this.getNotificationError()
+      if (err) {
+        throw new Error(err.title)
+      }
+      this.$("#page-torrents").waitForDisplayed({ timeout: this.timeout });
     });
+  }
+
+  getNotificationError() {
+      let msg = this.$("#notifications .negative")
+      try {
+        msg.waitForExist({ timeout: 1000 })
+        return {
+          title: msg.$(".header").getText(),
+          message: msg.$("p").getText()
+        }
+      } catch {
+        return null
+      }
   }
 
   async uploadTorrent({ filename, hash }) {
