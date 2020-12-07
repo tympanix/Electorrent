@@ -16,8 +16,7 @@ class App {
     this.timeout = 5 * 1000;
   }
 
-  login({ host, username, password, port, client }) {
-    await sleep(20*1000)
+  async login({ host, username, password, port, client }) {
     return sync(() => {
       this.$("#connection-host").setValue(host);
       this.$("#connection-proto").click();
