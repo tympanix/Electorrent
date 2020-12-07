@@ -17,6 +17,7 @@ class App {
   }
 
   login({ host, username, password, port, client }) {
+    await sleep(20*1000)
     return sync(() => {
       this.$("#connection-host").setValue(host);
       this.$("#connection-proto").click();
