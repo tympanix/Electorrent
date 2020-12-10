@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      image: node:12-alpine
+      - image: node:12-alpine
     steps:
       - checkout
       - run: npm install
