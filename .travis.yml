@@ -38,7 +38,7 @@ jobs:
   include:
     - stage: Test
       os: linux
-      script: npm test -- -g rtorrent
+      script: npm test -- -g qbittorrent
     - stage: Release
       os: linux
       script: npm run release
