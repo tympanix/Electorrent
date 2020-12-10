@@ -11,3 +11,9 @@ jobs:
       - setup_remote_docker:
         version: 19.03.13
       - run: npm test
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - test
