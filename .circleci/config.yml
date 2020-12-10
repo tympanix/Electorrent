@@ -1,17 +1,13 @@
-orbs:
-  node: circleci/node@4.0.0
-
 version: 2.1
 
 jobs:
-  docker:
+  test:
+    docker:
+      image: node:12-alpine
     steps:
+      - checkout
+      - run: npm install
+      - run: npm run build
       - setup_remote_docker:
         version: 19.03.13
-
-workflows:
-  app-tests:
-    jobs:
-      - node/test:
-        requires:
-          - docker
+      - run: npm test
