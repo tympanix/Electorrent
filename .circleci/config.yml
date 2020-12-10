@@ -7,6 +7,8 @@ jobs:
     steps:
       - checkout
       - run: npm install
+      - run: bower install
+      - run: gulp install
       - run: npm run build
       - setup_remote_docker:
           version: 19.03.13
