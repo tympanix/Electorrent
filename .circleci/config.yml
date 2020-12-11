@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  browser-tools: circleci/browser-tools@1.1.1
+
 jobs:
   build:
     docker:
@@ -23,6 +26,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ./
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - run: npm test -- -g qbittorrent
   test-transmission:
     docker:
@@ -31,6 +36,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ./
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - run: npm test -- -g transmission
 
 workflows:
