@@ -9,7 +9,13 @@ jobs:
       - image: node:12-buster
     steps:
       - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
       - run: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
       - run: npm run postinstall
       - run: npm run build
       - persist_to_workspace:
