@@ -103,7 +103,7 @@ exports.testclient = function ({
       });
       let i = 0;
       while (true) {
-        if (i > 50) {
+        if (i > 100) {
           throw Error("Service never started");
         }
         try {
@@ -115,7 +115,7 @@ exports.testclient = function ({
         } catch (err) {
           console.log("... waiting for serivce");
         }
-        await sleep(500);
+        await sleep(1000);
         i++;
       }
       await app.start();
