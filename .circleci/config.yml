@@ -27,7 +27,7 @@ jobs:
             - app
   test-qbittorrent:
     docker:
-      - image: node:12-buster
+      - image: circleci/node:12-browsers
       - image: linuxserver/qbittorrent
     steps:
       - attach_workspace:
@@ -37,7 +37,7 @@ jobs:
       - run: npm test -- -g qbittorrent
   test-transmission:
     docker:
-      - image: node:12-buster
+      - image: circleci/node:12-browsers
       - image: linuxserver/transmission
     steps:
       - attach_workspace:
