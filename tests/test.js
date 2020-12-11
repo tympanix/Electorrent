@@ -17,7 +17,7 @@ testlib.testclient({
     PASS: 'password'
   },
   host: "127.0.0.1",
-  port: 8080,
+  port: 9091,
   containerPort: 9091,
   username: "username",
   password: "password",
@@ -52,7 +52,7 @@ testlib.testclient({
   client: "rtorrent",
   dockerContainer: "crazymax/rtorrent-rutorrent",
   host: "127.0.0.1",
-  port: 8080,
+  port: 8000,
   containerPort: 8000,
   acceptHttpStatus: 502,
   username: "admin",
