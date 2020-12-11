@@ -13,6 +13,7 @@ jobs:
           root: ./
           paths:
             - test
+            - node_modules
             - package.json
             - app
   test-qbittorrent:
