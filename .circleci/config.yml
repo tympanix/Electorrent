@@ -9,17 +9,27 @@ jobs:
       - run: npm install
       - run: npm run postinstall
       - run: npm run build
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - test
+            - package.json
+            - app
   test-qbittorrent:
     docker:
       - image: node:12-buster
       - image: linuxserver/qbittorrent
     steps:
+      - attach_workspace:
+          at: /tmp/workspace
       - run: npm test -- -g qbittorrent
   test-transmission:
     docker:
       - image: node:12-buster
       - image: linuxserver/transmission
     steps:
+      - attach_workspace:
+          at: /tmp/workspace
       - run: npm test -- -g transmission
 
 workflows:
