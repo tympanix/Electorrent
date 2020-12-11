@@ -54,7 +54,7 @@ testlib.testclient({
   host: "127.0.0.1",
   port: 80,
   containerPort: 80,
-  acceptHttpStatus: 502,
+  acceptHttpStatus: 200,
   username: "admin",
   password: "admin",
 });
