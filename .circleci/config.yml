@@ -44,6 +44,17 @@ jobs:
       - attach_workspace:
           at: ./
       - run: npm test -- -g transmission
+  test-rtorrent:
+    docker:
+      - image: circleci/node:12-browsers
+      - image: linuxserver/rutorrent
+        environment:
+          USER: username
+          PASS: password
+    steps:
+      - attach_workspace:
+          at: ./
+      - run: npm test -- -g rtorrent
 
 workflows:
   version: 2

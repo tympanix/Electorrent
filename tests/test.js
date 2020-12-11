@@ -50,10 +50,10 @@ testlib.testclient({
 
 testlib.testclient({
   client: "rtorrent",
-  dockerContainer: "crazymax/rtorrent-rutorrent",
+  dockerContainer: "linuxserver/rutorrent",
   host: "127.0.0.1",
-  port: 8000,
-  containerPort: 8000,
+  port: 80,
+  containerPort: 80,
   acceptHttpStatus: 502,
   username: "admin",
   password: "admin",
