@@ -32,18 +32,17 @@ jobs:
     steps:
       - attach_workspace:
           at: ./
-      - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
       - run: npm test -- -g qbittorrent
   test-transmission:
     docker:
       - image: circleci/node:12-browsers
       - image: linuxserver/transmission
+        environment:
+          USER: username
+          PASS: password
     steps:
       - attach_workspace:
           at: ./
-      - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
       - run: npm test -- -g transmission
 
 workflows:
