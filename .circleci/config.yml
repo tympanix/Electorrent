@@ -12,7 +12,7 @@ jobs:
       - persist_to_workspace:
           root: ./
           paths:
-            - test
+            - tests
             - node_modules
             - package.json
             - app
