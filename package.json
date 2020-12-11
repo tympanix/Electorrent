@@ -7,7 +7,7 @@
   "scripts": {
     "start": "gulp",
     "build": "gulp build",
-    "postinstall": "bower install && gulp install && electron-builder install-app-deps",
+    "postinstall": "bower --allow-root install && gulp install && electron-builder install-app-deps",
     "pack": "build --dir",
     "predist": "gulp build",
     "dist": "electron-builder",
