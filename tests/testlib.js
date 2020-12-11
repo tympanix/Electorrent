@@ -73,24 +73,24 @@ exports.testclient = function ({
     this.timeout(500 * 1000);
 
     before(async function () {
-      await pullImage(dockerContainer);
-      console.log("Pulled image");
-      portMap = `${containerPort}/tcp`;
-      container = await docker.createContainer({
-        Image: dockerContainer,
-        Env: Object.keys(dockerEnv).map(v => `${v}=${dockerEnv[v]}`),
-        HostConfig: {
-          AutoRemove: true,
-          PortBindings: {
-            [portMap]: [
-              {
-                HostPort: port.toString(),
-              },
-            ],
-          },
-        },
-      });
-      await container.start({});
+      // await pullImage(dockerContainer);
+      // console.log("Pulled image");
+      // portMap = `${containerPort}/tcp`;
+      // container = await docker.createContainer({
+      //   Image: dockerContainer,
+      //   Env: Object.keys(dockerEnv).map(v => `${v}=${dockerEnv[v]}`),
+      //   HostConfig: {
+      //     AutoRemove: true,
+      //     PortBindings: {
+      //       [portMap]: [
+      //         {
+      //           HostPort: port.toString(),
+      //         },
+      //       ],
+      //     },
+      //   },
+      // });
+      // await container.start({});
       app = new Application({
         path: electronPath,
         args: [appPath],
