@@ -67,3 +67,6 @@ workflows:
       - test-transmission:
           requires:
             - build
+      - test-rtorrent:
+          requires:
+            - build
