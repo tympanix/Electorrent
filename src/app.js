@@ -12,6 +12,7 @@ const { app } = electron;
 const { BrowserWindow } = electron;
 const { ipcMain } = electron;
 const { session } = electron;
+const { nativeImage } = electron;
 
 // Set up program arguments
 yargs.version(() => app.getVersion())
@@ -40,7 +41,7 @@ function createTorrentWindow() {
         width: 1200,
         height: 800,
         backgroundColor: '#ffffff',
-        icon: getApplicationIcon(),
+        icon: nativeImage.createFromPath(getApplicationIcon()),
         webPreferences: {
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
