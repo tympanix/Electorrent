@@ -80,8 +80,12 @@ angular.module("torrentApp").service("transmissionService", [
       var encoded = new Buffer(`${server.user}:${server.password}`).toString("base64");
       config.encoded = encoded;
 
+      var data = {
+        method: "session-get",
+      };
+
       $http
-        .get(this.url(), {
+        .post(this.url(), data, {
           timeout: 5000,
           headers: {
             Authorization: "Basic " + encoded,
