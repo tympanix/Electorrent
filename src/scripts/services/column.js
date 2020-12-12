@@ -30,8 +30,8 @@ angular.module('torrentApp').factory('Column', [function() {
     }
 
     Column.NATURAL_NUMBER_ASC = function(a, b){
-        if (a < 1) return 1
-        if (b < 1) return -1
+        if (a < 0) return 1
+        if (b < 0) return -1
         return a - b
     }
 
