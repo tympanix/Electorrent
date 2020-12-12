@@ -72,4 +72,4 @@ Electorrent can connect to the following bittorrent clients:
 
 * **I can't connect to rTorrent what is wrong?**
 
- When using rTorrent you have to configure your http server correctly. Follow [this guide](https://github.com/rakshasa/rtorrent/wiki/RPC-Setup-XMLRPC) to make sure you have it set up correctly
+ When using rTorrent you have to configure your http server correctly. Follow [this guide](https://github.com/rakshasa/rtorrent/wiki/RPC-Setup-XMLRPC) to make sure you have it set up correctly. Alternative you may be able to use `/plugins/httprpc/action.php` as the path if your have the HTTPRPC plugin installed.
