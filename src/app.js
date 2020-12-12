@@ -42,7 +42,8 @@ function createTorrentWindow() {
         backgroundColor: '#ffffff',
         webPreferences: {
             nodeIntegration: true,
-            nodeIntegrationInWorker: true
+            nodeIntegrationInWorker: true,
+            enableRemoteModule: true
         },
     }
 

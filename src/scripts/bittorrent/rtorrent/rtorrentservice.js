@@ -1,16 +1,27 @@
 "use strict";
 
 angular.module("torrentApp").service("rtorrentService", [
-  "$http",
   "$q",
-  "$remote",
   "TorrentR",
   "notificationService",
   "Column",
-  function ($http, $q, $remote, TorrentR, $notify, Column) {
+  function ($q, TorrentR, $notify, Column) {
     const Rtorrent = require("@electorrent/node-rtorrent");
-    const { Remote } = require("./lib/worker");
-    const worker = new Worker("scripts/workers/rtorrent.js");
+
+    function handleErr(deferred) {
+      return function(err, value) {
+        if (err) {
+          return deferred.reject(err)
+        }
+        return deferred.resolve(value)
+      }
+    }
+
+    function defer(fn) {
+      let deferred = $q.defer()
+      fn(handleErr(deferred)) 
+      return deferred.promise
+    }
 
     /*
      * Global reference to the rtorrent remote web worker instance
@@ -36,12 +47,9 @@ angular.module("torrentApp").service("rtorrentService", [
      * @return {promise} connection
      */
     this.connect = function (server) {
-      rtorrent = new $remote(Rtorrent.prototype, worker);
+        let ca = server.getCertificate();
 
-      let ca = server.getCertificate();
-
-      return rtorrent
-        .instantiate({
+        rtorrent = new Rtorrent({
           host: server.ip,
           port: server.port,
           path: server.cleanPath(),
@@ -50,9 +58,10 @@ angular.module("torrentApp").service("rtorrentService", [
           ssl: server.isHTTPS(),
           ca: ca,
         })
-        .then(function () {
-          return rtorrent.get("system.client_version", []);
-        });
+
+        return defer((done) => {
+          rtorrent.get("system.client_version", [], done);
+        })
     };
 
     /**
@@ -85,18 +94,18 @@ angular.module("torrentApp").service("rtorrentService", [
         deleted: [],
       };
 
-      return rtorrent
-        .getTorrentsExtra()
-        .then(function (data) {
-          torrents.all = data.torrents.map((d) => new TorrentR(d));
-          torrents.trackers = data.trackers;
-          torrents.labels = data.labels;
-          return torrents;
-        })
-        .catch(function (err) {
-          console.error(err);
-          throw new Error(err);
-        });
+      return defer((done) => {
+        rtorrent.getTorrentsExtra(done)
+      }).then(function (data) {
+        torrents.all = data.torrents.map((d) => new TorrentR(d));
+        torrents.trackers = data.trackers;
+        torrents.labels = data.labels;
+        return torrents;
+      })
+      .catch(function (err) {
+        console.error(err);
+        throw new Error(err);
+      });
     };
 
     /**
@@ -106,7 +115,9 @@ angular.module("torrentApp").service("rtorrentService", [
      * @return {promise} isAdded
      */
     this.addTorrentUrl = function (magnet) {
-      return rtorrent.loadLink(magnet);
+      return defer((done) => {
+        rtorrent.loadLink(magnet, done);
+      })
     };
 
     /**
@@ -120,7 +131,9 @@ angular.module("torrentApp").service("rtorrentService", [
      */
     this.uploadTorrent = function (buffer /*, filename*/) {
       buffer = Buffer.from(buffer);
-      return rtorrent.loadFileContent(buffer);
+      return defer((done) => {
+        rtorrent.loadFileContent(buffer, done);
+      })
     };
 
     /**
@@ -131,47 +144,64 @@ angular.module("torrentApp").service("rtorrentService", [
      * @return {promise} actionIsDone
      */
     this.start = function (torrents) {
-      return rtorrent.start(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.start(torrents.map((t) => t.hash), done);
+      })
     };
 
     this.stop = function (torrents) {
-      return rtorrent.stop(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.stop(torrents.map((t) => t.hash), done);
+      })
     };
 
     this.label = function (torrents, label) {
-      return rtorrent.setLabel(
-        torrents.map((t) => t.hash),
-        label
-      );
+      return defer((done) => {
+        rtorrent.setLabel( torrents.map((t) => t.hash), label, done);
+      })
     };
 
     this.remove = function (torrents) {
-      return rtorrent.remove(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.remove(torrents.map((t) => t.hash), done);
+      })
     };
 
     this.deleteAndErase = function (torrents) {
-      return rtorrent.removeAndErase(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.removeAndErase(torrents.map((t) => t.hash), done);
+      })
     };
 
     this.recheck = function (torrents) {
-      return rtorrent.recheck(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.recheck(torrents.map((t) => t.hash), done);
+      })
     };
 
     this.priority = {};
     this.priority.high = function (torrents) {
-      return rtorrent.setPriorityHigh(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.setPriorityHigh(torrents.map((t) => t.hash), done);
+      })
     };
 
     this.priority.normal = function (torrents) {
-      return rtorrent.setPriorityNormal(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.setPriorityNormal(torrents.map((t) => t.hash), done);
+      })
     };
 
     this.priority.low = function (torrents) {
-      return rtorrent.setPriorityLow(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.setPriorityLow(torrents.map((t) => t.hash), done);
+      })
     };
 
     this.priority.off = function (torrents) {
-      return rtorrent.setPriorityOff(torrents.map((t) => t.hash));
+      return defer((done) => {
+        rtorrent.setPriorityOff(torrents.map((t) => t.hash), done);
+      })
     };
 
     /**

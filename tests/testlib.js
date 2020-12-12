@@ -48,6 +48,27 @@ function pullImage(image) {
   });
 }
 
+async function startDockerContainer({ image, hostPort, containerPort, env}) {
+  await pullImage(image);
+  console.log("Pulled image");
+  portMap = `${containerPort}/tcp`;
+  container = await docker.createContainer({
+    Image: image,
+    Env: Object.keys(env).map(v => `${v}=${env[v]}`),
+    HostConfig: {
+      AutoRemove: true,
+      PortBindings: {
+        [portMap]: [
+          {
+            HostPort: hostPort.toString(),
+          },
+        ],
+      },
+    },
+  });
+  await container.start({});
+}
+
 var appPath = path.join(__dirname, "..", "app");
 exports.testclient = function ({
   client,
@@ -73,24 +94,14 @@ exports.testclient = function ({
     this.timeout(500 * 1000);
 
     before(async function () {
-      // await pullImage(dockerContainer);
-      // console.log("Pulled image");
-      // portMap = `${containerPort}/tcp`;
-      // container = await docker.createContainer({
-      //   Image: dockerContainer,
-      //   Env: Object.keys(dockerEnv).map(v => `${v}=${dockerEnv[v]}`),
-      //   HostConfig: {
-      //     AutoRemove: true,
-      //     PortBindings: {
-      //       [portMap]: [
-      //         {
-      //           HostPort: port.toString(),
-      //         },
-      //       ],
-      //     },
-      //   },
-      // });
-      // await container.start({});
+      if (!process.env.CI) {
+        await startDockerContainer({
+          image: dockerContainer,
+          hostPort: port,
+          containerPort: containerPort,
+          env: dockerEnv,
+        })
+      }
       app = new Application({
         path: electronPath,
         args: [appPath],
@@ -126,6 +137,13 @@ exports.testclient = function ({
     });
 
     after(async function () {
+      app.client.getRenderProcessLogs().then(function (logs) {
+        logs.forEach(function (log) {
+          console.log(log.message)
+          console.log(log.source)
+          console.log(log.level)
+        })
+      })
       if (app && app.isRunning()) {
         await app.stop();
       }
@@ -133,6 +151,11 @@ exports.testclient = function ({
         await container.stop();
       }
     });
+
+    afterEach(function() {
+      if (app) {
+      }
+    })
 
     it("open the app", async function () {
       return app.client.waitUntilWindowLoaded();
@@ -146,7 +169,6 @@ exports.testclient = function ({
     });
 
     it("login to the client", async () => {
-      await sleep(20*1000)
       return tapp.login({
         username: username,
         password: password,

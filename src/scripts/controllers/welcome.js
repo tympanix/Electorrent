@@ -26,9 +26,10 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
     }
 
     $scope.setPath = function() {
-      if ($scope.server.client) {
-        $scope.server.setPath()
-      }
+        console.log("Set path")
+        if ($scope.server.client) {
+            $scope.server.setPath()
+        }
     }
 
     function saveServer(ip, port, username, password, client){
