@@ -137,13 +137,6 @@ exports.testclient = function ({
     });
 
     after(async function () {
-      app.client.getRenderProcessLogs().then(function (logs) {
-        logs.forEach(function (log) {
-          console.log(log.message)
-          console.log(log.source)
-          console.log(log.level)
-        })
-      })
       if (app && app.isRunning()) {
         await app.stop();
       }
@@ -153,7 +146,14 @@ exports.testclient = function ({
     });
 
     afterEach(function() {
-      if (app) {
+      if (this.currentTest.state == 'failed') {
+        app.client.getRenderProcessLogs().then(function (logs) {
+          logs.forEach(function (log) {
+            console.log(log.message)
+            console.log(log.source)
+            console.log(log.level)
+          })
+        })
       }
     })
 
