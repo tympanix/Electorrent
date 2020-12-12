@@ -52,7 +52,7 @@ async function startDockerContainer({ image, hostPort, containerPort, env}) {
   await pullImage(image);
   console.log("Pulled image");
   portMap = `${containerPort}/tcp`;
-  container = await docker.createContainer({
+  let = container = await docker.createContainer({
     Image: image,
     Env: Object.keys(env).map(v => `${v}=${env[v]}`),
     HostConfig: {
@@ -67,10 +67,12 @@ async function startDockerContainer({ image, hostPort, containerPort, env}) {
     },
   });
   await container.start({});
+  return container
 }
 
 var appPath = path.join(__dirname, "..", "app");
 exports.testclient = function ({
+  test,
   client,
   dockerContainer,
   dockerEnv = {},
@@ -85,7 +87,7 @@ exports.testclient = function ({
   downloadLabel = "Downloading",
   skipTests = [],
 }) {
-  describe(`test ${client}`, function () {
+  describe(`test ${test || client}`, function () {
     let app;
     let container;
     let $;
@@ -95,7 +97,7 @@ exports.testclient = function ({
 
     before(async function () {
       if (!process.env.CI) {
-        await startDockerContainer({
+        container = await startDockerContainer({
           image: dockerContainer,
           hostPort: port,
           containerPort: containerPort,
