@@ -109,8 +109,13 @@ gulp.task('build:fonts', function() {
 })
 
 gulp.task('build:others', function() {
-  return gulp.src(['src/img/**/*', 'build/**/*'], {base: 'src'})
+  return gulp.src(['src/img/**/*'], {base: 'src'})
     .pipe(gulp.dest(OUT))
+})
+
+gulp.task('build:build', function() {
+  return gulp.src(['build/**/*'])
+    .pipe(gulp.dest(path.join(OUT, 'build')))
 })
 
 gulp.task('build:assets' , function () {
@@ -135,7 +140,7 @@ gulp.task('semantic:default', function() {
 
 gulp.task('build:semantic', gulp.parallel('semantic:src', 'semantic:default'))
 
-gulp.task('build:static', gulp.parallel('build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers'))
+gulp.task('build:static', gulp.parallel('build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers', 'build:build'))
 
 gulp.task('build:less', function() {
   let dir = 'src/css/themes'
