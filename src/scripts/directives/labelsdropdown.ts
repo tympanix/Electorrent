@@ -12,7 +12,8 @@ angular.module("torrentApp").directive("labelsDropdown", [
         scope.form = { label: "Some Label" };
 
         scope.openNewLabelModal = function () {
-          $("#newLabelModal").modal("show");
+          let modal: any = $("#newLabelModal")
+          modal.modal("show");
         };
 
         scope.applyNewLabel = function (label) {

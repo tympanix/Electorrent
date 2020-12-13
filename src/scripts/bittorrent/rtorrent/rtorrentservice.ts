@@ -92,6 +92,7 @@ angular.module("torrentApp").service("rtorrentService", [
         all: [],
         changed: [],
         deleted: [],
+        trackers: [],
       };
 
       return defer((done) => {

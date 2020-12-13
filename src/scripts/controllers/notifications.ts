@@ -43,7 +43,8 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
                 })
                 .then(function() {
                     $scope.updateData = data
-                    $('#updateModal').modal('show');
+                    let modal: any = $('#updateModal')
+                    modal.modal('show');
                 })
         })
 
@@ -53,7 +54,8 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
             $scope.manualUpdate = true;
 
             $timeout(function(){
-                $('#updateModal').modal('show');
+                let modal: any = $('#updateModal')
+                modal.modal('show');
             }, 500)
         });
 
@@ -68,7 +70,8 @@ angular.module("torrentApp").controller("notificationsController", ["$scope", "$
 
         function showCertModal() {
             $timeout(function(){
-              $('#certificateModal').modal('show')
+                let modal: any = $('#certificateModal')
+                modal.modal('show')
             }, 0)
         }
 

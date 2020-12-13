@@ -4,6 +4,7 @@ const fs = require('fs');
 const gulp = require('gulp');
 const {server} = require('electron-connect')
 const useref = require('gulp-useref');
+const ts = require('gulp-typescript');
 const clean = require('gulp-clean');
 const sourcemaps = require('gulp-sourcemaps')
 const lazypipe = require('lazypipe')
@@ -31,7 +32,7 @@ gulp.task('serve', function () {
     gulp.watch('src/lib/*.js', gulp.series('build:lib', electron.restart))
 
     // Reload renderer process
-    gulp.watch(['src/*.html', 'src/scripts/**', 'src/main.js'], gulp.series('build:useref', electron.reload))
+    gulp.watch(['src/*.html', 'src/scripts/**', 'src/main.ts'], gulp.series('build:useref', electron.reload))
     gulp.watch(['src/views/**/*'], gulp.series('build:views', electron.reload))
     gulp.watch(['src/css/**/*'], gulp.series('build:less', electron.reload))
     gulp.watch(['src/scripts/**/*'], gulp.series('build:useref'), electron.reload)
@@ -52,7 +53,14 @@ gulp.task('clean', function() {
 })
 
 gulp.task('build:useref', function() {
-    var conf = {dev: c => PROD ? '' : c}
+    var tsStream = gulp.src('src/**/*.ts').pipe(ts({
+      esModuleInterop: true,
+      module: "commonjs",
+      allowSyntheticDefaultImports: true,
+      downlevelIteration: true,
+      typeRoots: ["node_modules/@types", "./src/types"],
+    }));
+    var conf = {dev: c => PROD ? '' : c, additionalStreams: [tsStream]}
     var maps = lazypipe().pipe(sourcemaps.init, { loadMaps: true})
 
     return gulp.src('src/*.html')

@@ -6,6 +6,11 @@ angular.module('torrentApp').factory('$remote', ['$q', '$timeout', function($q, 
 
     class Remote {
 
+        private _self: Remote
+        private _prototype
+        private _worker
+        private _callbacks: Record<string, Function>
+
         constructor(prototype, worker) {
             this._self = this
             this._prototype = prototype

@@ -70,7 +70,7 @@ angular.module('torrentApp').service('configService', ['$rootScope', '$bittorren
     }
 
     function settingsToJson() {
-        let copy = {}
+        let copy: any = {}
         angular.copy(settings, copy)
         copy.servers = copy.servers.map((server) => {
             return server.json()

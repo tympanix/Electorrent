@@ -34,7 +34,7 @@ angular.module("torrentApp").service("transmissionService", [
       if (buf.constructor.name === "Uint8Array" || buf.constructor === Uint8Array) {
         return buf;
       }
-      if (typeof buf === "string") buf = Buffer(buf);
+      if (typeof buf === "string") buf = Buffer.from(buf);
       var a = new Uint8Array(buf.length);
       for (var i = 0; i < buf.length; i++) a[i] = buf[i];
       return a;
@@ -252,7 +252,7 @@ angular.module("torrentApp").service("transmissionService", [
       reader.onloadend = function () {
         /* The use of split is necessary because the reader returns the type of the data
          * in the same string as the actual data, but we only need to send the actual data.*/
-        base64data = reader.result.split(",")[1];
+        base64data = reader.result.toString().split(",")[1];
 
         // Torrent-add
         var data = {
@@ -298,7 +298,7 @@ angular.module("torrentApp").service("transmissionService", [
       });
 
       var data = {
-        arguments: {},
+        arguments: {ids: null},
         method: command,
       };
 

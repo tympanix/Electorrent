@@ -1,4 +1,5 @@
-"use strict";
+import angular from "angular"
+import Fuse from "fuse.js"
 
 angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config, AbstractTorrent) {
     const LIMIT = 25;
@@ -138,7 +139,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         $scope.$apply()
     }
 
-    function startTimer(fullupdate){
+    function startTimer(fullupdate?: boolean){
         if (reconnect) $timeout.cancel(reconnect)
         if (timeout) $timeout.cancel(timeout)
         timeout = $timeout(function(){
@@ -402,7 +403,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
       }
     }
 
-    function torrentFilter(status, label, tracker, search){
+    function torrentFilter(status?, label?, tracker?, search?){
         var filterStatus = status || $scope.filters.status;
         var filterLabel = label || $scope.filters.label;
         var filterTracker = tracker || $scope.filters.tracker;
@@ -437,7 +438,7 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         }
     }
 
-    function fuzzySearch(torrents, search) {
+    function fuzzySearch(torrents, search?) {
         if ($scope.filters.search) {
             search = search || $scope.filters.search
             fuse.setCollection(torrents)

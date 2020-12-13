@@ -23,7 +23,7 @@ angular.module("torrentApp").directive("actionHeader", [
       return link;
     }
 
-    function render(scope, element /*, attr*/) {
+    function render(scope, element, attr?) {
       if (!scope.actions) return;
 
       toggleAble = [];

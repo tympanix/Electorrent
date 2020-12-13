@@ -17,7 +17,7 @@ angular.module("torrentApp").directive('progress', ['$timeout', function($timeou
         var idle = true
         var bar = element.find('.bar')
 
-        function updateProgress(newPercent, oldPercent) {
+        function updateProgress(newPercent?, oldPercent?) {
             if (scope.torrent.percent < 1000 || oldPercent < 1000) {
                 bar.css('width', scope.torrent.getPercentStr());
                 if (idle) {

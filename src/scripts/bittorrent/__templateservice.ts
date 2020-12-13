@@ -1,4 +1,4 @@
-'use strict';
+import angular from "angular"
 
 angular.module('torrentApp').service('__serviceName__', ["$http", "$q", "__TorrentName__", "notificationService", function($http, $q, __TorrentName__, $notify) {
 

@@ -32,7 +32,7 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
      * @param  {array} args   Arbitrary arguments for the config objects.
      * @return {object}       A config object for a HTTP GET call.
      */
-    function config(choice, args) {
+    function config(choice, args?) {
         switch (choice) {
             case 'query':
                 return {

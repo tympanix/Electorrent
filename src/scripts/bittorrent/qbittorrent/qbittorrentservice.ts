@@ -84,7 +84,7 @@ angular.module("torrentApp").service("qbittorrentService", [ "$q", "$remote", "T
       if (Array.isArray(data.categories) || Array.isArray(data.labels)) {
         torrents.labels = data.categories || data.labels;
       } else if (typeof data.categories === "object") {
-        torrents.labels = Object.values(data.categories).map((c) => c.name);
+        torrents.labels = Object.values(data.categories).map((c: any) => c.name);
       }
 
       if (data.full_update) {

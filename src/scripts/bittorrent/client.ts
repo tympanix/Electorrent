@@ -1,6 +1,7 @@
-'use strict';
+import angular from "angular"
+import _ from "underscore"
 
-angular.module('torrentApp').factory('Client', ['Column', function(Column) {
+angular.module('torrentApp').factory('Client', ['AbstractTorrent', 'Column', function(Torrent, Column) {
 
     function Client() {
         this.availableColumns = _.difference(Torrent.COLUMNS, this.disabledColumns)

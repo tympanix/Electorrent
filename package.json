@@ -31,6 +31,11 @@
   },
   "devDependencies": {
     "@wdio/sync": "^7.16.4",
+    "@types/angular": "^1.5.8",
+    "@types/moment": "^2.13.0",
+    "@types/mousetrap": "^1.6.5",
+    "@types/underscore": "^1.10.24",
+    "angular": "^1.5.8",
     "bower": "^1.8.8",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
@@ -41,6 +46,8 @@
     "electron-connect": "^0.6.3",
     "electron-is": "^3.0.0",
     "electron-squirrel-startup": "^1.0.0",
+    "fomantic-ui": "^2.8.7",
+    "fuse.js": "^3.6.1",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
     "gulp-concat": "^2.6.1",
@@ -50,18 +57,26 @@
     "gulp-rename": "^1.4.0",
     "gulp-run": "^1.7.1",
     "gulp-sourcemaps": "^2.6.5",
+    "gulp-typescript": "^6.0.0-alpha.1",
     "gulp-useref": "^3.1.6",
     "hoek": "^5.0.4",
     "lazypipe": "^1.0.2",
     "merge-stream": "^1.0.1",
     "mocha": "^8.1.0",
+    "moment": "^2.29.1",
+    "mousetrap": "^1.6.5",
     "request": "^2.88.2",
     "rollup": "^2.2.0",
     "run-sequence": "^1.2.2",
     "semver": "^5.7.1",
     "spectron": "^15.0.0",
     "through2": "^2.0.5",
+    "typescript": "^4.1.3",
+    "underscore": "^1.12.0",
     "winston": "^2.4.4",
     "yargs": "^4.8.1"
+  },
+  "resolutions": {
+    "graceful-fs": "^4.2.4"
   }
 }

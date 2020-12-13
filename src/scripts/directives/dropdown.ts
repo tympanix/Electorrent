@@ -10,7 +10,9 @@ angular.module("torrentApp").directive('dropdown', [function() {
 
     function link(scope, element, attr) {
 
-        $(element).dropdown({
+        let dropdown: any = $(element)
+
+        dropdown.dropdown({
             transition: "vertical flip",
             duration: 100,
             onChange: onChange,
@@ -30,7 +32,8 @@ angular.module("torrentApp").directive('dropdown', [function() {
             return scope.bind;
         }, function(newValue) {
             if (newValue) {
-                $(element).dropdown('set selected', newValue);
+                let dropdown: any = $(element)
+                dropdown.dropdown('set selected', newValue);
             }
         });
 
@@ -44,7 +47,8 @@ angular.module("torrentApp").directive('dropdown', [function() {
 
     function doAction(element, action) {
         return function(param) {
-            $(element).dropdown(action, param);
+            let dropdown: any = $(element)
+            dropdown.dropdown(action, param);
         }
     }
 
@@ -58,7 +62,7 @@ angular.module("torrentApp").directive('dropItem', [function() {
 
     function link(scope, element, attr) {
         if (scope.bind === attr.value){
-            var dropdown = $(element).closest('.dropdown');
+            var dropdown: any = $(element).closest('.dropdown');
             dropdown.dropdown('set selected', attr.value);
         }
 

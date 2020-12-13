@@ -111,7 +111,7 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         })
     })
 
-    function pageTorrents(fullupdate){
+    function pageTorrents(fullupdate?: boolean){
         $scope.showTorrents = true;
         //$scope.showLoading = false;
         $scope.$broadcast('start:torrents', fullupdate);

@@ -92,7 +92,8 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
     $scope.openRenameModal = function(server) {
       $scope.renameData.server = server
       $scope.renameData.name = server.getDisplayName()
-      $('#renameModal').modal('show');
+      let modal: any = $('#renameModal')
+      modal.modal('show');
     }
 
     $scope.renameServer = function() {

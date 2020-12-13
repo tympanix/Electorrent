@@ -26,7 +26,9 @@ angular.module('torrentApp').directive('modal', function() {
     function link(scope, element/*, attrs*/) {
         var accepted = false
 
-        $(element).modal({
+        let modal: any = $(element)
+
+        modal.modal({
             onDeny: function () {
                 accepted = false
                 return scope.deny()
@@ -45,7 +47,7 @@ angular.module('torrentApp').directive('modal', function() {
                 scope.show()
             },
             onVisible: function() {
-                $(element).modal('refresh')
+                modal.modal('refresh')
             },
             closable: false,
             duration: 150
@@ -53,7 +55,7 @@ angular.module('torrentApp').directive('modal', function() {
 
         scope.applyAndClose = function() {
           if (scope.approve()) {
-            $(element).modal('hide')
+            modal.modal('hide')
           }
         }
 
@@ -63,8 +65,9 @@ angular.module('torrentApp').directive('modal', function() {
     }
 
     function clearForm(element){
-        $(element).form('clear');
-        $(element).find('.error.message').empty()
+        let form: any = $(element)
+        form.form('clear');
+        form.find('.error.message').empty()
     }
 
 });

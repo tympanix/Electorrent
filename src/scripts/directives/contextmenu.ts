@@ -20,7 +20,7 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
         return link;
     }
 
-    function render(scope, element /*, attr*/){
+    function render(scope, element, attr?){
         if (!scope.menu) return;
 
         element.empty();

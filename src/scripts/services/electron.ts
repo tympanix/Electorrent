@@ -1,5 +1,7 @@
+import angular from "angular"
+
 angular.module('torrentApp').factory("electron", [function() {
-    var o = {};
+    var o: any = {};
 
     // Get the Electron remote
     const remote        = require('electron').remote;

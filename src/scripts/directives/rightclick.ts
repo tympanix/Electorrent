@@ -1,5 +1,7 @@
+import angular from "angular"
+
 angular.module("torrentApp").directive('ngRightClick', function($parse) {
-    return function(scope, element, attrs) {
+    function link(scope, element, attrs) {
         var fn = $parse(attrs.ngRightClick);
         element.bind('contextmenu', function(event) {
             scope.$apply(function() {
@@ -8,4 +10,7 @@ angular.module("torrentApp").directive('ngRightClick', function($parse) {
             });
         });
     };
+    return {
+        link: link
+    }
 });

@@ -71,7 +71,7 @@ angular.module('torrentApp').controller('DropDownController', ['$scope', functio
             '<div class="{{ menu_class }}"  ng-transclude>' +
             '</div>' +
             '</div>',
-        link: function(scope, element, attrs, DropDownController) {
+        link: function(scope, element, attrs, DropDownController: any) {
             scope.dropdown_class = 'ui selection dropdown';
             scope.menu_class = 'menu transition hidden';
             scope.text_class = 'default text';
@@ -127,7 +127,7 @@ angular.module('torrentApp').controller('DropDownController', ['$scope', functio
             value: '=value'
         },
         template: '<div class="item" ng-class="active()" ng-transclude>{{ item_title }}</div>',
-        link: function(scope, element, attrs, DropDownController) {
+        link: function(scope, element, attrs, DropDownController: any) {
 
             // Check if title= was set... if not take the contents of the dropdown-group tag
             // title= is for dynamic variables from something like ng-repeat {{variable}}
