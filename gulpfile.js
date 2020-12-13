@@ -16,7 +16,7 @@ const iconfont = require('gulp-iconfont');
 
 const PROD = process.env.NODE_ENV === 'production'
 const OUT = "./app";
-const CLEAN = [`!${OUT}/package.json`, `!${OUT}/node_modules`, `${OUT}/*`];
+const CLEAN = [`${OUT}/*`, `!${OUT}/package.json`, `!${OUT}/node_modules`];
 const SEMANTIC = './bower_components/semantic/src'
 
 gulp.task('serve', function () {
