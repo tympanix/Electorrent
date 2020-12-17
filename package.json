@@ -1,6 +1,6 @@
 {
   "name": "electorrent",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "A thin client for your torrenting needs",
   "main": "app/app.js",
   "license": "GPL-3.0",
