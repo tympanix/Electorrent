@@ -1,6 +1,3 @@
-import angular from "angular"
-import moment from "moment"
-
 angular.module("torrentApp").filter('date', function() {
     const BT_EPOCH = 994032000000 /* July 2nd 2001, release of bittorrent */
     return function(epochtime) {

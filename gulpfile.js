@@ -19,6 +19,9 @@ const OUT = "./app";
 const CLEAN = [`${OUT}/*`, `!${OUT}/package.json`, `!${OUT}/node_modules`];
 const SEMANTIC = './bower_components/semantic/src'
 
+const tsconfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, "tsconfig.json")))
+var tsProject = ts.createProject(tsconfig.compilerOptions);
+
 gulp.task('serve', function () {
     let electron = server.create({
       path: 'app'
@@ -32,17 +35,17 @@ gulp.task('serve', function () {
     gulp.watch('src/lib/*.js', gulp.series('build:lib', electron.restart))
 
     // Reload renderer process
-    gulp.watch(['src/*.html', 'src/scripts/**', 'src/main.ts'], gulp.series('build:useref', electron.reload))
+    //gulp.watch(['src/*.html', 'src/scripts/**', 'src/main.ts'], gulp.series('build:useref', electron.reload))
     gulp.watch(['src/views/**/*'], gulp.series('build:views', electron.reload))
     gulp.watch(['src/css/**/*'], gulp.series('build:less', electron.reload))
-    gulp.watch(['src/scripts/**/*'], gulp.series('build:useref'), electron.reload)
+    //gulp.watch(['src/scripts/**/*'], gulp.series('build:useref'), electron.reload)
     gulp.watch(['src/scripts/workers/*.js'], gulp.series('build:workers', electron.reload))
 
     // Watch dependencies
     gulp.watch(['app/node_modules/@electorrent/node-rtorrent/*.js'], electron.restart)
 
     // Watch frontend dependencies
-    gulp.watch(['bower_components/angular-table-resize/dist/*'], gulp.series('build:useref', electron.reload))
+    //gulp.watch(['bower_components/angular-table-resize/dist/*'], gulp.series('build:useref', electron.reload))
 })
 
 gulp.task('default', gulp.parallel('serve'));
@@ -50,6 +53,27 @@ gulp.task('default', gulp.parallel('serve'));
 gulp.task('clean', function() {
     return gulp.src(CLEAN, {read: false})
         .pipe(clean());
+})
+
+gulp.task('build:typescript', function() {
+  return gulp.src('src/**/*.ts')
+    .pipe(tsProject())
+    .pipe(gulp.dest(OUT))
+})
+
+gulp.task('build:typescript', function() {
+  return gulp.src('src/main.ts')
+    .pipe(ts({
+      moduleResolution: "node",
+      noImplicitAny: false,
+      outFile: 'main.js',
+      module: "amd",
+      allowSyntheticDefaultImports: true,
+      downlevelIteration: true,
+      esModuleInterop: true,
+      typeRoots: ["node_modules/@types", "src/types"],
+    }))
+    .pipe(gulp.dest(OUT))
 })
 
 gulp.task('build:useref', function() {
@@ -175,6 +199,6 @@ gulp.task('build:less', function() {
 
 gulp.task('build:styles', gulp.series(gulp.parallel('build:semantic', 'build:fonts'), 'build:less'))
 
-gulp.task('build', gulp.parallel('build:useref', 'build:static', 'build:styles'));
+gulp.task('build', gulp.parallel('build:static', 'build:styles'));
 
 gulp.task('install', gulp.parallel('build:semantic'))

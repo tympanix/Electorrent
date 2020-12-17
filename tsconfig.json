@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      "moduleResolution": "node",
+      "noImplicitAny": false,
+      "target": "es5",
+      "module": "commonjs",
+      "sourceMap": true,
+      "allowJs": true,
+      "lib": [
+        "dom",
+        "es5"
+      ],
+      "experimentalDecorators": true,
+      "esModuleInterop": true,
+      "emitDecoratorMetadata": true,
+      "downlevelIteration": true,
+      "outDir": "./app",
+      "typeRoots": [
+        "node_modules/@types",
+        "src/types"
+      ]
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modues"]
+  }

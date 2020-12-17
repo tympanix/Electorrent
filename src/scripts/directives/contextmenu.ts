@@ -142,7 +142,8 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
 
         // Remove context menu when user clicks anywhere not in the context menu
         angular.element($document[0].body).on('click',function(event) {
-            var inContext =  angular.element(event.target).inheritedData('contextmenu');
+            var element: any = angular.element(event.target)
+            var inContext =  element.inheritedData('contextmenu');
             if (!inContext) {
                 $(element).hide();
             }

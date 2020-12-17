@@ -1,4 +1,3 @@
-import angular from "angular"
 import _ from "underscore"
 
 angular.module('torrentApp').factory('Client', ['AbstractTorrent', 'Column', function(Torrent, Column) {

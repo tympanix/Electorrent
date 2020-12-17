@@ -1,4 +1,4 @@
-import angular from "angular"
+import * as angular from "angular"
 import Fuse from "fuse.js"
 
 angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config, AbstractTorrent) {

@@ -1,5 +1,3 @@
-import angular from "angular"
-
 angular.module("torrentApp").directive('ngRightClick', function($parse) {
     function link(scope, element, attrs) {
         var fn = $parse(attrs.ngRightClick);
