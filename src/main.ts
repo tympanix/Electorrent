@@ -22,6 +22,10 @@
 // import "angular-marked"
 // import "angular-ui-sortable"
 
+declare global {
+    const angular: ng.IAngularStatic;
+}
+
 var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
 
 // Configure the application
