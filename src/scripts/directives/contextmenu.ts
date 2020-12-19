@@ -143,8 +143,8 @@ export let contextMenu = ['$rootScope', '$document', '$window', 'electron', func
 
         // Remove context menu when user clicks anywhere not in the context menu
         angular.element($document[0].body).on('click',function(event) {
-            var element: any = angular.element(event.target)
-            var inContext =  element.inheritedData('contextmenu');
+            var rootElement: any = angular.element(event.target)
+            var inContext = rootElement.inheritedData('contextmenu');
             if (!inContext) {
                 $(element).hide();
             }
@@ -219,3 +219,4 @@ export let contextMenu = ['$rootScope', '$document', '$window', 'electron', func
         };
     }
 }];
+
