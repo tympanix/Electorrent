@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('fixedHeader', [function() {
+
+export let fixedHeader = [function() {
     return {
         restrict: 'A',
         link: link,
@@ -46,4 +47,4 @@ angular.module("torrentApp").directive('fixedHeader', [function() {
         bind(scope.enable)
     }
 
-}]);
+}];

@@ -1,6 +1,5 @@
-"use strict";
 
-angular.module("torrentApp").service("rtorrentService", [
+export let rtorrentService = [
   "$q",
   "TorrentR",
   "notificationService",
@@ -306,4 +305,4 @@ angular.module("torrentApp").service("rtorrentService", [
       },
     ];
   },
-]);
+]

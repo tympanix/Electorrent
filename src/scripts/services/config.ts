@@ -1,6 +1,4 @@
-'use strict';
-
-angular.module('torrentApp').service('configService', ['$rootScope', '$bittorrent', 'notificationService', 'electron', '$q', 'Server', function($rootScope, $bittorrent, $notify, electron, $q, Server) {
+export let configService = ['$rootScope', '$bittorrent', 'notificationService', 'electron', '$q', 'Server', function($rootScope, $bittorrent, $notify, electron, $q, Server) {
 
     const MenuItem = electron.menuItem
     const config = electron.config;
@@ -201,4 +199,4 @@ angular.module('torrentApp').service('configService', ['$rootScope', '$bittorren
         })
     }
 
-}]);
+}];

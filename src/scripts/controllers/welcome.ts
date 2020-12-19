@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeout", "$bittorrent", "$btclients", "electron", "configService", "notificationService", "Server", function ($scope, $timeout, $bittorrent, $btclients, electron, config, $notify, Server) {
+export let welcomeController = ["$scope", "$timeout", "$bittorrent", "$btclients", "electron", "configService", "notificationService", "Server", function ($scope, $timeout, $bittorrent, $btclients, electron, config, $notify, Server) {
 
     $scope.connecting = false;
     $scope.btclients = $btclients;
@@ -46,4 +46,4 @@ angular.module("torrentApp").controller("welcomeController", ["$scope", "$timeou
         })
     }
 
-}]);
+}]

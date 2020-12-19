@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('readyBroadcast', ['$rootScope', '$timeout', function($rootScope, $timeout) {
+
+export let readyBroadcast = ['$rootScope', '$timeout', function($rootScope, $timeout) {
     return {
         restrict: 'A',
         link: link
@@ -10,4 +11,5 @@ angular.module("torrentApp").directive('readyBroadcast', ['$rootScope', '$timeou
         });
     }
 
-}]);
+}];
+

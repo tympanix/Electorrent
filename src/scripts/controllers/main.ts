@@ -1,5 +1,7 @@
 
-angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope", "$timeout", "$bittorrent", "electron", "configService", "notificationService", function ($rootScope, $scope, $timeout, $bittorrent, electron, config, $notify) {
+angular.module("torrentApp").controller("", []);
+
+export let mainController = ["$rootScope", "$scope", "$timeout", "$bittorrent", "electron", "configService", "notificationService", function ($rootScope, $scope, $timeout, $bittorrent, electron, config, $notify) {
     const MAX_LOADING_TIME = 10000 // 10 seconds
 
     const PAGE_SETTINGS = 'settings';
@@ -208,4 +210,4 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         return page === PAGE_SERVERS;
     }
 
-}]);
+}]

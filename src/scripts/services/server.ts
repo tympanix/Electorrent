@@ -1,6 +1,6 @@
-'use strict';
+import _ from "underscore"
 
-angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$rootScope', '$q', 'electron', 'notificationService', '$bittorrent', '$btclients',
+export let serverService = ['AbstractTorrent', '$rootScope', '$q', 'electron', 'notificationService', '$bittorrent', '$btclients',
     function(Torrent, $rootScope, $q, electron, $notify, $bittorrent, $btclients) {
 
         /*
@@ -249,4 +249,4 @@ angular.module('torrentApp').factory('Server', ['AbstractTorrent', '$rootScope',
          */
         return Server;
     }
-]);
+];

@@ -1,4 +1,4 @@
-angular.module("torrentApp").filter('torrentQueue', function() {
+export let torrentQueueFilter = function() {
     return function(queue) {
         if (Number.isInteger(queue) && queue >= 0) {
             return queue
@@ -6,9 +6,9 @@ angular.module("torrentApp").filter('torrentQueue', function() {
             return ''
         }
     };
-});
+};
 
-angular.module("torrentApp").filter('torrentRatio', function() {
+export let torrentRatioFilter = function() {
     function isNumeric(number) {
         return !isNaN(parseFloat(number)) && isFinite(number);
     }
@@ -20,9 +20,9 @@ angular.module("torrentApp").filter('torrentRatio', function() {
             return ''
         }
     }
-});
+};
 
-angular.module("torrentApp").filter('torrentTracker', function() {
+export let torrentTrackerFilter = function() {
     const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/
 
     return function(tracker) {
@@ -31,4 +31,4 @@ angular.module("torrentApp").filter('torrentTracker', function() {
         if (!match) return ''
         return match[1]
     }
-});
+};

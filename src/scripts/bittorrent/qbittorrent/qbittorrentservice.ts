@@ -1,6 +1,5 @@
-"use strict";
 
-angular.module("torrentApp").service("qbittorrentService", [ "$q", "$remote", "TorrentQ", "notificationService",
+export let qbittorrentService = [ "$q", "$remote", "TorrentQ", "notificationService",
   function ($q, $remote, Torrent, $notify) {
     const QBittorrent = require("@electorrent/node-qbittorrent");
     const worker = new Worker("scripts/workers/qbittorrent.js");
@@ -320,4 +319,4 @@ angular.module("torrentApp").service("qbittorrentService", [ "$q", "$remote", "T
       },
     ];
   },
-]);
+];

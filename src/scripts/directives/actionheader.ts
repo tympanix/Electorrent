@@ -1,7 +1,5 @@
-angular.module("torrentApp").directive("actionHeader", [
-  "$rootScope",
-  "$compile",
-  "electron",
+
+export let actionHeader = [ "$rootScope", "$compile", "electron",
   function ($rootScope, $compile, electron) {
     var actionHeader = null;
     var toggleAble = [];
@@ -158,4 +156,5 @@ angular.module("torrentApp").directive("actionHeader", [
       );
     }
   },
-]);
+];
+

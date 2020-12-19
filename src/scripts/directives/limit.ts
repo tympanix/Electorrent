@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('limitBind', [function() {
+
+export let limitBind = [function() {
     return {
         scope: false,
         controller: controller,
@@ -34,9 +35,9 @@ angular.module("torrentApp").directive('limitBind', [function() {
         }
     }
 
-}]);
+}];
 
-angular.module("torrentApp").directive('limitSource', function() {
+export let limitSource = function() {
     return {
         scope: false,
         require: '^^limitBind',
@@ -49,5 +50,5 @@ angular.module("torrentApp").directive('limitSource', function() {
         }
     }
 
-});
+};
 

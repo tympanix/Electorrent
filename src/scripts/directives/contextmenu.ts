@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document', '$window', 'electron', function($rootScope, $document, $window, electron) {
+
+export let contextMenu = ['$rootScope', '$document', '$window', 'electron', function($rootScope, $document, $window, electron) {
 
     var contextMenu = null;
     var checkboxes = []
@@ -217,4 +218,4 @@ angular.module("torrentApp").directive('contextMenu', ['$rootScope', '$document'
             $(element).hide();
         };
     }
-}]);
+}];

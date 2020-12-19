@@ -90,64 +90,127 @@ torrentApp.run(['menuWin', 'menuMac', 'electron', 'configService', function(menu
 }]);
 
 // Controllers
-import "./scripts/controllers/main"
-import "./scripts/controllers/theme"
-import "./scripts/controllers/torrents"
-import "./scripts/controllers/settings"
-import "./scripts/controllers/welcome"
-import "./scripts/controllers/notifications"
+import { mainController } from "./scripts/controllers/main"
+torrentApp.controller("mainController", mainController)
+import {themeController} from "./scripts/controllers/theme"
+torrentApp.controller("themeController", themeController)
+import {torrentsController} from "./scripts/controllers/torrents"
+torrentApp.controller("torrentsController", torrentsController)
+import {settingsController} from "./scripts/controllers/settings"
+torrentApp.controller("settingsController", settingsController)
+import {welcomeController} from "./scripts/controllers/welcome"
+torrentApp.controller("welcomeController", welcomeController)
+import {notificationsController} from "./scripts/controllers/notifications"
+torrentApp.controller("notificationsController", notificationsController)
 
 // Services
-import "./scripts/services/httpFormService"
-import "./scripts/services/bittorrent"
-import "./scripts/services/electron"
-import "./scripts/services/config"
-import "./scripts/services/notification"
-import "./scripts/services/server"
-import "./scripts/services/column"
-import "./scripts/services/remote"
+import { httpFormService } from "./scripts/services/httpFormService"
+torrentApp.factory("httpFormService", httpFormService)
+import { bittorrentService } from "./scripts/services/bittorrent"
+torrentApp.service("$bittorrent", bittorrentService)
+import { electronService } from "./scripts/services/electron"
+torrentApp.service("electron", electronService)
+import { configService } from "./scripts/services/config"
+torrentApp.service("configService", configService)
+import { notificationService } from "./scripts/services/notification"
+torrentApp.service("notificationService", notificationService)
+import { serverService} from "./scripts/services/server"
+torrentApp.factory("Server", serverService)
+import { columnService } from  "./scripts/services/column"
+torrentApp.factory("Column", columnService)
+import { remoteService } from "./scripts/services/remote"
+torrentApp.factory("$remote", remoteService)
 
 // Bittorrent
-import "./scripts/bittorrent/abstracttorrent"
-import "./scripts/bittorrent/qbittorrent/qbittorrentservice"
-import "./scripts/bittorrent/qbittorrent/torrentq"
-import "./scripts/bittorrent/utorrent/utorrentservice"
-import "./scripts/bittorrent/utorrent/torrentu"
-import "./scripts/bittorrent/transmission/transmissionservice"
-import "./scripts/bittorrent/transmission/torrentt"
-import "./scripts/bittorrent/transmission/transmissionconfig"
-import "./scripts/bittorrent/rtorrent/rtorrentservice"
-import "./scripts/bittorrent/rtorrent/torrentr"
-import "./scripts/bittorrent/synology/synologyservice"
-import "./scripts/bittorrent/synology/synologytorrent"
-import "./scripts/bittorrent/deluge/delugeservice"
-import "./scripts/bittorrent/deluge/torrentd"
+import { abstractTorrent } from "./scripts/bittorrent/abstracttorrent"
+torrentApp.factory("AbstractTorrent", abstractTorrent)
+import {qbittorrentService} from "./scripts/bittorrent/qbittorrent/qbittorrentservice"
+torrentApp.service("qbittorrentService", qbittorrentService)
+import { torrentQ } from "./scripts/bittorrent/qbittorrent/torrentq"
+torrentApp.factory("TorrentQ", torrentQ)
+import { utorrentService } from "./scripts/bittorrent/utorrent/utorrentservice"
+torrentApp.service("utorrentService", utorrentService)
+import { torrentU } from "./scripts/bittorrent/utorrent/torrentu"
+torrentApp.factory('TorrentU', torrentU)
+import { transmissionService } from "./scripts/bittorrent/transmission/transmissionservice"
+torrentApp.service("transmissionService", transmissionService)
+import { torrentT } from "./scripts/bittorrent/transmission/torrentt"
+torrentApp.factory('TorrentT', torrentT)
+import { transmissionConfig } from "./scripts/bittorrent/transmission/transmissionconfig"
+torrentApp.factory("transmissionConfig", transmissionConfig)
+import { rtorrentService } from "./scripts/bittorrent/rtorrent/rtorrentservice"
+torrentApp.service("rtorrentService", rtorrentService)
+import {TorrentR} from "./scripts/bittorrent/rtorrent/torrentr"
+torrentApp.factory('TorrentR', TorrentR)
+import {synologyService} from "./scripts/bittorrent/synology/synologyservice"
+torrentApp.service('synologyService', synologyService)
+import {TorrentS} from "./scripts/bittorrent/synology/synologytorrent"
+torrentApp.factory('TorrentS', TorrentS)
+import {delugeService} from "./scripts/bittorrent/deluge/delugeservice"
+torrentApp.service('delugeService', delugeService)
+import {TorrentD} from "./scripts/bittorrent/deluge/torrentd"
+torrentApp.factory('TorrentD', TorrentD)
 
 // Filters
-import "./scripts/filters/dateFilter"
-import "./scripts/filters/bytes"
-import "./scripts/filters/torrentfilters"
+import {dateFilter, etaFilter, releaseDateFilter} from "./scripts/filters/dateFilter"
+torrentApp.filter('date', dateFilter)
+torrentApp.filter('eta', etaFilter)
+torrentApp.filter('releaseDate', releaseDateFilter)
+import {bytesFiler, speedFilter} from "./scripts/filters/bytes"
+torrentApp.filter('bytes', bytesFiler)
+torrentApp.filter('speed', speedFilter)
+import {torrentQueueFilter, torrentRatioFilter, torrentTrackerFilter} from "./scripts/filters/torrentfilters"
+torrentApp.filter('torrentQueue', torrentQueueFilter)
+torrentApp.filter('torrentRatio', torrentRatioFilter)
+torrentApp.filter('torrentTracker', torrentTrackerFilter)
 
 // Directives
-import "./scripts/directives/progress"
-import "./scripts/directives/rightclick"
-import "./scripts/directives/contextmenu"
-import "./scripts/directives/dropdown"
-import "./scripts/directives/readyBroadcast"
-import "./scripts/directives/checkbox"
-import "./scripts/directives/repeatdone"
-import "./scripts/directives/modal"
-import "./scripts/directives/actionheader"
-import "./scripts/directives/labelsdropdown"
-import "./scripts/directives/draganddrop"
-import "./scripts/directives/sorting"
-import "./scripts/directives/drop"
-import "./scripts/directives/torrenttable"
-import "./scripts/directives/search"
-import "./scripts/directives/fixedheader"
-import "./scripts/directives/time"
-import "./scripts/directives/limit"
+import {progress} from "./scripts/directives/progress"
+torrentApp.directive('progress', progress)
+import {ngRightClick} from "./scripts/directives/rightclick"
+torrentApp.directive('ngRightClick', ngRightClick)
+import {contextMenu} from "./scripts/directives/contextmenu"
+torrentApp.directive("contextMenu", contextMenu)
+import {dropdown, dropItem} from "./scripts/directives/dropdown"
+torrentApp.directive("dropdown", dropdown)
+torrentApp.directive('dropItem', dropItem)
+import {readyBroadcast} from "./scripts/directives/readyBroadcast"
+torrentApp.directive("readyBroadcast", readyBroadcast)
+import {toggleController, toggle} from "./scripts/directives/checkbox"
+torrentApp.controller('toggleController', toggleController)
+torrentApp.directive('toggle', toggle)
+import {repeatDone} from "./scripts/directives/repeatdone"
+torrentApp.directive("repeatDone", repeatDone)
+import {modal} from "./scripts/directives/modal"
+torrentApp.directive("modal", modal)
+import {actionHeader} from "./scripts/directives/actionheader"
+torrentApp.directive("actionHeader", actionHeader)
+import {labelsDropdown} from "./scripts/directives/labelsdropdown"
+torrentApp.directive("labelsDropdown", labelsDropdown)
+import {dragAndDrop} from "./scripts/directives/draganddrop"
+torrentApp.directive("dragAndDrop", dragAndDrop)
+import {sorting, sort} from "./scripts/directives/sorting"
+torrentApp.directive("sorting", sorting)
+torrentApp.directive('sort', sort)
+import {dropDownController, dropdown as dropdownDirective, dropdownGroup} from "./scripts/directives/drop"
+torrentApp.controller("DropDownController", dropDownController)
+torrentApp.directive('dropdown', dropdownDirective)
+torrentApp.directive('dropdownGroup', dropdownGroup)
+import {torrentBody, torrentRow} from "./scripts/directives/torrenttable"
+torrentApp.directive("torrentBody", torrentBody)
+torrentApp.directive('torrentRow', torrentRow)
+import {search} from "./scripts/directives/search"
+torrentApp.directive("search", search)
+import {fixedHeader} from "./scripts/directives/fixedheader"
+torrentApp.directive("fixedHeader", fixedHeader)
+import {time} from "./scripts/directives/time"
+torrentApp.directive("time", time)
+import {limitBind, limitSource} from "./scripts/directives/limit"
+torrentApp.directive("limitBind", limitBind)
+torrentApp.directive('limitSource', limitSource)
 
 // Components
-import "./scripts/components/menuWin"
-import "./scripts/components/menuMac"
+import {menuWin} from "./scripts/components/menuWin"
+torrentApp.factory("menuWin", menuWin)
+import {menuMac} from "./scripts/components/menuMac"
+torrentApp.factory("menuMac", menuMac)

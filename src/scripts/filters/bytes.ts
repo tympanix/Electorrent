@@ -1,4 +1,4 @@
-angular.module("torrentApp").filter('bytes', function() {
+export let bytesFiler = function() {
         return function(bytes) {
             var val;
             var uom;
@@ -18,9 +18,9 @@ angular.module("torrentApp").filter('bytes', function() {
             }
             return [val, uom].join(' ');
         };
-    });
+    };
 
-angular.module("torrentApp").filter('speed', ['bytesFilter', function(bytes) {
+export let speedFilter = ['bytesFilter', function(bytes) {
     return function(bytesPerSecond, torrent) {
         var display = true;
 
@@ -34,4 +34,4 @@ angular.module("torrentApp").filter('speed', ['bytesFilter', function(bytes) {
             return '';
         }
     }
-}])
+}]

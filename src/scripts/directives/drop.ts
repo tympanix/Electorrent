@@ -1,6 +1,5 @@
-'use strict';
 
-angular.module('torrentApp').controller('DropDownController', ['$scope', function($scope) {
+export let dropDownController = ['$scope', function($scope) {
     $scope.options = [];
 
     this.add_option = function(title, value) {
@@ -51,9 +50,9 @@ angular.module('torrentApp').controller('DropDownController', ['$scope', functio
         return $scope.model === value;
     }
 
-}])
+}]
 
-.directive('dropdown', function() {
+export let dropdown = function() {
     return {
         restrict: 'E',
         replace: true,
@@ -114,9 +113,9 @@ angular.module('torrentApp').controller('DropDownController', ['$scope', functio
             });
         }
     };
-})
+}
 
-.directive('dropdownGroup', function() {
+export let dropdownGroup = function() {
     return {
         restrict: 'AE',
         replace: true,
@@ -164,4 +163,4 @@ angular.module('torrentApp').controller('DropDownController', ['$scope', functio
 
         }
     };
-});
+};

@@ -1,4 +1,5 @@
-angular.module('torrentApp').directive('modal', function() {
+
+export let modal = function() {
     return {
         templateUrl: template,
         replace: true,
@@ -70,4 +71,5 @@ angular.module('torrentApp').directive('modal', function() {
         form.find('.error.message').empty()
     }
 
-});
+};
+

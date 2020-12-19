@@ -1,6 +1,4 @@
-'use strict';
-
-angular.module('torrentApp').factory('$remote', ['$q', '$timeout', function($q, $timeout) {
+export let remoteService = ['$q', '$timeout', function($q, $timeout) {
 
     let _ID = 0
 
@@ -94,4 +92,4 @@ angular.module('torrentApp').factory('$remote', ['$q', '$timeout', function($q, 
     }
 
     return Remote
-}]);
+}];

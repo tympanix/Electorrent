@@ -1,6 +1,4 @@
-'use strict';
-
-angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', '$btclients', 'notificationService', 'electron', function($rootScope, $injector, $btclients, $notify, electron){
+export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notificationService', 'electron', function($rootScope, $injector, $btclients, $notify, electron){
 
     this.getClient = function(name) {
         var client = $btclients[name];
@@ -51,4 +49,4 @@ angular.module('torrentApp').service('$bittorrent', ['$rootScope', '$injector', 
 
         $rootScope.$btclient.addTorrentUrl(magnet);
     }
-}]);
+}];

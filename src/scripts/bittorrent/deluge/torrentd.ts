@@ -1,6 +1,5 @@
-'use strict';
 
-angular.module('torrentApp').factory('TorrentD', ['AbstractTorrent', function(AbstractTorrent) {
+export let TorrentD = ['AbstractTorrent', function(AbstractTorrent) {
 
     /**
      * Constructor, with class name.
@@ -138,4 +137,4 @@ angular.module('torrentApp').factory('TorrentD', ['AbstractTorrent', function(Ab
      * Return the constructor function (only change the class name)
      */
     return TorrentD;
-}]);
+}];

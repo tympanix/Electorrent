@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').service('synologyService', ["$http", "$q", "TorrentS", "notificationService", function(
+export let synologyService = ["$http", "$q", "TorrentS", "notificationService", function(
     $http, $q, TorrentS, $notify) {
 
     /*
@@ -402,4 +402,4 @@ angular.module('torrentApp').service('synologyService', ["$http", "$q", "Torrent
         }
     ];
 
-}]);
+}]

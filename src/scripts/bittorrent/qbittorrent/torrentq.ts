@@ -1,6 +1,5 @@
-'use strict';
 
-angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(AbstractTorrent) {
+export let torrentQ = ['AbstractTorrent', function(AbstractTorrent) {
 
     /**
     hash (string),
@@ -125,4 +124,4 @@ angular.module('torrentApp').factory('TorrentQ', ['AbstractTorrent', function(Ab
      * Return the constructor function
      */
     return TorrentQ;
-}]);
+}];

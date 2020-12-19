@@ -1,4 +1,5 @@
-angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bittorrent', function(electron, $rootScope, $bittorrent) {
+
+export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron, $rootScope, $bittorrent) {
     const name = electron.app.name;
 
     const template = [
@@ -209,4 +210,5 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bit
 
     return template;
 
-}])
+}]
+

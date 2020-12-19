@@ -1,6 +1,5 @@
-'use strict';
 
-angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remote", "notificationService", function(TorrentD, $q, $remote, $notify) {
+export let delugeService = ["TorrentD", "$q", "$remote", "notificationService", function(TorrentD, $q, $remote, $notify) {
 
     const Deluge = require('@electorrent/node-deluge')
     const worker = new Worker('scripts/workers/deluge.js')
@@ -246,4 +245,4 @@ angular.module('torrentApp').service('delugeService', ["TorrentD", "$q", "$remot
         },
     ];
 
-}]);
+}];

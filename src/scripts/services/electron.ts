@@ -1,4 +1,4 @@
-angular.module('torrentApp').factory("electron", [function() {
+export let electronService = [function() {
     var o: any = {};
 
     // Get the Electron remote
@@ -35,4 +35,4 @@ angular.module('torrentApp').factory("electron", [function() {
 
     // Return object
     return o;
-}])
+}]

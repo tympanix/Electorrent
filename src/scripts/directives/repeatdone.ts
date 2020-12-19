@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('repeatDone', ['$timeout', function($timeout) {
+
+export let repeatDone = ['$timeout', function($timeout) {
     return function(scope, element, attrs) {
         if (scope.$last) {
             $timeout(function() {
@@ -7,4 +8,5 @@ angular.module("torrentApp").directive('repeatDone', ['$timeout', function($time
             }, 0)
         }
     }
-}]);
+}];
+

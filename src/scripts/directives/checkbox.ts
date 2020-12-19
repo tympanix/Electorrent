@@ -1,5 +1,5 @@
-'use strict'
-angular.module("torrentApp").controller('toggleController', ['$scope', function($scope){
+
+export let toggleController = ['$scope', function($scope){
 
     if (angular.isFunction($scope.checked)) { $scope.ngModel = !!$scope.checked(); }
 
@@ -8,9 +8,9 @@ angular.module("torrentApp").controller('toggleController', ['$scope', function(
         $scope.ngModel = !$scope.ngModel;
     }
 
-}])
+}]
 
-angular.module("torrentApp").directive('toggle', function() {
+export let toggle = function() {
 
     function controller() {
         // var vm = this;
@@ -53,4 +53,4 @@ angular.module("torrentApp").directive('toggle', function() {
             '</div>',
         link: link
     };
-});
+};

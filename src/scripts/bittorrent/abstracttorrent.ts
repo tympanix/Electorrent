@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Column) {
+export let abstractTorrent = ['Column', function(Column) {
 
     const statusRegex = /[^a-zA-Z(): ]/g;
 
@@ -350,4 +350,4 @@ angular.module('torrentApp').factory('AbstractTorrent', ['Column', function(Colu
      * Return the constructor function
      */
     return AbstractTorrent;
-}]);
+}];

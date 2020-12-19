@@ -1,7 +1,6 @@
-import * as angular from "angular"
-import Fuse from "fuse.js"
+import Fuse from "fuse.js";
 
-angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config, AbstractTorrent) {
+export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config, AbstractTorrent) {
     const LIMIT = 25;
 
     var selected = [];
@@ -573,4 +572,4 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         }
     }
 
-}])
+}]

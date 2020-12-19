@@ -1,4 +1,4 @@
-angular.module('torrentApp').factory("httpFormService", function() {
+export let httpFormService = [function() {
 
     // I prepare the request data for the form post.
     function transformRequest(data, getHeaders) {
@@ -44,4 +44,4 @@ angular.module('torrentApp').factory("httpFormService", function() {
             return "";
         }
     }
-});
+}];

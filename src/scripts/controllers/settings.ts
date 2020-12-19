@@ -1,4 +1,4 @@
-angular.module("torrentApp").controller("settingsController", ["$rootScope", "$scope", "$injector", "$q", "$bittorrent", "$btclients", "configService", "notificationService", "electron", function($rootScope, $scope, $injector, $q, $bittorrent, $btclients, config, $notify, electron) {
+export let settingsController = ["$rootScope", "$scope", "$injector", "$q", "$bittorrent", "$btclients", "configService", "notificationService", "electron", function($rootScope, $scope, $injector, $q, $bittorrent, $btclients, config, $notify, electron) {
 
     let serverCopy
 
@@ -196,4 +196,4 @@ angular.module("torrentApp").controller("settingsController", ["$rootScope", "$s
         $scope.gotoPage(page);
     })
 
-}]);
+}]

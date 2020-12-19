@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('dropdown', [function() {
+
+export let dropdown = [function() {
     return {
         restrict: 'A',
         link: link,
@@ -52,9 +53,9 @@ angular.module("torrentApp").directive('dropdown', [function() {
         }
     }
 
-}]);
+}];
 
-angular.module("torrentApp").directive('dropItem', [function() {
+export let dropItem = [function() {
     return {
         restrict: 'A',
         link: link
@@ -72,4 +73,4 @@ angular.module("torrentApp").directive('dropItem', [function() {
     }
 
 
-}]);
+}];

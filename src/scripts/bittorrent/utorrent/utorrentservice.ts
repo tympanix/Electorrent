@@ -1,13 +1,4 @@
-"use strict";
-
-angular.module("torrentApp").service("utorrentService", [
-  "$http",
-  "$resource",
-  "$log",
-  "$q",
-  "TorrentU",
-  "notificationService",
-  "Column",
+export let utorrentService = ["$http", "$resource", "$log", "$q", "TorrentU", "notificationService", "Column",
   function ($http, $resource, $log, $q, Torrent, $notify, Column) {
     this.server = undefined;
     this.name = "µTorrent";
@@ -454,4 +445,4 @@ angular.module("torrentApp").service("utorrentService", [
       },
     ];
   },
-]);
+];

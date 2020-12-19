@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('dragAndDrop', ['$rootScope', '$document', 'electron', function($rootScope, $document, electron) {
+
+export let dragAndDrop = ['$rootScope', '$document', 'electron', function($rootScope, $document, electron) {
     return function(scope, element /*, attrs*/) {
 
         var dragging = 0;
@@ -49,4 +50,4 @@ angular.module("torrentApp").directive('dragAndDrop', ['$rootScope', '$document'
             $rootScope.$emit('show:draganddrop', false);
         });
     }
-}]);
+}];

@@ -1,6 +1,4 @@
-'use strict';
-
-angular.module('torrentApp').factory('Column', [function() {
+export let columnService = [function() {
 
     /**
      * Constructor, with class name
@@ -39,4 +37,4 @@ angular.module('torrentApp').factory('Column', [function() {
      * Return the constructor function
      */
     return Column;
-}]);
+}];

@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('sorting', ['$window', function($window) {
+
+export let sorting = ['$window', function($window) {
 
     return {
         restrict: 'A',
@@ -63,9 +64,9 @@ angular.module("torrentApp").directive('sorting', ['$window', function($window) 
         }
     }
 
-}]);
+}];
 
-angular.module("torrentApp").directive('sort', [function() {
+export let sort = [function() {
 
     return {
         restrict: 'A',
@@ -137,4 +138,4 @@ angular.module("torrentApp").directive('sort', [function() {
         ctrl.last = element;
     }
 
-}]);
+}];

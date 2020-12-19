@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('search', ['$rootScope', '$document', function($rootScope, $document) {
+
+export let search = ['$rootScope', '$document', function($rootScope, $document) {
     return {
         restrict: 'A',
         link: link
@@ -17,4 +18,5 @@ angular.module("torrentApp").directive('search', ['$rootScope', '$document', fun
         });
     }
 
-}]);
+}];
+

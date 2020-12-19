@@ -1,6 +1,8 @@
-angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bittorrent', 'notificationService', 'configService', function(electron, $rootScope, $bittorrent, $notify, config) {
+import mousetrap from "mousetrap"
 
-    Mousetrap.bind('ctrl+a', function() {
+export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationService', 'configService', function(electron, $rootScope, $bittorrent, $notify, config) {
+
+    mousetrap.bind('ctrl+a', function() {
         if (document.activeElement.nodeName === 'INPUT') {
             electron.remote.getCurrentWebContents().selectAll()
         } else {
@@ -173,4 +175,5 @@ angular.module('torrentApp').factory("menuWin", ['electron', '$rootScope', '$bit
 
     return template;
 
-}])
+}]
+

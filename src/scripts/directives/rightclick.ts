@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('ngRightClick', function($parse) {
+export let ngRightClick = function($parse) {
     function link(scope, element, attrs) {
         var fn = $parse(attrs.ngRightClick);
         element.bind('contextmenu', function(event) {
@@ -11,4 +11,5 @@ angular.module("torrentApp").directive('ngRightClick', function($parse) {
     return {
         link: link
     }
-});
+};
+

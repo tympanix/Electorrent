@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive("labelsDropdown", [
+
+export let labelsDropdown = [
   function () {
     return {
       restrict: "A",
@@ -23,4 +24,4 @@ angular.module("torrentApp").directive("labelsDropdown", [
       },
     };
   },
-]);
+];

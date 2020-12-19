@@ -1,4 +1,4 @@
-angular.module("torrentApp").directive('progress', ['$timeout', function($timeout) {
+export let progress = ['$timeout', function($timeout) {
     return {
         scope: {
             torrent: '=progress',
@@ -52,4 +52,4 @@ angular.module("torrentApp").directive('progress', ['$timeout', function($timeou
         updateProgress()
     }
 
-}]);
+}];

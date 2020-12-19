@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('time', ['$timeout', '$filter', function($timeout, $filter) {
+
+export let time = ['$timeout', '$filter', function($timeout, $filter) {
 
     const DAY = 60*60*24*1000
     const HOUR = 60*60*1000
@@ -60,4 +61,5 @@ angular.module("torrentApp").directive('time', ['$timeout', '$filter', function(
 
     }
 
-}]);
+}];
+

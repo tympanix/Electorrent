@@ -1,11 +1,6 @@
-"use strict";
+import _ from "underscore"
 
-angular.module("torrentApp").service("transmissionService", [
-  "$http",
-  "$q",
-  "TorrentT",
-  "transmissionConfig",
-  "notificationService",
+export let transmissionService = ["$http", "$q", "TorrentT", "transmissionConfig", "notificationService",
   function ($http, $q, TorrentT, transmissionConfig, $notify) {
     const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 
@@ -468,4 +463,4 @@ angular.module("torrentApp").service("transmissionService", [
       },
     ];
   },
-]);
+];

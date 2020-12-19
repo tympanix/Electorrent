@@ -1,4 +1,4 @@
-angular.module('torrentApp').factory("transmissionConfig", [function() {
+export let transmissionConfig = [function() {
 
     var fields = [
         "activityDate",
@@ -75,4 +75,4 @@ angular.module('torrentApp').factory("transmissionConfig", [function() {
         fields: fields
     }
 
-}])
+}]

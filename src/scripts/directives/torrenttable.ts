@@ -1,4 +1,5 @@
-angular.module("torrentApp").directive('torrentBody', ['$document', '$compile', function($document, $compile) {
+
+export let torrentBody = ['$document', '$compile', function($document, $compile) {
     return {
         restrict: 'A',
         controller: controller,
@@ -55,9 +56,9 @@ angular.module("torrentApp").directive('torrentBody', ['$document', '$compile', 
       }, true)
     }
 
-}]);
+}];
 
-angular.module("torrentApp").directive('torrentRow', [function() {
+export let torrentRow = [function() {
     return {
         restrict: 'A',
         require: '^^torrentBody',
@@ -79,4 +80,5 @@ angular.module("torrentApp").directive('torrentRow', [function() {
       ctrl.subscribe(scope)
     }
 
-}]);
+}];
+
