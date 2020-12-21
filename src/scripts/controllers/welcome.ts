@@ -26,7 +26,6 @@ export let welcomeController = ["$scope", "$timeout", "$bittorrent", "$btclients
     }
 
     $scope.setPath = function() {
-        console.log("Set path")
         if ($scope.server.client) {
             $scope.server.setPath()
         }

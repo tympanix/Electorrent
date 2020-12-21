@@ -13,6 +13,8 @@ const concat = require('gulp-concat');
 const path = require('path');
 const merge = require('merge-stream');
 const iconfont = require('gulp-iconfont');
+const browserify = require('browserify');
+const source = require('vinyl-source-stream')
 
 const PROD = process.env.NODE_ENV === 'production'
 const OUT = "./app";
@@ -61,30 +63,22 @@ gulp.task('build:typescript', function() {
     .pipe(gulp.dest(OUT))
 })
 
-gulp.task('build:typescript', function() {
-  return gulp.src('src/main.ts')
-    .pipe(ts({
-      moduleResolution: "node",
-      noImplicitAny: false,
-      outFile: 'main.js',
-      module: "amd",
-      allowSyntheticDefaultImports: true,
-      downlevelIteration: true,
-      esModuleInterop: true,
-      typeRoots: ["node_modules/@types", "src/types"],
-    }))
+gulp.task('build:browserify', function() {
+  let bundler = browserify({
+      entries: `${OUT}/main.js`,
+      node: true,
+      cache: {},
+      packageCache: {},
+      fullPaths: true,
+  }) 
+  bundler.exclude('electron')
+  return bundler.bundle()
+    .pipe(source('main.bundle.js'))
     .pipe(gulp.dest(OUT))
 })
 
 gulp.task('build:useref', function() {
-    var tsStream = gulp.src('src/**/*.ts').pipe(ts({
-      esModuleInterop: true,
-      module: "commonjs",
-      allowSyntheticDefaultImports: true,
-      downlevelIteration: true,
-      typeRoots: ["node_modules/@types", "./src/types"],
-    }));
-    var conf = {dev: c => PROD ? '' : c, additionalStreams: [tsStream]}
+    var conf = {dev: c => PROD ? '' : c}
     var maps = lazypipe().pipe(sourcemaps.init, { loadMaps: true})
 
     return gulp.src('src/*.html')
@@ -172,7 +166,9 @@ gulp.task('semantic:default', function() {
 
 gulp.task('build:semantic', gulp.parallel('semantic:src', 'semantic:default'))
 
-gulp.task('build:static', gulp.parallel('build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers', 'build:build'))
+gulp.task('build:static', gulp.parallel('build:useref', 'build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers', 'build:build'))
+
+gulp.task('build:bundle', gulp.series('build:typescript', 'build:browserify'))
 
 gulp.task('build:less', function() {
   let dir = 'src/css/themes'
@@ -199,6 +195,6 @@ gulp.task('build:less', function() {
 
 gulp.task('build:styles', gulp.series(gulp.parallel('build:semantic', 'build:fonts'), 'build:less'))
 
-gulp.task('build', gulp.parallel('build:static', 'build:styles'));
+gulp.task('build', gulp.parallel('build:static', 'build:styles', 'build:bundle'));
 
 gulp.task('install', gulp.parallel('build:semantic'))
