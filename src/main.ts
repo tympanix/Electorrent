@@ -1,27 +1,3 @@
-// General browser dependencies
-// declare global {
-//     interface Window {
-//         $: JQueryStatic;
-//         jQuery: JQueryStatic;
-//     }
-// }
-// import '../node_modules/jquery/dist/jquery.js'
-// import "jquery-ui"
-// import "fomantic-ui"
-// import "marked"
-// import "base64-js"
-
-// // AngularJS front-end framework
-// import * as angular from "angular"
-
-// // AngularJS dependency modules
-// import "angular-resource"
-// import "angular-animate"
-// import "ng-infinite-scroll"
-// import "angular-table-resize"
-// import "angular-marked"
-// import "angular-ui-sortable"
-
 declare global {
     const angular: ng.IAngularStatic;
 }
