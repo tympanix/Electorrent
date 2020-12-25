@@ -1,34 +1,34 @@
+import { Torrent } from '../abstracttorrent'
 
-export let torrentQ = ['AbstractTorrent', function(AbstractTorrent) {
+export class QBittorrentTorrent extends Torrent {
 
-    /**
-    hash (string),
-    status* (integer),
-    name (string),
-    size (integer in bytes),
-    percent progress (integer in per mils),
-    downloaded (integer in bytes),
-    upload-speeded (integer in bytes),
-    ratio (integer in per mils),
-    upload-speed speed (integer in bytes per second),
-    download speed (integer in bytes per second),
-    eta (integer in seconds),
-    label (string),
-    peers connected (integer),
-    peers in swarm (integer),
-    seeds connected (integer),
-    seeds in swarm (integer),
-    availability (integer in 1/65535ths),
-    torrent queue order (integer),
-    remaining (integer in bytes)
-    */
+    // Field specific for qBittorrent
+    state: string
+    creationDate: string
+    pieceSize: number
+    comment: string
+    totalWasted: number
+    uploadedSession: number
+    downloadedSession: number
+    upLimit: number
+    downLimit: number
+    timeElapsed: number
+    seedingTime: number
+    connectionsLimit: number
+    createdBy: number
+    downAvgSpeed: number
+    lastSeen: number
+    peers: number
+    havePieces: any
+    totalPieces: number
+    reannounce: string
+    upSpeedAvg: number
+    forceStart: boolean
+    sequentialDownload: boolean
 
-    /**
-     * Constructor, with class name
-     */
-    function TorrentQ(hash, data) {
 
-        AbstractTorrent.call(this, {
+    constructor(hash: string, data: Record<string, any>) {
+        super({
             hash: hash,
             name: data.name,
             size: data.size || data.total_size,
@@ -76,52 +76,45 @@ export let torrentQ = ['AbstractTorrent', function(AbstractTorrent) {
 
     }
 
-    // Inherit by prototypal inheritance
-    TorrentQ.prototype = Object.create(AbstractTorrent.prototype);
-
-    TorrentQ.prototype.getStatus = function() {
-        var args = Array.prototype.slice.call(arguments);
+    getStatus(...statusOr: string[]) {
+        var args = Array.prototype.slice.call(statusOr);
         return (args.indexOf(this.state) > -1);
     }
 
-    TorrentQ.prototype.isStatusError = function() {
+    isStatusError() {
         return this.getStatus('error')
     };
-    TorrentQ.prototype.isStatusStopped = function() {
+    isStatusStopped() {
         return this.getStatus('paused', 'pausedUP', 'pausedDL') && !this.isStatusCompleted()
     };
-    TorrentQ.prototype.isStatusQueued = function() {
+    isStatusQueued() {
         return this.getStatus('queuedUP', 'queuedDL')
     };
-    TorrentQ.prototype.isStatusCompleted = function() {
+    isStatusCompleted() {
         return (this.percent === 1000) || this.getStatus('checkingUP')
     };
-    TorrentQ.prototype.isStatusDownloading = function() {
+    isStatusDownloading() {
         return this.getStatus('downloading', 'stalledDL', 'metaDL') || this.isStatusChecking()
     };
-    TorrentQ.prototype.isStatusSeeding = function() {
+    isStatusSeeding() {
         return this.getStatus('uploading', 'stalledUP')
     };
-    TorrentQ.prototype.isStatusPaused = function() {
+    isStatusPaused() {
         /* qBittorrent only has started and stopped torrents */
         return false
     };
 
     /* Additional custom states */
-    TorrentQ.prototype.isStatusChecking = function() {
+    isStatusChecking() {
         return this.getStatus('checkingDL', 'checkingUP', 'checkingResumeData')
     }
 
-    TorrentQ.prototype.manualStatusText = function () {
+    manualStatusText() {
         if (this.isStatusChecking()) {
             return 'Checking'
         } else {
-            return AbstractTorrent.prototype.manualStatusText.call(this)
+            return super.manualStatusText()
         }
     };
 
-    /**
-     * Return the constructor function
-     */
-    return TorrentQ;
-}];
+}

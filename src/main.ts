@@ -96,18 +96,10 @@ import { notificationService } from "./scripts/services/notification"
 torrentApp.service("notificationService", notificationService)
 import { serverService} from "./scripts/services/server"
 torrentApp.factory("Server", serverService)
-import { columnService } from  "./scripts/services/column"
-torrentApp.factory("Column", columnService)
 import { remoteService } from "./scripts/services/remote"
 torrentApp.factory("$remote", remoteService)
 
 // Bittorrent
-import { abstractTorrent } from "./scripts/bittorrent/abstracttorrent"
-torrentApp.factory("AbstractTorrent", abstractTorrent)
-import {qbittorrentService} from "./scripts/bittorrent/qbittorrent/qbittorrentservice"
-torrentApp.service("qbittorrentService", qbittorrentService)
-import { torrentQ } from "./scripts/bittorrent/qbittorrent/torrentq"
-torrentApp.factory("TorrentQ", torrentQ)
 import { utorrentService } from "./scripts/bittorrent/utorrent/utorrentservice"
 torrentApp.service("utorrentService", utorrentService)
 import { torrentU } from "./scripts/bittorrent/utorrent/torrentu"

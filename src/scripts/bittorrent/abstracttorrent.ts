@@ -1,16 +1,80 @@
-'use strict';
+import { Column } from '../services/column'
 
-export let abstractTorrent = ['Column', function(Column) {
+export interface TorrentProps {
+    hash: string
+    status?: number
+    name?: string
+    size?: number
+    percent?: number
+    downloaded?: number
+    uploaded?: number
+    ratio?: number
+    uploadSpeed?: number
+    downloadSpeed?: number
+    eta?: number
+    label?: string
+    peersConnected?: number
+    peersInSwarm?: number
+    seedsConnected?: number
+    seedsInSwarm?: number
+    torrentQueueOrder?: number
+    statusMessage?: string
+    dateAdded?: number
+    dateCompleted?: number
+    savePath?: string
+    props?: Record<string, any>
+}
 
-    const statusRegex = /[^a-zA-Z(): ]/g;
+export abstract class Torrent implements TorrentProps {
 
-    var decodeName = function(name) {
+    // Specific fields
+    selected: boolean
+    isStarred: boolean
+    decodedName: string
+    cleanedName: string
+
+    // Inherited fields
+    hash: string
+    status: number
+    name: string
+    size: number
+    percent: number
+    downloaded: number
+    uploaded: number
+    ratio: number
+    uploadSpeed: number
+    downloadSpeed: number
+    eta: number
+    label: string
+    peersConnected: number
+    peersInSwarm: number
+    seedsConnected: number
+    seedsInSwarm: number
+    torrentQueueOrder: number
+    statusMessage: string
+    dateAdded: number
+    dateCompleted: number
+    savePath: string
+    props: Record<string, any>
+
+
+    constructor(props: TorrentProps) {
+        for (let p in props) {
+            this[p] = props[p]
+        }
+        this.selected = false;
+        this.isStarred = false;
+        this.decodedName = this.decodeName(this.name);
+        this.cleanedName = this.cleanName(this.decodedName);
+    }
+
+    private decodeName(name: string) {
         if(!name) return undefined
 
         return name.replace(/[\._]/g, ' ').replace(/(\[[^\]]*\])(.*)$/, '$2 $1').trim();
     };
 
-    var cleanName = function(name) {
+    private cleanName(name: string) {
         if(!name) return undefined
 
         return name.toLowerCase().replace(/s?([0-9]{1,2})[x|e|-]([0-9]{1,2})/, '').replace(
@@ -18,83 +82,8 @@ export let abstractTorrent = ['Column', function(Column) {
             '').trim();
     };
 
-    /**
-    hash (string),
-    status* (integer),
-    name (string),
-    size (integer in bytes),
-    percent progress (integer in per mils),
-    downloaded (integer in bytes),
-    upload-speeded (integer in bytes),
-    ratio (integer in per mils),
-    upload-speed speed (integer in bytes per second),
-    download speed (integer in bytes per second),
-    eta (integer in seconds),
-    label (string),
-    peers connected (integer),
-    peers in swarm (integer),
-    seeds connected (integer),
-    seeds in swarm (integer),
-    availability (integer in 1/65535ths),
-    torrent queue order (integer),
-    remaining (integer in bytes)
-    */
 
-    /**
-     * Constructor, with class name
-     */
-    function AbstractTorrent({
-        hash,
-        name,
-        size,
-        percent,
-        downloaded,
-        uploaded,
-        ratio,
-        uploadSpeed,
-        downloadSpeed,
-        eta,
-        label,
-        peersConnected,
-        peersInSwarm,
-        seedsConnected,
-        seedsInSwarm,
-        torrentQueueOrder,
-        statusMessage,
-        dateAdded,
-        dateCompleted,
-        savePath
-    }) {
-
-        this.selected = false;
-        this.isStarred = false;
-
-        this.hash = hash;
-        this.name = name;
-        this.size = size;
-        this.percent = percent;
-        this.downloaded = downloaded;
-        this.uploaded = uploaded;
-        this.ratio = ratio;
-        this.uploadSpeed = uploadSpeed;
-        this.downloadSpeed = downloadSpeed;
-        this.eta = eta;
-        this.label = label;
-        this.peersConnected = peersConnected;
-        this.peersInSwarm = peersInSwarm;
-        this.seedsConnected = seedsConnected;
-        this.seedsInSwarm = seedsInSwarm;
-        this.torrentQueueOrder = torrentQueueOrder;
-        this.statusMessage = statusMessage;
-        this.dateAdded = dateAdded;
-        this.dateCompleted = dateCompleted;
-        this.savePath = savePath;
-
-        this.decodedName = decodeName(this.name);
-        this.cleanedName = cleanName(this.decodedName);
-    }
-
-    AbstractTorrent.prototype.update = function(other) {
+    update(other: Torrent) {
         for(var k in other) {
             if(other.hasOwnProperty(k) && k !== 'selected') {
                 if(other[k] !== undefined) {
@@ -104,7 +93,7 @@ export let abstractTorrent = ['Column', function(Column) {
         }
     };
 
-    AbstractTorrent.prototype.getMagnetURI = function(longUri) {
+    getMagnetURI(longUri: string) {
         var i = 0;
         var link = 'magnet:?xt=urn:btih:' + this.hash;
         if(longUri) {
@@ -124,33 +113,19 @@ export let abstractTorrent = ['Column', function(Column) {
     };
 
 
-    AbstractTorrent.prototype.isStatusError = function() {
-        throw new Error('isStatusError not implemented');
-    };
-    AbstractTorrent.prototype.isStatusPaused = function() {
-        throw new Error('isStatusPaused not implemented');
-    };
-    AbstractTorrent.prototype.isStatusQueued = function() {
-        throw new Error('isStatusQueued not implemented');
-    };
-    AbstractTorrent.prototype.isStatusCompleted = function() {
-        throw new Error('isStatusCompleted not implemented');
-    };
-    AbstractTorrent.prototype.isStatusDownloading = function() {
-        throw new Error('isStatusDownloading not implemented');
-    };
-    AbstractTorrent.prototype.isStatusSeeding = function() {
-        throw new Error('isStatusSeeding not implemented');
-    };
-    AbstractTorrent.prototype.isStatusStopped = function() {
-        throw new Error('isStatusStopped not implemented');
-    };
+    abstract isStatusError(): boolean;
+    abstract isStatusPaused(): boolean;
+    abstract isStatusQueued(): boolean;
+    abstract isStatusCompleted(): boolean;
+    abstract isStatusDownloading(): boolean;
+    abstract isStatusSeeding(): boolean;
+    abstract isStatusStopped(): boolean;
 
-    AbstractTorrent.prototype.getPercentStr = function() {
+    getPercentStr(): string {
         return(Number((this.percent || 0) / 10)).toFixed(0) + '%';
     };
 
-    AbstractTorrent.prototype.statusColor = function () {
+    statusColor(): string {
         if (this.isStatusPaused()){
             return 'grey';
         } else if (this.isStatusSeeding()){
@@ -168,7 +143,7 @@ export let abstractTorrent = ['Column', function(Column) {
         }
     };
 
-    AbstractTorrent.prototype.manualStatusText = function () {
+    manualStatusText(): string {
         if (this.isStatusPaused()){
             return 'Paused';
         } else if (this.isStatusStopped()){
@@ -188,12 +163,13 @@ export let abstractTorrent = ['Column', function(Column) {
         }
     };
 
-    AbstractTorrent.prototype.statusText = function () {
+    statusText(): string {
+        const statusRegex = /[^a-zA-Z(): ]/g;
         if (!this.statusMessage) return this.manualStatusText();
         return this.statusMessage.replace(statusRegex, '');
     };
 
-    AbstractTorrent.prototype.seedsText = function () {
+    seedsText(): string {
         if (Number.isInteger(this.seedsConnected) && Number.isInteger(this.seedsInSwarm)) {
             return this.seedsConnected + ' of ' + this.seedsInSwarm
         } else {
@@ -201,7 +177,7 @@ export let abstractTorrent = ['Column', function(Column) {
         }
     }
 
-    AbstractTorrent.prototype.peersText = function() {
+    peersText(): string {
         if (Number.isInteger(this.peersConnected) && Number.isInteger(this.peersInSwarm)) {
             return this.peersConnected + ' of ' + this.peersInSwarm
         } else {
@@ -209,25 +185,25 @@ export let abstractTorrent = ['Column', function(Column) {
         }
     }
 
-    AbstractTorrent.prototype.queueText = function() {
+    queueText(): string {
         if (Number.isInteger(this.torrentQueueOrder) && this.torrentQueueOrder >= 0) {
-            return this.torrentQueueOrder
+            return this.torrentQueueOrder.toString()
         } else {
             return ''
         }
     }
 
-    AbstractTorrent.sort = function(attribute) {
+    static sort(attribute: keyof Torrent) {
         switch (attribute) {
-            case 'decodedName': return alphabetical
-            case 'label': return alphabetical
-            case 'torrentQueueOrder': return naturalNumberAsc
-            case 'eta': return naturalNumberAsc
-            default: return numerical
+            case 'decodedName': return Torrent.alphabetical
+            case 'label': return Torrent.alphabetical
+            case 'torrentQueueOrder': return Torrent.naturalNumberAsc
+            case 'eta': return Torrent.naturalNumberAsc
+            default: return Torrent.numerical
         }
     }
 
-    AbstractTorrent.COL_NAME = new Column({
+    static COL_NAME = new Column({
       name: 'Name',
       enabled: true,
       template: '{{settings.ui.cleanNames ? torrent.decodedName : torrent.name}}',
@@ -235,35 +211,35 @@ export let abstractTorrent = ['Column', function(Column) {
       sort: Column.ALPHABETICAL
     })
 
-    AbstractTorrent.COL_SIZE = new Column({
+    static COL_SIZE = new Column({
       name: 'Size',
       enabled: true,
       template: '{{torrent.size | bytes}}',
       attribute: 'size'
     })
 
-    AbstractTorrent.COL_DOWNSPEED = new Column({
+    static COL_DOWNSPEED = new Column({
       name: 'Down',
       enabled: true,
       template: '{{torrent.downloadSpeed | speed}}',
       attribute: 'downloadSpeed'
     })
 
-    AbstractTorrent.COL_UPSPEED = new Column({
+    static COL_UPSPEED = new Column({
       name: 'Up',
       enabled: true,
       template: '{{torrent.uploadSpeed | speed}}',
       attribute: 'uploadSpeed'
     })
 
-    AbstractTorrent.COL_PROGRESS = new Column({
+    static COL_PROGRESS = new Column({
       name: 'Progress',
       enabled: true,
       template: '<div progress="torrent"></div>',
       attribute: 'percent'
     })
 
-    AbstractTorrent.COL_LABEL = new Column({
+    static COL_LABEL = new Column({
       name: 'Label',
       enabled: true,
       template: '{{torrent.label}}',
@@ -271,28 +247,28 @@ export let abstractTorrent = ['Column', function(Column) {
       sort: Column.ALPHABETICAL
     })
 
-    AbstractTorrent.COL_DATEADDED = new Column({
+    static COL_DATEADDED = new Column({
       name: 'Date Added',
       enabled: true,
       template: '<span time="torrent.dateAdded"></span>',
       attribute: 'dateAdded'
     })
 
-    AbstractTorrent.COL_PEERS = new Column({
+    static COL_PEERS = new Column({
       name: 'Peers',
       enabled: false,
       template: '{{torrent.peersText()}}',
       attribute: 'peersConnected'
     })
 
-    AbstractTorrent.COL_SEEDS = new Column({
+    static COL_SEEDS = new Column({
       name: 'Seeds',
       enabled: false,
       template: '{{torrent.seedsText()}}',
       attribute: 'seedsConnected'
     })
 
-    AbstractTorrent.COL_QUEUE = new Column({
+    static COL_QUEUE = new Column({
       name: 'Queue',
       enabled: false,
       template: '{{torrent.torrentQueueOrder | torrentQueue}}',
@@ -300,7 +276,7 @@ export let abstractTorrent = ['Column', function(Column) {
       sort: Column.NATURAL_NUMBER_ASC
     })
 
-    AbstractTorrent.COL_ETA = new Column({
+    static COL_ETA = new Column({
       name: 'ETA',
       enabled: false,
       template: '{{torrent.eta | eta}}',
@@ -308,46 +284,42 @@ export let abstractTorrent = ['Column', function(Column) {
       sort: Column.NATURAL_NUMBER_ASC
     })
 
-    AbstractTorrent.COL_RATIO = new Column({
+    static COL_RATIO = new Column({
       name: 'Ratio',
       enabled: false,
       template: '{{torrent.ratio | torrentRatio}}',
       attribute: 'ratio'
     })
 
-    AbstractTorrent.COLUMNS = [
-        AbstractTorrent.COL_NAME,
-        AbstractTorrent.COL_SIZE,
-        AbstractTorrent.COL_DOWNSPEED,
-        AbstractTorrent.COL_UPSPEED,
-        AbstractTorrent.COL_PROGRESS,
-        AbstractTorrent.COL_LABEL,
-        AbstractTorrent.COL_DATEADDED,
-        AbstractTorrent.COL_PEERS,
-        AbstractTorrent.COL_SEEDS,
-        AbstractTorrent.COL_QUEUE,
-        AbstractTorrent.COL_ETA,
-        AbstractTorrent.COL_RATIO
+    static COLUMNS = [
+        Torrent.COL_NAME,
+        Torrent.COL_SIZE,
+        Torrent.COL_DOWNSPEED,
+        Torrent.COL_UPSPEED,
+        Torrent.COL_PROGRESS,
+        Torrent.COL_LABEL,
+        Torrent.COL_DATEADDED,
+        Torrent.COL_PEERS,
+        Torrent.COL_SEEDS,
+        Torrent.COL_QUEUE,
+        Torrent.COL_ETA,
+        Torrent.COL_RATIO
     ]
 
-    function alphabetical(a, b) {
+    private static alphabetical(a: string, b: string) {
         var aLower = a.toLowerCase();
         var bLower = b.toLowerCase();
         return aLower.localeCompare(bLower);
     }
 
-    function numerical(a, b){
+    private static numerical(a: number, b: number){
         return b - a;
     }
 
-    function naturalNumberAsc(a, b){
+    private static naturalNumberAsc(a: number, b: number){
         if (a < 1) return 1
         if (b < 1) return -1
         return a - b
     }
+}
 
-    /**
-     * Return the constructor function
-     */
-    return AbstractTorrent;
-}];

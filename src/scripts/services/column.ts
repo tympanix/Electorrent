@@ -1,40 +1,47 @@
-export let columnService = [function() {
+type sortFunc = (a: any, b: any) => number
 
-    /**
-     * Constructor, with class name
-     */
-    function Column({
-        name,
-        enabled = false,
-        attribute,
-        template = '',
-        sort = Column.NUMERICAL
-    }) {
-        this.name = name
-        this.enabled = enabled
-        this.attribute = attribute
-        this.template = template
-        this.sort = sort
+export interface ColumnProps {
+    name?: string
+    enabled?: boolean
+    attribute?: string
+    template?: string
+    sort?: sortFunc
+}
+
+export class Column implements ColumnProps {
+
+    name: string
+    attribute: string
+    enabled: boolean
+    template: string
+    sort: sortFunc
+
+
+    constructor(props: ColumnProps = {}) {
+        for (let p in Object.assign(Column.defaultProps, props)) {
+            this[p] = props[p]
+        }
     }
 
-    Column.ALPHABETICAL = function(a, b) {
+    static ALPHABETICAL = function(a: string, b: string) {
         var aLower = a.toLowerCase();
         var bLower = b.toLowerCase();
         return aLower.localeCompare(bLower);
     }
 
-    Column.NUMERICAL = function(a, b){
+    static NUMERICAL = function(a: number, b: number){
         return b - a;
     }
 
-    Column.NATURAL_NUMBER_ASC = function(a, b){
+    static NATURAL_NUMBER_ASC = function(a: number, b: number){
         if (a < 0) return 1
         if (b < 0) return -1
         return a - b
     }
 
-    /**
-     * Return the constructor function
-     */
-    return Column;
-}];
+    private static defaultProps: ColumnProps = {
+        enabled: false,
+        template: '',
+        sort: Column.NUMERICAL,
+    }
+}
