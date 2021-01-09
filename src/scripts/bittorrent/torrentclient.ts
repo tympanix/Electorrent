@@ -41,7 +41,7 @@ export type TorrentActionElem<T extends Torrent> = TorrentActionButton<T> | Torr
 
 export type TorrentActionList<T extends Torrent> = TorrentActionElem<T>[]
 
-export interface ContextAction<T extends Torrent> {
+export interface ContextActionButton<T extends Torrent> {
     label: string
     click(torrents: T[]): Promise<void>
     icon?: string
@@ -49,7 +49,17 @@ export interface ContextAction<T extends Torrent> {
     check?(torrent: T): boolean
 }
 
-export type ContextActionList<T extends Torrent> = ContextAction<T>[]
+export interface ContextActionMenu<T extends Torrent> {
+    label: string
+    menu: {
+        label: string
+        click(torrents: T[]): Promise<void>
+    }[]
+}
+
+export type ContextActionElem<T extends Torrent> = ContextActionButton<T> | ContextActionMenu<T>;
+
+export type ContextActionList<T extends Torrent> = ContextActionElem<T>[]
 
 export abstract class TorrentClient<T extends Torrent = Torrent> {
 

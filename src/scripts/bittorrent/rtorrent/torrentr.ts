@@ -1,22 +1,19 @@
+import {Torrent} from "../abstracttorrent";
 
-export let TorrentR = ['AbstractTorrent', function(AbstractTorrent) {
+export class RtorrentTorrent extends Torrent {
 
+    active: boolean;
+    checked: boolean;
+    checking: boolean;
+    open: boolean;
+    complete: boolean;
+    message: string;
+    tracker: string;
+    trackers: string[];
 
-    /**
-     * Constructor, with class name.
-     * Replace all occurences of __TorrentName__ (including underscores) with
-     * the name of your torrent class. Best practise is naming the class 'Torrent'
-     * and appending a single letter desribing the client to which it belongs.
-     * (e.g. TorrentQ for qBittorrent, TorrentU for µTorrent... and so on)
-     */
-    function TorrentR(data) {
-        /*
-         * Please modify the constructor function parameters to
-         * your liking for the best implementation. If data is obtained as an array from
-         * the API one could list each function parameter in the same order as the array
-         */
+    constructor(data: Record<string, any>) {
 
-        AbstractTorrent.call(this, {
+        super({
             hash: data.hash, /* Hash (string): unique identifier for the torrent */
             name: data.name, /* Name (string): the name of the torrent */
             size: data.size, /* Size (integer): size of the file to be downloaded in bytes */
@@ -57,28 +54,11 @@ export let TorrentR = ['AbstractTorrent', function(AbstractTorrent) {
     }
 
 
-    /*
-     * Inherit by prototypal inheritance. Leave this line as is (only rename class name).
-     * Do NOT implement any prototypal features above this line!
-     */
-    TorrentR.prototype = Object.create(AbstractTorrent.prototype);
-
-
-    /**
-     * Returns whether this torrent is in an error state. Torrents in this group shows
-     * up in the 'Error' tab in the GUI
-     * @return {boolean} isStatusError
-     */
-    TorrentR.prototype.isStatusError = function() {
+    isStatusError(): boolean {
         return (!!this.message)
     };
 
-    /**
-     * Returns whether this torrent is stopped. Torrents in this group shows up in
-     * the 'Stopped' tab to the left in the GUI
-     * @return {boolean} isStatusStopped
-     */
-    TorrentR.prototype.isStatusStopped = function() {
+    isStatusStopped(): boolean {
         return (
             !this.active &&
             !this.open &&
@@ -88,34 +68,18 @@ export let TorrentR = ['AbstractTorrent', function(AbstractTorrent) {
         );
     };
 
-    /**
-     * Returns whether this torrent is in queue for downloading. Torrents in this group shows up
-     * in the same tab as 'Downloading' in the GUI
-     * @return {boolean} isStatusQueue
-     */
-    TorrentR.prototype.isStatusQueued = function() {
-        return
+    isStatusQueued(): boolean {
+        return false
     };
 
-    /**
-     * Returns whether this torrent is completed. Usually this can be done by
-     * checking whether this.percent === 1000 which means 100%. Torrents in this group
-     * shows up the 'Finished' tab in the GUI
-     * @return {boolean} isStatusCompleted
-     */
-    TorrentR.prototype.isStatusCompleted = function() {
+    isStatusCompleted(): boolean {
         return (
             !this.active &&
             this.complete
         )
     };
 
-    /**
-     * Returns whether this torrent is downloading. Torrents in this group
-     * shows up the 'Downloading' tab in the GUI
-     * @return {boolean} isStatusDownloading
-     */
-    TorrentR.prototype.isStatusDownloading = function() {
+    isStatusDownloading(): boolean {
         return (
             this.open &&
             this.active &&
@@ -124,12 +88,7 @@ export let TorrentR = ['AbstractTorrent', function(AbstractTorrent) {
         )
     };
 
-    /**
-     * Returns whether this torrent is seeding. Torrents in this group
-     * shows up the 'Seeding' tab in the GUI
-     * @return {boolean} isStatusDownloading
-     */
-    TorrentR.prototype.isStatusSeeding = function() {
+    isStatusSeeding(): boolean {
         return (
             this.active &&
             this.open &&
@@ -137,22 +96,16 @@ export let TorrentR = ['AbstractTorrent', function(AbstractTorrent) {
         )
     };
 
-    /**
-     * Returns whether this torrent is paused. Torrents in this group
-     * shows up in the same tab as the 'Downloading' tab in the GUI.
-     * @return {boolean} isStatusDownloading
-     */
-    TorrentR.prototype.isStatusPaused = function() {
+    isStatusPaused(): boolean {
         return (
             this.open &&
             !this.active &&
-            !this.state &&
             !this.complete
         )
     };
 
 
-    TorrentR.prototype.isStatusSeedPaused = function () {
+    isStatusSeedPaused(): boolean {
         return (
             this.open &&
             this.checked &&
@@ -161,17 +114,11 @@ export let TorrentR = ['AbstractTorrent', function(AbstractTorrent) {
         )
     };
 
-    TorrentR.prototype.isStatusChecking = function() {
+    isStatusChecking(): boolean {
         return !!this.checking
     }
 
-    /**
-     * Optionally returns the color for the progress bar used as a class in CSS.
-     * Colors are decided by default using the status functions above. Only implement
-     * this when having color issues.
-     * @return {string} color
-     */
-    TorrentR.prototype.statusColor = function () {
+    statusColor(): string {
         if (this.isStatusChecking()){
             return 'grey';
         } else if (this.isStatusSeeding()){
@@ -189,13 +136,7 @@ export let TorrentR = ['AbstractTorrent', function(AbstractTorrent) {
         }
     };
 
-    /**
-     * Optionally returns the status of the torrent. The status is by default
-     * computed using the.statusMessage. Only implement this when having trouble with
-     * incorrect status messages in the GUI
-     * @return {string} status
-     */
-    TorrentR.prototype.statusText = function () {
+    statusText(): string {
         if (this.isStatusChecking()) {
             return 'Checking';
         } else if (this.isStatusSeeding()){
@@ -217,8 +158,4 @@ export let TorrentR = ['AbstractTorrent', function(AbstractTorrent) {
         }
     };
 
-    /**
-     * Return the constructor function (only change the class name)
-     */
-    return TorrentR;
-}];
+}
