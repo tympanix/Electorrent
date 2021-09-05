@@ -55,6 +55,12 @@ angular.module("torrentApp").controller("mainController", ["$rootScope", "$scope
         }
     })
 
+    $scope.$on('menu:remove', function(event) {
+        if (page === PAGE_TORRENTS) {
+            $scope.$broadcast('remove:torrents')
+        }
+    })
+
     $scope.connectToServer = function(server) {
         connectToServer(server)
     }

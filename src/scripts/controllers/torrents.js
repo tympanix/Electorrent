@@ -118,6 +118,16 @@ angular.module("torrentApp").controller("torrentsController", ["$rootScope", "$s
         selectAll()
     })
 
+    $scope.$on('remove:torrents', function(){
+        remove()
+    })
+
+    function remove() {
+        var selectedTorrents = $scope.arrayTorrents.filter(torrent => torrent.selected)
+        $rootScope.$btclient.remove(selectedTorrents)
+        $scope.$apply()
+    }
+
     function selectAll() {
         deselectAll()
         for (var i = 0; i < $scope.arrayTorrents.length; i++){
