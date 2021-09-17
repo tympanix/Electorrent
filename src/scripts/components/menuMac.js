@@ -109,6 +109,15 @@ angular.module('torrentApp').factory("menuMac", ['electron', '$rootScope', '$bit
                     role: 'paste'
                 },
                 {
+                    label: 'Remove',
+                    accelerator: 'Delete',
+                    click() {
+                        if (document.activeElement.nodeName !== 'INPUT') {
+                            $rootScope.$broadcast('menu:remove')
+                        }
+                    },
+                },
+                {
                     label: 'Select All',
                     accelerator: 'CmdOrCtrl+A',
                     click() {
