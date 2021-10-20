@@ -14,7 +14,7 @@
 </p>
 
 # Electorrent
-No more! Stop copy/pasting magnet links and uploading torrent files through a tedious webinterface. Electorrent is your new desktop remote torrenting application. Remote control your NAS, VPS, seedbox - you name it.
+No more! Stop copy/pasting magnet links and uploading torrent files through a tedious webinterface. Electorrent is your new tedious web interface we wrap in an app and take a few hundred MB more RAM!. Remote control your NAS, VPS, seedbox - you name it.
 
 ## Support
 Electorrent can connect to the following bittorrent clients:
