@@ -1,30 +1,22 @@
 import _ from "underscore"
+import {TransmissionTorrent} from "./torrentt";
 
-export let transmissionService = ["$http", "$q", "TorrentT", "transmissionConfig", "notificationService",
-  function ($http, $q, TorrentT, transmissionConfig, $notify) {
-    const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
+const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 
-    this.server = undefined;
+export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
-    /*
-     * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
-     * Best practise is naming your service starting with the client name in lower case followed by 'Service'
-     * (remember capital 'S' e.g qbittorrentService for qBittorrent, utorrentService for µTorrent ect.).
-     * The real name of your client for display purposes can be changes in the field 'this.name' below.
-     */
-    this.name = "Transmission";
+    server = undefined;
 
-    /*
-     * Good practise is keeping a configuration object for your communication with the API
-     */
-    const config = {
+    name = "Transmission";
+
+    config = {
       ip: "",
       port: "",
       session: undefined,
       encoded: "",
     };
 
-    function bufferToUnit8Array(buf) {
+    bufferToUnit8Array(buf) {
       if (!buf) return undefined;
       if (buf.constructor.name === "Uint8Array" || buf.constructor === Uint8Array) {
         return buf;
@@ -35,40 +27,24 @@ export let transmissionService = ["$http", "$q", "TorrentT", "transmissionConfig
       return a;
     }
 
-    const fields = transmissionConfig.fields;
-
-    this.url = function (path) {
+    url(path: string): string {
       return `${this.server.url()}${path || ""}`;
     };
 
-    function updateSession(session) {
+    private updateSession(session: string) {
       if (!session) return;
-      config.session = session;
+      this.config.session = session;
     }
 
-    this.saveSession = function (session) {
-      config.session = session;
+    private saveSession(session: string) {
+      this.config.session = session;
     };
 
-    /**
-     * Returns the default path for the service. Should start with a slash.
-     @return {string} the default path
-     */
-    this.defaultPath = function () {
+    defaultPath(): string {
       return "/transmission/rpc";
     };
 
-    /**
-     * Connect to the server upon initial startup, changing connection settings ect. The function
-     * should return a promise that the connection was successfull. A standard http timeout of 5 seconds
-     * must be implemented. When successfull the service should save login details for later use.
-     * @param {string} ip
-     * @param {integer} port
-     * @param {string} user
-     * @param {string} password
-     * @return {promise} connection
-     */
-    this.connect = function (server) {
+    connect(server): Promise<void> {
       this.server = server;
       let self = this;
       var defer = $q.defer();
@@ -462,5 +438,5 @@ export let transmissionService = ["$http", "$q", "TorrentT", "transmissionConfig
         ],
       },
     ];
-  },
-];
+}
+
