@@ -44,6 +44,7 @@ function createTorrentWindow() {
         icon: nativeImage.createFromPath(getApplicationIcon()),
         webPreferences: {
             nodeIntegration: true,
+            contextIsolation: false,
             nodeIntegrationInWorker: true,
             enableRemoteModule: true
         },
