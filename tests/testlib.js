@@ -65,6 +65,9 @@ async function startDockerContainer({ image, hostPort, containerPort, env}) {
         ],
       },
     },
+    Volumes: {
+      "/downloads": {}
+    }
   });
   await container.start({});
   return container
@@ -96,14 +99,12 @@ exports.testclient = function ({
     this.timeout(500 * 1000);
 
     before(async function () {
-      if (!process.env.CI) {
-        container = await startDockerContainer({
-          image: dockerContainer,
-          hostPort: port,
-          containerPort: containerPort,
-          env: dockerEnv,
-        })
-      }
+      container = await startDockerContainer({
+        image: dockerContainer,
+        hostPort: port,
+        containerPort: containerPort,
+        env: dockerEnv,
+      })
       app = new Application({
         path: electronPath,
         args: [appPath],
@@ -139,13 +140,14 @@ exports.testclient = function ({
     });
 
     after(async function () {
-      app.client.getRenderProcessLogs().then(function (logs) {
+      if (app.client) {
+        let logs = await app.client.getRenderProcessLogs()
         logs.forEach(function (log) {
           console.log(log.message)
           console.log(log.source)
           console.log(log.level)
         })
-      })
+      }
       if (app && app.isRunning()) {
         await app.stop();
       }

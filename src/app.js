@@ -75,9 +75,13 @@ function createTorrentWindow() {
     });
 
     // Connect to server process
-    if (is.dev()) {
-      let client = require('electron-connect').client;
-      client.create(torrentWindow);
+    try {
+        if (electorrent.isDevelopment()) {
+            let client = require('electron-connect').client;
+            client.create(torrentWindow);
+        }
+    } catch (e) {
+        console.error("Could not establish debug connection", e)
     }
 
 }
