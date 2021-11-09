@@ -39,4 +39,4 @@ fileAssociations:
     role: Viewer
     description: Torrent Files
 afterPack: ./util/after-pack.js
-electronVersion: 8.2.0
+electronVersion: 13.6.1
