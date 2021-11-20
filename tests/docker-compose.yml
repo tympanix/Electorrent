@@ -1,6 +1,6 @@
 version: "3"
 
-# Extension field for peers
+# Common configuration for a peer in the p2p network
 x-peer: &peer
   build: docker/peer
   networks:
@@ -44,14 +44,6 @@ services:
     <<: *peer
     command: ["/start", "leech"]
     
-  # Electorrent
-  electorrent:
-    image: node:14
-    volumes:
-      - ./data/shared:/shared
-      - ../app:/app
-    command: ["tail", "-f", "/dev/null"]
-
 volumes:
   shared:
     driver_opts:

@@ -1,13 +1,11 @@
 const fs = require("fs");
 const Application = require("spectron").Application;
 const path = require("path");
-const Docker = require("dockerode");
 const http = require("http");
 const https = require("https");
 const e2e = require("./e2e");
 const sync = require("@wdio/sync").default;
-
-var docker = new Docker();
+const compose = require("docker-compose")
 
 var electronPath = path.join(__dirname, "..", "node_modules", ".bin", "electron");
 
@@ -35,55 +33,16 @@ function httpget(options) {
   });
 }
 
-function pullImage(image) {
-  console.log(`=> Pulling ${image}`);
-  return new Promise((resolve, reject) => {
-    docker.pull(image, (err, stream) => {
-      let message = "";
-      if (err) return reject(err);
-      stream.on("data", (data) => (message += data));
-      stream.on("end", () => resolve(message));
-      stream.on("error", (err) => reject(err));
-    });
-  });
-}
-
-async function startDockerContainer({ image, hostPort, containerPort, env}) {
-  await pullImage(image);
-  console.log("Pulled image");
-  portMap = `${containerPort}/tcp`;
-  let = container = await docker.createContainer({
-    Image: image,
-    Env: Object.keys(env).map(v => `${v}=${env[v]}`),
-    HostConfig: {
-      AutoRemove: true,
-      PortBindings: {
-        [portMap]: [
-          {
-            HostPort: hostPort.toString(),
-          },
-        ],
-      },
-    },
-    Volumes: {
-      "/downloads": {}
-    }
-  });
-  await container.start({});
-  return container
-}
-
 var appPath = path.join(__dirname, "..", "app");
+
 exports.testclient = function ({
   test,
   client,
-  dockerContainer,
-  dockerEnv = {},
+  fixture,
   username = "admin",
   password = "admin",
   host = "127.0.0.1",
   port = 8080,
-  containerPort = 8080,
   acceptHttpStatus = 200,
   timeout = 10 * 1000,
   stopLabel = "Stopped",
@@ -92,19 +51,15 @@ exports.testclient = function ({
 }) {
   describe(`test ${test || client}`, function () {
     let app;
-    let container;
     let $;
     let $$;
     let tapp;
     this.timeout(500 * 1000);
 
     before(async function () {
-      container = await startDockerContainer({
-        image: dockerContainer,
-        hostPort: port,
-        containerPort: containerPort,
-        env: dockerEnv,
-      })
+      const composeDir = path.join(__dirname, fixture)
+      console.log("Starting compose:", composeDir);
+      await compose.upAll({ cwd: composeDir, log: true })
       app = new Application({
         path: electronPath,
         args: [appPath],
@@ -151,9 +106,7 @@ exports.testclient = function ({
       if (app && app.isRunning()) {
         await app.stop();
       }
-      if (container) {
-        await container.stop();
-      }
+      await compose.down({ cwd: path.join(__dirname, fixture), log: true })
     });
 
     afterEach(function() {
