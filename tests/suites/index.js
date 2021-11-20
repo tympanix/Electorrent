@@ -35,7 +35,7 @@ module.exports = function() {
 
   testlib.testclient({
     client: "rtorrent",
-    fixutre: "fixtures/rutorrent",
+    fixture: "fixtures/rutorrent",
     host: "127.0.0.1",
     port: 8080,
     acceptHttpStatus: 200,
