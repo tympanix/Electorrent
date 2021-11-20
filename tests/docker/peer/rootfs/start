@@ -1,0 +1,35 @@
+#!/bin/bash -ex
+
+# This script handles execution of two roles: a seeder and a leecher.
+# The seeder will generate files with random (/dev/urandom) content, the
+# corrosponding .torrent files and a checksum file. Files are shared with
+# other peers in the /shared folder. The leecher will download the content
+# using the shared .torrent file and check the content using the checksum file
+
+# The seeder role
+if [ "$1" == "seed" ]; then
+    >2 echo "Peer acting as seeder"
+    # Create a random test file
+    dd if=/dev/urandom of=/srv/test-100k.bin bs=100k count=1
+    # Create a torrent file and save it in the shared folder
+    ctorrent -t -s /shared/test-100k.bin.torrent -u http://tracker:6969/announce /srv/test-100k.bin
+    # Write a checksum file for the files to be seeded
+    sha256sum /srv/*.bin | tee /shared/checksum
+    # Seed the torrent file (and contents)
+    ctorrent -P "$HOSTNAME" -p "$P2P_PORT" -s /srv/test-100k.bin /shared/test-100k.bin.torrent
+    exit 0
+fi
+
+# The leecher role
+if [ "$1" == "leech" ]; then
+    >2 echo "Peer acting a leecher"
+    # Wait until files have been shared from seeder 
+    until [ -f /shared/checksum ]; do sleep 0.2; done
+    # Make sure no files exists (will be downloaded shortly)
+    test ! -e /srv/*.bin
+    # Download files using the ctorrent client
+    ctorrent /shared/test-100k.bin.torrent -s /srv/test-100k.bin -e0 -E0
+    # Check that files a correct
+    sha256sum -c /shared/checksum
+    exit 0
+fi
