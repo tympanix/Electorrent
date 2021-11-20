@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  rutorrent:
+    image: "linuxserver/rutorrent"
+    ports:
+      - 8080:80
+    tmpfs:
+      - /downloads

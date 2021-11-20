@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  utorrent:
+    image: "ekho/utorrent"
+    ports:
+      - 8080:8080

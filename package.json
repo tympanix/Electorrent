@@ -34,7 +34,7 @@
     "bower": "^1.8.8",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "dockerode": "^3.2.1",
+    "docker-compose": "^0.23.13",
     "electron": "^13.6.1",
     "electron-builder": "^22.13.1",
     "electron-builder-squirrel-windows": "^22.4.1",
