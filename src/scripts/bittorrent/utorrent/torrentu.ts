@@ -1,98 +1,92 @@
+import {Torrent} from "../abstracttorrent";
 
-export let torrentU = ['AbstractTorrent', function(AbstractTorrent) {
+export class UtorrentTorrent extends Torrent {
 
-    /**
-    hash (string),
-    status* (integer),
-    name (string),
-    size (integer in bytes),
-    percent progress (integer in per mils),
-    downloaded (integer in bytes),
-    upload-speeded (integer in bytes),
-    ratio (integer in per mils),
-    upload-speed speed (integer in bytes per second),
-    download speed (integer in bytes per second),
-    eta (integer in seconds),
-    label (string),
-    peers connected (integer),
-    peers in swarm (integer),
-    seeds connected (integer),
-    seeds in swarm (integer),
-    availability (integer in 1/65535ths),
-    torrent queue order (integer),
-    remaining (integer in bytes)
-    */
+    /* Custom/additional attributes */
+    availability: number
+    remaining: number
+    downloadUrl: string
+    streamId: string
+    rssFeedUrl: string
+    appUpdateUrl: string
+    additionalData: Record<string, any>
 
-    /**
-     * Constructor, with class name
-     */
-    function TorrentU(hash,
-        status,
-        name,
-        size,
-        percent,
-        downloaded,
-        uploaded,
-        ratio,
-        uploadSpeed,
-        downloadSpeed,
-        eta,
-        label,
-        peersConnected,
-        peersInSwarm,
-        seedsConnected,
-        seedsInSwarm,
-        availability,
-        torrentQueueOrder,
-        remaining,
-        downloadUrl,
-        rssFeedUrl,
-        statusMessage,
-        streamId,
-        dateAdded,
-        dateCompleted,
-        appUpdateUrl,
-        savePath,
-        additionalData) {
+    constructor(data: Record<string, any>) {
 
-        AbstractTorrent.call(this, {
-            hash: hash,
-            name: name,
-            size: size,
-            percent: percent,
-            downloaded: downloaded,
-            uploaded: uploaded,
-            ratio: (ratio / 1000).toFixed(2),
-            uploadSpeed: uploadSpeed,
-            downloadSpeed: downloadSpeed,
-            eta: eta,
-            label: label,
-            peersConnected: peersConnected,
-            peersInSwarm: peersInSwarm,
-            seedsConnected: seedsConnected,
-            seedsInSwarm: seedsInSwarm,
-            torrentQueueOrder: torrentQueueOrder,
-            statusMessage: statusMessage,
-            dateAdded: dateAdded * 1000,
-            dateCompleted: dateCompleted * 100,
-            savePath: savePath}
+        super({
+            hash: data.hash,
+            name: data.name,
+            size: data.size,
+            percent: data.percent,
+            downloaded: data.downloaded,
+            uploaded: data.uploaded,
+            ratio: (data.ratio / 1000),
+            uploadSpeed: data.uploadSpeed,
+            downloadSpeed: data.downloadSpeed,
+            eta: data.eta,
+            label: data.label,
+            peersConnected: data.peersConnected,
+            peersInSwarm: data.peersInSwarm,
+            seedsConnected: data.seedsConnected,
+            seedsInSwarm: data.seedsInSwarm,
+            torrentQueueOrder: data.torrentQueueOrder,
+            statusMessage: data.statusMessage,
+            dateAdded: data.dateAdded * 1000,
+            dateCompleted: data.dateCompleted * 100,
+            savePath: data.savePath}
         );
 
-        this.status = status;
-        this.availability = (availability / 65536).toFixed(1);
-        this.remaining = remaining;
-        this.downloadUrl = downloadUrl;
-        this.streamId = streamId;
-        this.rssFeedUrl = rssFeedUrl;
-        this.appUpdateUrl = appUpdateUrl;
-        this.additionalData = additionalData;
+        this.status = data.status;
+        this.availability = (data.availability / 65536);
+        this.remaining = data.remaining;
+        this.downloadUrl = data.downloadUrl;
+        this.streamId = data.streamId;
+        this.rssFeedUrl = data.rssFeedUrl;
+        this.appUpdateUrl = data.appUpdateUrl;
+        this.additionalData = data.additionalData;
 
     }
 
-    // Inherit by prototypal inheritance
-    TorrentU.prototype = Object.create(AbstractTorrent.prototype);
+    static apiPropertiesOrder = [
+        "hash",
+        "status",
+        "name",
+        "size",
+        "percent",
+        "downloaded",
+        "uploaded",
+        "ratio",
+        "uploadSpeed",
+        "downloadSpeed",
+        "eta",
+        "label",
+        "peersConnected",
+        "peersInSwarm",
+        "seedsConnected",
+        "seedsInSwarm",
+        "availability",
+        "torrentQueueOrder",
+        "remaining",
+        "downloadUrl",
+        "rssFeedUrl",
+        "statusMessage",
+        "streamId",
+        "dateAdded",
+        "dateCompleted",
+        "appUpdateUrl",
+        "savePath",
+        "additionalData",
+    ]
 
-    var statusesMap = {
+    static fromArray(data: any[]): UtorrentTorrent {
+        let args = {}
+        for (let i = 0; i < data.length; i++) {
+            args[this.apiPropertiesOrder[i]] = data[i]
+        }
+        return new UtorrentTorrent(args)
+    }
+
+    statusesMap = {
         1: 'started',
         2: 'checking',
         4: 'startaftercheck',
@@ -102,15 +96,19 @@ export let torrentU = ['AbstractTorrent', function(AbstractTorrent) {
         64: 'queued',
         128: 'loaded'
     };
-    var statusesFlags = [1, 2, 4, 8, 16, 32, 64, 128].reverse();
 
-    TorrentU.prototype.getStatusFlag = function(x) {
+    statusesFlags = [1, 2, 4, 8, 16, 32, 64, 128].reverse();
+
+    /* State helper attributes */
+    statusesCached: string[]
+
+    getStatusFlag(x: number) {
         /*jshint bitwise: false*/
         return(this.status & x) === x;
         /*jshint bitwise: true*/
     };
 
-    TorrentU.prototype.getStatuses = function() {
+    getStatuses() {
         //var str = '';
         var i = 0;
 
@@ -119,9 +117,9 @@ export let torrentU = ['AbstractTorrent', function(AbstractTorrent) {
         }
         var res = [];
 
-        for(i = 0; i < statusesFlags.length; i++) {
-            if(this.getStatusFlag(statusesFlags[i])) {
-                res.push(statusesMap[statusesFlags[i]]);
+        for(i = 0; i < this.statusesFlags.length; i++) {
+            if(this.getStatusFlag(this.statusesFlags[i])) {
+                res.push(this.statusesMap[this.statusesFlags[i]]);
             }
         }
         if(this.status > 255) {
@@ -137,45 +135,51 @@ export let torrentU = ['AbstractTorrent', function(AbstractTorrent) {
         return this.statusesCached;
     };
 
-    TorrentU.prototype.isStatusStarted = function() {
+    isStatusStarted() {
         return this.getStatusFlag(1);
     };
-    TorrentU.prototype.isStatusChecking = function() {
+    isStatusChecking() {
         return this.getStatusFlag(2);
     };
-    TorrentU.prototype.isStatusStartAfterCheck = function() {
+
+    isStatusStartAfterCheck() {
         return this.getStatusFlag(4);
     };
-    TorrentU.prototype.isStatusChecked = function() {
+
+    isStatusChecked() {
         return this.getStatusFlag(8);
     };
-    TorrentU.prototype.isStatusError = function() {
+
+    isStatusError() {
         return this.getStatusFlag(16);
     };
-    TorrentU.prototype.isStatusPaused = function() {
+
+    isStatusPaused() {
         return this.getStatusFlag(32);
     };
-    TorrentU.prototype.isStatusQueued = function() {
+
+    isStatusQueued() {
         return this.getStatusFlag(64) && !this.isStatusDownloading();
     };
-    TorrentU.prototype.isStatusLoaded = function() {
+
+    isStatusLoaded() {
         return this.getStatusFlag(128);
     };
-    TorrentU.prototype.isStatusCompleted = function() {
+
+    isStatusCompleted() {
         return(this.percent === 1000);
     };
-    TorrentU.prototype.isStatusDownloading = function() {
+
+    isStatusDownloading() {
         return this.getStatusFlag(64) && this.percent !== 1000;
     };
-    TorrentU.prototype.isStatusSeeding = function() {
+
+    isStatusSeeding() {
         return this.isStatusStarted() && (this.isStatusCompleted());
     };
-    TorrentU.prototype.isStatusStopped = function() {
+
+    isStatusStopped() {
         return(!this.getStatusFlag(64)) && (!this.isStatusCompleted());
     };
 
-    /**
-     * Return the constructor function
-     */
-    return TorrentU;
-}];
+}
