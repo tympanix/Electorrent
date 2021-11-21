@@ -6,7 +6,7 @@ const Rtorrent = require("@electorrent/node-rtorrent");
 
 type CallbackFunc = (err: any, val: any) => void
 function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
-  return new Promise((reject, resolve) => {
+  return new Promise((resolve, reject) => {
     fn((err, val) => {
       if (err) {
         reject(err)
@@ -75,8 +75,8 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       })
     };
 
-    async uploadTorrent(buffer: Blob): Promise<void> {
-      let data = Buffer.from(await buffer.arrayBuffer());
+    async uploadTorrent(buffer: Uint8Array): Promise<void> {
+      let data = Buffer.from(buffer);
       return defer((done) => {
         this.rtorrent.loadFileContent(data, done);
       })

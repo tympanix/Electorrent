@@ -133,7 +133,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
     })
   };
 
-  async uploadTorrent(buffer: Blob, filename?: string, dir?: string, path?: string): Promise<void> {
+  async uploadTorrent(buffer: Uint8Array, filename?: string, dir?: string, path?: string): Promise<void> {
     let array = this.bufferToUnit8Array(Buffer.from(buffer.toString()));
     var blob = new Blob([array], { type: "application/x-bittorrent" });
 

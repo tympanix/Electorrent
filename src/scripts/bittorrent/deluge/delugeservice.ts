@@ -4,7 +4,7 @@ import {DelugeTorrent} from "./torrentd";
 type CallbackFunc = (err: any, val: any) => void
 
 function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
-  return new Promise((reject, resolve) => {
+  return new Promise((resolve, reject) => {
     fn((err, val) => {
       if (err) {
         reject(err)
@@ -64,7 +64,7 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
         return defer(done => this.deluge.addTorrentURL(magnet, {}, done))
     }
 
-    uploadTorrent(buffer: Blob, filename: string): Promise<void> {
+    uploadTorrent(buffer: Uint8Array, filename: string): Promise<void> {
         return defer(done => this.deluge.addTorrent(buffer, {}, done))
     }
 

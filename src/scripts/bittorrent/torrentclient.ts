@@ -125,7 +125,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * @param {string} filename
      * @return {promise} isAdded
      */
-    abstract uploadTorrent(buffer: Blob, filename: string): Promise<void>
+    abstract uploadTorrent(buffer: Uint8Array, filename: string): Promise<void>
 
 
     /**

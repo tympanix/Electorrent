@@ -5,7 +5,7 @@ import {QBittorrentTorrent} from "./torrentq";
 type CallbackFunc = (err: any, val: any) => void
 
 function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
-  return new Promise((reject, resolve) => {
+  return new Promise((resolve, reject) => {
     fn((err, val) => {
       if (err) {
         reject(err)
@@ -102,8 +102,8 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return defer(done => this.qbittorrent.addTorrentURL(magnet, {}, done));
     };
 
-    uploadTorrent(buffer: Blob, filename: string): Promise<void> {
-      let data = Buffer.from(buffer.toString());
+    uploadTorrent(buffer: Uint8Array, filename: string): Promise<void> {
+      let data = Buffer.from(buffer);
       return defer(done => this.qbittorrent.addTorrentFileContent(data, filename, {}, done));
     };
 

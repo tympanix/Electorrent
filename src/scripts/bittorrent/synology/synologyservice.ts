@@ -285,7 +285,7 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
      * @param {string} filename
      * @return {promise} isAdded
      */
-    uploadTorrent(buffer: Blob, filename?: string): Promise<void> {
+    uploadTorrent(buffer: Uint8Array, filename?: string): Promise<void> {
         var blob = new Blob([buffer], {
             type: 'application/x-bittorrent'
         })

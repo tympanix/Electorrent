@@ -6,6 +6,7 @@ import axios from 'axios';
 import _ from "underscore"
 
 const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
+const SESSION_ID_HEADER = "X-Transmission-Session-Id"
 
 export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
@@ -51,8 +52,6 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     async connect(server): Promise<void> {
       this.server = server;
       let self = this;
-      var encoded = new Buffer(`${server.user}:${server.password}`).toString("base64");
-      this.config.encoded = encoded;
 
       var data = {
         method: "session-get",
@@ -62,19 +61,31 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         let resp = await axios.post(this.url(), data, {
           timeout: 5000,
           headers: {
-            Authorization: "Basic " + encoded,
+            [SESSION_ID_HEADER]: this.config.session
           },
+          auth: {
+            username: server.user,
+            password: server.password,
+          },
+          validateStatus: (status) => {
+            return (status == 200 || status == 409)
+          }
         })
-        let session = resp.headers["X-Transmission-Session-Id"]
+        let session = resp.headers[SESSION_ID_HEADER]
         this.saveSession(session)
       } catch (err) {
         if (axios.isAxiosError(err)) {
           if (err.response.status == 409) {
-            var session = err.response.headers["X-Transmission-Session-Id"];
+            var session = err.response.headers[SESSION_ID_HEADER];
+            if (!session) {
+              throw new Error("Could not authenticate with Transmission server")
+            }
             self.saveSession(session);
+            return
           }
+        } else {
+          throw err
         }
-        throw err
       }
     };
 
@@ -109,12 +120,15 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
       let resp = await axios.post(this.url(), data, {
         headers: {
-          Authorization: "Basic " + this.config.encoded,
-          "X-Transmission-Session-Id": this.config.session,
+          [SESSION_ID_HEADER]: this.config.session,
         },
+        auth: {
+          username: this.server.user,
+          password: this.server.password,
+        }
       })
 
-      let session = resp.headers["X-Transmission-Session-Id"]
+      let session = resp.headers[SESSION_ID_HEADER]
       this.updateSession(session);
       return this.processData(resp.data)
     };
@@ -169,11 +183,14 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
       let resp = await axios.post(this.url(), data, {
         headers: {
-          Authorization: "Basic " + this.config.encoded,
-          "X-Transmission-Session-Id": this.config.session,
+          [SESSION_ID_HEADER]: this.config.session,
         },
+        auth: {
+          username: this.server.user,
+          password: this.server.password,
+        }
       })
-      let session = resp.headers["X-Transmission-Session-Id"];
+      let session = resp.headers[SESSION_ID_HEADER];
       this.updateSession(session);
       if ("torrent-duplicate" in resp.data.arguments) {
         //$notify.alert("Duplicate!", " This torrent is already added");
@@ -190,8 +207,8 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      * @param {string} filename
      * @return {promise} isAdded
      */
-    async uploadTorrent(buffer: Blob): Promise<void> {
-      let array = this.bufferToUnit8Array(Buffer.from(buffer.toString()));
+    async uploadTorrent(buffer: Uint8Array): Promise<void> {
+      let array = this.bufferToUnit8Array(Buffer.from(buffer));
       var self = this;
       var blob = new Blob([array]);
       var base64data = "";
@@ -214,11 +231,14 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
         let resp = await axios.post(self.url(), data, {
           headers: {
-            Authorization: "Basic " + self.config.encoded,
-            "X-Transmission-Session-Id": self.config.session,
+            [SESSION_ID_HEADER]: self.config.session,
           },
+          auth: {
+            username: self.server.user,
+            password: self.server.password,
+          }
         })
-        let session = resp.headers["X-Transmission-Session-Id"];
+        let session = resp.headers[SESSION_ID_HEADER];
         self.updateSession(session)
         if ("torrent-duplicate" in resp.data.arguments) {
           //$notify.alert("Duplicate!", " This torrent is already added");
@@ -247,9 +267,12 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
       return axios.post(this.url(), data, {
         headers: {
-          Authorization: "Basic " + this.config.encoded,
-          "X-Transmission-Session-Id": this.config.session,
+          [SESSION_ID_HEADER]: this.config.session,
         },
+        auth: {
+          username: this.server.user,
+          password: this.server.password,
+        }
       });
     };
 

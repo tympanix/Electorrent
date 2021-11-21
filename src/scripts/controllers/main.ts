@@ -106,7 +106,7 @@ export let mainController = ["$rootScope", "$scope", "$timeout", "$bittorrent", 
     })
 
     // Listen for incomming torrent files from the main process
-    electron.ipc.on('torrentfiles', function uploadTorrent(event, buffer, filename){
+    electron.ipc.on('torrentfiles', function uploadTorrent(event, buffer: Uint8Array, filename: string){
         $rootScope.$btclient.uploadTorrent(buffer, filename).catch(function(err) {
             $notify.alert('Upload Torrent', 'The torrent could not be uploaded')
             console.error("Error", err);
