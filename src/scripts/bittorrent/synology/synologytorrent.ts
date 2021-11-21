@@ -1,42 +1,9 @@
+import {Torrent} from "../abstracttorrent";
 
-export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
+export class SynologyTorrent extends Torrent {
 
-    /**
-     * Constructor, with class name.
-     * Replace all occurences of __TorrentName__ (including underscores) with
-     * the name of your torrent class. Best practise is naming the class 'Torrent'
-     * and appending a single letter desribing the client to which it belongs.
-     * (e.g. TorrentQ for qBittorrent, TorrentU for µTorrent... and so on)
-     */
-    function TorrentS(data) {
-        /*
-         * Please modify the constructor function parameters to
-         * your liking for the best implementation. If data is obtained as an array from
-         * the API one could list each function parameter in the same order as the array
-         */
-
-         // Information variables.
-         var detail = data.additional.detail;
-         var trans = data.additional.transfer;
-         var track = data.additional.tracker;
-
-         // Calculates the total amount of peers and seeds over all connected trackers.
-         // Takes a map function from peersInSwarm and seedsInSwarm to get the correct numbers.
-         function trackCount(mapFun) {
-             if (!track || track.length === 0) {
-                 return 0;
-             }
-             var numArr = track.map(mapFun)
-             return numArr.reduce((acc, curr) => acc + curr);
-         }
-
-         // Roughly calculates the ETA each update from the server.
-         function etaCalc() {
-             var remain = data.size - trans.size_downloaded;
-             return remain / trans.speed_download;
-         }
-
-        AbstractTorrent.call(this, {
+    constructor(data: Record<string, any>) {
+        super({
             hash: data.id, /* Hash (string): unique identifier for the torrent */
             name: data.title, /* Name (string): the name of the torrent */
             size: data.size, /* Size (integer): size of the file to be downloaded in bytes */
@@ -46,12 +13,12 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
             ratio: (trans.size_uploaded / trans.size_downloaded), /* Ratio (integer): integer i per-mille (1:1 = 1000) */
             uploadSpeed: trans.speed_upload,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: trans.speed_download, /* Download Speed (integer): bytes per second */
-            eta: etaCalc(), /* ETA (integer): second to completion */
+            eta: SynologyTorrent.etaCalc(data, data.additional.transfer), /* ETA (integer): second to completion */
             label: '', /* Label (string): group/category identification */
             peersConnected: detail.connected_peers, /* Peers Connected (integer): number of peers connected */
-            peersInSwarm: trackCount(t => t.peers), /* Peers In Swarm (integer): number of peers in the swarm */
+            peersInSwarm: SynologyTorrent.trackCount(data.additional.tracker, t => t.peers), /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: detail.connected_seeders, /* Seeds Connected (integer): number of connected seeds */
-            seedsInSwarm: trackCount(t => t.seeds), /* Seeds In Swarm (integer): number of connected seeds in swarm */
+            seedsInSwarm: SynologyTorrent.trackCount(data.additional.tracker, t => t.seeds), /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: 0, /* Queue (integer): the number in the download queue */
             statusMessage: data.status, /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: detail.create_time * 1000, /* Date Added (integer): number of milliseconds unix time */
@@ -59,20 +26,27 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
             savePath: detail.destination, /* Save Path (string): the path at which the downloaded content is saved */
         });
 
-
-        /*
-         * Additional data that does not match the default scheme above
-         * may be added as extra fields. This can be done in the manner below
-         */
-        this.myAddtionalData = undefined;
-
+         // Information variables.
+         var detail = data.additional.detail;
+         var trans = data.additional.transfer;
+         var track = data.additional.tracker;
     }
 
-    /*
-     * Inherit by prototypal inheritance. Leave this line as is (only rename class name).
-     * Do NOT implement any prototypal features above this line!
-     */
-    TorrentS.prototype = Object.create(AbstractTorrent.prototype);
+    // Calculates the total amount of peers and seeds over all connected trackers.
+    // Takes a map function from peersInSwarm and seedsInSwarm to get the correct numbers.
+    static trackCount(track: Record<string, any>, mapFun: (e: any) => any): number {
+        if (!track || track.length === 0) {
+            return 0;
+        }
+        var numArr = track.map(mapFun)
+        return numArr.reduce((acc: number, curr: number) => acc + curr);
+    }
+
+    // Roughly calculates the ETA each update from the server.
+    static etaCalc(data: any, trans: any) {
+        var remain = data.size - trans.size_downloaded;
+        return remain / trans.speed_download;
+    }
 
 
     /**
@@ -80,7 +54,7 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * up in the 'Error' tab in the GUI
      * @return {boolean} isStatusError
      */
-    TorrentS.prototype.isStatusError = function() {
+    isStatusError(): boolean {
         return this.statusMessage === "error";
     };
 
@@ -89,7 +63,7 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * the 'Stopped' tab to the left in the GUI
      * @return {boolean} isStatusStopped
      */
-    TorrentS.prototype.isStatusStopped = function() {
+    isStatusStopped(): boolean {
         return (this.statusMessage === "paused") && (this.percent !== 1000);
     };
 
@@ -98,7 +72,7 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * in the same tab as 'Downloading' in the GUI
      * @return {boolean} isStatusQueue
      */
-    TorrentS.prototype.isStatusQueued = function() {
+    isStatusQueued(): boolean {
         return
     };
 
@@ -108,7 +82,7 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * shows up the 'Finished' tab in the GUI
      * @return {boolean} isStatusCompleted
      */
-    TorrentS.prototype.isStatusCompleted = function() {
+    isStatusCompleted(): boolean {
         return (this.statusMessage === "finished") || ((this.statusMessage === "paused") && (this.percent === 1000)) ;
     };
 
@@ -117,7 +91,7 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * shows up the 'Downloading' tab in the GUI
      * @return {boolean} isStatusDownloading
      */
-    TorrentS.prototype.isStatusDownloading = function() {
+    isStatusDownloading(): boolean {
         return this.statusMessage === "downloading";
     };
 
@@ -126,7 +100,7 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * shows up the 'Seeding' tab in the GUI
      * @return {boolean} isStatusDownloading
      */
-    TorrentS.prototype.isStatusSeeding = function() {
+    isStatusSeeding(): boolean {
         return this.statusMessage === "seeding";
     };
 
@@ -135,9 +109,8 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * shows up in the same tab as the 'Downloading' tab in the GUI.
      * @return {boolean} isStatusDownloading
      */
-    TorrentS.prototype.isStatusPaused = function() {
+    isStatusPaused(): boolean {
         return
-
     };
 
     /**
@@ -146,7 +119,7 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * this when having color issues.
      * @return {string} color
      */
-    TorrentS.prototype.statusColor = function () {
+    statusColor(): string {
         if (this.isStatusError()) {
             return 'error';
         } else if (this.isStatusStopped()) {
@@ -168,7 +141,7 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
      * incorrect status messages in the GUI
      * @return {string} status
      */
-    TorrentS.prototype.statusText = function () {
+    statusText(): string {
         if (this.isStatusError()) {
             return 'Error';
         } else if (this.isStatusStopped()) {
@@ -184,9 +157,4 @@ export let TorrentS = ['AbstractTorrent', function(AbstractTorrent) {
         }
     };
 
-    /**
-     * Return the constructor function (only change the class name)
-     */
-    return TorrentS;
-}];
-
+}

@@ -1,27 +1,58 @@
-'use strict';
+import {Column} from "../../services/column";
+import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
+import {SynologyTorrent} from "./synologytorrent";
+import axios from "axios";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
 
-export let synologyService = ["$http", "$q", "TorrentS", "notificationService", function(
-    $http, $q, TorrentS, $notify) {
+const API_INFO = "SYNO.API.Info";
+const API_TASK = "SYNO.DownloadStation.Task";
+const API_AUTH = "SYNO.API.Auth";
 
-    /*
-     * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
-     * Best practise is naming your service starting with the client name in lower case followed by 'Service'
-     * (remember capital 'S' e.g qbittorrentService for qBittorrent, utorrentService for µTorrent ect.).
-     * The real name of your client for display purposes can be changes in the field 'this.name' below.
-     */
-    this.name = 'Synology Download Station';
+// Error objects that maps error codes to error information.
+const ERR_COM = {
+    100: "Unknown error.",
+    101: "Invalid parameter.",
+    102: "The requested API does not exist.",
+    103: "The requested method does not exist.",
+    104: "The requested version does not support the functionality.",
+    105: "The logged in session does not have permission.",
+    106: "Session timeout.",
+    107: "Session interrupted by duplicate login."
+}
+
+const ERR_AUTH = {
+    400: "No such account or incorrect password.",
+    401: "Account disabled.",
+    402: "Permission denied.",
+    403: "2-step verfication code required.",
+    404: "Faield to authenticate 2-step verification code."
+}
+
+const ERR_TASK = {
+    400: "File upload failed.",
+    401: "Max number of tasks reached.",
+    402: "Destination denied.",
+    403: "Destination does not exist.",
+    404: "Invalid task id.",
+    405: "Invalid task action.",
+    406: "No default destination.",
+    407: "Set destination failed.",
+    408: "File does not exist."
+};
+
+export class SynologyClient extends TorrentClient<SynologyTorrent> {
+
+    name = 'Synology Download Station';
+    server = undefined
 
     // API vars.
-    var authPath;
-    var authVersion;
-    var dlPath;
-    var dlVersion;
-    var taskPath = "/DownloadStation/task.cgi";
+    authPath;
+    authVersion;
+    dlPath;
+    dlVersion;
+    taskPath = "/DownloadStation/task.cgi";
 
-    var SYN_TIMEOUT = 6000;
-    var API_INFO = "SYNO.API.Info";
-    var API_TASK = "SYNO.DownloadStation.Task";
-    var API_AUTH = "SYNO.API.Auth";
+    timeout = 6000;
 
     /**
      * The config function is in charge of supplying config objects with
@@ -32,7 +63,7 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      * @param  {array} args   Arbitrary arguments for the config objects.
      * @return {object}       A config object for a HTTP GET call.
      */
-    function config(choice, args?) {
+    config(choice: string, args?): AxiosRequestConfig {
         switch (choice) {
             case 'query':
                 return {
@@ -41,91 +72,59 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
                         "version": "1",
                         "method": "query",
                         "query": "SYNO.API.Auth,SYNO.DownloadStation.Task"},
-                    timeout: SYN_TIMEOUT
+                    timeout: this.timeout
                 };
             case 'auth':
                 return {
                     params: {
                         "api": API_AUTH,
-                        "version": authVersion,
+                        "version": this.authVersion,
                         "method": "login",
                         "account": args[0],
                         "passwd": args[1],
                         "session": "DownloadStation"},
-                    timeout: SYN_TIMEOUT
+                    timeout: this.timeout
                 };
             case 'torrents':
                 return {
                     params: {
                         "api": API_TASK,
-                        "version": dlVersion,
+                        "version": this.dlVersion,
                         "method": "list",
                         "additional": "detail,transfer,tracker"},
-                    timeout: SYN_TIMEOUT
+                    timeout: this.timeout
                 };
             case 'tUrl':
                 return {
                     params: {
                         "api": API_TASK,
-                        "version": dlVersion,
+                        "version": this.dlVersion,
                         "method": "create",
                         "uri": args[0]},
-                    timeout: SYN_TIMEOUT
+                    timeout: this.timeout
                 };
             case 'action':
                 return {
                     params: {
                         "api": API_TASK,
-                        "version": dlVersion,
+                        "version": this.dlVersion,
                         "method": args[0],
                         "id": args[1]},
-                    timeout: SYN_TIMEOUT
+                    timeout: this.timeout
                 };
         }
     }
 
-    // Error objects that maps error codes to error information.
-    var comErr = {
-        100: "Unknown error.",
-        101: "Invalid parameter.",
-        102: "The requested API does not exist.",
-        103: "The requested method does not exist.",
-        104: "The requested version does not support the functionality.",
-        105: "The logged in session does not have permission.",
-        106: "Session timeout.",
-        107: "Session interrupted by duplicate login."
-    }
-
-    var authErr = {
-        400: "No such account or incorrect password.",
-        401: "Account disabled.",
-        402: "Permission denied.",
-        403: "2-step verfication code required.",
-        404: "Faield to authenticate 2-step verification code."
-    }
-
-    var taskErr = {
-        400: "File upload failed.",
-        401: "Max number of tasks reached.",
-        402: "Destination denied.",
-        403: "Destination does not exist.",
-        404: "Invalid task id.",
-        405: "Invalid task action.",
-        406: "No default destination.",
-        407: "Set destination failed.",
-        408: "File does not exist."
-    };
-
-    function handleError(response) {
+    handleError(response: AxiosResponse) {
         var data = response.data;
 
         // Common or Authentication errors.
         if (data.hasOwnProperty('error')) {
             var code = data.error.code;
-            if (comErr.hasOwnProperty(code)) {
-                $notify.alert('Common Error!', comErr[code]);
-            } else if (authErr.hasOwnProperty(code)) {
-                $notify.alert('Authentication Error!', authErr[code]);
+            if (ERR_COM.hasOwnProperty(code)) {
+                throw new Error(ERR_COM[code])
+            } else if (ERR_AUTH.hasOwnProperty(code)) {
+                throw new Error(ERR_AUTH[code])
             }
         }
 
@@ -135,9 +134,9 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
             var singErr = errs.filter(c => c > 0);
 
             if (singErr.length === 1) {
-                $notify.alert('Task Error!', taskErr[singErr[0]]);
+                throw new Error(ERR_TASK[singErr[0]])
             } else if (singErr.length > 1) {
-                $notify.alert('Multiple Task Errors!', 'There were multiple errors associated with the task requested.');
+                throw new Error('Multiple Task Errors! There were multiple errors associated with the task requested.')
             }
         }
         return response;
@@ -152,7 +151,7 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      * @param  {String}  data Response from a SYNO API call.
      * @return {Boolean}      Selfexplanatory.
      */
-    function isSuccess(data) {
+    isSuccess(data): boolean {
         return data.success
     }
 
@@ -164,37 +163,37 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      * @param {server} server
      * @return {promise} connection
      */
-    this.connect = function(server) {
+    async connect(server): Promise<void> {
         this.server = server;
         var self = this;
 
-        return $http.get(this.server.url() + "/query.cgi", config('query'))
-            .then(handleError)
+        await axios.get(this.server.url() + "/query.cgi", this.config('query'))
+            .then(this.handleError)
             .then(function(response) {
-                if (isSuccess(response.data)) {
+                if (this.isSuccess(response.data)) {
                     return {
                         auth: response.data.data[API_AUTH],
                         task: response.data.data[API_TASK]
                     };
                 }
-                return $q.reject("Getting initial API information from Auth and DownloadStation failed. Error: " + response.data.error);
+                throw new Error("Getting initial API information from Auth and DownloadStation failed. Error: " + response.data.error);
             }).then(function(data) {
                 /* Before login, API information is required on SYNO.Auth API.
                    Grab the DownloadStation API information as well.
                 */
-                authPath = "/" + data.auth.path;
-                authVersion = data.auth.maxVersion;
-                dlPath = "/" + data.task.path;
-                dlVersion = data.task.maxVersion;
+                this.authPath = "/" + data.auth.path;
+                this.authVersion = data.auth.maxVersion;
+                this.dlPath = "/" + data.task.path;
+                this.dlVersion = data.task.maxVersion;
 
                 // Lets login!
-                return $http.get(self.server.url() + authPath, config('auth', [server.user, server.password]))
-            }).then(handleError)
+                return axios.get(self.server.url() + self.authPath, self.config('auth', [server.user, server.password]))
+            }).then(self.handleError)
               .then(function(response) {
-                if (isSuccess(response.data)) {
-                    return $q.resolve(response);
+                if (self.isSuccess(response.data)) {
+                    return response
                 }
-                return $q.reject("Login failed. Error: " + response.data.error);
+                throw new Error("Login failed. Error: " + response.data.error)
             })
     }
 
@@ -214,15 +213,15 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      * @param {boolean} fullupdate
      * @return {promise} data
      */
-    this.torrents = function() {
+    torrents(): Promise<TorrentUpdates> {
         // Retrieve info of all torrents in DownloadStation
-        return $http.get(this.server.url() + dlPath, config('torrents'))
-            .then(handleError)
+        return axios.get(this.server.url() + this.dlPath, this.config('torrents'))
+            .then(this.handleError)
             .then(function(response) {
-                if (isSuccess(response.data)) {
-                    return $q.resolve(processData(response.data.data));
+                if (this.isSuccess(response.data)) {
+                    return this.processData(response.data.data)
                 }
-                return $q.reject("Retrieving torrent data failed. Error: " + response.data.error);
+                throw new Error("Retrieving torrent data failed. Error: " + response.data.error)
             })
     }
 
@@ -231,7 +230,7 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
     Take all the data retrieved by torrents() and create TorrentS objects from it.
     Uses dirty tag since Synology gives all data for all torrents in the system back at once and not in groups like "deleted".
      */
-    function processData(data) {
+    processData(data: Record<string, any>) {
         var torrents = {
             dirty: true,
             labels: [],
@@ -241,20 +240,20 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
         };
         // data is JSON formatted and contains "tasks" : array of json objects containing each individual torrent information.
         var tasks = data.tasks;
-        torrents.all = tasks.map(build);
+        torrents.all = tasks.map(this.build);
         return torrents;
     }
 
     // Takes a raw JSON object (torrent info) and converts it to a TorrentS object.
-    function build(data) {
-        return new TorrentS(data)
+    build(data: Record<string, any>) {
+        return new SynologyTorrent(data)
     }
 
     /**
      * Returns the default path for the service. Should start with a slash.
      @return {string} the default path
      */
-    this.defaultPath = function() {
+    defaultPath(): string {
         return "/webapi";
     }
 
@@ -264,18 +263,16 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      * @param {string} magnetURL
      * @return {promise} isAdded
      */
-    this.addTorrentUrl = function(magnet) {
+    addTorrentUrl(magnet: string): Promise<void> {
         // Contradicts API documentation by using GET instead of POST. However, POST doesn't work.
-        return $http.get(this.server.url() + taskPath, config('tUrl', [magnet]))
-            .then(handleError)
-            .then(function(response) {
+        return axios.get(this.server.url() + this.taskPath, this.config('tUrl', [magnet]))
+            .then(this.handleError)
+            .then((response) => {
                 // Check response for success.
-                if(isSuccess(response.data)) {
-                    return $q.resolve();
+                if(this.isSuccess(response.data)) {
+                    return
                 }
-                // Create failed, reject with the error code provided
-                return $q.reject(
-                    "Create a DownloadStation task with the provided URL failed. Error: " + response.data.error);
+                throw new Error("Create a DownloadStation task with the provided URL failed. Error: " + response.data.error)
         })
     }
 
@@ -288,18 +285,18 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      * @param {string} filename
      * @return {promise} isAdded
      */
-    this.uploadTorrent = function(buffer, filename) {
+    uploadTorrent(buffer: Blob, filename?: string): Promise<void> {
         var blob = new Blob([buffer], {
             type: 'application/x-bittorrent'
         })
 
         var formData = new FormData();
         formData.append('api', API_TASK);
-        formData.append('version', dlVersion);
+        formData.append('version', this.dlVersion);
         formData.append('method', "create");
         formData.append('file', blob, filename);
 
-        return $http.post(this.server.url() + taskPath, formData, {
+        return axios.post(this.server.url() + this.taskPath, formData, {
                 headers: { 'Content-Type': undefined },
                 transformRequest: function(data) {
                     return data;
@@ -312,16 +309,13 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      * @param  {string} action Selfexplanatory, can be start, pause or delete.
      * @return {promise}       [description]
      */
-    this.doAction = function(action, torrents) {
+    async doAction(action: string, torrents: SynologyTorrent[]) {
         // Retreive the ID's of the torrents (TorrentS.hash)
         var ids = torrents.map(t => t.hash);
         var idsStr = ids.join(",");
 
-        return $http.get(this.server.url() + taskPath, config('action', [action, idsStr]))
-            .then(handleError)
-            .then(function(response) {
-                    return $q.resolve();
-            })
+        return axios.get(this.server.url() + this.taskPath, this.config('action', [action, idsStr]))
+            .then(this.handleError)
     }
 
     /**
@@ -332,28 +326,28 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      * @param {array} torrents
      * @return {promise} actionIsDone
      */
-    this.start = function(torrents) {
-        return this.doAction("resume", torrents);
+    async start(torrents: SynologyTorrent[]): Promise<void> {
+        await this.doAction("resume", torrents);
     }
 
-    this.pause = function(torrents) {
-        return this.doAction("pause", torrents);
+    async pause(torrents: SynologyTorrent[]): Promise<void> {
+        await this.doAction("pause", torrents);
     }
 
-    this.remove = function(torrents) {
-        return this.doAction("delete", torrents);
+    async remove(torrents: SynologyTorrent[]): Promise<void> {
+        await this.doAction("delete", torrents);
     }
 
     /**
      * Whether the client supports sorting by trackers or not
      */
-    this.enableTrackerFilter = false
+    enableTrackerFilter = false
 
     /**
      * Provides the option to include extra columns for displaying data. This may concern columns
      * which are specific to this client. The extra columns will be merged with the default columns.
      */
-    this.extraColumns = []
+    extraColumns = []
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
@@ -366,7 +360,7 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      *      click [function]: The function to be executed when the when the button/element is pressed
      *      icon [string]: The icon of the button. See here: http://semantic-ui.com/elements/icon.html
      */
-    this.actionHeader = [
+    actionHeader: TorrentActionList<SynologyTorrent> = [
         {
             label: 'Start',
             type: 'button',
@@ -394,7 +388,7 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
      *      check [function]:   Displays a checkbox instead of an icon. The function is a predicate which
      *                          has to hold for all selected torrents, for the checkbox to be checked.
      */
-    this.contextMenu = [
+    contextMenu: ContextActionList<SynologyTorrent> = [
         {
             label: 'Remove Torrent',
             click: this.remove,
@@ -402,4 +396,4 @@ export let synologyService = ["$http", "$q", "TorrentS", "notificationService", 
         }
     ];
 
-}]
+}
