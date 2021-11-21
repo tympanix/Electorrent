@@ -53,6 +53,8 @@ export interface ContextActionMenu<T extends Torrent> {
     label: string
     menu: {
         label: string
+        icon?: string
+        role?: string
         click(torrents: T[]): Promise<void>
     }[]
 }

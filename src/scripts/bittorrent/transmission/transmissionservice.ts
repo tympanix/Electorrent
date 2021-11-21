@@ -1,5 +1,9 @@
-import _ from "underscore"
+import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
 import {TransmissionTorrent} from "./torrentt";
+import { fields } from "./transmissionconfig"
+import axios from 'axios';
+
+import _ from "underscore"
 
 const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 
@@ -27,7 +31,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       return a;
     }
 
-    url(path: string): string {
+    url(path?: string): string {
       return `${this.server.url()}${path || ""}`;
     };
 
@@ -44,39 +48,34 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       return "/transmission/rpc";
     };
 
-    connect(server): Promise<void> {
+    async connect(server): Promise<void> {
       this.server = server;
       let self = this;
-      var defer = $q.defer();
       var encoded = new Buffer(`${server.user}:${server.password}`).toString("base64");
-      config.encoded = encoded;
+      this.config.encoded = encoded;
 
       var data = {
         method: "session-get",
       };
 
-      $http
-        .post(this.url(), data, {
+      try {
+        let resp = await axios.post(this.url(), data, {
           timeout: 5000,
           headers: {
             Authorization: "Basic " + encoded,
           },
         })
-        .then(function (response) {
-          var session = response.headers("X-Transmission-Session-Id");
-          self.saveSession(session);
-          defer.resolve(response);
-        })
-        .catch(function (response) {
-          if (response.status === 409) {
-            var session = response.headers("X-Transmission-Session-Id");
+        let session = resp.headers["X-Transmission-Session-Id"]
+        this.saveSession(session)
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          if (err.response.status == 409) {
+            var session = err.response.headers["X-Transmission-Session-Id"];
             self.saveSession(session);
-            return defer.resolve(response);
           }
-          defer.reject(response);
-        });
-
-      return defer.promise;
+        }
+        throw err
+      }
     };
 
     /**
@@ -92,9 +91,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      *      deleted {array}: array of string containg the hashes of which torrents to be removed from the list in the GUI.
      * @return {promise} data
      */
-    this.torrents = function () {
-      var defer = $q.defer();
-
+    async torrents(): Promise<TorrentUpdates> {
       // downloadedEver and uploadedEver continue to count the second time you download that torrent.
 
       /*var fields = ['id','name','totalSize','percentDone', 'downloadedEver',
@@ -110,26 +107,19 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         method: "torrent-get",
       };
 
-      $http
-        .post(this.url(), data, {
-          headers: {
-            Authorization: "Basic " + config.encoded,
-            "X-Transmission-Session-Id": config.session,
-          },
-        })
-        .success(function (data, status, headers) {
-          var session = headers("X-Transmission-Session-Id");
-          updateSession(session);
-          defer.resolve(processData(data));
-        })
-        .error(function (err) {
-          defer.reject(err);
-        });
+      let resp = await axios.post(this.url(), data, {
+        headers: {
+          Authorization: "Basic " + this.config.encoded,
+          "X-Transmission-Session-Id": this.config.session,
+        },
+      })
 
-      return defer.promise;
+      let session = resp.headers["X-Transmission-Session-Id"]
+      this.updateSession(session);
+      return this.processData(resp.data)
     };
 
-    function processData(data) {
+    processData(data) {
       var torrents = {
         dirty: true,
         labels: [],
@@ -138,27 +128,27 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         deleted: [],
         trackers: [],
       };
-      torrents.all = data.arguments.torrents.map(build);
-      torrents.trackers = getTrackers(torrents.all);
+      torrents.all = data.arguments.torrents.map(this.build);
+      torrents.trackers = this.getTrackers(torrents.all);
       return torrents;
     }
 
-    function build(data) {
-      return new TorrentT(data);
+    build(data: Record<string, any>) {
+      return new TransmissionTorrent(data);
     }
 
-    function getTrackers(torrents) {
+    getTrackers(torrents) {
       let trackers = new Set();
       torrents.forEach((torrent) => {
         torrent.trackers.forEach((tracker) => trackers.add(tracker));
       });
       var trackerArray = Array.from(trackers).map(function (tracker) {
-        return parseUrl(tracker);
+        return this.parseUrl(tracker);
       });
       return _.compact(trackerArray);
     }
 
-    function parseUrl(url) {
+    parseUrl(url: string) {
       var match = url.match(URL_REGEX);
       return match && match[1];
     }
@@ -169,8 +159,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      * @param {string} magnetURL
      * @return {promise} isAdded
      */
-    this.addTorrentUrl = function (magnet) {
-      // Torrent-add
+    async addTorrentUrl(magnet: string): Promise<void> {
       var data = {
         arguments: {
           filename: magnet,
@@ -178,27 +167,18 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         method: "torrent-add",
       };
 
-      return $http
-        .post(this.url(), data, {
-          headers: {
-            Authorization: "Basic " + config.encoded,
-            "X-Transmission-Session-Id": config.session,
-          },
-        })
-        .then(function (response) {
-          var session = response.headers("X-Transmission-Session-Id");
-          updateSession(session);
-          if ("torrent-duplicate" in response.data.arguments) return $q.reject("torrentDuplicate");
-          return $q.resolve();
-        })
-        .catch(function (err) {
-          if (err === "torrentDuplicate") {
-            $notify.alert("Duplicate!", " This torrent is already added");
-          } else {
-            $notify.alert("Undefined error!", err);
-          }
-          return $q.reject();
-        });
+      let resp = await axios.post(this.url(), data, {
+        headers: {
+          Authorization: "Basic " + this.config.encoded,
+          "X-Transmission-Session-Id": this.config.session,
+        },
+      })
+      let session = resp.headers["X-Transmission-Session-Id"];
+      this.updateSession(session);
+      if ("torrent-duplicate" in resp.data.arguments) {
+        //$notify.alert("Duplicate!", " This torrent is already added");
+        throw new Error("Could not add duplicate torrent to transmission")
+      }
     };
 
     /**
@@ -210,17 +190,16 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      * @param {string} filename
      * @return {promise} isAdded
      */
-    this.uploadTorrent = function (buffer) {
-      let self = this;
-      var defer = $q.defer();
-      let array = bufferToUnit8Array(Buffer.from(buffer));
+    async uploadTorrent(buffer: Blob): Promise<void> {
+      let array = this.bufferToUnit8Array(Buffer.from(buffer.toString()));
+      var self = this;
       var blob = new Blob([array]);
       var base64data = "";
 
       // Convert blob file object to base64 encoded.
       var reader = new FileReader();
       reader.readAsDataURL(blob);
-      reader.onloadend = function () {
+      reader.onloadend = async function () {
         /* The use of split is necessary because the reader returns the type of the data
          * in the same string as the actual data, but we only need to send the actual data.*/
         base64data = reader.result.toString().split(",")[1];
@@ -233,37 +212,22 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
           method: "torrent-add",
         };
 
-        $http
-          .post(self.url(), data, {
-            headers: {
-              Authorization: "Basic " + config.encoded,
-              "X-Transmission-Session-Id": config.session,
-            },
-          })
-          .then(function (response) {
-            var session = response.headers("X-Transmission-Session-Id");
-            updateSession(session);
-            if ("torrent-duplicate" in response.data.arguments) return $q.reject("torrentDuplicate");
-            defer.resolve();
-          })
-          .catch(function (err) {
-            if (err === "torrentDuplicate") {
-              $notify.alert("Duplicate!", " This torrent is already added.");
-            } else {
-              $notify.alert("Undefined error!", err.msg);
-            }
-            defer.reject();
-          });
+        let resp = await axios.post(self.url(), data, {
+          headers: {
+            Authorization: "Basic " + self.config.encoded,
+            "X-Transmission-Session-Id": self.config.session,
+          },
+        })
+        let session = resp.headers["X-Transmission-Session-Id"];
+        self.updateSession(session)
+        if ("torrent-duplicate" in resp.data.arguments) {
+          //$notify.alert("Duplicate!", " This torrent is already added");
+          throw new Error("Could not add duplicate torrent to transmission")
+        }
       };
-
-      return defer.promise;
     };
 
-    this.doAction = function (command, torrents, mutator, value) {
-      if (!Array.isArray(torrents)) {
-        return $notify.alert("Error", "Action was passed incorrect arguments");
-      }
-
+    async doAction(command: string, torrents: TransmissionTorrent[], mutator?: string, value?: any) {
       var hashes = torrents.map(function (torrent) {
         return torrent.hash;
       });
@@ -281,15 +245,15 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         data.arguments[mutator] = value;
       }
 
-      return $http.post(this.url(), data, {
+      return axios.post(this.url(), data, {
         headers: {
-          Authorization: "Basic " + config.encoded,
-          "X-Transmission-Session-Id": config.session,
+          Authorization: "Basic " + this.config.encoded,
+          "X-Transmission-Session-Id": this.config.session,
         },
       });
     };
 
-    this.doGlobalAction = function (command) {
+    async doGlobalAction(command: string) {
       return this.doAction(command, []);
     };
 
@@ -300,46 +264,46 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      * @param {array} hashes
      * @return {promise} actionIsDone
      */
-    this.start = function (torrents) {
-      return this.doAction("torrent-start", torrents);
+    async start(torrents: TransmissionTorrent[]): Promise<void> {
+      await this.doAction("torrent-start", torrents);
     };
 
-    this.stop = function (torrents) {
-      return this.doAction("torrent-stop", torrents);
+    async stop(torrents: TransmissionTorrent[]): Promise<void> {
+      await this.doAction("torrent-stop", torrents);
     };
 
-    this.verify = function (torrents) {
-      return this.doAction("torrent-verify", torrents);
+    async verify(torrents: TransmissionTorrent[]): Promise<void> {
+      await this.doAction("torrent-verify", torrents);
     };
 
-    this.pauseAll = function () {
-      return this.doGlobalAction("torrent-stop");
+    async pauseAll(): Promise<void> {
+      await this.doGlobalAction("torrent-stop");
     };
 
-    this.resumeAll = function () {
-      return this.doGlobalAction("torrent-start");
+    async resumeAll(): Promise<void> {
+      await this.doGlobalAction("torrent-start");
     };
 
-    this.queueUp = function (torrents) {
-      return this.doAction("queue-move-up", torrents);
+    async queueUp(torrents: TransmissionTorrent[]): Promise<void> {
+      await this.doAction("queue-move-up", torrents);
     };
 
-    this.queueDown = function (torrents) {
-      return this.doAction("queue-move-down", torrents);
+    async queueDown(torrents: TransmissionTorrent[]): Promise<void> {
+      await this.doAction("queue-move-down", torrents);
     };
 
-    this.remove = function (torrents) {
-      return this.doAction("torrent-remove", torrents);
+    async remove(torrents: TransmissionTorrent[]): Promise<void> {
+      await this.doAction("torrent-remove", torrents);
     };
 
-    this.removeAndLocal = function (torrents) {
-      return this.doAction("torrent-remove", torrents, "delete-local-data", true);
+    async removeAndLocal(torrents: TransmissionTorrent[]): Promise<void> {
+      await this.doAction("torrent-remove", torrents, "delete-local-data", true);
     };
 
     /**
      * Whether the client supports sorting by trackers or not
      */
-    this.enableTrackerFilter = true;
+    enableTrackerFilter = true;
 
     /**
      * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
@@ -352,7 +316,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      *      click [function]: The function to be executed when the when the button/element is pressed
      *      icon [string]: The icon of the button. See here: http://semantic-ui.com/elements/icon.html
      */
-    this.actionHeader = [
+    actionHeader: TorrentActionList<TransmissionTorrent> = [
       {
         label: "Start",
         type: "button",
@@ -395,7 +359,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      *      click [function]: The function to be executed when clicked
      *      icon [string]: The icon of the action. See here: http://semantic-ui.com/elements/icon.html
      */
-    this.contextMenu = [
+    contextMenu: ContextActionList<TransmissionTorrent> = [
       {
         label: "Start",
         click: this.start,
