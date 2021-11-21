@@ -1,7 +1,8 @@
 import _ from "underscore"
+import { Torrent } from "../bittorrent"
 
-export let serverService = ['AbstractTorrent', '$rootScope', '$q', 'electron', 'notificationService', '$bittorrent', '$btclients',
-    function(Torrent, $rootScope, $q, electron, $notify, $bittorrent, $btclients) {
+export let serverService = ['$rootScope', '$q', 'electron', 'notificationService', '$bittorrent', '$btclients',
+    function($rootScope, $q, electron, $notify, $bittorrent, $btclients) {
 
         /*
          * Well known error values used for error handling

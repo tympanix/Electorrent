@@ -1,6 +1,6 @@
 import Fuse from "fuse.js";
 
-export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", "AbstractTorrent", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config, AbstractTorrent) {
+export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config) {
     const LIMIT = 25;
 
     var selected = [];
@@ -361,7 +361,6 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
 
         let column = $rootScope.$server.columns.find(c => c.attribute === sort)
         let sorter = column.sort
-        //var sorter = AbstractTorrent.sort(sort);
 
         var descSort = function(a, b) {
             return sorter(a[sort], b[sort]);

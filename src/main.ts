@@ -2,6 +2,16 @@ declare global {
     const angular: ng.IAngularStatic;
 }
 
+// Import all client implementations
+import {
+    UtorrentClient,
+    QBittorrentClient,
+    TransmissionClient,
+    RtorrentClient,
+    SynologyClient,
+    DelugeClient
+} from "./scripts/bittorrent"
+
 var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
 
 // Configure the application
@@ -14,35 +24,34 @@ torrentApp.config(['$animateProvider', function($animateProvider) {
 torrentApp.constant('$btclients', {
     'utorrent': {
         name: 'µTorrent',
-        service: 'utorrentService',
+        service: new UtorrentClient(),
         icon: 'utorrent'
     },
      'qbittorrent': {
         name: 'qBittorrent',
-        service: 'qbittorrentService',
+        service: new QBittorrentClient(),
         icon: 'qbittorrent'
     },
     'transmission': {
         name: 'Transmission',
-        service: 'transmissionService',
+        service: new TransmissionClient(),
         icon: 'transmission'
     },
     'rtorrent': {
         name: 'rTorrent',
-        service: 'rtorrentService',
+        service: new RtorrentClient(),
         icon: 'rtorrent'
     },
     'synology': {
         name: 'Synology Download Station',
-        service: 'synologyService',
+        service: new SynologyClient(),
         icon: 'downloadstation'
     },
     'deluge': {
         name: 'Deluge',
-        service: 'delugeService',
+        service: new DelugeClient(),
         icon: 'deluge',
     }
-
 });
 
 // Configure the client
@@ -98,30 +107,6 @@ import { serverService} from "./scripts/services/server"
 torrentApp.factory("Server", serverService)
 import { remoteService } from "./scripts/services/remote"
 torrentApp.factory("$remote", remoteService)
-
-// Bittorrent
-import { utorrentService } from "./scripts/bittorrent/utorrent/utorrentservice"
-torrentApp.service("utorrentService", utorrentService)
-import { torrentU } from "./scripts/bittorrent/utorrent/torrentu"
-torrentApp.factory('TorrentU', torrentU)
-import { transmissionService } from "./scripts/bittorrent/transmission/transmissionservice"
-torrentApp.service("transmissionService", transmissionService)
-import { torrentT } from "./scripts/bittorrent/transmission/torrentt"
-torrentApp.factory('TorrentT', torrentT)
-import { transmissionConfig } from "./scripts/bittorrent/transmission/transmissionconfig"
-torrentApp.factory("transmissionConfig", transmissionConfig)
-import { rtorrentService } from "./scripts/bittorrent/rtorrent/rtorrentservice"
-torrentApp.service("rtorrentService", rtorrentService)
-import {TorrentR} from "./scripts/bittorrent/rtorrent/torrentr"
-torrentApp.factory('TorrentR', TorrentR)
-import {synologyService} from "./scripts/bittorrent/synology/synologyservice"
-torrentApp.service('synologyService', synologyService)
-import {TorrentS} from "./scripts/bittorrent/synology/synologytorrent"
-torrentApp.factory('TorrentS', TorrentS)
-import {delugeService} from "./scripts/bittorrent/deluge/delugeservice"
-torrentApp.service('delugeService', delugeService)
-import {TorrentD} from "./scripts/bittorrent/deluge/torrentd"
-torrentApp.factory('TorrentD', TorrentD)
 
 // Filters
 import {dateFilter, etaFilter, releaseDateFilter} from "./scripts/filters/dateFilter"

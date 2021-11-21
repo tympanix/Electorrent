@@ -3,7 +3,7 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
     this.getClient = function(name) {
         var client = $btclients[name];
         if (client){
-            return $injector.get(client.service);
+            return client.service
         } else {
             throw new Error('Bittorrent client "' + name + '" not available');
         }

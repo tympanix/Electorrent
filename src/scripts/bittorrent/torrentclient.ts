@@ -1,4 +1,4 @@
-import {Torrent} from "./abstracttorrent"
+import { Torrent } from "./abstracttorrent"
 
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
