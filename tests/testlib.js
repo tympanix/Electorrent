@@ -95,14 +95,6 @@ exports.testclient = function ({
     });
 
     after(async function () {
-      if (app.client) {
-        let logs = await app.client.getRenderProcessLogs()
-        logs.forEach(function (log) {
-          console.log(log.message)
-          console.log(log.source)
-          console.log(log.level)
-        })
-      }
       if (app && app.isRunning()) {
         await app.stop();
       }
@@ -111,13 +103,15 @@ exports.testclient = function ({
 
     afterEach(function() {
       if (this.currentTest.state == 'failed') {
-        app.client.getRenderProcessLogs().then(function (logs) {
-          logs.forEach(function (log) {
-            console.log(log.message)
-            console.log(log.source)
-            console.log(log.level)
+        if (process.env.MOCHA_DEBUG) {
+          app.client.getRenderProcessLogs().then(function (logs) {
+            logs.forEach(function (log) {
+              console.log(log.message)
+              console.log(log.source)
+              console.log(log.level)
+            })
           })
-        })
+        }
       }
     })
 

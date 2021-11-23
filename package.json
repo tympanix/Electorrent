@@ -30,7 +30,6 @@
     "winreg": "^1.2.2"
   },
   "devDependencies": {
-    "@wdio/sync": "^7.16.4",
     "@electorrent/node-deluge": "^1.0.2",
     "@electorrent/node-qbittorrent": "^1.1.2",
     "@electorrent/node-rtorrent": "^1.2.1",
@@ -44,6 +43,7 @@
     "@types/node": "^14.14.13",
     "@types/tapable": "^0.2.5",
     "@types/underscore": "^1.10.24",
+    "@wdio/sync": "^7.16.4",
     "angular": "^1.5.8",
     "angular-animate": "^1.5.11",
     "angular-marked": "^1.2.2",
@@ -98,7 +98,10 @@
     "underscore": "^1.12.0",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
+    "webpack": "^5.64.2",
     "webpack-cli": "^4.2.0",
+    "webpack-node-externals": "^3.0.0",
+    "webpack-stream": "^7.0.0",
     "winston": "^2.4.4",
     "yargs": "^4.8.1"
   },

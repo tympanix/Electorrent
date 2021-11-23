@@ -4,7 +4,6 @@ const fs = require('fs');
 const gulp = require('gulp');
 const {server} = require('electron-connect')
 const useref = require('gulp-useref');
-const ts = require('gulp-typescript');
 const clean = require('gulp-clean');
 const sourcemaps = require('gulp-sourcemaps')
 const lazypipe = require('lazypipe')
@@ -13,7 +12,7 @@ const concat = require('gulp-concat');
 const path = require('path');
 const merge = require('merge-stream');
 const iconfont = require('gulp-iconfont');
-const browserify = require('browserify');
+const webpack = require('webpack-stream')
 const source = require('vinyl-source-stream')
 
 const PROD = process.env.NODE_ENV === 'production'
@@ -21,10 +20,8 @@ const OUT = "./app";
 const CLEAN = [`${OUT}/*`, `!${OUT}/package.json`, `!${OUT}/node_modules`];
 const SEMANTIC = './bower_components/semantic/src'
 
-const tsconfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, "tsconfig.json")))
-var tsProject = ts.createProject(tsconfig.compilerOptions);
 
-gulp.task('serve', function () {
+gulp.task('serve:watch', function () {
     let electron = server.create({
       path: 'app'
     });
@@ -50,31 +47,19 @@ gulp.task('serve', function () {
     //gulp.watch(['bower_components/angular-table-resize/dist/*'], gulp.series('build:useref', electron.reload))
 })
 
+gulp.task('build:webpack', function() {
+  return gulp.src('src/main.ts')
+    .pipe(webpack(Object.assign({ watch: false }, require('./webpack.config.js'))))
+    .pipe(gulp.dest(OUT))
+})
+
+gulp.task('serve', gulp.parallel('serve:watch', 'build:webpack'))
+
 gulp.task('default', gulp.parallel('serve'));
 
 gulp.task('clean', function() {
     return gulp.src(CLEAN, {read: false})
         .pipe(clean());
-})
-
-gulp.task('build:typescript', function() {
-  return gulp.src('src/**/*.ts')
-    .pipe(tsProject())
-    .pipe(gulp.dest(OUT))
-})
-
-gulp.task('build:browserify', function() {
-  let bundler = browserify({
-      entries: `${OUT}/main.js`,
-      node: true,
-      cache: {},
-      packageCache: {},
-      fullPaths: true,
-  }) 
-  bundler.exclude('electron')
-  return bundler.bundle()
-    .pipe(source('main.bundle.js'))
-    .pipe(gulp.dest(OUT))
 })
 
 gulp.task('build:useref', function() {
@@ -168,7 +153,7 @@ gulp.task('build:semantic', gulp.parallel('semantic:src', 'semantic:default'))
 
 gulp.task('build:static', gulp.parallel('build:useref', 'build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers', 'build:build'))
 
-gulp.task('build:bundle', gulp.series('build:typescript', 'build:browserify'))
+gulp.task('build:bundle', gulp.series('build:webpack'))
 
 gulp.task('build:less', function() {
   let dir = 'src/css/themes'

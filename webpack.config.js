@@ -1,8 +1,10 @@
 const webpack = require('webpack')
 const path = require('path')
+const fs = require('fs')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MinifyPlugin = require('babel-minify-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const nodeExternals = require('webpack-node-externals');
 
 // Any directories you will be adding code/files into, need to be added to this array so webpack will pick them up
 const defaultInclude = path.resolve(__dirname, 'src')
@@ -14,13 +16,22 @@ module.exports = {
       path: path.resolve(__dirname, 'app'),
       filename: '[name].js',
   },
-  externals: {
-    jquery: 'jQuery',
-    jquery: '$',
-    angular: 'angular',
-    mousetrap: 'mousetrap',
-    fuse: 'Fuse',
-  },
+  target: 'electron-renderer',
+  mode: 'development',
+  externals: [
+    /* Ignore import from bower packages */
+    {
+      jquery: 'jQuery',
+      jquery: '$',
+      angular: 'angular',
+      mousetrap: 'Mousetrap',
+      fuse: 'Fuse',
+    },
+    /* Ignore local app dependencies from runtime */
+    nodeExternals({
+      modulesDir: 'app/node_modules'
+    }),
+  ],
   module: {
     rules: [
       {
@@ -55,11 +66,14 @@ module.exports = {
       }
     ]
   },
-  target: 'electron-renderer',
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.json'],
+    modules: ['node_modules', 'src']
+  },
   plugins: [
-    new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, "src/index.html")
-    }),
+    // new HtmlWebpackPlugin({
+    //     template: path.resolve(__dirname, "src/index.html")
+    // }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional

@@ -38,8 +38,8 @@ describe("test clients", async function() {
 
   afterEach(async function() {
     if (this.currentTest.state === "failed") {
-      if (process.env["ELECTORRENT_HALT_ON_FAILED_TEST"] !== undefined) {
-        // wait until user decides to proceed (or very long timeout)
+      if (process.env.MOCHA_HALT) {
+        // halt and wait until user decides to proceed (or very long timeout)
         this.timeout(Math.pow(2, 32))
         await askQuestion("Test failed. Press any key to continue")
       }
