@@ -15,7 +15,6 @@ const iconfont = require('gulp-iconfont');
 const webpack = require('webpack-stream')
 const source = require('vinyl-source-stream')
 const compiler = require('webpack');
-const { computeDownloadUrl } = require('app-builder-lib/out/publish/PublishManager');
 
 const PROD = process.env.NODE_ENV === 'production'
 const OUT = "./app";
