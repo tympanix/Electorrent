@@ -27,13 +27,15 @@ describe("test clients", async function() {
   this.timeout(25 * 1000)
 
   before(async function() {
-      await compose.upAll({ cwd: path.join(__dirname), log: true })
+    await compose.upAll({ cwd: path.join(__dirname), log: true })
   })
 
   require("./suites")()
 
   after(async function() {
+    if (!process.env.MOCHA_DOCKER_KEEP) {
       await compose.down({ cwd: path.join(__dirname), log: true })
+    }
   })
 
   afterEach(async function() {

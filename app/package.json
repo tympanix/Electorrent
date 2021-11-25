@@ -31,6 +31,7 @@
     "@electorrent/node-deluge": "^1.0.2",
     "@electorrent/node-qbittorrent": "^1.1.2",
     "@electorrent/node-rtorrent": "^1.2.1",
+    "axios": "^0.24.0",
     "electron-is": "^3.0.0",
     "electron-regedit": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",

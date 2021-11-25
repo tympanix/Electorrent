@@ -1,12 +1,12 @@
 import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
 import {TransmissionTorrent} from "./torrentt";
 import { fields } from "./transmissionconfig"
-import axios from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
 import _ from "underscore"
 
 const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
-const SESSION_ID_HEADER = "X-Transmission-Session-Id"
+const SESSION_ID_HEADER = "X-Transmission-Session-Id".toLowerCase()
 
 export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
@@ -15,34 +15,48 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     name = "Transmission";
 
     config = {
-      ip: "",
-      port: "",
       session: undefined,
-      encoded: "",
     };
 
-    bufferToUnit8Array(buf) {
-      if (!buf) return undefined;
-      if (buf.constructor.name === "Uint8Array" || buf.constructor === Uint8Array) {
-        return buf;
+    private updateSession(res: AxiosResponse | AxiosError | any) {
+      let session: string
+      if (axios.isAxiosError(res)) {
+        session = res.response.headers[SESSION_ID_HEADER]
+      } else if (res instanceof Error) {
+        throw res
+      } else {
+        session = res.headers[SESSION_ID_HEADER]
       }
-      if (typeof buf === "string") buf = Buffer.from(buf);
-      var a = new Uint8Array(buf.length);
-      for (var i = 0; i < buf.length; i++) a[i] = buf[i];
-      return a;
+      if (session) {
+        this.config.session = session
+      }
+    }
+
+    private getHttpClient(): AxiosInstance {
+      // use basic auth for authentication
+      let http = axios.create({
+        auth: {
+          username: this.server.user,
+          password: this.server.password,
+        }
+      })
+      // update session header on both success and error http responses
+      http.interceptors.response.use(
+        (res) => this.updateSession(res), 
+        (res) => this.updateSession(res),
+      )
+      // always use newest session key in http request header
+      http.interceptors.request.use((config) => {
+        if (this.config.session) {
+          config.headers[SESSION_ID_HEADER] = this.config.session
+        }
+        return config
+      })
+      return http
     }
 
     url(path?: string): string {
       return `${this.server.url()}${path || ""}`;
-    };
-
-    private updateSession(session: string) {
-      if (!session) return;
-      this.config.session = session;
-    }
-
-    private saveSession(session: string) {
-      this.config.session = session;
     };
 
     defaultPath(): string {
@@ -51,42 +65,21 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
     async connect(server): Promise<void> {
       this.server = server;
-      let self = this;
 
       var data = {
         method: "session-get",
       };
 
-      try {
-        let resp = await axios.post(this.url(), data, {
-          timeout: 5000,
-          headers: {
-            [SESSION_ID_HEADER]: this.config.session
-          },
-          auth: {
-            username: server.user,
-            password: server.password,
-          },
-          validateStatus: (status) => {
-            return (status == 200 || status == 409)
-          }
-        })
-        let session = resp.headers[SESSION_ID_HEADER]
-        this.saveSession(session)
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          if (err.response.status == 409) {
-            var session = err.response.headers[SESSION_ID_HEADER];
-            if (!session) {
-              throw new Error("Could not authenticate with Transmission server")
-            }
-            self.saveSession(session);
-            return
-          }
-        } else {
-          throw err
+      await this.getHttpClient().post(this.url(), data, {
+        timeout: 5000,
+        auth: {
+          username: server.user,
+          password: server.password,
+        },
+        validateStatus: (status) => {
+          return (status == 200 || status == 409)
         }
-      }
+      })
     };
 
     /**
@@ -118,18 +111,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         method: "torrent-get",
       };
 
-      let resp = await axios.post(this.url(), data, {
-        headers: {
-          [SESSION_ID_HEADER]: this.config.session,
-        },
-        auth: {
-          username: this.server.user,
-          password: this.server.password,
-        }
-      })
-
-      let session = resp.headers[SESSION_ID_HEADER]
-      this.updateSession(session);
+      let resp = await this.getHttpClient().post(this.url(), data)
       return this.processData(resp.data)
     };
 
@@ -181,17 +163,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         method: "torrent-add",
       };
 
-      let resp = await axios.post(this.url(), data, {
-        headers: {
-          [SESSION_ID_HEADER]: this.config.session,
-        },
-        auth: {
-          username: this.server.user,
-          password: this.server.password,
-        }
-      })
-      let session = resp.headers[SESSION_ID_HEADER];
-      this.updateSession(session);
+      var resp = await this.getHttpClient().post(this.url(), data, {})
       if ("torrent-duplicate" in resp.data.arguments) {
         //$notify.alert("Duplicate!", " This torrent is already added");
         throw new Error("Could not add duplicate torrent to transmission")
@@ -208,43 +180,20 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      * @return {promise} isAdded
      */
     async uploadTorrent(buffer: Uint8Array): Promise<void> {
-      let array = this.bufferToUnit8Array(Buffer.from(buffer));
-      var self = this;
-      var blob = new Blob([array]);
-      var base64data = "";
+      var base64data = Buffer.from(buffer).toString("base64")
 
-      // Convert blob file object to base64 encoded.
-      var reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = async function () {
-        /* The use of split is necessary because the reader returns the type of the data
-         * in the same string as the actual data, but we only need to send the actual data.*/
-        base64data = reader.result.toString().split(",")[1];
-
-        // Torrent-add
-        var data = {
-          arguments: {
-            metainfo: base64data,
-          },
-          method: "torrent-add",
-        };
-
-        let resp = await axios.post(self.url(), data, {
-          headers: {
-            [SESSION_ID_HEADER]: self.config.session,
-          },
-          auth: {
-            username: self.server.user,
-            password: self.server.password,
-          }
-        })
-        let session = resp.headers[SESSION_ID_HEADER];
-        self.updateSession(session)
-        if ("torrent-duplicate" in resp.data.arguments) {
-          //$notify.alert("Duplicate!", " This torrent is already added");
-          throw new Error("Could not add duplicate torrent to transmission")
-        }
+      var data = {
+        arguments: {
+          metainfo: base64data,
+        },
+        method: "torrent-add",
       };
+
+      let resp = await this.getHttpClient().post(this.url(), data, {})
+      if ("torrent-duplicate" in resp.data.arguments) {
+        //$notify.alert("Duplicate!", " This torrent is already added");
+        throw new Error("Could not add duplicate torrent to transmission")
+      }
     };
 
     async doAction(command: string, torrents: TransmissionTorrent[], mutator?: string, value?: any) {
@@ -265,15 +214,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         data.arguments[mutator] = value;
       }
 
-      return axios.post(this.url(), data, {
-        headers: {
-          [SESSION_ID_HEADER]: this.config.session,
-        },
-        auth: {
-          username: this.server.user,
-          password: this.server.password,
-        }
-      });
+      return this.getHttpClient().post(this.url(), data);
     };
 
     async doGlobalAction(command: string) {

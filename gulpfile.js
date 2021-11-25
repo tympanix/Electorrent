@@ -14,48 +14,77 @@ const merge = require('merge-stream');
 const iconfont = require('gulp-iconfont');
 const webpack = require('webpack-stream')
 const source = require('vinyl-source-stream')
+const compiler = require('webpack');
+const { computeDownloadUrl } = require('app-builder-lib/out/publish/PublishManager');
 
 const PROD = process.env.NODE_ENV === 'production'
 const OUT = "./app";
 const CLEAN = [`${OUT}/*`, `!${OUT}/package.json`, `!${OUT}/node_modules`];
 const SEMANTIC = './bower_components/semantic/src'
 
+function dummy(done) {
+  if (done instanceof Function) {
+    done()
+  }
+}
 
-gulp.task('serve:watch', function () {
-    let electron = server.create({
-      path: 'app'
-    });
+gulp.task('develop', function () {
+  let electron = server.create({
+    path: 'app'
+  });
 
-    // Start browser process
-    electron.start('--debug');
+  // Start browser process
+  electron.start('--debug');
 
-    // Restart browser process
-    gulp.watch('src/app.js', gulp.series('build:app', electron.restart))
-    gulp.watch('src/lib/*.js', gulp.series('build:lib', electron.restart))
-
-    // Reload renderer process
-    //gulp.watch(['src/*.html', 'src/scripts/**', 'src/main.ts'], gulp.series('build:useref', electron.reload))
-    gulp.watch(['src/views/**/*'], gulp.series('build:views', electron.reload))
-    gulp.watch(['src/css/**/*'], gulp.series('build:less', electron.reload))
-    //gulp.watch(['src/scripts/**/*'], gulp.series('build:useref'), electron.reload)
-    gulp.watch(['src/scripts/workers/*.js'], gulp.series('build:workers', electron.reload))
-
-    // Watch dependencies
-    gulp.watch(['app/node_modules/@electorrent/node-rtorrent/*.js'], electron.restart)
-
-    // Watch frontend dependencies
-    //gulp.watch(['bower_components/angular-table-resize/dist/*'], gulp.series('build:useref', electron.reload))
+  watch({
+    updateMainCallback: electron.restart,
+    updateRendererCallback: electron.reload,
+  })
 })
 
-gulp.task('build:webpack', function() {
+function watch({ updateMainCallback, updateRendererCallback }) {
+  // Restart application
+  gulp.watch('src/app.js', gulp.series('build:app', updateMainCallback))
+  gulp.watch('src/lib/*.js', gulp.series('build:lib', updateMainCallback))
+
+  // Reload renderer process
+  gulp.watch(['src/**/*.html'], gulp.series('build:useref', updateRendererCallback))
+  gulp.watch(['src/views/**/*'], gulp.series('build:views', updateRendererCallback))
+  gulp.watch(['src/css/**/*'], gulp.series('build:less', updateRendererCallback))
+  gulp.watch(['src/scripts/workers/*.js'], gulp.series('build:workers', updateRendererCallback))
+
+  return compileWebpack({
+    watch: true,
+    updateCallback: updateRendererCallback,
+  })
+}
+
+function compileWebpack({ watch = false, updateCallback }) {
+  const config = require('./webpack.config.js')
   return gulp.src('src/main.ts')
-    .pipe(webpack(Object.assign({ watch: false }, require('./webpack.config.js'))))
+    .pipe(webpack({ ...config, watch }, compiler, updateCallback))
+    .pipe(gulp.dest(OUT))
+}
+
+gulp.task('watch', function() {
+  watch({ 
+    updateRendererCallback: dummy,
+    updateMainCallback: dummy, 
+  })
+})
+
+gulp.task('test', function() {
+  const config = require('./webpack.config.js')
+  return gulp.src('src/main.ts')
+    .pipe(webpack({ ...config, watch: true }, compiler))
     .pipe(gulp.dest(OUT))
 })
 
-gulp.task('serve', gulp.parallel('serve:watch', 'build:webpack'))
+gulp.task('build:webpack', function() {
+  return compileWebpack({ watch: false })
+})
 
-gulp.task('default', gulp.parallel('serve'));
+gulp.task('default', gulp.parallel('develop'));
 
 gulp.task('clean', function() {
     return gulp.src(CLEAN, {read: false})

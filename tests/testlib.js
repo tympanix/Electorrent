@@ -98,7 +98,9 @@ exports.testclient = function ({
       if (app && app.isRunning()) {
         await app.stop();
       }
-      await compose.down({ cwd: path.join(__dirname, fixture), log: true })
+      if (!process.env.MOCHA_DOCKER_KEEP) {
+        await compose.down({ cwd: path.join(__dirname, fixture), log: true })
+      }
     });
 
     afterEach(function() {

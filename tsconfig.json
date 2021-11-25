@@ -2,7 +2,8 @@
     "compilerOptions": {
       "moduleResolution": "node",
       "noImplicitAny": false,
-      "target": "es5",
+      "target": "es2017",
+      "pretty": true,
       "module": "commonjs",
       "sourceMap": true,
       "allowJs": true,
@@ -11,9 +12,9 @@
         "es5"
       ],
       "experimentalDecorators": true,
+      "allowSyntheticDefaultImports": true,
       "esModuleInterop": true,
-      "emitDecoratorMetadata": true,
-      "downlevelIteration": true,
+      "strict": false,
       "outDir": "./app",
       "typeRoots": [
         "node_modules/@types",

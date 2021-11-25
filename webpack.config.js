@@ -49,11 +49,11 @@ module.exports = {
         include: defaultInclude,
         exclude: /node_modules/,
       },
-      {
-        test: /\.jsx?$/,
-        use: [{ loader: 'babel-loader' }],
-        include: defaultInclude
-      },
+      // {
+      //   test: /\.jsx?$/,
+      //   use: [{ loader: 'babel-loader' }],
+      //   include: defaultInclude
+      // },
       {
         test: /\.(jpe?g|png|gif)$/,
         use: [{ loader: 'file-loader?name=img/[name]__[hash:base64:5].[ext]' }],
