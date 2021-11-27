@@ -1,12 +1,12 @@
 import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
 import {TransmissionTorrent} from "./torrentt";
 import { fields } from "./transmissionconfig"
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
 
 import _ from "underscore"
 
 const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
-const SESSION_ID_HEADER = "X-Transmission-Session-Id".toLowerCase()
+const SESSION_ID_HEADER = "X-Transmission-Session-Id"
 
 export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
@@ -21,20 +21,21 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     private updateSession(res: AxiosResponse | AxiosError | any) {
       let session: string
       if (axios.isAxiosError(res)) {
-        session = res.response.headers[SESSION_ID_HEADER]
+        session = res.response.headers[SESSION_ID_HEADER.toLowerCase()]
       } else if (res instanceof Error) {
         throw res
       } else {
-        session = res.headers[SESSION_ID_HEADER]
+        session = res.headers[SESSION_ID_HEADER.toLowerCase()]
       }
       if (session) {
         this.config.session = session
       }
+      return res
     }
 
     private getHttpClient(): AxiosInstance {
       // use basic auth for authentication
-      let http = axios.create({
+      var http = axios.create({
         auth: {
           username: this.server.user,
           password: this.server.password,
@@ -70,7 +71,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         method: "session-get",
       };
 
-      await this.getHttpClient().post(this.url(), data, {
+      let res = await this.getHttpClient().post(this.url(), data, {
         timeout: 5000,
         auth: {
           username: server.user,
@@ -80,6 +81,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
           return (status == 200 || status == 409)
         }
       })
+      console.log(res)
     };
 
     /**
@@ -134,13 +136,13 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     }
 
     getTrackers(torrents) {
-      let trackers = new Set();
+      let trackers = new Set<string>();
       torrents.forEach((torrent) => {
         torrent.trackers.forEach((tracker) => trackers.add(tracker));
       });
-      var trackerArray = Array.from(trackers).map(function (tracker) {
-        return this.parseUrl(tracker);
-      });
+      var trackerArray = Array.from(trackers).map(
+        (tracker) => this.parseUrl(tracker)
+      );
       return _.compact(trackerArray);
     }
 

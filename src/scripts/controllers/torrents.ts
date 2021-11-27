@@ -165,8 +165,9 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
                 $notify.ok("Reconnected", "The connection has been reestablished")
                 $scope.connectionLost = false;
                 startTimer(true);
-            }).catch(function() {
+            }).catch(function(err) {
                 startReconnect()
+                console.error(err)
             })
         }, refreshRate)
     }

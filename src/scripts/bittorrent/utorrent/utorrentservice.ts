@@ -96,9 +96,10 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       if (res.data && res.data.torrentc !== undefined) {
         this.data.cid = res.data.torrentc;
       }
+      return res
     })
 
-    let res = await axios.get(this.url() + "/token.html?t=" + Date.now(), {
+    let res = await this.http.get(this.url() + "/token.html?t=" + Date.now(), {
       timeout: 5000,
     })
     if (res.status == 401 || res.status == 402) {
@@ -112,12 +113,6 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
     } else {
       throw Error("Failed to authenticate with server")
     }
-
-    this.http.interceptors.response.use((res) => {
-      if (!(res.status >= 200 && res.status <= 299)) {
-        throw new Error(`Received status ${res.status} from server`)
-      }
-    })
   };
 
   async addTorrentUrl(url: string, dir?: string, path?: string) {
@@ -134,8 +129,9 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   };
 
   async uploadTorrent(buffer: Uint8Array, filename?: string, dir?: string, path?: string): Promise<void> {
-    let array = this.bufferToUnit8Array(Buffer.from(buffer.toString()));
-    var blob = new Blob([array], { type: "application/x-bittorrent" });
+    console.log("Type of data:", typeof buffer)
+    console.log("Data head:", Buffer.from(buffer).slice(0,64).toString("base64"))
+    var blob = new Blob([buffer], { type: "application/x-bittorrent" });
 
     var formData = new FormData();
     formData.append("torrent_file", blob, filename);
@@ -168,7 +164,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
           token: this.data.token,
           cid: this.data.cid,
           t: Date.now(),
-          action: "list=1",
+          list: 1,
         }
       },
     );
