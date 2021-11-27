@@ -3,6 +3,7 @@ import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} fro
 import {UtorrentTorrent} from "./torrentu";
 import axios from "axios";
 import { AxiosInstance } from "axios";
+import qs from "qs";
 
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
 
@@ -90,6 +91,9 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
         username: server.user,
         password: server.password,
       },
+      paramsSerializer: (params) => {
+        return qs.stringify(params, { arrayFormat: 'repeat' })
+      }
     })
 
     this.http.interceptors.response.use((res) => {
@@ -130,6 +134,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
 
   async uploadTorrent(buffer: Uint8Array, filename?: string, dir?: string, path?: string): Promise<void> {
     console.log("Type of data:", typeof buffer)
+    console.log("Name of constructor:", buffer.constructor.name)
     console.log("Data head:", Buffer.from(buffer).slice(0,64).toString("base64"))
     var blob = new Blob([buffer], { type: "application/x-bittorrent" });
 
@@ -250,13 +255,12 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       return torrent.hash;
     });
 
-    var encodedQuery = "";
-    for (let i = 0; i < hashes.length; i++) {
-      encodedQuery += "&" + ["hash=" + hashes[i], "s=label", "v=" + encodeURIComponent(label)].join("&");
-    }
-    return this.http.get(this.data.url + "/." + encodedQuery, {
+    return this.http.get(this.data.url + "/.", {
       params: {
         token: this.data.token,
+        hash: hashes,
+        s: "label",
+        v: label,
         action: "setprops",
         t: Date.now(),
       },

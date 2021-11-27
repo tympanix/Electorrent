@@ -55,7 +55,16 @@ class App {
     let torrent = new Torrent({ hash: hash, spectron: this.spectron, app: this });
     await torrent.isExisting().should.eventually.be.false;
     let data = fs.readFileSync(path.join(__dirname, "..", "data", filename));
-    this.spectron.webContents.send("torrentfiles", data, path.basename(filename));
+    /**
+     * Note: we're not sending the torrent data directory from the main process. Since the
+     * spectron test framework communicates with the browser intance, the webContents module
+     * is actually retrieved from the browser (using @electron/remote), meaning the IPC calls will
+     * take the following route/steps:
+     * renderer -> main -> renderer
+     * The multiple serialization of the IPC data behaves oddly with objects. We use a plain javascript
+     * array here to make the serialization behave properly.
+     */
+    this.spectron.webContents.send("torrentfiles", Array.from(data), path.basename(filename));
     await torrent.waitForExist();
     await torrent.isExisting().should.eventually.be.true;
     this.torrents.push(torrent);

@@ -9,7 +9,7 @@ class Torrent {
     this.$$ = this.browser.$$.bind(this.browser);
     this.hash = hash;
     this.query = `#torrentTable tbody tr[data-hash=${hash}]`;
-    this.timeout = 5 * 1000;
+    this.timeout = 10 * 1000;
   }
 
   isExisting() {
@@ -46,7 +46,7 @@ class Torrent {
     return this.browser.waitUntil(async () => {
       let cols = await self.getColumns();
       return cols["percent"].includes(state);
-    });
+    }, { timeout: this.timeout });
   }
 
   stop({ state = "Stopped" }) {
@@ -65,7 +65,7 @@ class Torrent {
     const button = "#torrent-action-header a[data-role=resume]";
 
     return sync(() => {
-      this.$(this.query).waitForExist();
+      this.$(this.query).waitForExist({ timeout: this.timeout });
       this.$(this.query).click();
       this.$(button).waitForEnabled();
       this.$(button).click();
