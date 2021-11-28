@@ -59,7 +59,7 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
         trackers: [],
       };
 
-      let data: Record<string, any> = defer((done) => {
+      let data: Record<string, any> = await defer((done) => {
         this.rtorrent.getTorrentsExtra(done)
       })
      
