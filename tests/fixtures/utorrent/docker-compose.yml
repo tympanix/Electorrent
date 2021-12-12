@@ -5,3 +5,5 @@ services:
     image: "ekho/utorrent"
     ports:
       - 8080:8080
+    tmpfs:
+      - /downloads

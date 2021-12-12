@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+      "moduleResolution": "node",
+      "noImplicitAny": false,
+      "target": "es2017",
+      "pretty": true,
+      "module": "commonjs",
+      "sourceMap": true,
+      "allowJs": true,
+      "lib": [
+        "dom",
+        "es5"
+      ],
+      "experimentalDecorators": true,
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true,
+      "strict": false,
+      "outDir": "./app",
+      "typeRoots": [
+        "node_modules/@types",
+        "src/types"
+      ]
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modues"]
+  }

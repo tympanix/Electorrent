@@ -5,5 +5,9 @@ services:
     image: "linuxserver/rutorrent"
     ports:
       - 8080:80
+      - 5000:5000
+      - 51413:51413
+      - 6881:6881/udp
     tmpfs:
       - /downloads
+      - /config

@@ -95,29 +95,25 @@ exports.testclient = function ({
     });
 
     after(async function () {
-      if (app.client) {
-        let logs = await app.client.getRenderProcessLogs()
-        logs.forEach(function (log) {
-          console.log(log.message)
-          console.log(log.source)
-          console.log(log.level)
-        })
-      }
       if (app && app.isRunning()) {
         await app.stop();
       }
-      await compose.down({ cwd: path.join(__dirname, fixture), log: true })
+      if (!process.env.MOCHA_DOCKER_KEEP) {
+        await compose.down({ cwd: path.join(__dirname, fixture), log: true })
+      }
     });
 
     afterEach(function() {
       if (this.currentTest.state == 'failed') {
-        app.client.getRenderProcessLogs().then(function (logs) {
-          logs.forEach(function (log) {
-            console.log(log.message)
-            console.log(log.source)
-            console.log(log.level)
+        if (process.env.MOCHA_DEBUG) {
+          app.client.getRenderProcessLogs().then(function (logs) {
+            logs.forEach(function (log) {
+              console.log(log.message)
+              console.log(log.source)
+              console.log(log.level)
+            })
           })
-        })
+        }
       }
     })
 
