@@ -108,12 +108,11 @@ export let mainController = ["$rootScope", "$scope", "$timeout", "$bittorrent", 
     // Listen for incomming torrent files from the main process
     electron.ipc.on('torrentfiles', function(event, buffer: ArrayLike<any>, filename: string){
         var data = new Uint8Array(buffer)
-        console.log("Data length:", data.length);
-        console.log("Buffer length:", buffer.length);
-        $rootScope.$btclient.uploadTorrent(data, filename).catch(function(err) {
-            $notify.alert('Upload Torrent', 'The torrent could not be uploaded')
-            console.error("Error", err);
-        })
+        $scope.$broadcast("torrents:add", data, filename)
+        // $rootScope.$btclient.uploadTorrent(data, filename).catch(function(err) {
+        //     $notify.alert('Upload Torrent', 'The torrent could not be uploaded')
+        //     console.error("Error", err);
+        // })
     })
 
     function pageTorrents(fullupdate?: boolean){

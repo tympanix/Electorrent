@@ -1,4 +1,6 @@
+import { exec } from "child_process";
 import Fuse from "fuse.js";
+import { TorrentUploadOptions } from "../bittorrent/torrentclient";
 
 export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config) {
     const LIMIT = 25;
@@ -23,6 +25,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     $scope.labels = [];
     $scope.trackers = [];
     $scope.guiBusy = true;
+    $scope.pendingTorrentFiles = [];
 
     $scope.filters = {
         status: 'all',
@@ -53,6 +56,8 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
 
     $scope.$on('new:settings', function(event, data) {
         refreshRate = data.refreshRate
+        settings = config.getAllSettings()
+        $scope.settings = config.getAllSettings()
         resetAll();
     });
 
@@ -105,6 +110,27 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         };
         $notify.enableAll()
     })
+
+    $scope.$on('torrents:add', function(event, data: Uint8Array, filename: String) {
+        if (settings.alwaysPromptUploadOptions === true) {
+            $scope.pendingTorrentFiles.push({
+                data: data,
+                filename: filename,
+            })
+        } else {
+            $scope.uploadTorrent(data, filename)
+        }
+        $scope.$apply()
+    })
+
+    $scope.uploadTorrent = async function(torrent: Uint8Array, filename: string, options?: TorrentUploadOptions) {
+        try {
+            await $rootScope.$btclient.uploadTorrent(torrent, filename, options)
+        } catch (e) {
+            $notify.alert("Could not upload torrent", "The torrent could not be uploaded to the server")
+            console.error(e)
+        }
+    }
 
     $scope.$on('stop:torrents', function(){
         stopTimer();

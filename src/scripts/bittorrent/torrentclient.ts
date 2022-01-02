@@ -9,6 +9,29 @@ export interface TorrentUpdates {
     deletes?: [],
 }
 
+/**
+ * Options to apply to a torrent upon uploading a new torrent to the client.
+ * The torrent API may accept any subset of the interface below. 
+ */
+export interface TorrentUploadOptions {
+    saveLocation?: string
+    renameTorrent?: string
+    category?: string
+    startTorrent?: boolean
+    skipCheck?: boolean
+    sequentialDownload?: boolean
+    firstAndLastPiecePrio?: boolean
+    downloadSpeedLimit?: number
+    uploadSpeedLimit?: number
+}
+
+/**
+ * A record of which upload options to enable for a torrent client. The options you enable
+ * must be supported by the API. Any features that are enabled will have the corrosponding UI
+ * components rendered when uploading a torrent
+ */
+export type TorrentUploadOptionsEnable = Partial<Record<keyof TorrentUploadOptions, boolean>>
+
 export interface TorrentActionButton<T extends Torrent> {
     label: string,
     type: 'button',
@@ -114,7 +137,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * @param {string} magnetURL
      * @return {promise} isAdded
      */
-    abstract addTorrentUrl(magnet: string): Promise<void>
+    abstract addTorrentUrl(magnet: string, options?: TorrentUploadOptions): Promise<void>
 
     /**
      * Add a torrent file with the .torrent extension to the client through the API. Should
@@ -125,13 +148,20 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * @param {string} filename
      * @return {promise} isAdded
      */
-    abstract uploadTorrent(buffer: Uint8Array, filename: string): Promise<void>
+    abstract uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions): Promise<void>
 
 
     /**
      * Whether the client supports sorting by trackers or not
      */
     public enableTrackerFilter: boolean
+
+    /**
+     * A set of options supported by the client when uploading torrents (may be either torrent files
+     * or links). The set of supported options will effect how UI is rendered. If "undefined", then
+     * the client API does not support any upload options.
+     */
+    public uploadOptionsEnable: TorrentUploadOptionsEnable
 
     /**
      * Provides the option to include extra columns for displaying data. This may concern columns

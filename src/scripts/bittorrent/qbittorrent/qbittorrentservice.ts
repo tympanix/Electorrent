@@ -1,5 +1,5 @@
 import {Torrent} from "../abstracttorrent";
-import {TorrentActionList, TorrentClient, TorrentUpdates, ContextActionList} from "../torrentclient";
+import {TorrentActionList, TorrentClient, TorrentUpdates, ContextActionList, TorrentUploadOptions, TorrentUploadOptionsEnable} from "../torrentclient";
 import {QBittorrentTorrent} from "./torrentq";
 
 type CallbackFunc = (err: any, val: any) => void
@@ -15,6 +15,24 @@ function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
     })
   })
 }
+
+export interface QBittorrentUploadOptions {
+  savepath?: string
+  cookie?: string
+  category?: string
+  tags?: string
+  skip_checking?: boolean
+  paused?: boolean
+  root_folder?: boolean
+  rename?: string
+  upLimit?: number
+  dlLimit?: number
+  autoTMM?: boolean
+  sequentialDownload?: boolean
+  firstLastPiecePrio?: boolean
+}
+
+type QBittorrentUploadFormData = Partial<Record<keyof QBittorrentUploadOptions, string | Uint8Array | Buffer>>
 
 const QBittorrent = require("@electorrent/node-qbittorrent");
 
@@ -102,10 +120,57 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return defer(done => this.qbittorrent.addTorrentURL(magnet, {}, done));
     };
 
-    uploadTorrent(buffer: Uint8Array, filename: string): Promise<void> {
+    /**
+     * Transforms generic upload options to QBittorrent spefific ones. Options are returned in
+     * a form data compatible format accepted by the QBittorrent API. The returned object can
+     * be used directly in a HTTP post request
+     */
+    private getHttpUploadOptions(options: TorrentUploadOptions): QBittorrentUploadFormData {
+      let qbittorrentOptions: Required<QBittorrentUploadOptions> = {
+        savepath: options.saveLocation,
+        cookie: undefined,
+        category: options.category,
+        tags: undefined,
+        skip_checking: options.skipCheck,
+        paused: !options.startTorrent,
+        root_folder: undefined,
+        rename: options.renameTorrent,
+        upLimit: options.uploadSpeedLimit,
+        dlLimit: options.downloadSpeedLimit,
+        autoTMM: undefined,
+        sequentialDownload: options.sequentialDownload,
+        firstLastPiecePrio: options.firstAndLastPiecePrio,
+      }
+      let formData: QBittorrentUploadFormData = {}
+      // remove values which are undefined and transform into http form style
+      for (let k in qbittorrentOptions) {
+        if (qbittorrentOptions[k] !== undefined && qbittorrentOptions[k] !== null) {
+          formData[k] = qbittorrentOptions[k].toString()
+        }
+      }
+      return formData
+    }
+
+    uploadTorrent(buffer: Uint8Array, filename: string, options: TorrentUploadOptions): Promise<void> {
       let data = Buffer.from(buffer);
-      return defer(done => this.qbittorrent.addTorrentFileContent(data, filename, {}, done));
+      let httpFormOptions = undefined
+      if (options !== undefined) {
+        httpFormOptions = this.getHttpUploadOptions(options)
+      }
+      return defer(done => this.qbittorrent.addTorrentFileContent(data, filename, httpFormOptions, done));
     };
+
+    public uploadOptionsEnable: TorrentUploadOptionsEnable = {
+      saveLocation: true,
+      renameTorrent: true,
+      category: true,
+      startTorrent: true,
+      skipCheck: true,
+      sequentialDownload: true,
+      firstAndLastPiecePrio: true,
+      downloadSpeedLimit: true,
+      uploadSpeedLimit: true,
+    }
 
     enableTrackerFilter = false;
 

@@ -32,6 +32,11 @@ const torrents = require('./lib/torrents');
 logger.debug('Starting Electorrent in debug mode');
 logger.verbose('Verbose logging enabled');
 
+// Use the electron-reloader plugin for live reload during development
+try {
+	require('electron-reloader')(module);
+} catch {}
+
 // Global windows object reference
 let torrentWindow;
 
@@ -73,17 +78,6 @@ function createTorrentWindow() {
         // Dereference the window object
         torrentWindow = null;
     });
-
-    // Connect to server process
-    try {
-        if (electorrent.isDevelopment()) {
-            let client = require('electron-connect').client;
-            client.create(torrentWindow);
-        }
-    } catch (e) {
-        console.error("Could not establish debug connection", e)
-    }
-
 }
 
 function getApplicationIcon() {

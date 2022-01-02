@@ -1,0 +1,61 @@
+<div>
+    <div class="ui form" ng-class="{'loading': loading}">
+        <div class="field" ng-if="ctl.optionsEnabled.saveLocation">
+            <div class="ui left icon input">
+                <i class="save icon"></i>
+                <input id="upload-options-savelocation" placeholder="Download location" type="text" ng-model="options.saveLocation">
+            </div>
+        </div>
+
+        <div class="field" ng-if="ctl.optionsEnabled.renameTorrent">
+            <div class="ui left icon input">
+                <i class="tag icon"></i>
+                <input id="upload-options-renametorrent" type="text" placeholder="Rename torrent" ng-model="options.renameTorrent">
+            </div>
+        </div>
+
+        <div class="fields">
+            <div class="eight wide field" ng-if="ctl.optionsEnabled.startTorrent">
+                <toggle ng-model="options.startTorrent">
+                    Start torrent
+                </toggle>
+            </div>
+
+            <div class="eight wide field" ng-if="ctl.optionsEnabled.skipCheck">
+                <toggle ng-model="options.skipCheck">
+                    Skip hash check
+                </toggle>
+            </div>
+
+            <div class="eight wide field" ng-if="ctl.optionsEnabled.sequentialDownload">
+                <toggle ng-model="options.sequentialDownload">
+                    Sequential download
+                </toggle>
+            </div>
+
+            <div class="eight wide field" ng-if="ctl.optionsEnabled.firstAndLastPiecePrio">
+                <toggle ng-model="options.firstAndLastPiecePrio">
+                    First and last piece priority
+                </toggle>
+            </div>
+        </div>
+
+        <div class="field" ng-if="ctl.optionsEnabled.downloadSpeedLimit || ctl.optionsEnabled.uploadSpeedLimit">
+            <div class="two fields">
+                <div class="field" ng-if="ctl.optionsEnabled.downloadSpeedLimit">
+                    <div class="ui left icon input">
+                        <i class="arrow circle down icon"></i>
+                        <input id="upload-options-downloadspeedlimit" type="number" placeholder="Download speed limit (KB/s)" ng-model="options.downloadSpeedLimit">
+                    </div>
+                </div>
+                <div class="field" ng-if="ctl.optionsEnabled.uploadSpeedLimit">
+                    <div class="ui left icon input">
+                        <i class="arrow circle up icon"></i>
+                        <input id="upload-options-uploadspeedlimit" type="number" placeholder="Upload speed limit (KB/s)" ng-model="options.uploadSpeedLimit">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

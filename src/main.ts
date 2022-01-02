@@ -1,6 +1,6 @@
-declare global {
-    const angular: ng.IAngularStatic;
-}
+// declare global {
+//     const angular: ng.IAngularStatic;
+// }
 
 // Import all client implementations
 import {
@@ -165,6 +165,12 @@ torrentApp.directive("time", time)
 import {limitBind, limitSource} from "./scripts/directives/limit"
 torrentApp.directive("limitBind", limitBind)
 torrentApp.directive('limitSource', limitSource)
+import { ModalDirective } from "./scripts/directives/modal/modal.directive"
+torrentApp.directive('modalNew', ModalDirective.getInstance())
+import { AddTorrentModalDirective } from "./scripts/directives/add-torrent-modal/add-torrent-modal.directive";
+torrentApp.directive('addTorrentModal', AddTorrentModalDirective.getInstance())
+import { TorrentUploadFormDirective } from "./scripts/directives/torrent-upload-form/torrent-upload-form.directive";
+torrentApp.directive('torrentUploadForm', TorrentUploadFormDirective.getInstance())
 
 // Components
 import {menuWin} from "./scripts/components/menuWin"

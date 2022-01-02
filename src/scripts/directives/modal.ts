@@ -1,5 +1,6 @@
+import { IDirectiveFactory } from "angular"
 
-export let modal = function() {
+export let modal: IDirectiveFactory = function() {
     return {
         templateUrl: template,
         replace: true,
@@ -8,6 +9,7 @@ export let modal = function() {
             title: '@',
             btnOk: '@',
             btnCancel: '@',
+            closable: '<',
             icon: '@',
             approve: '&',
             deny: '&',
@@ -50,7 +52,7 @@ export let modal = function() {
             onVisible: function() {
                 modal.modal('refresh')
             },
-            closable: false,
+            closable: !!scope.closable,
             duration: 150
         });
 
