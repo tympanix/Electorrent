@@ -1,5 +1,5 @@
 import {Column} from "../../services/column";
-import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
+import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions} from "../torrentclient";
 import {UtorrentTorrent} from "./torrentu";
 import axios from "axios";
 import { AxiosInstance } from "axios";
@@ -119,20 +119,20 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
     }
   };
 
-  async addTorrentUrl(url: string, dir?: string, path?: string) {
+  async addTorrentUrl(url: string, options?: TorrentUploadOptions) {
     await this.http.get(this.data.url + "/.", {
       params: {
         token: this.data.token,
         t: Date.now(),
         action: "add-url",
         s: url,
-        download_dir: dir || 0,
-        path: path || "",
+        download_dir: options.saveLocation || 0,
+        path: "",
       }
     })
   };
 
-  async uploadTorrent(buffer: Uint8Array, filename?: string, dir?: string, path?: string): Promise<void> {
+  async uploadTorrent(buffer: Uint8Array, filename?: string, options?: TorrentUploadOptions): Promise<void> {
     console.log("Type of data:", typeof buffer)
     console.log("Name of constructor:", buffer.constructor.name)
     console.log("Data head:", Buffer.from(buffer).slice(0,64).toString("base64"))
@@ -146,8 +146,8 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
         params: {
           token: this.data.token,
           action: "add-file",
-          download_dir: dir || 0,
-          path: path,
+          download_dir: options.saveLocation || 0,
+          path: undefined,
         },
         headers: { "Content-Type": undefined },
         transformRequest: function (data) {

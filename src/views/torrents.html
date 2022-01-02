@@ -155,4 +155,9 @@
 
   <context-menu id="contextmenu" bind="contextMenu" menu="$btclient.contextMenu" click="doContextAction" debug="debug">
   </context-menu>
+
+  <add-torrent-modal 
+    torrents="pendingTorrentFiles"
+    upload-torrent-action="uploadTorrent">
+  </add-torrent-modal>
 </div>

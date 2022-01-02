@@ -1,0 +1,27 @@
+<div class="ui small modal" modal-new on-show="ctl.onShow()" on-hidden="ctl.onHidden()" ng-ref="ctl.modalref" ng-ref-read="modal-new">
+    <i class="close icon"></i>
+    <div class="header">
+        Add Torrent
+        <div class="ui label float right">
+            <i class="file alternate icon"></i>{{ torrents.length }} files remaining
+        </div>
+    </div>
+    <div class="content">
+        <h4 class="ui header">
+            <div class="content">
+                Add a New Torrent
+                <div class="sub header">{{ ctl.getCurrentTorrentUpload().filename }}</div>
+            </div>
+        </h4>
+        <torrent-upload-form loading="ctl.isLoading" options="ctl.uploadOptions" />
+    </div>
+    <div class="actions">
+        <a class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
+            Cancel
+        </a>
+        <a class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.uploadCurrentTorrent()">
+            Add Torrent
+            <i class="plus icon"></i>
+        </a>
+    </div>
+</div>
