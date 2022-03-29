@@ -76,6 +76,13 @@ export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron
                         $bittorrent.uploadFromClipboard();
                     }
                 },
+                {
+                    label: "Paste Torrent URL with Options...",
+                    accelerator: "CmdOrCtrl+Shift+I",
+                    click: function() {
+                        $bittorrent.uploadFromClipboard(true);
+                    }
+                },
             ]
         },
         {

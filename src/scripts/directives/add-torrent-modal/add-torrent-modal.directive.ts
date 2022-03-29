@@ -4,9 +4,25 @@ import { TorrentUploadOptions } from "../../bittorrent/torrentclient";
 import { AddTorrentModalController } from "./add-torrent-modal.controller";
 import html from "./add-torrent-modal.template.html"
 
+export type PendingTorrentUploadList = Array<PendingTorrentUploadItem>
+
+export type PendingTorrentUploadItem = PendingTorrentUploadFile|PendingTorrentUploadLink
+
+export interface PendingTorrentUploadFile {
+    type: 'file',
+    data: Uint8Array,
+    filename: string,
+}
+
+export interface PendingTorrentUploadLink {
+    type: 'link'
+    uri: string
+}
+
 export interface AddTorrentModalScope extends IScope {
-    torrents: Array<{data: Uint8Array, filename: string}>
+    torrents: PendingTorrentUploadList
     uploadTorrentAction: (torrent: Uint8Array, filename: string, options: TorrentUploadOptions) => Promise<void>
+    uploadTorrentUrlAction: (uri: string, options: TorrentUploadOptions) => Promise<void>
 }
 
 export class AddTorrentModalDirective implements IDirective {
@@ -15,7 +31,8 @@ export class AddTorrentModalDirective implements IDirective {
     restrict = "E"
     scope = {
         torrents: '=',
-        uploadTorrentAction: '<'
+        uploadTorrentAction: '<',
+        uploadTorrentUrlAction: '<'
     }
     controller = AddTorrentModalController
     controllerAs = "ctl"
