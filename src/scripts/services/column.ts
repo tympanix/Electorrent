@@ -18,9 +18,8 @@ export class Column implements ColumnProps {
 
 
     constructor(props: ColumnProps = {}) {
-        for (let p in Object.assign(Column.defaultProps, props)) {
-            this[p] = props[p]
-        }
+        Object.assign(this, Column.defaultProps)
+        Object.assign(this, props)
     }
 
     static ALPHABETICAL = function(a: string, b: string) {
