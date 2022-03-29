@@ -47,6 +47,9 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
             return;
         }
 
-        $rootScope.$btclient.addTorrentUrl(magnet);
+        $rootScope.$btclient.addTorrentUrl(magnet).catch(function(err: Error) {
+            $notify.alert('Upload failed', 'The torrent link could not be uploaded')
+            console.error(err)
+        });
     }
 }];

@@ -18,7 +18,14 @@ export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationServ
                     label: "Add Torrent...",
                     accelerator: "CmdOrCtrl+O",
                     click: function() {
-                        electron.torrents.browse();
+                        electron.torrents.browse(false);
+                    }
+                },
+                {
+                    label: "Add Torrent with Options...",
+                    accelerator: "CmdOrCtrl+Shift+O",
+                    click: function() {
+                        electron.torrents.browse(true);
                     }
                 },
                 {

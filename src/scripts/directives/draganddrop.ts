@@ -46,7 +46,7 @@ export let dragAndDrop = ['$rootScope', '$document', 'electron', function($rootS
                 paths.push(files.item(i).path);
             }
 
-            electron.torrents.readFiles(paths);
+            electron.torrents.readFiles(paths, event.ctrlKey);
             $rootScope.$emit('show:draganddrop', false);
         });
     }

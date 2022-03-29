@@ -20,25 +20,24 @@ function notify({ title = '', message = '', type = 'info'}) {
     });
 }
 
-function browse(paths){
+async function browse(askUploadOptions){
     var win = electorrent.getWindow();
 
-    if (paths) {
-        processFiles(paths);
-        return;
-    }
-
-    dialog.showOpenDialog(win, {
+    let result = await dialog.showOpenDialog(win, {
         title: 'Open Torrent File',
         buttonLabel: 'Add Torrent',
         filters: [
             {name: 'Torrent', extensions: ['torrent']}
         ],
         properties: ['openFile', 'multiSelections']
-    }, processFiles)
+    })
+
+    if (!result.canceled) {
+        processFiles(result.filePaths, askUploadOptions)
+    }
 }
 
-function processFiles(filepaths) {
+function processFiles(filepaths, askUploadOptions) {
     var win = electorrent.getWindow();
 
     if (!filepaths) return;
@@ -58,7 +57,7 @@ function processFiles(filepaths) {
         fs.readFile(file, (err, data) => {
             if (err) throw err;
 
-            win.webContents.send('torrentfiles', data, path.basename(file));
+            win.webContents.send('torrentfiles', data, path.basename(file), askUploadOptions);
 
         });
     })

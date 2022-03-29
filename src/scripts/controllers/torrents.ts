@@ -111,8 +111,8 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         $notify.enableAll()
     })
 
-    $scope.$on('torrents:add', function(event, data: Uint8Array, filename: String) {
-        if (settings.alwaysPromptUploadOptions === true) {
+    $scope.$on('torrents:add', function(event, data: Uint8Array, filename: String, askUploadOptions: boolean) {
+        if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true) {
             $scope.pendingTorrentFiles.push({
                 data: data,
                 filename: filename,
