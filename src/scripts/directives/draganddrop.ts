@@ -46,7 +46,9 @@ export let dragAndDrop = ['$rootScope', '$document', 'electron', function($rootS
                 paths.push(files.item(i).path);
             }
 
-            electron.torrents.readFiles(paths, event.ctrlKey);
+            let advancedKey = process.platform === 'darwin' ? event.altKey : event.ctrlKey
+
+            electron.torrents.readFiles(paths, advancedKey);
             $rootScope.$emit('show:draganddrop', false);
         });
     }

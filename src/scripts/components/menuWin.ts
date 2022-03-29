@@ -36,6 +36,13 @@ export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationServ
                     }
                 },
                 {
+                    label: "Paste Torrent URL with Options...",
+                    accelerator: "CmdOrCtrl+Shift+I",
+                    click: function() {
+                        $bittorrent.uploadFromClipboard(true);
+                    }
+                },
+                {
                     type: 'separator'
                 },
                 {

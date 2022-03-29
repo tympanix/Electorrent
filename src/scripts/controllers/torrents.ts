@@ -32,6 +32,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     $scope.trackers = [];
     $scope.guiBusy = true;
     $scope.pendingTorrentFiles = [];
+    $scope.uploadAdvancedOptionsKey = process.platform === 'darwin' ? '⌥' : "Ctrl"
 
     $scope.filters = {
         status: 'all',
