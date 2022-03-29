@@ -64,7 +64,7 @@ export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron
                 },
                 {
                     label: "Add Torrent with Options...",
-                    accelerator: "CmdOrCtrl+Shift+O",
+                    accelerator: "CmdOrCtrl+Alt+O",
                     click: function() {
                         electron.torrents.browse(true);
                     }
@@ -78,7 +78,7 @@ export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron
                 },
                 {
                     label: "Paste Torrent URL with Options...",
-                    accelerator: "CmdOrCtrl+Shift+I",
+                    accelerator: "CmdOrCtrl+Alt+I",
                     click: function() {
                         $bittorrent.uploadFromClipboard(true);
                     }

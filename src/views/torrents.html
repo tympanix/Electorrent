@@ -110,7 +110,9 @@
           <h2 class="ui center aligned icon header">
             <i class="add circle icon"></i>
             Upload Torrent Files
-            <div class="sub header" ng-if="!settings.alwaysPromptUploadOptions">Hold down <div class="ui label">CTRL</div> key for advanced options</div>
+            <div class="sub header" ng-if="!settings.alwaysPromptUploadOptions">
+              Hold down <div class="ui label">{{ uploadAdvancedOptionsKey }}</div> key for advanced options
+            </div>
           </h2>
         </div>
       </div>

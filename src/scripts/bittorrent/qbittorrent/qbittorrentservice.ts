@@ -11,7 +11,7 @@ function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
         reject(err)
       } else {
         resolve(val)
-      } 
+      }
     })
   })
 }
@@ -116,10 +116,6 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return "/";
     };
 
-    addTorrentUrl(magnet: string): Promise<void> {
-      return defer(done => this.qbittorrent.addTorrentURL(magnet, {}, done));
-    };
-
     /**
      * Transforms generic upload options to QBittorrent spefific ones. Options are returned in
      * a form data compatible format accepted by the QBittorrent API. The returned object can
@@ -159,6 +155,15 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       }
       return defer(done => this.qbittorrent.addTorrentFileContent(data, filename, httpFormOptions, done));
     };
+
+    addTorrentUrl(magnet: string, options?: TorrentUploadOptions): Promise<void> {
+      let httpFormOptions = undefined
+      if (options !== undefined) {
+        httpFormOptions = this.getHttpUploadOptions(options)
+      }
+      return defer(done => this.qbittorrent.addTorrentURL(magnet, httpFormOptions, done));
+    };
+
 
     public uploadOptionsEnable: TorrentUploadOptionsEnable = {
       saveLocation: true,
