@@ -15,28 +15,28 @@ export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationServ
             label: 'File',
             submenu: [
                 {
-                    label: "Add Torrent...",
+                    label: "Add Torrent",
                     accelerator: "CmdOrCtrl+O",
                     click: function() {
                         electron.torrents.browse(false);
                     }
                 },
                 {
-                    label: "Add Torrent with Options...",
+                    label: "Add Torrent with Options",
                     accelerator: "CmdOrCtrl+Shift+O",
                     click: function() {
                         electron.torrents.browse(true);
                     }
                 },
                 {
-                    label: "Paste Torrent URL...",
+                    label: "Paste Torrent URL",
                     accelerator: "CmdOrCtrl+I",
                     click: function() {
                         $bittorrent.uploadFromClipboard();
                     }
                 },
                 {
-                    label: "Paste Torrent URL with Options...",
+                    label: "Paste Torrent URL with Options",
                     accelerator: "CmdOrCtrl+Shift+I",
                     click: function() {
                         $bittorrent.uploadFromClipboard(true);
