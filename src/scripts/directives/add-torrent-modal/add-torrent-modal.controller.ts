@@ -57,15 +57,26 @@ export class AddTorrentModalController {
     async uploadCurrentTorrent() {
         try {
             this.isLoading = true
-            console.log(this.uploadOptions);
             let torrent = this.getCurrentTorrentUpload()
-            await this.performTorrentUpload(torrent.data, torrent.filename, this.uploadOptions)
+            if (torrent.type === 'file') {
+                await this.performTorrentUpload(torrent.data, torrent.filename, this.uploadOptions)
+            } else {
+                await this.performTorrentURIUpload(torrent.uri, this.uploadOptions)
+            }
             this.scope.torrents.shift()
             if (this.scope.torrents.length === 0) {
                 this.modalref.hideModal()
             }
         } finally {
             this.isLoading = false
+        }
+    }
+
+    async performTorrentURIUpload(uri: string, options: TorrentUploadOptions) {
+        if (this.scope.uploadTorrentUrlAction) {
+            await this.scope.uploadTorrentUrlAction(uri, options)
+        } else {
+            await this.rootScope.$btclient.addTorrentUrl(uri, options)
         }
     }
 

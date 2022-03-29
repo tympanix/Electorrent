@@ -1,3 +1,4 @@
+import { PendingTorrentUploadFile } from "../directives/add-torrent-modal/add-torrent-modal.directive";
 
 angular.module("torrentApp").controller("", []);
 
@@ -108,7 +109,12 @@ export let mainController = ["$rootScope", "$scope", "$timeout", "$bittorrent", 
     // Listen for incomming torrent files from the main process
     electron.ipc.on('torrentfiles', function(event, buffer: ArrayLike<any>, filename: string, askUploadOptions: boolean){
         var data = new Uint8Array(buffer)
-        $scope.$broadcast("torrents:add", data, filename, askUploadOptions)
+        let file: PendingTorrentUploadFile = {
+            type: 'file',
+            data: data,
+            filename: filename,
+        }
+        $scope.$broadcast("torrents:add", file, askUploadOptions)
     })
 
     function pageTorrents(fullupdate?: boolean){

@@ -1,3 +1,5 @@
+import { PendingTorrentUploadLink } from "../directives/add-torrent-modal/add-torrent-modal.directive";
+
 export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notificationService', 'electron', function($rootScope, $injector, $btclients, $notify, electron){
 
     this.getClient = function(name) {
@@ -33,7 +35,7 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
         return angular.copy($rootScope.$server)
     }
 
-    this.uploadFromClipboard = function() {
+    this.uploadFromClipboard = function(askUploadOptions: boolean) {
         var magnet = electron.clipboard.readText();
 
         var protocol = ['magnet', 'http'];
@@ -47,9 +49,11 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
             return;
         }
 
-        $rootScope.$btclient.addTorrentUrl(magnet).catch(function(err: Error) {
-            $notify.alert('Upload failed', 'The torrent link could not be uploaded')
-            console.error(err)
-        });
+        let link: PendingTorrentUploadLink = {
+            type: 'link',
+            uri: magnet
+        }
+
+        $rootScope.$broadcast('torrents:add', link, askUploadOptions)
     }
 }];

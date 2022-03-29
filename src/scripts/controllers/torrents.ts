@@ -1,8 +1,14 @@
 import { exec } from "child_process";
 import Fuse from "fuse.js";
 import { TorrentUploadOptions } from "../bittorrent/torrentclient";
+import { PendingTorrentUploadItem, PendingTorrentUploadList } from "../directives/add-torrent-modal/add-torrent-modal.directive"
 
-export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", function ($rootScope, $scope, $timeout, $filter, $q, $bittorrent, $notify, config) {
+interface TorrentControllerScope {
+    pendingTorrentFiles: PendingTorrentUploadList
+    [key: string]: any
+}
+
+export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", function ($rootScope, $scope: TorrentControllerScope, $timeout, $filter, $q, $bittorrent, $notify, config) {
     const LIMIT = 25;
 
     var selected = [];
@@ -111,14 +117,15 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         $notify.enableAll()
     })
 
-    $scope.$on('torrents:add', function(event, data: Uint8Array, filename: String, askUploadOptions: boolean) {
+    $scope.$on('torrents:add', function(event, item: PendingTorrentUploadItem, askUploadOptions: boolean) {
         if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true) {
-            $scope.pendingTorrentFiles.push({
-                data: data,
-                filename: filename,
-            })
+            $scope.pendingTorrentFiles.push(item)
         } else {
-            $scope.uploadTorrent(data, filename)
+            if (item.type === 'file') {
+                $scope.uploadTorrent(item.data, item.filename)
+            } else {
+                $scope.uploadTorrentURL(item.uri)
+            }
         }
         $scope.$apply()
     })
@@ -129,6 +136,15 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         } catch (e) {
             $notify.alert("Could not upload torrent", "The torrent could not be uploaded to the server")
             console.error(e)
+        }
+    }
+
+    $scope.uploadTorrentURL = async function(uri: string, options?: TorrentUploadOptions) {
+        try {
+            await $rootScope.$btclient.addTorrentUrl(uri)
+        } catch (err) {
+            $notify.alert('Upload failed', 'The torrent link could not be uploaded')
+            console.error(err)
         }
     }
 
