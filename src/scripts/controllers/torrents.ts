@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { IRootScopeService } from "angular";
 import Fuse from "fuse.js";
 import { TorrentUploadOptions } from "../bittorrent/torrentclient";
 import { PendingTorrentUploadItem, PendingTorrentUploadList } from "../directives/add-torrent-modal/add-torrent-modal.directive"
@@ -8,7 +8,7 @@ interface TorrentControllerScope {
     [key: string]: any
 }
 
-export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", function ($rootScope, $scope: TorrentControllerScope, $timeout, $filter, $q, $bittorrent, $notify, config) {
+export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService", function ($rootScope: IRootScopeService, $scope: TorrentControllerScope, $timeout, $filter, $q, $bittorrent, $notify, config) {
     const LIMIT = 25;
 
     var selected = [];
@@ -119,7 +119,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     })
 
     $scope.$on('torrents:add', function(event, item: PendingTorrentUploadItem, askUploadOptions: boolean) {
-        if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true) {
+        if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true && $rootScope.$btclient.uploadOptionsEnable) {
             $scope.pendingTorrentFiles.push(item)
         } else {
             if (item.type === 'file') {

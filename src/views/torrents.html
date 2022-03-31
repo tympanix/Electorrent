@@ -110,7 +110,7 @@
           <h2 class="ui center aligned icon header">
             <i class="add circle icon"></i>
             Upload Torrent Files
-            <div class="sub header" ng-if="!settings.alwaysPromptUploadOptions">
+            <div class="sub header" ng-if="!settings.alwaysPromptUploadOptions && $btclient.uploadOptionsEnable">
               Hold down <div class="ui label">{{ uploadAdvancedOptionsKey }}</div> key for advanced options
             </div>
           </h2>

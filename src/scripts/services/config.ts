@@ -1,4 +1,6 @@
-export let configService = ['$rootScope', '$bittorrent', 'notificationService', 'electron', '$q', 'Server', function($rootScope, $bittorrent, $notify, electron, $q, Server) {
+import { IRootScopeService } from "angular";
+
+export let configService = ['$rootScope', '$bittorrent', 'notificationService', 'electron', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, electron, $q, Server) {
 
     const MenuItem = electron.menuItem
     const config = electron.config;
@@ -150,13 +152,33 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
         return maxServer
     }
 
-    function getMenu(menu, name) {
-        return menu.items.find((menuItem) => menuItem.label === name)
+    function getMenu(menu, id) {
+        return menu.items.find((menuItem) => menuItem.id === id)
+    }
+
+    this.updateApplicationMenu = function() {
+        let menu = electron.menu.getApplicationMenu()
+        let fileMenu = getMenu(menu, 'file')
+        let addFileAdvancedMenu = getMenu(fileMenu.submenu, 'torrent-file-add-advanced')
+        let addUrlAdvancedMenu = getMenu(fileMenu.submenu, 'torrent-url-add-advanced')
+
+        let advancedUploadEnabled = false
+        if ($rootScope.$btclient && $rootScope.$server) {
+            advancedUploadEnabled = !!$rootScope.$btclient.uploadOptionsEnable
+        }
+
+        addFileAdvancedMenu.enabled = advancedUploadEnabled
+        addFileAdvancedMenu.visible = advancedUploadEnabled
+
+        addUrlAdvancedMenu.enabled = advancedUploadEnabled
+        addUrlAdvancedMenu.visible = advancedUploadEnabled
+
+        this.renderServerMenu()
     }
 
     this.renderServerMenu = function() {
         let menu = electron.menu.getApplicationMenu()
-        let serverMenu = getMenu(menu, 'Servers').submenu
+        let serverMenu = getMenu(menu, 'servers').submenu
         serverMenu.clear()
         serverMenu.append(new MenuItem({
             label: 'Add new server...',

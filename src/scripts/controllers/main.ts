@@ -86,7 +86,7 @@ export let mainController = ["$rootScope", "$scope", "$timeout", "$bittorrent", 
         }).catch(function(){
             pageSettings('connection');
         }).finally(function() {
-            config.renderServerMenu()
+            config.updateApplicationMenu()
         });
     }
 
