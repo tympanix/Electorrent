@@ -13,6 +13,7 @@ export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationServ
     const template = [
         {
             label: 'File',
+            id: 'file',
             submenu: [
                 {
                     label: "Add Torrent",
@@ -22,8 +23,10 @@ export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationServ
                     }
                 },
                 {
-                    label: "Add Torrent with Options",
+                    label: "Add Torrent (Advanced)",
+                    id: "torrent-file-add-advanced",
                     accelerator: "CmdOrCtrl+Shift+O",
+                    visible: true,
                     click: function() {
                         electron.torrents.browse(true);
                     }
@@ -36,8 +39,10 @@ export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationServ
                     }
                 },
                 {
-                    label: "Paste Torrent URL with Options",
+                    label: "Paste Torrent URL (Advanced)",
+                    id: "torrent-url-add-advanced",
                     accelerator: "CmdOrCtrl+Shift+I",
+                    visible: false,
                     click: function() {
                         $bittorrent.uploadFromClipboard(true);
                     }
@@ -153,6 +158,7 @@ export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationServ
         },
         {
             label: 'Servers',
+            id: 'servers',
             submenu: []
         },
         {

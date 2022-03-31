@@ -101,7 +101,7 @@ export let settingsController = ["$rootScope", "$scope", "$injector", "$q", "$bi
         return false
       }
       $scope.renameData.server.name = $scope.renameData.name
-      config.renderServerMenu()
+      config.updateApplicationMenu()
       return true
     }
 
@@ -150,7 +150,7 @@ export let settingsController = ["$rootScope", "$scope", "$injector", "$q", "$bi
             return writeSettings()
         }).then(function() {
             $scope.close();
-            config.renderServerMenu()
+            config.updateApplicationMenu()
             $rootScope.$broadcast('new:settings', $scope.settings)
             $notify.ok("Saved Settings", "Your settings have been updated")
         }).catch(function(err) {

@@ -75,7 +75,7 @@ torrentApp.run(['menuWin', 'menuMac', 'electron', 'configService', function(menu
 
     var appMenu = electron.menu.buildFromTemplate(menuTemplate);
     electron.menu.setApplicationMenu(appMenu);
-    config.renderServerMenu()
+    config.updateApplicationMenu()
 }]);
 
 // Controllers

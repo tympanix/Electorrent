@@ -23,7 +23,7 @@ export class AddTorrentModalController {
         this.isLoading = false
         this.uploadOptions = {}
         this.scope.$watch(() => {
-            return this.scope.torrents.length
+            return this.scope.torrents && this.scope.torrents.length
         }, (newVal, oldVal) => {
             if (newVal > 0) {
                 this.modalref.showModal()
@@ -44,7 +44,9 @@ export class AddTorrentModalController {
     }
 
     getCurrentTorrentUpload() {
-        return this.scope.torrents.length && this.scope.torrents[0]
+        if (this.scope.torrents) {
+            return this.scope.torrents.length && this.scope.torrents[0]
+        }
     }
 
     discardCurrentTorrent() {

@@ -54,6 +54,7 @@ export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron
         },
         {
             label: 'File',
+            id: 'file',
             submenu: [
                 {
                     label: "Add Torrent",
@@ -63,8 +64,11 @@ export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron
                     }
                 },
                 {
-                    label: "Add Torrent with Options",
+                    label: "Add Torrent (Advanced)",
+                    id: "torrent-file-add-advanced",
                     accelerator: "CmdOrCtrl+Alt+O",
+                    visible: false,
+                    enabled: false,
                     click: function() {
                         electron.torrents.browse(true);
                     }
@@ -77,8 +81,10 @@ export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron
                     }
                 },
                 {
-                    label: "Paste Torrent URL with Options",
+                    label: "Paste Torrent URL (Advanced)",
                     accelerator: "CmdOrCtrl+Alt+I",
+                    id: "torrent-url-add-advanced",
+                    visible: false,
                     click: function() {
                         $bittorrent.uploadFromClipboard(true);
                     }
@@ -177,6 +183,7 @@ export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron
         },
         {
             label: 'Servers',
+            id: 'servers',
             submenu: []
         },
         {
