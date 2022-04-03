@@ -9,7 +9,6 @@ const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 const SESSION_ID_HEADER = "X-Transmission-Session-Id"
 
 export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
-
     server = undefined;
 
     name = "Transmission";
@@ -43,7 +42,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       })
       // update session header on both success and error http responses
       http.interceptors.response.use(
-        (res) => this.updateSession(res), 
+        (res) => this.updateSession(res),
         (res) => this.updateSession(res),
       )
       // always use newest session key in http request header
@@ -265,6 +264,15 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     async removeAndLocal(torrents: TransmissionTorrent[]): Promise<void> {
       await this.doAction("torrent-remove", torrents, "delete-local-data", true);
     };
+
+    /**
+     * Delete function to satisfy interface implementation
+     * @param torrents torrent to delete from client
+     */
+    deleteTorrents(torrents: TransmissionTorrent[]): Promise<void> {
+      return this.remove(torrents)
+    }
+
 
     /**
      * Whether the client supports sorting by trackers or not

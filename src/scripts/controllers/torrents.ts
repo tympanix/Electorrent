@@ -87,16 +87,6 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         }
     }
 
-    $scope.setLabel = function(label){
-        $rootScope.$btclient.setLabel(getSelectedHashes(), label)
-            .then(function() {
-                $scope.update();
-            })
-            .catch(function() {
-                $notify.alert("Could not set label", "The label could not be changed. Please go to settings and configure your connection");
-            })
-    }
-
     $scope.renderDone = function() {
         $scope.guiBusy = false
         $timeout(function() {
@@ -167,8 +157,8 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
 
     function remove() {
         var selectedTorrents = $scope.arrayTorrents.filter(torrent => torrent.selected)
-        $rootScope.$btclient.remove(selectedTorrents)
-        $scope.$apply()
+        $rootScope.$btclient.deleteTorrents(selectedTorrents)
+        $scope.$apply.deleteTorrents
     }
 
     function selectAll() {
