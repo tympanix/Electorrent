@@ -15,6 +15,21 @@
         </div>
 
         <div class="fields">
+            <div class="field twelve wide">
+                <dropdown title="Label" id="upload-options-label" class="fluid" ng-model="options.category">
+                    <dropdown-group ng-repeat="label in labels" title="label" value="label">
+                    {{ label }}
+                    </dropdown-group>
+                </dropdown>
+            </div>
+            <div class="field four wide">
+                <button class="ui button fluid" ng-click="options.category = null" ng-class="{'disabled': !options.category}">
+                    Clear Category
+                </button>
+            </div>
+        </div>
+
+        <div class="fields">
             <div class="eight wide field" ng-if="ctl.optionsEnabled.startTorrent">
                 <toggle ng-model="options.startTorrent">
                     Start torrent

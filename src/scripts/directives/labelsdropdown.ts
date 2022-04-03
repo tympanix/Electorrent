@@ -10,7 +10,7 @@ export let labelsDropdown = [
         labels: "=",
       },
       link: function (scope) {
-        scope.form = { label: "Some Label" };
+        scope.form = { label: "" };
 
         scope.openNewLabelModal = function () {
           let modal: any = $("#newLabelModal")
