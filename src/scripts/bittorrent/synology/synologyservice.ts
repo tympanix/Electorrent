@@ -1,4 +1,3 @@
-import {Column} from "../../services/column";
 import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
 import {SynologyTorrent} from "./synologytorrent";
 import axios from "axios";
@@ -41,7 +40,6 @@ const ERR_TASK = {
 };
 
 export class SynologyClient extends TorrentClient<SynologyTorrent> {
-
     name = 'Synology Download Station';
     server = undefined
 
@@ -337,6 +335,16 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
     async remove(torrents: SynologyTorrent[]): Promise<void> {
         await this.doAction("delete", torrents);
     }
+
+    /**
+     * Delete function to satisfy interface implementation
+     * @param torrents torrent to delete
+     * @returns promise that torrents were deleted
+     */
+    deleteTorrents(torrents: SynologyTorrent[]): Promise<void> {
+        return this.remove(torrents)
+    }
+
 
     /**
      * Whether the client supports sorting by trackers or not

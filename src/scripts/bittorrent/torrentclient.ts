@@ -11,7 +11,7 @@ export interface TorrentUpdates {
 
 /**
  * Options to apply to a torrent upon uploading a new torrent to the client.
- * The torrent API may accept any subset of the interface below. 
+ * The torrent API may accept any subset of the interface below.
  */
 export interface TorrentUploadOptions {
     saveLocation?: string
@@ -149,6 +149,14 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * @return {promise} isAdded
      */
     abstract uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions): Promise<void>
+
+    /**
+     * Delete torrent(s) from the client. If the client has multiple methods of deleting a torrent,
+     * i.e. deleting with and without data, the torrent should be removed without data. That means the
+     * torrent is removed from the client, but the (maybe incomplete) data still persists on disk.
+     * @param torrents torrents to delete from the client
+     */
+    abstract deleteTorrents(torrents: Array<T>): Promise<void>
 
 
     /**

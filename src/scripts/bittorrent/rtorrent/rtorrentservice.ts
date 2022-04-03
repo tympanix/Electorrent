@@ -12,13 +12,12 @@ function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
         reject(err)
       } else {
         resolve(val)
-      } 
+      }
     })
   })
 }
 
 export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
-
     /*
      * Global reference to the rtorrent remote web worker instance
      */
@@ -62,7 +61,7 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       let data: Record<string, any> = await defer((done) => {
         this.rtorrent.getTorrentsExtra(done)
       })
-     
+
       torrents.all = data.torrents.map((d: Record<string, any>) => new RtorrentTorrent(d));
       torrents.trackers = data.trackers;
       torrents.labels = data.labels;
@@ -141,6 +140,15 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
         this.rtorrent.setPriorityOff(torrents.map((t) => t.hash), done);
       })
     };
+
+    /**
+     * Delete function to satisfy interface implementation
+     * @param torrents torrents to delete
+     */
+    deleteTorrents(torrents: RtorrentTorrent[]): Promise<void> {
+      throw new Error("Method not implemented.");
+    }
+
 
     /**
      * Whether the client supports sorting by trackers or not

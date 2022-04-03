@@ -6,7 +6,6 @@ import { AxiosInstance } from "axios";
 import qs from "qs";
 
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
-
   server = undefined;
   http: AxiosInstance = undefined;
   name = "µTorrent";
@@ -249,6 +248,15 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   async getprops(torrents: UtorrentTorrent[]): Promise<void> {
     return this.doAction("getprops", torrents);
   };
+
+  /**
+   * Delete function to satisfy interface implementation
+   * @param torrents torrent to delete from client
+   */
+  deleteTorrents(torrents: UtorrentTorrent[]): Promise<void> {
+    return this.removetorrent(torrents)
+  }
+
 
   setLabel(torrents: UtorrentTorrent[], label: string): Promise<void> {
     var hashes = torrents.map(function (torrent) {

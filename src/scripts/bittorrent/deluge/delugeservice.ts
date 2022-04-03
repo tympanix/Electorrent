@@ -10,7 +10,7 @@ function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
         reject(err)
       } else {
         resolve(val)
-      } 
+      }
     })
   })
 }
@@ -102,6 +102,15 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
 
     queueBottom(torrents: DelugeTorrent[]): Promise<void> {
         return defer(done => this.deluge.queueBottom(torrents.map(t => t.hash), done))
+    }
+
+    /**
+     * Delete function to satisfy interface implementation
+     * @param torrents torrent to delete
+     * @returns promise that torrents were deleted
+     */
+    deleteTorrents(torrents: DelugeTorrent[]): Promise<void> {
+        return this.remove(torrents)
     }
 
     /**

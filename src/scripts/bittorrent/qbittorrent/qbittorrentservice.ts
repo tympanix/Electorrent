@@ -38,7 +38,6 @@ const QBittorrent = require("@electorrent/node-qbittorrent");
 
 export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
 
-
     name = "qBittorrent";
 
     private qbittorrent: any
@@ -240,6 +239,16 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       let hashes = torrents.map((t) => t.hash);
       return promise.then(() => defer(done => this.qbittorrent.setCategory(hashes, category, done)));
     };
+
+    /**
+     * Delete function to satisfy interface implementation
+     * @param torrents torrent to delete
+     * @returns promise that torrents were deleted
+     */
+    deleteTorrents(torrents: QBittorrentTorrent[]): Promise<void> {
+      return this.delete(torrents)
+    }
+
 
     actionHeader: TorrentActionList<QBittorrentTorrent> = [
       {
