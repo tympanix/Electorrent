@@ -31,6 +31,7 @@ export class AddTorrentModalDirective implements IDirective {
     restrict = "E"
     scope = {
         torrents: '=',
+        labels: '=',
         uploadTorrentAction: '<',
         uploadTorrentUrlAction: '<'
     }

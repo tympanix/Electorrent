@@ -37,6 +37,7 @@ export class TorrentUploadFormDirective extends Directive {
         this.restrict = "E"
         this.scope = {
             options: "=",
+            labels: "=",
             loading: "<",
         }
         this.controller = TorrentUploadFormController

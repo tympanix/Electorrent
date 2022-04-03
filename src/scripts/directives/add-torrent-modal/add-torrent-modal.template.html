@@ -13,7 +13,7 @@
                 <div class="sub header">{{ ctl.getCurrentTorrentUpload().filename }}</div>
             </div>
         </h4>
-        <torrent-upload-form loading="ctl.isLoading" options="ctl.uploadOptions" />
+        <torrent-upload-form loading="ctl.isLoading" options="ctl.uploadOptions" labels="labels" />
     </div>
     <div class="actions">
         <a class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
