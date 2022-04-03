@@ -131,7 +131,7 @@ export let dropdownGroup = function() {
             // Check if title= was set... if not take the contents of the dropdown-group tag
             // title= is for dynamic variables from something like ng-repeat {{variable}}
             if(scope.title === undefined) {
-                scope.item_title = attrs.title || element.children()[0]?.innerHTML || "";
+                scope.item_title = attrs.title || element[0]?.innerHTML || "";
             } else {
                 scope.item_title = scope.title;
             }
