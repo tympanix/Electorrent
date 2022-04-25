@@ -3,9 +3,6 @@ version: "3"
 services:
   utorrent:
     image: "ekho/utorrent"
-    networks:
-      - default
-      - p2p
     ports:
       - 8080:8080
     tmpfs:
