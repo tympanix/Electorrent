@@ -10,20 +10,22 @@
 if [ "$1" == "seed" ]; then
     >2 echo "Peer acting as seeder"
     # Create a random test file
-    dd if=/dev/urandom of=/srv/test-100k.bin bs=100k count=1
+    dd if=/dev/urandom of=/srv/test-100k.bin bs=1M count=50
+    # Delete any old torrent files
+    rm -rf /shared/*.torrent
     # Create a torrent file and save it in the shared folder
     ctorrent -t -s /shared/test-100k.bin.torrent -u http://tracker:6969/announce /srv/test-100k.bin
     # Write a checksum file for the files to be seeded
     sha256sum /srv/*.bin | tee /shared/checksum
     # Seed the torrent file (and contents)
-    ctorrent -P "$HOSTNAME" -p "$P2P_PORT" -s /srv/test-100k.bin /shared/test-100k.bin.torrent
+    ctorrent -P "$HOSTNAME" -p "$P2P_PORT" -U10 -D10 -s /srv/test-100k.bin /shared/test-100k.bin.torrent
     exit 0
 fi
 
 # The leecher role
 if [ "$1" == "leech" ]; then
     >2 echo "Peer acting a leecher"
-    # Wait until files have been shared from seeder 
+    # Wait until files have been shared from seeder
     until [ -f /shared/checksum ]; do sleep 0.2; done
     # Make sure no files exists (will be downloaded shortly)
     test ! -e /srv/*.bin

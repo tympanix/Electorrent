@@ -11,3 +11,8 @@ services:
     tmpfs:
       - /downloads
       - /config
+
+networks:
+  default:
+    external:
+      name: electorrent_p2p

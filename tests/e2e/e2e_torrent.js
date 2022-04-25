@@ -8,7 +8,7 @@ class Torrent {
     this.$ = this.browser.$.bind(this.browser);
     this.$$ = this.browser.$$.bind(this.browser);
     this.hash = hash;
-    this.query = `#torrentTable tbody tr[data-hash=${hash}]`;
+    this.query = `#torrentTable tbody tr[data-hash="${hash}"]`;
     this.timeout = 10 * 1000;
   }
 

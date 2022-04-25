@@ -7,3 +7,8 @@ services:
       - 8112:8112
     tmpfs:
       - /downloads
+
+networks:
+  default:
+    external:
+      name: electorrent_p2p

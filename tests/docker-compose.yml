@@ -43,7 +43,7 @@ services:
     hostname: peer02
     <<: *peer
     command: ["/start", "leech"]
-    
+
 volumes:
   shared:
     driver_opts:
@@ -52,3 +52,4 @@ volumes:
 
 networks:
   p2p:
+    name: electorrent_p2p

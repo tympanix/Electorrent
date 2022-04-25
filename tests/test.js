@@ -16,7 +16,7 @@ describe("test clients", async function() {
   this.timeout(25 * 1000)
 
   before(async function() {
-    await compose.upAll({ cwd: path.join(__dirname), log: true })
+    await compose.upAll({ cwd: path.join(__dirname), log: true, commandOptions: ['--build']})
   })
 
   require("./suites")()
