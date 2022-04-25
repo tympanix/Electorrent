@@ -132,9 +132,9 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   };
 
   async uploadTorrent(buffer: Uint8Array, filename?: string, options?: TorrentUploadOptions): Promise<void> {
-    console.log("Type of data:", typeof buffer)
-    console.log("Name of constructor:", buffer.constructor.name)
-    console.log("Data head:", Buffer.from(buffer).slice(0,64).toString("base64"))
+    if (options === undefined || options === null) {
+      options = {}
+    }
     var blob = new Blob([buffer], { type: "application/x-bittorrent" });
 
     var formData = new FormData();
