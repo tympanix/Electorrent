@@ -9,3 +9,8 @@ services:
       - WEBUI_PORT=8080
     tmpfs:
       - /downloads
+
+networks:
+  default:
+    external:
+      name: electorrent_p2p

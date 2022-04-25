@@ -6,6 +6,7 @@ const https = require("https");
 const e2e = require("./e2e");
 const sync = require("@wdio/sync").default;
 const compose = require("docker-compose")
+const parseTorrent = require("parse-torrent")
 
 var electronPath = path.join(__dirname, "..", "node_modules", ".bin", "electron");
 
@@ -58,8 +59,7 @@ exports.testclient = function ({
 
     before(async function () {
       const composeDir = path.join(__dirname, fixture)
-      console.log("Starting compose:", composeDir);
-      await compose.upAll({ cwd: composeDir, log: true })
+      await compose.upAll({ cwd: composeDir, log: true, commandOptions: ['--build'] })
       app = new Application({
         path: electronPath,
         args: [appPath],
@@ -77,13 +77,10 @@ exports.testclient = function ({
         }
         try {
           let res = await httpget(`http://${host}:${port}`);
-          console.log("Polling http:", res.statusCode);
           if (res.statusCode === acceptHttpStatus) {
             break;
           }
-        } catch (err) {
-          console.log("... waiting for serivce");
-        }
+        } catch (err) { }
         await sleep(1000);
         i++;
       }
@@ -139,9 +136,9 @@ exports.testclient = function ({
     });
 
     it("upload torrent file", async () => {
-      let filename = "ubuntu-20.04-live-server-amd64.iso.torrent";
-      let hash = "c44f931b1a3986851242d755d0ac46e9fa3c5d32";
-      await tapp.uploadTorrent({ filename, hash });
+      let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
+      let data = parseTorrent(fs.readFileSync(filename))
+      await tapp.uploadTorrent({ filename: filename, hash: data.infoHash });
     });
 
     it("wait for download to begin", () => {
