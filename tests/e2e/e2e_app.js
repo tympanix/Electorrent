@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const sync = require("@wdio/sync").default;
 const { Torrent } = require("./e2e_torrent");
+const parseTorrent = require("parse-torrent")
 
 /**
  * Class to perform various app-related actions with WebDriverIO
@@ -51,10 +52,12 @@ class App {
       }
   }
 
-  async uploadTorrent({ filename, hash }) {
+  async uploadTorrent({ filename, askUploadOptions }) {
+    let data = fs.readFileSync(path.join(filename));
+    let info = parseTorrent(data)
+    let hash = info.infoHash
     let torrent = new Torrent({ hash: hash, spectron: this.spectron, app: this });
     await torrent.isExisting().should.eventually.be.false;
-    let data = fs.readFileSync(path.join(filename));
     /**
      * Note: we're not sending the torrent data directory from the main process. Since the
      * spectron test framework communicates with the browser intance, the webContents module
@@ -64,7 +67,7 @@ class App {
      * The multiple serialization of the IPC data behaves oddly with objects. We use a plain javascript
      * array here to make the serialization behave properly.
      */
-    this.spectron.webContents.send("torrentfiles", Array.from(data), path.basename(filename));
+    this.spectron.webContents.send("torrentfiles", Array.from(data), path.basename(filename), askUploadOptions);
     await torrent.waitForExist();
     await torrent.isExisting().should.eventually.be.true;
     this.torrents.push(torrent);
