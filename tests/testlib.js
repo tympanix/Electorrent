@@ -64,10 +64,6 @@ exports.testclient = function ({
       const composeDir = path.join(__dirname, fixture)
       await compose.upAll({ cwd: composeDir, log: process.env.DEBUG, commandOptions: ['--build'] })
       waitForHttp({ url: `http://${host}:${port}`, statusCode: acceptHttpStatus})
-
-      it("Test something", function() {
-        throw Error("Oh noes!")
-      })
     });
 
     after(async function () {
@@ -119,41 +115,39 @@ exports.testclient = function ({
           });
         })
 
-        describe("given torrent is uploaded", async function() {
+        describe("given new torrent is uploaded", async function() {
+          let torrent
 
           before(async function() {
             let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
-            await tapp.uploadTorrent({ filename: filename });
+            torrent = await tapp.uploadTorrent({ filename: filename });
           })
 
           after(async function() {
-            let torrent = tapp.torrents[0];
-            await torrent.clickContextMenu("delete");
-            await torrent.waitForGone();
+            if (torrent) {
+              await torrent.clickContextMenu("delete");
+              await torrent.waitForGone();
+            }
           })
 
           it("wait for download to begin", () => {
-            return tapp.torrents[0].waitForState(downloadLabel);
+            return torrent.waitForState(downloadLabel);
           });
 
           it("torrent should be in downloading tab", () => {
-            let t = tapp.torrents[0];
-            return t.checkInState(["all", "downloading"]);
+            return torrent.checkInState(["all", "downloading"]);
           });
 
           it("stop the torrent", async () => {
-            let t = tapp.torrents[0];
-            await t.stop({ state: stopLabel });
+            await torrent.stop({ state: stopLabel });
           });
 
           it("check torrent in stopped tab", () => {
-            let t = tapp.torrents[0];
-            return t.checkInState(["all", "stopped"]);
+            return torrent.checkInState(["all", "stopped"]);
           });
 
           it("resume the torrent", async () => {
-            let t = tapp.torrents[0];
-            await t.resume({ state: downloadLabel });
+            await torrent.resume({ state: downloadLabel });
           });
 
           describe("given labels are supported", function () {
@@ -163,47 +157,46 @@ exports.testclient = function ({
 
             it("apply new label", async function () {
               const label = "testlabel123";
-              let t = tapp.torrents[0];
-              await t.newLabel(label);
+              await torrent.newLabel(label);
               await tapp.waitForLabelInDropdown(label);
               await tapp.getAllSidebarLabels().should.eventually.have.length(1);
             });
 
             it("apply another new label", async () => {
               const label = "someotherlabel123";
-              let t = tapp.torrents[0];
-              await t.newLabel(label);
+              await torrent.newLabel(label);
               await tapp.waitForLabelInDropdown(label);
-              await t.checkInFilterLabel(label);
+              await torrent.checkInFilterLabel(label);
               await tapp.getAllSidebarLabels().should.eventually.have.length(2);
             });
 
             it("change back to previous label", async () => {
               const label = "testlabel123";
-              let t = tapp.torrents[0];
-              await t.changeLabel(label);
-              await t.checkInFilterLabel(label);
+              await torrent.changeLabel(label);
+              await torrent.checkInFilterLabel(label);
             });
           });
         })
 
-        describe("given advanced upload options are supported", async function() {
+        describe.only("given advanced upload options are supported", async function() {
 
           before(async function() {
             if (skipTests.includes("upload options")) return this.skip();
           })
 
           describe("given torrent uploaded with advanced options", async function() {
+            let torrent
 
             before(async function() {
               let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
-              await tapp.uploadTorrent({ filename: filename, askUploadOptions: true });
+              torrent = await tapp.uploadTorrent({ filename: filename, askUploadOptions: true });
             })
 
             after(async function() {
-              let torrent = tapp.torrents[0];
-              await torrent.clickContextMenu("delete");
-              await torrent.waitForGone();
+              if (torrent) {
+                await torrent.clickContextMenu("delete");
+                await torrent.waitForGone();
+              }
             })
 
             it("torrent has label already set", function() {
