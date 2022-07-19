@@ -1,4 +1,4 @@
-import { Torrent } from '../abstracttorrent'
+import { Torrent } from '../abstracttorrent';
 
 export class QBittorrentTorrent extends Torrent {
 
@@ -73,47 +73,45 @@ export class QBittorrentTorrent extends Torrent {
         this.upSpeedAvg = data.up_speed_avg;
         this.forceStart = data.force_start;
         this.sequentialDownload = data.seq_dl;
-
     }
 
     getStatus(...statusOr: string[]) {
-        var args = Array.prototype.slice.call(statusOr);
-        return (args.indexOf(this.state) > -1);
+        return statusOr.includes(this.state);
     }
 
     isStatusError() {
-        return this.getStatus('error')
+        return this.getStatus('error', 'missingFiles');
     };
     isStatusStopped() {
-        return this.getStatus('paused', 'pausedUP', 'pausedDL') && !this.isStatusCompleted()
+        return this.getStatus('paused', 'pausedUP', 'pausedDL') && !this.isStatusCompleted();
     };
     isStatusQueued() {
-        return this.getStatus('queuedUP', 'queuedDL')
+        return this.getStatus('queuedUP', 'queuedDL', 'allocating');
     };
     isStatusCompleted() {
-        return (this.percent === 1000) || this.getStatus('checkingUP')
+        return (this.percent === 1000) || this.getStatus('checkingUP', 'moving');
     };
     isStatusDownloading() {
-        return this.getStatus('downloading', 'stalledDL', 'metaDL') || this.isStatusChecking()
+        return this.getStatus('downloading', 'stalledDL', 'metaDL', 'forcedDL') || this.isStatusChecking();
     };
     isStatusSeeding() {
-        return this.getStatus('uploading', 'stalledUP')
+        return this.getStatus('uploading', 'stalledUP', 'forcedUP');
     };
     isStatusPaused() {
         /* qBittorrent only has started and stopped torrents */
-        return false
+        return false;
     };
 
     /* Additional custom states */
     isStatusChecking() {
-        return this.getStatus('checkingDL', 'checkingUP', 'checkingResumeData')
+        return this.getStatus('checkingDL', 'checkingUP', 'checkingResumeData');
     }
 
     manualStatusText() {
         if (this.isStatusChecking()) {
-            return 'Checking'
+            return 'Checking';
         } else {
-            return super.manualStatusText()
+            return super.manualStatusText();
         }
     };
 
