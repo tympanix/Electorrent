@@ -158,8 +158,6 @@ torrentApp.directive("torrentBody", torrentBody)
 torrentApp.directive('torrentRow', torrentRow)
 import {search} from "./scripts/directives/search"
 torrentApp.directive("search", search)
-import {fixedHeader} from "./scripts/directives/fixedheader"
-torrentApp.directive("fixedHeader", fixedHeader)
 import {time} from "./scripts/directives/time"
 torrentApp.directive("time", time)
 import {limitBind, limitSource} from "./scripts/directives/limit"
