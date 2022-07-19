@@ -128,6 +128,17 @@
           columns="$server.columns"
           class="ui single line unstackable selectable fixed torrent resize table"
         >
+          <thead>
+          <tr sorting="changeSorting" mode="$server.id">
+            <th
+                    ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name"
+                    rz-col="col.attribute"
+                    sort="col.attribute"
+            >
+              {{::col.name}}
+            </th>
+          </tr>
+          </thead>
           <tbody class="zoom" ng-class="settings.ui.displaySize" torrent-body columns="$server.columns">
             <tr
               ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit track by torrent.hash"
@@ -140,18 +151,17 @@
               torrent-row
             ></tr>
           </tbody>
-          <thead>
-            <tr sorting="changeSorting" mode="$server.id">
-              <th
-                ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name"
-                rz-col="col.attribute"
-                sort="col.attribute"
-              >
-                {{::col.name}}
-              </th>
-            </tr>
-          </thead>
         </table>
+      </div>
+    </div>
+    <div class="action footer status-bar">
+      <div class="download-speed">
+        <i class="ui blue arrow down icon"></i>
+        {{ totalDownloadSpeed | speed }} <span ng-if="totalDownloaded">({{ totalDownloaded | speed }})</span>
+      </div>
+      <div class="upload-speed">
+        <i class="ui orange arrow up icon"></i>
+        {{ totalUploadSpeed | speed }} <span ng-if="totalDownloaded">({{ totalUploaded | speed }})</span>
       </div>
     </div>
   </div>

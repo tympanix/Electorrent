@@ -160,11 +160,29 @@ html, body {
     background-color: @pageMiddleground;
     overflow: hidden;
 }
-.main-panel .main-content {
-    height: calc(~"100% - 50px");
-    overflow-x: hidden;
-    /*overflow-y: auto;*/
-    overflow-y: overlay; /* Chrome scrollbar on top */
+
+.main-panel {
+    .main-content {
+        height: calc(~"100% - 50px - 27px");
+        overflow-x: hidden;
+        /*overflow-y: auto;*/
+        overflow-y: overlay; /* Chrome scrollbar on top */
+    }
+
+    .status-bar {
+        display: flex;
+        justify-content: flex-end;
+        border-top: 1px solid @borderColor;
+        padding-top: 0.25rem;
+        padding-left: 1rem;
+        padding-bottom: 0.25rem;
+        padding-right: 1rem;
+
+        & > * {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+    }
 }
 .ui.welcome.form.loading:before {
     background: fadeout(@pageBackground, 25%);
@@ -189,6 +207,11 @@ html, body {
 }
 
 .ui.torrent.table {
+    tfoot {
+        position: absolute;
+        bottom: 0;
+    }
+
     tr td {
         &:first-child {
             padding-left: 0.75em;
