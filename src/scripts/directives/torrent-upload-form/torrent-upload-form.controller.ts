@@ -22,7 +22,7 @@ export class TorrentUploadFormController {
     }
 
     onNewTorrentClient() {
-        this.optionsEnabled = this.rootScope.$btclient.uploadOptionsEnable || {}
+        this.optionsEnabled = this.rootScope?.$btclient?.uploadOptionsEnable || {}
     }
 
 }

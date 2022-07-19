@@ -24,6 +24,10 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     $scope.connectionLost = false;
     $scope.torrents = {};
     $scope.arrayTorrents = [];
+    $scope.totalDownloadSpeed = 0;
+    $scope.totalUploadSpeed = 0;
+    $scope.totalDownloaded = 0;
+    $scope.totalUploaded = 0;
     $scope.contextMenu = null;
     $scope.showDragAndDrop = false;
     $scope.labelsDrowdown = null;
@@ -72,8 +76,8 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         $scope.torrentLimit += LIMIT;
     };
 
-    $scope.debug = function(){
-        for (var i = 0; i < selected.length; i++){
+    $scope.debug = function() {
+        for (let i = 0; i < selected.length; i++){
             console.info(selected[i]);
         }
         return $q.when();
@@ -156,19 +160,19 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     })
 
     function remove() {
-        var selectedTorrents = $scope.arrayTorrents.filter(torrent => torrent.selected)
-        $rootScope.$btclient.deleteTorrents(selectedTorrents)
-        $scope.$apply.deleteTorrents
+        const selectedTorrents = $scope.arrayTorrents.filter(({ selected }) => selected);
+        $rootScope.$btclient.deleteTorrents(selectedTorrents);
+        $scope.$apply.deleteTorrents;
     }
 
     function selectAll() {
-        deselectAll()
-        for (var i = 0; i < $scope.arrayTorrents.length; i++){
-            var torrent = $scope.arrayTorrents[i]
+        deselectAll();
+        for (let i = 0; i < $scope.arrayTorrents.length; i++){
+            const torrent = $scope.arrayTorrents[i];
             torrent.selected = true;
-            selected.push(torrent)
+            selected.push(torrent);
         }
-        $scope.$apply()
+        $scope.$apply();
     }
 
     function startTimer(fullupdate?: boolean){
@@ -176,10 +180,10 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         if (timeout) $timeout.cancel(timeout)
         timeout = $timeout(function(){
             $scope.update(fullupdate)
-            .then(function(){
-                startTimer();
-                $scope.connectionLost = false;
-            }).catch(function() {
+                .then(function(){
+                    startTimer();
+                    $scope.connectionLost = false;
+                }).catch(function() {
                 $notify.alert("Connection lost", "Trying to reconnect")
                 $scope.connectionLost = true;
                 startReconnect();
@@ -191,9 +195,9 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         $notify.disableAll();
         reconnect = $timeout(function() {
             $rootScope.$server.connect()
-            .then(function() {
-                return $scope.update(true)
-            }).then(function() {
+                .then(function() {
+                    return $scope.update(true)
+                }).then(function() {
                 $notify.enableAll();
                 $notify.ok("Reconnected", "The connection has been reestablished")
                 $scope.connectionLost = false;
@@ -378,8 +382,8 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
             })
     }
 
-    function fetchTorrents(){
-        return Array.from(Object.values($scope.torrents))
+    function fetchTorrents() {
+        return Array.from(Object.values($scope.torrents));
     }
 
     $scope.changeSorting = function(sortName, descending) {
@@ -422,17 +426,17 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     }
 
     function trackerFilter(filterTracker) {
-      return function(torrent) {
-        return torrent.trackers && torrent.trackers.some((tracker) => {
-          return tracker && tracker.includes(filterTracker)
-        })
-      }
+        return function(torrent) {
+            return torrent.trackers && torrent.trackers.some((tracker) => {
+                return tracker && tracker.includes(filterTracker)
+            })
+        }
     }
 
     function searchFilter(search) {
-      return function(torrent) {
-        return torrent.name.toLowerCase().includes(search.toLowerCase())
-      }
+        return function(torrent) {
+            return torrent.name.toLowerCase().includes(search.toLowerCase())
+        }
     }
 
     function torrentFilter(status?, label?, tracker?, search?){
@@ -445,13 +449,13 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
 
         if (filterStatus) {
             filters.push(function(torrent) {
-              return statusFilter(torrent, filterStatus)
+                return statusFilter(torrent, filterStatus)
             });
         }
 
         if (filterLabel) {
             filters.push(function(torrent) {
-              return torrent.label === filterLabel
+                return torrent.label === filterLabel
             })
         }
 
@@ -481,12 +485,16 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     }
 
     function refreshTorrents(){
-        var torrents = fetchTorrents();
+        let torrents = fetchTorrents();
         torrents = torrents.filter(torrentFilter());
         torrents = fuzzySearch(torrents);
         torrents = torrents.sort(torrentSorter());
         $scope.isSearching = false
         $scope.arrayTorrents = torrents;
+        $scope.totalDownloadSpeed = torrents.reduce((acc, { downloadSpeed }) => acc += downloadSpeed, 0);
+        $scope.totalUploadSpeed = torrents.reduce((acc, { uploadSpeed }) => acc += uploadSpeed, 0);
+        $scope.totalDownloaded = torrents.reduce((acc, { downloaded }) => acc += downloaded, 0);
+        $scope.totalUploaded = torrents.reduce((acc, { uploaded }) => acc += uploaded, 0);
     }
 
     function reassignSelected() {
@@ -546,7 +554,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     function newTorrents(torrents){
         if ((torrents.all && torrents.all.length > 0) || torrents.dirty === true) {
             var torrentMap = {};
-            for (var i = 0; i < torrents.all.length; i++){
+            for (let i = 0; i < torrents.all.length; i++){
                 var torrent = torrents.all[i];
                 torrentMap[torrent.hash] = torrent;
                 var old = $scope.torrents[torrent.hash];
@@ -569,9 +577,9 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
 
     function changeTorrents(torrents){
         if (torrents.changed && torrents.changed.length > 0) {
-            for (var i = 0; i < torrents.changed.length; i++) {
-                var torrent = torrents.changed[i];
-                var existing = $scope.torrents[torrent.hash];
+            for (let i = 0; i < torrents.changed.length; i++) {
+                const torrent = torrents.changed[i];
+                const existing = $scope.torrents[torrent.hash];
                 checkNotification(existing, torrent);
 
                 if (existing) {
@@ -581,7 +589,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
                 }
 
             }
-            refreshTorrents()
+            refreshTorrents();
         }
     }
 
