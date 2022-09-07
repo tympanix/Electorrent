@@ -1,0 +1,21 @@
+{
+    "extends": "@tsconfig/node14/tsconfig.json",
+    "include": [
+        "./"
+    ],
+    "compilerOptions": {
+        "lib": [
+            "es6"
+        ],
+        "module": "commonjs",
+        "target": "es2020",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "noImplicitAny": false,
+        "forceConsistentCasingInFileNames": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -13,7 +13,7 @@
     "dist": "electron-builder",
     "prerelease": "gulp build",
     "release": "electron-builder",
-    "test": "mocha --bail tests/test.js"
+    "test": "TS_NODE_PROJECT=tests/tsconfig.json mocha --bail -r ts-node/register tests/test.ts"
   },
   "keywords": [
     "utorrent"
@@ -37,10 +37,13 @@
     "@types/angular-animate": "^1.5.10",
     "@types/angular-resource": "^1.5.16",
     "@types/axios": "^0.14.0",
+    "@types/chai": "^4.3.3",
+    "@types/chai-as-promised": "^7.1.5",
     "@types/jquery": "^3.5.5",
+    "@types/mocha": "^9.1.1",
     "@types/moment": "^2.13.0",
     "@types/mousetrap": "^1.6.5",
-    "@types/node": "^14.14.13",
+    "@types/node": "^14.18.16",
     "@types/parse-torrent": "^5.8.4",
     "@types/qs": "^6.9.7",
     "@types/tapable": "^0.2.5",
@@ -100,6 +103,7 @@
     "spectron": "^15.0.0",
     "through2": "^2.0.5",
     "ts-loader": "^8.0.12",
+    "ts-node": "^10.7.0",
     "typescript": "^4.1.3",
     "underscore": "^1.12.0",
     "vinyl-buffer": "^1.0.1",
