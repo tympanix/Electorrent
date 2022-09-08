@@ -2,6 +2,7 @@ name: Electorrent Release
 
 on:
   push:
+  pull_request:
 
 env:
   NODE_VERSION: 14.x
