@@ -2,7 +2,7 @@ version: "3"
 
 services:
   utorrent:
-    image: "ekho/utorrent"
+    image: ekho/utorrent:${VERSION:-latest}
     ports:
       - 8080:8080
     tmpfs:
