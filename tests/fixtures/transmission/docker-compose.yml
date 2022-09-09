@@ -2,7 +2,7 @@ version: "3"
 
 services:
   transmission:
-    image: linuxserver/transmission
+    image: linuxserver/transmission:${VERSION:-latest}
     environment:
       - USER=username
       - PASS=password

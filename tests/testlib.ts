@@ -1,4 +1,5 @@
-import { Application, SpectronClient } from "spectron"
+import { Application } from "spectron"
+const { askQuestion } = require("./testutil")
 import path = require("path");
 import http = require("http");
 import e2e = require("./e2e");
@@ -123,6 +124,7 @@ exports.testclient = function (optionsArg: TestSuiteOptions) {
       describe("given user is logged in", function() {
 
         before(async function() {
+          this.retries(5)
           await tapp.login({
             username: options.username,
             password: options.password,
