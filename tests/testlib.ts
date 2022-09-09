@@ -1,4 +1,5 @@
-import { Application, SpectronClient } from "spectron"
+import { Application } from "spectron"
+const { askQuestion } = require("./testutil")
 import path = require("path");
 import http = require("http");
 import e2e = require("./e2e");
@@ -123,6 +124,7 @@ exports.testclient = function (optionsArg: TestSuiteOptions) {
       describe("given user is logged in", function() {
 
         before(async function() {
+          this.retries(5)
           await tapp.login({
             username: options.username,
             password: options.password,
@@ -136,8 +138,14 @@ exports.testclient = function (optionsArg: TestSuiteOptions) {
           let torrent: e2e.Torrent
 
           before(async function() {
-            let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
-            torrent = await tapp.uploadTorrent({ filename: filename });
+            try {
+              this.retries(3)
+              let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
+              torrent = await tapp.uploadTorrent({ filename: filename });
+            } finally {
+              this.timeout(Math.pow(2, 32))
+              await askQuestion("Test paused. Press any key to continue: ")
+            }
           })
 
           after(async function() {
