@@ -4,6 +4,8 @@ const chaiAsPromised = require("chai-as-promised");
 const compose = require("docker-compose")
 const { askQuestion } = require("./testutil")
 
+process.on('unhandledRejection', (reason) => { throw reason });
+
 export {}
 
 global.before(function () {

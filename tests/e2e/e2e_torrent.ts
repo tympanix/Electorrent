@@ -1,8 +1,5 @@
 import { App } from "./e2e_app"
-import { Application, SpectronClient, SpectronWindow } from "spectron";
-import { isThisTypeNode } from "typescript";
-import { element } from "angular";
-const sync = require("@wdio/sync").default;
+import { Application, SpectronClient } from "spectron";
 
 class Torrent {
   app: App
