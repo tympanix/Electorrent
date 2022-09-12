@@ -48,7 +48,6 @@
     "@types/qs": "^6.9.7",
     "@types/tapable": "^0.2.5",
     "@types/underscore": "^1.10.24",
-    "@wdio/sync": "^7.16.4",
     "angular": "^1.8.2",
     "angular-animate": "^1.5.11",
     "angular-marked": "^1.2.2",
