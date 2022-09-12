@@ -1,0 +1,21 @@
+# This is an example Mocha config containing every Mocha option plus others.
+# allow-uncaught: false
+# async-only: false
+bail: true
+# color: true
+# diff: true
+exit: true # could be expressed as "no-exit: true"
+# #extension: ['ts', 'js', 'cjs', 'mjs']
+# fail-zero: true
+node-option:
+  - 'unhandled-rejections=strict' # without leading "--", also V8 flags
+# parallel: false
+# recursive: false
+# reporter: 'spec'
+require:
+  - 'ts-node/register'
+# retries: 1
+spec:
+  - 'tests/test.ts' # the positional arguments!
+# timeout: "2000"
+# watch: false
