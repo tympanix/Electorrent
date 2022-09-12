@@ -76,7 +76,11 @@ jobs:
         key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
     - name: Install npm dependencies
       run: npm install
+    - name: Build distribution
+      run: npm run dist
+      if: github.ref != 'refs/heads/master'
     - name: Release artifacts
       run: npm run release
+      if: github.ref == 'refs/heads/master'
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_ACCESS_TOKEN }}
