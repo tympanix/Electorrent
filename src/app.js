@@ -3,6 +3,7 @@ const electron = require('electron');
 const yargs = require('yargs');
 const path = require('path');
 const is = require('electron-is');
+require('@electron/remote/main').initialize();
 
 // Handle Squirrel startup parameters
 if (require('./lib/startup')) return
@@ -59,6 +60,10 @@ function createTorrentWindow() {
 
     // Create the browser window.
     torrentWindow = new BrowserWindow(windowSettings);
+
+    // Enable the remote module to access main-process-only objects from
+    // the renderer process
+    require("@electron/remote/main").enable(torrentWindow.webContents)
 
     torrentWindow.once('ready-to-show', () => {
         torrentWindow.show();

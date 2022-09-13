@@ -2,7 +2,7 @@ export let electronService = [function() {
     var o: any = {};
 
     // Get the Electron remote
-    const remote        = require('electron').remote;
+    const remote        = require('@electron/remote');
 
     // Directly accesible modules
     o.ipc               = require('electron').ipcRenderer;
