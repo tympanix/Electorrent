@@ -3,6 +3,8 @@ import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, Tor
 import {UtorrentTorrent} from "./torrentu";
 import axios from "axios";
 import { AxiosInstance } from "axios";
+import { promisify } from "util"
+import { default as FormData } from "form-data"
 import qs from "qs";
 
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
@@ -92,9 +94,12 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       },
       paramsSerializer: (params) => {
         return qs.stringify(params, { arrayFormat: 'repeat' })
-      }
+      },
+      adapter: require("axios/lib/adapters/http")
     })
 
+    // The µTorrent client will respond with a "cid" (context id) number which is
+    // used for incremental updates
     this.http.interceptors.response.use((res) => {
       if (res.data && res.data.torrentc !== undefined) {
         this.data.cid = res.data.torrentc;
@@ -102,8 +107,30 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       return res
     })
 
-    let res = await this.http.get(this.url() + "/token.html?t=" + Date.now(), {
+    // Unlike in the browser, there is no cookie handling when using Axios in NodeJS.
+    // Implement simple interceptor to store cookies and set request headers
+    this.http.interceptors.response.use((res) => {
+      let cookie = res.headers["set-cookie"]
+      if (cookie && cookie.length) {
+        this.http.defaults.headers.common["Cookie"] = cookie[0]
+      }
+      return res
+    })
+
+    // If json response contains an "error" attribute an exception is thrown
+    this.http.interceptors.response.use((res) => {
+      let error = res?.data?.error
+      if (typeof error === "string") {
+        throw new Error(error)
+      }
+      return res
+    })
+
+    let res = await this.http.get(this.url() + "/token.html", {
       timeout: 5000,
+      params: {
+        t: Date.now()
+      },
     })
     if (res.status == 401 || res.status == 402) {
       throw new Error("Invalid credentials")
@@ -119,7 +146,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   };
 
   async addTorrentUrl(url: string, options?: TorrentUploadOptions) {
-    await this.http.get(this.data.url + "/.", {
+    await this.http.get(this.data.url + "/", {
       params: {
         token: this.data.token,
         t: Date.now(),
@@ -127,7 +154,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
         s: url,
         download_dir: options.saveLocation || 0,
         path: "",
-      }
+      },
     })
   };
 
@@ -135,22 +162,30 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
     if (options === undefined || options === null) {
       options = {}
     }
-    var blob = new Blob([buffer], { type: "application/x-bittorrent" });
 
     var formData = new FormData();
-    formData.append("torrent_file", blob, filename);
+    formData.append("torrent_file", Buffer.from(buffer), {
+      filename: filename,
+      contentType: "application/x-bittorrent",
+    });
+
+    let contentLength = await new Promise((resolve, reject) => {
+      formData.getLength((err, length) => {
+        err ? reject(err) : resolve(length)
+      })
+    })
 
     return this.http
-      .post(this.data.url + "/.", formData, {
+      .post(this.data.url + "/", formData, {
         params: {
           token: this.data.token,
           action: "add-file",
           download_dir: options.saveLocation || 0,
-          path: undefined,
+          path: "",
         },
-        headers: { "Content-Type": undefined },
-        transformRequest: function (data) {
-          return data;
+        headers: {
+          ...formData.getHeaders(),
+          "Content-Length": contentLength.toString(),
         },
       })
   };
@@ -163,7 +198,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       deleted: [],
     };
 
-    let res = await this.http.get(this.data.url + "/.", {
+    let res = await this.http.get(this.data.url + "/", {
         params: {
           token: this.data.token,
           cid: this.data.cid,
@@ -190,7 +225,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       return torrent.hash;
     });
 
-    await this.http.get(this.data.url + "/.", {
+    await this.http.get(this.data.url + "/", {
       params: {
         action: action,
         hash: hashes,
@@ -263,7 +298,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       return torrent.hash;
     });
 
-    return this.http.get(this.data.url + "/.", {
+    return this.http.get(this.data.url + "/", {
       params: {
         token: this.data.token,
         hash: hashes,
@@ -277,7 +312,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
 
   async getDownloadDirectories() {
     let res = await this.http.get(
-      this.data.url + "/.",
+      this.data.url + "/",
       {
         params: {
           token: this.data.token,
@@ -291,7 +326,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
 
   async filePriority(torrent: UtorrentTorrent, priority: string) {
     return await this.http.get(
-      this.data.url + "/." + "?token=:token&action=setprio&hash=:hash&t=:t&p=:priority",
+      this.data.url + "/" + "?token=:token&action=setprio&hash=:hash&t=:t&p=:priority",
       {
         params: {
           token: this.data.token,

@@ -53,7 +53,7 @@ function createTorrentWindow() {
             contextIsolation: false,
             nodeIntegrationInWorker: true,
             enableRemoteModule: true
-        },
+        }
     }
 
     Object.assign(windowSettings, config.get('windowsize'));

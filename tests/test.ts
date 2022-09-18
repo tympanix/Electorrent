@@ -20,7 +20,7 @@ describe("given local private tracker service is running (docker-compose)", asyn
   this.timeout(25 * 1000)
 
   before(async function() {
-    await compose.upAll({ cwd: path.join(__dirname), log: process.env.DEBUG, commandOptions: ['--build']})
+    await compose.upAll({ cwd: path.join(__dirname), log: process.env.DEBUG, commandOptions: ['--build', '--remove-orphans'] })
   })
 
   require("./suites")()

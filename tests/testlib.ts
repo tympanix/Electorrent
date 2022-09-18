@@ -1,8 +1,8 @@
 import { Application } from "spectron"
-const { askQuestion } = require("./testutil")
 import path = require("path");
 import http = require("http");
 import e2e = require("./e2e");
+import axios from "axios"
 import compose = require("docker-compose")
 
 var electronPath = path.join(__dirname, "..", "node_modules", ".bin", "electron");
@@ -11,31 +11,21 @@ if (process.platform === "win32") {
   electronPath += ".cmd";
 }
 
-const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
+const sleep = (time: number) => new Promise(resolve => setTimeout(resolve, time));
 
-function httpGet(options: http.RequestOptions): Promise<http.IncomingMessage> {
-  return new Promise((resolve, reject) => {
-    let req = http.get(options, (res) => {
-      res.on("end", () => resolve(res));
-    });
-    req.on("error", (err) => reject(err));
-  });
-}
-
-/**
- *
- * @param param0
- */
-async function waitForHttp({ url, statusCode=200, timeout=20000, step=1000 }) {
+async function waitForHttp({ url, statusCode=200, timeout=30000, step=1000 }) {
   let timeSpent = 0;
   while (true) {
     if (timeSpent > timeout) {
-      throw Error(`Timeout waiting for ${url}`);
+      throw new Error(`Timeout waiting for ${url}`);
     }
     try {
-      let res = await httpGet(url);
-      if (res.statusCode === statusCode) {
-        break;
+      let res = await axios.get(url, {
+        timeout: 1000,
+        validateStatus: _ => true
+      })
+      if (res.status === statusCode) {
+        return;
       }
     } catch (err) { }
     await sleep(step)
@@ -80,8 +70,8 @@ exports.testclient = function (optionsArg: TestSuiteOptions) {
 
     before(async function () {
       const composeDir = path.join(__dirname, options.fixture)
-      await compose.upAll({ cwd: composeDir, log: !!process.env.DEBUG, commandOptions: ['--build'] })
-      waitForHttp({ url: `http://${options.host}:${options.port}`, statusCode: options.acceptHttpStatus})
+      await compose.upAll({ cwd: composeDir, log: !!process.env.DEBUG, commandOptions: ['--build', '--remove-orphans'] })
+      await waitForHttp({ url: `http://${options.host}:${options.port}`, statusCode: options.acceptHttpStatus})
     });
 
     after(async function () {
@@ -91,7 +81,7 @@ exports.testclient = function (optionsArg: TestSuiteOptions) {
     });
 
     describe("given application is running", function() {
-      let app;
+      let app: Application;
       let $;
       let $$;
       let tapp: e2e.App;
