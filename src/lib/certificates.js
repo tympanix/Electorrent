@@ -33,6 +33,11 @@ function isEmpty(object) {
 }
 
 function pemEncode(str, n) {
+    if (!Buffer.isBuffer(str)) {
+        str = Buffer.from(str)
+    }
+    str = str.toString("base64")
+
     var ret = []
 
     for (var i = 1; i <= str.length; i++) {
@@ -82,7 +87,7 @@ function installCertificate(cert, callback) {
         return callback(new Error('Could not install invalid certificate'))
     }
 
-    const pemData = pemEncode(cert.raw.toString('base64'), 64)
+    const pemData = pemEncode(cert.raw, 64)
     const fingerprint = cert.fingerprint.split(":").join("").toLowerCase()
 
     const pemFilename = path.join(CERT_DIR, `${fingerprint}.crt`)

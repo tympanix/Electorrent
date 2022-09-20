@@ -13,7 +13,19 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "noImplicitAny": false,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "types": [
+            "node",
+            "webdriverio/async",
+            "@types/mocha",
+            "@types/chai",
+            "@types/chai-as-promised",
+        ],
+        "typeRoots": [
+            "types",
+            "../node_modules/@types",
+            "../node_modules/webdriverio/types"
+        ]
     },
     "exclude": [
         "node_modules"

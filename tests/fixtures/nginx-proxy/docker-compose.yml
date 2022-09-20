@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  nginx:
+    build: .
+    ports:
+      - 8443:443
+    environment:
+      - PROXY_HOST=${PROXY_HOST}
+      - PROXY_PORT=${PROXY_PORT}
+
+networks:
+  default:
+    external:
+      name: electorrent_p2p

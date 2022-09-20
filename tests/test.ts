@@ -3,6 +3,7 @@ const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const compose = require("docker-compose")
 const { askQuestion } = require("./testutil")
+import { default as suites } from "./suites"
 
 process.on('unhandledRejection', (reason) => { throw reason });
 
@@ -20,10 +21,10 @@ describe("given local private tracker service is running (docker-compose)", asyn
   this.timeout(25 * 1000)
 
   before(async function() {
-    await compose.upAll({ cwd: path.join(__dirname), log: process.env.DEBUG, commandOptions: ['--build', '--remove-orphans'] })
+    await compose.upAll({ cwd: path.join(__dirname), log: process.env.DEBUG, commandOptions: ['--build'] })
   })
 
-  require("./suites")()
+  suites()
 
   after(async function() {
     if (!process.env.MOCHA_DOCKER_KEEP) {

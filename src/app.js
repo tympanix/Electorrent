@@ -5,6 +5,8 @@ const path = require('path');
 const is = require('electron-is');
 require('@electron/remote/main').initialize();
 
+console.log("Starting app")
+
 // Handle Squirrel startup parameters
 if (require('./lib/startup')) return
 
