@@ -6,9 +6,21 @@ import { Torrent } from "./e2e_torrent";
 import parseTorrent = require("parse-torrent")
 
 /**
+ * Options to use during the login screen of the app to connect to your torrent client
+ */
+interface LoginOptions {
+  host: string
+  username: string
+  password: string
+  port: number
+  client: string
+  https?: boolean
+}
+
+/**
  * Class to perform various app-related actions with WebDriverIO
  */
-class App {
+export class App {
   spectron: Application
   client: SpectronClient
   torrents: Array<Torrent>
@@ -21,43 +33,58 @@ class App {
     this.timeout = 5 * 1000;
   }
 
-  async login({ host, username, password, port, client }) {
+  async login(options: LoginOptions) {
     let hostForm = await this.client.$("#connection-host")
-    await hostForm.setValue(host)
+    await hostForm.setValue(options.host)
 
-    let proto = await this.client.$("#connection-proto")
-    await proto.click()
+    let protoField = await this.client.$("#connection-proto")
+    await protoField.click()
 
-    let protoHttp = await this.client.$("#connection-proto-http")
+    let proto = options.https ? 'https' : 'http'
+    let protoHttp = await this.client.$(`#connection-proto-${proto}`)
     await protoHttp.waitForExist()
     await protoHttp.click()
 
     let user = await this.client.$("#connection-user")
-    await user.setValue(username)
+    await user.setValue(options.username)
 
     let pass = await this.client.$("#connection-password")
-    await pass.setValue(password);
+    await pass.setValue(options.password);
 
     let clientForm = await this.client.$("#connection-client")
     await clientForm.click();
 
-    let clientFormSelect = await this.client.$(`#connection-client-${client}`)
+    let clientFormSelect = await this.client.$(`#connection-client-${options.client}`)
     await clientFormSelect.waitForExist()
     await clientFormSelect.click()
 
     let portForm = await this.client.$("#connection-port")
-    await portForm.setValue(port);
+    await portForm.setValue(options.port);
 
     let submit = await this.client.$("#connection-submit")
     await submit.click();
+  }
 
-    let err = await this.getNotificationError()
-    if (err) {
-      throw new Error(err.title)
-    }
-
+  async torrentsPageIsVisible() {
     let pageTorrents = await this.client.$("#page-torrents")
-    await pageTorrents.waitForDisplayed({ timeout: this.timeout });
+    await pageTorrents.waitForDisplayed({ timeout: this.timeout })
+  }
+
+  async certificateModalIsVisible() {
+    let certificateModal = await this.client.$("#certificateModal")
+    await certificateModal.waitForExist()
+    await certificateModal.waitForDisplayed({ timeout: this.timeout })
+    return certificateModal
+  }
+
+  async acceptCertificate() {
+    let certificateModal = await this.certificateModalIsVisible()
+    let submit = await certificateModal.$("button.ok")
+    await submit.waitForExist()
+    await submit.waitForDisplayed()
+    await submit.waitForClickable()
+    await submit.waitForEnabled()
+    await submit.click()
   }
 
   async getNotificationError() {
@@ -147,8 +174,4 @@ class App {
     let data = labelsElem.map(async (e) => await e.getAttribute("data-label"));
     return await Promise.all(data)
   }
-}
-
-export {
-  App
 }

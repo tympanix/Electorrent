@@ -1,0 +1,41 @@
+server {
+  listen 80;
+
+  # Redirect all traffic to SSL
+  rewrite ^ https://$server_name$request_uri?;
+}
+
+server {
+  listen 443 ssl default_server;
+
+  ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers         HIGH:!aNULL:!MD5;
+
+  ## Access and error logs.
+  access_log /var/log/nginx/access.log;
+  error_log  /var/log/nginx/error.log info;
+
+  ## Keep alive timeout set to a greater value for SSL/TLS.
+  keepalive_timeout 75 75;
+
+  ## See the keepalive_timeout directive in nginx.conf.
+  ## Server certificate and key.
+  ssl on;
+  ssl_certificate /etc/ssl/certs/dummy.crt;
+  ssl_certificate_key /etc/ssl/private/dummy.key;
+  ssl_session_timeout  5m;
+
+  ## Strict Transport Security header for enhanced security. See
+  ## http://www.chromium.org/sts. I've set it to 2 hours; set it to
+  ## whichever age you want.
+  add_header Strict-Transport-Security "max-age=7200";
+
+  location / {
+    proxy_http_version 1.1;
+    proxy_set_header   Host               ${PROXY_HOST}:${PROXY_PORT};
+    proxy_set_header   X-Forwarded-Host   $http_host;
+    proxy_set_header   X-Forwarded-For    $remote_addr;
+    proxy_set_header   Referer            '';
+    proxy_pass http://${PROXY_HOST}:${PROXY_PORT};
+  }
+}

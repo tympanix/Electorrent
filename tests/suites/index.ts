@@ -1,10 +1,9 @@
-const testlib = require("../testlib");
+import { testclient } from "../testlib"
 
-module.exports = function() {
-  testlib.testclient({
+export default function() {
+  testclient({
     client: "transmission",
     fixture: "fixtures/transmission",
-    host: "127.0.0.1",
     port: 9091,
     username: "username",
     password: "password",
@@ -12,10 +11,9 @@ module.exports = function() {
     skipTests: ["labels"]
   });
 
-  testlib.testclient({
+  testclient({
     client: "deluge",
     fixture: "fixtures/deluge",
-    host: "127.0.0.1",
     port: 8112,
     username: "admin",
     password: "deluge",
@@ -23,30 +21,27 @@ module.exports = function() {
     skipTests: ["labels"],
   });
 
-  testlib.testclient({
+  testclient({
     client: "utorrent",
     fixture: "fixtures/utorrent",
-    host: "127.0.0.1",
     port: 8080,
     username: "admin",
     password: "",
     acceptHttpStatus: 400,
   });
 
-  testlib.testclient({
+  testclient({
     client: "rtorrent",
     fixture: "fixtures/rutorrent",
-    host: "127.0.0.1",
     port: 8080,
     acceptHttpStatus: 200,
     username: "admin",
     password: "admin",
   });
 
-  testlib.testclient({
+  testclient({
     client: "qbittorrent",
     fixture: "fixtures/qbittorrent",
-    host: "127.0.0.1",
     port: 8080,
     username: "admin",
     password: "adminadmin",

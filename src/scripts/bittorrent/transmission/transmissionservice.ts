@@ -80,7 +80,6 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
           return (status == 200 || status == 409)
         }
       })
-      console.log(res)
     };
 
     /**
