@@ -2,6 +2,7 @@ import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} fro
 import {TransmissionTorrent} from "./torrentt";
 import { fields } from "./transmissionconfig"
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import https from "https"
 
 import _ from "underscore"
 
@@ -20,7 +21,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     private updateSession(res: AxiosResponse | AxiosError | any) {
       let session: string
       if (axios.isAxiosError(res)) {
-        session = res.response.headers[SESSION_ID_HEADER.toLowerCase()]
+        return res
       } else if (res instanceof Error) {
         throw res
       } else {
@@ -38,7 +39,10 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         auth: {
           username: this.server.user,
           password: this.server.password,
-        }
+        },
+        httpsAgent: new https.Agent({
+          ca: this.server.getCertificate()
+        })
       })
       // update session header on both success and error http responses
       http.interceptors.response.use(
