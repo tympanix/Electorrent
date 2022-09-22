@@ -41,6 +41,7 @@ interface TestSuiteOptions {
   password: string,
   host?: string,
   port: number,
+  proxyPort?: number,
   acceptHttpStatus?: number,
   timeout?: number,
   stopLabel?: string,
@@ -89,7 +90,7 @@ export function testclient(optionsArg: TestSuiteOptions) {
         env: {
           ... process.env,
           "PROXY_HOST": backendServiceName,
-          "PROXY_PORT": options.port.toString(),
+          "PROXY_PORT": (options.proxyPort || options.port).toString(),
         },
         log: !!process.env.DEBUG
       }

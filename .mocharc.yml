@@ -15,6 +15,9 @@ node-option:
 require:
   - 'ts-node/register'
 # retries: 1
+watch-files:
+  - 'tests/**/*.{ts}'
+  - 'app/**/*.{ts,js,html,css}'
 spec:
   - 'tests/test.ts' # the positional arguments!
 # timeout: "2000"

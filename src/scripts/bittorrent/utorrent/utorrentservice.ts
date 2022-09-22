@@ -3,8 +3,8 @@ import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, Tor
 import {UtorrentTorrent} from "./torrentu";
 import axios from "axios";
 import { AxiosInstance } from "axios";
-import { promisify } from "util"
 import { default as FormData } from "form-data"
+import https from "https"
 import qs from "qs";
 
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
@@ -92,6 +92,9 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
         username: server.user,
         password: server.password,
       },
+      httpsAgent: new https.Agent({
+        ca: this.server.getCertificate()
+      }),
       paramsSerializer: (params) => {
         return qs.stringify(params, { arrayFormat: 'repeat' })
       },

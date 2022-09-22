@@ -30,7 +30,7 @@
     "winreg": "^1.2.2"
   },
   "devDependencies": {
-    "@electorrent/node-deluge": "^1.0.2",
+    "@electorrent/node-deluge": "^1.0.3",
     "@electorrent/node-qbittorrent": "^1.1.2",
     "@electorrent/node-rtorrent": "^1.2.1",
     "@electron/remote": "^2.0.8",
