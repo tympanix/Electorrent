@@ -1,38 +1,8 @@
-import { Application } from "spectron"
 import path = require("path");
-import http = require("http");
 import e2e = require("./e2e");
-import axios from "axios"
 import compose = require("docker-compose")
+import { FeatureSet, waitForHttp } from "./testutil"
 import { startApplicationHooks } from "./shared"
-
-var electronPath = path.join(__dirname, "..", "node_modules", ".bin", "electron");
-
-if (process.platform === "win32") {
-  electronPath += ".cmd";
-}
-
-const sleep = (time: number) => new Promise(resolve => setTimeout(resolve, time));
-
-async function waitForHttp({ url, statusCode=200, timeout=30000, step=1000 }) {
-  let timeSpent = 0;
-  while (true) {
-    if (timeSpent > timeout) {
-      throw new Error(`Timeout waiting for ${url}`);
-    }
-    try {
-      let res = await axios.get(url, {
-        timeout: 1000,
-        validateStatus: _ => true
-      })
-      if (res.status === statusCode) {
-        return;
-      }
-    } catch (err) { }
-    await sleep(step)
-    timeSpent += step
-  }
-}
 
 interface TestSuiteOptions {
   client: string,
@@ -46,7 +16,7 @@ interface TestSuiteOptions {
   timeout?: number,
   stopLabel?: string,
   downloadLabel?: string,
-  skipTests?: Array<string>,
+  unsupportedFeatures: FeatureSet[]
 }
 
 const TEST_SUITE_OPTIONS_DEFAULT = {
@@ -58,11 +28,24 @@ const TEST_SUITE_OPTIONS_DEFAULT = {
   timeout: 10*1000,
   stopLabel: "Stopped",
   downloadLabel: "Downloading",
-  skipTests: [],
 }
 
-export function testclient(optionsArg: TestSuiteOptions) {
-  let options = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULT, optionsArg)
+/**
+ * Make sure the current test suite defined in `options` supports a certain `feature`. If not,
+ * skip all test in the current mocha context
+ * @param options test suite options
+ * @param feature the feature that is required to continue
+ */
+function requireFeatureHook(options: TestSuiteOptions, feature: FeatureSet) {
+  before(function() {
+    if (options.unsupportedFeatures.includes(feature)) {
+      this.skip()
+    }
+  })
+}
+
+export function createTestSuite(optionsArg: TestSuiteOptions) {
+  const options = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULT, optionsArg)
 
   describe(`given ${options.client} service is running (docker-compose)`, function () {
     this.timeout(500 * 1000);
@@ -97,7 +80,6 @@ export function testclient(optionsArg: TestSuiteOptions) {
 
       before(async function () {
         await compose.upAll({ ...dockerComposeArgs, commandOptions: ['--build'] })
-        //await waitForHttp({ url: `https://${options.host}:8443`, statusCode: options.acceptHttpStatus})
       });
 
       after(async function () {
@@ -183,9 +165,7 @@ export function testclient(optionsArg: TestSuiteOptions) {
           });
 
           describe("given labels are supported", function () {
-            before(function () {
-              if (options.skipTests.includes("labels")) return this.skip();
-            });
+            requireFeatureHook(options, FeatureSet.Labels)
 
             it("apply new label", async function () {
               const label = "testlabel123";
@@ -211,11 +191,7 @@ export function testclient(optionsArg: TestSuiteOptions) {
         })
 
         describe("given advanced upload options are supported", async function() {
-
-          before(async function() {
-            return this.skip()
-            //if (options.skipTests.includes("upload options")) return this.skip();
-          })
+          requireFeatureHook(options, FeatureSet.AdvancedUploadOptions)
 
           describe("given torrent uploaded with advanced options", async function() {
             let torrent: e2e.Torrent
