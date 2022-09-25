@@ -13,7 +13,7 @@
     "dist": "electron-builder --publish never",
     "prerelease": "gulp build",
     "release": "electron-builder",
-    "test": "TS_NODE_PROJECT=test/tsconfig.json mocha --bail -r ts-node/register test/test.ts"
+    "test": "TS_NODE_PROJECT=test/tsconfig.json mocha --bail -r ts-node/register"
   },
   "keywords": [
     "utorrent"
