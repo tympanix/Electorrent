@@ -2,7 +2,7 @@ version: "3"
 
 # Common configuration for a peer in the p2p network
 x-peer: &peer
-  build: docker/peer
+  build: peer
   networks:
     - p2p
   volumes:
@@ -20,7 +20,7 @@ services:
   # with real P2P traffic.
   tracker:
     hostname: tracker
-    build: docker/tracker
+    build: tracker
     ports:
       - 6969:6969
       - 6969:6969/udp

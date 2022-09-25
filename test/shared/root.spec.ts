@@ -1,8 +1,8 @@
-const path = require("path");
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
-const compose = require("docker-compose")
-const { askQuestion } = require("./testutil")
+import path from "path"
+import chai from "chai"
+import chaiAsPromised from "chai-as-promised";
+import { askQuestion } from "../testutil";
+import { dockerComposeHooks } from ".";
 
 process.on('unhandledRejection', (reason) => { throw reason });
 
@@ -13,17 +13,8 @@ global.before(function () {
   chai.use(chaiAsPromised);
 });
 
-before(async function() {
-  this.timeout(30 * 1000)
-  await compose.upAll({ cwd: path.join(__dirname), log: process.env.DEBUG, commandOptions: ['--build'] })
-})
-
-after(async function() {
-  this.timeout(30 * 1000)
-  if (!process.env.MOCHA_DOCKER_KEEP) {
-    await compose.down({ cwd: path.join(__dirname), log: process.env.DEBUG })
-  }
-})
+// set up root mocha hooks to start opentracker docker-compose services
+dockerComposeHooks([__dirname, "opentracker"])
 
 afterEach(async function() {
   if (this.currentTest && this.currentTest.state === "failed") {

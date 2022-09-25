@@ -1,8 +1,7 @@
 import path = require("path");
 import e2e = require("./e2e");
-import compose = require("docker-compose")
 import { FeatureSet, waitForHttp } from "./testutil"
-import { startApplicationHooks } from "./shared"
+import { dockerComposeHooks, startApplicationHooks } from "./shared"
 
 interface TestSuiteOptions {
   client: string,
@@ -48,45 +47,24 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
   const options = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULT, optionsArg)
 
   describe(`given ${options.client} service is running (docker-compose)`, function () {
-    this.timeout(500 * 1000);
+    dockerComposeHooks([__dirname, options.fixture])
 
     before(async function () {
-      const composeDir = path.join(__dirname, options.fixture)
-      await compose.upAll({ cwd: composeDir, log: !!process.env.DEBUG, commandOptions: ['--build'] })
+      this.timeout(20 * 1000)
       await waitForHttp({ url: `http://${options.host}:${options.port}`, statusCode: options.acceptHttpStatus})
     });
 
-    after(async function () {
-      if (!process.env.MOCHA_DOCKER_KEEP) {
-        await compose.down({ cwd: path.join(__dirname, options.fixture), log: !!process.env.DEBUG })
-      }
-    });
-
     describe("given tls/ssl reverse proxy is running (docker-compose)", function() {
-      this.timeout(500 * 1000);
-
       // The service name in the docker-compose.yml must be equal to the name of the folder in which it resides
       const backendServiceName = path.basename(options.fixture)
 
-      const dockerComposeArgs: compose.IDockerComposeOptions = {
-        cwd: path.join(__dirname, "fixtures", "nginx-proxy"),
+      dockerComposeHooks([__dirname, "shared", "nginx"], {
         env: {
           ... process.env,
           "PROXY_HOST": backendServiceName,
           "PROXY_PORT": (options.proxyPort || options.port).toString(),
         },
-        log: !!process.env.DEBUG
-      }
-
-      before(async function () {
-        await compose.upAll({ ...dockerComposeArgs, commandOptions: ['--build'] })
-      });
-
-      after(async function () {
-        if (!process.env.MOCHA_DOCKER_KEEP) {
-          await compose.down({ ...dockerComposeArgs })
-        }
-      });
+      })
 
       describe("given application is running", function() {
         startApplicationHooks()
@@ -111,7 +89,6 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
       })
     })
 
-
     describe("given application is running", function() {
       startApplicationHooks()
 
@@ -133,7 +110,7 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
           let torrent: e2e.Torrent
 
           before(async function() {
-            let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
+            let filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
             torrent = await this.app.uploadTorrent({ filename: filename });
           })
 
@@ -202,7 +179,7 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
           let torrent: e2e.Torrent
 
           before(async function() {
-            let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
+            let filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
             torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
           })
 

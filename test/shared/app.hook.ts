@@ -17,6 +17,7 @@ export function startApplicationHooks() {
   var appPath = path.join(__dirname, "..", "..", "app");
 
   before(async function () {
+    this.timeout(10 * 1000)
     this.spectron = new Application({
       path: electronPath,
       args: ['--inspect=5858', appPath],
@@ -42,6 +43,7 @@ export function startApplicationHooks() {
   })
 
   after(async function () {
+    this.timeout(10 * 1000)
     if (this.spectron && this.spectron.isRunning()) {
       await this.spectron.stop();
     }
