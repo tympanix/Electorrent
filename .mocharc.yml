@@ -14,11 +14,13 @@ node-option:
 # reporter: 'spec'
 require:
   - 'ts-node/register'
+file:
+  - 'test/shared/root.spec.ts'
 # retries: 1
 watch-files:
   - 'test/**/*.{ts}'
   - 'app/**/*.{ts,js,html,css}'
-spec:
-  - 'test/**/*.spec.ts' # the positional arguments!
+# spec:
+#   - 'test/**/*.spec.ts' # the positional arguments!
 timeout: 10000
 # watch: false
