@@ -189,31 +189,35 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
             });
           });
         })
+      })
+    })
 
-        describe("given advanced upload options are supported", async function() {
-          requireFeatureHook(options, FeatureSet.AdvancedUploadOptions)
+    describe("given advanced upload options are supported", async function() {
+      requireFeatureHook(options, FeatureSet.AdvancedUploadOptions)
 
-          describe("given torrent uploaded with advanced options", async function() {
-            let torrent: e2e.Torrent
+      describe("given application is running", function() {
+        startApplicationHooks()
 
-            before(async function() {
-              let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
-              torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
-            })
+        describe("given torrent uploaded with advanced options", async function() {
+          let torrent: e2e.Torrent
 
-            after(async function() {
-              if (torrent) {
-                await torrent.clickContextMenu("delete");
-                await torrent.waitForGone();
-              }
-            })
+          before(async function() {
+            let filename = path.join(__dirname, 'data/shared/test-100k.bin.torrent')
+            torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
+          })
 
-            it("torrent has label already set", function() {
-              // TODO: Check that torrent label is set
-            })
+          after(async function() {
+            if (torrent) {
+              await torrent.clickContextMenu("delete");
+              await torrent.waitForGone();
+            }
+          })
+
+          it("torrent has label already set", function() {
+            // TODO: Check that torrent label is set
           })
         })
       })
     })
-  });
+  })
 };
