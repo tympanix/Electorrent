@@ -1,7 +1,2 @@
-import { App } from "./e2e_app"
-import { Torrent } from "./e2e_torrent"
-
-export {
-  App,
-  Torrent,
-};
+export { App, LoginOptions } from "./e2e_app"
+export { Torrent } from "./e2e_torrent"

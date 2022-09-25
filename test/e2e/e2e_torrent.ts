@@ -1,7 +1,10 @@
 import { App } from "./e2e_app"
 import { Application, SpectronClient } from "spectron";
+import { ClickOptions } from "webdriverio";
 
-class Torrent {
+export type ColumnName = "decodedName" | "label"
+
+export class Torrent {
   app: App
   spectron: Application
   client: SpectronClient
@@ -25,7 +28,7 @@ class Torrent {
 
   async waitForExist() {
     let elem = await this.client.$(this.query)
-    return await elem.waitForExist({ timeout: this.timeout })
+    await elem.waitForExist({ timeout: this.timeout })
   }
 
   async waitForGone() {
@@ -33,7 +36,7 @@ class Torrent {
     return await elem.waitForExist({ timeout: this.timeout, reverse: true })
   }
 
-  async getColumns(): Promise<Record<string, any>> {
+  async getAllColumns(): Promise<Record<string, string>> {
     let elem = await this.client.$$(this.query + " td")
     let dataPromise = elem.map(async (e) => {
       return {
@@ -44,10 +47,16 @@ class Torrent {
     return Object.assign({}, ...data)
   }
 
+  async getColumn(column: ColumnName) {
+    let torrent = await this.client.$(this.query)
+    let elem = await torrent.$(`td[data-col='${column}']`)
+    return await elem.getText()
+  }
+
   async waitForState(state: string) {
     let self = this;
     return this.client.waitUntil(async () => {
-      let cols = await self.getColumns();
+      let cols = await self.getAllColumns();
       return cols["percent"].includes(state);
     }, { timeout: this.timeout });
   }
@@ -65,6 +74,11 @@ class Torrent {
     await this.waitForState(state)
   }
 
+  async delete() {
+    await this.clickContextMenu("delete");
+    await this.waitForGone();
+  }
+
   async stop({ state = "Stopped" }) {
     await this.performAction({ action: "stop", state: state })
   }
@@ -73,7 +87,12 @@ class Torrent {
     await this.performAction({ action: "resume", state: state })
   }
 
-  async newLabel(labelName) {
+  async getLabel() {
+    let cols = await this.getAllColumns();
+    return cols["label"]
+  }
+
+  async newLabel(labelName: string) {
     const labels = "#torrent-action-header div[data-role=labels]";
 
     let elem = await this.client.$(this.query)
@@ -97,12 +116,11 @@ class Torrent {
     await modal.waitForDisplayed({ reverse: true })
 
     await this.client.waitUntil(async () => {
-      let cols = await this.getColumns();
-      return cols["label"] === labelName;
+      return await this.getLabel() === labelName
     });
   }
 
-  async changeLabel(labelName) {
+  async changeLabel(labelName: string) {
     const labels = "#torrent-action-header div[data-role=labels]";
 
     let elem = await this.client.$(this.query)
@@ -117,17 +135,16 @@ class Torrent {
     await labelItemElem.waitForDisplayed({ reverse: true })
 
     await this.client.waitUntil(async () => {
-      let cols = await this.getColumns();
-      return cols["label"] === labelName;
+      return await this.getLabel() === labelName
     });
   }
 
-  async click(options) {
+  async click(options: ClickOptions) {
     let elem = await this.client.$(this.query)
     await elem.click(options)
   }
 
-  async clickContextMenu(roleName) {
+  async clickContextMenu(roleName: string) {
     const button = `#contextmenu a[data-role=${roleName}]`;
 
     let elem = await this.client.$(this.query)
@@ -153,7 +170,7 @@ class Torrent {
     await contextMeny.waitForDisplayed({ reverse: true })
   }
 
-  async checkInState(states) {
+  async checkInState(states: string[]) {
     let allStates = ["all", "downloading", "finished", "seeding", "stopped", "error"];
 
     for (const state of allStates.reverse()) {
@@ -179,8 +196,4 @@ class Torrent {
     }
     await this.app.filterLabel()
   }
-}
-
-export {
-  Torrent
 }

@@ -8,7 +8,7 @@ import parseTorrent = require("parse-torrent")
 /**
  * Options to use during the login screen of the app to connect to your torrent client
  */
-interface LoginOptions {
+export interface LoginOptions {
   host: string
   username: string
   password: string
@@ -100,6 +100,45 @@ export class App {
       }
   }
 
+  async uploadTorrentModalVisible() {
+    let modal = await this.client.$("#uploadTorrnetModal")
+    await modal.waitForDisplayed()
+    return modal
+  }
+
+  async uploadTorrentModalSubmit(options?: { label?: string, start?: boolean, name?: string }) {
+    let modal = await this.uploadTorrentModalVisible()
+    await this.client.pause(200)
+
+    if (options?.name) {
+      let nameInput = await modal.$("input[data-action='rename-torrent']")
+      await nameInput.waitForDisplayed()
+      await nameInput.setValue(options.name)
+    }
+
+    if (options?.start !== undefined) {
+      let startToggle = await modal.$(`div[data-action="start-torrent"] > input`)
+      await startToggle.waitForExist()
+      if (await startToggle.isSelected() !== options.start) {
+        await startToggle.click()
+      }
+    }
+
+    if (options?.label) {
+      let labelElem = await modal.$("div[title=Label]")
+      await labelElem.waitForClickable()
+      await labelElem.click()
+      let labelItemElem = await labelElem.$(`div[data-label='${options.label}']`)
+      await labelItemElem.waitForDisplayed()
+      await labelItemElem.click()
+    }
+
+    await this.client.pause(250)
+    let submitBtn = await modal.$("button[type=submit]")
+    await submitBtn.click()
+    await modal.waitForDisplayed({ reverse: true })
+  }
+
   async uploadTorrent({ filename, askUploadOptions }: { filename: string, askUploadOptions?: boolean }) {
     let data = fs.readFileSync(path.join(filename));
     let info = parseTorrent(data)
@@ -116,8 +155,6 @@ export class App {
      * array here to make the serialization behave properly.
      */
     this.spectron.webContents.send("torrentfiles", Array.from(data), path.basename(filename), askUploadOptions);
-    await torrent.waitForExist();
-    await torrent.isExisting().should.eventually.be.true;
     this.torrents.push(torrent);
     return torrent;
   }

@@ -10,14 +10,14 @@
         <div class="field" ng-if="ctl.optionsEnabled.renameTorrent">
             <div class="ui left icon input">
                 <i class="tag icon"></i>
-                <input id="upload-options-renametorrent" type="text" placeholder="Rename torrent" ng-model="options.renameTorrent">
+                <input data-action="rename-torrent" id="upload-options-renametorrent" type="text" placeholder="Rename torrent" ng-model="options.renameTorrent">
             </div>
         </div>
 
         <div class="fields">
             <div class="field twelve wide">
                 <dropdown title="Label" id="upload-options-label" class="fluid" ng-model="options.category">
-                    <dropdown-group ng-repeat="label in labels" title="label" value="label">
+                    <dropdown-group ng-repeat="label in labels" data-label="{{ label }}" title="label" value="label">
                     {{ label }}
                     </dropdown-group>
                 </dropdown>
@@ -31,25 +31,25 @@
 
         <div class="fields">
             <div class="eight wide field" ng-if="ctl.optionsEnabled.startTorrent">
-                <toggle ng-model="options.startTorrent">
+                <toggle data-action="start-torrent" ng-model="options.startTorrent">
                     Start torrent
                 </toggle>
             </div>
 
             <div class="eight wide field" ng-if="ctl.optionsEnabled.skipCheck">
-                <toggle ng-model="options.skipCheck">
+                <toggle data-action="skip-check" ng-model="options.skipCheck">
                     Skip hash check
                 </toggle>
             </div>
 
             <div class="eight wide field" ng-if="ctl.optionsEnabled.sequentialDownload">
-                <toggle ng-model="options.sequentialDownload">
+                <toggle data-action="sequential-download" ng-model="options.sequentialDownload">
                     Sequential download
                 </toggle>
             </div>
 
             <div class="eight wide field" ng-if="ctl.optionsEnabled.firstAndLastPiecePrio">
-                <toggle ng-model="options.firstAndLastPiecePrio">
+                <toggle data-action="first-last-piece-prio" ng-model="options.firstAndLastPiecePrio">
                     First and last piece priority
                 </toggle>
             </div>

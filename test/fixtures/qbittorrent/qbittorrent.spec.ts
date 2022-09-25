@@ -7,7 +7,5 @@ createTestSuite({
   port: 8080,
   username: "admin",
   password: "adminadmin",
-  unsupportedFeatures: [
-    FeatureSet.AdvancedUploadOptions,
-  ],
+  unsupportedFeatures: [],
 });

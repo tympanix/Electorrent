@@ -1,4 +1,4 @@
-<div class="ui small modal" modal-new on-show="ctl.onShow()" on-hidden="ctl.onHidden()" ng-ref="ctl.modalref" ng-ref-read="modal-new">
+<div class="ui small modal" id="uploadTorrnetModal" modal-new on-show="ctl.onShow()" on-hidden="ctl.onHidden()" ng-ref="ctl.modalref" ng-ref-read="modal-new">
     <i class="close icon"></i>
     <div class="header">
         Add Torrent
@@ -16,12 +16,12 @@
         <torrent-upload-form loading="ctl.isLoading" options="ctl.uploadOptions" labels="labels" />
     </div>
     <div class="actions">
-        <a class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
+        <button class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
             Cancel
-        </a>
-        <a class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.uploadCurrentTorrent()">
+        </button>
+        <button type="submit" class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.uploadCurrentTorrent()">
             Add Torrent
             <i class="plus icon"></i>
-        </a>
+        </button>
     </div>
 </div>

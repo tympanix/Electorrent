@@ -3,7 +3,7 @@ import e2e = require("./e2e");
 import { FeatureSet, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks } from "./shared"
 
-interface TestSuiteOptions {
+interface TestSuiteOptionsOptional {
   client: string,
   fixture: string,
   username: string,
@@ -18,7 +18,7 @@ interface TestSuiteOptions {
   unsupportedFeatures: FeatureSet[]
 }
 
-const TEST_SUITE_OPTIONS_DEFAULT = {
+const TEST_SUITE_OPTIONS_DEFAULTS = {
   username: "admin",
   password: "admin",
   host: "localhost",
@@ -28,6 +28,12 @@ const TEST_SUITE_OPTIONS_DEFAULT = {
   stopLabel: "Stopped",
   downloadLabel: "Downloading",
 }
+
+/**
+ * Options given to a test suite execution with information about the backend bittorrent service
+ * to be tested, login information, features etc.
+ */
+export type TestSuiteOptions = TestSuiteOptionsOptional & (typeof TEST_SUITE_OPTIONS_DEFAULTS)
 
 /**
  * Make sure the current test suite defined in `options` supports a certain `feature`. If not,
@@ -43,8 +49,8 @@ function requireFeatureHook(options: TestSuiteOptions, feature: FeatureSet) {
   })
 }
 
-export function createTestSuite(optionsArg: TestSuiteOptions) {
-  const options = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULT, optionsArg)
+export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
+  const options: TestSuiteOptions = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULTS, optionsArg)
 
   describe(`given ${options.client} service is running (docker-compose)`, function () {
     dockerComposeHooks([__dirname, options.fixture])
@@ -71,14 +77,7 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
 
         it("user is logging in with https", async function() {
           this.retries(3)
-          await this.app.login({
-            username: options.username,
-            password: options.password,
-            host: options.host,
-            port: 8443,
-            client: options.client,
-            https: true,
-          });
+          await this.app.login({ ...options, https: true, port: 8443 })
           await this.app.certificateModalIsVisible()
         })
 
@@ -96,13 +95,7 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
 
         before(async function() {
           this.retries(3)
-          await this.app.login({
-            username: options.username,
-            password: options.password,
-            host: options.host,
-            port: options.port,
-            client: options.client,
-          });
+          await this.app.login(options)
           await this.app.torrentsPageIsVisible()
         })
 
@@ -119,6 +112,10 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
               await torrent.clickContextMenu("delete");
               await torrent.waitForGone();
             }
+          })
+
+          it("torrent should be visible in table", () => {
+            return torrent.waitForExist();
           })
 
           it("wait for download to begin", () => {
@@ -175,23 +172,54 @@ export function createTestSuite(optionsArg: TestSuiteOptions) {
       describe("given application is running", function() {
         startApplicationHooks()
 
-        describe("given torrent uploaded with advanced options", async function() {
-          let torrent: e2e.Torrent
+        describe("given user is logged in", function() {
+
+          this.timeout(20 * 1000)
 
           before(async function() {
-            let filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
+            this.retries(3)
+            await this.app.login(options)
+            await this.app.torrentsPageIsVisible()
+          })
+
+          const filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
+
+          it("torrent uploaded with default options", async function() {
+            let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
+            await this.app.uploadTorrentModalSubmit()
+            await torrent.waitForExist()
+            await torrent.waitForState(options.downloadLabel)
+            await torrent.delete()
+          })
+
+          it("torent uploaded with preexisting label", async function() {
+            const labelName = "mylabel#1"
+            let torrent = await this.app.uploadTorrent({ filename: filename });
+            await torrent.newLabel(labelName)
+            await torrent.delete()
+
             torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
+            await this.app.uploadTorrentModalSubmit({ label: labelName })
+            await torrent.waitForExist()
+            await torrent.getLabel().should.eventually.equal(labelName)
+            await torrent.delete()
           })
 
-          after(async function() {
-            if (torrent) {
-              await torrent.clickContextMenu("delete");
-              await torrent.waitForGone();
-            }
+          it("torrent uploaded in stopped state", async function() {
+            let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
+            await this.app.uploadTorrentModalSubmit({ start: false })
+            await torrent.isExisting()
+            await torrent.waitForState(options.stopLabel)
+            await torrent.delete()
           })
 
-          it("torrent has label already set", function() {
-            // TODO: Check that torrent label is set
+          it("torrent uploaded with name", async function() {
+            const torrentName = "my awesome torrent"
+            let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
+            await this.app.uploadTorrentModalSubmit({ name: torrentName })
+            await torrent.isExisting()
+            await torrent.getColumn("decodedName").should.eventually.equal(torrentName)
+            await torrent.delete()
           })
         })
       })
