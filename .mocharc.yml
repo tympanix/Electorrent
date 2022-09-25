@@ -20,5 +20,5 @@ watch-files:
   - 'app/**/*.{ts,js,html,css}'
 spec:
   - 'test/**/*.spec.ts' # the positional arguments!
-# timeout: "2000"
+timeout: 10000
 # watch: false
