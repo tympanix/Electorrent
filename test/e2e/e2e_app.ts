@@ -106,7 +106,7 @@ export class App {
     return modal
   }
 
-  async uploadTorrentModalSubmit(options?: { label?: string, start?: boolean, name?: string }) {
+  async uploadTorrentModalSubmit(options?: { label?: string, start?: boolean, name?: string, saveLocation?: string }) {
     let modal = await this.uploadTorrentModalVisible()
     await this.client.pause(200)
 
@@ -114,6 +114,12 @@ export class App {
       let nameInput = await modal.$("input[data-action='rename-torrent']")
       await nameInput.waitForDisplayed()
       await nameInput.setValue(options.name)
+    }
+
+    if (options?.saveLocation) {
+      let saveLocationInput = await modal.$("input[data-action='save-location']")
+      await saveLocationInput.waitForDisplayed()
+      await saveLocationInput.setValue(options.saveLocation)
     }
 
     if (options?.start !== undefined) {

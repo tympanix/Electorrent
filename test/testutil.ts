@@ -58,3 +58,27 @@ export async function waitForHttp(
     timeSpent += step
   }
 }
+
+/**
+ * Perform a test function multiple times until it succeeds without an exception
+ * @param fn function to test
+ * @param timeout time to wait for `fn` to return successfully without an exception
+ * @param step time between calls of `fn`
+ * @returns whatever `fn` returns
+ */
+export async function waitUntil(fn: () => Promise<any>, timeout?: number, step?: number) {
+  let currentTime = 0
+  let err: any
+  timeout = timeout ? timeout : 5000
+  step = step ? step : 500
+  while (currentTime <= timeout) {
+    try {
+      return await fn()
+    } catch (e) {
+      err = e
+    }
+    await sleep(step)
+    currentTime += step
+  }
+  throw err
+}
