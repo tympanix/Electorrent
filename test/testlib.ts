@@ -2,6 +2,7 @@ import path = require("path");
 import e2e = require("./e2e");
 import { FeatureSet, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks } from "./shared"
+import { backendHooks } from "./shared/backend.hook";
 
 interface TestSuiteOptionsOptional {
   client: string,
@@ -53,7 +54,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
   const options: TestSuiteOptions = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULTS, optionsArg)
 
   describe(`given ${options.client} service is running (docker-compose)`, function () {
-    dockerComposeHooks([__dirname, options.fixture])
+    backendHooks([__dirname, options.fixture])
 
     before(async function () {
       this.timeout(20 * 1000)
@@ -219,6 +220,17 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await this.app.uploadTorrentModalSubmit({ name: torrentName })
             await torrent.isExisting()
             await torrent.getColumn("decodedName").should.eventually.equal(torrentName)
+            await torrent.delete()
+          })
+
+          it("torrent uploaded with save location", async function() {
+            const saveLocation = "/tmp/custom/save/location"
+            await this.backend.exec(["test", "!", "-e", saveLocation])
+            let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
+            await this.app.uploadTorrentModalSubmit({ saveLocation: saveLocation })
+            await torrent.isExisting()
+            await torrent.waitForState(options.downloadLabel)
+            await this.backend.waitForExec(["test", "-e", saveLocation])
             await torrent.delete()
           })
         })
