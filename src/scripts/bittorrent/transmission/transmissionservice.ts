@@ -10,9 +10,11 @@ const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 const SESSION_ID_HEADER = "X-Transmission-Session-Id"
 
 export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
-    server = undefined;
 
-    name = "Transmission";
+    public name = "Transmission";
+    public id = "transmission"
+
+    server = undefined;
 
     config = {
       session: undefined,

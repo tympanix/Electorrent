@@ -1,8 +1,9 @@
 import { createTestSuite } from "../../testlib";
 import { FeatureSet } from "../../testutil";
+import { RtorrentClient } from "../../../src/scripts/bittorrent"
 
 createTestSuite({
-  client: "rtorrent",
+  client: new RtorrentClient(),
   fixture: "fixtures/rutorrent",
   port: 8080,
   proxyPort: 80,
@@ -10,6 +11,5 @@ createTestSuite({
   username: "admin",
   password: "admin",
   unsupportedFeatures: [
-    FeatureSet.AdvancedUploadOptions,
   ],
 });

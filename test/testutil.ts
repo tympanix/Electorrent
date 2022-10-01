@@ -6,7 +6,6 @@ import readline from "readline"
  */
 export enum FeatureSet {
   Labels,
-  AdvancedUploadOptions,
 }
 
 /**

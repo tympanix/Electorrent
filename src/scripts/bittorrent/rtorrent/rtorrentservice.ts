@@ -23,7 +23,8 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
      */
     rtorrent = null;
 
-    name = "rTorrent";
+    public name = "rTorrent"
+    public id = "rtorrent"
 
     connect(server): Promise<void> {
         let ca = server.getCertificate();

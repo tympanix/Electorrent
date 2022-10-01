@@ -113,7 +113,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     })
 
     $scope.$on('torrents:add', function(event, item: PendingTorrentUploadItem, askUploadOptions: boolean) {
-        if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true && $rootScope.$btclient.uploadOptionsEnable) {
+        if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true) {
             $scope.pendingTorrentFiles.push(item)
         } else {
             if (item.type === 'file') {

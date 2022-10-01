@@ -1,8 +1,9 @@
 import { createTestSuite } from "../../testlib";
 import { FeatureSet } from "../../testutil";
+import { TransmissionClient } from "../../../src/scripts/bittorrent"
 
 createTestSuite({
-  client: "transmission",
+  client: new TransmissionClient(),
   fixture: "fixtures/transmission",
   port: 9091,
   username: "username",
@@ -10,6 +11,5 @@ createTestSuite({
   acceptHttpStatus: 401,
   unsupportedFeatures: [
     FeatureSet.Labels,
-    FeatureSet.AdvancedUploadOptions,
   ],
 });

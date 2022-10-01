@@ -1,4 +1,5 @@
 export { Torrent } from "./abstracttorrent"
+export { TorrentClient } from "./torrentclient"
 
 // Client API implementations for bittorrent providers
 export { DelugeClient, DelugeTorrent } from "./deluge"
