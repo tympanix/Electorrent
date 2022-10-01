@@ -2,7 +2,7 @@ import { App } from "./e2e_app"
 import { Application, SpectronClient } from "spectron";
 import { ClickOptions } from "webdriverio";
 
-export type ColumnName = "decodedName" | "label"
+export type ColumnName = "decodedName" | "label" | "percent"
 
 export class Torrent {
   app: App
@@ -33,7 +33,7 @@ export class Torrent {
 
   async waitForGone() {
     let elem = await this.client.$(this.query)
-    return await elem.waitForExist({ timeout: this.timeout, reverse: true })
+    await elem.waitForExist({ timeout: this.timeout, reverse: true })
   }
 
   async getAllColumns(): Promise<Record<string, string>> {
@@ -54,10 +54,9 @@ export class Torrent {
   }
 
   async waitForState(state: string) {
-    let self = this;
-    return this.client.waitUntil(async () => {
-      let cols = await self.getAllColumns();
-      return cols["percent"].includes(state);
+    await this.client.waitUntil(async () => {
+      let percent = await this.getColumn("percent")
+      return percent.toLowerCase().includes(state.toLowerCase());
     }, { timeout: this.timeout });
   }
 
@@ -173,10 +172,10 @@ export class Torrent {
   async checkInState(states: string[]) {
     let allStates = ["all", "downloading", "finished", "seeding", "stopped", "error"];
 
-    for (const state of allStates.reverse()) {
+    for (let state of allStates.reverse()) {
       let stateBtn = await this.client.$(`#page-torrents li[data-state=${state}]`)
       await stateBtn.click()
-      this.client.pause(200)
+      await this.client.pause(50)
       let elem = await this.client.$(this.query)
       await elem.waitForExist({ reverse: !states.includes(state) })
     }

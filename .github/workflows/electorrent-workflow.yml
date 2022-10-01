@@ -58,7 +58,7 @@ jobs:
 
     steps:
     - name: Install apt packages
-      run: sudo apt-get install -y graphicsmagick icnsutils
+      run: sudo apt-get update && sudo apt-get install -y graphicsmagick icnsutils
       if: runner.os == 'Linux'
     - name: Checkout source code
       uses: actions/checkout@v2

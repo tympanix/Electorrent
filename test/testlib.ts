@@ -127,17 +127,15 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             return torrent.checkInState(["all", "downloading"]);
           });
 
-          it("stop the torrent", async () => {
+          it("torrent is stopped and resumed", async function() {
+            this.timeout(25 * 1000)
             await torrent.stop({ state: options.stopLabel });
-          });
-
-          it("check torrent in stopped tab", () => {
-            return torrent.checkInState(["all", "stopped"]);
-          });
-
-          it("resume the torrent", async () => {
+            await torrent.waitForState(options.stopLabel)
+            await torrent.checkInState(["all", "stopped"]);
             await torrent.resume({ state: options.downloadLabel });
-          });
+            await torrent.waitForState(options.downloadLabel)
+            await torrent.checkInState(["all", "downloading"])
+          })
 
           describe("given labels are supported", function () {
             requireFeatureHook(options, FeatureSet.Labels)
