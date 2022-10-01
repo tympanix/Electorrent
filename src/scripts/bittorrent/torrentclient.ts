@@ -88,14 +88,16 @@ export type ContextActionList<T extends Torrent> = ContextActionElem<T>[]
 
 export abstract class TorrentClient<T extends Torrent = Torrent> {
 
-    /*
-     * Please rename all occurences of __serviceName__ (including underscores) with the name of your service.
-     * Best practise is naming your service starting with the client name in lower case followed by 'Service'
-     * (remember capital 'S' e.g qbittorrentService for qBittorrent, utorrentService for µTorrent ect.).
-     * The real name of your client for display purposes can be changes in the field 'this.name' below.
+    /**
+     * The semantic name of the torrent service as presented in the UI
      */
-    public name: string
+    public abstract name: string
 
+    /**
+     * The indentification for the torrent client used for programmatic use, serialization and other references.
+     * Should be all lowercase and alphanumeric characters only
+     */
+    public abstract id: string
 
     /**
      * Connect to the server upon initial startup, changing connection settings ect. The function
@@ -188,7 +190,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      *      click [function]: The function to be executed when the when the button/element is pressed
      *      icon [string]: The icon of the button. See here: http://semantic-ui.com/elements/icon.html
      */
-    public actionHeader: TorrentActionList<T>
+    public abstract actionHeader: TorrentActionList<T>
 
     /**
      * Represents the actions available in the context menu. Can be customized to your liking or
@@ -200,6 +202,6 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      *      check [function]:   Displays a checkbox instead of an icon. The function is a predicate which
      *                          has to hold for all selected torrents, for the checkbox to be checked.
      */
-    public contextMenu: ContextActionList<T>
+    public abstract contextMenu: ContextActionList<T>
 };
 

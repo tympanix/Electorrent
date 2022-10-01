@@ -19,7 +19,8 @@ const Deluge = require('@electorrent/node-deluge')
 
 export class DelugeClient extends TorrentClient<DelugeTorrent> {
 
-    name = 'Deluge';
+    public name = 'Deluge'
+    public id = 'deluge'
 
     private deluge = null
 

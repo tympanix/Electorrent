@@ -3,9 +3,11 @@ import e2e = require("./e2e");
 import { FeatureSet, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks } from "./shared"
 import { backendHooks } from "./shared/backend.hook";
+import { TorrentClient } from "../src/scripts/bittorrent"
+
 
 interface TestSuiteOptionsOptional {
-  client: string,
+  client: TorrentClient
   fixture: string,
   username: string,
   password: string,
@@ -53,7 +55,7 @@ function requireFeatureHook(options: TestSuiteOptions, feature: FeatureSet) {
 export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
   const options: TestSuiteOptions = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULTS, optionsArg)
 
-  describe(`given ${options.client} service is running (docker-compose)`, function () {
+  describe(`given ${options.client.id} service is running (docker-compose)`, function () {
     backendHooks([__dirname, options.fixture])
 
     before(async function () {
@@ -166,7 +168,6 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     })
 
     describe("given advanced upload options are supported", async function() {
-      requireFeatureHook(options, FeatureSet.AdvancedUploadOptions)
 
       describe("given application is running", function() {
         startApplicationHooks()
@@ -192,6 +193,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torent uploaded with preexisting label", async function() {
+            if (!options.client.uploadOptionsEnable?.category) return this.skip()
             const labelName = "mylabel#1"
             let torrent = await this.app.uploadTorrent({ filename: filename });
             await torrent.newLabel(labelName)
@@ -205,6 +207,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torrent uploaded in stopped state", async function() {
+            if (!options.client.uploadOptionsEnable?.startTorrent) return this.skip()
             let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ start: false })
             await torrent.isExisting()
@@ -213,6 +216,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torrent uploaded with name", async function() {
+            if (!options.client.uploadOptionsEnable?.renameTorrent) return this.skip()
             const torrentName = "my awesome torrent"
             let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ name: torrentName })
@@ -222,6 +226,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torrent uploaded with save location", async function() {
+            if (!options.client.uploadOptionsEnable?.saveLocation) return this.skip()
             const saveLocation = "/tmp/custom/save/location"
             await this.backend.exec(["test", "!", "-e", saveLocation])
             let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });

@@ -14,7 +14,7 @@
             </div>
         </div>
 
-        <div class="fields">
+        <div class="fields" ng-if="ctl.optionsEnabled.category">
             <div class="field twelve wide">
                 <dropdown title="Label" id="upload-options-label" class="fluid" ng-model="options.category">
                     <dropdown-group ng-repeat="label in labels" data-label="{{ label }}" title="label" value="label">

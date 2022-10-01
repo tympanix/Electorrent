@@ -5,6 +5,8 @@ import path = require("path");
 import { Torrent } from "./e2e_torrent";
 import parseTorrent = require("parse-torrent")
 
+import { TorrentClient } from "../../src/scripts/bittorrent"
+
 /**
  * Options to use during the login screen of the app to connect to your torrent client
  */
@@ -13,7 +15,7 @@ export interface LoginOptions {
   username: string
   password: string
   port: number
-  client: string
+  client: TorrentClient
   https?: boolean
 }
 
@@ -54,7 +56,7 @@ export class App {
     let clientForm = await this.client.$("#connection-client")
     await clientForm.click();
 
-    let clientFormSelect = await this.client.$(`#connection-client-${options.client}`)
+    let clientFormSelect = await this.client.$(`#connection-client-${options.client.id}`)
     await clientFormSelect.waitForExist()
     await clientFormSelect.click()
 
@@ -101,7 +103,7 @@ export class App {
   }
 
   async uploadTorrentModalVisible() {
-    let modal = await this.client.$("#uploadTorrnetModal")
+    let modal = await this.client.$("#uploadTorrentModal")
     await modal.waitForDisplayed()
     return modal
   }

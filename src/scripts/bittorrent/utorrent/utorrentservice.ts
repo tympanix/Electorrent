@@ -8,10 +8,12 @@ import https from "https"
 import qs from "qs";
 
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
+
+  public name = "µTorrent"
+  public id = "utorrent"
+
   server = undefined;
   http: AxiosInstance = undefined;
-  name = "µTorrent";
-
   data = {
     url: null,
     username: null,

@@ -40,7 +40,10 @@ const ERR_TASK = {
 };
 
 export class SynologyClient extends TorrentClient<SynologyTorrent> {
-    name = 'Synology Download Station';
+
+    public name = 'Synology Download Station'
+    public id = 'downloadstation'
+
     server = undefined
 
     // API vars.

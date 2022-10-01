@@ -38,7 +38,8 @@ const QBittorrent = require("@electorrent/node-qbittorrent");
 
 export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
 
-    name = "qBittorrent";
+    public name = "qBittorrent"
+    public id = "qbittorrent"
 
     private qbittorrent: any
 

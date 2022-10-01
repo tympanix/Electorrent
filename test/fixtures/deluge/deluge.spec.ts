@@ -1,8 +1,9 @@
 import { createTestSuite } from "../../testlib";
 import { FeatureSet } from "../../testutil";
+import { DelugeClient } from "../../../src/scripts/bittorrent"
 
 createTestSuite({
-  client: "deluge",
+  client: new DelugeClient(),
   fixture: "fixtures/deluge",
   port: 8112,
   username: "admin",
@@ -10,6 +11,5 @@ createTestSuite({
   stopLabel: "Paused",
   unsupportedFeatures: [
     FeatureSet.Labels,
-    FeatureSet.AdvancedUploadOptions,
   ],
 });
