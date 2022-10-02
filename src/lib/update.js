@@ -66,7 +66,7 @@ exports.manualQuitAndUpdate = function() {
             logger.error('Error while executing update', arguments);
             shell.showItemInFolder(downloadedUpdate);
         } else {
-            shell.openItem(downloadedUpdate);
+            shell.openPath(downloadedUpdate);
             app.quit();
         }
     })

@@ -219,7 +219,7 @@ export let menuMac = ['electron', '$rootScope', '$bittorrent', function(electron
             submenu: [
                 {
                     label: 'Learn More',
-                    click() { electron.shell.openExternal('https://github.com/Tympanix/Electorrent'); }
+                    click() { electron.shell.openExternal('https://github.com/tympanix/Electorrent'); }
                 },
                 {
                     label: 'Check For Updates',
