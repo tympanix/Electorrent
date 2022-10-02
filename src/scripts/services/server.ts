@@ -121,6 +121,14 @@ export let serverService = ['$rootScope', '$q', 'electron', 'notificationService
             }
         };
 
+        const promiseWithTimeout = (promise: Promise<any>, timeout: number) => {
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Request timed out')), timeout);
+            })
+            return Promise.race([promise, timeoutPromise])
+        };
+
+
         Server.prototype.connect = function() {
             let self = this
 
@@ -130,9 +138,12 @@ export let serverService = ['$rootScope', '$q', 'electron', 'notificationService
             }
 
             let service = $bittorrent.getClient(this.client);
-            return service.connect(this).catch(function(err, msg) {
+
+            let connectOrTimeout = promiseWithTimeout(service.connect(this), 3000)
+
+            return connectOrTimeout.catch(function(err) {
                 self.isConnected = false
-                $notify.alertAuth(err, msg)
+                $notify.alertAuth(err)
                 if (err.code === ERR_SELF_SIGNED_CERT) {
                     return self.askForCertificate().then(function() {
                         return self.connect()

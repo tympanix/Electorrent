@@ -1,3 +1,4 @@
+import crypto from "crypto"
 import path = require("path");
 import { Application } from "spectron";
 import { App } from "../e2e"
@@ -16,7 +17,10 @@ export function startApplicationHooks() {
 
   var appPath = path.join(__dirname, "..", "..", "app");
 
+  const appId = crypto.randomBytes(8).toString("hex");
+
   before(async function () {
+    const userDataDir = path.join(__dirname, "data", appId, "userdata")
     this.timeout(10 * 1000)
     this.spectron = new Application({
       path: electronPath,
@@ -26,7 +30,8 @@ export function startApplicationHooks() {
         deprecationWarnings: false,
       },
       chromeDriverArgs: [
-        "no-sandbox"
+        "no-sandbox",
+        `--user-data-dir=${userDataDir}`,
       ]
     });
     await this.spectron.start()
@@ -49,4 +54,12 @@ export function startApplicationHooks() {
     }
   })
 
+}
+
+export async function restartApplication(context: Mocha.Context) {
+  let spectron = await context.spectron.restart()
+  context.app = new App(spectron)
+  context.spectron = spectron
+  await context.spectron.client.setTimeout({ implicit: 0 });
+  await context.spectron.client.waitUntilWindowLoaded()
 }

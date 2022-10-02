@@ -77,16 +77,18 @@ export let mainController = ["$rootScope", "$scope", "$timeout", "$bittorrent", 
         $bittorrent.setServer(server)
         $scope.statusText = "Connecting to " + $rootScope.$btclient.name;
 
-        server.connect(server).then(function(){
+        server.connect().then(() => {
             $scope.statusText = "Loading Torrents"
             config.updateServer(server)
             pageTorrents(true /* full update */);
             requestMagnetLinks();
             requestTorrentFiles();
-        }).catch(function(){
+        }).catch((err) => {
+            console.error(err)
             pageSettings('connection');
-        }).finally(function() {
+        }).then(() => {
             config.updateApplicationMenu()
+            $scope.$apply()
         });
     }
 

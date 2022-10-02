@@ -1,7 +1,7 @@
 import path = require("path");
 import e2e = require("./e2e");
 import { FeatureSet, waitForHttp } from "./testutil"
-import { dockerComposeHooks, startApplicationHooks } from "./shared"
+import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { backendHooks } from "./shared/backend.hook";
 import { TorrentClient } from "../src/scripts/bittorrent"
 
@@ -99,6 +99,22 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
         before(async function() {
           this.retries(3)
           await this.app.login(options)
+          await this.app.torrentsPageIsVisible()
+        })
+
+        it("automatically connect when restarting app", async function() {
+          await restartApplication(this)
+          await this.app.torrentsPageIsVisible()
+        })
+
+        it("show settings when connection error after restarting app", async function() {
+          this.timeout(25 * 1000)
+          await this.backend.pause()
+          await restartApplication(this)
+          await this.app.settingsPageIsVisible({ timeout: 10 * 1000})
+          await this.app.settingsPageConnectionIsVisible()
+          await this.backend.unpause()
+          await restartApplication(this)
           await this.app.torrentsPageIsVisible()
         })
 

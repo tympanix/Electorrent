@@ -67,9 +67,19 @@ export class App {
     await submit.click();
   }
 
-  async torrentsPageIsVisible() {
+  async torrentsPageIsVisible(opts?: { timeout: number }) {
     let pageTorrents = await this.client.$("#page-torrents")
-    await pageTorrents.waitForDisplayed({ timeout: this.timeout })
+    await pageTorrents.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
+  }
+
+  async settingsPageIsVisible(opts?: { timeout: number }) {
+    let settingsPage = await this.client.$("#page-settings")
+    await settingsPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
+  }
+
+  async settingsPageConnectionIsVisible() {
+    let settingsPage = await this.client.$("#page-settings-connection")
+    await settingsPage.waitForDisplayed({ timeout: this.timeout })
   }
 
   async certificateModalIsVisible() {
