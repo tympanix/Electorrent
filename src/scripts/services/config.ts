@@ -139,6 +139,9 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
     }
 
     this.getDefaultServer = function() {
+        if (settings.servers.length === 1) {
+            return settings.servers[0]
+        }
         return settings.servers.find(isDefault)
     }
 

@@ -23,4 +23,5 @@ watch-files:
 # spec:
 #   - 'test/**/*.spec.ts' # the positional arguments!
 timeout: 10000
+slow: 20000
 # watch: false

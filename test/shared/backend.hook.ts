@@ -11,17 +11,18 @@ export class Backend {
 
   composeDir: string
   serviceName: string
+  composeOptions: IDockerComposeOptions
 
   constructor(composeDir: string | string[]) {
     this.composeDir = Array.isArray(composeDir) ? path.join(...composeDir) : composeDir
     this.serviceName = path.basename(this.composeDir)
+    this.composeOptions = {
+      cwd: this.composeDir,
+    }
   }
 
   async exec(command: string | string[]) {
-    const options: IDockerComposeOptions = {
-      cwd: this.composeDir,
-    }
-    let result = await compose.exec(this.serviceName, command, options)
+    let result = await compose.exec(this.serviceName, command, this.composeOptions)
     if (result.exitCode !== 0) {
       throw new Error(`command for ${this.serviceName} container exited with code ${result.exitCode}`)
     }
@@ -30,6 +31,14 @@ export class Backend {
 
   async waitForExec(command: string | string[], timeout?: number, step?: number) {
     await waitUntil(async () => this.exec(command), timeout, step)
+  }
+
+  async pause() {
+    await compose.pauseOne(this.serviceName, this.composeOptions)
+  }
+
+  async unpause() {
+    await compose.unpauseOne(this.serviceName, this.composeOptions)
   }
 
 }

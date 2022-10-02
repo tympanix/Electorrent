@@ -1,7 +1,7 @@
 import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
 import {TransmissionTorrent} from "./torrentt";
 import { fields } from "./transmissionconfig"
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import axios, { AxiosInstance, AxiosResponse, AxiosError, Axios } from "axios";
 import https from "https"
 
 import _ from "underscore"
@@ -35,7 +35,21 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       return res
     }
 
-    private getHttpClient(): AxiosInstance {
+    private handleErrors(res: AxiosResponse) {
+      if (axios.isAxiosError(res) || res instanceof Error) {
+        throw res
+      }
+      return res
+    }
+
+    private retryResponseInterceptor(res: AxiosResponse) {
+      if (res.status === 409 && res.config) {
+        return this.getHttpClient(true).request(res.config)
+      }
+      return res
+    }
+
+    private getHttpClient(allowFail?: boolean): AxiosInstance {
       // use basic auth for authentication
       var http = axios.create({
         auth: {
@@ -44,7 +58,8 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         },
         httpsAgent: new https.Agent({
           ca: this.server.getCertificate()
-        })
+        }),
+        adapter: require("axios/lib/adapters/http")
       })
       // update session header on both success and error http responses
       http.interceptors.response.use(
@@ -58,6 +73,17 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         }
         return config
       })
+      // retry requests failing with 409
+      if (allowFail) {
+        http.interceptors.response.use(
+          (res) => this.retryResponseInterceptor(res),
+          (res) => this.retryResponseInterceptor(res),
+        )
+      }
+      http.interceptors.response.use(
+        (res) => this.handleErrors(res),
+        (res) => this.handleErrors(res),
+      )
       return http
     }
 
@@ -76,7 +102,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         method: "session-get",
       };
 
-      let res = await this.getHttpClient().post(this.url(), data, {
+      return await this.getHttpClient().post(this.url(), data, {
         timeout: 5000,
         auth: {
           username: server.user,

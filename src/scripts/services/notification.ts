@@ -61,14 +61,14 @@ export let notificationService = ["$rootScope", "electron", function ($rootScope
         $rootScope.$emit('notification', notification);
     }
 
-    this.alertAuth = function (err, code) {
+    this.alertAuth = function (err) {
         if (typeof err === 'string') {
             this.alert('Connection problem', err)
         } else if (typeof err !== 'object') {
             this.alert("Connection problem", "The connection could not be established")
         } else if (err.status === -1) {
             this.alert("Connection problem", "The connection to the server timed out!")
-        } else if (err.status === 401 || code === 401) {
+        } else if (err.status === 401) {
             this.alert("Connection problem", "You entered an incorrent username/password")
         } else if (err.code && ERR_CODES.hasOwnProperty(err.code)) {
             this.alert(ERR_CODES[err.code].title, ERR_CODES[err.code].msg)
