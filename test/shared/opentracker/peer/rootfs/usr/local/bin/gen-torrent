@@ -1,4 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -e
 
 # Parse CLI options for upload speed, download speed, file size, and torrent file name
 while [[ "$#" -gt 0 ]]; do
@@ -7,35 +9,31 @@ while [[ "$#" -gt 0 ]]; do
         --download-speed) DL_SPEED="$2"; shift ;;
         --file-size) FILE_SIZE="$2"; shift ;;
         --torrent-name) TORRENT_NAME="$2"; shift ;;
-        *) echo "Usage: $0 --upload-speed <up-speed> --download-speed <dl-speed> --file-size <file-size> --torrent-name <torrent-name>" >&2; exit 1 ;;
+        *) echo >&2 "Usage: $0 --upload-speed <up-speed> --download-speed <dl-speed> --file-size <file-size> --torrent-name <torrent-name>" >&2; exit 1 ;;
     esac
     shift
 done
 
 # Set default values if not provided
 FILE_SIZE="${FILE_SIZE:-1}"
-
 # Generate a random suffix for unique file names
 RANDOM_SUFFIX=$(date +%s%N | sha256sum | head -c 8)
-
 # Create a random test file with the specified file size and unique name
 TEST_FILE="/srv/test-file-${RANDOM_SUFFIX}.bin"
-dd if=/dev/urandom of="$TEST_FILE" bs=1k count="$FILE_SIZE"
-
+dd if=/dev/urandom of="$TEST_FILE" bs=1k count="$FILE_SIZE" 2>/dev/null
 # Set the torrent file name, defaulting to a random name if not provided
 TORRENT_FILE="/shared/${TORRENT_NAME}.torrent"
-
 # Create a torrent file and save it in the shared folder with specified upload and download speeds
 rm -f "$TORRENT_FILE"
-ctorrent -t -s $TORRENT_FILE -u http://tracker:6969/announce $TEST_FILE
-
+ctorrent -t -s $TORRENT_FILE -u http://tracker:6969/announce $TEST_FILE >/dev/null
 # Generate a random unprivileged port (1024-65535)
 P2P_PORT=$((1024 + RANDOM % 64512))
-
 # Seed the torrent file (and contents)
-echo "Seeding torrent file $TORRENT_FILE on port $P2P_PORT"
 [ -n "$UP_SPEED" ] && CTORRENT_ARGS+=" -U$UP_SPEED"
 [ -n "$DL_SPEED" ] && CTORRENT_ARGS+=" -D$DL_SPEED"
-ctorrent $CTORRENT_ARGS -P "$HOSTNAME" -p "$P2P_PORT" -s "$TEST_FILE" "$TORRENT_FILE"
+ctorrent $CTORRENT_ARGS -P "$HOSTNAME" -p "$P2P_PORT" -s "$TEST_FILE" "$TORRENT_FILE" >/dev/null &
+PID=$!
 
+# Write info on the torrent to stdout in JSON format
+echo "{\"torrent_file\": \"$TORRENT_FILE\", \"port\": $P2P_PORT, \"pid\": $pid}"
 exit 0

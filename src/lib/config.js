@@ -66,6 +66,11 @@ function load() {
 
     file = fs.readFileSync(CONF_PATH, 'utf-8')
 
+    if (!file) {
+        data = copy(defaultSettings);
+        return
+    }
+
     try {
         data = JSON.parse(file);
     } catch(e) {

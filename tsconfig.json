@@ -2,14 +2,14 @@
     "compilerOptions": {
       "moduleResolution": "node",
       "noImplicitAny": false,
-      "target": "es2017",
+      "target": "es2019",
       "pretty": true,
       "module": "commonjs",
       "sourceMap": true,
       "allowJs": true,
       "lib": [
         "dom",
-        "es5"
+        "es2019"
       ],
       "experimentalDecorators": true,
       "allowSyntheticDefaultImports": true,
