@@ -14,7 +14,7 @@ export class Torrent {
     this.app = app;
     this.hash = hash;
     this.query = `#torrentTable tbody tr[data-hash="${hash}"]`;
-    this.timeout = 8 * 1000;
+    this.timeout = 10 * 1000;
   }
 
   async isExisting() {
@@ -49,11 +49,11 @@ export class Torrent {
     return await elem.getText()
   }
 
-  async waitForState(state: string) {
+  async waitForState(state: string, { timeout = this.timeout } = {}) {
     await browser.waitUntil(async () => {
       let percent = await this.getColumn("percent")
       return percent.toLowerCase().includes(state.toLowerCase());
-    }, { timeout: this.timeout });
+    }, { timeout: timeout });
   }
 
   async performAction({ action, state }) {

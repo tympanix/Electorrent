@@ -1,4 +1,4 @@
-import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
+import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions, TorrentUploadOptionsEnable} from "../torrentclient";
 import {TransmissionTorrent} from "./torrentt";
 import { fields } from "./transmissionconfig"
 import axios, { AxiosInstance, AxiosResponse, AxiosError, Axios } from "axios";
@@ -19,6 +19,11 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     config = {
       session: undefined,
     };
+
+    public uploadOptionsEnable: TorrentUploadOptionsEnable = {
+      saveLocation: true,
+      startTorrent: true,
+    }
 
     private updateSession(res: AxiosResponse | AxiosError | any) {
       let session: string
@@ -181,24 +186,49 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       return match && match[1];
     }
 
+    private removeEmpty(obj: object) {
+      return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v != undefined));
+    }
+
+    /**
+     * Transforms generic upload options to Transmission API variants
+     * @param uploadOptions
+     * @returns object with post options to transmission rpc call
+     */
+    private getUploadOptions(uploadOptions: TorrentUploadOptions) {
+      if (!uploadOptions) {
+        return {}
+      }
+      let postOptions = {
+        'download-dir': uploadOptions.saveLocation,
+        'paused': !uploadOptions.startTorrent,
+      }
+      return this.removeEmpty(postOptions)
+    }
+
     /**
      * Add a torrent to the client by sending a magnet link to the API. Should return
      * a promise that the torrent has been added successfully to the client.
      * @param {string} magnetURL
      * @return {promise} isAdded
      */
-    async addTorrentUrl(magnet: string): Promise<void> {
+    async addTorrentUrl(magnet: string, uploadOptions: TorrentUploadOptions): Promise<void> {
       var data = {
         arguments: {
           filename: magnet,
+          ...this.getUploadOptions(uploadOptions)
         },
         method: "torrent-add",
       };
 
       var resp = await this.getHttpClient().post(this.url(), data, {})
+      console.log("Transmission addTorrentUrl response", resp.data)
       if ("torrent-duplicate" in resp.data.arguments) {
         //$notify.alert("Duplicate!", " This torrent is already added");
         throw new Error("Could not add duplicate torrent to transmission")
+      }
+      if (resp.data.result !== "success") {
+        throw new Error(`Could not add torrent to transmission: ${resp.data.result}`)
       }
     };
 
@@ -211,12 +241,13 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
      * @param {string} filename
      * @return {promise} isAdded
      */
-    async uploadTorrent(buffer: Uint8Array): Promise<void> {
+    async uploadTorrent(buffer: Uint8Array, filename?: string, uploadOptions?: TorrentUploadOptions): Promise<void> {
       var base64data = Buffer.from(buffer).toString("base64")
 
       var data = {
         arguments: {
           metainfo: base64data,
+          ...this.getUploadOptions(uploadOptions),
         },
         method: "torrent-add",
       };
@@ -225,6 +256,9 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       if ("torrent-duplicate" in resp.data.arguments) {
         //$notify.alert("Duplicate!", " This torrent is already added");
         throw new Error("Could not add duplicate torrent to transmission")
+      }
+      if (resp.data.result !== "success") {
+        throw new Error(`Could not add torrent to transmission: ${resp.data.result}`)
       }
     };
 

@@ -11,5 +11,6 @@ createTestSuite({
   username: "admin",
   password: "admin",
   unsupportedFeatures: [
+    FeatureSet.AdvancedUploadOptions,
   ],
 });

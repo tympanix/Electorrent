@@ -8,6 +8,7 @@ import { afterEach } from "mocha";
 export enum FeatureSet {
   Labels,
   MagnetLinks,
+  AdvancedUploadOptions,
 }
 
 /**
@@ -81,7 +82,7 @@ export async function waitUntil(fn: () => Promise<any>, timeout?: number, step?:
     await sleep(step)
     currentTime += step
   }
-  throw err
+  throw new Error(`Timeout after ${timeout}ms while waiting for function to succeed: ${err}`)
 }
 
 /**
