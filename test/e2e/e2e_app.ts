@@ -158,7 +158,7 @@ export class App {
     let info = parseTorrent(data)
     let hash = info.infoHash
     let torrent = new Torrent({ hash: hash, app: this });
-    expect(await torrent.isExisting()).toBe(false);
+    await expect(await torrent.isExisting()).toBe(false);
     /**
      * Note: we're not sending the torrent data directory from the main process. Since the
      * WebdriverIO framework communicates with the browser intance, the webContents module

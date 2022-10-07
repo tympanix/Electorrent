@@ -10,5 +10,6 @@ createTestSuite({
   password: "",
   acceptHttpStatus: 400,
   unsupportedFeatures: [
+    FeatureSet.AdvancedUploadOptions
   ],
 });

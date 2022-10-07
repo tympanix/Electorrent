@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   transmission:
     image: linuxserver/transmission:${VERSION:-latest}
@@ -8,6 +6,8 @@ services:
       - PASS=password
     ports:
       - 9091:9091
+    tmpfs:
+      - /downloads
 
 networks:
   default:

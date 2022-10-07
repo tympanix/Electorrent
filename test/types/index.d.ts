@@ -2,6 +2,6 @@
 declare namespace Mocha {
   interface Context {
     app: import("../e2e").App
-    backend: import("../shared/backend.hook").Backend
+    backend: import("../shared/compose").DockerComposeService
   }
 }

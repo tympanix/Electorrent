@@ -33,6 +33,22 @@ export const config: WebdriverIO.Config = {
     exclude: [
         // 'path/to/excluded/files'
     ],
+
+    suites: {
+        deluge: [
+            'test/fixtures/deluge/*.spec.ts',
+        ],
+        qbittorrent: [
+            'test/fixtures/qbittorrent/*.spec.ts',
+        ],
+        transmission: [
+            'test/fixtures/transmission/*.spec.ts',
+        ],
+        utorrent: [
+            'test/fixtures/utorrent/*.spec.ts',
+        ],
+    },
+
     //
     // ============
     // Capabilities
@@ -107,7 +123,7 @@ export const config: WebdriverIO.Config = {
     // baseUrl: 'http://localhost:8080',
     //
     // Default timeout for all waitFor* commands.
-    waitforTimeout: 10000,
+    waitforTimeout: 30000,
     //
     // Default timeout in milliseconds for request
     // if browser driver or grid doesn't send response

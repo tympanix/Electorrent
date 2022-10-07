@@ -9,13 +9,10 @@ export function startApplicationHooks() {
 
   before(async function (this: Mocha.Context) {
     // Open the application
+    await browser.closeWindow()
     await browser.reloadSession()
     this.timeout(10 * 1000)
     this.app = new App();
-  })
-
-  after(async function () {
-    this.timeout(10 * 1000)
   })
 
 }
