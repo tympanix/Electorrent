@@ -170,7 +170,7 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
 
         await axios.get(this.server.url() + "/query.cgi", this.config('query'))
             .then(this.handleError)
-            .then(function(response) {
+            .then((response) => {
                 if (this.isSuccess(response.data)) {
                     return {
                         auth: response.data.data[API_AUTH],
@@ -178,7 +178,7 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
                     };
                 }
                 throw new Error("Getting initial API information from Auth and DownloadStation failed. Error: " + response.data.error);
-            }).then(function(data) {
+            }).then((data) => {
                 /* Before login, API information is required on SYNO.Auth API.
                    Grab the DownloadStation API information as well.
                 */
@@ -190,8 +190,8 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
                 // Lets login!
                 return axios.get(self.server.url() + self.authPath, self.config('auth', [server.user, server.password]))
             }).then(self.handleError)
-              .then(function(response) {
-                if (self.isSuccess(response.data)) {
+              .then((response) => {
+                if (this.isSuccess(response.data)) {
                     return response
                 }
                 throw new Error("Login failed. Error: " + response.data.error)
@@ -218,7 +218,7 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
         // Retrieve info of all torrents in DownloadStation
         return axios.get(this.server.url() + this.dlPath, this.config('torrents'))
             .then(this.handleError)
-            .then(function(response) {
+            .then((response) => {
                 if (this.isSuccess(response.data)) {
                     return this.processData(response.data.data)
                 }
