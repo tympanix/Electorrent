@@ -2,6 +2,7 @@ import { Application, SpectronClient } from "spectron";
 
 import fs = require("fs");
 import path = require("path");
+import magnet from "magnet-uri"
 import { Torrent } from "./e2e_torrent";
 import parseTorrent = require("parse-torrent")
 
@@ -175,6 +176,23 @@ export class App {
     this.spectron.webContents.send("torrentfiles", Array.from(data), path.basename(filename), askUploadOptions);
     this.torrents.push(torrent);
     return torrent;
+  }
+
+  async uploadMagnetLink({ magnetUri, filename, options }: { magnetUri?: string, filename?: string, options?: magnet.Instance }) {
+    if (!magnetUri && filename) {
+      let data = fs.readFileSync(filename)
+      let info = parseTorrent(data)
+      magnetUri = magnet.encode({
+        xt: [`urn:btih:${info.infoHash}`],
+        tr: info.announce,
+      })
+    }
+    if (!magnetUri) throw new Error("invalid arguments passed to generate magnet uri")
+    let info = parseTorrent(magnetUri)
+    let torrent = new Torrent({ hash: info.infoHash, spectron: this.spectron, app: this })
+    this.spectron.webContents.send("magnet", [magnetUri])
+    this.torrents.push(torrent)
+    return torrent
   }
 
   async waitForLabelInDropdown(labelName) {

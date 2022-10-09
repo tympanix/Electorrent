@@ -18,7 +18,7 @@ export class Torrent {
     this.client = this.spectron.client;
     this.hash = hash;
     this.query = `#torrentTable tbody tr[data-hash="${hash}"]`;
-    this.timeout = 10 * 1000;
+    this.timeout = 8 * 1000;
   }
 
   async isExisting() {
