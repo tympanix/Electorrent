@@ -183,7 +183,7 @@ export let menuWin = ['electron', '$rootScope', '$bittorrent', 'notificationServ
             submenu: [
                 {
                     label: 'Learn More',
-                    click() { electron.shell.openExternal('https://github.com/Tympanix/Electorrent'); }
+                    click() { electron.shell.openExternal('https://github.com/tympanix/Electorrent'); }
                 },
                 {
                     label: 'Check For Updates',
