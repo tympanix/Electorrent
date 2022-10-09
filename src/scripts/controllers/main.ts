@@ -21,7 +21,8 @@ export let mainController = ["$rootScope", "$scope", "$timeout", "$bittorrent", 
     var page = null;
 
     $rootScope.$on('ready', function() {
-        if (!electron.program.debug) {
+        let automaticUpdates = config.getAllSettings()?.automaticUpdates
+        if (!electron.program.debug && automaticUpdates !== false) {
             electron.updater.checkForUpdates();
         }
 
