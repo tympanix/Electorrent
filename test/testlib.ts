@@ -4,6 +4,7 @@ import { FeatureSet, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { backendHooks } from "./shared/backend.hook";
 import { TorrentClient } from "../src/scripts/bittorrent"
+import magnet from "magnet-uri"
 
 
 interface TestSuiteOptionsOptional {
@@ -116,6 +117,29 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           await this.backend.unpause()
           await restartApplication(this)
           await this.app.torrentsPageIsVisible()
+        })
+
+        describe("when a magnet link is uploaded", async function() {
+          let torrent: e2e.Torrent
+
+          before(async function() {
+            let filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
+            torrent = await this.app.uploadMagnetLink({ filename })
+          })
+
+          after(async function() {
+            if (await torrent.isExisting()) {
+              await torrent.delete()
+            }
+          })
+
+          it("torrent should be visible in table", () => {
+            return torrent.waitForExist()
+          })
+
+          it("torrent should begin downloading", () => {
+            return torrent.waitForState(options.downloadLabel)
+          })
         })
 
         describe("given new torrent is uploaded", async function() {
