@@ -157,7 +157,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
         t: Date.now(),
         action: "add-url",
         s: url,
-        download_dir: options.saveLocation || 0,
+        download_dir: options?.saveLocation || 0,
         path: "",
       },
     })
