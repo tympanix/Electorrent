@@ -20,7 +20,7 @@
   "dependencies": {
     "angular": "^1.8.2",
     "angular-resource": "^1.8.2",
-    "semantic": "^2.4.1",
+    "semantic": "~2.4.1",
     "moment": "momentjs#^2.13.0",
     "jquery": "^3.0.0",
     "angular-animate": "^1.8.2",
