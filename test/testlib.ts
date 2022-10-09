@@ -4,7 +4,6 @@ import { FeatureSet, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { backendHooks } from "./shared/backend.hook";
 import { TorrentClient } from "../src/scripts/bittorrent"
-import magnet from "magnet-uri"
 
 
 interface TestSuiteOptionsOptional {
@@ -141,6 +140,24 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           it("torrent should begin downloading", () => {
             return torrent.waitForState(options.downloadLabel)
           })
+        })
+
+        describe("when torrent uploaded with http link", async function() {
+          let torrent: e2e.Torrent
+
+          before(async function() {
+            let url = "http://nginx/test-100k.bin.torrent"
+            torrent = await this.app.uploadHttpLink({ httpUrl: url, infoHash: "06b1e23f98b8479a97c41583dcc5ce0d76663ed6" })
+          })
+
+          it("torrent should be visible in table", () => {
+            return torrent.waitForExist()
+          })
+
+          it("torrent should begin downloading", () => {
+            return torrent.waitForState(options.downloadLabel)
+          })
+
         })
 
         describe("given new torrent is uploaded", async function() {

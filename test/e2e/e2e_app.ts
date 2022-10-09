@@ -195,6 +195,13 @@ export class App {
     return torrent
   }
 
+  async uploadHttpLink({ httpUrl, infoHash }: { httpUrl: string, infoHash: string }) {
+    let torrent = new Torrent({ hash: infoHash, spectron: this.spectron, app: this })
+    this.spectron.webContents.send("magnet", [httpUrl])
+    this.torrents.push(torrent)
+    return torrent
+  }
+
   async waitForLabelInDropdown(labelName) {
     const labels = "#torrent-action-header div[data-role=labels]";
     const labelBtn = `div[data-label='${labelName}']`;

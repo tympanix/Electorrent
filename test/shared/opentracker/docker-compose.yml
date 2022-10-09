@@ -27,6 +27,15 @@ services:
     networks:
       - p2p
 
+  nginx:
+    hostname: nginx
+    build: nginx
+    ports:
+      - 8000:80
+    volumes:
+      - ./data/shared:/usr/share/nginx/html
+    networks:
+      - p2p
 
   # A peer in the ad-hoc torrent network that announces torrents on the P2P
   # network using the local tracker (see above). Used to provide content to
