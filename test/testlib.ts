@@ -121,6 +121,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
         describe("when a magnet link is uploaded", async function() {
           let torrent: e2e.Torrent
+          requireFeatureHook(options, FeatureSet.MagnetLinks)
 
           before(async function() {
             let filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
@@ -128,7 +129,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           after(async function() {
-            if (await torrent.isExisting()) {
+            if (torrent && await torrent.isExisting()) {
               await torrent.delete()
             }
           })
