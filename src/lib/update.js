@@ -16,8 +16,8 @@ const {ipcMain} = electron;
 const {autoUpdater} = electron;
 const {shell} = electron;
 
-// Heroku endpoint to release server
-const ENDPOINT = 'https://electorrent.herokuapp.com/';
+// Endpoint to release server
+const ENDPOINT = 'https://electorrent.vercel.app/';
 
 // Get the version number
 const version = app.getVersion();
@@ -32,9 +32,9 @@ var verbose = false;
 if(is.windows()) {
     updateUrl = ENDPOINT + 'update/win32/' + version;
 } else if(is.macOS()) {
-    updateUrl = ENDPOINT + 'update/osx/' + version;
+    updateUrl = ENDPOINT + 'update/dmg/' + version;
 } else if(is.linux()) {
-    updateUrl = ENDPOINT + 'update/linux/' + version;
+    updateUrl = ENDPOINT + 'update/appimage/' + version;
 }
 
 exports.checkForUpdates = function(notifyVerbose) {
@@ -80,8 +80,6 @@ exports.openUpdateFilePath = function() {
 ipcMain.on('startUpdate', (/*event*/) => {
     if (manualDownloadURL) {
         var url = manualDownloadURL;
-        url = url.substr(0, url.lastIndexOf('?'));
-
         mainWindow.webContents.downloadURL(url);
     } else {
         mainWindow.webContents.send('notify', {
@@ -94,7 +92,6 @@ ipcMain.on('startUpdate', (/*event*/) => {
 
 function downloadUpdate(updateUrl){
     var url = updateUrl;
-    url = url.substr(0, url.lastIndexOf('?'));
     mainWindow.webContents.downloadURL(url);
 }
 

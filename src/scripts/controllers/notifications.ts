@@ -34,9 +34,9 @@ export let notificationsController = ["$scope", "$rootScope", "$timeout", "elect
             $scope.manualUpdate = false;
 
             $http.get(data.updateUrl, { timeout: 10000 })
-                .success(function(releaseData){
-                    data.releaseNotes = releaseData.notes;
-                    data.releaseDate = releaseData.pub_date;
+                .then(function(res){
+                    data.releaseNotes = res.data.notes;
+                    data.releaseDate = res.data.pub_date;
                 })
                 .catch(function(){
                     data.releaseNotes = "Not available. Please go to the website for more info"
