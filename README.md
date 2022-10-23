@@ -27,9 +27,9 @@ Electorrent can connect to the following bittorrent clients:
 
 ## Downloads
 *Please note: I do not own code signing certificates which may results in anti-virus warnings!*
-* [Windows](https://electorrent.herokuapp.com/download/win32) (64 bit only)
-* [MacOS](https://electorrent.herokuapp.com/download/osx)
-* [Linux](https://electorrent.herokuapp.com/download/linux)
+* [Windows](https://electorrent.vercel.app/download/win32) (64 bit only)
+* [MacOS](https://electorrent.vercel.app/download/dmg)
+* [Linux](https://electorrent.vercel.app/download/appimage)
 
 ## Features
 - [x] Connects to your favorite torrent client
