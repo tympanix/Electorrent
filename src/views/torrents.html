@@ -157,11 +157,11 @@
     <div class="action footer status-bar">
       <div class="download-speed">
         <i class="ui blue arrow down icon"></i>
-        {{ totalDownloadSpeed | speed }} <span ng-if="totalDownloaded">({{ totalDownloaded | speed }})</span>
+        {{ totalDownloadSpeed | speed }} <span ng-if="totalDownloaded">({{ totalDownloaded | bytes:2 }})</span>
       </div>
       <div class="upload-speed">
         <i class="ui orange arrow up icon"></i>
-        {{ totalUploadSpeed | speed }} <span ng-if="totalDownloaded">({{ totalUploaded | speed }})</span>
+        {{ totalUploadSpeed | speed }} <span ng-if="totalUploaded">({{ totalUploaded | bytes:2 }})</span>
       </div>
     </div>
   </div>

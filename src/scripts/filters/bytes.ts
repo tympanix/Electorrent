@@ -1,22 +1,14 @@
-export let bytesFiler = function() {
-        return function(bytes) {
-            var val;
-            var uom;
+export let bytesFilter = function() {
+        return function(bytes, decimals = 1) {
+            if (!+bytes) return '0 B'
 
-            if (bytes < 1024) {
-                val = bytes;
-                uom = 'B';
-            } else if (bytes < 1048576) {
-                val = (bytes / 1024).toFixed(1);
-                uom = 'KB';
-            } else if (bytes < 1073741824) {
-                val = (bytes / 1048576).toFixed(1);
-                uom = 'MB';
-            } else {
-                val = (bytes / 1073741824).toFixed(1);
-                uom = 'GB';
-            }
-            return [val, uom].join(' ');
+            const k = 1024
+            const dm = +decimals < 0 ? 0 : +decimals
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+            const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
         };
     };
 
