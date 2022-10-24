@@ -3,6 +3,11 @@ import {Torrent} from "../abstracttorrent";
 export class SynologyTorrent extends Torrent {
 
     constructor(data: Record<string, any>) {
+        // Information variables.
+        var detail = data.additional.detail;
+        var trans = data.additional.transfer;
+        var track = data.additional.tracker;
+
         super({
             hash: data.id, /* Hash (string): unique identifier for the torrent */
             name: data.title, /* Name (string): the name of the torrent */
@@ -25,11 +30,6 @@ export class SynologyTorrent extends Torrent {
             dateCompleted: detail.completed_time * 1000, /* Date Completed (integer): number of milliseconds unix time */
             savePath: detail.destination, /* Save Path (string): the path at which the downloaded content is saved */
         });
-
-         // Information variables.
-         var detail = data.additional.detail;
-         var trans = data.additional.transfer;
-         var track = data.additional.tracker;
     }
 
     // Calculates the total amount of peers and seeds over all connected trackers.
