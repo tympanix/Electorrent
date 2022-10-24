@@ -113,8 +113,8 @@ import {dateFilter, etaFilter, releaseDateFilter} from "./scripts/filters/dateFi
 torrentApp.filter('date', dateFilter)
 torrentApp.filter('eta', etaFilter)
 torrentApp.filter('releaseDate', releaseDateFilter)
-import {bytesFiler, speedFilter} from "./scripts/filters/bytes"
-torrentApp.filter('bytes', bytesFiler)
+import {bytesFilter, speedFilter} from "./scripts/filters/bytes"
+torrentApp.filter('bytes', bytesFilter)
 torrentApp.filter('speed', speedFilter)
 import {torrentQueueFilter, torrentRatioFilter, torrentTrackerFilter} from "./scripts/filters/torrentfilters"
 torrentApp.filter('torrentQueue', torrentQueueFilter)
