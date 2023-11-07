@@ -20,7 +20,6 @@ server {
 
   ## See the keepalive_timeout directive in nginx.conf.
   ## Server certificate and key.
-  ssl on;
   ssl_certificate /etc/ssl/certs/dummy.crt;
   ssl_certificate_key /etc/ssl/private/dummy.key;
   ssl_session_timeout  5m;
