@@ -80,7 +80,7 @@ jobs:
       run: npm run dist
       if: github.ref != 'refs/heads/master'
     - name: Release artifacts
-      run: npm run release
       if: github.ref == 'refs/heads/master'
+      run: npm run release
       env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_ACCESS_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
