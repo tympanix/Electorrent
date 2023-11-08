@@ -2,7 +2,6 @@ const webpack = require('webpack')
 const path = require('path')
 const fs = require('fs')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const MinifyPlugin = require('babel-minify-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const nodeExternals = require('webpack-node-externals');
 
