@@ -58,7 +58,7 @@
     "angular-resource": "^1.5.11",
     "angular-table-resize": "^2.0.1",
     "angular-ui-sortable": "^0.16.1",
-    "axios": "^0.24.0",
+    "axios": "^1.6.0",
     "babel-minify-webpack-plugin": "^0.3.1",
     "base64-js": "^1.5.1",
     "bower": "^1.8.8",
