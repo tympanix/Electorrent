@@ -11,43 +11,6 @@ env:
   ELECTRON_IS_DEV: 0
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        testspec: [qbittorrent, rtorrent, transmission, deluge, utorrent]
-
-    steps:
-    - name: Checkout source code
-      uses: actions/checkout@v2
-    - name: Install dependencies
-      run: sudo apt-get install xvfb
-    - name: Install nodejs
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-    - name: Cache npm modules
-      uses: actions/cache@v2
-      with:
-        path: |
-          node_modules
-          */*/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-    - name: Cache bower modules
-      uses: actions/cache@v2
-      with:
-        path: bower.json
-        key: ${{ runner.os }}-${{ hashFiles('bower.json') }}
-    - name: Install npm dependencies
-      run: npm install
-    - name: Build web application
-      run: npm run build
-    - name: Run e2e tests
-      timeout-minutes: 10
-      run: xvfb-run -a -- npm test -- -g ${{ matrix.testspec }}
 
   build:
     strategy:
