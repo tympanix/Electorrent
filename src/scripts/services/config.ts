@@ -189,7 +189,7 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
             click: () => $rootScope.$broadcast('add:server'),
         }))
         serverMenu.append(new MenuItem({
-            label: 'Set current as default',
+            label: '设置当前为默认',
             click: () => this.setCurrentServerAsDefault(),
             enabled: !!$rootScope.$server
         }))
