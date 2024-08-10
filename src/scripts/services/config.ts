@@ -184,7 +184,7 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
         let serverMenu = getMenu(menu, 'servers').submenu
         serverMenu.clear()
         serverMenu.append(new MenuItem({
-            label: 'Add new server...',
+            label: '新增服务器...',
             accelerator: 'CmdOrCtrl+N',
             click: () => $rootScope.$broadcast('add:server'),
         }))
