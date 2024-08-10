@@ -7,7 +7,7 @@ on:
   pull_request:
 
 env:
-  NODE_VERSION: 14.21.3
+  NODE_VERSION: 14.x
   ELECTRON_IS_DEV: 0
 
 jobs:
