@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@electorrent/node-deluge": "^1.0.3",
-    "@electorrent/node-qbittorrent": "^1.1.2",
+    "@electorrent/node-qbittorrent": "^1.2.0",
     "@electorrent/node-rtorrent": "^1.2.1",
     "@electron/remote": "^2.0.8",
     "@types/angular": "^1.5.8",
