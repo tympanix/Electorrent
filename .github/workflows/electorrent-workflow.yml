@@ -23,7 +23,7 @@ jobs:
           - qbittorrent-5
           - rtorrent-latest
           - transmission-latest
-          - deluge-latest
+          - deluge-1
           - utorrent-latest
 
     steps:
