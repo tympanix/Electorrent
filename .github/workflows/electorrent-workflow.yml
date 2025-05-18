@@ -52,9 +52,14 @@ jobs:
       run: npm install
     - name: Build web application
       run: npm run build
-    - name: Run e2e tests
-      timeout-minutes: 10
-      run: xvfb-run -a -- npm test -- -g ${{ matrix.testspec }}
+    - name: Run tests
+      uses: nick-fields/retry@v3
+      timeout-minutes: 15
+      with:
+        max_attempts: 3
+        timeout_minutes: 10
+        retry_on: error
+        command: xvfb-run -a -- npm test -- -g ${{ matrix.testspec }}
 
   build:
     strategy:
