@@ -83,7 +83,7 @@ export class QBittorrentTorrent extends Torrent {
         return this.getStatus('error', 'missingFiles');
     };
     isStatusStopped() {
-        return this.getStatus('paused', 'pausedUP', 'pausedDL') && !this.isStatusCompleted();
+        return this.getStatus('paused', 'pausedUP', 'pausedDL', 'stopped', 'stoppedUP', 'stoppedDL') && !this.isStatusCompleted();
     };
     isStatusQueued() {
         return this.getStatus('queuedUP', 'queuedDL', 'allocating');
