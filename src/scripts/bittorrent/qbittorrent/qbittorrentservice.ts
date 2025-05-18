@@ -22,7 +22,8 @@ export interface QBittorrentUploadOptions {
   category?: string
   tags?: string
   skip_checking?: boolean
-  paused?: boolean
+  paused?: boolean // api v4
+  stopped?: boolean // api v5
   root_folder?: boolean
   rename?: string
   upLimit?: number
@@ -129,6 +130,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         tags: undefined,
         skip_checking: options.skipCheck,
         paused: !options.startTorrent,
+        stopped: !options.startTorrent,
         root_folder: undefined,
         rename: options.renameTorrent,
         upLimit: options.uploadSpeedLimit,
