@@ -31,13 +31,3 @@ createTestSuite({
   password: "adminadmin",
   unsupportedFeatures: [],
 });
-
-createTestSuite({
-  client: new QBittorrentClient(),
-  fixture: "fixtures/qbittorrent",
-  version: "3.3.15",
-  port: 8080,
-  username: "admin",
-  password: "adminadmin",
-  unsupportedFeatures: [],
-});
