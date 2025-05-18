@@ -64,7 +64,7 @@
     "browserify": "^17.0.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "docker-compose": "^0.23.13",
+    "docker-compose": "^1.2.0",
     "electron": "^15.5.5",
     "electron-builder": "^23.6.0",
     "electron-builder-squirrel-windows": "^23.6.0",
