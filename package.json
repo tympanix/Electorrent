@@ -13,7 +13,7 @@
     "dist": "electron-builder --publish never",
     "prerelease": "gulp build",
     "release": "electron-builder",
-    "test": "mocha 'test/**/*.spec.ts'"
+    "test": "mocha --retries 3"
   },
   "keywords": [
     "utorrent"

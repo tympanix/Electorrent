@@ -20,8 +20,8 @@ file:
 watch-files:
   - 'test/**/*.{ts}'
   - 'app/**/*.{ts,js,html,css}'
-# spec:
-#   - 'test/**/*.spec.ts' # the positional arguments!
+spec:
+  - 'test/**/*.spec.ts' # the positional arguments!
 timeout: 20000
 slow: 20000
 # watch: false
