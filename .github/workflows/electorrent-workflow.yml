@@ -21,6 +21,7 @@ jobs:
           - qbittorrent-3
           - qbittorrent-4
           - qbittorrent-5
+          - qbittorrent-latest
           - rtorrent-latest
           - transmission-latest
           - deluge-1
