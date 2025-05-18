@@ -17,7 +17,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        testspec: [qbittorrent, rtorrent, transmission, deluge, utorrent]
+        testspec:
+          - qbittorrent-3
+          - qbittorrent-4
+          - qbittorrent-5
+          - rtorrent-latest
+          - transmission-latest
+          - deluge-latest
+          - utorrent-latest
 
     steps:
     - name: Checkout source code
