@@ -7,6 +7,8 @@ services:
       - 8080:8080
     environment:
       - WEBUI_PORT=8080
+    volumes:
+      - ./qBittorrent.conf:/defaults/qBittorrent.conf
     tmpfs:
       - /downloads
 
