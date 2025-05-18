@@ -21,11 +21,11 @@ jobs:
 
     steps:
     - name: Checkout source code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Install dependencies
       run: sudo apt-get install xvfb
     - name: Install nodejs
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
@@ -62,9 +62,9 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y graphicsmagick icnsutils
       if: runner.os == 'Linux'
     - name: Checkout source code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Install nodejs
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
