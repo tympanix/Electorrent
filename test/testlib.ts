@@ -10,6 +10,7 @@ import magnet from "magnet-uri"
 interface TestSuiteOptionsOptional {
   client: TorrentClient
   fixture: string,
+  version?: string,
   username: string,
   password: string,
   host?: string,
@@ -25,6 +26,7 @@ interface TestSuiteOptionsOptional {
 const TEST_SUITE_OPTIONS_DEFAULTS = {
   username: "admin",
   password: "admin",
+  version: "latest",
   host: "localhost",
   port: 8080,
   acceptHttpStatus: 200,
@@ -56,8 +58,12 @@ function requireFeatureHook(options: TestSuiteOptions, feature: FeatureSet) {
 export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
   const options: TestSuiteOptions = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULTS, optionsArg)
 
-  describe(`given ${options.client.id} service is running (docker-compose)`, function () {
-    backendHooks([__dirname, options.fixture])
+  describe(`given ${options.client.id}-${options.version} service is running (docker-compose)`, function () {
+    backendHooks([__dirname, options.fixture], {
+      env: {
+        VERSION: options.version,
+      }
+    })
 
     before(async function () {
       this.timeout(20 * 1000)
