@@ -60,9 +60,9 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
   describe(`given ${options.client.id}-${options.version} service is running (docker-compose)`, function () {
     backendHooks([__dirname, options.fixture], {
-      env: {
+      env: Object.assign({}, process.env, {
         VERSION: options.version,
-      }
+      }),
     })
 
     before(async function () {
