@@ -9,7 +9,7 @@ on:
     - cron: '0 0 * * 0' # every Sunday at midnight
 
 env:
-  NODE_VERSION: 14.x
+  NODE_VERSION: 22.x
   ELECTRON_IS_DEV: 0
 
 jobs:
