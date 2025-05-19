@@ -5,6 +5,8 @@ on:
     branches:
       - master
   pull_request:
+  schedule:
+    - cron: '0 0 * * 0' # every Sunday at midnight
 
 env:
   NODE_VERSION: 14.x
