@@ -30,7 +30,17 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v4
     - name: Install dependencies
-      run: sudo apt-get install xvfb
+      run: >
+        sudo apt-get install -y
+        xvfb
+        libnss3-dev
+        libdbus-1-dev
+        libatk1.0-dev
+        libatk-bridge2.0-dev
+        libcups2-dev
+        libgtk-3-0
+        libgbm1
+        libasound2t64
     - name: Install nodejs
       uses: actions/setup-node@v4
       with:
@@ -59,7 +69,7 @@ jobs:
         max_attempts: 3
         timeout_minutes: 10
         retry_on: error
-        command: xvfb-run -a -- npm test -- -g ${{ matrix.testspec }}
+        command: xvfb-run -a -- npm test -- --mochaOpts.grep "${{ matrix.testspec }}"
 
   build:
     strategy:

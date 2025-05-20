@@ -17,7 +17,7 @@ export function dockerComposeHooks(composeDir: string | string[], extraOpts?: ID
 
   const composeOpts: IDockerComposeOptions = {
     cwd: composeDir,
-    log: !!process.env.DEBUG,
+    log: true,
   }
 
   before(async function() {

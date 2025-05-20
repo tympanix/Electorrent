@@ -13,9 +13,6 @@ global.before(function () {
   chai.use(chaiAsPromised);
 });
 
-// set up root mocha hooks to start opentracker docker-compose services
-dockerComposeHooks([__dirname, "opentracker"])
-
 afterEach(async function() {
   if (this.currentTest && this.currentTest.state === "failed") {
     if (process.env.MOCHA_HALT === "1") {
