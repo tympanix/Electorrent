@@ -1,12 +1,11 @@
-import { Application, SpectronClient } from "spectron";
-
 import fs = require("fs");
 import path = require("path");
 import magnet from "magnet-uri"
 import { Torrent } from "./e2e_torrent";
 import parseTorrent = require("parse-torrent")
-
+import { browser, $, $$, expect } from '@wdio/globals'
 import { TorrentClient } from "../../src/scripts/bittorrent"
+import { assert } from "chai";
 
 /**
  * Options to use during the login screen of the app to connect to your torrent client
@@ -24,67 +23,63 @@ export interface LoginOptions {
  * Class to perform various app-related actions with WebDriverIO
  */
 export class App {
-  spectron: Application
-  client: SpectronClient
   torrents: Array<Torrent>
   timeout: number
 
-  constructor(spectron: Application) {
-    this.spectron = spectron;
-    this.client = this.spectron.client;
+  constructor() {
     this.torrents = [];
     this.timeout = 5 * 1000;
   }
 
   async login(options: LoginOptions) {
-    let hostForm = await this.client.$("#connection-host")
+    let hostForm = await $("#connection-host")
     await hostForm.setValue(options.host)
 
-    let protoField = await this.client.$("#connection-proto")
+    let protoField = await $("#connection-proto")
     await protoField.click()
 
     let proto = options.https ? 'https' : 'http'
-    let protoHttp = await this.client.$(`#connection-proto-${proto}`)
+    let protoHttp = await $(`#connection-proto-${proto}`)
     await protoHttp.waitForExist()
     await protoHttp.click()
 
-    let user = await this.client.$("#connection-user")
+    let user = await $("#connection-user")
     await user.setValue(options.username)
 
-    let pass = await this.client.$("#connection-password")
+    let pass = await $("#connection-password")
     await pass.setValue(options.password);
 
-    let clientForm = await this.client.$("#connection-client")
+    let clientForm = await $("#connection-client")
     await clientForm.click();
 
-    let clientFormSelect = await this.client.$(`#connection-client-${options.client.id}`)
+    let clientFormSelect = await $(`#connection-client-${options.client.id}`)
     await clientFormSelect.waitForExist()
     await clientFormSelect.click()
 
-    let portForm = await this.client.$("#connection-port")
+    let portForm = await $("#connection-port")
     await portForm.setValue(options.port);
 
-    let submit = await this.client.$("#connection-submit")
+    let submit = await $("#connection-submit")
     await submit.click();
   }
 
   async torrentsPageIsVisible(opts?: { timeout: number }) {
-    let pageTorrents = await this.client.$("#page-torrents")
+    let pageTorrents = await $("#page-torrents")
     await pageTorrents.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
   }
 
   async settingsPageIsVisible(opts?: { timeout: number }) {
-    let settingsPage = await this.client.$("#page-settings")
+    let settingsPage = await $("#page-settings")
     await settingsPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
   }
 
   async settingsPageConnectionIsVisible() {
-    let settingsPage = await this.client.$("#page-settings-connection")
+    let settingsPage = await $("#page-settings-connection")
     await settingsPage.waitForDisplayed({ timeout: this.timeout })
   }
 
   async certificateModalIsVisible() {
-    let certificateModal = await this.client.$("#certificateModal")
+    let certificateModal = await $("#certificateModal")
     await certificateModal.waitForExist()
     await certificateModal.waitForDisplayed({ timeout: this.timeout })
     return certificateModal
@@ -101,7 +96,7 @@ export class App {
   }
 
   async getNotificationError() {
-      let msg = await this.client.$("#notifications .negative")
+      let msg = await $("#notifications .negative")
       try {
         await msg.waitForExist({ timeout: 1000 })
         return {
@@ -114,14 +109,14 @@ export class App {
   }
 
   async uploadTorrentModalVisible() {
-    let modal = await this.client.$("#uploadTorrentModal")
+    let modal = await $("#uploadTorrentModal")
     await modal.waitForDisplayed()
     return modal
   }
 
   async uploadTorrentModalSubmit(options?: { label?: string, start?: boolean, name?: string, saveLocation?: string }) {
     let modal = await this.uploadTorrentModalVisible()
-    await this.client.pause(200)
+    await browser.pause(200)
 
     if (options?.name) {
       let nameInput = await modal.$("input[data-action='rename-torrent']")
@@ -152,7 +147,7 @@ export class App {
       await labelItemElem.click()
     }
 
-    await this.client.pause(250)
+    await browser.pause(250)
     let submitBtn = await modal.$("button[type=submit]")
     await submitBtn.click()
     await modal.waitForDisplayed({ reverse: true })
@@ -162,18 +157,21 @@ export class App {
     let data = fs.readFileSync(path.join(filename));
     let info = parseTorrent(data)
     let hash = info.infoHash
-    let torrent = new Torrent({ hash: hash, spectron: this.spectron, app: this });
-    await torrent.isExisting().should.eventually.be.false;
+    let torrent = new Torrent({ hash: hash, app: this });
+    expect(await torrent.isExisting()).toBe(false);
     /**
      * Note: we're not sending the torrent data directory from the main process. Since the
-     * spectron test framework communicates with the browser intance, the webContents module
+     * WebdriverIO framework communicates with the browser intance, the webContents module
      * is actually retrieved from the browser (using @electron/remote), meaning the IPC calls will
      * take the following route/steps:
      * renderer -> main -> renderer
      * The multiple serialization of the IPC data behaves oddly with objects. We use a plain javascript
      * array here to make the serialization behave properly.
      */
-    this.spectron.webContents.send("torrentfiles", Array.from(data), path.basename(filename), askUploadOptions);
+    await browser.execute((data, filename, askUploadOptions) => {
+      const remote = require('@electron/remote')
+      remote.getCurrentWindow().webContents.send("torrentfiles", data, filename, askUploadOptions)
+    }, Array.from(data), path.basename(filename), askUploadOptions)
     this.torrents.push(torrent);
     return torrent;
   }
@@ -189,8 +187,11 @@ export class App {
     }
     if (!magnetUri) throw new Error("invalid arguments passed to generate magnet uri")
     let info = parseTorrent(magnetUri)
-    let torrent = new Torrent({ hash: info.infoHash, spectron: this.spectron, app: this })
-    this.spectron.webContents.send("magnet", [magnetUri])
+    let torrent = new Torrent({ hash: info.infoHash, app: this })
+    await browser.execute((magnetUri) => {
+      const remote = require('@electron/remote')
+      remote.getCurrentWindow().webContents.send("magnet", [magnetUri])
+    }, magnetUri)
     this.torrents.push(torrent)
     return torrent
   }
@@ -199,7 +200,7 @@ export class App {
     const labels = "#torrent-action-header div[data-role=labels]";
     const labelBtn = `div[data-label='${labelName}']`;
 
-    let labelsElem = await this.client.$(labels)
+    let labelsElem = await $(labels)
     await labelsElem.click()
 
     let labelBtnElem = await labelsElem.$(labelBtn)
@@ -208,25 +209,25 @@ export class App {
     let labelText = await labelBtnElem.getText()
     labelText.should.contain(labelName)
 
-    await this.client.pause(200)
+    await browser.pause(200)
     await labelsElem.click()
     await labelBtnElem.waitForDisplayed({ reverse: true })
   }
 
   async getTorrents() {
     const table = "#torrentTable tbody tr";
-    let torrents = await this.client.$$(table)
+    let torrents = await $$(table)
     let data = torrents.map(
-      async (e) => new Torrent({ hash: await e.getAttribute("data-hash"), spectron: this.spectron, app: this })
+      async (e) => new Torrent({ hash: await e.getAttribute("data-hash"), app: this })
     );
     return await Promise.all(data)
   }
 
   async getSelectedTorrents() {
     const table = "#torrentTable tbody tr.active";
-    let tableElem = await this.client.$$(table)
+    let tableElem = await $$(table)
     let data = tableElem.map(async (e) => {
-      return new Torrent({ hash: await e.getAttribute("data-hash"), spectron: this.spectron, app: this })
+      return new Torrent({ hash: await e.getAttribute("data-hash"), app: this })
     })
     return await Promise.all(data)
   }
@@ -236,15 +237,16 @@ export class App {
     const clear = `#torrent-sidebar-labels [data-role="labels-clear"]`;
 
     if (labelName === undefined) {
-      await (await this.client.$(clear)).click()
+      await (await $(clear)).click()
     } else {
-      await (await this.client.$(label)).click()
+      await (await $(label)).click()
     }
   }
 
   async getAllSidebarLabels() {
-    let labelsElem = await this.client.$$("#torrent-sidebar-labels li")
+    let labelsElem = $$("#torrent-sidebar-labels li")
     let data = labelsElem.map(async (e) => await e.getAttribute("data-label"));
-    return await Promise.all(data)
+    let labels = await data
+    return labels || [];
   }
 }

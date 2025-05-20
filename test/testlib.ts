@@ -1,10 +1,11 @@
+import chai from "chai"
 import path = require("path");
+import chaiAsPromised from "chai-as-promised";
 import e2e = require("./e2e");
 import { FeatureSet, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { backendHooks } from "./shared/backend.hook";
 import { TorrentClient } from "../src/scripts/bittorrent"
-import magnet from "magnet-uri"
 
 
 interface TestSuiteOptionsOptional {
@@ -58,7 +59,17 @@ function requireFeatureHook(options: TestSuiteOptions, feature: FeatureSet) {
 export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
   const options: TestSuiteOptions = Object.assign({}, TEST_SUITE_OPTIONS_DEFAULTS, optionsArg)
 
+  global.before(function () {
+    chai.should();
+    chai.use(chaiAsPromised);
+  });
+
   describe(`given ${options.client.id}-${options.version} service is running (docker-compose)`, function () {
+
+    // start up opentracker docker-compose services
+    dockerComposeHooks([__dirname, "shared", "opentracker"])
+
+    // start up backend bittorrent service
     backendHooks([__dirname, options.fixture], {
       env: Object.assign({}, process.env, {
         VERSION: options.version,
