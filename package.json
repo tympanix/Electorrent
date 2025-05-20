@@ -13,7 +13,7 @@
     "dist": "electron-builder --publish never",
     "prerelease": "gulp build",
     "release": "electron-builder",
-    "test": "mocha --retries 3"
+    "test": "wdio run ./wdio.conf.ts"
   },
   "keywords": [
     "utorrent"
@@ -51,6 +51,11 @@
     "@types/qs": "^6.9.7",
     "@types/tapable": "^0.2.5",
     "@types/underscore": "^1.10.24",
+    "@wdio/cli": "^9.14.0",
+    "@wdio/electron-types": "^8.1.0",
+    "@wdio/local-runner": "^9.14.0",
+    "@wdio/mocha-framework": "^9.14.0",
+    "@wdio/spec-reporter": "^9.14.0",
     "@wdio/types": "^7.24.0",
     "angular": "^1.8.2",
     "angular-animate": "^1.5.11",
@@ -104,7 +109,6 @@
     "rollup": "^2.2.0",
     "run-sequence": "^1.2.2",
     "semver": "^5.7.1",
-    "spectron": "^16.0.0",
     "terser-webpack-plugin": "^5.3.12",
     "through2": "^2.0.5",
     "ts-loader": "^9.5.2",
@@ -113,6 +117,8 @@
     "underscore": "^1.12.1",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
+    "wdio": "^6.0.1",
+    "wdio-electron-service": "^8.1.0",
     "webpack": "^5.99.8",
     "webpack-cli": "^6.0.1",
     "webpack-node-externals": "^3.0.0",

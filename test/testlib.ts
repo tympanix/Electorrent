@@ -4,7 +4,6 @@ import { FeatureSet, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { backendHooks } from "./shared/backend.hook";
 import { TorrentClient } from "../src/scripts/bittorrent"
-import magnet from "magnet-uri"
 
 
 interface TestSuiteOptionsOptional {
