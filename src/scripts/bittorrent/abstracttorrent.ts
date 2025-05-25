@@ -254,6 +254,13 @@ export abstract class Torrent implements TorrentProps {
       attribute: 'dateAdded'
     })
 
+    static COL_DATECOMPLETED = new Column({
+      name: 'Date Completed',
+      enabled: true,
+      template: '<span time="torrent.dateCompleted"></span>',
+      attribute: 'dateCompleted'
+    })
+
     static COL_PEERS = new Column({
       name: 'Peers',
       enabled: false,
@@ -299,6 +306,7 @@ export abstract class Torrent implements TorrentProps {
         Torrent.COL_PROGRESS,
         Torrent.COL_LABEL,
         Torrent.COL_DATEADDED,
+        Torrent.COL_DATECOMPLETED,
         Torrent.COL_PEERS,
         Torrent.COL_SEEDS,
         Torrent.COL_QUEUE,
