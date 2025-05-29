@@ -82,8 +82,8 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         all: [],
         changed: [],
         deleted: [],
+        freeDiskSpace: 0
       };
-
       if (Array.isArray(data.categories) || Array.isArray(data.labels)) {
         torrents.labels = data.categories || data.labels;
       } else if (typeof data.categories === "object") {
@@ -97,6 +97,9 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       }
 
       torrents.deleted = data.torrents_removed || [];
+      if (data.full_update) {
+        torrents.freeDiskSpace = data.server_state.free_space_on_disk;
+      }
       return torrents;
     }
 
