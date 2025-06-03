@@ -1,5 +1,6 @@
 import axios from "axios"
 import readline from "readline"
+import { afterEach } from "mocha";
 
 /**
  * Enum representing the different features of a bittorrent client to be tested
@@ -81,4 +82,37 @@ export async function waitUntil(fn: () => Promise<any>, timeout?: number, step?:
     currentTime += step
   }
   throw err
+}
+
+/**
+ * Sets up Mocha hooks for test execution. This function adds an `afterEach` hook
+ * that performs specific actions based on the state of the test and environment variables.
+ *
+ * - If a test fails and the `MOCHA_HALT` environment variable is set to "1", the test execution
+ *   will halt and wait for user input before proceeding.
+ * - If the `MOCHA_STEP` environment variable is set, the test execution will pause after each test
+ *   and wait for user input before proceeding.
+ *
+ * @example
+ * setupMochaHooks();
+ *
+ * Environment Variables:
+ * - `MOCHA_HALT`: Set to "1" to halt execution on test failure and wait for user input.
+ * - `MOCHA_STEP`: Set to pause execution after each test and wait for user input.
+ */
+export function setupMochaHooks() {
+  afterEach(async function() {
+    if (this.currentTest && this.currentTest.state === "failed") {
+      if (process.env.MOCHA_HALT === "1") {
+        // halt and wait until user decides to proceed (or very long timeout)
+        this.timeout(Math.pow(2, 32));
+        await askQuestion("Test failed. Press any key to continue: ");
+      }
+      return;
+    }
+    if (process.env.MOCHA_STEP) {
+      this.timeout(Math.pow(2, 32));
+      await askQuestion("Test paused. Press any key to continue: ");
+    }
+  });
 }

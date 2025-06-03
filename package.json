@@ -38,7 +38,7 @@
     "@types/angular-animate": "^1.5.10",
     "@types/angular-resource": "^1.5.16",
     "@types/axios": "^0.14.0",
-    "@types/chai": "^4.3.3",
+    "@types/chai": "^4.3.20",
     "@types/chai-as-promised": "^7.1.5",
     "@types/form-data": "^2.5.0",
     "@types/jquery": "^3.5.5",
