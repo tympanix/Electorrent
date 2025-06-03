@@ -11,6 +11,6 @@ services:
 
 networks:
   default:
-    external:
-      name: electorrent_p2p
+    name: electorrent_p2p
+    external: true
 
