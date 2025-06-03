@@ -32,54 +32,54 @@ export class App {
   }
 
   async login(options: LoginOptions) {
-    let hostForm = await $("#connection-host")
+    let hostForm = $("#connection-host")
     await hostForm.setValue(options.host)
 
-    let protoField = await $("#connection-proto")
+    let protoField = $("#connection-proto")
     await protoField.click()
 
     let proto = options.https ? 'https' : 'http'
-    let protoHttp = await $(`#connection-proto-${proto}`)
+    let protoHttp = $(`#connection-proto-${proto}`)
     await protoHttp.waitForExist()
     await protoHttp.click()
 
-    let user = await $("#connection-user")
+    let user = $("#connection-user")
     await user.setValue(options.username)
 
-    let pass = await $("#connection-password")
+    let pass = $("#connection-password")
     await pass.setValue(options.password);
 
-    let clientForm = await $("#connection-client")
+    let clientForm = $("#connection-client")
     await clientForm.click();
 
-    let clientFormSelect = await $(`#connection-client-${options.client.id}`)
+    let clientFormSelect = $(`#connection-client-${options.client.id}`)
     await clientFormSelect.waitForExist()
     await clientFormSelect.click()
 
-    let portForm = await $("#connection-port")
+    let portForm = $("#connection-port")
     await portForm.setValue(options.port);
 
-    let submit = await $("#connection-submit")
+    let submit = $("#connection-submit")
     await submit.click();
   }
 
   async torrentsPageIsVisible(opts?: { timeout: number }) {
-    let pageTorrents = await $("#page-torrents")
+    let pageTorrents = $("#page-torrents")
     await pageTorrents.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
   }
 
   async settingsPageIsVisible(opts?: { timeout: number }) {
-    let settingsPage = await $("#page-settings")
+    let settingsPage = $("#page-settings")
     await settingsPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
   }
 
   async settingsPageConnectionIsVisible() {
-    let settingsPage = await $("#page-settings-connection")
+    let settingsPage = $("#page-settings-connection")
     await settingsPage.waitForDisplayed({ timeout: this.timeout })
   }
 
   async certificateModalIsVisible() {
-    let certificateModal = await $("#certificateModal")
+    let certificateModal = $("#certificateModal")
     await certificateModal.waitForExist()
     await certificateModal.waitForDisplayed({ timeout: this.timeout })
     return certificateModal
@@ -87,7 +87,7 @@ export class App {
 
   async acceptCertificate() {
     let certificateModal = await this.certificateModalIsVisible()
-    let submit = await certificateModal.$("button.ok")
+    let submit = certificateModal.$("button.ok")
     await submit.waitForExist()
     await submit.waitForDisplayed()
     await submit.waitForClickable()
@@ -96,12 +96,12 @@ export class App {
   }
 
   async getNotificationError() {
-      let msg = await $("#notifications .negative")
+      let msg = $("#notifications .negative")
       try {
         await msg.waitForExist({ timeout: 1000 })
         return {
-          title: await (await msg.$(".header")).getText(),
-          message: await (await msg.$("p")).getText()
+          title: await msg.$(".header").getText(),
+          message: await msg.$("p").getText()
         }
       } catch {
         return null
@@ -109,7 +109,7 @@ export class App {
   }
 
   async uploadTorrentModalVisible() {
-    let modal = await $("#uploadTorrentModal")
+    let modal = $("#uploadTorrentModal")
     await modal.waitForDisplayed()
     return modal
   }
@@ -119,19 +119,19 @@ export class App {
     await browser.pause(200)
 
     if (options?.name) {
-      let nameInput = await modal.$("input[data-action='rename-torrent']")
+      let nameInput = modal.$("input[data-action='rename-torrent']")
       await nameInput.waitForDisplayed()
       await nameInput.setValue(options.name)
     }
 
     if (options?.saveLocation) {
-      let saveLocationInput = await modal.$("input[data-action='save-location']")
+      let saveLocationInput = modal.$("input[data-action='save-location']")
       await saveLocationInput.waitForDisplayed()
       await saveLocationInput.setValue(options.saveLocation)
     }
 
     if (options?.start !== undefined) {
-      let startToggle = await modal.$(`div[data-action="start-torrent"] > input`)
+      let startToggle = modal.$(`div[data-action="start-torrent"] > input`)
       await startToggle.waitForExist()
       if (await startToggle.isSelected() !== options.start) {
         await startToggle.click()
@@ -139,16 +139,16 @@ export class App {
     }
 
     if (options?.label) {
-      let labelElem = await modal.$("div[title=Label]")
+      let labelElem = modal.$("div[title=Label]")
       await labelElem.waitForClickable()
       await labelElem.click()
-      let labelItemElem = await labelElem.$(`div[data-label='${options.label}']`)
+      let labelItemElem = labelElem.$(`div[data-label='${options.label}']`)
       await labelItemElem.waitForDisplayed()
       await labelItemElem.click()
     }
 
     await browser.pause(250)
-    let submitBtn = await modal.$("button[type=submit]")
+    let submitBtn = modal.$("button[type=submit]")
     await submitBtn.click()
     await modal.waitForDisplayed({ reverse: true })
   }
@@ -200,10 +200,10 @@ export class App {
     const labels = "#torrent-action-header div[data-role=labels]";
     const labelBtn = `div[data-label='${labelName}']`;
 
-    let labelsElem = await $(labels)
+    let labelsElem = $(labels)
     await labelsElem.click()
 
-    let labelBtnElem = await labelsElem.$(labelBtn)
+    let labelBtnElem = labelsElem.$(labelBtn)
     await labelBtnElem.waitForDisplayed()
 
     let labelText = await labelBtnElem.getText()
@@ -216,30 +216,30 @@ export class App {
 
   async getTorrents() {
     const table = "#torrentTable tbody tr";
-    let torrents = await $$(table)
+    let torrents = $$(table)
     let data = torrents.map(
       async (e) => new Torrent({ hash: await e.getAttribute("data-hash"), app: this })
     );
-    return await Promise.all(data)
+    return await data
   }
 
   async getSelectedTorrents() {
     const table = "#torrentTable tbody tr.active";
-    let tableElem = await $$(table)
+    let tableElem = $$(table)
     let data = tableElem.map(async (e) => {
       return new Torrent({ hash: await e.getAttribute("data-hash"), app: this })
     })
-    return await Promise.all(data)
+    return await data
   }
 
-  async filterLabel(labelName?) {
+  async filterLabel(labelName?: string) {
     const label = `#torrent-sidebar-labels li[data-label="${labelName}"]`;
     const clear = `#torrent-sidebar-labels [data-role="labels-clear"]`;
 
     if (labelName === undefined) {
-      await (await $(clear)).click()
+      await $(clear).click()
     } else {
-      await (await $(label)).click()
+      await $(label).click()
     }
   }
 

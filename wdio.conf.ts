@@ -1,11 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
-const randomUuid = uuidv4();
-
 /// <reference types="wdio-electron-service" />
-
-// Enable wdio electron service using the TEST environment variable
-process.env.TEST = 'true';
-process.env.NODE_ENV = 'test';
 
 export const config: WebdriverIO.Config = {
     //
