@@ -24,10 +24,18 @@ linux:
   target:
     - snap
     - AppImage
+    - deb
+    - rpm
 snap:
   publish:
     - github
 appImage:
+  publish:
+    - github
+deb:
+  publish:
+    - github
+rpm:
   publish:
     - github
 extraFiles:
