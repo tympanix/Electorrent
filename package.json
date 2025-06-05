@@ -106,7 +106,7 @@
     "parse-torrent": "^9.1.5",
     "qs": "^6.10.3",
     "request": "^2.88.2",
-    "rollup": "^2.2.0",
+    "rollup": "^2.79.2",
     "run-sequence": "^1.2.2",
     "semver": "^5.7.1",
     "terser-webpack-plugin": "^5.3.12",
