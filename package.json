@@ -78,7 +78,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "form-data": "^4.0.0",
     "fuse.js": "^3.6.1",
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.1",
     "gulp-clean": "^0.4.0",
     "gulp-concat": "^2.6.1",
     "gulp-iconfont": "^10.0.3",
