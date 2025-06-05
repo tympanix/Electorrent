@@ -5,6 +5,10 @@ productName: Electorrent
 appId: com.github.tympanix.electorrent
 mac:
   category: public.app-category.utilities
+  target:
+    - target: dmg
+      arch:
+        - universal
 win:
   target: squirrel
   publish:
