@@ -23,8 +23,9 @@ linux:
   icon: build/png
   category: Network;FileTransfer;P2P;
   desktop:
-    MimeType: application/x-bittorrent;x-scheme-handler/magnet;
-    Keywords: p2p;bittorrent;
+    entry:
+      MimeType: application/x-bittorrent;x-scheme-handler/magnet;
+      Keywords: p2p;bittorrent;
   target:
     - snap
     - AppImage
