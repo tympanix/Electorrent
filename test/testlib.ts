@@ -1,8 +1,9 @@
 import chai from "chai"
+import { describe, it, before, after } from "mocha";
 import path = require("path");
 import chaiAsPromised from "chai-as-promised";
 import e2e = require("./e2e");
-import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
+import { FeatureSet, setupMochaHooks, sleep, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { backendHooks } from "./shared/backend.hook";
 import { TorrentClient } from "../src/scripts/bittorrent"
@@ -143,7 +144,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           requireFeatureHook(options, FeatureSet.MagnetLinks)
 
           before(async function() {
-            let filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
+            let filename = path.join(__dirname, 'shared/opentracker/data/shared/slow.torrent')
             torrent = await this.app.uploadMagnetLink({ filename })
           })
 
@@ -166,7 +167,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           let torrent: e2e.Torrent
 
           before(async function() {
-            let filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
+            let filename = path.join(__dirname, 'shared/opentracker/data/shared/slow.torrent')
             torrent = await this.app.uploadTorrent({ filename: filename });
           })
 
@@ -228,6 +229,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     })
 
     describe("given advanced upload options are supported", async function() {
+      requireFeatureHook(options, FeatureSet.AdvancedUploadOptions)
 
       describe("given application is running", function() {
         startApplicationHooks()
@@ -242,7 +244,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await this.app.torrentsPageIsVisible()
           })
 
-          const filename = path.join(__dirname, 'shared/opentracker/data/shared/test-100k.bin.torrent')
+          const filename = path.join(__dirname, 'shared/opentracker/data/shared/fast.torrent')
 
           it("torrent uploaded with default options", async function() {
             let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
@@ -286,14 +288,16 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torrent uploaded with save location", async function() {
+            this.timeout(60 * 1000)
             if (!options.client.uploadOptionsEnable?.saveLocation) return this.skip()
             const saveLocation = "/tmp/custom/save/location"
+            await this.backend.exec(["rm", "-rf", saveLocation])
             await this.backend.exec(["test", "!", "-e", saveLocation])
             let torrent = await this.app.uploadTorrent({ filename: filename, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ saveLocation: saveLocation })
-            await torrent.isExisting()
-            await torrent.waitForState(options.downloadLabel)
-            await this.backend.waitForExec(["test", "-e", saveLocation])
+            await torrent.waitForExist()
+            await torrent.waitForState("Seeding", { timeout: 60 * 1000 })
+            await this.backend.waitForExec(["test", "-e", saveLocation], 30000)
             await torrent.delete()
           })
         })

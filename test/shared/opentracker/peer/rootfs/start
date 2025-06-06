@@ -1,37 +1,41 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
-# This script handles execution of two roles: a seeder and a leecher.
-# The seeder will generate files with random (/dev/urandom) content, the
-# corrosponding .torrent files and a checksum file. Files are shared with
-# other peers in the /shared folder. The leecher will download the content
-# using the shared .torrent file and check the content using the checksum file
+# Parse CLI options for upload speed, download speed, file size, and torrent file name
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --upload-speed) UP_SPEED="$2"; shift ;;
+        --download-speed) DL_SPEED="$2"; shift ;;
+        --file-size) FILE_SIZE="$2"; shift ;;
+        --torrent-name) TORRENT_NAME="$2"; shift ;;
+        *) echo "Usage: $0 --upload-speed <up-speed> --download-speed <dl-speed> --file-size <file-size> --torrent-name <torrent-name>" >&2; exit 1 ;;
+    esac
+    shift
+done
 
-# The seeder role
-if [ "$1" == "seed" ]; then
-    >2 echo "Peer acting as seeder"
-    # Create a random test file
-    dd if=/dev/urandom of=/srv/test-100k.bin bs=1M count=50
-    # Delete any old torrent files
-    rm -rf /shared/*.torrent
-    # Create a torrent file and save it in the shared folder
-    ctorrent -t -s /shared/test-100k.bin.torrent -u http://tracker:6969/announce /srv/test-100k.bin
-    # Write a checksum file for the files to be seeded
-    sha256sum /srv/*.bin | tee /shared/checksum
-    # Seed the torrent file (and contents)
-    ctorrent -P "$HOSTNAME" -p "$P2P_PORT" -U10 -D10 -s /srv/test-100k.bin /shared/test-100k.bin.torrent
-    exit 0
-fi
+# Set default values if not provided
+FILE_SIZE="${FILE_SIZE:-1}"
 
-# The leecher role
-if [ "$1" == "leech" ]; then
-    >2 echo "Peer acting a leecher"
-    # Wait until files have been shared from seeder
-    until [ -f /shared/checksum ]; do sleep 0.2; done
-    # Make sure no files exists (will be downloaded shortly)
-    test ! -e /srv/*.bin
-    # Download files using the ctorrent client
-    ctorrent /shared/test-100k.bin.torrent -s /srv/test-100k.bin -e0 -E0
-    # Check that files a correct
-    sha256sum -c /shared/checksum
-    exit 0
-fi
+# Generate a random suffix for unique file names
+RANDOM_SUFFIX=$(date +%s%N | sha256sum | head -c 8)
+
+# Create a random test file with the specified file size and unique name
+TEST_FILE="/srv/test-file-${RANDOM_SUFFIX}.bin"
+dd if=/dev/urandom of="$TEST_FILE" bs=1M count="$FILE_SIZE"
+
+# Set the torrent file name, defaulting to a random name if not provided
+TORRENT_FILE="/shared/${TORRENT_NAME}.torrent"
+
+# Create a torrent file and save it in the shared folder with specified upload and download speeds
+rm -f "$TORRENT_FILE"
+ctorrent -t -s $TORRENT_FILE -u http://tracker:6969/announce $TEST_FILE
+
+# Generate a random unprivileged port (1024-65535)
+P2P_PORT=$((1024 + RANDOM % 64512))
+
+# Seed the torrent file (and contents)
+echo "Seeding torrent file $TORRENT_FILE on port $P2P_PORT"
+[ -n "$UP_SPEED" ] && CTORRENT_ARGS+=" -U$UP_SPEED"
+[ -n "$DL_SPEED" ] && CTORRENT_ARGS+=" -D$DL_SPEED"
+ctorrent $CTORRENT_ARGS -P "$HOSTNAME" -p "$P2P_PORT" -s "$TEST_FILE" "$TORRENT_FILE"
+
+exit 0

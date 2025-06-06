@@ -17,19 +17,17 @@ export function dockerComposeHooks(composeDir: string | string[], extraOpts?: ID
 
   const composeOpts: IDockerComposeOptions = {
     cwd: composeDir,
-    log: true,
   }
 
   before(async function() {
     this.timeout(60 * 1000)
-    await compose.rm({ ...composeOpts, ...extraOpts})
-    await compose.upAll({ ...composeOpts, ...extraOpts, commandOptions: ['--build'] })
+    await compose.upAll({ ...composeOpts, ...extraOpts })
   })
 
   after(async function() {
     this.timeout(60 * 1000)
-    if (!process.env.MOCHA_DOCKER_KEEP) {
-      await compose.down({ ...composeOpts, ...extraOpts })
+    if (process.env.MOCHA_DOCKER_CLEANUP) {
+      await compose.downAll({ ...composeOpts, ...extraOpts })
     }
   })
 }

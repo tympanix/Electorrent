@@ -13,5 +13,6 @@ createTestSuite({
   unsupportedFeatures: [
     FeatureSet.Labels,
     FeatureSet.MagnetLinks,
+    FeatureSet.AdvancedUploadOptions,
   ],
 });

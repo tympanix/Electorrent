@@ -16,10 +16,9 @@
         "forceConsistentCasingInFileNames": true,
         "types": [
             "node",
-            "webdriverio/async",
-            "@types/mocha",
-            "@types/chai",
-            "@types/chai-as-promised",
+            "mocha",
+            "chai",
+            "chai-as-promised",
         ],
         "typeRoots": [
             "types",

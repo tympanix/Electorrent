@@ -18,19 +18,20 @@ export class Backend {
     this.serviceName = path.basename(this.composeDir)
     this.composeOptions = {
       cwd: this.composeDir,
+      log: true,
     }
   }
 
   async exec(command: string | string[]) {
-    let result = await compose.exec(this.serviceName, command, this.composeOptions)
-    if (result.exitCode !== 0) {
-      throw new Error(`command for ${this.serviceName} container exited with code ${result.exitCode}`)
+    try {
+      return await compose.exec(this.serviceName, command, this.composeOptions)
+    } catch (err: any) {
+      throw new Error(`command for ${this.serviceName} container exited with code ${err.exitCode}`)
     }
-    return result
   }
 
   async waitForExec(command: string | string[], timeout?: number, step?: number) {
-    await waitUntil(async () => this.exec(command), timeout, step)
+    await waitUntil(async () => await this.exec(command), timeout, step)
   }
 
   async pause() {
