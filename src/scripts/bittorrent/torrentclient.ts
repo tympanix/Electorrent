@@ -7,6 +7,7 @@ export interface TorrentUpdates {
     all?: any[],
     changed?: any[],
     deletes?: [],
+    freeDiskSpace?: number
 }
 
 /**
