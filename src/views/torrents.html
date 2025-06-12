@@ -163,10 +163,12 @@
         <i class="ui orange arrow up icon"></i>
         {{ totalUploadSpeed | speed }} <span ng-if="totalUploaded">({{ totalUploaded | bytes:2 }})</span>
       </div>
-      <div class="free-disk-space">
-        <i class="ui grey disk outline icon"></i>
-        {{ freeDiskSpace | bytes:2 }}
-      </div>
+      <ng-container ng-if="$server.client == 'qbittorrent'">
+        <div class="free-disk-space" ></div>
+          <i class="ui grey disk outline icon"></i>
+          {{ freeDiskSpace | bytes:2 }}
+        </div>
+      </ng-container>
     </div>
   </div>
 
