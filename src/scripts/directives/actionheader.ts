@@ -61,7 +61,7 @@ export let actionHeader = [ "$rootScope", "$compile", "electron",
     }
 
     function appendDropdown(list, item, scope) {
-      var dropdown = angular.element('<div dropdown class="ui top left pointing labeled icon dropdown button"></div>');
+      var dropdown = angular.element('<div dropdown class="ui top left pointing labeled icon dropdown button" role="button" aria-haspopup="true"></div>');
       dropdown.addClass(item.color);
       addIcon(dropdown, "plus");
 
@@ -73,14 +73,21 @@ export let actionHeader = [ "$rootScope", "$compile", "electron",
       text.append(item.label);
       dropdown.append(text);
 
-      var menu = angular.element('<div class="menu"></div>');
+      var menu = angular.element('<div class="menu" role="menu"></div>');
 
       item.actions.forEach(function (action) {
-        var option = angular.element('<div class="item"></div>');
+        var option = angular.element('<div class="item" role="menuitem" tabindex="-1"></div>');
         option.append(action.label);
 
         option.bind("click", function () {
           scope.click(action.click, action.label);
+        });
+
+        option.bind("keydown", function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            scope.click(action.click, action.label);
+          }
         });
 
         menu.append(option);
@@ -93,7 +100,7 @@ export let actionHeader = [ "$rootScope", "$compile", "electron",
     }
 
     function appendButton(list, item, scope) {
-      var button = angular.element('<a class="ui labeled icon button"></a>');
+      var button = angular.element('<button type="button" class="ui labeled icon button"></button>');
       button.addClass(item.color);
 
       if (item.role) {
@@ -133,6 +140,7 @@ export let actionHeader = [ "$rootScope", "$compile", "electron",
     function addIcon(item, iconName) {
       var icon = angular.element("<i></i>");
       icon.addClass("ui " + iconName + " icon");
+      icon.attr("aria-hidden", "true");
       item.append(icon);
     }
 

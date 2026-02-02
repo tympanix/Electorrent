@@ -12,17 +12,17 @@
                 <div class="card" ng-repeat="server in servers">
                     <div class="content">
                         <div class="header">
-                            <i class="torrent icon" ng-class="server.getIcon()"></i>
+                            <i class="torrent icon" ng-class="server.getIcon()" aria-hidden="true"></i>
                             {{server.getName()}}
                         </div>
                         <div class="meta">
                             {{server.getNameAtAddress()}}
                         </div>
                     </div>
-                    <div class="ui bottom attached green button" ng-click="connectToServer(server)">
+                    <button type="button" class="ui bottom attached green button" ng-click="connectToServer(server)" ng-keydown="$event.key === 'Enter' && connectToServer(server)" aria-label="Connect to {{server.getName()}}">
                         Connect
-                        <i class="icon right arrow"></i>
-                    </div>
+                        <i class="icon right arrow" aria-hidden="true"></i>
+                    </button>
                 </div>
             </div>
         </div>

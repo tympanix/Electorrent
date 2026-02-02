@@ -17,13 +17,15 @@
         >
           <div class="fields">
             <div class="ten wide field">
+              <label for="connection-host" class="sr-only">IP Address</label>
               <div class="ui left icon input">
-                <i class="world icon"></i>
-                <input type="text" id="connection-host" name="ip" ng-model="server.ip" placeholder="IP Address" />
+                <i class="world icon" aria-hidden="true"></i>
+                <input type="text" id="connection-host" name="ip" ng-model="server.ip" placeholder="IP Address" aria-required="true" />
               </div>
             </div>
             <div class="six wide field">
-              <dropdown title="Protocol" id="connection-proto" class="fluid" ng-model="server.proto">
+              <label for="connection-proto" class="sr-only">Protocol</label>
+              <dropdown title="Protocol" id="connection-proto" class="fluid" ng-model="server.proto" aria-label="Select protocol">
                 <dropdown-group value="http" id="connection-proto-http" title="http">
                   http
                 </dropdown-group>
@@ -35,14 +37,16 @@
           </div>
           <div class="two fields">
             <div class="field">
+              <label for="connection-user" class="sr-only">Username</label>
               <div class="ui left icon input">
-                <i class="user icon"></i>
+                <i class="user icon" aria-hidden="true"></i>
                 <input type="text" id="connection-user" name="username" ng-model="server.user" placeholder="Username" />
               </div>
             </div>
             <div class="field">
+              <label for="connection-password" class="sr-only">Password</label>
               <div class="ui left icon input">
-                <i class="lock icon"></i>
+                <i class="lock icon" aria-hidden="true"></i>
                 <input
                   type="password"
                   id="connection-password"
@@ -54,12 +58,14 @@
             </div>
           </div>
           <div class="field">
+            <label for="connection-client" class="sr-only">BitTorrent Client</label>
             <dropdown
               title="Client Program"
               id="connection-client"
               class="fluid"
               ng-model="server.client"
               ng-change="setPath()"
+              aria-label="Select BitTorrent client"
             >
               <dropdown-group
                 value="id"
@@ -67,20 +73,22 @@
                 title="client.name"
                 ng-repeat="(id, client) in btclients"
               >
-                <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}}
+                <i class="icon torrent big" ng-class="client.icon" aria-hidden="true"></i> {{client.name}}
               </dropdown-group>
             </dropdown>
           </div>
           <div class="fields">
             <div class="six wide field">
+              <label for="connection-port" class="sr-only">Port</label>
               <div class="ui left icon input">
-                <i class="sitemap icon"></i>
-                <input type="number" name="port" id="connection-port" ng-model="server.port" placeholder="Port" />
+                <i class="sitemap icon" aria-hidden="true"></i>
+                <input type="number" name="port" id="connection-port" ng-model="server.port" placeholder="Port" aria-required="true" />
               </div>
             </div>
             <div class="ten wide field">
+              <label for="connection-path" class="sr-only">Path</label>
               <div class="ui left icon input">
-                <i class="linkify icon"></i>
+                <i class="linkify icon" aria-hidden="true"></i>
                 <input
                   type="text"
                   ng-disabled="!advanced"
@@ -92,14 +100,14 @@
               </div>
             </div>
             <div class="field">
-              <div class="ui checkbox">
+              <label for="connection-advanced">
                 <input type="checkbox" id="connection-advanced" ng-model="advanced" name="example" />
-                <label></label>
-              </div>
+                <span class="sr-only">Advanced options</span>
+              </label>
             </div>
           </div>
-          <button id="connection-submit" class="ui fluid large green labeled icon submit button">
-            <i class="checkmark icon"></i> Connect
+          <button id="connection-submit" type="submit" class="ui fluid large green labeled icon submit button">
+            <i class="checkmark icon" aria-hidden="true"></i> Connect
           </button>
         </form>
       </div>

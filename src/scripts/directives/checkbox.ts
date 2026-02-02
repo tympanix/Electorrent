@@ -29,8 +29,12 @@ export let toggle = function() {
 
     }
 
-    function link() {
+    var toggleIdCounter = 0;
 
+    function link(scope, element) {
+        var id = 'toggle-' + (++toggleIdCounter);
+        element.find('input').attr('id', id);
+        element.find('label').attr('for', id);
     }
 
     return {

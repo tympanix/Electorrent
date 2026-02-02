@@ -96,10 +96,10 @@ export let dropdown = function() {
             model: '=ngModel',
             change: '&?ngChange'
         },
-        template: '<div class="{{ dropdown_class }}" tabindex="0">' +
-            '<div class="{{text_class}}">{{ title }}</div>' +
-            '<i class="dropdown icon"></i>' +
-            '<div class="{{ menu_class }}"  ng-transclude>' +
+        template: '<div class="{{ dropdown_class }}" tabindex="0" role="listbox" aria-haspopup="listbox" aria-expanded="{{is_open}}" aria-label="{{original_title}}">' +
+            '<div class="{{text_class}}" aria-hidden="true">{{ title }}</div>' +
+            '<i class="dropdown icon" aria-hidden="true"></i>' +
+            '<div class="{{ menu_class }}" role="presentation" ng-transclude>' +
             '</div>' +
             '</div>',
         link: function(scope, element, attrs, DropDownController: any) {
@@ -291,7 +291,7 @@ export let dropdownGroup = function() {
             title: '=title',
             value: '=value'
         },
-        template: '<div class="item" ng-class="active()" ng-transclude>{{ item_title }}</div>',
+        template: '<div class="item" role="option" aria-selected="{{active() ? true : false}}" ng-class="active()" ng-transclude>{{ item_title }}</div>',
         link: function(scope, element, attrs, DropDownController: any) {
 
             // Check if title= was set... if not take the contents of the dropdown-group tag

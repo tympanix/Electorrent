@@ -19,40 +19,34 @@
 
                 <div class="ui list">
                     <div class="item">
-                        <i class="user secret big icon"></i>
+                        <i class="user secret big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Self Signed</div>
                             <span>
-                                <a ng-if="data.selfSigned">Yes</a>
-                                <a ng-if="!data.selfSigned">No</a>
+                                <span ng-if="data.selfSigned">Yes</span>
+                                <span ng-if="!data.selfSigned">No</span>
                             </span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="calendar check big icon"></i>
+                        <i class="calendar check big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Valid From</div>
-                            <span>
-                                <a>{{data.validFrom | epoch}}</a>
-                            </span>
+                            <span>{{data.validFrom | epoch}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="calendar times big icon"></i>
+                        <i class="calendar times big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Valid To</div>
-                            <span>
-                                <a>{{data.validTo | epoch}}</a>
-                            </span>
+                            <span>{{data.validTo | epoch}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="certificate big icon"></i>
+                        <i class="certificate big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Serial Number</div>
-                            <span>
-                                <a>{{data.serialNumber}}</a>
-                            </span>
+                            <span>{{data.serialNumber}}</span>
                         </div>
                     </div>
                 </div>
@@ -68,48 +62,38 @@
 
                 <div class="ui list">
                     <div class="item">
-                        <i class="building big icon"></i>
+                        <i class="building big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Organization</div>
-                            <span>
-                                <a>{{data.issuer.organization}}</a>
-                            </span>
+                            <span>{{data.issuer.organization}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="map marker alternate big icon"></i>
+                        <i class="map marker alternate big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Organization Unit</div>
-                            <span>
-                                <a>{{data.issuer.organizationUnit}}</a>
-                            </span>
+                            <span>{{data.issuer.organizationUnit}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="paper plane big icon"></i>
+                        <i class="paper plane big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">State</div>
-                            <span>
-                                <a>{{data.issuer.state}}</a>
-                            </span>
+                            <span>{{data.issuer.state}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="globe big icon"></i>
+                        <i class="globe big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Country</div>
-                            <span>
-                                <a>{{data.issuer.country}}</a>
-                            </span>
+                            <span>{{data.issuer.country}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="user big icon"></i>
+                        <i class="user big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Common Name</div>
-                            <span>
-                                <a>{{data.issuer.commonName}}</a>
-                            </span>
+                            <span>{{data.issuer.commonName}}</span>
                         </div>
                     </div>
                 </div>
@@ -125,48 +109,38 @@
 
                 <div class="ui list">
                     <div class="item">
-                        <i class="building big icon"></i>
+                        <i class="building big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Organization</div>
-                            <span>
-                                <a>{{data.subject.organization}}</a>
-                            </span>
+                            <span>{{data.subject.organization}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="map marker alternate big icon"></i>
+                        <i class="map marker alternate big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Organization Unit</div>
-                            <span>
-                                <a>{{data.subject.organizationUnit}}</a>
-                            </span>
+                            <span>{{data.subject.organizationUnit}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="paper plane big icon"></i>
+                        <i class="paper plane big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">State</div>
-                            <span>
-                                <a>{{data.subject.state}}</a>
-                            </span>
+                            <span>{{data.subject.state}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="globe big icon"></i>
+                        <i class="globe big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Country</div>
-                            <span>
-                                <a>{{data.subject.country}}</a>
-                            </span>
+                            <span>{{data.subject.country}}</span>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="user big icon"></i>
+                        <i class="user big icon" aria-hidden="true"></i>
                         <div class="content">
                             <div class="ui sub header">Common Name</div>
-                            <span>
-                                <a>{{data.subject.commonName}}</a>
-                            </span>
+                            <span>{{data.subject.commonName}}</span>
                         </div>
                     </div>
                 </div>
@@ -178,17 +152,18 @@
         <div class="ui stackable grid">
               <div class="ten wide column">
                   <div class="ui left icon fluid input">
-                        <input name="Fingerprint" type="text" readonly ng-model="data.fingerprint">
-                        <i class="address card icon"></i>
+                        <label for="cert-fingerprint" class="sr-only">Certificate Fingerprint</label>
+                        <input id="cert-fingerprint" name="Fingerprint" type="text" readonly ng-model="data.fingerprint" aria-label="Certificate Fingerprint">
+                        <i class="address card icon" aria-hidden="true"></i>
                   </div>
               </div>
               <div class="six wide column">
-                  <a class="ui red deny button">
+                  <button type="button" class="ui red deny button">
                       Cancel
-                  </a>
+                  </button>
                   <button type="submit" class="ui black ok right labeled icon button">
                       Trust
-                      <i class="address card icon"></i>
+                      <i class="address card icon" aria-hidden="true"></i>
                   </button>
               </div>
         </div>

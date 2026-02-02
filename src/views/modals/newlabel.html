@@ -6,20 +6,21 @@
   <div class="content">
     <form class="ui form" ng-submit="applyAndClose()">
       <div class="field">
+        <label for="new-label-input" class="sr-only">Label Name</label>
         <div class="ui left icon action input">
-          <i class="tag icon"></i>
-          <input type="text" name="label" maxlength="36" ng-model="data.label" placeholder="Label Name" />
+          <i class="tag icon" aria-hidden="true"></i>
+          <input type="text" id="new-label-input" name="label" maxlength="36" ng-model="data.label" placeholder="Label Name" aria-label="Label Name" />
         </div>
       </div>
     </form>
   </div>
   <div class="actions">
-    <a class="ui black deny button">
+    <button type="button" class="ui black deny button">
       Cancel
-    </a>
+    </button>
     <button type="submit" class="ui positive right labeled icon button" ng-class="{'disabled': !data.label}">
       Apply Label
-      <i class="tag icon"></i>
+      <i class="tag icon" aria-hidden="true"></i>
     </button>
   </div>
 </div>

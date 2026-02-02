@@ -3,26 +3,51 @@
 
     <div class="ui stretched segment">
         <div class="settings sidebar">
-            <ul class="nav">
-                <li ng-class="activeOn('general')" ng-click="gotoPage('general')">
-                    <i class="large settings icon"></i>
-                    General Settings
+            <ul class="nav" role="navigation" aria-label="Settings sections">
+                <li>
+                    <button type="button"
+                            ng-class="activeOn('general')"
+                            ng-click="gotoPage('general')"
+                            aria-current="{{activeOn('general') ? 'page' : 'false'}}">
+                        <i class="large settings icon" aria-hidden="true"></i>
+                        General Settings
+                    </button>
                 </li>
-                <li ng-class="activeOn('connection')" ng-click="gotoPage('connection')">
-                    <i class="large sitemap icon"></i>
-                    Connection
+                <li>
+                    <button type="button"
+                            ng-class="activeOn('connection')"
+                            ng-click="gotoPage('connection')"
+                            aria-current="{{activeOn('connection') ? 'page' : 'false'}}">
+                        <i class="large sitemap icon" aria-hidden="true"></i>
+                        Connection
+                    </button>
                 </li>
-                <li ng-class="activeOn('layout')" ng-click="gotoPage('layout')">
-                    <i class="large list layout icon"></i>
-                    Layout
+                <li>
+                    <button type="button"
+                            ng-class="activeOn('layout')"
+                            ng-click="gotoPage('layout')"
+                            aria-current="{{activeOn('layout') ? 'page' : 'false'}}">
+                        <i class="large list layout icon" aria-hidden="true"></i>
+                        Layout
+                    </button>
                 </li>
-                <li ng-class="activeOn('servers')" ng-click="gotoPage('servers')">
-                    <i class="large server icon"></i>
-                    Servers
+                <li>
+                    <button type="button"
+                            ng-class="activeOn('servers')"
+                            ng-click="gotoPage('servers')"
+                            aria-current="{{activeOn('servers') ? 'page' : 'false'}}">
+                        <i class="large server icon" aria-hidden="true"></i>
+                        Servers
+                    </button>
                 </li>
-                <li ng-class="activeOn('about')" ng-click="gotoPage('about')">
-                    <i class="large at icon"></i>
-                    About
+                <li>
+                    <button type="button"
+                            ng-class="activeOn('about')"
+                            ng-click="gotoPage('about')"
+                            aria-current="{{activeOn('about') ? 'page' : 'false'}}">
+                        <i class="large at icon" aria-hidden="true"></i>
+                        About
+                    </button>
                 </li>
             </ul>
         </div>
@@ -50,14 +75,14 @@
 
             </div>
             <div class="actions footer">
-                <a class="ui deny right labeled icon button" ng-click="close()">
+                <button type="button" class="ui deny right labeled icon button" ng-click="close()">
                     Cancel
-                    <i class="cancel icon"></i>
-                </a>
-                <a class="ui positive right labeled icon button" ng-click="save()">
+                    <i class="cancel icon" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="ui positive right labeled icon button" ng-click="save()">
                     Save
-                    <i class="checkmark icon"></i>
-                </a>
+                    <i class="checkmark icon" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
 

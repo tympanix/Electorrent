@@ -217,4 +217,45 @@ export let mainController = ["$rootScope", "$scope", "$timeout", "$bittorrent", 
         return page === PAGE_SERVERS;
     }
 
+    // Focus management for overlay transitions
+    var previousFocusBeforeOverlay = null;
+
+    $scope.$watch(function() { return page; }, function(newPage, oldPage) {
+        if (newPage === oldPage) return;
+
+        // When entering an overlay, save focus and move focus into the overlay
+        if (newPage === PAGE_SETTINGS || newPage === PAGE_WELCOME || newPage === PAGE_SERVERS) {
+            previousFocusBeforeOverlay = document.activeElement;
+
+            $timeout(function() {
+                var overlay = null;
+                if (newPage === PAGE_SETTINGS) {
+                    overlay = document.getElementById('page-settings');
+                } else if (newPage === PAGE_WELCOME) {
+                    overlay = document.querySelector('[ng-show="showWelcome()"] .wrapper, [ng-show="showWelcome()"]');
+                } else if (newPage === PAGE_SERVERS) {
+                    overlay = document.querySelector('[ng-show="showServers()"] .wrapper, [ng-show="showServers()"]');
+                }
+
+                if (overlay) {
+                    // Focus the first focusable element in the overlay
+                    var focusable = overlay.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])') as HTMLElement;
+                    if (focusable) {
+                        focusable.focus();
+                    }
+                }
+            }, 100);
+        }
+
+        // When returning to torrents, restore focus
+        if (newPage === PAGE_TORRENTS && previousFocusBeforeOverlay) {
+            $timeout(function() {
+                if (previousFocusBeforeOverlay && document.body.contains(previousFocusBeforeOverlay)) {
+                    previousFocusBeforeOverlay.focus();
+                }
+                previousFocusBeforeOverlay = null;
+            }, 100);
+        }
+    });
+
 }]

@@ -1,13 +1,13 @@
-<div data-role="labels" dropdown class="ui icon top left pointing dropdown button" ng-class="{disabled: enabled}">
-  <i class="tag icon"></i>
-  <div class="menu">
+<div data-role="labels" dropdown class="ui icon top left pointing dropdown button" ng-class="{disabled: enabled}" aria-label="Labels">
+  <i class="tag icon" aria-hidden="true"></i>
+  <div class="menu" role="menu">
     <div class="ui icon search input">
-      <i class="search icon"></i>
-      <input type="text" placeholder="Search labels..." />
+      <i class="search icon" aria-hidden="true"></i>
+      <input type="text" placeholder="Search labels..." aria-label="Search labels" />
     </div>
-    <div data-role="new-label" class="item" ng-click="openNewLabelModal()"><i class="edit icon"></i> New Label</div>
-    <div class="scrolling menu">
-      <div class="item" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
+    <div data-role="new-label" class="item" role="menuitem" tabindex="-1" ng-click="openNewLabelModal()" ng-keydown="($event.key === 'Enter' || $event.key === ' ') && openNewLabelModal()"><i class="edit icon" aria-hidden="true"></i> New Label</div>
+    <div class="scrolling menu" role="group" aria-label="Available labels">
+      <div class="item" role="menuitem" tabindex="-1" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)" ng-keydown="($event.key === 'Enter' || $event.key === ' ') && action(label)">{{label}}</div>
       <div></div>
     </div>
   </div>

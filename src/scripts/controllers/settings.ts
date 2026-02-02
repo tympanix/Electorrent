@@ -187,6 +187,34 @@ export let settingsController = ["$rootScope", "$scope", "$injector", "$q", "$bi
         }
     }
 
+    $scope.moveColumn = function(index, event) {
+        var columns = $scope.server.columns
+        if (event.key === 'ArrowUp' && index > 0) {
+            event.preventDefault()
+            var tmp = columns[index - 1]
+            columns[index - 1] = columns[index]
+            columns[index] = tmp
+            // Re-focus the handle after Angular re-renders
+            setTimeout(function() {
+                var handles = document.querySelectorAll('.sort.handle')
+                if (handles[index - 1]) {
+                    (handles[index - 1] as HTMLElement).focus()
+                }
+            }, 50)
+        } else if (event.key === 'ArrowDown' && index < columns.length - 1) {
+            event.preventDefault()
+            var tmp = columns[index + 1]
+            columns[index + 1] = columns[index]
+            columns[index] = tmp
+            setTimeout(function() {
+                var handles = document.querySelectorAll('.sort.handle')
+                if (handles[index + 1]) {
+                    (handles[index + 1] as HTMLElement).focus()
+                }
+            }, 50)
+        }
+    }
+
     $scope.gotoPage = function(page) {
         $scope.page = page;
     }
@@ -195,5 +223,19 @@ export let settingsController = ["$rootScope", "$scope", "$injector", "$q", "$bi
         $scope.force = force || false
         $scope.gotoPage(page);
     })
+
+    // Escape key closes settings
+    var settingsElement = document.getElementById('page-settings')
+    if (settingsElement) {
+        angular.element(settingsElement).on('keydown', function(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault()
+                event.stopPropagation()
+                $scope.$apply(function() {
+                    $scope.close()
+                })
+            }
+        })
+    }
 
 }]

@@ -86,7 +86,10 @@ export let sort = [function() {
         }
 
         var column = $(element);
-        column.append('<i class="ui sorting icon"></i>');
+        column.attr('tabindex', '0');
+        column.attr('role', 'columnheader');
+        column.attr('aria-sort', 'none');
+        column.append('<i class="ui sorting icon" aria-hidden="true"></i>');
         bindSortAction(scope, column, ctrl);
         scope.update()
     }
@@ -108,31 +111,48 @@ export let sort = [function() {
                 showSortingArrows(scope, element, ctrl);
             }
         });
+
+        element.on('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                showSortingArrows(scope, element, ctrl);
+            }
+        });
     }
 
     function showSortingArrows(scope, element, ctrl) {
         if(element.is('.sortdown, .sortup')) {
             element.toggleClass('sortdown sortup');
         } else {
-            if (ctrl.last) ctrl.last.removeClass('sortdown sortup');
+            if (ctrl.last) {
+                ctrl.last.removeClass('sortdown sortup');
+                ctrl.last.attr('aria-sort', 'none');
+            }
             element.addClass('sortdown')
             ctrl.last = element;
         }
 
         var desc = element.hasClass('sortdown');
+        element.attr('aria-sort', desc ? 'descending' : 'ascending');
         ctrl.sorting(scope.sort, desc);
         ctrl.save(scope.sort, desc);
     }
 
     function setSortingArrow(scope, element, ctrl, sortDesc) {
-        if (ctrl.last) ctrl.last.removeClass('sortdown sortup');
+        if (ctrl.last) {
+            ctrl.last.removeClass('sortdown sortup');
+            ctrl.last.attr('aria-sort', 'none');
+        }
 
         if (sortDesc === true) {
             element.addClass('sortdown')
+            element.attr('aria-sort', 'descending');
         } else if (sortDesc === false) {
             element.addClass('sortup')
+            element.attr('aria-sort', 'ascending');
         } else {
             element.removeClass('sortdown sortup')
+            element.attr('aria-sort', 'none');
         }
 
         ctrl.last = element;

@@ -16,7 +16,7 @@
         <tr ng-repeat="server in settings.servers">
             <td class="collapsing">
                 <div class="ui toggle checkbox">
-                    <input type="checkbox" ng-model="server.default" ng-change="toggleDefaultServer(server)">
+                    <input type="checkbox" ng-model="server.default" ng-change="toggleDefaultServer(server)" aria-label="Set {{server.getName()}} as default server">
                     <label></label>
                 </div>
             </td>
@@ -26,17 +26,17 @@
                 <div ng-switch="server.proto">
                     <div class="" ng-switch-when="http">
                         <div class="ui label">
-                            <i class="unlock alternate icon"></i> {{server.proto}}
+                            <i class="unlock alternate icon" aria-hidden="true"></i> {{server.proto}}
                         </div>
                     </div>
                     <div class="" ng-switch-when="https">
                         <div class="ui label">
-                            <i class="green lock icon"></i> {{server.proto}}
+                            <i class="green lock icon" aria-hidden="true"></i> {{server.proto}}
                         </div>
                     </div>
                     <div class="" ng-switch-default>
                         <div class="ui label">
-                            <i class="help icon"></i> {{server.proto}}
+                            <i class="help icon" aria-hidden="true"></i> {{server.proto}}
                         </div>
                     </div>
                 </div>
@@ -44,14 +44,14 @@
             <td>{{server.port}}</td>
             <td>{{server.user}}</td>
             <td class="collapsing center aligned">
-                <button ng-disabled="$first" class="circular green ui icon mini button" ng-click="moveServerUp(server)">
-                    <i class="icon arrow up"></i>
+                <button ng-disabled="$first" class="circular green ui icon mini button" ng-click="moveServerUp(server)" aria-label="Move {{server.getName()}} up">
+                    <i class="icon arrow up" aria-hidden="true"></i>
                 </button>
-                <button class="circular blue ui icon mini button" ng-click="openRenameModal(server)">
-                    <i class="icon tag"></i>
+                <button class="circular blue ui icon mini button" ng-click="openRenameModal(server)" aria-label="Rename {{server.getName()}}">
+                    <i class="icon tag" aria-hidden="true"></i>
                 </button>
-                <button class="circular red ui icon mini button" ng-click="removeServer(server)">
-                    <i class="icon remove"></i>
+                <button class="circular red ui icon mini button" ng-click="removeServer(server)" aria-label="Remove {{server.getName()}}">
+                    <i class="icon remove" aria-hidden="true"></i>
                 </button>
             </td>
         </tr>

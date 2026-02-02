@@ -6,13 +6,13 @@
             <label>Bittorrent Client</label>
             <dropdown class="fluid" title="Client Program" ng-model="server.client" ng-change="setPath()">
                 <dropdown-group value="id" title="client.name" ng-repeat="(id, client) in btclients">
-                    <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}}
+                    <i class="icon torrent big" ng-class="client.icon" aria-hidden="true"></i> {{client.name}}
                 </dropdown-group>
             </dropdown>
         </div>
         <div class="four wide field">
             <label>Protocol</label>
-            <dropdown class="fluid" title="Client Program" ng-model="server.proto">
+            <dropdown class="fluid" title="Protocol" ng-model="server.proto">
                 <dropdown-group value="http" title="http">http</dropdown-group>
                 <dropdown-group value="https" title="https">https</dropdown-group>
             </dropdown>
@@ -20,43 +20,43 @@
     </div>
     <div class="two fields">
         <div class="field six wide">
-            <label>IP Address</label>
+            <label for="conn-ip">IP Address</label>
             <div class="ui left icon input">
-                <i class="world icon"></i>
-                <input type="text" name="ip" ng-model="server.ip" placeholder="IP Address">
+                <i class="world icon" aria-hidden="true"></i>
+                <input type="text" id="conn-ip" name="ip" ng-model="server.ip" placeholder="IP Address">
             </div>
         </div>
         <div class="field four wide">
-            <label>Port</label>
+            <label for="conn-port">Port</label>
             <div class="ui left icon input">
-                <i class="sitemap icon"></i>
-                <input type="number" name="port" ng-model="server.port" placeholder="Port">
+                <i class="sitemap icon" aria-hidden="true"></i>
+                <input type="number" id="conn-port" name="port" ng-model="server.port" placeholder="Port">
             </div>
         </div>
         <div class="field six wide">
-            <label>Path</label>
+            <label for="conn-path">Path</label>
             <div class="ui left icon action input">
-                <i class="linkify icon"></i>
-                <input type="text" name="path" ng-model="server.path" placeholder="Path" ng-change="lockPath()">
-                <button class="ui icon button" ng-click="resetPath()">
-                    <i class="refresh icon"></i>
+                <i class="linkify icon" aria-hidden="true"></i>
+                <input type="text" id="conn-path" name="path" ng-model="server.path" placeholder="Path" ng-change="lockPath()">
+                <button class="ui icon button" ng-click="resetPath()" aria-label="Reset path">
+                    <i class="refresh icon" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
     </div>
     <div class="two fields">
         <div class="field">
-            <label>Username</label>
+            <label for="conn-username">Username</label>
             <div class="ui left icon input">
-                <i class="user icon"></i>
-                <input type="text" name="username" ng-model="server.user" placeholder="Username">
+                <i class="user icon" aria-hidden="true"></i>
+                <input type="text" id="conn-username" name="username" ng-model="server.user" placeholder="Username">
             </div>
         </div>
         <div class="field">
-            <label>Password</label>
+            <label for="conn-password">Password</label>
             <div class="ui left icon input">
-                <i class="lock icon"></i>
-                <input type="password" name="password" ng-model="server.password" placeholder="Password">
+                <i class="lock icon" aria-hidden="true"></i>
+                <input type="password" id="conn-password" name="password" ng-model="server.password" placeholder="Password">
             </div>
         </div>
     </div>

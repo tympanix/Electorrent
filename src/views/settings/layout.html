@@ -12,16 +12,16 @@
     <tbody ui-sortable="layoutSortOptions" ng-model="server.columns">
         <tr ng-repeat="col in server.columns">
             <td style="min-width: 12em">
-                <div class="sort handle">
-                    <i class="ui grey maximize icon"></i>
+                <div class="sort handle" role="button" tabindex="0" aria-label="Reorder {{col.name}}, use arrow keys" ng-keydown="moveColumn($index, $event)">
+                    <i class="ui grey maximize icon" aria-hidden="true"></i>
                 </div>
             </td>
             <td style="min-width: 12em">
               <div class="ui checkbox">
-                  <input type="checkbox" ng-model="col.enabled"><label></label>
+                  <input type="checkbox" ng-model="col.enabled" id="col-enabled-{{$index}}" aria-label="Enable {{col.name}} column"><label for="col-enabled-{{$index}}">{{col.name}}</label>
               </div>
             </td>
-            <td style="width: 100%">{{col.name}}</td>
+            <td style="width: 100%" aria-hidden="true">{{col.name}}</td>
         </tr>
     </tbody>
 </table>

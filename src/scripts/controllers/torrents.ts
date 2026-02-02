@@ -273,6 +273,32 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         $scope.contextMenu.show(event, selected);
     };
 
+    $scope.handleRowKeydown = function(event, torrent, index) {
+        // Handle Enter/Space for selection
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            $scope.setSelected(event, torrent, index);
+        }
+        // Handle Shift+F10 or ContextMenu key for context menu
+        else if ((event.shiftKey && (event.key === 'F10' || event.keyCode === 121)) || event.key === 'ContextMenu' || event.keyCode === 93) {
+            event.preventDefault();
+            event.stopPropagation();
+            // Create a synthetic event with the row's position
+            var row = event.target;
+            if (row.tagName !== 'TR') {
+                row = row.closest('tr') || row;
+            }
+            var rect = row.getBoundingClientRect();
+            var syntheticEvent = {
+                pageX: rect.left + rect.width / 2 + window.scrollX,
+                pageY: rect.top + rect.height / 2 + window.scrollY,
+                preventDefault: function() {},
+                stopPropagation: function() {}
+            };
+            $scope.showContextMenu(syntheticEvent, torrent, index);
+        }
+    };
+
     $scope.numInFilter = function(status) {
         var num = 0;
         var filter = torrentFilter(status);
@@ -289,6 +315,23 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         return selected.length === 0;
     }
 
+    function announceSelection(text) {
+        $timeout(function() {
+            var el = document.getElementById('selection-announcement');
+            if (el) {
+                // Clear first to ensure repeated identical announcements are spoken
+                el.textContent = '';
+                $timeout(function() {
+                    el.textContent = text;
+                }, 50);
+            }
+        }, 0);
+    }
+
+    function torrentDisplayName(torrent) {
+        return torrent.decodedName || torrent.name || 'Unknown torrent';
+    }
+
     function toggleSelect(target){
         var torrent = $scope.torrents[target.hash]
         if (!torrent.selected){
@@ -300,6 +343,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         }
         torrent.selected = !torrent.selected;
         lastSelected = torrent;
+        announceSelection(torrentDisplayName(torrent) + (torrent.selected ? ' selected' : ' unselected'));
     }
 
     function deselectAll(){
@@ -316,6 +360,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
         torrent.selected = true
         selected.push(torrent);
         lastSelected = torrent;
+        announceSelection(torrentDisplayName(torrent) + ' selected');
     }
 
     function multiSelect(index){
@@ -339,6 +384,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
             selected.push($scope.arrayTorrents[i]);
             i++;
         }
+        announceSelection(selected.length + ' torrents selected');
     }
 
     $scope.setSelected = function(event, torrent, index) {
@@ -612,5 +658,36 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
             })
         }
     }
+
+    // Global keyboard accessibility handler
+    angular.element(document).on('keydown', function(event) {
+        const target = event.target;
+
+        // Handle dropdown navigation
+        if (target.hasAttribute('role') && target.getAttribute('role') === 'combobox') {
+            const dropdown: any = angular.element(target);
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                if (dropdown.hasClass('active')) {
+                    // Close and select active item
+                    const active = dropdown.find('.item.selected, .item.active').first();
+                    if (active.length) {
+                        active.click();
+                    }
+                } else {
+                    // Open dropdown
+                    dropdown.dropdown('show');
+                }
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                dropdown.dropdown('hide');
+            } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (!dropdown.hasClass('active')) {
+                    dropdown.dropdown('show');
+                }
+            }
+        }
+    });
 
 }]

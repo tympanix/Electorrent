@@ -1,75 +1,136 @@
 <!DOCTYPE html>
 <div id="page-torrents" class="wrapper" ng-controller="torrentsController">
-  <div ng-if="connectionLost" class="popup animated">
+  <div id="selection-announcement" class="sr-only" role="status" aria-live="assertive" aria-atomic="true"></div>
+  <div ng-if="connectionLost" class="popup animated" role="alert" aria-live="assertive">
     <div class="content">
       <h2 class="ui center aligned icon header">
-        <i class="plug icon"></i>
+        <i class="plug icon" aria-hidden="true"></i>
         Connection Lost!
       </h2>
     </div>
   </div>
   <div class="torrent sidebar">
-    <ul class="nav">
-      <li data-state="all" ng-click="filterByStatus('all')" ng-class="activeOn('all')">
-        <i class="ui large teal asterisk icon"></i>
-        All
-        <div class="ui torrent sort label">{{numInFilter('all')}}</div>
+    <ul class="nav" role="navigation" aria-label="Filter torrents by status">
+      <li data-state="all">
+        <button type="button"
+                class="filter-button"
+                ng-click="filterByStatus('all')"
+                ng-class="activeOn('all')"
+                aria-pressed="{{activeOn('all') ? 'true' : 'false'}}"
+                aria-label="Show all torrents">
+          <i class="ui large teal asterisk icon" aria-hidden="true"></i>
+          All
+          <div class="ui torrent sort label" aria-label="{{numInFilter('all')}} torrents">{{numInFilter('all')}}</div>
+        </button>
       </li>
-      <li data-state="downloading" ng-click="filterByStatus('downloading')" ng-class="activeOn('downloading')">
-        <i class="ui large blue arrow down icon"></i>
-        Downloading
-        <div class="ui torrent sort label">{{numInFilter('downloading')}}</div>
+      <li data-state="downloading">
+        <button type="button"
+                class="filter-button"
+                ng-click="filterByStatus('downloading')"
+                ng-class="activeOn('downloading')"
+                aria-pressed="{{activeOn('downloading') ? 'true' : 'false'}}"
+                aria-label="Show downloading torrents">
+          <i class="ui large blue arrow down icon" aria-hidden="true"></i>
+          Downloading
+          <div class="ui torrent sort label" aria-label="{{numInFilter('downloading')}} torrents">{{numInFilter('downloading')}}</div>
+        </button>
       </li>
-      <li data-state="finished" ng-click="filterByStatus('finished')" ng-class="activeOn('finished')">
-        <i class="ui large green checkmark icon"></i>
-        Finished
-        <div class="ui torrent sort label">{{numInFilter('finished')}}</div>
+      <li data-state="finished">
+        <button type="button"
+                class="filter-button"
+                ng-click="filterByStatus('finished')"
+                ng-class="activeOn('finished')"
+                aria-pressed="{{activeOn('finished') ? 'true' : 'false'}}"
+                aria-label="Show finished torrents">
+          <i class="ui large green checkmark icon" aria-hidden="true"></i>
+          Finished
+          <div class="ui torrent sort label" aria-label="{{numInFilter('finished')}} torrents">{{numInFilter('finished')}}</div>
+        </button>
       </li>
-      <li data-state="seeding" ng-click="filterByStatus('seeding')" ng-class="activeOn('seeding')">
-        <i class="ui large orange arrow up icon"></i>
-        Seeding
-        <div class="ui torrent sort label">{{numInFilter('seeding')}}</div>
+      <li data-state="seeding">
+        <button type="button"
+                class="filter-button"
+                ng-click="filterByStatus('seeding')"
+                ng-class="activeOn('seeding')"
+                aria-pressed="{{activeOn('seeding') ? 'true' : 'false'}}"
+                aria-label="Show seeding torrents">
+          <i class="ui large orange arrow up icon" aria-hidden="true"></i>
+          Seeding
+          <div class="ui torrent sort label" aria-label="{{numInFilter('seeding')}} torrents">{{numInFilter('seeding')}}</div>
+        </button>
       </li>
-      <li data-state="stopped" ng-click="filterByStatus('stopped')" ng-class="activeOn('stopped')">
-        <i class="ui large grey pause icon"></i>
-        Stopped
-        <div class="ui torrent sort label">{{numInFilter('stopped')}}</div>
+      <li data-state="stopped">
+        <button type="button"
+                class="filter-button"
+                ng-click="filterByStatus('stopped')"
+                ng-class="activeOn('stopped')"
+                aria-pressed="{{activeOn('stopped') ? 'true' : 'false'}}"
+                aria-label="Show stopped torrents">
+          <i class="ui large grey pause icon" aria-hidden="true"></i>
+          Stopped
+          <div class="ui torrent sort label" aria-label="{{numInFilter('stopped')}} torrents">{{numInFilter('stopped')}}</div>
+        </button>
       </li>
-      <li data-state="error" ng-click="filterByStatus('error')" ng-class="activeOn('error')">
-        <i class="ui large red remove icon"></i>
-        Failed
-        <div class="ui torrent sort label">{{numInFilter('error')}}</div>
+      <li data-state="error">
+        <button type="button"
+                class="filter-button"
+                ng-click="filterByStatus('error')"
+                ng-class="activeOn('error')"
+                aria-pressed="{{activeOn('error') ? 'true' : 'false'}}"
+                aria-label="Show failed torrents">
+          <i class="ui large red remove icon" aria-hidden="true"></i>
+          Failed
+          <div class="ui torrent sort label" aria-label="{{numInFilter('error')}} torrents">{{numInFilter('error')}}</div>
+        </button>
       </li>
     </ul>
     <div id="torrent-sidebar-labels">
       <div class="section">
-        <span>Labels</span>
-        <a data-role="labels-clear" class="ui gray basic mini clear button" ng-click="filterByLabel()">Clear</a>
+        <span id="labels-heading">Labels</span>
+        <button type="button"
+                data-role="labels-clear"
+                class="ui gray basic mini clear button"
+                ng-click="filterByLabel()"
+                aria-label="Clear label filter">
+          Clear
+        </button>
       </div>
-      <ul class="filter label">
-        <span ng-if="labels.length == 0" class="meta text">No labels...</span>
-        <li data-label="{{label}}" ng-repeat="label in labels">
-          <div class="ui fluid torrent tag label" ng-click="filterByLabel(label)" ng-class="{blue: activeLabel(label)}">
+      <ul class="filter label" role="list" aria-labelledby="labels-heading">
+        <span ng-if="labels.length == 0" class="meta text" role="status">No labels...</span>
+        <li data-label="{{label}}" ng-repeat="label in labels" role="listitem">
+          <button type="button"
+                  class="ui fluid torrent tag label"
+                  ng-click="filterByLabel(label)"
+                  ng-class="{blue: activeLabel(label)}"
+                  aria-pressed="{{activeLabel(label) ? 'true' : 'false'}}"
+                  aria-label="Filter by label: {{label}}">
             {{label}}
-          </div>
+          </button>
         </li>
       </ul>
     </div>
     <div id="torrent-sidebar-trackers" ng-if="$btclient.enableTrackerFilter">
       <div class="section">
-        <span>Trackers</span>
-        <a data-role="trackers-clear" class="ui gray basic mini clear button" ng-click="filterByTracker()">Clear</a>
+        <span id="trackers-heading">Trackers</span>
+        <button type="button"
+                data-role="trackers-clear"
+                class="ui gray basic mini clear button"
+                ng-click="filterByTracker()"
+                aria-label="Clear tracker filter">
+          Clear
+        </button>
       </div>
-      <ul class="filter label">
-        <span ng-if="trackers.length == 0" class="meta text">No trackers...</span>
-        <li ng-repeat="tracker in trackers">
-          <div
-            class="ui fluid torrent tag label"
-            ng-click="filterByTracker(tracker)"
-            ng-class="{blue: activeTracker(tracker)}"
-          >
+      <ul class="filter label" role="list" aria-labelledby="trackers-heading">
+        <span ng-if="trackers.length == 0" class="meta text" role="status">No trackers...</span>
+        <li ng-repeat="tracker in trackers" role="listitem">
+          <button type="button"
+                  class="ui fluid torrent tag label"
+                  ng-click="filterByTracker(tracker)"
+                  ng-class="{blue: activeTracker(tracker)}"
+                  aria-pressed="{{activeTracker(tracker) ? 'true' : 'false'}}"
+                  aria-label="Filter by tracker: {{tracker}}">
             {{tracker}}
-          </div>
+          </button>
         </li>
       </ul>
     </div>
@@ -89,8 +150,10 @@
       </div>
       <div class="actions right">
         <div class="ui fluid search" ng-class="{loading: isSearching}">
+          <label for="torrent-search" class="sr-only">Search torrents</label>
           <div class="ui icon input">
             <input
+              id="torrent-search"
               search
               class="prompt"
               type="text"
@@ -98,17 +161,18 @@
               ng-model="filters.search"
               ng-change="filterBySearch()"
               ng-model-options="filters.options"
+              aria-label="Search torrents"
             />
-            <i class="search icon"></i>
+            <i class="search icon" aria-hidden="true"></i>
           </div>
         </div>
       </div>
     </div>
     <div class="main-content" limit-bind="torrentLimit">
-      <div ng-if="showDragAndDrop" class="popup animated">
+      <div ng-if="showDragAndDrop" class="popup animated" role="status" aria-live="polite">
         <div class="content">
           <h2 class="ui center aligned icon header">
-            <i class="add circle icon"></i>
+            <i class="add circle icon" aria-hidden="true"></i>
             Upload Torrent Files
             <div class="sub header" ng-if="!settings.alwaysPromptUploadOptions && $btclient.uploadOptionsEnable">
               Hold down <div class="ui label">{{ uploadAdvancedOptionsKey }}</div> key for advanced options
@@ -119,6 +183,8 @@
       <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="0.5">
         <table
           id="torrentTable"
+          role="grid"
+          aria-label="Torrent list"
           ng-class="{ 'compact': settings.ui.displayCompact, 'is-sticky': settings.ui.fixedHeader }"
           rz-table
           rz-busy="guiBusy"
@@ -128,12 +194,15 @@
           columns="$server.columns"
           class="ui single line unstackable selectable fixed torrent resize table"
         >
+          <caption class="sr-only">List of torrents showing name, status, size, and progress</caption>
           <thead>
-          <tr sorting="changeSorting" mode="$server.id">
+          <tr sorting="changeSorting" mode="$server.id" role="row">
             <th
                     ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name"
                     rz-col="col.attribute"
                     sort="col.attribute"
+                    scope="col"
+                    role="columnheader"
             >
               {{::col.name}}
             </th>
@@ -145,23 +214,27 @@
               ng-class="{active: torrent.selected}"
               ng-click="setSelected($event, torrent, $index)"
               ng-right-click="showContextMenu($event, torrent, $index)"
+              ng-keydown="handleRowKeydown($event, torrent, $index)"
               repeat-done="renderDone"
               data-hash="{{torrent.hash | lowercase }}"
               limit-source
               torrent-row
+              role="row"
+              tabindex="0"
+              aria-selected="{{torrent.selected}}"
             ></tr>
           </tbody>
         </table>
       </div>
     </div>
-    <div class="action footer status-bar">
+    <div class="action footer status-bar" role="status" aria-live="polite">
       <div class="download-speed">
-        <i class="ui blue arrow down icon"></i>
-        {{ totalDownloadSpeed | speed }} <span ng-if="totalDownloaded">({{ totalDownloaded | bytes:2 }})</span>
+        <i class="ui blue arrow down icon" aria-hidden="true"></i>
+        <span aria-label="Download speed">{{ totalDownloadSpeed | speed }}</span> <span ng-if="totalDownloaded" aria-label="Total downloaded">({{ totalDownloaded | bytes:2 }})</span>
       </div>
       <div class="upload-speed">
-        <i class="ui orange arrow up icon"></i>
-        {{ totalUploadSpeed | speed }} <span ng-if="totalUploaded">({{ totalUploaded | bytes:2 }})</span>
+        <i class="ui orange arrow up icon" aria-hidden="true"></i>
+        <span aria-label="Upload speed">{{ totalUploadSpeed | speed }}</span> <span ng-if="totalUploaded" aria-label="Total uploaded">({{ totalUploaded | bytes:2 }})</span>
       </div>
     </div>
   </div>

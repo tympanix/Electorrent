@@ -4,8 +4,8 @@ export let progress = ['$timeout', function($timeout) {
             torrent: '=progress',
         },
         restrict: 'A',
-        template: `<div class="ui torrent progress" ng-class="class()">
-            <label>{{label()}}</label>
+        template: `<div class="ui torrent progress" ng-class="class()" role="progressbar" aria-valuenow="{{torrent.percent / 10}}" aria-valuemin="0" aria-valuemax="100" aria-label="{{label()}}">
+            <label aria-hidden="true">{{label()}}</label>
             <div class="bar idle"></div>
         </div>`,
         replace: true,

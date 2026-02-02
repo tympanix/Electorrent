@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <div ng-controller="notificationsController">
     <div id="notifications" class="notifications container">
-        <div class="animated notification" ng-repeat="notification in notifications">
+        <div class="animated notification"
+             ng-repeat="notification in notifications"
+             role="{{notification.type === 'negative' ? 'alert' : 'status'}}"
+             aria-live="{{notification.type === 'negative' ? 'assertive' : 'polite'}}"
+             aria-atomic="true">
             <div class="ui message" ng-class="notification.type">
-                <i class="close icon" ng-click="close($index)"></i>
+                <button type="button"
+                        class="close icon"
+                        ng-click="close($index)"
+                        aria-label="Dismiss notification">
+                    <i class="close icon" aria-hidden="true"></i>
+                </button>
                 <div class="header">
                     {{notification.title}}
                 </div>

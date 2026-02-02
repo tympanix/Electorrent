@@ -6,23 +6,24 @@
     <div class="content">
         <form class="ui form" ng-submit="applyAndClose()">
             <div class="field">
+                <label for="rename-server-input" class="sr-only">Server Name</label>
                 <div class="ui left icon action input">
-                    <i class="user icon"></i>
-                    <input type="text" name="servername" maxlength="36" ng-model="data.name" placeholder="Server Name">
-                    <a class="ui icon button" ng-click="data.reset()">
-                        <i class="refresh icon"></i>
-                    </a>
+                    <i class="user icon" aria-hidden="true"></i>
+                    <input type="text" id="rename-server-input" name="servername" maxlength="36" ng-model="data.name" placeholder="Server Name" aria-label="Server Name">
+                    <button type="button" class="ui icon button" ng-click="data.reset()" aria-label="Reset name">
+                        <i class="refresh icon" aria-hidden="true"></i>
+                    </button>
                 </div>
             </div>
         </form>
     </div>
     <div class="actions">
-        <a class="ui black deny button">
+        <button type="button" class="ui black deny button">
             Cancel
-        </a>
+        </button>
         <button type="submit" class="ui positive right labeled icon button">
             Rename
-            <i class="tag icon"></i>
+            <i class="tag icon" aria-hidden="true"></i>
         </button>
     </div>
 </div>

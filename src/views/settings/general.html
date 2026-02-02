@@ -4,7 +4,7 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="asterisk icon"></i>
+                <i class="asterisk icon" aria-hidden="true"></i>
                 Startup Connection
             </div>
             <div class="description">
@@ -22,7 +22,7 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="theme icon"></i>
+                <i class="theme icon" aria-hidden="true"></i>
                 Theme
             </div>
             <div class="description">
@@ -38,7 +38,7 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="text height icon"></i>
+                <i class="text height icon" aria-hidden="true"></i>
                 Display Size
             </div>
             <div class="description">
@@ -56,7 +56,7 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="expand icon"></i>
+                <i class="expand icon" aria-hidden="true"></i>
                 Table Resize Style
             </div>
             <div class="description">
@@ -75,7 +75,7 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="refresh icon"></i>
+                <i class="refresh icon" aria-hidden="true"></i>
                 Synchronization Speed
             </div>
             <div class="description">
@@ -83,7 +83,7 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <dropdown class="fluid" title="Resize Mode" ng-model="settings.refreshRate">
+            <dropdown class="fluid" title="Synchronization Speed" ng-model="settings.refreshRate">
                 <dropdown-group data-value="1000">Fast (1 second)</dropdown-group>
                 <dropdown-group data-value="2000">Default (2 seconds)</dropdown-group>
                 <dropdown-group data-value="4000">Slow (4 seconds)</dropdown-group>
@@ -93,7 +93,7 @@
     <div class="ui card" ng-if="!is.linux()">
         <div class="content">
             <div class="header">
-                <i class="magnet icon"></i>
+                <i class="magnet icon" aria-hidden="true"></i>
                 Magnet Links
             </div>
             <div class="description">
@@ -101,13 +101,13 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="general.magnets"></toggle>
+            <toggle ng-model="general.magnets"><span class="sr-only">Magnet Links</span></toggle>
         </div>
     </div>
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="cubes icon"></i>
+                <i class="cubes icon" aria-hidden="true"></i>
                 Compact Listings
             </div>
             <div class="description">
@@ -115,14 +115,14 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="settings.ui.displayCompact"></toggle>
+            <toggle ng-model="settings.ui.displayCompact"><span class="sr-only">Compact Listings</span></toggle>
         </div>
     </div>
 
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="announcement icon"></i>
+                <i class="announcement icon" aria-hidden="true"></i>
                 Notifications
             </div>
             <div class="description">
@@ -130,14 +130,14 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="settings.ui.notifications"></toggle>
+            <toggle ng-model="settings.ui.notifications"><span class="sr-only">Notifications</span></toggle>
         </div>
     </div> 
 
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="paint brush icon"></i>
+                <i class="paint brush icon" aria-hidden="true"></i>
                 Clean Names
             </div>
             <div class="description">
@@ -145,13 +145,13 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="settings.ui.cleanNames"></toggle>
+            <toggle ng-model="settings.ui.cleanNames"><span class="sr-only">Clean Names</span></toggle>
         </div>
     </div>
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="pin icon"></i>
+                <i class="pin icon" aria-hidden="true"></i>
                 Fixed Header
             </div>
             <div class="description">
@@ -159,13 +159,13 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="settings.ui.fixedHeader"></toggle>
+            <toggle ng-model="settings.ui.fixedHeader"><span class="sr-only">Fixed Header</span></toggle>
         </div>
     </div>
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="bug icon"></i>
+                <i class="bug icon" aria-hidden="true"></i>
                 Debug Mode
             </div>
             <div class="description">
@@ -173,14 +173,14 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="settings.debugMode"></toggle>
+            <toggle ng-model="settings.debugMode"><span class="sr-only">Debug Mode</span></toggle>
         </div>
     </div>
 
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="upload icon"></i>
+                <i class="upload icon" aria-hidden="true"></i>
                 Automatic Updates
             </div>
             <div class="description">
@@ -188,14 +188,14 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="settings.automaticUpdates"></toggle>
+            <toggle ng-model="settings.automaticUpdates"><span class="sr-only">Automatic Updates</span></toggle>
         </div>
     </div>
 
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="trash icon"></i>
+                <i class="trash icon" aria-hidden="true"></i>
                 Delete Torrent Files
             </div>
             <div class="description">
@@ -203,14 +203,14 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="settings.autoRemoveTorrents"></toggle>
+            <toggle ng-model="settings.autoRemoveTorrents"><span class="sr-only">Delete Torrent Files</span></toggle>
         </div>
     </div>
 
     <div class="ui card">
         <div class="content">
             <div class="header">
-                <i class="trash icon"></i>
+                <i class="trash icon" aria-hidden="true"></i>
                 Always prompt for upload options
             </div>
             <div class="description">
@@ -218,7 +218,7 @@
             </div>
         </div>
         <div class="center aligned extra content">
-            <toggle ng-model="settings.alwaysPromptUploadOptions"></toggle>
+            <toggle ng-model="settings.alwaysPromptUploadOptions"><span class="sr-only">Always prompt for upload options</span></toggle>
         </div>
     </div>
 
