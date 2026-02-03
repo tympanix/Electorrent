@@ -51,7 +51,7 @@
     "@types/qs": "^6.9.7",
     "@types/tapable": "^0.2.5",
     "@types/underscore": "^1.10.24",
-    "@wdio/cli": "^9.14.0",
+    "@wdio/cli": "^9.23.3",
     "@wdio/electron-types": "^8.1.0",
     "@wdio/local-runner": "^9.14.0",
     "@wdio/mocha-framework": "^9.14.0",
