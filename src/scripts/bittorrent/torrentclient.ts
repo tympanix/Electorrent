@@ -1,4 +1,4 @@
-import { Torrent } from "./abstracttorrent"
+import { Torrent, TorrentFile } from "./abstracttorrent"
 
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
@@ -71,6 +71,8 @@ export interface ContextActionButton<T extends Torrent> {
     icon?: string
     role?: TorrentActionRole
     check?(torrent: T): boolean
+    /** Optional id for controller to handle specially (e.g. 'torrent-files' to open file selection modal). */
+    id?: string
 }
 
 export interface ContextActionMenu<T extends Torrent> {
@@ -166,6 +168,34 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * Whether the client supports sorting by trackers or not
      */
     public enableTrackerFilter: boolean
+
+    /**
+     * When true, the client supports listing torrent files and setting which files to download
+     * (selective download). When false, the "Files" context menu item and file selection UI are hidden.
+     */
+    public supportsFileSelection: boolean = false
+
+    /**
+     * Get the list of files for a torrent. Only implemented when supportsFileSelection is true.
+     * @throws Error with message "File selection not supported for this client" when not supported.
+     */
+    async getTorrentFiles(torrent: T): Promise<TorrentFile[]> {
+        if (!this.supportsFileSelection) {
+            throw new Error("File selection not supported for this client")
+        }
+        return Promise.reject(new Error("File selection not supported for this client"))
+    }
+
+    /**
+     * Apply wanted/unwanted selection for torrent files. Only implemented when supportsFileSelection is true.
+     * @throws Error with message "File selection not supported for this client" when not supported.
+     */
+    async setTorrentFileSelection(torrent: T, files: TorrentFile[]): Promise<void> {
+        if (!this.supportsFileSelection) {
+            throw new Error("File selection not supported for this client")
+        }
+        return Promise.reject(new Error("File selection not supported for this client"))
+    }
 
     /**
      * A set of options supported by the client when uploading torrents (may be either torrent files
