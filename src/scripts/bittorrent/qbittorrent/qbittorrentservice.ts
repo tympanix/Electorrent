@@ -1,5 +1,6 @@
 import {Torrent} from "../abstracttorrent";
 import {TorrentActionList, TorrentClient, TorrentUpdates, ContextActionList, TorrentUploadOptions, TorrentUploadOptionsEnable} from "../torrentclient";
+import {TorrentFile} from "../abstracttorrent";
 import {QBittorrentTorrent} from "./torrentq";
 
 type CallbackFunc = (err: any, val: any) => void
@@ -37,10 +38,16 @@ type QBittorrentUploadFormData = Partial<Record<keyof QBittorrentUploadOptions, 
 
 const QBittorrent = require("@electorrent/node-qbittorrent");
 
+/** qBittorrent file priority: 0 = do not download, 1 = normal, 2 = high, 6 = maximal */
+const QBITTORRENT_PRIORITY_SKIP = 0;
+const QBITTORRENT_PRIORITY_NORMAL = 1;
+
 export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
 
     public name = "qBittorrent"
     public id = "qbittorrent"
+
+    public supportsFileSelection = true
 
     private qbittorrent: any
 
@@ -252,6 +259,50 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return this.delete(torrents)
     }
 
+    async getTorrentFiles(torrent: QBittorrentTorrent): Promise<TorrentFile[]> {
+      const api = (this.qbittorrent as any).api;
+      if (!api || typeof api.getJson !== 'function') {
+        return Promise.reject(new Error('qBittorrent API does not support getTorrentFiles'));
+      }
+      return new Promise((resolve, reject) => {
+        api.getJson('torrents/files', { qs: { hash: torrent.hash } }, (err: any, _res: any, body: any) => {
+          if (err) return reject(err);
+          if (!Array.isArray(body)) return reject(new Error('Invalid response'));
+          const files: TorrentFile[] = body.map((f: any, idx: number) => ({
+            index: f.index != null ? f.index : idx,
+            path: f.name || '',
+            name: (f.name || '').split(/[/\\]/).pop() || '',
+            size: typeof f.size === 'number' ? f.size : (parseInt(String(f.size), 10) || 0),
+            wanted: (f.priority != null ? f.priority : 1) !== QBITTORRENT_PRIORITY_SKIP,
+            priority: f.priority,
+          }));
+          resolve(files);
+        });
+      });
+    }
+
+    async setTorrentFileSelection(torrent: QBittorrentTorrent, files: TorrentFile[]): Promise<void> {
+      const api = (this.qbittorrent as any).api;
+      if (!api || typeof api.post !== 'function') {
+        return Promise.reject(new Error('qBittorrent API does not support setTorrentFileSelection'));
+      }
+      const wantedIds: number[] = [];
+      const unwantedIds: number[] = [];
+      files.forEach((f) => {
+        if (f.wanted) wantedIds.push(f.index);
+        else unwantedIds.push(f.index);
+      });
+      const setPrio = (ids: number[], priority: number) =>
+        new Promise<void>((resolve, reject) => {
+          if (ids.length === 0) return resolve();
+          api.post('torrents/filePrio', {
+            form: { hash: torrent.hash, id: ids.join('|'), priority: String(priority) },
+          }, (err: any) => (err ? reject(err) : resolve()));
+        });
+      await setPrio(unwantedIds, QBITTORRENT_PRIORITY_SKIP);
+      await setPrio(wantedIds, QBITTORRENT_PRIORITY_NORMAL);
+    }
+
 
     actionHeader: TorrentActionList<QBittorrentTorrent> = [
       {
@@ -304,6 +355,12 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
      *                          has to hold for all selected torrents, for the checkbox to be checked.
      */
     contextMenu: ContextActionList<QBittorrentTorrent> = [
+      {
+        id: 'torrent-files',
+        label: "Files",
+        click: () => Promise.resolve(),
+        icon: "file",
+      },
       {
         label: "Recheck",
         click: this.recheck,

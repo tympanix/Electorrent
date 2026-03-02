@@ -1,0 +1,48 @@
+<div class="torrent-files-tree">
+  <div class="ui small buttons" style="margin-bottom: 0.5rem;">
+    <button type="button" class="ui button" ng-click="selectAll()">Select all</button>
+    <button type="button" class="ui button" ng-click="selectNone()">Deselect all</button>
+    <button type="button" class="ui button" ng-click="invertSelection()">Invert</button>
+  </div>
+  <div class="ui list" style="max-height: 320px; overflow-y: auto;">
+    <div
+      class="item"
+      ng-repeat="row in visibleRows track by row.path"
+      style="padding-left: {{ row.depth * 16 + 8 }}px; display: flex; align-items: center; gap: 6px;"
+    >
+      <span
+        ng-if="row.isDirectory"
+        class="expand-icon"
+        ng-click="toggleExpanded(row.path)"
+        style="cursor: pointer; flex-shrink: 0; width: 20px; text-align: center;"
+        title="{{ isExpanded(row.path) ? 'Collapse' : 'Expand' }}"
+      >
+        <i class="ui icon chevron right" ng-if="!isExpanded(row.path)"></i>
+        <i class="ui icon chevron down" ng-if="isExpanded(row.path)"></i>
+      </span>
+      <span ng-if="!row.isDirectory" style="width: 20px; flex-shrink: 0;"></span>
+      <div class="ui checkbox" ng-if="row.isDirectory" ng-click="$event.stopPropagation();">
+        <input
+          type="checkbox"
+          ng-checked="row._folderWanted"
+          indeterminate-value="row._folderIndeterminate"
+          ng-click="setFolderWanted(row, !row._folderWanted); $event.stopPropagation();"
+          id="folder-cb-{{ row.path }}"
+        />
+        <label for="folder-cb-{{ row.path }}"></label>
+      </div>
+      <div class="ui checkbox" ng-if="row.file" ng-click="$event.stopPropagation();">
+        <input type="checkbox" ng-model="row.file.wanted" id="file-cb-{{ row.file.index }}" />
+        <label for="file-cb-{{ row.file.index }}"></label>
+      </div>
+      <span
+        class="content"
+        style="flex: 1; word-break: break-all; min-width: 0;"
+        title="{{ row.path }}"
+        ng-click="row.isDirectory && toggleExpanded(row.path)"
+        ng-style="row.isDirectory && { cursor: 'pointer' }"
+      >{{ row.name }}</span>
+      <span class="meta" style="flex-shrink: 0;">{{ row.size | bytes }}</span>
+    </div>
+  </div>
+</div>
