@@ -14,6 +14,9 @@ export interface TorrentFileRow {
   isDirectory: boolean;
   /** All files in this folder's subtree (for folder rows only) */
   filesInSubtree: TorrentFile[];
+  /** Folder-level checkbox state, computed in controller for template convenience. */
+  _folderWanted?: boolean;
+  _folderIndeterminate?: boolean;
 }
 
 interface TreeNode {
