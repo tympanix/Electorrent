@@ -201,6 +201,62 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await torrent.checkInState(["all", "downloading"])
           })
 
+          describe("given file selection is supported", function () {
+            before(function () {
+              if (!(options.client as any).supportsFileSelection) {
+                this.skip()
+              }
+            })
+
+            it("persists file wanted state via Files modal", async function () {
+              this.timeout(60 * 1000)
+
+              // Open context menu for the torrent row
+              const row = $(torrent.query)
+              await row.waitForExist({ timeout: 60 * 1000 })
+              await row.click({ button: "right" })
+
+              const contextMenu = $("#contextmenu")
+              await contextMenu.waitForDisplayed()
+
+              // Click the Files item in the context menu
+              const filesItem = contextMenu.$("a=Files")
+              await filesItem.waitForDisplayed()
+              await filesItem.click()
+              await contextMenu.waitForDisplayed({ reverse: true })
+
+              const modal = $("#torrentFilesModal")
+              await modal.waitForDisplayed()
+
+              // Wait for at least one file checkbox
+              const firstFileCheckbox = modal.$('.torrent-files-tree input[id^="file-cb-"]')
+              await firstFileCheckbox.waitForExist({ timeout: 30_000 })
+
+              const initialSelected = await firstFileCheckbox.isSelected()
+              await firstFileCheckbox.click()
+
+              const saveButton = modal.$("button.ui.green")
+              await saveButton.waitForEnabled()
+              await saveButton.click()
+              await modal.waitForDisplayed({ reverse: true })
+
+              // Reopen Files modal and verify state persisted
+              await row.click({ button: "right" })
+              await contextMenu.waitForDisplayed()
+              const filesItem2 = contextMenu.$("a=Files")
+              await filesItem2.waitForDisplayed()
+              await filesItem2.click()
+              await contextMenu.waitForDisplayed({ reverse: true })
+              await modal.waitForDisplayed()
+
+              const firstFileCheckboxAfter = modal.$('.torrent-files-tree input[id^="file-cb-"]')
+              await firstFileCheckboxAfter.waitForExist({ timeout: 30_000 })
+              const selectedAfter = await firstFileCheckboxAfter.isSelected()
+
+              chai.expect(selectedAfter).to.equal(!initialSelected)
+            })
+          })
+
           describe("given labels are supported", function () {
             requireFeatureHook(options, FeatureSet.Labels)
 
