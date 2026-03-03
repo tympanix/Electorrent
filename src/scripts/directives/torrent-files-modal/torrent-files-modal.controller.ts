@@ -61,10 +61,10 @@ export class TorrentFilesModalController {
       });
   }
 
-  loadFiles(): ng.IPromise<TorrentFile[] | void> {
+  loadFiles(): Promise<TorrentFile[] | void> {
     const torrent = this.scope.torrent;
     if (!torrent || !this.rootScope.$btclient || !this.rootScope.$btclient.supportsFileSelection) {
-      return this.scope.$q ? this.scope.$q.resolve() : Promise.resolve();
+      return Promise.resolve();
     }
     this.scope.loading = true;
     this.scope.error = null;
@@ -78,7 +78,7 @@ export class TorrentFilesModalController {
       })
       .finally(() => {
         this.scope.loading = false;
-      }) as ng.IPromise<TorrentFile[] | void>;
+      });
   }
 
   onShow() {
