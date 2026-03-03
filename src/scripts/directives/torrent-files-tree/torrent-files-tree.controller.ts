@@ -57,8 +57,8 @@ export class TorrentFilesTreeController {
     );
     this.scope.visibleRows.forEach((row) => {
       if (row.isDirectory) {
-        (row as any)._folderWanted = this.getFolderWanted(row);
-        (row as any)._folderIndeterminate = this.getFolderIndeterminate(row);
+        row._folderWanted = this.getFolderWanted(row);
+        row._folderIndeterminate = this.getFolderIndeterminate(row);
       }
     });
   }
