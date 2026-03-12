@@ -183,7 +183,7 @@ gulp.task('install', gulp.parallel('build:semantic'))
 gulp.task('develop', gulp.series("build", function() {
   watch({})
   return gulp.src(OUT)
-    .pipe(startApp(["--debug"], { cwd: OUT }))
+    .pipe(startApp(["--inspect=9229", "--", "--debug"], { cwd: OUT }))
 }))
 
 gulp.task('default', gulp.parallel('develop'));
