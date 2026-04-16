@@ -163,6 +163,10 @@
         <i class="ui orange arrow up icon"></i>
         {{ totalUploadSpeed | speed }} <span ng-if="totalUploaded">({{ totalUploaded | bytes:2 }})</span>
       </div>
+      <div class="free-space" ng-if="freeDiskSpace != null">
+        <i class="ui grey database icon"></i>
+        Free: {{ freeDiskSpace | bytes }}
+      </div>
     </div>
   </div>
 

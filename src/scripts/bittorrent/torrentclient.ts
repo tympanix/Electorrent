@@ -7,6 +7,7 @@ export interface TorrentUpdates {
     all?: any[],
     changed?: any[],
     deletes?: [],
+    freeDiskSpace?: number | null,
 }
 
 /**
@@ -204,4 +205,3 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      */
     public abstract contextMenu: ContextActionList<T>
 };
-
