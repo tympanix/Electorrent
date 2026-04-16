@@ -140,6 +140,15 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           await this.app.torrentsPageIsVisible()
         })
 
+        if (options.client.id === "qbittorrent") {
+          it("shows qBittorrent free space in the footer", async function() {
+            await browser.waitUntil(async () => {
+              const footerText = await this.app.getTorrentsFooterText();
+              return footerText.includes("Free:");
+            });
+          });
+        }
+
         describe("when a magnet link is uploaded", async function() {
           let torrent: e2e.Torrent
           requireFeatureHook(options, FeatureSet.MagnetLinks)

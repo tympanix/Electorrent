@@ -16,6 +16,7 @@ function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
   })
 }
 
+
 export interface QBittorrentUploadOptions {
   savepath?: string
   cookie?: string
@@ -43,9 +44,11 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     public id = "qbittorrent"
 
     private qbittorrent: any
+    private freeSpaceOnDisk: number | null = null
 
     connect(server): Promise<void> {
       let ca = server.getCertificate();
+      this.freeSpaceOnDisk = null
 
       this.qbittorrent = new QBittorrent({
           host: server.url(),
@@ -77,11 +80,16 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     };
 
     processData(data: Record<string, any>) {
+      if (data && data.server_state && data.server_state.free_space_on_disk !== undefined) {
+        this.freeSpaceOnDisk = data.server_state.free_space_on_disk;
+      }
+
       var torrents = {
         labels: [],
         all: [],
         changed: [],
         deleted: [],
+        freeDiskSpace: this.freeSpaceOnDisk,
       };
 
       if (Array.isArray(data.categories) || Array.isArray(data.labels)) {
@@ -349,4 +357,3 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       },
     ];
 }
-

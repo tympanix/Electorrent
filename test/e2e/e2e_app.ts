@@ -249,4 +249,8 @@ export class App {
     let labels = await data
     return labels || [];
   }
+
+  async getTorrentsFooterText() {
+    return await $("#page-torrents .status-bar").getText()
+  }
 }

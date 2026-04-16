@@ -28,6 +28,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     $scope.totalUploadSpeed = 0;
     $scope.totalDownloaded = 0;
     $scope.totalUploaded = 0;
+    $scope.freeDiskSpace = null;
     $scope.contextMenu = null;
     $scope.showDragAndDrop = false;
     $scope.labelsDrowdown = null;
@@ -532,6 +533,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
             changeTorrents(torrents);
             updateLabels(torrents);
             updateTrackers(torrents);
+            $scope.freeDiskSpace = torrents.freeDiskSpace ?? null;
         }).then(function() {
             if (!$scope.arrayTorrents || $scope.arrayTorrents.length === 0) {
                 $scope.renderDone()
