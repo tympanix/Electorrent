@@ -60,6 +60,7 @@ function createTorrentWindow() {
 
     // Create the browser window.
     torrentWindow = new BrowserWindow(windowSettings);
+    electorrent.setWindow(torrentWindow);
 
     // Enable the remote module to access main-process-only objects from
     // the renderer process
@@ -67,7 +68,6 @@ function createTorrentWindow() {
 
     torrentWindow.once('ready-to-show', () => {
         torrentWindow.show();
-        electorrent.setWindow(torrentWindow);
     });
 
     torrentWindow.loadURL(`file://${__dirname}/index.html`);
