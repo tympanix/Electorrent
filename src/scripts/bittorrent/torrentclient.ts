@@ -70,8 +70,6 @@ export interface ContextActionButton<T extends Torrent> {
     icon?: string
     role?: TorrentActionRole
     check?(torrent: T): boolean
-    /** Optional id for controller to handle specially (e.g. 'torrent-files' to open file selection modal). */
-    id?: string
 }
 
 export interface ContextActionMenu<T extends Torrent> {

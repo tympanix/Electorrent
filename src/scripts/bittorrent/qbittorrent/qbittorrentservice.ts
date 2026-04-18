@@ -356,12 +356,6 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
      */
     contextMenu: ContextActionList<QBittorrentTorrent> = [
       {
-        id: 'torrent-files',
-        label: "Files",
-        click: () => Promise.resolve(),
-        icon: "file",
-      },
-      {
         label: "Recheck",
         click: this.recheck,
         icon: "checkmark",

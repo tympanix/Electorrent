@@ -39,9 +39,6 @@ export let contextMenu = ['$rootScope', '$document', '$window', 'electron', func
             if (item.menu) {
                 appendSubmenu(list, item, scope);
             } else {
-                if (item.id === 'torrent-files' && (!$rootScope.$btclient || !$rootScope.$btclient.supportsFileSelection)) {
-                    return;
-                }
                 appendMenuItem(list, item, scope);
             }
         });

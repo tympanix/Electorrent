@@ -1,7 +1,9 @@
 import { IRootScopeService } from "angular";
 import Fuse from "fuse.js";
-import { TorrentUploadOptions } from "../bittorrent/torrentclient";
+import { Torrent } from "../bittorrent/abstracttorrent";
+import { ContextActionList, TorrentUploadOptions } from "../bittorrent/torrentclient";
 import { PendingTorrentUploadItem, PendingTorrentUploadList } from "../directives/add-torrent-modal/add-torrent-modal.directive"
+import { uiContextActions } from "../directives/contextmenu/ui-context-actions";
 
 interface TorrentControllerScope {
     pendingTorrentFiles: PendingTorrentUploadList
@@ -29,6 +31,7 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     $scope.totalDownloaded = 0;
     $scope.totalUploaded = 0;
     $scope.contextMenu = null;
+    $scope.composedContextMenu = [];
     $scope.showDragAndDrop = false;
     $scope.labelsDrowdown = null;
     $scope.torrentLimit = LIMIT;
@@ -372,12 +375,6 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
     };
 
     $scope.doContextAction = function(action, label, item) {
-        if (item && item.id === 'torrent-files') {
-            if (selected.length >= 1) {
-                $rootScope.$emit('torrentFiles:open', selected[0]);
-            }
-            return $q.resolve();
-        }
         return action.call($rootScope.$btclient, selected)
             .then(function(){
                 return $scope.update();
@@ -387,6 +384,28 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
                 $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
             })
     }
+
+    function composeContextMenu() {
+        var client = $rootScope.$btclient;
+        if (!client) {
+            $scope.composedContextMenu = [];
+            return;
+        }
+        var prefix = uiContextActions
+            .filter(function (a) { return a.appliesTo(client); })
+            .map(function (a) {
+                return {
+                    label: a.label,
+                    icon: a.icon,
+                    click: function (torrents) {
+                        return a.click({ torrents: torrents, rootScope: $rootScope });
+                    }
+                };
+            });
+        $scope.composedContextMenu = [...prefix, ...client.contextMenu] as ContextActionList<Torrent>;
+    }
+
+    $rootScope.$watch(function () { return $rootScope.$btclient; }, composeContextMenu);
 
     function fetchTorrents() {
         return Array.from(Object.values($scope.torrents));
