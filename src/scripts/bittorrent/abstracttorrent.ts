@@ -1,5 +1,18 @@
 import { Column } from '../services/column'
 
+/**
+ * Represents a single file inside a torrent. Used for file list display and
+ * selective download (wanted/unwanted). Index is the client API file index.
+ */
+export interface TorrentFile {
+    index: number
+    path: string
+    name: string
+    size: number
+    wanted: boolean
+    priority?: number
+}
+
 export interface TorrentProps {
     hash: string
     status?: number

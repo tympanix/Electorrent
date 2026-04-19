@@ -1,0 +1,33 @@
+<div
+  class="ui small modal"
+  id="torrentFilesModal"
+  modal-new
+  on-show="ctl.onShow()"
+  on-hidden="ctl.onHidden()"
+  ng-ref="ctl.modalref"
+  ng-ref-read="modal-new"
+>
+  <i class="close icon"></i>
+  <div class="header">
+    <i class="file icon"></i>
+    Files
+    <div class="sub header" ng-if="ctl.scope.torrent">{{ ctl.scope.torrent.name }}</div>
+  </div>
+  <div class="content">
+    <div ng-if="ctl.scope.loading && !ctl.scope.files.length" class="ui active inline loader"></div>
+    <div ng-if="ctl.scope.error" class="ui negative message">{{ ctl.scope.error }}</div>
+    <torrent-files-tree files="ctl.scope.files" ng-if="ctl.scope.files.length"></torrent-files-tree>
+  </div>
+  <div class="actions">
+    <button type="button" class="ui black button" ng-click="ctl.close()">Cancel</button>
+    <button
+      type="button"
+      class="ui green right labeled icon button"
+      ng-class="{ disabled: ctl.scope.loading }"
+      ng-click="ctl.save()"
+    >
+      Save
+      <i class="checkmark icon"></i>
+    </button>
+  </div>
+</div>

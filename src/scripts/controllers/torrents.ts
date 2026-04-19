@@ -372,7 +372,13 @@ export let torrentsController = ["$rootScope", "$scope", "$timeout", "$filter", 
             });
     };
 
-    $scope.doContextAction = function(action) {
+    $scope.doContextAction = function(action, label, item) {
+        if (item && item.id === 'torrent-files') {
+            if (selected.length >= 1) {
+                $rootScope.$emit('torrentFiles:open', selected[0]);
+            }
+            return $q.resolve();
+        }
         return action.call($rootScope.$btclient, selected)
             .then(function(){
                 return $scope.update();

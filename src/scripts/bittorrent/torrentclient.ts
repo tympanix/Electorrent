@@ -1,4 +1,4 @@
-import { Torrent } from "./abstracttorrent"
+import { Torrent, TorrentFile } from "./abstracttorrent"
 
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
@@ -71,6 +71,8 @@ export interface ContextActionButton<T extends Torrent> {
     icon?: string
     role?: TorrentActionRole
     check?(torrent: T): boolean
+    /** Optional id for controller to handle specially (e.g. 'torrent-files' to open file selection modal). */
+    id?: string
 }
 
 export interface ContextActionMenu<T extends Torrent> {
@@ -166,6 +168,48 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * Whether the client supports sorting by trackers or not
      */
     public enableTrackerFilter: boolean
+
+    /**
+     * When true, the client supports listing torrent files and setting which files to download
+     * (selective download). When false, the "Files" context menu item and file selection UI are hidden.
+     * Concrete clients that set this flag to true are expected to override
+     * {@link getTorrentFiles} and {@link setTorrentFileSelection}.
+     */
+    public supportsFileSelection: boolean = false
+
+    /**
+     * Get the list of files for a torrent.
+     *
+     * Default implementation always throws:
+     * - when {@link supportsFileSelection} is false: Error("File selection not supported for this client")
+     * - when {@link supportsFileSelection} is true but the client did not override this method:
+     *   Error("File selection not implemented for this client")
+     *
+     * Concrete clients that support file selection must override this method.
+     */
+    async getTorrentFiles(torrent: T): Promise<TorrentFile[]> {
+        if (!this.supportsFileSelection) {
+            throw new Error("File selection not supported for this client")
+        }
+        return Promise.reject(new Error("File selection not implemented for this client"))
+    }
+
+    /**
+     * Apply wanted/unwanted selection for torrent files.
+     *
+     * Default implementation always throws:
+     * - when {@link supportsFileSelection} is false: Error("File selection not supported for this client")
+     * - when {@link supportsFileSelection} is true but the client did not override this method:
+     *   Error("File selection not implemented for this client")
+     *
+     * Concrete clients that support file selection must override this method.
+     */
+    async setTorrentFileSelection(torrent: T, files: TorrentFile[]): Promise<void> {
+        if (!this.supportsFileSelection) {
+            throw new Error("File selection not supported for this client")
+        }
+        return Promise.reject(new Error("File selection not implemented for this client"))
+    }
 
     /**
      * A set of options supported by the client when uploading torrents (may be either torrent files

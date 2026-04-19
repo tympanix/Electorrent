@@ -38,8 +38,6 @@ async function browse(askUploadOptions){
 }
 
 function processFiles(filepaths, askUploadOptions) {
-    var win = electorrent.getWindow();
-
     if (!filepaths) return;
 
     var torrents = filepaths.filter(filterFiles);
@@ -56,6 +54,8 @@ function processFiles(filepaths, askUploadOptions) {
     torrents.forEach(function(file){
         fs.readFile(file, (err, data) => {
             if (err) throw err;
+            var win = electorrent.getWindow();
+            if (!win || win.isDestroyed() || !win.webContents) return;
 
             win.webContents.send('torrentfiles', data, path.basename(file), askUploadOptions);
 
