@@ -261,8 +261,13 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
               const firstFileCheckboxAfter = modal.$('.torrent-files-tree input[id^="file-cb-"]')
               await firstFileCheckboxAfter.waitForExist({ timeout: 30_000 })
               const selectedAfter = await firstFileCheckboxAfter.isSelected()
-
               chai.expect(selectedAfter).to.equal(!initialSelected)
+
+              // Close modal
+              const closeButton = modal.$("button.ui.black")
+              await closeButton.waitForEnabled()
+              await closeButton.click()
+              await modal.waitForDisplayed({ reverse: true })
             })
           })
 
