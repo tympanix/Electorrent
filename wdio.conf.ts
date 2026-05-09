@@ -1,5 +1,9 @@
 /// <reference types="wdio-electron-service" />
 
+import path from 'path'
+
+const TEST_USER_DATA_DIR = path.join(process.cwd(), '.wdio', 'electron-user-data')
+
 export const config: WebdriverIO.Config = {
     //
     // ====================
@@ -78,7 +82,7 @@ export const config: WebdriverIO.Config = {
         'wdio:electronServiceOptions': {
             // custom application args
             appEntryPoint: 'app/app.js',
-            appArgs: []
+            appArgs: [`--electorrent-user-data-dir=${TEST_USER_DATA_DIR}`]
         },
         'goog:chromeOptions': {
             args: [
@@ -87,7 +91,7 @@ export const config: WebdriverIO.Config = {
                 '--no-sandbox',
             ],
         },
-    }],
+    }] as any,
 
     //
     // ===================

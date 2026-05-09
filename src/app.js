@@ -15,6 +15,11 @@ const { ipcMain } = electron;
 const { session } = electron;
 const { nativeImage } = electron;
 
+const userDataArg = process.argv.find((arg) => arg.startsWith('--electorrent-user-data-dir='));
+if (userDataArg) {
+    app.setPath('userData', path.resolve(userDataArg.split('=')[1]));
+}
+
 // Set up program arguments
 yargs.version(() => app.getVersion())
 yargs.help('h').alias('h', 'help')
