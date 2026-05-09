@@ -13,6 +13,7 @@
     "dist": "electron-builder --publish never",
     "prerelease": "gulp build",
     "release": "electron-builder",
+    "version": "node ./scripts/sync-app-version.js && git add app/package.json",
     "test": "wdio run ./wdio.conf.ts"
   },
   "keywords": [

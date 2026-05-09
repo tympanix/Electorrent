@@ -1,0 +1,12 @@
+const fs = require('node:fs');
+const path = require('node:path');
+
+const rootPackagePath = path.join(__dirname, '..', 'package.json');
+const appPackagePath = path.join(__dirname, '..', 'app', 'package.json');
+
+const rootPackage = JSON.parse(fs.readFileSync(rootPackagePath, 'utf8'));
+const appPackage = JSON.parse(fs.readFileSync(appPackagePath, 'utf8'));
+
+appPackage.version = rootPackage.version;
+
+fs.writeFileSync(appPackagePath, `${JSON.stringify(appPackage, null, 2)}\n`);
