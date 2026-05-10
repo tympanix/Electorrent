@@ -21,6 +21,7 @@ export class LegacyModalDirective implements IDirective {
     replace = true;
     transclude = true;
     restrict = "E";
+    template = html;
     scope = {
         title: "@",
         btnOk: "@",
@@ -38,10 +39,6 @@ export class LegacyModalDirective implements IDirective {
 
     static getInstance(): IDirectiveFactory {
         return () => new LegacyModalDirective();
-    }
-
-    templateUrl(element: IAugmentedJQuery, attrs: IAttributes) {
-        return attrs.templateUrl || html;
     }
 
     link(scope: LegacyModalScope, element: IAugmentedJQuery, attrs: IAttributes, controller: LegacyModalController) {

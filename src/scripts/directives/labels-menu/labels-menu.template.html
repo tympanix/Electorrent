@@ -1,0 +1,16 @@
+<div data-role="labels" dropdown class="ui icon top left pointing dropdown button" ng-class="{disabled: enabled}">
+    <i class="tag icon"></i>
+    <div class="menu">
+        <div class="ui icon search input">
+            <i class="search icon"></i>
+            <input type="text" placeholder="Search labels...">
+        </div>
+        <div data-role="new-label" class="item" ng-click="openNewLabelModal()"><i class="edit icon"></i> New Label</div>
+        <div class="scrolling menu">
+            <div class="item" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
+            <div></div>
+        </div>
+    </div>
+</div>
+
+<new-label-modal data="form" approve="action(form.label, true)"></new-label-modal>
