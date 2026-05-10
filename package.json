@@ -2,7 +2,7 @@
   "name": "electorrent",
   "version": "2.9.0",
   "description": "A thin client for your torrenting needs",
-  "main": "app/app.js",
+  "main": "app/main.js",
   "license": "GPL-3.0",
   "scripts": {
     "start": "gulp",

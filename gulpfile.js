@@ -28,7 +28,7 @@ function dummy(done) {
 
 function watch({ updateMainCallback = dummy, updateRendererCallback = dummy }) {
   // Restart application
-  gulp.watch('src/main/app.js', gulp.series('build:app', updateMainCallback))
+  gulp.watch('src/main/main.js', gulp.series('build:app', updateMainCallback))
   gulp.watch('src/main/lib/*.js', gulp.series('build:lib', updateMainCallback))
 
   // Reload renderer process
@@ -42,7 +42,7 @@ function watch({ updateMainCallback = dummy, updateRendererCallback = dummy }) {
 
 function compileWebpack({ watch = false }) {
   const config = require('./webpack.config.js')
-  return gulp.src('src/renderer/main.ts')
+  return gulp.src('src/renderer/app.ts')
     .pipe(webpack({ ...config, watch }, compiler))
     .pipe(gulp.dest(OUT))
 }
@@ -71,7 +71,7 @@ gulp.task('build:useref', function() {
 })
 
 gulp.task('build:app', function() {
-  return gulp.src('src/main/app.js')
+  return gulp.src('src/main/main.js')
     .pipe(gulp.dest(OUT));
 })
 
