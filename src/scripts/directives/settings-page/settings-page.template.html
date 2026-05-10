@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<div id="page-settings" class="wrapper" ng-controller="settingsController as settings">
-
+<div id="page-settings" class="wrapper">
     <div class="ui stretched segment">
         <div class="settings sidebar">
             <ul class="nav">
@@ -47,7 +45,6 @@
                 <div ng-switch-when="about" id="page-settings-about">
                     <div ng-include="'./views/settings/about.html'"></div>
                 </div>
-
             </div>
             <div class="actions footer">
                 <a class="ui deny right labeled icon button" ng-click="close()">
@@ -60,7 +57,5 @@
                 </a>
             </div>
         </div>
-
     </div>
-
 </div>

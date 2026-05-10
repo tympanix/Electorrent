@@ -1,0 +1,26 @@
+<div id="notifications" class="notifications container">
+    <div class="animated notification" ng-repeat="notification in notifications">
+        <div class="ui message" ng-class="notification.type">
+            <i class="close icon" ng-click="close($index)"></i>
+            <div class="header">
+                {{notification.title}}
+            </div>
+            <p>{{notification.message}}</p>
+        </div>
+    </div>
+</div>
+
+<modal
+    approve="installUpdate()"
+    data="updateData"
+    id="updateModal"
+    template-url="./views/modals/update.html">
+</modal>
+
+<modal
+    approve="installCertificate()"
+    after="certificateResult"
+    data="certificate"
+    id="certificateModal"
+    template-url="./views/modals/certificate.html">
+</modal>

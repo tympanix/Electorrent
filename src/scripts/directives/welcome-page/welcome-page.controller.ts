@@ -1,0 +1,59 @@
+export class WelcomePageController {
+    static $inject = ["$scope", "$timeout", "$bittorrent", "$btclients", "electron", "configService", "notificationService", "Server"];
+
+    constructor(
+        $scope: any,
+        $timeout: angular.ITimeoutService,
+        $bittorrent: any,
+        $btclients: any,
+        electron: any,
+        config: any,
+        $notify: any,
+        Server: any,
+    ) {
+        $scope.connecting = false;
+        $scope.btclients = $btclients;
+        $scope.server = new Server();
+        $scope.advanced = false;
+
+        function clearForm() {
+            $scope.server = new Server();
+        }
+
+        $scope.connect = () => {
+            $scope.connecting = true;
+
+            $scope.server.connect().then(() => {
+                return config.saveServer($scope.server);
+            }).then(() => {
+                $scope.$emit("connect:server", $scope.server);
+                clearForm();
+                $notify.ok("Success!", "Hooray! Welcome to Electorrent");
+            }).catch((err: unknown) => {
+                console.error(err);
+            }).finally(() => {
+                $scope.connecting = false;
+            });
+        };
+
+        $scope.setPath = () => {
+            if ($scope.server.client) {
+                $scope.server.setPath();
+            }
+        };
+
+        function saveServer(ip: string, port: number, username: string, password: string, client: string) {
+            const server = new Server(ip, port, username, password, client);
+
+            $bittorrent.setServer(server);
+
+            config.saveServer(server).then(() => {
+                $scope.$emit("show:torrents");
+                clearForm();
+                $notify.ok("Success!", "Hooray! Welcome to Electorrent");
+            }).catch(() => {
+                $notify.alert("Oops!", "Could not save settings?!");
+            });
+        }
+    }
+}

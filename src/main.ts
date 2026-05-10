@@ -78,20 +78,6 @@ torrentApp.run(['menuWin', 'menuMac', 'electron', 'configService', function(menu
     config.updateApplicationMenu()
 }]);
 
-// Controllers
-import { mainController } from "./scripts/controllers/main"
-torrentApp.controller("mainController", mainController)
-import {themeController} from "./scripts/controllers/theme"
-torrentApp.controller("themeController", themeController)
-import {torrentsController} from "./scripts/controllers/torrents"
-torrentApp.controller("torrentsController", torrentsController)
-import {settingsController} from "./scripts/controllers/settings"
-torrentApp.controller("settingsController", settingsController)
-import {welcomeController} from "./scripts/controllers/welcome"
-torrentApp.controller("welcomeController", welcomeController)
-import {notificationsController} from "./scripts/controllers/notifications"
-torrentApp.controller("notificationsController", notificationsController)
-
 // Services
 import { httpFormService } from "./scripts/services/httpFormService"
 torrentApp.factory("httpFormService", httpFormService)
@@ -133,6 +119,20 @@ torrentApp.directive("dropdown", SemanticDropdownDirective.getInstance())
 torrentApp.directive("dropItem", DropItemDirective.getInstance())
 import { ReadyBroadcastDirective } from "./scripts/directives/ready-broadcast/ready-broadcast.directive"
 torrentApp.directive("readyBroadcast", ReadyBroadcastDirective.getInstance())
+import { AppThemeDirective } from "./scripts/directives/app-theme/app-theme.directive"
+torrentApp.directive("appTheme", AppThemeDirective.getInstance())
+import { AppShellDirective } from "./scripts/directives/app-shell/app-shell.directive"
+torrentApp.directive("appShell", AppShellDirective.getInstance())
+import { NotificationsCenterDirective } from "./scripts/directives/notifications-center/notifications-center.directive"
+torrentApp.directive("notificationsCenter", NotificationsCenterDirective.getInstance())
+import { SettingsPageDirective } from "./scripts/directives/settings-page/settings-page.directive"
+torrentApp.directive("settingsPage", SettingsPageDirective.getInstance())
+import { WelcomePageDirective } from "./scripts/directives/welcome-page/welcome-page.directive"
+torrentApp.directive("welcomePage", WelcomePageDirective.getInstance())
+import { ServerSelectionDirective } from "./scripts/directives/server-selection/server-selection.directive"
+torrentApp.directive("serverSelection", ServerSelectionDirective.getInstance())
+import { TorrentsPageDirective } from "./scripts/directives/torrents-page/torrents-page.directive"
+torrentApp.directive("torrentsPage", TorrentsPageDirective.getInstance())
 import { ToggleDirective } from "./scripts/directives/checkbox/checkbox.directive"
 torrentApp.directive("toggle", ToggleDirective.getInstance())
 import { RepeatDoneDirective } from "./scripts/directives/repeat-done/repeat-done.directive"
