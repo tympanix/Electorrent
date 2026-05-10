@@ -95,17 +95,24 @@ import { remoteService } from "./scripts/services/remote"
 torrentApp.factory("$remote", remoteService)
 
 // Filters
-import {dateFilter, etaFilter, releaseDateFilter} from "./scripts/filters/dateFilter"
-torrentApp.filter('date', dateFilter)
-torrentApp.filter('eta', etaFilter)
-torrentApp.filter('releaseDate', releaseDateFilter)
-import {bytesFilter, speedFilter} from "./scripts/filters/bytes"
-torrentApp.filter('bytes', bytesFilter)
-torrentApp.filter('speed', speedFilter)
-import {torrentQueueFilter, torrentRatioFilter, torrentTrackerFilter} from "./scripts/filters/torrentfilters"
-torrentApp.filter('torrentQueue', torrentQueueFilter)
-torrentApp.filter('torrentRatio', torrentRatioFilter)
-torrentApp.filter('torrentTracker', torrentTrackerFilter)
+import { DateFilter } from "./scripts/filters/date.filter"
+import { EtaFilter } from "./scripts/filters/eta.filter"
+import { ReleaseDateFilter } from "./scripts/filters/release-date.filter"
+import { EpochFilter } from "./scripts/filters/epoch.filter"
+torrentApp.filter("date", DateFilter.getInstance())
+torrentApp.filter("eta", EtaFilter.getInstance())
+torrentApp.filter("releaseDate", ReleaseDateFilter.getInstance())
+torrentApp.filter("epoch", EpochFilter.getInstance())
+import { BytesFilter } from "./scripts/filters/bytes.filter"
+import { SpeedFilter } from "./scripts/filters/speed.filter"
+torrentApp.filter("bytes", BytesFilter.getInstance())
+torrentApp.filter("speed", SpeedFilter.getInstance())
+import { TorrentQueueFilter } from "./scripts/filters/torrent-queue.filter"
+import { TorrentRatioFilter } from "./scripts/filters/torrent-ratio.filter"
+import { TorrentTrackerFilter } from "./scripts/filters/torrent-tracker.filter"
+torrentApp.filter("torrentQueue", TorrentQueueFilter.getInstance())
+torrentApp.filter("torrentRatio", TorrentRatioFilter.getInstance())
+torrentApp.filter("torrentTracker", TorrentTrackerFilter.getInstance())
 
 // Directives
 import { ProgressDirective } from "./scripts/directives/progress/progress.directive"
