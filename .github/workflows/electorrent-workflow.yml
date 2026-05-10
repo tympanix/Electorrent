@@ -55,11 +55,6 @@ jobs:
           node_modules
           */*/node_modules
         key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-    - name: Cache bower modules
-      uses: actions/cache@v4
-      with:
-        path: bower.json
-        key: ${{ runner.os }}-${{ hashFiles('bower.json') }}
     - name: Install npm dependencies
       run: npm install
     - name: Build web application

@@ -18,7 +18,7 @@ module.exports = {
   target: 'electron-renderer',
   mode: 'development',
   externals: [
-    /* Ignore import from bower packages */
+    /* Ignore browser-provided vendor packages */
     {
       jquery: 'jQuery',
       jquery: '$',

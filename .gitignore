@@ -99,9 +99,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Bower components
-bower_components
-
 # Ignore distibution folder
 dist
 
@@ -125,4 +122,3 @@ yarn.lock
 src/css/semantic/*
 !src/css/semantic/theme.config
 src/css/themes/default
-
