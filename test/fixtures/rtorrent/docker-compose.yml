@@ -1,5 +1,5 @@
 services:
-  rutorrent:
+  rtorrent:
     image: linuxserver/rutorrent:${VERSION:-latest}
     ports:
       - 8080:80
