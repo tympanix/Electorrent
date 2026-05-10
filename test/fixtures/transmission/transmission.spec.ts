@@ -1,6 +1,6 @@
 import { createTestSuite } from "../../testlib";
 import { FeatureSet } from "../../testutil";
-import { TransmissionClient } from "../../../src/scripts/bittorrent"
+import { TransmissionClient } from "../../../src/renderer/app/bittorrent"
 
 createTestSuite({
   client: new TransmissionClient(),

@@ -1,6 +1,6 @@
 import { createTestSuite } from "../../testlib";
 import { FeatureSet } from "../../testutil";
-import { RtorrentClient } from "../../../src/scripts/bittorrent"
+import { RtorrentClient } from "../../../src/renderer/app/bittorrent"
 
 createTestSuite({
   client: new RtorrentClient(),

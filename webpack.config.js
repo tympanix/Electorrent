@@ -1,7 +1,5 @@
 const webpack = require('webpack')
 const path = require('path')
-const fs = require('fs')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const nodeExternals = require('webpack-node-externals');
 
@@ -10,7 +8,7 @@ const defaultInclude = path.resolve(__dirname, 'src')
 
 module.exports = {
   devtool: 'source-map',
-  entry: path.resolve(__dirname, "src/main.ts"),
+  entry: path.resolve(__dirname, "src/renderer/main.ts"),
   output: {
       path: path.resolve(__dirname, 'app'),
       filename: '[name].js',
@@ -75,7 +73,7 @@ module.exports = {
   },
   plugins: [
     // new HtmlWebpackPlugin({
-    //     template: path.resolve(__dirname, "src/index.html")
+    //     template: path.resolve(__dirname, "src/renderer/assets/index.html")
     // }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output

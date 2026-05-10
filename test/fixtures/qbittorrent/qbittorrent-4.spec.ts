@@ -1,6 +1,6 @@
 import { createTestSuite } from "../../testlib";
 
-import { QBittorrentClient } from "../../../src/scripts/bittorrent"
+import { QBittorrentClient } from "../../../src/renderer/app/bittorrent"
 
 createTestSuite({
   client: new QBittorrentClient(),
