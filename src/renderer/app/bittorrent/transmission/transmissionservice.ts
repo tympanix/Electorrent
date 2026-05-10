@@ -64,7 +64,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         httpsAgent: new https.Agent({
           ca: this.server.getCertificate()
         }),
-        adapter: axios.getAdapter('http')
+        adapter: require("axios/lib/adapters/http")
       })
       // update session header on both success and error http responses
       http.interceptors.response.use(
