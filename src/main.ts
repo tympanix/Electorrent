@@ -122,47 +122,45 @@ torrentApp.filter('torrentRatio', torrentRatioFilter)
 torrentApp.filter('torrentTracker', torrentTrackerFilter)
 
 // Directives
-import {progress} from "./scripts/directives/progress"
-torrentApp.directive('progress', progress)
-import {ngRightClick} from "./scripts/directives/rightclick"
-torrentApp.directive('ngRightClick', ngRightClick)
-import {contextMenu} from "./scripts/directives/contextmenu"
-torrentApp.directive("contextMenu", contextMenu)
-import {dropdown, dropItem} from "./scripts/directives/dropdown"
-torrentApp.directive("dropdown", dropdown)
-torrentApp.directive('dropItem', dropItem)
-import {readyBroadcast} from "./scripts/directives/readyBroadcast"
-torrentApp.directive("readyBroadcast", readyBroadcast)
-import {toggleController, toggle} from "./scripts/directives/checkbox"
-torrentApp.controller('toggleController', toggleController)
-torrentApp.directive('toggle', toggle)
-import {repeatDone} from "./scripts/directives/repeatdone"
-torrentApp.directive("repeatDone", repeatDone)
-import {modal} from "./scripts/directives/modal"
-torrentApp.directive("modal", modal)
-import {actionHeader} from "./scripts/directives/actionheader"
-torrentApp.directive("actionHeader", actionHeader)
-import {labelsDropdown} from "./scripts/directives/labelsdropdown"
-torrentApp.directive("labelsDropdown", labelsDropdown)
-import {dragAndDrop} from "./scripts/directives/draganddrop"
-torrentApp.directive("dragAndDrop", dragAndDrop)
-import {sorting, sort} from "./scripts/directives/sorting"
-torrentApp.directive("sorting", sorting)
-torrentApp.directive('sort', sort)
-import {dropDownController, dropdown as dropdownDirective, dropdownGroup} from "./scripts/directives/drop"
-torrentApp.controller("DropDownController", dropDownController)
-torrentApp.directive('dropdown', dropdownDirective)
-torrentApp.directive('dropdownGroup', dropdownGroup)
-import {torrentBody, torrentRow} from "./scripts/directives/torrenttable"
-torrentApp.directive("torrentBody", torrentBody)
-torrentApp.directive('torrentRow', torrentRow)
-import {search} from "./scripts/directives/search"
-torrentApp.directive("search", search)
-import {time} from "./scripts/directives/time"
-torrentApp.directive("time", time)
-import {limitBind, limitSource} from "./scripts/directives/limit"
-torrentApp.directive("limitBind", limitBind)
-torrentApp.directive('limitSource', limitSource)
+import { ProgressDirective } from "./scripts/directives/progress/progress.directive"
+torrentApp.directive("progress", ProgressDirective.getInstance())
+import { RightClickDirective } from "./scripts/directives/right-click/right-click.directive"
+torrentApp.directive("ngRightClick", RightClickDirective.getInstance())
+import { ContextMenuDirective } from "./scripts/directives/context-menu/context-menu.directive"
+torrentApp.directive("contextMenu", ContextMenuDirective.getInstance())
+import { SemanticDropdownDirective, DropItemDirective } from "./scripts/directives/dropdown/dropdown.directive"
+torrentApp.directive("dropdown", SemanticDropdownDirective.getInstance())
+torrentApp.directive("dropItem", DropItemDirective.getInstance())
+import { ReadyBroadcastDirective } from "./scripts/directives/ready-broadcast/ready-broadcast.directive"
+torrentApp.directive("readyBroadcast", ReadyBroadcastDirective.getInstance())
+import { ToggleDirective } from "./scripts/directives/checkbox/checkbox.directive"
+torrentApp.directive("toggle", ToggleDirective.getInstance())
+import { RepeatDoneDirective } from "./scripts/directives/repeat-done/repeat-done.directive"
+torrentApp.directive("repeatDone", RepeatDoneDirective.getInstance())
+import { LegacyModalDirective } from "./scripts/directives/legacy-modal/legacy-modal.directive"
+torrentApp.directive("modal", LegacyModalDirective.getInstance())
+import { ActionHeaderDirective } from "./scripts/directives/action-header/action-header.directive"
+torrentApp.directive("actionHeader", ActionHeaderDirective.getInstance())
+import { LabelsDropdownDirective } from "./scripts/directives/labels-dropdown/labels-dropdown.directive"
+torrentApp.directive("labelsDropdown", LabelsDropdownDirective.getInstance())
+import { DragAndDropDirective } from "./scripts/directives/drag-and-drop/drag-and-drop.directive"
+torrentApp.directive("dragAndDrop", DragAndDropDirective.getInstance())
+import { SortingDirective, SortDirective } from "./scripts/directives/sorting/sorting.directive"
+torrentApp.directive("sorting", SortingDirective.getInstance())
+torrentApp.directive("sort", SortDirective.getInstance())
+import { DropdownElementDirective, DropdownGroupDirective } from "./scripts/directives/drop/drop.directive"
+torrentApp.directive("dropdown", DropdownElementDirective.getInstance())
+torrentApp.directive("dropdownGroup", DropdownGroupDirective.getInstance())
+import { TorrentBodyDirective, TorrentRowDirective } from "./scripts/directives/torrent-table/torrent-table.directive"
+torrentApp.directive("torrentBody", TorrentBodyDirective.getInstance())
+torrentApp.directive("torrentRow", TorrentRowDirective.getInstance())
+import { SearchDirective } from "./scripts/directives/search/search.directive"
+torrentApp.directive("search", SearchDirective.getInstance())
+import { TimeDirective } from "./scripts/directives/time/time.directive"
+torrentApp.directive("time", TimeDirective.getInstance())
+import { LimitBindDirective, LimitSourceDirective } from "./scripts/directives/limit/limit.directive"
+torrentApp.directive("limitBind", LimitBindDirective.getInstance())
+torrentApp.directive("limitSource", LimitSourceDirective.getInstance())
 import { ModalDirective } from "./scripts/directives/modal/modal.directive"
 torrentApp.directive('modalNew', ModalDirective.getInstance())
 import { AddTorrentModalDirective } from "./scripts/directives/add-torrent-modal/add-torrent-modal.directive";
