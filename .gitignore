@@ -119,6 +119,6 @@ app/*
 yarn.lock
 
 # SemanticUI
-src/css/semantic/*
-!src/css/semantic/theme.config
-src/css/themes/default
+src/renderer/assets/css/semantic/*
+!src/renderer/assets/css/semantic/theme.config
+src/renderer/assets/css/themes/default

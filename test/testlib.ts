@@ -5,7 +5,7 @@ import chaiAsPromised from "chai-as-promised";
 import e2e = require("./e2e");
 import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
-import { TorrentClient } from "../src/scripts/bittorrent"
+import { TorrentClient } from "../src/renderer/app/bittorrent"
 import { browser, $ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
 

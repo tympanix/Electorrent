@@ -4,7 +4,7 @@ import magnet from "magnet-uri"
 import { Torrent } from "./e2e_torrent";
 import parseTorrent = require("parse-torrent")
 import { browser, $, $$, expect } from '@wdio/globals'
-import { TorrentClient } from "../../src/scripts/bittorrent"
+import { TorrentClient } from "../../src/renderer/app/bittorrent"
 import { assert } from "chai";
 
 /**

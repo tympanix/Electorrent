@@ -18,7 +18,7 @@
       "outDir": "./app",
       "typeRoots": [
         "node_modules/@types",
-        "src/types"
+        "src/shared/types"
       ]
     },
     "include": ["src/**/*.ts"],

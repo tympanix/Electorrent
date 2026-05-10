@@ -1,6 +1,6 @@
 import { createTestSuite } from "../../testlib";
 import { FeatureSet } from "../../testutil";
-import { DelugeClient } from "../../../src/scripts/bittorrent"
+import { DelugeClient } from "../../../src/renderer/app/bittorrent"
 
 createTestSuite({
   client: new DelugeClient(),
