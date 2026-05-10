@@ -56,6 +56,9 @@ export const config: WebdriverIO.Config = {
         'utorrent': [
             'test/fixtures/utorrent/*.spec.ts',
         ],
+        'rtorrent': [
+            'test/fixtures/rtorrent/*.spec.ts',
+        ],
     },
 
     //
