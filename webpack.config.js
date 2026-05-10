@@ -1,32 +1,31 @@
-const webpack = require('webpack')
 const path = require('path')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const nodeExternals = require('webpack-node-externals');
+const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const nodeExternals = require('webpack-node-externals')
 
-// Any directories you will be adding code/files into, need to be added to this array so webpack will pick them up
 const defaultInclude = path.resolve(__dirname, 'src')
+const outDir = path.resolve(__dirname, 'app')
+const isProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
   devtool: 'source-map',
   entry: {
-    app: path.resolve(__dirname, "src/renderer/app.ts"),
+    app: path.resolve(__dirname, 'src/renderer/app.ts'),
   },
   output: {
-      path: path.resolve(__dirname, 'app'),
-      filename: '[name].js',
+    path: outDir,
+    filename: '[name].js',
   },
   target: 'electron-renderer',
-  mode: 'development',
+  mode: isProduction ? 'production' : 'development',
   externals: [
-    /* Ignore browser-provided vendor packages */
     {
       jquery: 'jQuery',
-      jquery: '$',
       angular: 'angular',
       mousetrap: 'Mousetrap',
       fuse: 'Fuse',
     },
-    /* Ignore local app dependencies from runtime */
     nodeExternals({
       modulesDir: 'app/node_modules'
     }),
@@ -34,38 +33,29 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          'postcss-loader'
-        ],
-        include: defaultInclude
-      },
-      {
         test: /\.tsx?$/,
         use: 'ts-loader',
         include: defaultInclude,
         exclude: /node_modules/,
       },
-      // {
-      //   test: /\.jsx?$/,
-      //   use: [{ loader: 'babel-loader' }],
-      //   include: defaultInclude
-      // },
       {
-        test: /\.(jpe?g|png|gif)$/,
-        use: [{ loader: 'file-loader?name=img/[name]__[hash:base64:5].[ext]' }],
+        test: /\.(jpe?g|png|gif)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'img/[name]__[hash:base64:5][ext]'
+        },
         include: defaultInclude
       },
       {
-        test: /\.(eot|svg|ttf|woff|woff2)$/,
-        use: [{ loader: 'file-loader?name=font/[name]__[hash:base64:5].[ext]' }],
-        include: defaultInclude
+        test: /\.(eot|svg|ttf|woff|woff2)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'font/[name]__[hash:base64:5][ext]'
+        },
       },
       {
         test: /\.html$/i,
-        loader: "html-loader",
+        loader: 'html-loader',
       },
     ]
   },
@@ -74,23 +64,50 @@ module.exports = {
     modules: ['node_modules', 'src']
   },
   plugins: [
-    // new HtmlWebpackPlugin({
-    //     template: path.resolve(__dirname, "src/renderer/assets/index.html")
-    // }),
-    new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
-      filename: 'bundle.css',
-      chunkFilename: '[id].css'
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, 'src/renderer/assets/index.ejs'),
+      filename: 'index.html',
+      inject: false,
     }),
-    // new webpack.DefinePlugin({
-    //   'process.env.NODE_ENV': JSON.stringify('production')
-    // }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/main/main.js'),
+          to: path.resolve(outDir, 'main.js'),
+        },
+        {
+          from: path.resolve(__dirname, 'src/main/lib'),
+          to: path.resolve(outDir, 'lib'),
+        },
+        {
+          from: path.resolve(__dirname, 'src/renderer/app/workers'),
+          to: path.resolve(outDir, 'scripts'),
+        },
+        {
+          from: path.resolve(__dirname, 'build'),
+          to: path.resolve(outDir, 'build'),
+        },
+        {
+          from: path.resolve(__dirname, 'node_modules/semantic-ui-css/themes/default/assets'),
+          to: path.resolve(outDir, 'css/themes/default/assets'),
+        },
+        {
+          from: path.resolve(__dirname, 'src/renderer/assets/views'),
+          to: path.resolve(outDir, 'views'),
+          noErrorOnMissing: true,
+        },
+        {
+          from: path.resolve(__dirname, 'src/renderer/assets/img'),
+          to: path.resolve(outDir, 'img'),
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
     new webpack.ProvidePlugin({
       'window.jQuery': 'jquery',
-      'jQuery': 'jquery',
-      '$': 'jquery',
-      'angular': 'angular',
+      jQuery: 'jquery',
+      $: 'jquery',
+      angular: 'angular',
     }),
   ],
   stats: {
