@@ -1,5 +1,37 @@
 /// <reference types="wdio-electron-service" />
 
+import { browser } from '@wdio/globals'
+
+type BrowserLogEntry = {
+    level?: string
+    message?: string
+    source?: string
+}
+
+let hasActiveSession = false
+let isFlushingBrowserLogs = false
+
+async function flushBrowserConsoleLogs() {
+    if (!hasActiveSession || isFlushingBrowserLogs || !browser.sessionId || typeof browser.getLogs !== 'function') {
+        return
+    }
+
+    isFlushingBrowserLogs = true
+
+    try {
+        const logs = await browser.getLogs('browser').catch(() => [])
+
+        for (const log of logs as BrowserLogEntry[]) {
+            const source = log.source || 'browser'
+            const level = log.level || 'INFO'
+            const message = log.message || ''
+            process.stdout.write(`[chrome:${source}:${level}] ${message}\n`)
+        }
+    } finally {
+        isFlushingBrowserLogs = false
+    }
+}
+
 export const config: WebdriverIO.Config = {
     //
     // ====================
@@ -98,6 +130,9 @@ export const config: WebdriverIO.Config = {
                 '--disable-dev-shm-usage',
                 '--no-sandbox',
             ],
+        },
+        'goog:loggingPrefs': {
+            browser: 'ALL',
         },
     }],
 
@@ -232,15 +267,20 @@ export const config: WebdriverIO.Config = {
      * @param {Array.<String>} specs        List of spec file paths that are to be run
      * @param {object}         browser      instance of created browser/device session
      */
-    // before: function (capabilities, specs) {
-    // },
+    before: async function () {
+        hasActiveSession = true
+        await flushBrowserConsoleLogs()
+    },
     /**
      * Runs before a WebdriverIO command gets executed.
      * @param {string} commandName hook command name
      * @param {Array} args arguments that command would receive
      */
-    // beforeCommand: function (commandName, args) {
-    // },
+    beforeCommand: async function (commandName) {
+        if (commandName !== 'getLogs' && commandName !== 'deleteSession') {
+            await flushBrowserConsoleLogs()
+        }
+    },
     /**
      * Hook that gets executed before the suite starts
      * @param {object} suite suite details
@@ -308,8 +348,9 @@ export const config: WebdriverIO.Config = {
      * @param {Array.<Object>} capabilities list of capabilities details
      * @param {Array.<String>} specs List of spec file paths that ran
      */
-    // afterSession: function (config, capabilities, specs) {
-    // },
+    afterSession: function () {
+        hasActiveSession = false
+    },
     /**
      * Gets executed after all workers got shut down and the process is about to exit. An error
      * thrown in the onComplete hook will result in the test run failing.
