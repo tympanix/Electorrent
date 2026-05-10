@@ -18,7 +18,7 @@ const compiler = require('webpack');
 const PROD = process.env.NODE_ENV === 'production'
 const OUT = "./app";
 const CLEAN = [`${OUT}/*`, `!${OUT}/package.json`, `!${OUT}/node_modules`];
-const SEMANTIC = './node_modules/semantic-ui/src'
+const SEMANTIC = './node_modules/semantic-ui-less'
 
 function dummy(done) {
   if (done instanceof Function) {
@@ -128,7 +128,7 @@ gulp.task('build:build', function() {
 })
 
 gulp.task('build:assets' , function () {
-    return gulp.src('./node_modules/semantic-ui/dist/themes/default/assets/**')
+    return gulp.src('./node_modules/semantic-ui-css/themes/default/assets/**')
     .pipe(gulp.dest(OUT + '/css/themes/default/assets'))
 })
 
