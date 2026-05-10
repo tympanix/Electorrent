@@ -442,4 +442,3 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       },
     ];
 }
-
