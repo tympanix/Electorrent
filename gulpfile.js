@@ -8,7 +8,6 @@ const less = require('gulp-less');
 const concat = require('gulp-concat');
 const path = require('path');
 const merge = require('merge-stream');
-const iconfont = require('gulp-iconfont');
 const webpack = require('webpack-stream')
 const compiler = require('webpack');
 
@@ -63,33 +62,6 @@ gulp.task('build:lib', function() {
         .pipe(gulp.dest(OUT))
 })
 
-gulp.task('build:fonts', function() {
-  let runTimestamp = Math.round(Date.now()/1000)
-  return gulp.src(['src/renderer/assets/css/fonts/icons/*.svg'], {base:'src/renderer/assets'})
-    .pipe(iconfont({
-      fontName: 'bittorrent',
-      normalize: true,
-      fontHeight: 1024,
-      prependedUnicode: true,
-      formats: ['ttf', 'eot', 'woff', 'svg'],
-      timestamp: runTimestamp,
-    }))
-    .on('glyphs', function(glyphs, options) {
-      /* Creates a uppercase hex number with at least length digits from a given number */
-      function unicodeEscape(str) {
-        return str.replace(/[\s\S]/g, function (escape) {
-          return '\\u' + ('0000' + escape.charCodeAt().toString(16)).slice(-4);
-        });
-      }
-      /*
-      for (let g of glyphs) {
-        console.log(g.name.padEnd(24), unicodeEscape(g.unicode[0]))
-      }
-      */
-    })
-    .pipe(gulp.dest(path.join(OUT, 'css', 'fonts')))
-})
-
 gulp.task('semantic:src', function() {
   return gulp.src([
     path.join(SEMANTIC, '**'),
@@ -130,7 +102,7 @@ gulp.task('build:less', function() {
   return merge(tasks)
 })
 
-gulp.task('build:styles', gulp.series(gulp.parallel('build:semantic', 'build:fonts'), 'build:less'))
+gulp.task('build:styles', gulp.series('build:semantic', 'build:less'))
 
 gulp.task('build', gulp.parallel('build:styles', 'build:webpack'));
 

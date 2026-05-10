@@ -100,7 +100,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       paramsSerializer: (params) => {
         return qs.stringify(params, { arrayFormat: 'repeat' })
       },
-      adapter: require("axios/lib/adapters/http")
+      adapter: axios.getAdapter('http')
     })
 
     // The µTorrent client will respond with a "cid" (context id) number which is

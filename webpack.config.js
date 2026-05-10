@@ -11,7 +11,10 @@ const isProduction = process.env.NODE_ENV === 'production'
 module.exports = {
   devtool: 'source-map',
   entry: {
-    app: path.resolve(__dirname, 'src/renderer/app.ts'),
+    app: [
+      path.resolve(__dirname, 'src/renderer/assets/css/fonts/bittorrent.font.js'),
+      path.resolve(__dirname, 'src/renderer/app.ts'),
+    ],
   },
   output: {
     path: outDir,
@@ -37,6 +40,13 @@ module.exports = {
         use: 'ts-loader',
         include: defaultInclude,
         exclude: /node_modules/,
+      },
+      {
+        test: /\.font\.js$/i,
+        use: [
+          'null-loader',
+          'webfonts-loader',
+        ],
       },
       {
         test: /\.(jpe?g|png|gif)$/i,
