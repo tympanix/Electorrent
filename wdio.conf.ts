@@ -121,7 +121,7 @@ export const config: WebdriverIO.Config = {
         // see https://webdriver.io/docs/desktop-testing/electron/configuration/#service-options
         'wdio:electronServiceOptions': {
             // custom application args
-            appEntryPoint: 'app/app.js',
+            appEntryPoint: 'app/main.js',
             appArgs: []
         },
         'goog:chromeOptions': {

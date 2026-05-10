@@ -8,7 +8,9 @@ const defaultInclude = path.resolve(__dirname, 'src')
 
 module.exports = {
   devtool: 'source-map',
-  entry: path.resolve(__dirname, "src/renderer/main.ts"),
+  entry: {
+    app: path.resolve(__dirname, "src/renderer/app.ts"),
+  },
   output: {
       path: path.resolve(__dirname, 'app'),
       filename: '[name].js',
