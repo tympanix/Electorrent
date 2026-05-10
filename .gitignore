@@ -122,3 +122,7 @@ yarn.lock
 src/renderer/assets/css/semantic/*
 !src/renderer/assets/css/semantic/theme.config
 src/renderer/assets/css/themes/default
+
+# Git worktress
+.worktrees
+
