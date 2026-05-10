@@ -19,14 +19,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        testspec:
-          - qbittorrent-4
-          - qbittorrent-5
-          - qbittorrent-latest
-          - rtorrent-latest
-          - transmission-latest
-          - deluge-1
-          - utorrent-latest
+        suite:
+          - qbittorrent:4
+          - qbittorrent:5
+          - qbittorrent:latest
+          - rtorrent
+          - transmission
+          - deluge
+          - utorrent
 
     steps:
     - name: Checkout source code
@@ -71,7 +71,7 @@ jobs:
         max_attempts: 3
         timeout_minutes: 10
         retry_on: error
-        command: xvfb-run -a -- npm test -- --mochaOpts.grep "${{ matrix.testspec }}"
+        command: xvfb-run -a -- npm test -- --suite "${{ matrix.suite }}"
 
   build:
     strategy:
