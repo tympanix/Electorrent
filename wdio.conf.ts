@@ -35,16 +35,25 @@ export const config: WebdriverIO.Config = {
     ],
 
     suites: {
-        deluge: [
+        'deluge': [
             'test/fixtures/deluge/*.spec.ts',
         ],
-        qbittorrent: [
+        'qbittorrent': [
             'test/fixtures/qbittorrent/*.spec.ts',
         ],
-        transmission: [
+        'qbittorrent:latest': [
+            'test/fixtures/qbittorrent/qbittorrent-latest.spec.ts',
+        ],
+         'qbittorrent:5': [
+            'test/fixtures/qbittorrent/qbittorrent-5.spec.ts',
+        ],
+         'qbittorrent:4': [
+            'test/fixtures/qbittorrent/qbittorrent-4.spec.ts',
+        ],
+        'transmission': [
             'test/fixtures/transmission/*.spec.ts',
         ],
-        utorrent: [
+        'utorrent': [
             'test/fixtures/utorrent/*.spec.ts',
         ],
     },
