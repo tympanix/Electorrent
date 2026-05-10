@@ -3,10 +3,7 @@
 const startApp = require("gulp-run-electron")
 const fs = require('fs');
 const gulp = require('gulp');
-const useref = require('gulp-useref');
 const clean = require('gulp-clean');
-const sourcemaps = require('gulp-sourcemaps')
-const lazypipe = require('lazypipe')
 const less = require('gulp-less');
 const concat = require('gulp-concat');
 const path = require('path');
@@ -15,7 +12,6 @@ const iconfont = require('gulp-iconfont');
 const webpack = require('webpack-stream')
 const compiler = require('webpack');
 
-const PROD = process.env.NODE_ENV === 'production'
 const OUT = "./app";
 const CLEAN = [`${OUT}/*`, `!${OUT}/package.json`, `!${OUT}/node_modules`];
 const SEMANTIC = './node_modules/semantic-ui-less'
@@ -32,10 +28,7 @@ function watch({ updateMainCallback = dummy, updateRendererCallback = dummy }) {
   gulp.watch('src/main/lib/*.js', gulp.series('build:lib', updateMainCallback))
 
   // Reload renderer process
-  gulp.watch(['src/renderer/assets/**/*.html'], gulp.series('build:useref', updateRendererCallback))
-  gulp.watch(['src/renderer/assets/views/**/*.html'], gulp.series('build:views', updateRendererCallback))
   gulp.watch(['src/renderer/assets/css/**/*'], gulp.series('build:less', updateRendererCallback))
-  gulp.watch(['src/renderer/app/workers/*.js'], gulp.series('build:workers', updateRendererCallback))
 
   return compileWebpack({ watch: true })
 }
@@ -60,29 +53,9 @@ gulp.task('clean', function() {
         .pipe(clean());
 })
 
-gulp.task('build:useref', function() {
-    var conf = {dev: c => PROD ? '' : c}
-    var maps = lazypipe().pipe(sourcemaps.init, { loadMaps: true})
-
-    return gulp.src('src/renderer/assets/*.html')
-        .pipe(useref(conf, maps))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(OUT))
-})
-
 gulp.task('build:app', function() {
   return gulp.src('src/main/main.js')
     .pipe(gulp.dest(OUT));
-})
-
-gulp.task('build:views', function() {
-    return gulp.src('src/renderer/assets/views/**/*', {base: 'src/renderer/assets'})
-        .pipe(gulp.dest(OUT))
-})
-
-gulp.task('build:workers', function() {
-    return gulp.src('src/renderer/app/workers/*.js', {base: 'src/renderer/app'})
-        .pipe(gulp.dest(path.join(OUT, 'scripts')))
 })
 
 gulp.task('build:lib', function() {
@@ -117,21 +90,6 @@ gulp.task('build:fonts', function() {
     .pipe(gulp.dest(path.join(OUT, 'css', 'fonts')))
 })
 
-gulp.task('build:others', function() {
-  return gulp.src(['src/renderer/assets/img/**/*'], {base: 'src/renderer/assets'})
-    .pipe(gulp.dest(OUT))
-})
-
-gulp.task('build:build', function() {
-  return gulp.src(['build/**/*'])
-    .pipe(gulp.dest(path.join(OUT, 'build')))
-})
-
-gulp.task('build:assets' , function () {
-    return gulp.src('./node_modules/semantic-ui-css/themes/default/assets/**')
-    .pipe(gulp.dest(OUT + '/css/themes/default/assets'))
-})
-
 gulp.task('semantic:src', function() {
   return gulp.src([
     path.join(SEMANTIC, '**'),
@@ -148,8 +106,6 @@ gulp.task('semantic:default', function() {
 })
 
 gulp.task('build:semantic', gulp.parallel('semantic:src', 'semantic:default'))
-
-gulp.task('build:static', gulp.parallel('build:useref', 'build:app', 'build:views', 'build:lib', 'build:others', 'build:assets', 'build:workers', 'build:build'))
 
 gulp.task('build:less', function() {
   let dir = 'src/renderer/assets/css/themes'
@@ -176,7 +132,7 @@ gulp.task('build:less', function() {
 
 gulp.task('build:styles', gulp.series(gulp.parallel('build:semantic', 'build:fonts'), 'build:less'))
 
-gulp.task('build', gulp.parallel('build:static', 'build:styles', 'build:webpack'));
+gulp.task('build', gulp.parallel('build:styles', 'build:webpack'));
 
 gulp.task('install', gulp.parallel('build:semantic'))
 
