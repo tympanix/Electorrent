@@ -1,4 +1,9 @@
-<div class="ui big modal">
+<modal
+    class="big"
+    approve="approve()"
+    after="after"
+    data="data"
+    id="certificateModal">
     <i class="close icon"></i>
     <div class="header">
         Untrusted Certificate
@@ -8,13 +13,9 @@
         the consequences of doing so. Never trust a certificate which you do not know the origin of.</p>
 
         <div class="ui equal width stackable grid">
-
-            <!--
-                Certificate
-            -->
             <div class="column">
                 <h3 class="ui dividing header">
-                  Certificate
+                    Certificate
                 </h3>
 
                 <div class="ui list">
@@ -58,12 +59,9 @@
                 </div>
             </div>
 
-            <!--
-                Issuer
-            -->
             <div class="column">
                 <h3 class="ui dividing header">
-                  Issuer
+                    Issuer
                 </h3>
 
                 <div class="ui list">
@@ -115,12 +113,9 @@
                 </div>
             </div>
 
-            <!--
-                Subject
-            -->
             <div class="column">
                 <h3 class="ui dividing header">
-                  Subject
+                    Subject
                 </h3>
 
                 <div class="ui list">
@@ -172,26 +167,24 @@
                 </div>
             </div>
         </div>
-
     </div>
     <div class="actions">
         <div class="ui stackable grid">
-              <div class="ten wide column">
-                  <div class="ui left icon fluid input">
-                        <input name="Fingerprint" type="text" readonly ng-model="data.fingerprint">
-                        <i class="address card icon"></i>
-                  </div>
-              </div>
-              <div class="six wide column">
-                  <a class="ui red deny button">
-                      Cancel
-                  </a>
-                  <button type="submit" class="ui black ok right labeled icon button">
-                      Trust
-                      <i class="address card icon"></i>
-                  </button>
-              </div>
+            <div class="ten wide column">
+                <div class="ui left icon fluid input">
+                    <input name="Fingerprint" type="text" readonly ng-model="data.fingerprint">
+                    <i class="address card icon"></i>
+                </div>
+            </div>
+            <div class="six wide column">
+                <a class="ui red deny button">
+                    Cancel
+                </a>
+                <button type="submit" class="ui black ok right labeled icon button">
+                    Trust
+                    <i class="address card icon"></i>
+                </button>
+            </div>
         </div>
-
     </div>
-</div>
+</modal>

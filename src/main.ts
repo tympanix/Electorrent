@@ -127,6 +127,16 @@ import { NotificationsCenterDirective } from "./scripts/directives/notifications
 torrentApp.directive("notificationsCenter", NotificationsCenterDirective.getInstance())
 import { SettingsPageDirective } from "./scripts/directives/settings-page/settings-page.directive"
 torrentApp.directive("settingsPage", SettingsPageDirective.getInstance())
+import { SettingsGeneralDirective } from "./scripts/directives/settings-general/settings-general.directive"
+torrentApp.directive("settingsGeneral", SettingsGeneralDirective.getInstance())
+import { SettingsConnectionDirective } from "./scripts/directives/settings-connection/settings-connection.directive"
+torrentApp.directive("settingsConnection", SettingsConnectionDirective.getInstance())
+import { SettingsLayoutDirective } from "./scripts/directives/settings-layout/settings-layout.directive"
+torrentApp.directive("settingsLayout", SettingsLayoutDirective.getInstance())
+import { SettingsServersDirective } from "./scripts/directives/settings-servers/settings-servers.directive"
+torrentApp.directive("settingsServers", SettingsServersDirective.getInstance())
+import { SettingsAboutDirective } from "./scripts/directives/settings-about/settings-about.directive"
+torrentApp.directive("settingsAbout", SettingsAboutDirective.getInstance())
 import { WelcomePageDirective } from "./scripts/directives/welcome-page/welcome-page.directive"
 torrentApp.directive("welcomePage", WelcomePageDirective.getInstance())
 import { ServerSelectionDirective } from "./scripts/directives/server-selection/server-selection.directive"
@@ -143,6 +153,10 @@ import { ActionHeaderDirective } from "./scripts/directives/action-header/action
 torrentApp.directive("actionHeader", ActionHeaderDirective.getInstance())
 import { LabelsDropdownDirective } from "./scripts/directives/labels-dropdown/labels-dropdown.directive"
 torrentApp.directive("labelsDropdown", LabelsDropdownDirective.getInstance())
+import { LabelsMenuDirective } from "./scripts/directives/labels-menu/labels-menu.directive"
+torrentApp.directive("labelsMenu", LabelsMenuDirective.getInstance())
+import { NewLabelModalDirective } from "./scripts/directives/new-label-modal/new-label-modal.directive"
+torrentApp.directive("newLabelModal", NewLabelModalDirective.getInstance())
 import { DragAndDropDirective } from "./scripts/directives/drag-and-drop/drag-and-drop.directive"
 torrentApp.directive("dragAndDrop", DragAndDropDirective.getInstance())
 import { SortingDirective, SortDirective } from "./scripts/directives/sorting/sorting.directive"
@@ -163,6 +177,12 @@ torrentApp.directive("limitBind", LimitBindDirective.getInstance())
 torrentApp.directive("limitSource", LimitSourceDirective.getInstance())
 import { ModalDirective } from "./scripts/directives/modal/modal.directive"
 torrentApp.directive('modalNew', ModalDirective.getInstance())
+import { RenameServerModalDirective } from "./scripts/directives/rename-server-modal/rename-server-modal.directive"
+torrentApp.directive("renameServerModal", RenameServerModalDirective.getInstance())
+import { UpdateModalDirective } from "./scripts/directives/update-modal/update-modal.directive"
+torrentApp.directive("updateModal", UpdateModalDirective.getInstance())
+import { CertificateModalDirective } from "./scripts/directives/certificate-modal/certificate-modal.directive"
+torrentApp.directive("certificateModal", CertificateModalDirective.getInstance())
 import { AddTorrentModalDirective } from "./scripts/directives/add-torrent-modal/add-torrent-modal.directive";
 torrentApp.directive('addTorrentModal', AddTorrentModalDirective.getInstance())
 import { TorrentUploadFormDirective } from "./scripts/directives/torrent-upload-form/torrent-upload-form.directive";

@@ -27,23 +27,23 @@
         <div class="container">
             <div class="content" ng-switch="page">
                 <div ng-switch-when="general" id="page-settings-general">
-                    <div ng-include="'./views/settings/general.html'"></div>
+                    <settings-general></settings-general>
                 </div>
 
                 <div ng-switch-when="connection" id="page-settings-connection">
-                    <div ng-include="'./views/settings/connection.html'"></div>
+                    <settings-connection></settings-connection>
                 </div>
 
                 <div ng-switch-when="layout" id="page-settings-layout">
-                    <div ng-include="'./views/settings/layout.html'"></div>
+                    <settings-layout></settings-layout>
                 </div>
 
                 <div ng-switch-when="servers" id="page-settings-servers">
-                    <div ng-include="'./views/settings/servers.html'"></div>
+                    <settings-servers></settings-servers>
                 </div>
 
                 <div ng-switch-when="about" id="page-settings-about">
-                    <div ng-include="'./views/settings/about.html'"></div>
+                    <settings-about></settings-about>
                 </div>
             </div>
             <div class="actions footer">

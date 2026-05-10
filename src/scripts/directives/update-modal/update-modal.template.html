@@ -1,11 +1,13 @@
-<div class="ui small modal">
+<modal
+    class="small"
+    approve="approve()"
+    data="data"
+    id="updateModal">
     <i class="close icon"></i>
     <div class="header">
-
         Update Available
     </div>
     <div class="content">
-
         <h4 class="ui header">
             <div class="content">
                 Version:
@@ -20,7 +22,6 @@
         </h4>
 
         <p marked="data.releaseNotes"></p>
-
     </div>
     <div class="actions">
         <a class="ui black deny button">
@@ -31,4 +32,4 @@
             <i class="arrow alternate circle up icon"></i>
         </a>
     </div>
-</div>
+</modal>

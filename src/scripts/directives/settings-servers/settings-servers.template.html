@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <h1>Servers</h1>
 <table class="ui very basic table">
     <thead>
@@ -24,17 +23,17 @@
             <td>{{server.ip}}</td>
             <td class="collapsing">
                 <div ng-switch="server.proto">
-                    <div class="" ng-switch-when="http">
+                    <div ng-switch-when="http">
                         <div class="ui label">
                             <i class="unlock alternate icon"></i> {{server.proto}}
                         </div>
                     </div>
-                    <div class="" ng-switch-when="https">
+                    <div ng-switch-when="https">
                         <div class="ui label">
                             <i class="green lock icon"></i> {{server.proto}}
                         </div>
                     </div>
-                    <div class="" ng-switch-default>
+                    <div ng-switch-default>
                         <div class="ui label">
                             <i class="help icon"></i> {{server.proto}}
                         </div>
@@ -58,10 +57,4 @@
     </tbody>
 </table>
 
-<modal
-    title="Rename Server"
-    approve="renameServer()"
-    data="renameData"
-    id="renameModal"
-    template-url="./views/modals/rename.html">
-</modal>
+<rename-server-modal data="renameData" approve="renameServer()"></rename-server-modal>

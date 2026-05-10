@@ -10,17 +10,10 @@
     </div>
 </div>
 
-<modal
-    approve="installUpdate()"
-    data="updateData"
-    id="updateModal"
-    template-url="./views/modals/update.html">
-</modal>
+<update-modal data="updateData" approve="installUpdate()"></update-modal>
 
-<modal
+<certificate-modal
     approve="installCertificate()"
     after="certificateResult"
-    data="certificate"
-    id="certificateModal"
-    template-url="./views/modals/certificate.html">
-</modal>
+    data="certificate">
+</certificate-modal>
