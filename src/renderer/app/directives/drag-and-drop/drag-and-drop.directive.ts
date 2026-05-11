@@ -17,6 +17,27 @@ export class DragAndDropDirective implements IDirective {
         private $rootScope: IRootScopeService,
     ) {}
 
+    private notifyInvalidFiles() {
+        this.$rootScope.$emit("notification", {
+            title: "Oopsy Daisy!",
+            message: "Seems like you chose an incorrect file type!",
+            type: "negative",
+        });
+    }
+
+    private isTorrentFile(file: File) {
+        return file.name.toLowerCase().endsWith(".torrent");
+    }
+
+    private readDroppedFile(file: File, askUploadOptions: boolean): Promise<PendingTorrentUploadFile> {
+        return file.arrayBuffer().then((buffer) => ({
+            type: "file",
+            filename: file.name,
+            data: new Uint8Array(buffer),
+            askUploadOptions,
+        }));
+    }
+
     private broadcastTorrentFiles(files: PendingTorrentUploadFile[]) {
         files.forEach((file) => {
             this.$rootScope.$broadcast("torrents:add", {
@@ -65,20 +86,19 @@ export class DragAndDropDirective implements IDirective {
 
         const onDrop = (event: JQuery.TriggeredEvent) => {
             const files = (event.originalEvent as DragEvent).dataTransfer?.files;
-            const paths: string[] = [];
-
-            if (files) {
-                for (let index = 0; index < files.length; index += 1) {
-                    const file = files.item(index);
-                    if (file) {
-                        paths.push((file as File & { path?: string }).path || "");
-                    }
-                }
-            }
 
             metaPromise.then((meta) => {
                 const advancedKey = meta.isMacOS ? !!event.altKey : !!event.ctrlKey;
-                return electorrent.torrents.readFiles(paths.filter(Boolean), advancedKey)
+                const torrentFiles = Array.from(files || []).filter((file) => this.isTorrentFile(file));
+
+                if (torrentFiles.length === 0) {
+                    if (files && files.length > 0) {
+                        this.notifyInvalidFiles();
+                    }
+                    return [];
+                }
+
+                return Promise.all(torrentFiles.map((file) => this.readDroppedFile(file, advancedKey)));
             }).then((files: PendingTorrentUploadFile[]) => {
                 this.$rootScope.$applyAsync(() => {
                     this.broadcastTorrentFiles(files);

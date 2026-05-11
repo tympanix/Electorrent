@@ -237,10 +237,6 @@ ipcMain.handle(IPC_CHANNELS.torrents.openFiles, async function(_event, { askUplo
     return torrents.browse(askUploadOptions)
 })
 
-ipcMain.handle(IPC_CHANNELS.torrents.readFiles, async function(_event, { paths, askUploadOptions }) {
-    return torrents.readFiles(paths, askUploadOptions)
-})
-
 ipcMain.handle(IPC_CHANNELS.updates.check, async function(_event, { verbose }) {
     updater.checkForUpdates(verbose)
 })

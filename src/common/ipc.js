@@ -21,7 +21,6 @@ const IPC_CHANNELS = {
     },
     torrents: {
         openFiles: "torrents:open-files",
-        readFiles: "torrents:read-files",
     },
     updates: {
         check: "updates:check",

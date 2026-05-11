@@ -170,7 +170,6 @@ export interface ElectorrentBridge {
     }
     torrents: {
         openFiles(askUploadOptions: boolean): Promise<PendingTorrentUploadFile[]>
-        readFiles(paths: string[], askUploadOptions: boolean): Promise<PendingTorrentUploadFile[]>
     }
     updates: {
         check(verbose?: boolean): Promise<void>
