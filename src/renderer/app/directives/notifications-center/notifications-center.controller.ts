@@ -62,32 +62,35 @@ export class NotificationsCenterController {
             }, 0);
         };
 
-        electron.ipc.on("autoUpdate", (event: unknown, data: any) => {
-            $scope.manualUpdate = false;
+        electron.updater.onStatus((event: any) => {
+            if (event.type !== "downloaded") {
+                return;
+            }
+
+            const data = event.data || {};
+            $scope.manualUpdate = !!data.manual;
 
             $http.get(data.updateUrl, { timeout: 10000 })
                 .then((res: any) => {
-                    data.releaseNotes = res.data.notes;
-                    data.releaseDate = res.data.pub_date;
+                    if (!data.releaseNotes) {
+                        data.releaseNotes = res.data.notes;
+                    }
+                    if (!data.releaseDate) {
+                        data.releaseDate = res.data.pub_date;
+                    }
                 })
                 .catch(() => {
-                    data.releaseNotes = "Not available. Please go to the website for more info";
+                    if (!data.releaseNotes) {
+                        data.releaseNotes = "Not available. Please go to the website for more info";
+                    }
                 })
                 .then(() => {
                     $scope.updateData = data;
-                    const modal: any = $("#updateModal");
-                    modal.modal("show");
+                    $timeout(() => {
+                        const modal: any = $("#updateModal");
+                        modal.modal("show");
+                    }, $scope.manualUpdate ? 500 : 0);
                 });
-        });
-
-        electron.ipc.on("manualUpdate", (event: unknown, data: any) => {
-            $scope.updateData = data;
-            $scope.manualUpdate = true;
-
-            $timeout(() => {
-                const modal: any = $("#updateModal");
-                modal.modal("show");
-            }, 500);
         });
 
         $scope.installUpdate = () => {
@@ -98,68 +101,26 @@ export class NotificationsCenterController {
             }
         };
 
-        electron.ipc.on("certificate-modal-node", (event: unknown, cert: any, server: any) => {
+        electron.ca.onChallenge((cert: any) => {
             $scope.installCertificate = () => {
-                electron.ca.installCertificate(cert, (err: unknown, fingerprint: string) => {
-                    if (err) {
-                        $rootScope.$emit("certificate-modal", false);
-                        $notify.alert("Could not install certificate", String(err));
-                    } else {
-                        $rootScope.$emit("certificate-modal", server.id, fingerprint);
-                        $rootScope.$broadcast("certificate-installed", server.id, fingerprint);
-                        $notify.ok("Certificate installed", "The certificate has been trusted for this server to use");
-                    }
-                });
+                if (cert.source === "node-client-check") {
+                    electron.ca.installCertificate(cert, (err: unknown, fingerprint: string) => {
+                        if (err) {
+                            $rootScope.$emit("certificate-modal", false);
+                            $notify.alert("Could not install certificate", String(err));
+                        } else {
+                            $rootScope.$emit("certificate-modal", cert.serverId, fingerprint);
+                            $rootScope.$broadcast("certificate-installed", cert.serverId, fingerprint);
+                            $notify.ok("Certificate installed", "The certificate has been trusted for this server to use");
+                        }
+                    });
+                } else {
+                    config.trustCertificate(cert).catch((err: unknown) => {
+                        $notify.alert("Could not trust certificate", String(err));
+                    });
+                }
             };
-            $scope.certificate = {
-                selfSigned: !cert.issuerCertificate,
-                issuer: {
-                    country: cert.issuer.C,
-                    state: cert.issuer.ST,
-                    organization: cert.issuer.O,
-                    organizationUnit: cert.issuer.OU,
-                    commonName: cert.issuer.CN,
-                },
-                subject: {
-                    country: cert.subject.C,
-                    state: cert.subject.ST,
-                    organization: cert.subject.O,
-                    organizationUnit: cert.subject.OU,
-                    commonName: cert.subject.CN,
-                },
-                fingerprint: cert.fingerprint,
-                validFrom: new Date(cert.valid_from).getTime() / 1000,
-                validTo: new Date(cert.valid_to).getTime() / 1000,
-                serialNumber: cert.serialNumber,
-            };
-            showCertModal();
-        });
-
-        electron.ipc.on("certificate-error", (event: unknown, cert: any) => {
-            $scope.installCertificate = () => {
-                config.trustCertificate(cert);
-            };
-            $scope.certificate = {
-                selfSigned: !cert.issuerCert,
-                issuer: {
-                    country: cert.issuer.country,
-                    state: cert.issuer.state,
-                    organization: cert.issuer.organizations && cert.issuer.organizations[0],
-                    organizationUnit: cert.issuer.organizationUnits && cert.issuer.organizationUnits[0],
-                    commonName: cert.issuer.commonName,
-                },
-                subject: {
-                    country: cert.subject.country,
-                    state: cert.subject.state,
-                    organization: cert.subject.organizations && cert.subject.organizations[0],
-                    organizationUnit: cert.subject.organizationUnits && cert.subject.organizationUnits[0],
-                    commonName: cert.subject.commonName,
-                },
-                fingerprint: cert.fingerprint,
-                validFrom: cert.validStart,
-                validTo: cert.validExpiry,
-                serialNumber: cert.serialNumber,
-            };
+            $scope.certificate = cert;
             showCertModal();
         });
 

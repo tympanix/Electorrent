@@ -4,6 +4,7 @@ const yargs = require('yargs');
 const path = require('path');
 const is = require('electron-is');
 require('@electron/remote/main').initialize();
+const { IPC_CHANNELS } = require('./common/ipc');
 
 // Handle Squirrel startup parameters
 if (require('./lib/startup')) return
@@ -14,6 +15,7 @@ const { BrowserWindow } = electron;
 const { ipcMain } = electron;
 const { session } = electron;
 const { nativeImage } = electron;
+const { shell } = electron;
 
 // Set up program arguments
 yargs.version(() => app.getVersion())
@@ -28,10 +30,15 @@ const updater = require('./lib/update');
 const logger = require('./lib/logger');
 const electorrent = require('./lib/electorrent');
 const torrents = require('./lib/torrents');
+const themes = require('./lib/themes');
+const certificates = require('./lib/certificates');
+const menu = require('./lib/menu');
 
 // Log startup information
 logger.debug('Starting Electorrent in debug mode');
 logger.verbose('Verbose logging enabled');
+
+const program = yargs.argv
 
 // Use the electron-reloader plugin for live reload during development
 try {
@@ -40,6 +47,10 @@ try {
 
 // Global windows object reference
 let torrentWindow;
+let pendingLaunchPayload = {
+    magnets: [],
+    torrentFilePaths: [],
+};
 
 function createTorrentWindow() {
     var windowSettings = {
@@ -52,7 +63,8 @@ function createTorrentWindow() {
             nodeIntegration: true,
             contextIsolation: false,
             nodeIntegrationInWorker: true,
-            enableRemoteModule: true
+            enableRemoteModule: true,
+            preload: path.join(__dirname, 'preload.js'),
         }
     }
 
@@ -61,6 +73,7 @@ function createTorrentWindow() {
     // Create the browser window.
     torrentWindow = new BrowserWindow(windowSettings);
     electorrent.setWindow(torrentWindow);
+    menu.setWindow(torrentWindow);
 
     // Enable the remote module to access main-process-only objects from
     // the renderer process
@@ -95,31 +108,184 @@ function getApplicationIcon() {
     }
 }
 
-function sendMagnetLinks(args) {
-    var magnetLinks = args.filter((url) => url.startsWith('magnet'))
-    if(magnetLinks.length === 0) return
-    torrentWindow.webContents.send('magnet', magnetLinks);
+function getMagnetLinks(args) {
+    return args.filter((url) => url.startsWith('magnet'))
 }
 
-function sendTorrentFiles(args) {
+function getTorrentFilePaths(args) {
+    return args.filter((filePath) => filePath.endsWith('.torrent'))
+}
+
+function queuePendingLaunchArgs(args) {
+    pendingLaunchPayload.magnets.push(...getMagnetLinks(args))
+    pendingLaunchPayload.torrentFilePaths.push(...getTorrentFilePaths(args))
+}
+
+async function sendMagnetLinks(args) {
+    var magnetLinks = getMagnetLinks(args)
+    if(magnetLinks.length === 0 || !torrentWindow || torrentWindow.isDestroyed()) return
+    torrentWindow.webContents.send(IPC_CHANNELS.launch.magnets, magnetLinks);
+}
+
+async function sendTorrentFiles(args) {
     logger.info('Main searching for files in', args)
-    var torrentFiles = args.filter((path) => path.endsWith('.torrent'))
-    if(torrentFiles.length === 0) return
-    logger.info('Main seding torrent files', torrentFiles)
-    torrents.readFiles(torrentFiles)
+    var torrentFiles = getTorrentFilePaths(args)
+    if(torrentFiles.length === 0 || !torrentWindow || torrentWindow.isDestroyed()) return
+    logger.info('Main sending torrent files', torrentFiles)
+    const files = await torrents.readFiles(torrentFiles, false)
+    if (files.length === 0) return
+    torrentWindow.webContents.send(IPC_CHANNELS.launch.torrentFiles, files);
 }
 
-ipcMain.on('send:magnets', function() {
-    sendMagnetLinks(process.argv);
+function getAppMeta() {
+    return {
+        appName: app.name,
+        appVersion: app.getVersion(),
+        isMacOS: is.macOS(),
+        isWindows: is.windows(),
+        isLinux: is.linux(),
+        isDebug: !!program.debug,
+        platform: process.platform,
+        versions: {
+            node: process.versions.node,
+            chrome: process.versions.chrome,
+            electron: process.versions.electron,
+        },
+    }
+}
+
+function sanitizeCertificateError(certificate) {
+    return {
+        source: 'main-certificate-error',
+        selfSigned: !certificate.issuerCert,
+        issuer: {
+            country: certificate.issuer && certificate.issuer.country,
+            state: certificate.issuer && certificate.issuer.state,
+            organization: certificate.issuer && certificate.issuer.organizations && certificate.issuer.organizations[0],
+            organizationUnit: certificate.issuer && certificate.issuer.organizationUnits && certificate.issuer.organizationUnits[0],
+            commonName: certificate.issuer && certificate.issuer.commonName,
+        },
+        subject: {
+            country: certificate.subject && certificate.subject.country,
+            state: certificate.subject && certificate.subject.state,
+            organization: certificate.subject && certificate.subject.organizations && certificate.subject.organizations[0],
+            organizationUnit: certificate.subject && certificate.subject.organizationUnits && certificate.subject.organizationUnits[0],
+            commonName: certificate.subject && certificate.subject.commonName,
+        },
+        fingerprint: certificate.fingerprint,
+        validFrom: certificate.validStart,
+        validTo: certificate.validExpiry,
+        serialNumber: certificate.serialNumber,
+    }
+}
+
+ipcMain.handle(IPC_CHANNELS.app.getMeta, async function() {
+    return getAppMeta()
 })
 
-ipcMain.on('send:torrentfiles', function() {
-    logger.info('Main received send torrentfiles')
-    sendTorrentFiles(process.argv);
+ipcMain.handle(IPC_CHANNELS.app.getDefaultProtocolStatus, async function(_event, { protocol }) {
+    return app.isDefaultProtocolClient(protocol)
 })
 
-ipcMain.on('settings:corrupt', function() {
+ipcMain.handle(IPC_CHANNELS.app.setDefaultProtocolStatus, async function(_event, { protocol, enabled }) {
+    if (enabled) {
+        app.setAsDefaultProtocolClient(protocol);
+    } else {
+        app.removeAsDefaultProtocolClient(protocol);
+    }
+})
+
+ipcMain.handle(IPC_CHANNELS.app.quit, async function() {
+    app.quit()
+})
+
+ipcMain.handle(IPC_CHANNELS.app.reportCorruptSettings, async function() {
     config.showCorruptDialog()
+})
+
+ipcMain.handle(IPC_CHANNELS.shell.openExternal, async function(_event, { url }) {
+    await shell.openExternal(url)
+})
+
+ipcMain.handle(IPC_CHANNELS.settings.getAll, async function() {
+    return config.getAllSettings()
+})
+
+ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event, { settings }) {
+    return new Promise((resolve, reject) => {
+        config.saveAll(settings, function(err) {
+            if (err) reject(err)
+            else resolve()
+        })
+    })
+})
+
+ipcMain.handle(IPC_CHANNELS.settings.listThemes, async function() {
+    return themes()
+})
+
+ipcMain.handle(IPC_CHANNELS.launch.getPending, async function() {
+    const payload = {
+        magnets: pendingLaunchPayload.magnets.splice(0),
+        torrentFiles: await torrents.readFiles(pendingLaunchPayload.torrentFilePaths.splice(0), false),
+    }
+
+    return payload
+})
+
+ipcMain.handle(IPC_CHANNELS.torrents.openFiles, async function(_event, { askUploadOptions }) {
+    return torrents.browse(askUploadOptions)
+})
+
+ipcMain.handle(IPC_CHANNELS.torrents.readFiles, async function(_event, { paths, askUploadOptions }) {
+    return torrents.readFiles(paths, askUploadOptions)
+})
+
+ipcMain.handle(IPC_CHANNELS.updates.check, async function(_event, { verbose }) {
+    updater.checkForUpdates(verbose)
+})
+
+ipcMain.handle(IPC_CHANNELS.updates.installDownloaded, async function() {
+    updater.manualQuitAndUpdate()
+})
+
+ipcMain.handle(IPC_CHANNELS.updates.installAuto, async function() {
+    updater.quitAndInstall()
+})
+
+ipcMain.handle(IPC_CHANNELS.certificates.fetch, async function(_event, request) {
+    return new Promise((resolve, reject) => {
+        certificates.get(request.server, function(err, cert) {
+            if (err) {
+                reject(err)
+                return
+            }
+
+            if (torrentWindow && !torrentWindow.isDestroyed()) {
+                torrentWindow.webContents.send(IPC_CHANNELS.certificates.challenge, cert);
+            }
+
+            resolve(cert)
+        })
+    })
+})
+
+ipcMain.handle(IPC_CHANNELS.certificates.install, async function(_event, request) {
+    return new Promise((resolve, reject) => {
+        certificates.installCertificate(request, function(err, fingerprint) {
+            if (err) reject(err)
+            else resolve({ fingerprint })
+        })
+    })
+})
+
+ipcMain.handle(IPC_CHANNELS.certificates.load, async function(_event, { fingerprint }) {
+    const cert = certificates.loadCertificate(fingerprint)
+    return cert ? new Uint8Array(cert) : null
+})
+
+ipcMain.handle(IPC_CHANNELS.menu.setState, async function(_event, state) {
+    menu.setState(state)
 })
 
 // If another instance of the app is allready running, execute this callback
@@ -135,6 +301,8 @@ if (!app.requestSingleInstanceLock()) {
             sendTorrentFiles(args)
             if(torrentWindow.isMinimized()) torrentWindow.restore();
             torrentWindow.focus();
+        } else {
+            queuePendingLaunchArgs(args)
         }
     })
 };
@@ -147,7 +315,7 @@ app.on('open-url', function(event, url) {
     if(torrentWindow) {
         sendMagnetLinks([url]);
     } else {
-        process.argv.push(url);
+        queuePendingLaunchArgs([url]);
     }
 });
 
@@ -156,7 +324,7 @@ app.on('open-file', function(event, path) {
     if (torrentWindow) {
         sendTorrentFiles([path]);
     } else {
-        process.argv.push(path);
+        queuePendingLaunchArgs([path]);
     }
 })
 
@@ -164,6 +332,7 @@ app.on('open-file', function(event, path) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', function() {
+    queuePendingLaunchArgs(process.argv);
     createTorrentWindow();
     updater.initialise(torrentWindow);
 
@@ -184,7 +353,9 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
         event.preventDefault()
         callback(true)
     } else {
-        torrentWindow.webContents.send('certificate-error', certificate);
+        if (torrentWindow && !torrentWindow.isDestroyed()) {
+            torrentWindow.webContents.send(IPC_CHANNELS.certificates.challenge, sanitizeCertificateError(certificate));
+        }
         callback(false)
     }
 })

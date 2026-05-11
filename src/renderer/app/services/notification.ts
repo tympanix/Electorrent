@@ -89,8 +89,8 @@ export let notificationService = ["$rootScope", "electron", function ($rootScope
     }
 
     // Listen for incomming notifications from main process
-    electron.ipc.on('notify', function (event, data) {
-        $rootScope.$apply(function () {
+    electron.notifications.onPush(function (data) {
+        $rootScope.$applyAsync(function () {
             sendNotification(data.title, data.message, data.type || 'warning');
         })
     })

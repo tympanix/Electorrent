@@ -33,8 +33,9 @@ export class AppShellController {
         const PAGE_TORRENTS = "torrents";
 
         let loadingTimer: angular.IPromise<void> | undefined;
-        let settings = config.getAllSettings();
         let page: string | null = null;
+        let pendingMagnets: string[] = [];
+        let pendingTorrentFiles: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }> = [];
 
         $scope.servers = config.getServers();
         $scope.showTorrents = false;
@@ -42,35 +43,40 @@ export class AppShellController {
         $scope.statusText = "Loading";
 
         $rootScope.$on("ready", () => {
-            const automaticUpdates = config.getAllSettings()?.automaticUpdates;
-            if (!electron.program.debug && automaticUpdates !== false) {
-                electron.updater.checkForUpdates();
-            }
+            config.whenReady().then(() => {
+                const settings = config.getAllSettings();
+                const automaticUpdates = settings?.automaticUpdates;
+                if (!electron.program.debug && automaticUpdates !== false) {
+                    electron.updater.checkForUpdates();
+                }
 
-            if (!settings.servers.length) {
-                pageWelcome();
-                return;
-            }
+                if (!settings.servers.length) {
+                    pageWelcome();
+                    return;
+                }
 
-            if (settings.startup === "default") {
-                const server = config.getDefaultServer();
-                if (server) {
-                    connectToServer(server);
+                if (settings.startup === "default") {
+                    const server = config.getDefaultServer();
+                    if (server) {
+                        connectToServer(server);
+                    } else {
+                        pageServers();
+                        $notify.ok("No default server", "Please choose a server to connect to");
+                    }
+                } else if (settings.startup === "latest") {
+                    const server = config.getRecentServer();
+                    if (server) {
+                        connectToServer(server);
+                    } else {
+                        pageServers();
+                        $notify.ok("No recent servers", "Please choose a server to connect to");
+                    }
                 } else {
                     pageServers();
-                    $notify.ok("No default server", "Please choose a server to connect to");
                 }
-            } else if (settings.startup === "latest") {
-                const server = config.getRecentServer();
-                if (server) {
-                    connectToServer(server);
-                } else {
-                    pageServers();
-                    $notify.ok("No recent servers", "Please choose a server to connect to");
-                }
-            } else {
-                pageServers();
-            }
+            }).finally(() => {
+                $scope.$applyAsync();
+            });
         });
 
         $scope.$on("menu:selectall", () => {
@@ -89,28 +95,104 @@ export class AppShellController {
             connectToServer(server);
         };
 
-        const requestMagnetLinks = () => {
-            electron.ipc.send("send:magnets");
+        const queueMagnetLinks = (magnets: string[]) => {
+            pendingMagnets.push(...magnets);
         };
 
-        const requestTorrentFiles = () => {
-            electron.ipc.send("send:torrentfiles");
+        const queueTorrentFiles = (files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
+            pendingTorrentFiles.push(...files);
         };
 
-        electron.ipc.on("magnet", (event: unknown, data: string[]) => {
-            data.forEach((magnet) => {
+        const broadcastTorrentFile = (file: PendingTorrentUploadFile, askUploadOptions: boolean) => {
+            const pendingFile: PendingTorrentUploadFile = {
+                type: "file",
+                data: new Uint8Array(file.data),
+                filename: file.filename,
+            };
+            $scope.$broadcast("torrents:add", pendingFile, askUploadOptions);
+        };
+
+        const drainPendingLaunchPayloads = () => {
+            if (!$rootScope.$btclient) {
+                return;
+            }
+
+            pendingMagnets.splice(0).forEach((magnet) => {
                 $rootScope.$btclient?.addTorrentUrl(magnet);
             });
+
+            pendingTorrentFiles.splice(0).forEach((file) => {
+                broadcastTorrentFile(file, !!file.askUploadOptions);
+            });
+        };
+
+        electron.launch.onMagnets((magnets: string[]) => {
+            queueMagnetLinks(magnets);
+            drainPendingLaunchPayloads();
+            $scope.$applyAsync();
         });
 
-        electron.ipc.on("torrentfiles", (event: unknown, buffer: ArrayLike<any>, filename: string, askUploadOptions: boolean) => {
-            const data = new Uint8Array(buffer);
-            const file: PendingTorrentUploadFile = {
-                type: "file",
-                data,
-                filename,
-            };
-            $scope.$broadcast("torrents:add", file, askUploadOptions);
+        electron.launch.onTorrentFiles((files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
+            queueTorrentFiles(files);
+            drainPendingLaunchPayloads();
+            $scope.$applyAsync();
+        });
+
+        electron.menu.onAction((action: any) => {
+            switch (action.type) {
+                case "show-settings":
+                    $scope.$emit("show:settings");
+                    break;
+                case "show-servers":
+                    $scope.$emit("show:servers");
+                    break;
+                case "search-torrent":
+                    $rootScope.$broadcast("search:torrent");
+                    break;
+                case "select-all":
+                    if (document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement) {
+                        document.activeElement.select();
+                    } else if (page === PAGE_TORRENTS) {
+                        $scope.$broadcast("select:torrents");
+                    }
+                    break;
+                case "remove-selected":
+                    if (document.activeElement?.nodeName !== "INPUT" && page === PAGE_TORRENTS) {
+                        $scope.$broadcast("remove:torrents");
+                    }
+                    break;
+                case "open-add-torrent":
+                    electron.torrents.browse(!!action.askUploadOptions).then((files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
+                        files.forEach((item) => broadcastTorrentFile(item, !!item.askUploadOptions));
+                    });
+                    break;
+                case "paste-torrent-url":
+                    $bittorrent.uploadFromClipboard(!!action.askUploadOptions);
+                    break;
+                case "open-external":
+                    electron.shell.openExternal(action.url);
+                    break;
+                case "check-for-updates":
+                    electron.updater.checkForUpdates(!!action.verbose);
+                    break;
+                case "connect-server":
+                    {
+                        const server = config.getServer(action.serverId);
+                        if (server) {
+                            connectToServer(server);
+                        }
+                    }
+                    break;
+                case "set-current-default-server":
+                    config.setCurrentServerAsDefault();
+                    break;
+                case "add-server":
+                    $scope.$emit("add:server");
+                    break;
+                default:
+                    break;
+            }
+            $scope.$applyAsync();
         });
 
         const pageTorrents = (fullupdate?: boolean) => {
@@ -156,8 +238,11 @@ export class AppShellController {
                 $scope.statusText = "Loading Torrents";
                 config.updateServer(server);
                 pageTorrents(true);
-                requestMagnetLinks();
-                requestTorrentFiles();
+                return electron.launch.getPending().then((payload: any) => {
+                    queueMagnetLinks(payload.magnets || []);
+                    queueTorrentFiles(payload.torrentFiles || []);
+                    drainPendingLaunchPayloads();
+                });
             }).catch((err: unknown) => {
                 console.error(err);
                 pageSettings("connection");

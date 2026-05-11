@@ -2,9 +2,6 @@ import { IRootScopeService } from "angular";
 
 export let configService = ['$rootScope', '$bittorrent', 'notificationService', 'electron', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, electron, $q, Server) {
 
-    const MenuItem = electron.menuItem
-    const config = electron.config;
-
     var settings = {
         startup: 'default',
         refreshRate: 2000,
@@ -21,12 +18,20 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
         certificates: []
     };
 
+    const readyPromise = electron.ready().then(() => {
+        return electron.settings.getAll();
+    }).then((org: any) => {
+        angular.merge(settings, org);
+        settings.servers = settings.servers.map((server) => new Server(server));
+        return settings;
+    });
+
+    this.whenReady = function() {
+        return readyPromise;
+    }
+
     this.initSettings = function() {
-        var org = config.settingsReference();
-        angular.merge(settings, org)
-        settings.servers = settings.servers.map((server) => {
-            return new Server(server)
-        })
+        return readyPromise;
     }
 
     function isDefault(server) {
@@ -80,15 +85,10 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
 
 
     this.saveAllSettings = function(newSettings) {
-        var q = $q.defer();
         if (newSettings) {
             Object.assign(settings, newSettings)
         }
-        config.saveAll(settingsToJson(), function(err) {
-            if(err) q.reject(err)
-            else q.resolve()
-        });
-        return q.promise.then(function() {
+        return electron.settings.saveAll(settingsToJson()).then(function() {
             updateServerReference()
         });
     }
@@ -155,73 +155,27 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
         return maxServer
     }
 
-    function getMenu(menu, id) {
-        return menu.items.find((menuItem) => menuItem.id === id)
-    }
-
     this.updateApplicationMenu = function() {
-        let menu = electron.menu.getApplicationMenu()
-        let fileMenu = getMenu(menu, 'file')
-        let addFileAdvancedMenu = getMenu(fileMenu.submenu, 'torrent-file-add-advanced')
-        let addUrlAdvancedMenu = getMenu(fileMenu.submenu, 'torrent-url-add-advanced')
-
         let advancedUploadEnabled = false
         if ($rootScope.$btclient && $rootScope.$server) {
             advancedUploadEnabled = !!$rootScope.$btclient.uploadOptionsEnable
         }
 
-        addFileAdvancedMenu.enabled = advancedUploadEnabled
-        addFileAdvancedMenu.visible = advancedUploadEnabled
-
-        addUrlAdvancedMenu.enabled = advancedUploadEnabled
-        addUrlAdvancedMenu.visible = advancedUploadEnabled
-
-        this.renderServerMenu()
+        return electron.menu.setState({
+            isDebug: !!electron.program.debug,
+            hasActiveServer: !!$rootScope.$server,
+            advancedUploadEnabled: advancedUploadEnabled,
+            servers: this.getServers().map((server, index) => ({
+                id: server.id,
+                label: server.getDisplayName(),
+                accelerator: index < 10 ? 'CmdOrCtrl+' + ((index + 1) % 10) : undefined,
+                checked: !!$rootScope.$server && server.id === $rootScope.$server.id,
+            })),
+        })
     }
 
     this.renderServerMenu = function() {
-        let menu = electron.menu.getApplicationMenu()
-        let serverMenu = getMenu(menu, 'servers').submenu
-        serverMenu.clear()
-        serverMenu.append(new MenuItem({
-            label: 'Add new server...',
-            accelerator: 'CmdOrCtrl+N',
-            click: () => $rootScope.$broadcast('add:server'),
-        }))
-        serverMenu.append(new MenuItem({
-            label: 'Set current as default',
-            click: () => this.setCurrentServerAsDefault(),
-            enabled: !!$rootScope.$server
-        }))
-        serverMenu.append(new MenuItem({type: 'separator'}))
-        renderServerMenuOptions(serverMenu, this.getServers())
-        electron.menu.setApplicationMenu(menu)
-    }
-
-    function serverAccelerator(index) {
-      if (index > 0 && index <= 10) {
-        return 'CmdOrCtrl+'+ (index % 10)
-      }
-    }
-
-    function renderServerMenuOptions(menu, servers) {
-        if (!$rootScope.$server) {
-            menu.append(new MenuItem({
-                label: 'Disabled...',
-                enabled: false
-            }))
-            return
-        }
-        servers.forEach((server, index) => {
-            menu.append(new MenuItem({
-                label: server.getDisplayName(),
-                accelerator: serverAccelerator(index+1),
-                id: server.id,
-                click: () => $rootScope.$broadcast('connect:server', server),
-                checked: server.id === $rootScope.$server.id,
-                type: 'radio'
-            }))
-        })
+        return this.updateApplicationMenu()
     }
 
 }];

@@ -3,9 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const { app } = require('electron')
 
-const config = require('./config')
-const electorrent = require('./electorrent')
-
 const CERT_DIR = path.join(app.getPath('userData'), 'certs')
 
 function ensureDir() {
@@ -14,7 +11,7 @@ function ensureDir() {
             fs.mkdirSync(CERT_DIR)
         }
     } catch (e) {
-        console.error(err)
+        console.error(e)
     }
 }
 
@@ -69,9 +66,30 @@ function get(server, callback) {
         if (isEmpty(certificate) || certificate === null) {
             callback(new Error('The website did not provide a certificate'))
         } else {
-            let torrentWindow = electorrent.getWindow()
-            torrentWindow.webContents.send('certificate-modal-node', certificate, server);
-            callback(null, certificate)
+            callback(null, {
+                source: 'node-client-check',
+                serverId: server.id,
+                selfSigned: !certificate.issuerCertificate,
+                issuer: {
+                    country: certificate.issuer && certificate.issuer.C,
+                    state: certificate.issuer && certificate.issuer.ST,
+                    organization: certificate.issuer && certificate.issuer.O,
+                    organizationUnit: certificate.issuer && certificate.issuer.OU,
+                    commonName: certificate.issuer && certificate.issuer.CN,
+                },
+                subject: {
+                    country: certificate.subject && certificate.subject.C,
+                    state: certificate.subject && certificate.subject.ST,
+                    organization: certificate.subject && certificate.subject.O,
+                    organizationUnit: certificate.subject && certificate.subject.OU,
+                    commonName: certificate.subject && certificate.subject.CN,
+                },
+                fingerprint: certificate.fingerprint,
+                validFrom: new Date(certificate.valid_from).getTime() / 1000,
+                validTo: new Date(certificate.valid_to).getTime() / 1000,
+                serialNumber: certificate.serialNumber,
+                raw: certificate.raw ? new Uint8Array(certificate.raw) : undefined,
+            })
         }
     })
 

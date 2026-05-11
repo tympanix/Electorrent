@@ -9,10 +9,10 @@ const fs = require('fs');
 // Custom imports
 const logger = require('./logger');
 const electorrent = require('./electorrent');
+const { IPC_CHANNELS } = require('../common/ipc')
 
 // Electron modules
 const {app} = electron;
-const {ipcMain} = electron;
 const {autoUpdater} = electron;
 const {shell} = electron;
 
@@ -72,23 +72,14 @@ exports.manualQuitAndUpdate = function() {
     })
 }
 
+exports.quitAndInstall = function() {
+    autoUpdater.quitAndInstall();
+}
+
 exports.openUpdateFilePath = function() {
     // Open the downloaded file in a file browser
     shell.showItemInFolder(downloadedUpdate);
 }
-
-ipcMain.on('startUpdate', (/*event*/) => {
-    if (manualDownloadURL) {
-        var url = manualDownloadURL;
-        mainWindow.webContents.downloadURL(url);
-    } else {
-        mainWindow.webContents.send('notify', {
-            title: 'Update Error',
-            message: 'Could not update Electorrent. Please visit the website instead',
-            type: 'negative'
-        });
-    }
-});
 
 function downloadUpdate(updateUrl){
     var url = updateUrl;
@@ -139,13 +130,16 @@ function manualDownloader() {
 
                 downloadedUpdate = item.getSavePath();
 
-                mainWindow.webContents.send('manualUpdate', {
-                    releaseNotes: update.notes,
-                    releaseName: update.name,
-                    releaseDate: update.pub_date,
-                    updateUrl: update.url,
-                    manual: true
-                });
+                sendUpdateStatus({
+                    type: 'downloaded',
+                    data: {
+                        releaseNotes: update.notes,
+                        releaseName: update.name,
+                        releaseDate: update.pub_date,
+                        updateUrl: update.url,
+                        manual: true
+                    }
+                })
             }
         })
     })
@@ -191,14 +185,23 @@ function notify({ title = '', message = '', type = 'info'}) {
     var win = electorrent.getWindow();
     if (!win) return;
 
-    win.webContents.send('notify', {
+    win.webContents.send(IPC_CHANNELS.notifications.push, {
         title: title,
         message: message,
         type: type
     });
 }
 
+function sendUpdateStatus(payload) {
+    if (!mainWindow || mainWindow.isDestroyed()) return
+    mainWindow.webContents.send(IPC_CHANNELS.updates.status, payload)
+}
+
 function notifyUpdateError() {
+    sendUpdateStatus({
+        type: 'error',
+        message: 'Could not update Electorrent. Please visit the website instead',
+    })
     notify({
         title: 'Update Error',
         message: 'Could not update Electorrent. Please visit the website instead',
@@ -209,6 +212,9 @@ function notifyUpdateError() {
 function notifyCheckingUpdate() {
     if (!verbose) return;
 
+    sendUpdateStatus({
+        type: 'checking',
+    })
     notify({
         title: 'Checking for update',
         message: 'Checking for new updates',
@@ -217,6 +223,16 @@ function notifyCheckingUpdate() {
 }
 
 function notifyUpdateAvailable() {
+    sendUpdateStatus({
+        type: 'available',
+        data: {
+            releaseNotes: update && update.notes,
+            releaseName: update && update.name,
+            releaseDate: update && update.pub_date,
+            updateUrl: update && update.url,
+            manual: !is.windows(),
+        }
+    })
     notify({
         title: 'Update Available!',
         message: 'We are downloading the newest version of Electorrent for you!',
@@ -227,6 +243,9 @@ function notifyUpdateAvailable() {
 function notifyUpToDate() {
     if (!verbose) return;
 
+    sendUpdateStatus({
+        type: 'up-to-date',
+    })
     notify({
         title: 'Up to date!',
         message: 'Your version of Electorrent is up to date',
@@ -235,6 +254,10 @@ function notifyUpToDate() {
 }
 
 function notifyConnectionError() {
+    sendUpdateStatus({
+        type: 'error',
+        message: 'Could not check version automatically. Please visit the website instead',
+    })
     notify({
         title: 'Update Error',
         message: 'Could not check version automatically. Please visit the website instead',
@@ -272,11 +295,15 @@ function squirrelUpdater() {
         });
         autoUpdater.on('update-downloaded', function(event, releaseNotes, releaseName, releaseDate, updateUrl) {
 
-            mainWindow.webContents.send('autoUpdate', {
-                releaseNotes: releaseNotes,
-                releaseName: releaseName,
-                releaseDate: releaseDate,
-                updateUrl: updateUrl
+            sendUpdateStatus({
+                type: 'downloaded',
+                data: {
+                    releaseNotes: releaseNotes,
+                    releaseName: releaseName,
+                    releaseDate: releaseDate,
+                    updateUrl: updateUrl,
+                    manual: false,
+                }
             })
 
             if (is.macOS()){

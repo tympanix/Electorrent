@@ -86,8 +86,16 @@ module.exports = {
           to: path.resolve(outDir, 'main.js'),
         },
         {
+          from: path.resolve(__dirname, 'src/main/preload.js'),
+          to: path.resolve(outDir, 'preload.js'),
+        },
+        {
           from: path.resolve(__dirname, 'src/main/lib'),
           to: path.resolve(outDir, 'lib'),
+        },
+        {
+          from: path.resolve(__dirname, 'src/common'),
+          to: path.resolve(outDir, 'common'),
         },
         {
           from: path.resolve(__dirname, 'src/renderer/app/workers'),
