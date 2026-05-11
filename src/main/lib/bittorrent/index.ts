@@ -415,7 +415,7 @@ class DelugeRuntime implements BittorrentRuntime {
         })
 
         await defer((done) => this.deluge.login(done))
-        await this.deluge.connect(0)
+        await defer((done) => this.deluge.connect(0, done))
     }
 
     getSnapshot(): Promise<any> {
