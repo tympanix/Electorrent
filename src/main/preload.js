@@ -57,7 +57,6 @@ window.electorrent = {
     },
     torrents: {
         openFiles: (askUploadOptions) => invoke(IPC_CHANNELS.torrents.openFiles, { askUploadOptions }),
-        readFiles: (paths, askUploadOptions) => invoke(IPC_CHANNELS.torrents.readFiles, { paths, askUploadOptions }),
     },
     updates: {
         check: (verbose) => invoke(IPC_CHANNELS.updates.check, { verbose }),

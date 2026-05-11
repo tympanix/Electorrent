@@ -4,6 +4,7 @@ const path = require('path')
 const { app } = require('electron')
 
 const CERT_DIR = path.join(app.getPath('userData'), 'certs')
+const FINGERPRINT_PATTERN = /^(?:[A-Fa-f0-9]{2}:?)+$/
 
 function ensureDir() {
     try {
@@ -49,6 +50,35 @@ function pemEncode(str, n) {
     var returnString = `-----BEGIN CERTIFICATE-----\n${ret.join('')}\n-----END CERTIFICATE-----`
 
     return returnString
+}
+
+function normalizeFingerprint(fingerprint) {
+    if (typeof fingerprint !== 'string' || !FINGERPRINT_PATTERN.test(fingerprint)) {
+        throw new Error('Invalid certificate fingerprint')
+    }
+
+    const normalized = fingerprint.replace(/:/g, '').toLowerCase()
+
+    if (normalized.length === 0 || normalized.length % 2 !== 0) {
+        throw new Error('Invalid certificate fingerprint')
+    }
+
+    return normalized
+}
+
+function getCertificatePath(fingerprint) {
+    const normalizedFingerprint = normalizeFingerprint(fingerprint)
+    const certPath = path.resolve(CERT_DIR, `${normalizedFingerprint}.crt`)
+    const certDir = `${path.resolve(CERT_DIR)}${path.sep}`
+
+    if (!certPath.startsWith(certDir)) {
+        throw new Error('Invalid certificate fingerprint')
+    }
+
+    return {
+        certPath,
+        fingerprint: normalizedFingerprint,
+    }
 }
 
 function get(server, callback) {
@@ -105,15 +135,18 @@ function installCertificate(cert, callback) {
         return callback(new Error('Could not install invalid certificate'))
     }
 
-    const pemData = pemEncode(cert.raw, 64)
-    const fingerprint = cert.fingerprint.split(":").join("").toLowerCase()
+    try {
+        const pemData = pemEncode(cert.raw, 64)
+        const { certPath, fingerprint } = getCertificatePath(cert.fingerprint)
 
-    const pemFilename = path.join(CERT_DIR, `${fingerprint}.crt`)
-    fs.writeFile(pemFilename, pemData, (err) => callback(err, fingerprint))
+        fs.writeFile(certPath, pemData, (err) => callback(err, fingerprint))
+    } catch (err) {
+        callback(err)
+    }
 }
 
 function loadCertificate(fingerprint) {
-    const certPath = path.join(CERT_DIR, `${fingerprint}.crt`)
+    const { certPath } = getCertificatePath(fingerprint)
     if (!fs.existsSync(certPath)) {
         return
     }
