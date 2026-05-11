@@ -41,7 +41,7 @@ function serializeTorrentFile(filePath, askUploadOptions) {
 }
 
 async function readFiles(filepaths, askUploadOptions) {
-    if (!filepaths) return [];
+    if (!Array.isArray(filepaths) || filepaths.length === 0) return [];
 
     var torrents = filepaths.filter(filterFiles);
 
