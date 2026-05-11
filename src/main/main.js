@@ -3,8 +3,8 @@ const electron = require('electron');
 const yargs = require('yargs');
 const path = require('path');
 const is = require('electron-is');
-require('@electron/remote/main').initialize();
 const { IPC_CHANNELS } = require('./common/ipc');
+const { bittorrentManager } = require('./lib/bittorrent');
 
 // Handle Squirrel startup parameters
 if (require('./lib/startup')) return
@@ -60,10 +60,9 @@ function createTorrentWindow() {
         backgroundColor: '#ffffff',
         icon: nativeImage.createFromPath(getApplicationIcon()),
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-            nodeIntegrationInWorker: true,
-            enableRemoteModule: true,
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
             preload: path.join(__dirname, 'preload.js'),
         }
     }
@@ -75,18 +74,17 @@ function createTorrentWindow() {
     electorrent.setWindow(torrentWindow);
     menu.setWindow(torrentWindow);
 
-    // Enable the remote module to access main-process-only objects from
-    // the renderer process
-    require("@electron/remote/main").enable(torrentWindow.webContents)
-
     torrentWindow.once('ready-to-show', () => {
         torrentWindow.show();
     });
 
     torrentWindow.loadURL(`file://${__dirname}/index.html`);
 
+    const windowWebContents = torrentWindow.webContents
+
     // Save window size when closing
     torrentWindow.on('close', () => {
+        bittorrentManager.disconnectWindow(windowWebContents)
         config.put('windowsize', torrentWindow.getBounds())
         config.write();
     })
@@ -235,6 +233,38 @@ ipcMain.handle(IPC_CHANNELS.launch.getPending, async function() {
 
 ipcMain.handle(IPC_CHANNELS.torrents.openFiles, async function(_event, { askUploadOptions }) {
     return torrents.browse(askUploadOptions)
+})
+
+ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event, { server }) {
+    return bittorrentManager.connect(event.sender, server)
+})
+
+ipcMain.handle(IPC_CHANNELS.bittorrent.disconnect, async function(event) {
+    return bittorrentManager.disconnect(event.sender)
+})
+
+ipcMain.handle(IPC_CHANNELS.bittorrent.getSnapshot, async function(event, { fullUpdate } = {}) {
+    return bittorrentManager.getSnapshot(event.sender, fullUpdate)
+})
+
+ipcMain.handle(IPC_CHANNELS.bittorrent.addTorrentUrl, async function(event, request) {
+    return bittorrentManager.addTorrentUrl(event.sender, request)
+})
+
+ipcMain.handle(IPC_CHANNELS.bittorrent.uploadTorrent, async function(event, request) {
+    return bittorrentManager.uploadTorrent(event.sender, request)
+})
+
+ipcMain.handle(IPC_CHANNELS.bittorrent.invokeAction, async function(event, request) {
+    return bittorrentManager.invokeAction(event.sender, request)
+})
+
+ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentFiles, async function(event, { hash }) {
+    return bittorrentManager.getTorrentFiles(event.sender, hash)
+})
+
+ipcMain.handle(IPC_CHANNELS.bittorrent.setTorrentFileSelection, async function(event, request) {
+    return bittorrentManager.setTorrentFileSelection(event.sender, request)
 })
 
 ipcMain.handle(IPC_CHANNELS.updates.check, async function(_event, { verbose }) {

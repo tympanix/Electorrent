@@ -22,6 +22,16 @@ const IPC_CHANNELS = {
     torrents: {
         openFiles: "torrents:open-files",
     },
+    bittorrent: {
+        connect: "bittorrent:connect",
+        disconnect: "bittorrent:disconnect",
+        getSnapshot: "bittorrent:get-snapshot",
+        addTorrentUrl: "bittorrent:add-torrent-url",
+        uploadTorrent: "bittorrent:upload-torrent",
+        invokeAction: "bittorrent:invoke-action",
+        getTorrentFiles: "bittorrent:get-torrent-files",
+        setTorrentFileSelection: "bittorrent:set-torrent-file-selection",
+    },
     updates: {
         check: "updates:check",
         installDownloaded: "updates:install-downloaded",

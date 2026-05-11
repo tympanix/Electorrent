@@ -1,60 +1,25 @@
-import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
-import {DelugeTorrent} from "./torrentd";
-
-type CallbackFunc = (err: any, val: any) => void
-
-function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
-  return new Promise((resolve, reject) => {
-    fn((err, val) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(val)
-      }
-    })
-  })
-}
-
-const Deluge = require('@electorrent/node-deluge')
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "../torrentclient";
+import { DelugeTorrent } from "./torrentd";
+import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "../ipc";
 
 export class DelugeClient extends TorrentClient<DelugeTorrent> {
-
     public name = 'Deluge'
     public id = 'deluge'
 
-    private deluge = null
-
-
-    async connect(server): Promise<void> {
-        this.deluge = new Deluge({
-            host: server.url(),
-            port: server.port,
-            path: server.cleanPath(),
-            pass: server.password,
-            ca: server.getCertificate(),
-        })
-
-        await defer(done => this.deluge.login(done))
-        // Connect to server #0 by default
-        return await this.deluge.connect(0)
+    connect(server): Promise<void> {
+        return connect(server)
     }
 
     async torrents(): Promise<TorrentUpdates> {
-        var torrents = {
+        const data: Record<string, any> = await getSnapshot()
+
+        return {
             labels: [],
-            all: [],
+            all: Object.keys(data.torrents || {}).map((hash) => new DelugeTorrent(hash, data.torrents[hash])),
             changed: [],
             deleted: [],
             dirty: true,
-        };
-
-        let data: Record<string, any> = await defer(done => this.deluge.getTorrents(done))
-
-        for (const hash of Object.keys(data.torrents || {})) {
-            torrents.all.push(new DelugeTorrent(hash, data.torrents[hash]))
         }
-
-        return torrents
     }
 
     defaultPath(): string {
@@ -62,67 +27,55 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
     }
 
     addTorrentUrl(magnet: string): Promise<void> {
-        return defer(done => this.deluge.addTorrentURL(magnet, {}, done))
+        return addTorrentUrl(magnet)
     }
 
     uploadTorrent(buffer: Uint8Array, filename: string): Promise<void> {
-        return defer(done => this.deluge.addTorrent(buffer, {}, done))
+        return uploadTorrent(buffer, filename)
     }
 
     resume(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.resume(torrents.map(t => t.hash), done))
+        return invokeAction("resume", torrents.map((torrent) => torrent.hash))
     }
 
     pause(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.pause(torrents.map(t => t.hash), done))
+        return invokeAction("pause", torrents.map((torrent) => torrent.hash))
     }
 
     verify(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.verify(torrents.map(t => t.hash), done))
+        return invokeAction("verify", torrents.map((torrent) => torrent.hash))
     }
 
     remove(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.remove(torrents.map(t => t.hash), done))
+        return invokeAction("remove", torrents.map((torrent) => torrent.hash))
     }
 
     removeAndDelete(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.removeAndDelete(torrents.map(t => t.hash), done))
+        return invokeAction("removeAndDelete", torrents.map((torrent) => torrent.hash))
     }
 
     queueUp(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.queueUp(torrents.map(t => t.hash), done))
+        return invokeAction("queueUp", torrents.map((torrent) => torrent.hash))
     }
 
     queueDown(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.queueDown(torrents.map(t => t.hash), done))
+        return invokeAction("queueDown", torrents.map((torrent) => torrent.hash))
     }
 
     queueTop(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.queueTop(torrents.map(t => t.hash), done))
+        return invokeAction("queueTop", torrents.map((torrent) => torrent.hash))
     }
 
     queueBottom(torrents: DelugeTorrent[]): Promise<void> {
-        return defer(done => this.deluge.queueBottom(torrents.map(t => t.hash), done))
+        return invokeAction("queueBottom", torrents.map((torrent) => torrent.hash))
     }
 
-    /**
-     * Delete function to satisfy interface implementation
-     * @param torrents torrent to delete
-     * @returns promise that torrents were deleted
-     */
     deleteTorrents(torrents: DelugeTorrent[]): Promise<void> {
         return this.remove(torrents)
     }
 
-    /**
-     * Whether the client supports sorting by trackers or not
-     */
     enableTrackerFilter = false
 
-    /**
-     * Provides the option to include extra columns for displaying data. This may concern columns
-     * which are specific to this client. The extra columns will be merged with the default columns.
-     */
     extraColumns = []
 
     actionHeader: TorrentActionList<DelugeTorrent> = [
@@ -182,6 +135,4 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
             role: 'delete'
         },
     ];
-
 }
-

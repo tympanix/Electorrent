@@ -6,7 +6,9 @@ export interface TorrentUpdates {
     labels?: string[],
     all?: any[],
     changed?: any[],
-    deletes?: [],
+    deleted?: any[],
+    dirty?: boolean,
+    trackers?: any[],
     freeDiskSpace?: number | null,
 }
 

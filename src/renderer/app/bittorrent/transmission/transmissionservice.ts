@@ -1,159 +1,33 @@
-import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions, TorrentUploadOptionsEnable} from "../torrentclient";
-import {TransmissionTorrent} from "./torrentt";
-import { fields } from "./transmissionconfig"
-import axios, { AxiosInstance, AxiosResponse, AxiosError, Axios } from "axios";
-import https from "https"
-
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions, TorrentUploadOptionsEnable } from "../torrentclient";
+import { TransmissionTorrent } from "./torrentt";
 import _ from "underscore"
+import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "../ipc";
 
 const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
-const SESSION_ID_HEADER = "X-Transmission-Session-Id"
 
 export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
-
     public name = "Transmission";
     public id = "transmission"
-
-    server = undefined;
-
-    config = {
-      session: undefined,
-    };
 
     public uploadOptionsEnable: TorrentUploadOptionsEnable = {
       saveLocation: true,
       startTorrent: true,
     }
 
-    private updateSession(res: AxiosResponse | AxiosError | any) {
-      let session: string
-      if (axios.isAxiosError(res)) {
-        return res
-      } else if (res instanceof Error) {
-        throw res
-      } else {
-        session = res.headers[SESSION_ID_HEADER.toLowerCase()]
-      }
-      if (session) {
-        this.config.session = session
-      }
-      return res
-    }
-
-    private handleErrors(res: AxiosResponse) {
-      if (axios.isAxiosError(res) || res instanceof Error) {
-        throw res
-      }
-      return res
-    }
-
-    private retryResponseInterceptor(res: AxiosResponse) {
-      if (res.status === 409 && res.config) {
-        return this.getHttpClient(true).request(res.config)
-      }
-      return res
-    }
-
-    private getHttpClient(allowFail?: boolean): AxiosInstance {
-      // use basic auth for authentication
-      var http = axios.create({
-        auth: {
-          username: this.server.user,
-          password: this.server.password,
-        },
-        httpsAgent: new https.Agent({
-          ca: this.server.getCertificate()
-        }),
-        adapter: require("axios/lib/adapters/http")
-      })
-      // update session header on both success and error http responses
-      http.interceptors.response.use(
-        (res) => this.updateSession(res),
-        (res) => this.updateSession(res),
-      )
-      // always use newest session key in http request header
-      http.interceptors.request.use((config) => {
-        if (this.config.session) {
-          config.headers[SESSION_ID_HEADER] = this.config.session
-        }
-        return config
-      })
-      // retry requests failing with 409
-      if (allowFail) {
-        http.interceptors.response.use(
-          (res) => this.retryResponseInterceptor(res),
-          (res) => this.retryResponseInterceptor(res),
-        )
-      }
-      http.interceptors.response.use(
-        (res) => this.handleErrors(res),
-        (res) => this.handleErrors(res),
-      )
-      return http
-    }
-
-    url(path?: string): string {
-      return `${this.server.url()}${path || ""}`;
+    connect(server): Promise<void> {
+      return connect(server)
     };
 
     defaultPath(): string {
       return "/transmission/rpc";
     };
 
-    async connect(server): Promise<void> {
-      this.server = server;
-
-      var data = {
-        method: "session-get",
-      };
-
-      return await this.getHttpClient().post(this.url(), data, {
-        timeout: 5000,
-        auth: {
-          username: server.user,
-          password: server.password,
-        },
-        validateStatus: (status) => {
-          return (status == 200 || status == 409)
-        }
-      })
-    };
-
-    /**
-     * Return any new information about torrents to be rendered in the GUI. Should return a
-     * promise with the required information to be updated. Will be executed by controllers
-     * very frequently. You can find a template of the data to be returned in the function.
-     * Here you will need:
-     *      labels {array}: array of string of each label
-     *      all {array}: array of objects inherited from 'AbstractTorrent' that are not currently known.
-     *              This means they have just been added or never seen before since the last startup.
-     *      changed {array}: array of objects inherited from 'AbstractTorrent' that have allready been seend before.
-     *              This means they may contain partial information in which case they ar merged with any present infomation.
-     *      deleted {array}: array of string containg the hashes of which torrents to be removed from the list in the GUI.
-     * @return {promise} data
-     */
     async torrents(): Promise<TorrentUpdates> {
-      // downloadedEver and uploadedEver continue to count the second time you download that torrent.
-
-      /*var fields = ['id','name','totalSize','percentDone', 'downloadedEver',
-        'uploadedEver', 'uploadRatio','rateUpload','rateDownload','eta','comment',
-        'peersConnected','maxConnectedPeers','peersGettingToUs','seedsGettingFromUs',
-        'queuePosition','status','addedDate','doneDate','downloadDir','recheckProgress',
-        'isFinished','priorities'];
-        */
-      var data = {
-        arguments: {
-          fields: fields,
-        },
-        method: "torrent-get",
-      };
-
-      let resp = await this.getHttpClient().post(this.url(), data)
-      return this.processData(resp.data)
+      return this.processData(await getSnapshot())
     };
 
     processData(data) {
-      var torrents = {
+      const torrents = {
         dirty: true,
         labels: [],
         all: [],
@@ -171,190 +45,71 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     }
 
     getTrackers(torrents) {
-      let trackers = new Set<string>();
+      const trackers = new Set<string>();
       torrents.forEach((torrent) => {
         torrent.trackers.forEach((tracker) => trackers.add(tracker));
       });
-      var trackerArray = Array.from(trackers).map(
+      const trackerArray = Array.from(trackers).map(
         (tracker) => this.parseUrl(tracker)
       );
       return _.compact(trackerArray);
     }
 
     parseUrl(url: string) {
-      var match = url.match(URL_REGEX);
+      const match = url.match(URL_REGEX);
       return match && match[1];
     }
 
-    private removeEmpty(obj: object) {
-      return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v != undefined));
-    }
-
-    /**
-     * Transforms generic upload options to Transmission API variants
-     * @param uploadOptions
-     * @returns object with post options to transmission rpc call
-     */
-    private getUploadOptions(uploadOptions: TorrentUploadOptions) {
-      if (!uploadOptions) {
-        return {}
-      }
-      let postOptions = {
-        'download-dir': uploadOptions.saveLocation,
-        'paused': !uploadOptions.startTorrent,
-      }
-      return this.removeEmpty(postOptions)
-    }
-
-    /**
-     * Add a torrent to the client by sending a magnet link to the API. Should return
-     * a promise that the torrent has been added successfully to the client.
-     * @param {string} magnetURL
-     * @return {promise} isAdded
-     */
-    async addTorrentUrl(magnet: string, uploadOptions: TorrentUploadOptions): Promise<void> {
-      var data = {
-        arguments: {
-          filename: magnet,
-          ...this.getUploadOptions(uploadOptions)
-        },
-        method: "torrent-add",
-      };
-
-      var resp = await this.getHttpClient().post(this.url(), data, {})
-      console.log("Transmission addTorrentUrl response", resp.data)
-      if ("torrent-duplicate" in resp.data.arguments) {
-        //$notify.alert("Duplicate!", " This torrent is already added");
-        throw new Error("Could not add duplicate torrent to transmission")
-      }
-      if (resp.data.result !== "success") {
-        throw new Error(`Could not add torrent to transmission: ${resp.data.result}`)
-      }
+    addTorrentUrl(magnet: string, uploadOptions: TorrentUploadOptions): Promise<void> {
+      return addTorrentUrl(magnet, uploadOptions)
     };
 
-    /**
-     * Add a torrent file with the .torrent extension to the client through the API. Should
-     * return a promise that the torrent was added sucessfully. File data is given as a blob
-     * more information here: https://developer.mozilla.org/en/docs/Web/API/Blob. You may use
-     * the existing implementation as a helping hand
-     * @param {blob} filedata
-     * @param {string} filename
-     * @return {promise} isAdded
-     */
-    async uploadTorrent(buffer: Uint8Array, filename?: string, uploadOptions?: TorrentUploadOptions): Promise<void> {
-      var base64data = Buffer.from(buffer).toString("base64")
-
-      var data = {
-        arguments: {
-          metainfo: base64data,
-          ...this.getUploadOptions(uploadOptions),
-        },
-        method: "torrent-add",
-      };
-
-      let resp = await this.getHttpClient().post(this.url(), data, {})
-      if ("torrent-duplicate" in resp.data.arguments) {
-        //$notify.alert("Duplicate!", " This torrent is already added");
-        throw new Error("Could not add duplicate torrent to transmission")
-      }
-      if (resp.data.result !== "success") {
-        throw new Error(`Could not add torrent to transmission: ${resp.data.result}`)
-      }
+    uploadTorrent(buffer: Uint8Array, filename?: string, uploadOptions?: TorrentUploadOptions): Promise<void> {
+      return uploadTorrent(buffer, filename || "upload.torrent", uploadOptions)
     };
 
-    async doAction(command: string, torrents: TransmissionTorrent[], mutator?: string, value?: any) {
-      var hashes = torrents.map(function (torrent) {
-        return torrent.hash;
-      });
-
-      var data = {
-        arguments: {ids: null},
-        method: command,
-      };
-
-      if (hashes.length) {
-        data.arguments.ids = hashes;
-      }
-
-      if (mutator) {
-        data.arguments[mutator] = value;
-      }
-
-      return this.getHttpClient().post(this.url(), data);
+    start(torrents: TransmissionTorrent[]): Promise<void> {
+      return invokeAction("start", torrents.map((torrent) => torrent.hash));
     };
 
-    async doGlobalAction(command: string) {
-      return this.doAction(command, []);
+    stop(torrents: TransmissionTorrent[]): Promise<void> {
+      return invokeAction("stop", torrents.map((torrent) => torrent.hash));
     };
 
-    /**
-     * Example action function. You will have to implement several of these to support the various
-     * actions in your bittorrent client. Each action is supplied an array of the hashes on which
-     * the action should be applied.
-     * @param {array} hashes
-     * @return {promise} actionIsDone
-     */
-    async start(torrents: TransmissionTorrent[]): Promise<void> {
-      await this.doAction("torrent-start", torrents);
+    verify(torrents: TransmissionTorrent[]): Promise<void> {
+      return invokeAction("verify", torrents.map((torrent) => torrent.hash));
     };
 
-    async stop(torrents: TransmissionTorrent[]): Promise<void> {
-      await this.doAction("torrent-stop", torrents);
+    pauseAll(): Promise<void> {
+      return invokeAction("pauseAll");
     };
 
-    async verify(torrents: TransmissionTorrent[]): Promise<void> {
-      await this.doAction("torrent-verify", torrents);
+    resumeAll(): Promise<void> {
+      return invokeAction("resumeAll");
     };
 
-    async pauseAll(): Promise<void> {
-      await this.doGlobalAction("torrent-stop");
+    queueUp(torrents: TransmissionTorrent[]): Promise<void> {
+      return invokeAction("queueUp", torrents.map((torrent) => torrent.hash));
     };
 
-    async resumeAll(): Promise<void> {
-      await this.doGlobalAction("torrent-start");
+    queueDown(torrents: TransmissionTorrent[]): Promise<void> {
+      return invokeAction("queueDown", torrents.map((torrent) => torrent.hash));
     };
 
-    async queueUp(torrents: TransmissionTorrent[]): Promise<void> {
-      await this.doAction("queue-move-up", torrents);
+    remove(torrents: TransmissionTorrent[]): Promise<void> {
+      return invokeAction("remove", torrents.map((torrent) => torrent.hash));
     };
 
-    async queueDown(torrents: TransmissionTorrent[]): Promise<void> {
-      await this.doAction("queue-move-down", torrents);
+    removeAndLocal(torrents: TransmissionTorrent[]): Promise<void> {
+      return invokeAction("removeAndLocal", torrents.map((torrent) => torrent.hash));
     };
 
-    async remove(torrents: TransmissionTorrent[]): Promise<void> {
-      await this.doAction("torrent-remove", torrents);
-    };
-
-    async removeAndLocal(torrents: TransmissionTorrent[]): Promise<void> {
-      await this.doAction("torrent-remove", torrents, "delete-local-data", true);
-    };
-
-    /**
-     * Delete function to satisfy interface implementation
-     * @param torrents torrent to delete from client
-     */
     deleteTorrents(torrents: TransmissionTorrent[]): Promise<void> {
       return this.remove(torrents)
     }
 
-
-    /**
-     * Whether the client supports sorting by trackers or not
-     */
     enableTrackerFilter = true;
 
-    /**
-     * Represents the buttons and GUI elements to be displayed in the top navigation bar of the windows.
-     * You may customize the GUI to your liking or to better accommodate the specific bittorrent client.
-     * Every action must have a click function that corresponds to an action like the one showed above.
-     * An object in the array should consist of the following information:
-     *      label [string]: Name of the button/element
-     *      type [string]: Can be 'button' or 'dropdown' or 'labels'
-     *      color [string]: Can be 'red', 'orange', 'yellow', 'olive', 'green', 'teal', 'blue', 'violet', 'purple', 'pink', 'brown', 'grey', 'black'
-     *      click [function]: The function to be executed when the when the button/element is pressed
-     *      icon [string]: The icon of the button. See here: http://semantic-ui.com/elements/icon.html
-     */
     actionHeader: TorrentActionList<TransmissionTorrent> = [
       {
         label: "Start",
@@ -390,14 +145,6 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       },
     ];
 
-    /**
-     * Represents the actions available in the context menu. Can be customized to your liking or
-     * to better accommodate your bittorrent client. Every action must have a click function implemented.
-     * Each element has an:
-     *      label [string]: The name of the action
-     *      click [function]: The function to be executed when clicked
-     *      icon [string]: The icon of the action. See here: http://semantic-ui.com/elements/icon.html
-     */
     contextMenu: ContextActionList<TransmissionTorrent> = [
       {
         label: "Start",

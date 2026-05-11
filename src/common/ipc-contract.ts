@@ -35,6 +35,49 @@ export interface PendingTorrentUploadFile {
     askUploadOptions?: boolean
 }
 
+export interface BittorrentServerConfig extends StoredServerConfig {
+    certificateData?: Uint8Array
+}
+
+export interface BittorrentSnapshotRequest {
+    fullUpdate?: boolean
+}
+
+export interface BittorrentAddTorrentUrlRequest {
+    uri: string
+    options?: Record<string, any>
+}
+
+export interface BittorrentUploadTorrentRequest {
+    data: Uint8Array
+    filename: string
+    options?: Record<string, any>
+}
+
+export interface BittorrentInvokeActionRequest {
+    action: string
+    hashes?: string[]
+    args?: any[]
+}
+
+export interface BittorrentGetTorrentFilesRequest {
+    hash: string
+}
+
+export interface BittorrentFileSelection {
+    index: number
+    path: string
+    name: string
+    size: number
+    wanted: boolean
+    priority?: number
+}
+
+export interface BittorrentSetTorrentFileSelectionRequest {
+    hash: string
+    files: BittorrentFileSelection[]
+}
+
 export interface LaunchPayload {
     magnets: string[]
     torrentFiles: PendingTorrentUploadFile[]
@@ -170,6 +213,16 @@ export interface ElectorrentBridge {
     }
     torrents: {
         openFiles(askUploadOptions: boolean): Promise<PendingTorrentUploadFile[]>
+    }
+    bittorrent: {
+        connect(server: BittorrentServerConfig): Promise<void>
+        disconnect(): Promise<void>
+        getSnapshot(request?: BittorrentSnapshotRequest): Promise<any>
+        addTorrentUrl(request: BittorrentAddTorrentUrlRequest): Promise<void>
+        uploadTorrent(request: BittorrentUploadTorrentRequest): Promise<void>
+        invokeAction(request: BittorrentInvokeActionRequest): Promise<void>
+        getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<any>
+        setTorrentFileSelection(request: BittorrentSetTorrentFileSelectionRequest): Promise<void>
     }
     updates: {
         check(verbose?: boolean): Promise<void>

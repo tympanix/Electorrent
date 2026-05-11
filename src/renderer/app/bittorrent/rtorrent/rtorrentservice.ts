@@ -1,159 +1,85 @@
-import {Column} from "../../services/column";
-import {ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates} from "../torrentclient";
-import {RtorrentTorrent} from "./torrentr";
-
-const Rtorrent = require("@electorrent/node-rtorrent");
-
-type CallbackFunc = (err: any, val: any) => void
-function defer<T>(fn: (f: CallbackFunc) => void): Promise<T> {
-  return new Promise((resolve, reject) => {
-    fn((err, val) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(val)
-      }
-    })
-  })
-}
+import { Column } from "../../services/column";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "../torrentclient";
+import { RtorrentTorrent } from "./torrentr";
+import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "../ipc";
 
 export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
-    /*
-     * Global reference to the rtorrent remote web worker instance
-     */
-    rtorrent = null;
-
     public name = "rTorrent"
     public id = "rtorrent"
 
     connect(server): Promise<void> {
-        let ca = server.getCertificate();
-
-        this.rtorrent = new Rtorrent({
-          host: server.ip,
-          port: server.port,
-          path: server.cleanPath(),
-          user: server.user,
-          pass: server.password,
-          ssl: server.isHTTPS(),
-          ca: ca,
-        })
-
-        return defer((done) => {
-          this.rtorrent.get("system.client_version", [], done);
-        })
+        return connect(server)
     };
 
     defaultPath(): string {
       return "/RPC2";
     };
 
-
     async torrents(): Promise<TorrentUpdates> {
-      var torrents = {
+      const data: Record<string, any> = await getSnapshot()
+
+      return {
         dirty: true,
-        labels: [],
-        all: [],
+        labels: data.labels,
+        all: data.torrents.map((entry: Record<string, any>) => new RtorrentTorrent(entry)),
         changed: [],
         deleted: [],
-        trackers: [],
+        trackers: data.trackers,
       };
-
-      let data: Record<string, any> = await defer((done) => {
-        this.rtorrent.getTorrentsExtra(done)
-      })
-
-      torrents.all = data.torrents.map((d: Record<string, any>) => new RtorrentTorrent(d));
-      torrents.trackers = data.trackers;
-      torrents.labels = data.labels;
-      return torrents;
     };
 
     addTorrentUrl(magnet: string): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.loadLink(magnet, done);
-      })
+      return addTorrentUrl(magnet)
     };
 
-    async uploadTorrent(buffer: Uint8Array): Promise<void> {
-      let data = Buffer.from(buffer);
-      return defer((done) => {
-        this.rtorrent.loadFileContent(data, done);
-      })
+    uploadTorrent(buffer: Uint8Array): Promise<void> {
+      return uploadTorrent(buffer, "upload.torrent")
     };
 
     start(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.start(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("start", torrents.map((torrent) => torrent.hash))
     };
 
     stop(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.stop(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("stop", torrents.map((torrent) => torrent.hash))
     };
 
     label(torrents: RtorrentTorrent[], label: string): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.setLabel( torrents.map((t) => t.hash), label, done);
-      })
+      return invokeAction("label", torrents.map((torrent) => torrent.hash), label)
     };
 
     remove(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.remove(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("remove", torrents.map((torrent) => torrent.hash))
     };
 
     deleteAndErase(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.removeAndErase(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("deleteAndErase", torrents.map((torrent) => torrent.hash))
     };
 
     recheck(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.recheck(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("recheck", torrents.map((torrent) => torrent.hash))
     };
 
     priorityHigh(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.setPriorityHigh(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("priorityHigh", torrents.map((torrent) => torrent.hash))
     };
 
     priorityNormal(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.setPriorityNormal(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("priorityNormal", torrents.map((torrent) => torrent.hash))
     };
 
     priorityLow(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.setPriorityLow(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("priorityLow", torrents.map((torrent) => torrent.hash))
     };
 
     priorityOff(torrents: RtorrentTorrent[]): Promise<void> {
-      return defer((done) => {
-        this.rtorrent.setPriorityOff(torrents.map((t) => t.hash), done);
-      })
+      return invokeAction("priorityOff", torrents.map((torrent) => torrent.hash))
     };
 
-    /**
-     * Delete function to satisfy interface implementation
-     * @param torrents torrents to delete
-     */
     deleteTorrents(torrents: RtorrentTorrent[]): Promise<void> {
-      throw new Error("Method not implemented.");
+      return this.remove(torrents)
     }
 
-
-    /**
-     * Whether the client supports sorting by trackers or not
-     */
     enableTrackerFilter = true;
 
     extraColumns = [
@@ -229,4 +155,3 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       },
     ];
 }
-

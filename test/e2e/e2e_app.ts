@@ -159,18 +159,15 @@ export class App {
     let hash = info.infoHash
     let torrent = new Torrent({ hash: hash, app: this });
     await expect(await torrent.isExisting()).toBe(false);
-    /**
-     * Note: we're not sending the torrent data directory from the main process. Since the
-     * WebdriverIO framework communicates with the browser intance, the webContents module
-     * is actually retrieved from the browser (using @electron/remote), meaning the IPC calls will
-     * take the following route/steps:
-     * renderer -> main -> renderer
-     * The multiple serialization of the IPC data behaves oddly with objects. We use a plain javascript
-     * array here to make the serialization behave properly.
-     */
     await browser.execute((data, filename, askUploadOptions) => {
-      const remote = require('@electron/remote')
-      remote.getCurrentWindow().webContents.send("torrentfiles", data, filename, askUploadOptions)
+      const injector = angular.element(document.body).injector()
+      const $rootScope = injector.get("$rootScope")
+      $rootScope.$broadcast("torrents:add", {
+        type: "file",
+        data: new Uint8Array(data),
+        filename,
+      }, !!askUploadOptions)
+      $rootScope.$apply()
     }, Array.from(data), path.basename(filename), askUploadOptions)
     this.torrents.push(torrent);
     return torrent;
@@ -189,8 +186,13 @@ export class App {
     let info = parseTorrent(magnetUri)
     let torrent = new Torrent({ hash: info.infoHash, app: this })
     await browser.execute((magnetUri) => {
-      const remote = require('@electron/remote')
-      remote.getCurrentWindow().webContents.send("magnet", [magnetUri])
+      const injector = angular.element(document.body).injector()
+      const $rootScope = injector.get("$rootScope")
+      $rootScope.$broadcast("torrents:add", {
+        type: "link",
+        uri: magnetUri,
+      }, false)
+      $rootScope.$apply()
     }, magnetUri)
     this.torrents.push(torrent)
     return torrent
