@@ -56,26 +56,11 @@ torrentApp.constant('$btclients', {
 
 // Configure the client
 torrentApp.run(["electron", "configService", function(electron, config){
-    try {
-        config.initSettings();
-    } catch {
-        electron.ipc.send('settings:corrupt')
-    }
-}]);
-
-// Set application menu
-torrentApp.run(['menuWin', 'menuMac', 'electron', 'configService', function(menuWin, menuMac, electron, config){
-    var menuTemplate = null;
-
-    if (electron.is.macOS()) {
-        menuTemplate = menuMac;
-    } else {
-        menuTemplate = menuWin;
-    }
-
-    var appMenu = electron.menu.buildFromTemplate(menuTemplate);
-    electron.menu.setApplicationMenu(appMenu);
-    config.updateApplicationMenu()
+    config.initSettings()
+        .then(() => config.updateApplicationMenu())
+        .catch(() => {
+            electron.app.reportCorruptSettings()
+        })
 }]);
 
 // Services
@@ -200,9 +185,3 @@ import { indeterminateValueDirective } from "./app/directives/torrent-files-tree
 torrentApp.directive('indeterminateValue', indeterminateValueDirective)
 import { TorrentFilesModalDirective } from "./app/directives/torrent-files-modal/torrent-files-modal.directive";
 torrentApp.directive('torrentFilesModal', TorrentFilesModalDirective.getInstance())
-
-// Components
-import {menuWin} from "./app/components/menuWin"
-torrentApp.factory("menuWin", menuWin)
-import {menuMac} from "./app/components/menuMac"
-torrentApp.factory("menuMac", menuMac)

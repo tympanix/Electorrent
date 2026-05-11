@@ -17,6 +17,16 @@ export class DragAndDropDirective implements IDirective {
         private electron: any,
     ) {}
 
+    private broadcastTorrentFiles(files: Array<{ type: "file"; filename: string; data: Uint8Array; askUploadOptions?: boolean }>) {
+        files.forEach((file) => {
+            this.$rootScope.$broadcast("torrents:add", {
+                type: "file",
+                filename: file.filename,
+                data: new Uint8Array(file.data),
+            }, !!file.askUploadOptions);
+        });
+    }
+
     link(scope: IScope, element: IAugmentedJQuery) {
         let dragging = 0;
         const previousDragOver = document.ondragover;
@@ -66,7 +76,11 @@ export class DragAndDropDirective implements IDirective {
 
             const advancedKey = process.platform === "darwin" ? !!event.altKey : !!event.ctrlKey;
 
-            this.electron.torrents.readFiles(paths.filter(Boolean), advancedKey);
+            this.electron.torrents.readFiles(paths.filter(Boolean), advancedKey).then((files: any[]) => {
+                this.$rootScope.$applyAsync(() => {
+                    this.broadcastTorrentFiles(files);
+                });
+            });
             this.$rootScope.$emit("show:draganddrop", false);
         };
 

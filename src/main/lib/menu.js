@@ -1,0 +1,286 @@
+const { app, Menu } = require('electron')
+const { IPC_CHANNELS } = require('../common/ipc')
+
+let mainWindow = null
+let menuState = {
+    isDebug: false,
+    hasActiveServer: false,
+    advancedUploadEnabled: false,
+    servers: [],
+}
+
+function setWindow(window) {
+    mainWindow = window
+    buildMenu()
+}
+
+function sendAction(action) {
+    if (!mainWindow || mainWindow.isDestroyed()) return
+    mainWindow.webContents.send(IPC_CHANNELS.menu.action, action)
+}
+
+function serverAccelerator(index) {
+    if (index > 0 && index <= 10) {
+        return `CmdOrCtrl+${index % 10}`
+    }
+}
+
+function serverMenuItems() {
+    const submenu = [
+        {
+            label: 'Add new server...',
+            accelerator: 'CmdOrCtrl+N',
+            click: () => sendAction({ type: 'add-server' }),
+        },
+        {
+            label: 'Set current as default',
+            enabled: !!menuState.hasActiveServer,
+            click: () => sendAction({ type: 'set-current-default-server' }),
+        },
+        { type: 'separator' },
+    ]
+
+    if (!menuState.hasActiveServer) {
+        submenu.push({
+            label: 'Disabled...',
+            enabled: false,
+        })
+        return submenu
+    }
+
+    menuState.servers.forEach((server, index) => {
+        submenu.push({
+            label: server.label,
+            accelerator: server.accelerator || serverAccelerator(index + 1),
+            type: 'radio',
+            checked: !!server.checked,
+            click: () => sendAction({ type: 'connect-server', serverId: server.id }),
+        })
+    })
+
+    return submenu
+}
+
+function fileMenuItems() {
+    return [
+        {
+            label: 'Add Torrent',
+            accelerator: 'CmdOrCtrl+O',
+            click: () => sendAction({ type: 'open-add-torrent', askUploadOptions: false }),
+        },
+        {
+            label: 'Add Torrent (Advanced)',
+            accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+O' : 'CmdOrCtrl+Shift+O',
+            visible: !!menuState.advancedUploadEnabled,
+            enabled: !!menuState.advancedUploadEnabled,
+            click: () => sendAction({ type: 'open-add-torrent', askUploadOptions: true }),
+        },
+        {
+            label: 'Paste Torrent URL',
+            accelerator: 'CmdOrCtrl+I',
+            click: () => sendAction({ type: 'paste-torrent-url', askUploadOptions: false }),
+        },
+        {
+            label: 'Paste Torrent URL (Advanced)',
+            accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+I' : 'CmdOrCtrl+Shift+I',
+            visible: !!menuState.advancedUploadEnabled,
+            enabled: !!menuState.advancedUploadEnabled,
+            click: () => sendAction({ type: 'paste-torrent-url', askUploadOptions: true }),
+        },
+    ]
+}
+
+function editMenuItems() {
+    return [
+        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
+        { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', role: 'redo' },
+        { type: 'separator' },
+        {
+            label: 'Find',
+            accelerator: 'CmdOrCtrl+F',
+            click: () => sendAction({ type: 'search-torrent' }),
+        },
+        { label: 'Cut', accelerator: 'CmdOrCtrl+X', role: 'cut' },
+        { label: 'Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' },
+        { label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste' },
+        {
+            label: 'Remove',
+            accelerator: 'Delete',
+            click: () => sendAction({ type: 'remove-selected' }),
+        },
+        {
+            label: 'Select All',
+            accelerator: 'CmdOrCtrl+A',
+            click: () => sendAction({ type: 'select-all' }),
+        },
+    ]
+}
+
+function viewMenuItems() {
+    return [
+        {
+            label: 'Reload',
+            visible: !!menuState.isDebug,
+            accelerator: 'CmdOrCtrl+R',
+            click(_item, focusedWindow) {
+                if (focusedWindow) focusedWindow.reload()
+            },
+        },
+        {
+            label: 'Toggle Full Screen',
+            accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
+            click(_item, focusedWindow) {
+                if (focusedWindow) {
+                    focusedWindow.setFullScreen(!focusedWindow.isFullScreen())
+                }
+            },
+        },
+        {
+            label: 'Toggle Developer Tools',
+            visible: !!menuState.isDebug,
+            accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+            click(_item, focusedWindow) {
+                if (focusedWindow) {
+                    focusedWindow.webContents.toggleDevTools()
+                }
+            },
+        },
+    ]
+}
+
+function helpMenuItems() {
+    return [
+        {
+            label: 'Learn More',
+            click: () => sendAction({ type: 'open-external', url: 'https://github.com/tympanix/Electorrent' }),
+        },
+        {
+            label: 'Check For Updates',
+            click: () => sendAction({ type: 'check-for-updates', verbose: true }),
+        },
+    ]
+}
+
+function buildDarwinTemplate() {
+    const name = app.name
+
+    return [
+        {
+            label: name,
+            submenu: [
+                { label: `About ${name}`, role: 'about' },
+                { type: 'separator' },
+                {
+                    label: 'Preferences',
+                    accelerator: 'Command+,',
+                    click: () => sendAction({ type: 'show-settings' }),
+                },
+                { label: 'Services', role: 'services', submenu: [] },
+                { type: 'separator' },
+                { label: `Hide ${name}`, accelerator: 'Command+H', role: 'hide' },
+                { label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideothers' },
+                { label: 'Show All', role: 'unhide' },
+                { type: 'separator' },
+                { label: 'Quit', accelerator: 'Command+Q', role: 'quit' },
+            ],
+        },
+        {
+            label: 'File',
+            id: 'file',
+            submenu: fileMenuItems(),
+        },
+        {
+            label: 'Edit',
+            submenu: editMenuItems(),
+        },
+        {
+            label: 'View',
+            submenu: viewMenuItems(),
+        },
+        {
+            label: 'Servers',
+            id: 'servers',
+            submenu: serverMenuItems(),
+        },
+        {
+            label: 'Window',
+            role: 'window',
+            submenu: [
+                { label: 'Close', accelerator: 'CmdOrCtrl+W', role: 'close' },
+                { label: 'Minimize', accelerator: 'CmdOrCtrl+M', role: 'minimize' },
+                { label: 'Zoom', role: 'zoom' },
+                { type: 'separator' },
+                { label: 'Bring All to Front', role: 'front' },
+            ],
+        },
+        {
+            label: 'Help',
+            role: 'help',
+            submenu: helpMenuItems(),
+        },
+    ]
+}
+
+function buildDefaultTemplate() {
+    return [
+        {
+            label: 'File',
+            id: 'file',
+            submenu: [
+                ...fileMenuItems(),
+                { type: 'separator' },
+                {
+                    label: 'Settings',
+                    accelerator: 'Ctrl+,',
+                    click: () => sendAction({ type: 'show-settings' }),
+                },
+                { type: 'separator' },
+                { label: 'Exit', role: 'quit' },
+            ],
+        },
+        {
+            label: 'Edit',
+            submenu: editMenuItems(),
+        },
+        {
+            label: 'View',
+            submenu: viewMenuItems(),
+        },
+        {
+            label: 'Servers',
+            id: 'servers',
+            submenu: serverMenuItems(),
+        },
+        {
+            label: 'Window',
+            role: 'window',
+            submenu: [
+                { label: 'Minimize', accelerator: 'CmdOrCtrl+M', role: 'minimize' },
+                { label: 'Close', accelerator: 'CmdOrCtrl+W', role: 'close' },
+            ],
+        },
+        {
+            label: 'Help',
+            role: 'help',
+            submenu: helpMenuItems(),
+        },
+    ]
+}
+
+function buildMenu() {
+    const template = process.platform === 'darwin'
+        ? buildDarwinTemplate()
+        : buildDefaultTemplate()
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+}
+
+function setState(state) {
+    menuState = Object.assign({}, menuState, state)
+    buildMenu()
+}
+
+module.exports = {
+    setWindow,
+    setState,
+}

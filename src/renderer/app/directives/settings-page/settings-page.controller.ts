@@ -13,10 +13,11 @@ export class SettingsPageController {
         electron: any,
     ) {
         let serverCopy: any;
+        let loadPromise: angular.IPromise<any> | undefined;
 
         $scope.settings = {};
         $scope.server = {};
-        $scope.themes = electron.themes();
+        $scope.themes = [];
         $scope.btclients = $btclients;
         $scope.is = electron.is;
         $scope.general = {
@@ -29,10 +30,10 @@ export class SettingsPageController {
                 this.name = this.server.getNameAtAddress();
             },
         };
-        $scope.appVersion = electron.app.getVersion();
-        $scope.nodeVersion = process.versions.node;
-        $scope.chromeVersion = process.versions.chrome;
-        $scope.electronVersion = process.versions.electron;
+        $scope.appVersion = "";
+        $scope.nodeVersion = "";
+        $scope.chromeVersion = "";
+        $scope.electronVersion = "";
         $scope.connecting = false;
         $scope.page = "general";
         $scope.layoutSortOptions = {
@@ -40,7 +41,21 @@ export class SettingsPageController {
             "ui-floating": true,
         };
 
-        loadAllSettings();
+        loadPromise = $q.all([
+            config.whenReady(),
+            electron.ready(),
+            electron.themes(),
+            electron.app.getMeta(),
+        ]).then(([_settingsReady, _electronReady, themes, meta]: any[]) => {
+            $scope.themes = themes;
+            $scope.appVersion = meta.appVersion;
+            $scope.nodeVersion = meta.versions.node;
+            $scope.chromeVersion = meta.versions.chrome;
+            $scope.electronVersion = meta.versions.electron;
+            return loadAllSettings();
+        }).finally(() => {
+            $scope.$applyAsync();
+        });
 
         function loadAllSettings() {
             $scope.settings = config.getAllSettingsCopy();
@@ -48,9 +63,11 @@ export class SettingsPageController {
 
             serverCopy = angular.copy($scope.server);
 
-            $scope.general = {
-                magnets: electron.app.isDefaultProtocolClient("magnet"),
-            };
+            return electron.app.isDefaultProtocolClient("magnet").then((magnets: boolean) => {
+                $scope.general = {
+                    magnets: magnets,
+                };
+            });
         }
 
         function loadServerReference() {
@@ -63,21 +80,23 @@ export class SettingsPageController {
 
         function subscribeToMagnets() {
             if ($scope.general.magnets) {
-                electron.app.setAsDefaultProtocolClient("magnet");
+                return electron.app.setAsDefaultProtocolClient("magnet");
             } else {
-                electron.app.removeAsDefaultProtocolClient("magnet");
+                return electron.app.removeAsDefaultProtocolClient("magnet");
             }
         }
 
         $scope.$on("setting:load", () => {
             console.info("Loading settings");
-            loadAllSettings();
+            $q.when(loadPromise).then(() => loadAllSettings()).finally(() => {
+                $scope.$applyAsync();
+            });
         });
 
         function writeSettings() {
             return config.saveAllSettings($scope.settings)
                 .then(() => {
-                    subscribeToMagnets();
+                    return subscribeToMagnets();
                 }).catch((err: unknown) => {
                     $notify.alert("Settings could not be saved", err);
                     return $q.reject(err);
