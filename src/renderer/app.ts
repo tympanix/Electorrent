@@ -55,11 +55,11 @@ torrentApp.constant('$btclients', {
 });
 
 // Configure the client
-torrentApp.run(["electron", "configService", function(electron, config){
+torrentApp.run(["configService", function(config){
     config.initSettings()
         .then(() => config.updateApplicationMenu())
         .catch(() => {
-            electron.app.reportCorruptSettings()
+            window.electorrent.app.reportCorruptSettings()
         })
 }]);
 
@@ -68,8 +68,6 @@ import { httpFormService } from "./app/services/httpFormService"
 torrentApp.factory("httpFormService", httpFormService)
 import { bittorrentService } from "./app/services/bittorrent"
 torrentApp.service("$bittorrent", bittorrentService)
-import { electronService } from "./app/services/electron"
-torrentApp.service("electron", electronService)
 import { configService } from "./app/services/config"
 torrentApp.service("configService", configService)
 import { notificationService } from "./app/services/notification"

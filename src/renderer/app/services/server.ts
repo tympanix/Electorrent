@@ -1,8 +1,10 @@
 import _ from "underscore"
 import { Torrent } from "../bittorrent"
+import type { StoredServerConfig } from "../../../common/ipc-contract"
 
-export let serverService = ['$rootScope', '$q', 'electron', 'notificationService', '$bittorrent', '$btclients',
-    function($rootScope, $q, electron, $notify, $bittorrent, $btclients) {
+export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorrent', '$btclients',
+    function($rootScope, $q, $notify, $bittorrent, $btclients) {
+        const electorrent = window.electorrent
 
         /*
          * Well known error values used for error handling
@@ -13,6 +15,7 @@ export let serverService = ['$rootScope', '$q', 'electron', 'notificationService
          * Constructor, with class name
          */
         function Server(ip, proto, port, user, password, client, path) {
+            this.certificateData = undefined
             if(arguments.length === 1) {
                 this.fromJson(arguments[0])
             } else {
@@ -43,6 +46,7 @@ export let serverService = ['$rootScope', '$q', 'electron', 'notificationService
             this.default = data.default
             this.lastused = data.lastused
             this.certificate = data.certificate
+            this.certificateData = data.certificateData ? new Uint8Array(data.certificateData) : undefined
             this.columns = this.parseColumns(data.columns)
         };
 
@@ -162,29 +166,39 @@ export let serverService = ['$rootScope', '$q', 'electron', 'notificationService
             let self = this
             let defer = $q.defer()
 
-            electron.ca.get(self.json(), function(err, cert) {
-                if (err) {
-                    defer.reject(err)
-                } else {
-                    let unsubscribe = $rootScope.$on('certificate-modal', function(e, id, fingerprint) {
-                        unsubscribe()
-                        if (id) {
-                          self.certificate = fingerprint
-                          defer.resolve()
-                        } else {
-                          defer.reject()
-                        }
-                    })
+            let unsubscribe = $rootScope.$on('certificate-modal', function(e, id, fingerprint) {
+                if (!id) {
+                    unsubscribe()
+                    defer.reject()
+                    return
                 }
+
+                if (id !== self.id) {
+                    return
+                }
+
+                unsubscribe()
+                self.certificate = fingerprint
+                electorrent.certificates.load(fingerprint).then((certificateData) => {
+                    self.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
+                    defer.resolve()
+                }).catch((err: unknown) => {
+                    defer.reject(err)
+                })
+            })
+
+            electorrent.certificates.fetch({
+                server: self.json() as StoredServerConfig,
+            }).catch((err: unknown) => {
+                unsubscribe()
+                defer.reject(err)
             })
 
             return defer.promise
         }
 
         Server.prototype.getCertificate = function() {
-            if (this.certificate) {
-                return electron.ca.loadCertificate(this.certificate)
-            }
+            return this.certificateData
         }
 
         Server.prototype.equals = function(other) {

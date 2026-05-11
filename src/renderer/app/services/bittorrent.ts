@@ -1,6 +1,7 @@
 import { PendingTorrentUploadLink } from "../directives/add-torrent-modal/add-torrent-modal.directive";
 
-export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notificationService', 'electron', function($rootScope, $injector, $btclients, $notify, electron){
+export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notificationService', function($rootScope, $injector, $btclients, $notify){
+    const electorrent = window.electorrent
 
     this.getClient = function(name) {
         var client = $btclients[name];
@@ -36,7 +37,7 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
     }
 
     this.uploadFromClipboard = function(askUploadOptions: boolean) {
-        var magnet = electron.clipboard.readText();
+        var magnet = electorrent.clipboard.readText();
 
         var protocol = ['magnet', 'http'];
 

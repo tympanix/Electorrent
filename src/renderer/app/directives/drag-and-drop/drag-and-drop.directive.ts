@@ -1,23 +1,23 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IRootScopeService, IScope } from "angular";
 import { DragAndDropController } from "./drag-and-drop.controller";
+import type { PendingTorrentUploadFile } from "../../../../common/ipc-contract";
 
 export class DragAndDropDirective implements IDirective {
     restrict = "A";
     controller = DragAndDropController;
 
     static getInstance(): IDirectiveFactory {
-        const factory = ($rootScope: IRootScopeService, electron: any) =>
-            new DragAndDropDirective($rootScope, electron);
-        factory.$inject = ["$rootScope", "electron"];
+        const factory = ($rootScope: IRootScopeService) =>
+            new DragAndDropDirective($rootScope);
+        factory.$inject = ["$rootScope"];
         return factory;
     }
 
     constructor(
         private $rootScope: IRootScopeService,
-        private electron: any,
     ) {}
 
-    private broadcastTorrentFiles(files: Array<{ type: "file"; filename: string; data: Uint8Array; askUploadOptions?: boolean }>) {
+    private broadcastTorrentFiles(files: PendingTorrentUploadFile[]) {
         files.forEach((file) => {
             this.$rootScope.$broadcast("torrents:add", {
                 type: "file",
@@ -28,6 +28,8 @@ export class DragAndDropDirective implements IDirective {
     }
 
     link(scope: IScope, element: IAugmentedJQuery) {
+        const electorrent = window.electorrent
+        const metaPromise = electorrent.app.getMeta()
         let dragging = 0;
         const previousDragOver = document.ondragover;
         const previousDrop = document.ondrop;
@@ -74,9 +76,10 @@ export class DragAndDropDirective implements IDirective {
                 }
             }
 
-            const advancedKey = process.platform === "darwin" ? !!event.altKey : !!event.ctrlKey;
-
-            this.electron.torrents.readFiles(paths.filter(Boolean), advancedKey).then((files: any[]) => {
+            metaPromise.then((meta) => {
+                const advancedKey = meta.isMacOS ? !!event.altKey : !!event.ctrlKey;
+                return electorrent.torrents.readFiles(paths.filter(Boolean), advancedKey)
+            }).then((files: PendingTorrentUploadFile[]) => {
                 this.$rootScope.$applyAsync(() => {
                     this.broadcastTorrentFiles(files);
                 });

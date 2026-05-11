@@ -1,8 +1,11 @@
 import { IRootScopeService } from "angular";
+import type { AppMeta, AppSettings, MenuState, StoredServerConfig } from "../../../common/ipc-contract";
 
-export let configService = ['$rootScope', '$bittorrent', 'notificationService', 'electron', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, electron, $q, Server) {
+export let configService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
+    const electorrent = window.electorrent
+    const metaPromise = electorrent.app.getMeta()
 
-    var settings = {
+    var settings: AppSettings<any> = {
         startup: 'default',
         refreshRate: 2000,
         ui: {
@@ -18,13 +21,40 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
         certificates: []
     };
 
-    const readyPromise = electron.ready().then(() => {
-        return electron.settings.getAll();
-    }).then((org: any) => {
+    function loadServerCertificate(server: any) {
+        if (!server?.certificate) {
+            server.certificateData = undefined
+            return Promise.resolve()
+        }
+
+        return electorrent.certificates.load(server.certificate).then((certificateData) => {
+            server.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
+        })
+    }
+
+    function loadServerCertificates(servers: any[]) {
+        return Promise.all(servers.map((server) => loadServerCertificate(server))).then(() => undefined)
+    }
+
+    const readyPromise = electorrent.settings.getAll().then((org: AppSettings<StoredServerConfig>) => {
         angular.merge(settings, org);
         settings.servers = settings.servers.map((server) => new Server(server));
-        return settings;
+        return loadServerCertificates(settings.servers).then(() => settings)
     });
+
+    $rootScope.$on("certificate-installed", (_event: unknown, serverId: string, fingerprint: string) => {
+        const server = this.getServer(serverId)
+        if (!server) {
+            return
+        }
+
+        server.certificate = fingerprint
+        loadServerCertificate(server).then(() => {
+            return this.saveAllSettings()
+        }).catch((err: unknown) => {
+            $notify.alert("Certificate cache error", String(err))
+        })
+    })
 
     this.whenReady = function() {
         return readyPromise;
@@ -88,7 +118,7 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
         if (newSettings) {
             Object.assign(settings, newSettings)
         }
-        return electron.settings.saveAll(settingsToJson()).then(function() {
+        return electorrent.settings.saveAll(settingsToJson()).then(function() {
             updateServerReference()
         });
     }
@@ -161,16 +191,20 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
             advancedUploadEnabled = !!$rootScope.$btclient.uploadOptionsEnable
         }
 
-        return electron.menu.setState({
-            isDebug: !!electron.program.debug,
-            hasActiveServer: !!$rootScope.$server,
-            advancedUploadEnabled: advancedUploadEnabled,
-            servers: this.getServers().map((server, index) => ({
-                id: server.id,
-                label: server.getDisplayName(),
-                accelerator: index < 10 ? 'CmdOrCtrl+' + ((index + 1) % 10) : undefined,
-                checked: !!$rootScope.$server && server.id === $rootScope.$server.id,
-            })),
+        return metaPromise.then((meta: AppMeta) => {
+            const menuState: MenuState = {
+                isDebug: !!meta.isDebug,
+                hasActiveServer: !!$rootScope.$server,
+                advancedUploadEnabled: advancedUploadEnabled,
+                servers: this.getServers().map((server, index) => ({
+                    id: server.id,
+                    label: server.getDisplayName(),
+                    accelerator: index < 10 ? 'CmdOrCtrl+' + ((index + 1) % 10) : undefined,
+                    checked: !!$rootScope.$server && server.id === $rootScope.$server.id,
+                })),
+            }
+
+            return electorrent.menu.setState(menuState)
         })
     }
 
