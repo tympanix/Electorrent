@@ -1,12 +1,11 @@
 export class WelcomePageController {
-    static $inject = ["$scope", "$timeout", "$bittorrent", "$btclients", "electron", "configService", "notificationService", "Server"];
+    static $inject = ["$scope", "$timeout", "$bittorrent", "$btclients", "configService", "notificationService", "Server"];
 
     constructor(
         $scope: any,
         $timeout: angular.ITimeoutService,
         $bittorrent: any,
         $btclients: any,
-        electron: any,
         config: any,
         $notify: any,
         Server: any,

@@ -1,4 +1,5 @@
 import { IScope } from "angular";
+import type { CertificatePrompt, UpdateEvent } from "../../../../common/ipc-contract";
 
 interface NotificationsCenterScope extends IScope {
     updateData: {
@@ -16,17 +17,17 @@ interface NotificationsCenterScope extends IScope {
 }
 
 export class NotificationsCenterController {
-    static $inject = ["$scope", "$rootScope", "$timeout", "electron", "configService", "notificationService", "$http"];
+    static $inject = ["$scope", "$rootScope", "$timeout", "configService", "notificationService", "$http"];
 
     constructor(
         $scope: NotificationsCenterScope,
         $rootScope: angular.IRootScopeService,
         $timeout: angular.ITimeoutService,
-        electron: any,
         config: any,
         $notify: any,
         $http: angular.IHttpService,
     ) {
+        const electorrent = window.electorrent
         let id = 0;
 
         $scope.updateData = {
@@ -62,12 +63,15 @@ export class NotificationsCenterController {
             }, 0);
         };
 
-        electron.updater.onStatus((event: any) => {
+        electorrent.updates.onStatus((event: UpdateEvent) => {
             if (event.type !== "downloaded") {
                 return;
             }
 
-            const data = event.data || {};
+            const data = Object.assign({
+                releaseDate: $scope.updateData.releaseDate,
+                updateUrl: $scope.updateData.updateUrl,
+            }, event.data || {});
             $scope.manualUpdate = !!data.manual;
 
             $http.get(data.updateUrl, { timeout: 10000 })
@@ -95,25 +99,26 @@ export class NotificationsCenterController {
 
         $scope.installUpdate = () => {
             if ($scope.manualUpdate) {
-                electron.updater.manualQuitAndUpdate();
+                electorrent.updates.installDownloaded();
             } else {
-                electron.autoUpdater.quitAndInstall();
+                electorrent.updates.installAuto();
             }
         };
 
-        electron.ca.onChallenge((cert: any) => {
+        electorrent.certificates.onChallenge((cert: CertificatePrompt) => {
             $scope.installCertificate = () => {
                 if (cert.source === "node-client-check") {
-                    electron.ca.installCertificate(cert, (err: unknown, fingerprint: string) => {
-                        if (err) {
-                            $rootScope.$emit("certificate-modal", false);
-                            $notify.alert("Could not install certificate", String(err));
-                        } else {
-                            $rootScope.$emit("certificate-modal", cert.serverId, fingerprint);
-                            $rootScope.$broadcast("certificate-installed", cert.serverId, fingerprint);
-                            $notify.ok("Certificate installed", "The certificate has been trusted for this server to use");
-                        }
-                    });
+                    electorrent.certificates.install({
+                        fingerprint: cert.fingerprint,
+                        raw: cert.raw,
+                    }).then((result) => {
+                        $rootScope.$emit("certificate-modal", cert.serverId, result.fingerprint);
+                        $rootScope.$broadcast("certificate-installed", cert.serverId, result.fingerprint);
+                        $notify.ok("Certificate installed", "The certificate has been trusted for this server to use");
+                    }).catch((err: unknown) => {
+                        $rootScope.$emit("certificate-modal", false);
+                        $notify.alert("Could not install certificate", String(err));
+                    })
                 } else {
                     config.trustCertificate(cert).catch((err: unknown) => {
                         $notify.alert("Could not trust certificate", String(err));

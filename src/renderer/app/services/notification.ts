@@ -1,5 +1,6 @@
 
-export let notificationService = ["$rootScope", "electron", function ($rootScope, electron) {
+export let notificationService = ["$rootScope", function ($rootScope) {
+    const electorrent = window.electorrent
 
     const ERR_SELF_SIGNED_CERT = 'DEPTH_ZERO_SELF_SIGNED_CERT'
     const ERR_TLS_CERT_ALTNAME_INVALID = 'ERR_TLS_CERT_ALTNAME_INVALID'
@@ -89,7 +90,7 @@ export let notificationService = ["$rootScope", "electron", function ($rootScope
     }
 
     // Listen for incomming notifications from main process
-    electron.notifications.onPush(function (data) {
+    electorrent.notifications.onPush(function (data) {
         $rootScope.$applyAsync(function () {
             sendNotification(data.title, data.message, data.type || 'warning');
         })

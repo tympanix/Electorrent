@@ -22,21 +22,22 @@ export class ActionHeaderDirective implements IDirective {
     controller = ActionHeaderController;
 
     static getInstance(): IDirectiveFactory {
-        const factory = ($rootScope: IRootScopeService, $compile: ICompileService, electron: any) =>
-            new ActionHeaderDirective($rootScope, $compile, electron);
-        factory.$inject = ["$rootScope", "$compile", "electron"];
+        const factory = ($rootScope: IRootScopeService, $compile: ICompileService) =>
+            new ActionHeaderDirective($rootScope, $compile);
+        factory.$inject = ["$rootScope", "$compile"];
         return factory;
     }
 
     constructor(
         private $rootScope: IRootScopeService,
         private $compile: ICompileService,
-        private electron: any,
     ) {}
 
     link(scope: ActionHeaderScope, element: IAugmentedJQuery, attr: IAttributes) {
         scope.bind = {};
-        (scope as ActionHeaderScope & { program?: any }).program = this.electron.program;
+        (scope as ActionHeaderScope & { program?: any }).program = {
+            debug: false,
+        };
 
         let toggleAble: IAugmentedJQuery[] = [];
 
@@ -144,6 +145,13 @@ export class ActionHeaderDirective implements IDirective {
         };
 
         render();
+
+        window.electorrent.app.getMeta().then((meta) => {
+            (scope as ActionHeaderScope & { program?: any }).program = {
+                debug: !!meta.isDebug,
+            }
+            scope.$evalAsync()
+        });
 
         scope.$watch(() => scope.enabled, (disable) => {
             toggleActive(disable);

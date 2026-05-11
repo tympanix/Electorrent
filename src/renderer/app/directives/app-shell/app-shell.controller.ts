@@ -1,5 +1,6 @@
 import { IRootScopeService, IScope } from "angular";
 import { PendingTorrentUploadFile } from "../add-torrent-modal/add-torrent-modal.directive";
+import type { AppMeta, LaunchPayload, MenuAction } from "../../../../common/ipc-contract";
 
 interface AppShellScope extends IScope {
     servers: any[];
@@ -14,17 +15,17 @@ interface AppShellScope extends IScope {
 }
 
 export class AppShellController {
-    static $inject = ["$rootScope", "$scope", "$timeout", "$bittorrent", "electron", "configService", "notificationService"];
+    static $inject = ["$rootScope", "$scope", "$timeout", "$bittorrent", "configService", "notificationService"];
 
     constructor(
         $rootScope: IRootScopeService & { $btclient?: any; $server?: any },
         $scope: AppShellScope,
         $timeout: angular.ITimeoutService,
         $bittorrent: any,
-        electron: any,
         config: any,
         $notify: any,
     ) {
+        const electorrent = window.electorrent
         const MAX_LOADING_TIME = 10000;
 
         const PAGE_SETTINGS = "settings";
@@ -43,11 +44,11 @@ export class AppShellController {
         $scope.statusText = "Loading";
 
         $rootScope.$on("ready", () => {
-            config.whenReady().then(() => {
+            Promise.all([config.whenReady(), electorrent.app.getMeta()]).then(([_, meta]: [unknown, AppMeta]) => {
                 const settings = config.getAllSettings();
                 const automaticUpdates = settings?.automaticUpdates;
-                if (!electron.program.debug && automaticUpdates !== false) {
-                    electron.updater.checkForUpdates();
+                if (!meta.isDebug && automaticUpdates !== false) {
+                    electorrent.updates.check();
                 }
 
                 if (!settings.servers.length) {
@@ -126,19 +127,19 @@ export class AppShellController {
             });
         };
 
-        electron.launch.onMagnets((magnets: string[]) => {
+        electorrent.launch.onMagnets((magnets: string[]) => {
             queueMagnetLinks(magnets);
             drainPendingLaunchPayloads();
             $scope.$applyAsync();
         });
 
-        electron.launch.onTorrentFiles((files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
+        electorrent.launch.onTorrentFiles((files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
             queueTorrentFiles(files);
             drainPendingLaunchPayloads();
             $scope.$applyAsync();
         });
 
-        electron.menu.onAction((action: any) => {
+        electorrent.menu.onAction((action: MenuAction) => {
             switch (action.type) {
                 case "show-settings":
                     $scope.$emit("show:settings");
@@ -162,7 +163,7 @@ export class AppShellController {
                     }
                     break;
                 case "open-add-torrent":
-                    electron.torrents.browse(!!action.askUploadOptions).then((files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
+                    electorrent.torrents.openFiles(!!action.askUploadOptions).then((files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
                         files.forEach((item) => broadcastTorrentFile(item, !!item.askUploadOptions));
                     });
                     break;
@@ -170,10 +171,10 @@ export class AppShellController {
                     $bittorrent.uploadFromClipboard(!!action.askUploadOptions);
                     break;
                 case "open-external":
-                    electron.shell.openExternal(action.url);
+                    electorrent.shell.openExternal(action.url);
                     break;
                 case "check-for-updates":
-                    electron.updater.checkForUpdates(!!action.verbose);
+                    electorrent.updates.check(!!action.verbose);
                     break;
                 case "connect-server":
                     {
@@ -238,7 +239,7 @@ export class AppShellController {
                 $scope.statusText = "Loading Torrents";
                 config.updateServer(server);
                 pageTorrents(true);
-                return electron.launch.getPending().then((payload: any) => {
+                return electorrent.launch.getPending().then((payload: LaunchPayload) => {
                     queueMagnetLinks(payload.magnets || []);
                     queueTorrentFiles(payload.torrentFiles || []);
                     drainPendingLaunchPayloads();

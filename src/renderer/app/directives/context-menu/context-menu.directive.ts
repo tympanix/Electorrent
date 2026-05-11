@@ -30,15 +30,15 @@ export class ContextMenuDirective implements IDirective {
         debug: "=?",
     };
     controller = ContextMenuController;
+    private isDebug = false
 
     static getInstance(): IDirectiveFactory {
         const factory = (
             $rootScope: IRootScopeService,
             $document: IDocumentService,
             $window: IWindowService,
-            electron: any,
-        ) => new ContextMenuDirective($rootScope, $document, $window, electron);
-        factory.$inject = ["$rootScope", "$document", "$window", "electron"];
+        ) => new ContextMenuDirective($rootScope, $document, $window);
+        factory.$inject = ["$rootScope", "$document", "$window"];
         return factory;
     }
 
@@ -46,7 +46,6 @@ export class ContextMenuDirective implements IDirective {
         private $rootScope: IRootScopeService,
         private $document: IDocumentService,
         private $window: IWindowService,
-        private electron: any,
     ) {}
 
     link(scope: ContextMenuScope, element: IAugmentedJQuery) {
@@ -147,7 +146,7 @@ export class ContextMenuDirective implements IDirective {
             const list = angular.element('<div class="ui vertical menu"></div>');
             element.append(list);
 
-            if (this.electron.program.debug) {
+            if (this.isDebug) {
                 appendDebugItem(list);
             }
 
@@ -228,6 +227,11 @@ export class ContextMenuDirective implements IDirective {
         document.addEventListener("keyup", onKeyUp);
 
         render();
+
+        window.electorrent.app.getMeta().then((meta) => {
+            this.isDebug = !!meta.isDebug
+            scope.$evalAsync(render)
+        });
 
         scope.$watch(
             () => this.$rootScope.$btclient,

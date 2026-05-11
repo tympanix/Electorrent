@@ -1,25 +1,30 @@
+import type { AppMeta, ThemeInfo } from "../../../../common/ipc-contract";
+
 export class SettingsPageController {
-    static $inject = ["$rootScope", "$scope", "$injector", "$q", "$bittorrent", "$btclients", "configService", "notificationService", "electron"];
+    static $inject = ["$rootScope", "$scope", "$injector", "$bittorrent", "$btclients", "configService", "notificationService"];
 
     constructor(
         $rootScope: angular.IRootScopeService & { $server?: any },
         $scope: any,
         $injector: angular.auto.IInjectorService,
-        $q: angular.IQService,
         $bittorrent: any,
         $btclients: any,
         config: any,
         $notify: any,
-        electron: any,
     ) {
+        const electorrent = window.electorrent
         let serverCopy: any;
-        let loadPromise: angular.IPromise<any> | undefined;
+        let loadPromise: Promise<void> | undefined;
 
         $scope.settings = {};
         $scope.server = {};
         $scope.themes = [];
         $scope.btclients = $btclients;
-        $scope.is = electron.is;
+        $scope.is = {
+            macOS: () => false,
+            windows: () => false,
+            linux: () => false,
+        };
         $scope.general = {
             magnet: false,
         };
@@ -41,17 +46,21 @@ export class SettingsPageController {
             "ui-floating": true,
         };
 
-        loadPromise = $q.all([
-            config.whenReady(),
-            electron.ready(),
-            electron.themes(),
-            electron.app.getMeta(),
-        ]).then(([_settingsReady, _electronReady, themes, meta]: any[]) => {
+        loadPromise = Promise.all([
+            Promise.resolve(config.whenReady()),
+            electorrent.settings.listThemes(),
+            electorrent.app.getMeta(),
+        ]).then(([_settingsReady, themes, meta]: [unknown, ThemeInfo[], AppMeta]) => {
             $scope.themes = themes;
             $scope.appVersion = meta.appVersion;
             $scope.nodeVersion = meta.versions.node;
             $scope.chromeVersion = meta.versions.chrome;
             $scope.electronVersion = meta.versions.electron;
+            $scope.is = {
+                macOS: () => meta.isMacOS,
+                windows: () => meta.isWindows,
+                linux: () => meta.isLinux,
+            };
             return loadAllSettings();
         }).finally(() => {
             $scope.$applyAsync();
@@ -63,7 +72,7 @@ export class SettingsPageController {
 
             serverCopy = angular.copy($scope.server);
 
-            return electron.app.isDefaultProtocolClient("magnet").then((magnets: boolean) => {
+            return electorrent.app.getDefaultProtocolStatus("magnet").then((magnets: boolean) => {
                 $scope.general = {
                     magnets: magnets,
                 };
@@ -80,15 +89,15 @@ export class SettingsPageController {
 
         function subscribeToMagnets() {
             if ($scope.general.magnets) {
-                return electron.app.setAsDefaultProtocolClient("magnet");
+                return electorrent.app.setDefaultProtocolStatus("magnet", true);
             } else {
-                return electron.app.removeAsDefaultProtocolClient("magnet");
+                return electorrent.app.setDefaultProtocolStatus("magnet", false);
             }
         }
 
         $scope.$on("setting:load", () => {
             console.info("Loading settings");
-            $q.when(loadPromise).then(() => loadAllSettings()).finally(() => {
+            Promise.resolve(loadPromise).then(() => loadAllSettings()).finally(() => {
                 $scope.$applyAsync();
             });
         });
@@ -99,7 +108,7 @@ export class SettingsPageController {
                     return subscribeToMagnets();
                 }).catch((err: unknown) => {
                     $notify.alert("Settings could not be saved", err);
-                    return $q.reject(err);
+                    throw err;
                 });
         }
 
@@ -166,7 +175,7 @@ export class SettingsPageController {
         $scope.save = () => {
             $scope.$emit("loading", "Applying Settings");
 
-            $q.when().then(() => {
+            Promise.resolve().then(() => {
                 return saveServer();
             }).then(() => {
                 return writeSettings();
