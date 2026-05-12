@@ -24,17 +24,6 @@ const commonPlugins = [
   new CopyWebpackPlugin({
     patterns: [
       {
-        from: path.resolve(__dirname, 'src/main/main.js'),
-        to: path.resolve(outDir, 'main.js'),
-      },
-      {
-        from: path.resolve(__dirname, 'src/main/lib'),
-        to: path.resolve(outDir, 'lib'),
-        globOptions: {
-          ignore: ['**/bittorrent/**'],
-        },
-      },
-      {
         from: path.resolve(__dirname, 'src/common'),
         to: path.resolve(outDir, 'common'),
       },
@@ -165,10 +154,20 @@ const preloadConfig = {
   stats: rendererConfig.stats,
 }
 
-const mainBittorrentConfig = {
-  name: 'main-bittorrent',
+const mainConfig = {
+  name: 'main',
   devtool: 'source-map',
   entry: {
+    main: path.resolve(__dirname, 'src/main/main.ts'),
+    'lib/config': path.resolve(__dirname, 'src/main/lib/config.ts'),
+    'lib/logger': path.resolve(__dirname, 'src/main/lib/logger.ts'),
+    'lib/torrents': path.resolve(__dirname, 'src/main/lib/torrents.ts'),
+    'lib/themes': path.resolve(__dirname, 'src/main/lib/themes.ts'),
+    'lib/menu': path.resolve(__dirname, 'src/main/lib/menu.ts'),
+    'lib/update': path.resolve(__dirname, 'src/main/lib/update.ts'),
+    'lib/certificates': path.resolve(__dirname, 'src/main/lib/certificates.ts'),
+    'lib/electorrent': path.resolve(__dirname, 'src/main/lib/electorrent.ts'),
+    'lib/startup': path.resolve(__dirname, 'src/main/lib/startup.ts'),
     'lib/bittorrent/index': path.resolve(__dirname, 'src/main/lib/bittorrent/index.ts'),
   },
   output: {
@@ -190,4 +189,4 @@ const mainBittorrentConfig = {
   stats: rendererConfig.stats,
 }
 
-module.exports = [rendererConfig, preloadConfig, mainBittorrentConfig]
+module.exports = [rendererConfig, preloadConfig, mainConfig]

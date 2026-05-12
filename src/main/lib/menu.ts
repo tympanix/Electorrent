@@ -1,32 +1,49 @@
-const { app, Menu } = require('electron')
+import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
+
 const { IPC_CHANNELS } = require('../common/ipc')
 
-let mainWindow = null
-let menuState = {
+type ServerMenuState = {
+    id: string
+    label: string
+    accelerator?: string
+    checked?: boolean
+}
+
+type MenuState = {
+    isDebug: boolean
+    hasActiveServer: boolean
+    advancedUploadEnabled: boolean
+    servers: ServerMenuState[]
+}
+
+let mainWindow: BrowserWindow | null = null
+let menuState: MenuState = {
     isDebug: false,
     hasActiveServer: false,
     advancedUploadEnabled: false,
     servers: [],
 }
 
-function setWindow(window) {
+function setWindow(window: BrowserWindow) {
     mainWindow = window
     buildMenu()
 }
 
-function sendAction(action) {
+function sendAction(action: unknown) {
     if (!mainWindow || mainWindow.isDestroyed()) return
     mainWindow.webContents.send(IPC_CHANNELS.menu.action, action)
 }
 
-function serverAccelerator(index) {
+function serverAccelerator(index: number) {
     if (index > 0 && index <= 10) {
         return `CmdOrCtrl+${index % 10}`
     }
+
+    return undefined
 }
 
-function serverMenuItems() {
-    const submenu = [
+function serverMenuItems(): MenuItemConstructorOptions[] {
+    const submenu: MenuItemConstructorOptions[] = [
         {
             label: 'Add new server...',
             accelerator: 'CmdOrCtrl+N',
@@ -61,7 +78,7 @@ function serverMenuItems() {
     return submenu
 }
 
-function fileMenuItems() {
+function fileMenuItems(): MenuItemConstructorOptions[] {
     return [
         {
             label: 'Add Torrent',
@@ -90,7 +107,7 @@ function fileMenuItems() {
     ]
 }
 
-function editMenuItems() {
+function editMenuItems(): MenuItemConstructorOptions[] {
     return [
         { label: 'Undo', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
         { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', role: 'redo' },
@@ -116,7 +133,7 @@ function editMenuItems() {
     ]
 }
 
-function viewMenuItems() {
+function viewMenuItems(): MenuItemConstructorOptions[] {
     return [
         {
             label: 'Reload',
@@ -148,7 +165,7 @@ function viewMenuItems() {
     ]
 }
 
-function helpMenuItems() {
+function helpMenuItems(): MenuItemConstructorOptions[] {
     return [
         {
             label: 'Learn More',
@@ -161,7 +178,7 @@ function helpMenuItems() {
     ]
 }
 
-function buildDarwinTemplate() {
+function buildDarwinTemplate(): MenuItemConstructorOptions[] {
     const name = app.name
 
     return [
@@ -221,7 +238,7 @@ function buildDarwinTemplate() {
     ]
 }
 
-function buildDefaultTemplate() {
+function buildDefaultTemplate(): MenuItemConstructorOptions[] {
     return [
         {
             label: 'File',
@@ -275,7 +292,7 @@ function buildMenu() {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-function setState(state) {
+function setState(state: Partial<MenuState>) {
     menuState = Object.assign({}, menuState, state)
     buildMenu()
 }
