@@ -1,21 +1,63 @@
-const { IPC_CHANNELS } = require('../common/ipc')
+import { IPC_CHANNELS } from "../common/ipc"
 
 type PendingLaunchPayload = {
     magnets: string[]
     torrentFilePaths: string[]
 }
 
+type SaveAllCallback = (err?: unknown) => void
+type InstallCertificateCallback = (err?: unknown, fingerprint?: string) => void
+type GetCertificateCallback = (err?: unknown, cert?: unknown) => void
+
+type ConfigService = {
+    showCorruptDialog: () => void
+    getAllSettings: () => unknown
+    saveAll: (settings: unknown, callback: SaveAllCallback) => void
+}
+
+type TorrentsService = {
+    readFiles: (paths: string[], askUploadOptions: boolean) => Promise<unknown>
+    browse: (askUploadOptions: boolean) => unknown
+}
+
+type BittorrentManager = {
+    connect: (sender: Electron.WebContents, server: unknown) => unknown
+    disconnect: (sender: Electron.WebContents) => unknown
+    getSnapshot: (sender: Electron.WebContents, fullUpdate?: unknown) => unknown
+    addTorrentUrl: (sender: Electron.WebContents, request: unknown) => unknown
+    uploadTorrent: (sender: Electron.WebContents, request: unknown) => unknown
+    invokeAction: (sender: Electron.WebContents, request: unknown) => unknown
+    getTorrentFiles: (sender: Electron.WebContents, hash: unknown) => unknown
+    setTorrentFileSelection: (sender: Electron.WebContents, request: unknown) => unknown
+}
+
+type UpdaterService = {
+    checkForUpdates: (verbose?: boolean) => void
+    manualQuitAndUpdate: () => void
+    quitAndInstall: () => void
+}
+
+type CertificatesService = {
+    get: (server: unknown, callback: GetCertificateCallback) => void
+    installCertificate: (request: unknown, callback: InstallCertificateCallback) => void
+    loadCertificate: (fingerprint: string) => Uint8Array | null | undefined
+}
+
+type MenuService = {
+    setState: (state: unknown) => void
+}
+
 type IpcDependencies = {
     app: Electron.App
     ipcMain: Electron.IpcMain
     shell: Electron.Shell
-    config: any
-    themes: any
-    torrents: any
-    bittorrentManager: any
-    updater: any
-    certificates: any
-    menu: any
+    config: ConfigService
+    themes: () => unknown
+    torrents: TorrentsService
+    bittorrentManager: BittorrentManager
+    updater: UpdaterService
+    certificates: CertificatesService
+    menu: MenuService
     getAppMeta: () => unknown
     pendingLaunchPayload: PendingLaunchPayload
     getTorrentWindow: () => Electron.BrowserWindow | null | undefined
@@ -69,10 +111,10 @@ export function registerIpcHandlers({
     })
 
     ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event, { settings }) {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             config.saveAll(settings, function(err) {
                 if (err) reject(err)
-                else resolve(undefined)
+                else resolve()
             })
         })
     })
