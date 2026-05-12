@@ -169,6 +169,7 @@ const mainBittorrentConfig = {
   name: 'main-bittorrent',
   devtool: 'source-map',
   entry: {
+    ipc: path.resolve(__dirname, 'src/main/ipc.ts'),
     'lib/bittorrent/index': path.resolve(__dirname, 'src/main/lib/bittorrent/index.ts'),
   },
   output: {
