@@ -1,6 +1,6 @@
 import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
 
-const { IPC_CHANNELS } = require('../common/ipc')
+const { IPC_CHANNELS } = require('../../common/ipc')
 
 type ServerMenuState = {
     id: string
@@ -140,7 +140,7 @@ function viewMenuItems(): MenuItemConstructorOptions[] {
             visible: !!menuState.isDebug,
             accelerator: 'CmdOrCtrl+R',
             click(_item, focusedWindow) {
-                if (focusedWindow) focusedWindow.reload()
+                if (focusedWindow) (focusedWindow as BrowserWindow).reload()
             },
         },
         {
@@ -148,7 +148,8 @@ function viewMenuItems(): MenuItemConstructorOptions[] {
             accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
             click(_item, focusedWindow) {
                 if (focusedWindow) {
-                    focusedWindow.setFullScreen(!focusedWindow.isFullScreen())
+                    const browserWindow = focusedWindow as BrowserWindow
+                    browserWindow.setFullScreen(!browserWindow.isFullScreen())
                 }
             },
         },
@@ -158,7 +159,7 @@ function viewMenuItems(): MenuItemConstructorOptions[] {
             accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
             click(_item, focusedWindow) {
                 if (focusedWindow) {
-                    focusedWindow.webContents.toggleDevTools()
+                    ;(focusedWindow as BrowserWindow).webContents.toggleDevTools()
                 }
             },
         },
@@ -195,7 +196,7 @@ function buildDarwinTemplate(): MenuItemConstructorOptions[] {
                 { label: 'Services', role: 'services', submenu: [] },
                 { type: 'separator' },
                 { label: `Hide ${name}`, accelerator: 'Command+H', role: 'hide' },
-                { label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideothers' },
+                { label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideOthers' },
                 { label: 'Show All', role: 'unhide' },
                 { type: 'separator' },
                 { label: 'Quit', accelerator: 'Command+Q', role: 'quit' },

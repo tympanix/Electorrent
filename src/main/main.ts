@@ -15,7 +15,7 @@ import {
 const yargs = require('yargs')
 const path = require('path')
 const is = require('electron-is')
-const { IPC_CHANNELS } = require('./common/ipc')
+const { IPC_CHANNELS } = require('../common/ipc')
 const { bittorrentManager } = require('./lib/bittorrent')
 
 if (!require('./lib/startup')) {
@@ -324,7 +324,7 @@ if (!require('./lib/startup')) {
         })
     }
 
-    app.allowRendererProcessReuse = false
+    ;(app as any).allowRendererProcessReuse = false
 
     app.on('open-url', function(_event: ElectronEvent, url: string) {
         if (torrentWindow) {

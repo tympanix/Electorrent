@@ -4,7 +4,7 @@ const path = require('path')
 const fs = require('fs')
 
 const electorrent = require('./electorrent')
-const { IPC_CHANNELS } = require('../common/ipc')
+const { IPC_CHANNELS } = require('../../common/ipc')
 
 function notify({ title = '', message = '', type = 'info' }) {
     const win = electorrent.getWindow()
