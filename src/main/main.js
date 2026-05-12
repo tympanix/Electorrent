@@ -13,10 +13,8 @@ if (require('./lib/startup')) return
 // Electron modules
 const { app } = electron;
 const { BrowserWindow } = electron;
-const { ipcMain } = electron;
 const { session } = electron;
 const { nativeImage } = electron;
-const { shell } = electron;
 
 // Set up program arguments
 yargs.version(() => app.getVersion())
@@ -179,9 +177,6 @@ function sanitizeCertificateError(certificate) {
 }
 
 registerIpcHandlers({
-    app,
-    ipcMain,
-    shell,
     config,
     themes,
     torrents,

@@ -1,4 +1,5 @@
 import { IPC_CHANNELS } from "../common/ipc"
+import { app, ipcMain, shell } from "electron"
 
 type PendingLaunchPayload = {
     magnets: string[]
@@ -48,9 +49,6 @@ type MenuService = {
 }
 
 type IpcDependencies = {
-    app: Electron.App
-    ipcMain: Electron.IpcMain
-    shell: Electron.Shell
     config: ConfigService
     themes: () => unknown
     torrents: TorrentsService
@@ -64,9 +62,6 @@ type IpcDependencies = {
 }
 
 export function registerIpcHandlers({
-    app,
-    ipcMain,
-    shell,
     config,
     themes,
     torrents,
