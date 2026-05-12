@@ -324,8 +324,6 @@ if (!require('./lib/startup')) {
         })
     }
 
-    ;(app as any).allowRendererProcessReuse = false
-
     app.on('open-url', function(_event: ElectronEvent, url: string) {
         if (torrentWindow) {
             sendMagnetLinks([url])

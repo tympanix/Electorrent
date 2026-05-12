@@ -47,8 +47,8 @@ exports.manualQuitAndUpdate = function() {
     if (!downloadedUpdate) return
     const updatePath = downloadedUpdate
 
-    const isExecuteable = fs.constants.F_OK && fs.constants.X_OK
-    fs.access(updatePath, isExecuteable, (err: Error | null) => {
+    const isExecutable = fs.constants.F_OK | fs.constants.X_OK
+    fs.access(updatePath, isExecutable, (err: Error | null) => {
         if (err) {
             logger.error('Error while executing update', arguments)
             shell.showItemInFolder(updatePath)
