@@ -1,4 +1,4 @@
-const { IPC_CHANNELS } = require('./common/ipc')
+const { IPC_CHANNELS } = require('../common/ipc')
 
 type PendingLaunchPayload = {
     magnets: string[]
