@@ -13,7 +13,7 @@ exports.getWindow = function() {
 exports.isDevelopment = function() {
     try {
         if (app.isPackaged) {
-            return true
+            return false
         }
         return Number.parseInt(process.env.ELECTRON_IS_DEV || '0', 10) === 1
     } catch (_e) {
