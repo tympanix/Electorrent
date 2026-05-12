@@ -124,9 +124,14 @@ export function registerIpcHandlers({
     })
 
     ipcMain.handle(IPC_CHANNELS.launch.getPending, async function() {
+        const magnets = pendingLaunchPayload.magnets.slice()
+        const torrentFilePaths = pendingLaunchPayload.torrentFilePaths.slice()
+        pendingLaunchPayload.magnets.length = 0
+        pendingLaunchPayload.torrentFilePaths.length = 0
+
         return {
-            magnets: pendingLaunchPayload.magnets.splice(0),
-            torrentFiles: await torrents.readFiles(pendingLaunchPayload.torrentFilePaths.splice(0), false),
+            magnets,
+            torrentFiles: await torrents.readFiles(torrentFilePaths, false),
         }
     })
 
