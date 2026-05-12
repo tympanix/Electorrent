@@ -45,14 +45,15 @@ exports.initialise = function(initWindow: BrowserWindow) {
 
 exports.manualQuitAndUpdate = function() {
     if (!downloadedUpdate) return
+    const updatePath = downloadedUpdate
 
     const isExecuteable = fs.constants.F_OK && fs.constants.X_OK
-    fs.access(downloadedUpdate, isExecuteable, (err: Error | null) => {
+    fs.access(updatePath, isExecuteable, (err: Error | null) => {
         if (err) {
             logger.error('Error while executing update', arguments)
-            shell.showItemInFolder(downloadedUpdate)
+            shell.showItemInFolder(updatePath)
         } else {
-            shell.openPath(downloadedUpdate)
+            shell.openPath(updatePath)
             app.quit()
         }
     })
