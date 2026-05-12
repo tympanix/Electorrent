@@ -74,8 +74,6 @@ import { notificationService } from "./app/services/notification"
 torrentApp.service("notificationService", notificationService)
 import { serverService} from "./app/services/server"
 torrentApp.factory("Server", serverService)
-import { remoteService } from "./app/services/remote"
-torrentApp.factory("$remote", remoteService)
 
 // Filters
 import { DateFilter } from "./app/filters/date.filter"

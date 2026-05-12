@@ -11,6 +11,19 @@ export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorr
          */
         const ERR_SELF_SIGNED_CERT = "DEPTH_ZERO_SELF_SIGNED_CERT"
 
+        function isSelfSignedCertificateError(err: any) {
+            if (!err) {
+                return false
+            }
+
+            if (err.code === ERR_SELF_SIGNED_CERT) {
+                return true
+            }
+
+            const message = String(err.message || err)
+            return message.toLowerCase().includes("self signed certificate")
+        }
+
         /**
          * Constructor, with class name
          */
@@ -147,12 +160,12 @@ export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorr
 
             return connectOrTimeout.catch(function(err) {
                 self.isConnected = false
-                $notify.alertAuth(err)
-                if (err.code === ERR_SELF_SIGNED_CERT) {
+                if (isSelfSignedCertificateError(err)) {
                     return self.askForCertificate().then(function() {
                         return self.connect()
                     })
                 }
+                $notify.alertAuth(err)
                 return $q.reject(err, this)
             }).then(function() {
                 self.isConnected = true

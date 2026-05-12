@@ -8,7 +8,60 @@ const defaultInclude = path.resolve(__dirname, 'src')
 const outDir = path.resolve(__dirname, 'app')
 const isProduction = process.env.NODE_ENV === 'production'
 
-module.exports = {
+const sharedResolve = {
+  extensions: ['.ts', '.tsx', '.js', '.json'],
+  modules: ['node_modules', 'src'],
+}
+
+const tsRule = {
+  test: /\.tsx?$/,
+  use: 'ts-loader',
+  include: defaultInclude,
+  exclude: /node_modules/,
+}
+
+const commonPlugins = [
+  new CopyWebpackPlugin({
+    patterns: [
+      {
+        from: path.resolve(__dirname, 'src/main/main.js'),
+        to: path.resolve(outDir, 'main.js'),
+      },
+      {
+        from: path.resolve(__dirname, 'src/main/lib'),
+        to: path.resolve(outDir, 'lib'),
+        globOptions: {
+          ignore: ['**/bittorrent/**'],
+        },
+      },
+      {
+        from: path.resolve(__dirname, 'src/common'),
+        to: path.resolve(outDir, 'common'),
+      },
+      {
+        from: path.resolve(__dirname, 'build'),
+        to: path.resolve(outDir, 'build'),
+      },
+      {
+        from: path.resolve(__dirname, 'node_modules/semantic-ui-css/themes/default/assets'),
+        to: path.resolve(outDir, 'css/themes/default/assets'),
+      },
+      {
+        from: path.resolve(__dirname, 'src/renderer/assets/views'),
+        to: path.resolve(outDir, 'views'),
+        noErrorOnMissing: true,
+      },
+      {
+        from: path.resolve(__dirname, 'src/renderer/assets/img'),
+        to: path.resolve(outDir, 'img'),
+        noErrorOnMissing: true,
+      },
+    ],
+  }),
+]
+
+const rendererConfig = {
+  name: 'renderer',
   devtool: 'source-map',
   entry: {
     app: [
@@ -30,17 +83,12 @@ module.exports = {
       fuse: 'Fuse',
     },
     nodeExternals({
-      modulesDir: 'app/node_modules'
+      modulesDir: 'app/node_modules',
     }),
   ],
   module: {
     rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        include: defaultInclude,
-        exclude: /node_modules/,
-      },
+      tsRule,
       {
         test: /\.font\.js$/i,
         use: [
@@ -52,75 +100,31 @@ module.exports = {
         test: /\.(jpe?g|png|gif)$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'img/[name]__[hash:base64:5][ext]'
+          filename: 'img/[name]__[hash:base64:5][ext]',
         },
-        include: defaultInclude
+        include: defaultInclude,
       },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'font/[name]__[hash:base64:5][ext]'
+          filename: 'font/[name]__[hash:base64:5][ext]',
         },
       },
       {
         test: /\.html$/i,
         loader: 'html-loader',
       },
-    ]
+    ],
   },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.json'],
-    modules: ['node_modules', 'src']
-  },
+  resolve: sharedResolve,
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/renderer/assets/index.ejs'),
       filename: 'index.html',
       inject: false,
     }),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: path.resolve(__dirname, 'src/main/main.js'),
-          to: path.resolve(outDir, 'main.js'),
-        },
-        {
-          from: path.resolve(__dirname, 'src/main/preload.js'),
-          to: path.resolve(outDir, 'preload.js'),
-        },
-        {
-          from: path.resolve(__dirname, 'src/main/lib'),
-          to: path.resolve(outDir, 'lib'),
-        },
-        {
-          from: path.resolve(__dirname, 'src/common'),
-          to: path.resolve(outDir, 'common'),
-        },
-        {
-          from: path.resolve(__dirname, 'src/renderer/app/workers'),
-          to: path.resolve(outDir, 'scripts'),
-        },
-        {
-          from: path.resolve(__dirname, 'build'),
-          to: path.resolve(outDir, 'build'),
-        },
-        {
-          from: path.resolve(__dirname, 'node_modules/semantic-ui-css/themes/default/assets'),
-          to: path.resolve(outDir, 'css/themes/default/assets'),
-        },
-        {
-          from: path.resolve(__dirname, 'src/renderer/assets/views'),
-          to: path.resolve(outDir, 'views'),
-          noErrorOnMissing: true,
-        },
-        {
-          from: path.resolve(__dirname, 'src/renderer/assets/img'),
-          to: path.resolve(outDir, 'img'),
-          noErrorOnMissing: true,
-        },
-      ],
-    }),
+    ...commonPlugins,
     new webpack.ProvidePlugin({
       'window.jQuery': 'jquery',
       jQuery: 'jquery',
@@ -132,6 +136,58 @@ module.exports = {
     colors: true,
     children: false,
     chunks: false,
-    modules: false
-  }
+    modules: false,
+  },
 }
+
+const preloadConfig = {
+  name: 'preload',
+  devtool: 'source-map',
+  entry: {
+    preload: path.resolve(__dirname, 'src/main/preload.ts'),
+  },
+  output: {
+    path: outDir,
+    filename: '[name].js',
+    libraryTarget: 'commonjs2',
+  },
+  target: 'electron-preload',
+  mode: isProduction ? 'production' : 'development',
+  externals: [
+    nodeExternals({
+      modulesDir: 'app/node_modules',
+    }),
+  ],
+  module: {
+    rules: [tsRule],
+  },
+  resolve: sharedResolve,
+  stats: rendererConfig.stats,
+}
+
+const mainBittorrentConfig = {
+  name: 'main-bittorrent',
+  devtool: 'source-map',
+  entry: {
+    'lib/bittorrent/index': path.resolve(__dirname, 'src/main/lib/bittorrent/index.ts'),
+  },
+  output: {
+    path: outDir,
+    filename: '[name].js',
+    libraryTarget: 'commonjs2',
+  },
+  target: 'electron-main',
+  mode: isProduction ? 'production' : 'development',
+  externals: [
+    nodeExternals({
+      modulesDir: 'app/node_modules',
+    }),
+  ],
+  module: {
+    rules: [tsRule],
+  },
+  resolve: sharedResolve,
+  stats: rendererConfig.stats,
+}
+
+module.exports = [rendererConfig, preloadConfig, mainBittorrentConfig]

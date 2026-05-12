@@ -48,7 +48,11 @@ export class TorrentsPageController {
         $scope.trackers = [];
         $scope.guiBusy = true;
         $scope.pendingTorrentFiles = [];
-        $scope.uploadAdvancedOptionsKey = process.platform === "darwin" ? "⌥" : "Ctrl";
+        $scope.uploadAdvancedOptionsKey = "Ctrl";
+
+        window.electorrent.app.getMeta().then((meta) => {
+            $scope.uploadAdvancedOptionsKey = meta.isMacOS ? "⌥" : "Ctrl";
+        });
 
         $scope.filters = {
             status: "all",
