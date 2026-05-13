@@ -1,7 +1,8 @@
+import { app } from 'electron'
+
 const https = require('https')
 const fs = require('fs')
 const path = require('path')
-const { app } = require('electron')
 
 const CERT_DIR = path.join(app.getPath('userData'), 'certs')
 const FINGERPRINT_PATTERN = /^(?:[A-Fa-f0-9]{2}:?)+$/
@@ -16,43 +17,40 @@ function ensureDir() {
     }
 }
 
-/*
- * Make sure the certificate directory exists
- */
 ensureDir()
 
-function isEmpty(object) {
-    for (var prop in object) {
-        if (object.hasOwnProperty(prop))
+function isEmpty(object: Record<string, unknown>) {
+    for (const prop in object) {
+        if (Object.prototype.hasOwnProperty.call(object, prop)) {
             return false
+        }
     }
 
     return true
 }
 
-function pemEncode(str, n) {
-    if (!Buffer.isBuffer(str)) {
-        str = Buffer.from(str)
+function pemEncode(input: Buffer | Uint8Array | string, n: number) {
+    let value = input
+    if (!Buffer.isBuffer(value)) {
+        value = Buffer.from(value)
     }
-    str = str.toString("base64")
+    const encoded = value.toString('base64')
 
-    var ret = []
+    const ret: string[] = []
 
-    for (var i = 1; i <= str.length; i++) {
-        ret.push(str[i - 1])
-        var mod = i % n
+    for (let i = 1; i <= encoded.length; i++) {
+        ret.push(encoded[i - 1])
+        const mod = i % n
 
         if (mod === 0) {
             ret.push('\n')
         }
     }
 
-    var returnString = `-----BEGIN CERTIFICATE-----\n${ret.join('')}\n-----END CERTIFICATE-----`
-
-    return returnString
+    return `-----BEGIN CERTIFICATE-----\n${ret.join('')}\n-----END CERTIFICATE-----`
 }
 
-function normalizeFingerprint(fingerprint) {
+function normalizeFingerprint(fingerprint: string) {
     if (typeof fingerprint !== 'string' || !FINGERPRINT_PATTERN.test(fingerprint)) {
         throw new Error('Invalid certificate fingerprint')
     }
@@ -66,7 +64,7 @@ function normalizeFingerprint(fingerprint) {
     return normalized
 }
 
-function getCertificatePath(fingerprint) {
+function getCertificatePath(fingerprint: string) {
     const normalizedFingerprint = normalizeFingerprint(fingerprint)
     const certPath = path.resolve(CERT_DIR, `${normalizedFingerprint}.crt`)
     const certDir = `${path.resolve(CERT_DIR)}${path.sep}`
@@ -81,18 +79,18 @@ function getCertificatePath(fingerprint) {
     }
 }
 
-function get(server, callback) {
-    var options = {
+function get(server: { ip: string; port: number; path: string; id: string }, callback: (err: Error | null, cert?: unknown) => void) {
+    const options = {
         hostname: server.ip,
         port: server.port,
         path: server.path,
         agent: false,
         rejectUnauthorized: false,
-        ciphers: 'ALL'
+        ciphers: 'ALL',
     }
 
-    var req = https.get(options, function(res) {
-        var certificate = res.socket.getPeerCertificate()
+    const req = https.get(options, function(res: any) {
+        const certificate = res.socket.getPeerCertificate()
         if (isEmpty(certificate) || certificate === null) {
             callback(new Error('The website did not provide a certificate'))
         } else {
@@ -123,14 +121,14 @@ function get(server, callback) {
         }
     })
 
-    req.on('error', function(e) {
+    req.on('error', function(e: Error) {
         callback(e)
     })
 
     req.end()
 }
 
-function installCertificate(cert, callback) {
+function installCertificate(cert: { raw?: Uint8Array; fingerprint: string }, callback: (err: Error | null, fingerprint?: string) => void) {
     if (!cert.raw) {
         return callback(new Error('Could not install invalid certificate'))
     }
@@ -139,26 +137,27 @@ function installCertificate(cert, callback) {
         const pemData = pemEncode(cert.raw, 64)
         const { certPath, fingerprint } = getCertificatePath(cert.fingerprint)
 
-        fs.writeFile(certPath, pemData, (err) => callback(err, fingerprint))
+        fs.writeFile(certPath, pemData, (err: Error | null) => callback(err, fingerprint))
     } catch (err) {
-        callback(err)
+        callback(err as Error)
     }
 }
 
-function loadCertificate(fingerprint) {
+function loadCertificate(fingerprint: string) {
     const { certPath } = getCertificatePath(fingerprint)
     if (!fs.existsSync(certPath)) {
         return
     }
+
     try {
         return fs.readFileSync(certPath)
-    } catch (e) {
+    } catch (_e) {
         return
     }
 }
 
 module.exports = {
-    get: get,
-    installCertificate: installCertificate,
-    loadCertificate: loadCertificate,
+    get,
+    installCertificate,
+    loadCertificate,
 }

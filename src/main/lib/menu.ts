@@ -1,32 +1,49 @@
-const { app, Menu } = require('electron')
-const { IPC_CHANNELS } = require('../common/ipc')
+import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
 
-let mainWindow = null
-let menuState = {
+const { IPC_CHANNELS } = require('../../common/ipc')
+
+type ServerMenuState = {
+    id: string
+    label: string
+    accelerator?: string
+    checked?: boolean
+}
+
+type MenuState = {
+    isDebug: boolean
+    hasActiveServer: boolean
+    advancedUploadEnabled: boolean
+    servers: ServerMenuState[]
+}
+
+let mainWindow: BrowserWindow | null = null
+let menuState: MenuState = {
     isDebug: false,
     hasActiveServer: false,
     advancedUploadEnabled: false,
     servers: [],
 }
 
-function setWindow(window) {
+function setWindow(window: BrowserWindow) {
     mainWindow = window
     buildMenu()
 }
 
-function sendAction(action) {
+function sendAction(action: unknown) {
     if (!mainWindow || mainWindow.isDestroyed()) return
     mainWindow.webContents.send(IPC_CHANNELS.menu.action, action)
 }
 
-function serverAccelerator(index) {
+function serverAccelerator(index: number) {
     if (index > 0 && index <= 10) {
         return `CmdOrCtrl+${index % 10}`
     }
+
+    return undefined
 }
 
-function serverMenuItems() {
-    const submenu = [
+function serverMenuItems(): MenuItemConstructorOptions[] {
+    const submenu: MenuItemConstructorOptions[] = [
         {
             label: 'Add new server...',
             accelerator: 'CmdOrCtrl+N',
@@ -61,7 +78,7 @@ function serverMenuItems() {
     return submenu
 }
 
-function fileMenuItems() {
+function fileMenuItems(): MenuItemConstructorOptions[] {
     return [
         {
             label: 'Add Torrent',
@@ -90,7 +107,7 @@ function fileMenuItems() {
     ]
 }
 
-function editMenuItems() {
+function editMenuItems(): MenuItemConstructorOptions[] {
     return [
         { label: 'Undo', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
         { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', role: 'redo' },
@@ -116,14 +133,14 @@ function editMenuItems() {
     ]
 }
 
-function viewMenuItems() {
+function viewMenuItems(): MenuItemConstructorOptions[] {
     return [
         {
             label: 'Reload',
             visible: !!menuState.isDebug,
             accelerator: 'CmdOrCtrl+R',
             click(_item, focusedWindow) {
-                if (focusedWindow) focusedWindow.reload()
+                if (focusedWindow) (focusedWindow as BrowserWindow).reload()
             },
         },
         {
@@ -131,7 +148,8 @@ function viewMenuItems() {
             accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
             click(_item, focusedWindow) {
                 if (focusedWindow) {
-                    focusedWindow.setFullScreen(!focusedWindow.isFullScreen())
+                    const browserWindow = focusedWindow as BrowserWindow
+                    browserWindow.setFullScreen(!browserWindow.isFullScreen())
                 }
             },
         },
@@ -141,14 +159,14 @@ function viewMenuItems() {
             accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
             click(_item, focusedWindow) {
                 if (focusedWindow) {
-                    focusedWindow.webContents.toggleDevTools()
+                    ;(focusedWindow as BrowserWindow).webContents.toggleDevTools()
                 }
             },
         },
     ]
 }
 
-function helpMenuItems() {
+function helpMenuItems(): MenuItemConstructorOptions[] {
     return [
         {
             label: 'Learn More',
@@ -161,7 +179,7 @@ function helpMenuItems() {
     ]
 }
 
-function buildDarwinTemplate() {
+function buildDarwinTemplate(): MenuItemConstructorOptions[] {
     const name = app.name
 
     return [
@@ -178,7 +196,7 @@ function buildDarwinTemplate() {
                 { label: 'Services', role: 'services', submenu: [] },
                 { type: 'separator' },
                 { label: `Hide ${name}`, accelerator: 'Command+H', role: 'hide' },
-                { label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideothers' },
+                { label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideOthers' },
                 { label: 'Show All', role: 'unhide' },
                 { type: 'separator' },
                 { label: 'Quit', accelerator: 'Command+Q', role: 'quit' },
@@ -221,7 +239,7 @@ function buildDarwinTemplate() {
     ]
 }
 
-function buildDefaultTemplate() {
+function buildDefaultTemplate(): MenuItemConstructorOptions[] {
     return [
         {
             label: 'File',
@@ -275,7 +293,7 @@ function buildMenu() {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-function setState(state) {
+function setState(state: Partial<MenuState>) {
     menuState = Object.assign({}, menuState, state)
     buildMenu()
 }

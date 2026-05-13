@@ -23,8 +23,7 @@ function dummy(done) {
 
 function watch({ updateMainCallback = dummy, updateRendererCallback = dummy }) {
   // Restart application
-  gulp.watch('src/main/main.js', gulp.series('build:app', updateMainCallback))
-  gulp.watch('src/main/lib/*.js', gulp.series('build:lib', updateMainCallback))
+  gulp.watch('src/main/**/*.ts', gulp.series('build:webpack', updateMainCallback))
 
   // Reload renderer process
   gulp.watch(['src/renderer/assets/css/**/*'], gulp.series('build:less', updateRendererCallback))
@@ -53,13 +52,11 @@ gulp.task('clean', function() {
 })
 
 gulp.task('build:app', function() {
-  return gulp.src('src/main/main.js')
-    .pipe(gulp.dest(OUT));
+  return compileWebpack({ watch: false })
 })
 
 gulp.task('build:lib', function() {
-    return gulp.src('src/main/lib/**/*', {base: 'src/main'})
-        .pipe(gulp.dest(OUT))
+    return compileWebpack({ watch: false })
 })
 
 gulp.task('semantic:src', function() {
