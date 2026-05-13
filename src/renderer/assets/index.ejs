@@ -6,43 +6,8 @@
 
         <link rel="stylesheet" href="css/themes/light.css">
         <link rel="stylesheet" ng-href="css/themes/{{theme}}.css">
-
-        <link rel="stylesheet" href="../node_modules/angular-table-resize/dist/angular-table-resize.min.css">
     </head>
     <body ready-broadcast>
         <app-shell></app-shell>
-
-        <!-- Insert this line above script imports  -->
-        <script>
-            if (typeof module === 'object') {
-                window.module = module;
-                module = undefined;
-            }
-        </script>
-        <script src="../node_modules/jquery/dist/jquery.min.js"></script>
-        <script src="../node_modules/angular/angular.js" charset="utf-8"></script>
-        <script src="../node_modules/angular-resource/angular-resource.min.js" charset="utf-8"></script>
-        <script src="../node_modules/angular-animate/angular-animate.js" charset="utf-8"></script>
-        <script src="../node_modules/angular-table-resize/dist/angular-table-resize.js" charset="utf-8"></script>
-        <script src="../src/renderer/app/vendor/ng-infinite-scroll.js" charset="utf-8"></script>
-        <script src="../node_modules/moment/moment.js" charset="utf-8"></script>
-        <script src="../node_modules/semantic-ui-css/semantic.min.js" charset="utf-8"></script>
-        <script src="../node_modules/marked/lib/marked.js" charset="utf-8"></script>
-        <script src="../node_modules/angular-marked/dist/angular-marked.js" charset="utf-8"></script>
-        <script src="../node_modules/jquery-ui-dist/jquery-ui.js" charset="utf-8"></script>
-        <script src="../node_modules/angular-ui-sortable/dist/sortable.js" charset="utf-8"></script>
-        <script src="../node_modules/underscore/underscore.js" charset="utf-8"></script>
-        <script src="../node_modules/base64-js/base64js.min.js" charset="utf-8"></script>
-        <script src="../node_modules/fuse.js/dist/fuse.js" charset="utf-8"></script>
-        <script src="../node_modules/mousetrap/mousetrap.js" charset="utf-8"></script>
-
-        <!-- Insert this line after script imports -->
-        <script>
-            if (window.module)
-                module = window.module;
-        </script>
-
-        <script src="app.js" charset="utf-8"></script>
-
     </body>
 </html>
