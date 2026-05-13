@@ -129,64 +129,45 @@ const rendererConfig = {
   },
 }
 
-const preloadConfig = {
+function makeNodeConfig({ name, entry, target }) {
+  return {
+    name,
+    devtool: 'source-map',
+    entry,
+    output: {
+      path: outDir,
+      filename: '[name].js',
+      libraryTarget: 'commonjs2',
+    },
+    target,
+    mode: isProduction ? 'production' : 'development',
+    externals: [
+      nodeExternals({
+        modulesDir: 'app/node_modules',
+      }),
+    ],
+    module: {
+      rules: [tsRule],
+    },
+    resolve: sharedResolve,
+    stats: rendererConfig.stats,
+  }
+}
+
+const preloadConfig = makeNodeConfig({
   name: 'preload',
-  devtool: 'source-map',
   entry: {
     preload: path.resolve(__dirname, 'src/main/preload.ts'),
   },
-  output: {
-    path: outDir,
-    filename: '[name].js',
-    libraryTarget: 'commonjs2',
-  },
   target: 'electron-preload',
-  mode: isProduction ? 'production' : 'development',
-  externals: [
-    nodeExternals({
-      modulesDir: 'app/node_modules',
-    }),
-  ],
-  module: {
-    rules: [tsRule],
-  },
-  resolve: sharedResolve,
-  stats: rendererConfig.stats,
-}
+})
 
-const mainConfig = {
+const mainConfig = makeNodeConfig({
   name: 'main',
-  devtool: 'source-map',
   entry: {
     main: path.resolve(__dirname, 'src/main/main.ts'),
-    'lib/config': path.resolve(__dirname, 'src/main/lib/config.ts'),
-    'lib/logger': path.resolve(__dirname, 'src/main/lib/logger.ts'),
-    'lib/torrents': path.resolve(__dirname, 'src/main/lib/torrents.ts'),
-    'lib/themes': path.resolve(__dirname, 'src/main/lib/themes.ts'),
-    'lib/menu': path.resolve(__dirname, 'src/main/lib/menu.ts'),
-    'lib/update': path.resolve(__dirname, 'src/main/lib/update.ts'),
-    'lib/certificates': path.resolve(__dirname, 'src/main/lib/certificates.ts'),
-    'lib/electorrent': path.resolve(__dirname, 'src/main/lib/electorrent.ts'),
-    'lib/startup': path.resolve(__dirname, 'src/main/lib/startup.ts'),
-    'lib/bittorrent/index': path.resolve(__dirname, 'src/main/lib/bittorrent/index.ts'),
-  },
-  output: {
-    path: outDir,
-    filename: '[name].js',
-    libraryTarget: 'commonjs2',
   },
   target: 'electron-main',
-  mode: isProduction ? 'production' : 'development',
-  externals: [
-    nodeExternals({
-      modulesDir: 'app/node_modules',
-    }),
-  ],
-  module: {
-    rules: [tsRule],
-  },
-  resolve: sharedResolve,
-  stats: rendererConfig.stats,
-}
+})
 
 module.exports = [rendererConfig, preloadConfig, mainConfig]
