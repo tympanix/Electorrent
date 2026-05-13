@@ -54,6 +54,7 @@ const rendererConfig = {
   devtool: 'source-map',
   entry: {
     app: [
+      path.resolve(__dirname, 'src/renderer/vendor.ts'),
       path.resolve(__dirname, 'src/renderer/assets/css/fonts/bittorrent.font.js'),
       path.resolve(__dirname, 'src/renderer/app.ts'),
     ],
@@ -64,17 +65,6 @@ const rendererConfig = {
   },
   target: 'electron-renderer',
   mode: isProduction ? 'production' : 'development',
-  externals: [
-    {
-      jquery: 'jQuery',
-      angular: 'angular',
-      mousetrap: 'Mousetrap',
-      fuse: 'Fuse',
-    },
-    nodeExternals({
-      modulesDir: 'app/node_modules',
-    }),
-  ],
   module: {
     rules: [
       tsRule,
@@ -111,14 +101,14 @@ const rendererConfig = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/renderer/assets/index.ejs'),
       filename: 'index.html',
-      inject: false,
+      inject: 'body',
+      scriptLoading: 'defer',
     }),
     ...commonPlugins,
     new webpack.ProvidePlugin({
       'window.jQuery': 'jquery',
       jQuery: 'jquery',
       $: 'jquery',
-      angular: 'angular',
     }),
   ],
   stats: {
