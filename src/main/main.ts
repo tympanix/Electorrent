@@ -12,6 +12,8 @@ import {
     type WebContents,
 } from 'electron'
 
+declare const __non_webpack_require__: NodeRequire | undefined
+
 const yargs = require('yargs')
 const path = require('path')
 const is = require('electron-is')
@@ -39,9 +41,14 @@ if (!require('./lib/startup')) {
 
     const program = yargs.argv
 
-    try {
-        require('electron-reloader')(module)
-    } catch {}
+    if (!app.isPackaged) {
+        try {
+            const runtimeRequire: NodeJS.Require = typeof __non_webpack_require__ === 'function'
+                ? __non_webpack_require__
+                : module.require.bind(module)
+            runtimeRequire('electron-reloader')(module)
+        } catch {}
+    }
 
     let torrentWindow: BrowserWindow | null
     let pendingLaunchPayload = {
