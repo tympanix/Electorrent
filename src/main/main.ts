@@ -1,14 +1,10 @@
 import {
     app,
     BrowserWindow,
-    ipcMain,
     nativeImage,
     session,
-    shell,
     type BrowserWindowConstructorOptions,
-    type Certificate,
     type Event as ElectronEvent,
-    type IpcMainInvokeEvent,
     type WebContents,
 } from 'electron'
 
@@ -32,8 +28,8 @@ if (!require('./lib/startup')) {
     const logger = require('./lib/logger')
     const electorrent = require('./lib/electorrent')
     const torrents = require('./lib/torrents')
-    const themes = require('./lib/themes')
     const certificates = require('./lib/certificates')
+    const ipcHandlers = require('./lib/ipc')
     const menu = require('./lib/menu')
 
     logger.debug('Starting Electorrent in debug mode')
@@ -137,183 +133,17 @@ if (!require('./lib/startup')) {
         torrentWindow.webContents.send(IPC_CHANNELS.launch.torrentFiles, files)
     }
 
-    function getAppMeta() {
+    async function consumePendingLaunchPayload() {
         return {
-            appName: app.name,
-            appVersion: app.getVersion(),
-            isMacOS: is.macOS(),
-            isWindows: is.windows(),
-            isLinux: is.linux(),
-            isDebug: !!program.debug,
-            platform: process.platform,
-            versions: {
-                node: process.versions.node,
-                chrome: process.versions.chrome,
-                electron: process.versions.electron,
-            },
-        }
-    }
-
-    function sanitizeCertificateError(certificate: Certificate) {
-        return {
-            source: 'main-certificate-error',
-            selfSigned: !certificate.issuerCert,
-            issuer: {
-                country: certificate.issuer && certificate.issuer.country,
-                state: certificate.issuer && certificate.issuer.state,
-                organization: certificate.issuer && certificate.issuer.organizations && certificate.issuer.organizations[0],
-                organizationUnit: certificate.issuer && certificate.issuer.organizationUnits && certificate.issuer.organizationUnits[0],
-                commonName: certificate.issuer && certificate.issuer.commonName,
-            },
-            subject: {
-                country: certificate.subject && certificate.subject.country,
-                state: certificate.subject && certificate.subject.state,
-                organization: certificate.subject && certificate.subject.organizations && certificate.subject.organizations[0],
-                organizationUnit: certificate.subject && certificate.subject.organizationUnits && certificate.subject.organizationUnits[0],
-                commonName: certificate.subject && certificate.subject.commonName,
-            },
-            fingerprint: certificate.fingerprint,
-            validFrom: certificate.validStart,
-            validTo: certificate.validExpiry,
-            serialNumber: certificate.serialNumber,
-        }
-    }
-
-    ipcMain.handle(IPC_CHANNELS.app.getMeta, async function() {
-        return getAppMeta()
-    })
-
-    ipcMain.handle(IPC_CHANNELS.app.getDefaultProtocolStatus, async function(_event: IpcMainInvokeEvent, { protocol }) {
-        return app.isDefaultProtocolClient(protocol)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.app.setDefaultProtocolStatus, async function(_event: IpcMainInvokeEvent, { protocol, enabled }) {
-        if (enabled) {
-            app.setAsDefaultProtocolClient(protocol)
-        } else {
-            app.removeAsDefaultProtocolClient(protocol)
-        }
-    })
-
-    ipcMain.handle(IPC_CHANNELS.app.quit, async function() {
-        app.quit()
-    })
-
-    ipcMain.handle(IPC_CHANNELS.app.reportCorruptSettings, async function() {
-        config.showCorruptDialog()
-    })
-
-    ipcMain.handle(IPC_CHANNELS.shell.openExternal, async function(_event: IpcMainInvokeEvent, { url }) {
-        await shell.openExternal(url)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.settings.getAll, async function() {
-        return config.getAllSettings()
-    })
-
-    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings }) {
-        return new Promise<void>((resolve, reject) => {
-            config.saveAll(settings, function(err: Error) {
-                if (err) reject(err)
-                else resolve()
-            })
-        })
-    })
-
-    ipcMain.handle(IPC_CHANNELS.settings.listThemes, async function() {
-        return themes()
-    })
-
-    ipcMain.handle(IPC_CHANNELS.launch.getPending, async function() {
-        const payload = {
             magnets: pendingLaunchPayload.magnets.splice(0),
             torrentFiles: await torrents.readFiles(pendingLaunchPayload.torrentFilePaths.splice(0), false),
         }
+    }
 
-        return payload
-    })
-
-    ipcMain.handle(IPC_CHANNELS.torrents.openFiles, async function(_event: IpcMainInvokeEvent, { askUploadOptions }) {
-        return torrents.browse(askUploadOptions)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
-        return bittorrentManager.connect(event.sender, server)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.bittorrent.disconnect, async function(event: IpcMainInvokeEvent) {
-        return bittorrentManager.disconnect(event.sender)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.bittorrent.getSnapshot, async function(event: IpcMainInvokeEvent, { fullUpdate } = {}) {
-        return bittorrentManager.getSnapshot(event.sender, fullUpdate)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.bittorrent.addTorrentUrl, async function(event: IpcMainInvokeEvent, request) {
-        return bittorrentManager.addTorrentUrl(event.sender, request)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.bittorrent.uploadTorrent, async function(event: IpcMainInvokeEvent, request) {
-        return bittorrentManager.uploadTorrent(event.sender, request)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.bittorrent.invokeAction, async function(event: IpcMainInvokeEvent, request) {
-        return bittorrentManager.invokeAction(event.sender, request)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentFiles, async function(event: IpcMainInvokeEvent, { hash }) {
-        return bittorrentManager.getTorrentFiles(event.sender, hash)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.bittorrent.setTorrentFileSelection, async function(event: IpcMainInvokeEvent, request) {
-        return bittorrentManager.setTorrentFileSelection(event.sender, request)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.updates.check, async function(_event: IpcMainInvokeEvent, { verbose }) {
-        updater.checkForUpdates(verbose)
-    })
-
-    ipcMain.handle(IPC_CHANNELS.updates.installDownloaded, async function() {
-        updater.manualQuitAndUpdate()
-    })
-
-    ipcMain.handle(IPC_CHANNELS.updates.installAuto, async function() {
-        updater.quitAndInstall()
-    })
-
-    ipcMain.handle(IPC_CHANNELS.certificates.fetch, async function(_event: IpcMainInvokeEvent, request) {
-        return new Promise((resolve, reject) => {
-            certificates.get(request.server, function(err: Error, cert: unknown) {
-                if (err) {
-                    reject(err)
-                    return
-                }
-
-                if (torrentWindow && !torrentWindow.isDestroyed()) {
-                    torrentWindow.webContents.send(IPC_CHANNELS.certificates.challenge, cert)
-                }
-
-                resolve(cert)
-            })
-        })
-    })
-
-    ipcMain.handle(IPC_CHANNELS.certificates.install, async function(_event: IpcMainInvokeEvent, request) {
-        return new Promise((resolve, reject) => {
-            certificates.installCertificate(request, function(err: Error, fingerprint: string) {
-                if (err) reject(err)
-                else resolve({ fingerprint })
-            })
-        })
-    })
-
-    ipcMain.handle(IPC_CHANNELS.certificates.load, async function(_event: IpcMainInvokeEvent, { fingerprint }) {
-        const cert = certificates.loadCertificate(fingerprint)
-        return cert ? new Uint8Array(cert) : null
-    })
-
-    ipcMain.handle(IPC_CHANNELS.menu.setState, async function(_event: IpcMainInvokeEvent, state) {
-        menu.setState(state)
+    ipcHandlers.registerHandlers({
+        isDebug: !!program.debug,
+        getWindow: () => torrentWindow,
+        consumePendingLaunchPayload,
     })
 
     if (!app.requestSingleInstanceLock()) {
@@ -368,7 +198,7 @@ if (!require('./lib/startup')) {
             callback(true)
         } else {
             if (torrentWindow && !torrentWindow.isDestroyed()) {
-                torrentWindow.webContents.send(IPC_CHANNELS.certificates.challenge, sanitizeCertificateError(certificate))
+                torrentWindow.webContents.send(IPC_CHANNELS.certificates.challenge, certificates.sanitizeCertificateError(certificate))
             }
             callback(false)
         }

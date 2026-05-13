@@ -1,4 +1,5 @@
-import { app } from 'electron'
+import { app, type Certificate } from 'electron'
+import type { CertificatePrompt } from '../../common/ipc-contract'
 
 const https = require('https')
 const fs = require('fs')
@@ -156,8 +157,34 @@ function loadCertificate(fingerprint: string) {
     }
 }
 
+function sanitizeCertificateError(certificate: Certificate): CertificatePrompt {
+    return {
+        source: 'main-certificate-error',
+        selfSigned: !certificate.issuerCert,
+        issuer: {
+            country: certificate.issuer && certificate.issuer.country,
+            state: certificate.issuer && certificate.issuer.state,
+            organization: certificate.issuer && certificate.issuer.organizations && certificate.issuer.organizations[0],
+            organizationUnit: certificate.issuer && certificate.issuer.organizationUnits && certificate.issuer.organizationUnits[0],
+            commonName: certificate.issuer && certificate.issuer.commonName,
+        },
+        subject: {
+            country: certificate.subject && certificate.subject.country,
+            state: certificate.subject && certificate.subject.state,
+            organization: certificate.subject && certificate.subject.organizations && certificate.subject.organizations[0],
+            organizationUnit: certificate.subject && certificate.subject.organizationUnits && certificate.subject.organizationUnits[0],
+            commonName: certificate.subject && certificate.subject.commonName,
+        },
+        fingerprint: certificate.fingerprint,
+        validFrom: certificate.validStart,
+        validTo: certificate.validExpiry,
+        serialNumber: certificate.serialNumber,
+    }
+}
+
 module.exports = {
     get,
     installCertificate,
     loadCertificate,
+    sanitizeCertificateError,
 }
