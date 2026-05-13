@@ -43,7 +43,7 @@ if (!require('./lib/startup')) {
 
     if (!app.isPackaged) {
         try {
-            const runtimeRequire: NodeJS.Require = typeof __non_webpack_require__ === 'function'
+            const runtimeRequire: NodeRequire = typeof __non_webpack_require__ === 'function'
                 ? __non_webpack_require__
                 : module.require.bind(module)
             runtimeRequire('electron-reloader')(module)
