@@ -1,11 +1,14 @@
 import { browser } from '@wdio/globals'
 import { App } from "../e2e"
 
+let hasReusedInitialSession = false
+const APPLICATION_SESSION_TIMEOUT = 30 * 1000
+
 function isInvalidSessionError(err: unknown) {
   return err instanceof Error && err.message.includes('invalid session id')
 }
 
-async function closeApplication() {
+async function closeApplicationSession() {
   if (!browser.sessionId) {
     return
   }
@@ -18,6 +21,7 @@ async function closeApplication() {
     if (isInvalidSessionError(err)) {
       return
     }
+
     throw err
   }
 
@@ -34,15 +38,20 @@ async function closeApplication() {
 export function startApplicationHooks() {
 
   before(async function (this: Mocha.Context) {
-    // Open the application
-    await browser.reloadSession()
-    this.timeout(10 * 1000)
+    this.timeout(APPLICATION_SESSION_TIMEOUT)
+
+    if (hasReusedInitialSession) {
+      await browser.reloadSession()
+    } else {
+      hasReusedInitialSession = true
+    }
+
     this.app = new App();
   })
 
   after(async function () {
-    this.timeout(10 * 1000)
-    await closeApplication()
+    this.timeout(APPLICATION_SESSION_TIMEOUT)
+    await closeApplicationSession()
   })
 
 }
