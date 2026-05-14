@@ -255,4 +255,41 @@ export class App {
   async getTorrentsFooterText() {
     return await $("#page-torrents .status-bar").getText()
   }
+
+  async openSettings() {
+    await browser.execute(() => {
+      const injector = angular.element(document.body).injector()
+      const $rootScope = injector.get("$rootScope")
+      $rootScope.$broadcast("show:settings")
+      $rootScope.$apply()
+    })
+    await this.settingsPageIsVisible()
+  }
+
+  async settingsGotoTab(tab: string) {
+    await browser.execute((tab) => {
+      const scope = angular.element(document.querySelector('settings-page')).scope() as any
+      scope.gotoPage(tab)
+      scope.$apply()
+    }, tab)
+  }
+
+  async settingsSave() {
+    const saveBtn = $("#page-settings .actions.footer a.positive")
+    await saveBtn.waitForDisplayed()
+    await saveBtn.waitForClickable()
+    await saveBtn.click()
+  }
+
+  async settingsCancel() {
+    const cancelBtn = $("#page-settings .actions.footer a.deny")
+    await cancelBtn.waitForDisplayed()
+    await cancelBtn.waitForClickable()
+    await cancelBtn.click()
+  }
+
+  async getSettingsServerCount(): Promise<number> {
+    const serverRows = await $$("#page-settings-servers tbody tr")
+    return serverRows.length
+  }
 }

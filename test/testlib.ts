@@ -1,12 +1,13 @@
 import chai from "chai"
-import { describe, it, before, after } from "mocha";
+import { assert } from "chai"
+import { describe, it, before, after, beforeEach, afterEach } from "mocha";
 import path = require("path");
 import chaiAsPromised from "chai-as-promised";
 import e2e = require("./e2e");
 import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { TorrentClient } from "../src/renderer/app/bittorrent"
-import { browser, $ } from '@wdio/globals'
+import { browser, $, $$ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
 
 
@@ -116,7 +117,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     describe("given application is running", function() {
       startApplicationHooks()
 
-      describe("given user is logged in", function() {
+        describe("given user is logged in", function() {
 
         before(async function() {
           this.retries(3)
@@ -148,6 +149,100 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             });
           });
         }
+
+        describe("settings page", function() {
+
+          beforeEach(async function() {
+            this.timeout(10 * 1000)
+            await this.app.openSettings()
+          })
+
+          afterEach(async function() {
+            this.timeout(10 * 1000)
+            try {
+              const settingsPage = await $("#page-settings")
+              if (await settingsPage.isDisplayed()) {
+                await this.app.settingsCancel()
+              }
+            } catch (_) {}
+          })
+
+          it("settings page is visible", async function() {
+            await this.app.settingsPageIsVisible()
+          })
+
+          it("general settings tab is shown by default", async function() {
+            const generalTab = $("#page-settings-general")
+            await generalTab.waitForDisplayed()
+          })
+
+          it("can navigate to the connection tab", async function() {
+            await this.app.settingsGotoTab("connection")
+            const connTab = $("#page-settings-connection")
+            await connTab.waitForDisplayed()
+          })
+
+          it("can navigate to the layout tab", async function() {
+            await this.app.settingsGotoTab("layout")
+            const layoutTab = $("#page-settings-layout")
+            await layoutTab.waitForDisplayed()
+          })
+
+          it("can navigate to the servers tab", async function() {
+            await this.app.settingsGotoTab("servers")
+            const serversTab = $("#page-settings-servers")
+            await serversTab.waitForDisplayed()
+          })
+
+          it("can navigate to the about tab", async function() {
+            await this.app.settingsGotoTab("about")
+            const aboutTab = $("#page-settings-about")
+            await aboutTab.waitForDisplayed()
+          })
+
+          it("servers tab shows the connected server", async function() {
+            await this.app.settingsGotoTab("servers")
+            const serverCount = await this.app.getSettingsServerCount()
+            assert.isAtLeast(serverCount, 1, "at least one server should be listed")
+          })
+
+          it("cancel button returns to the torrents page", async function() {
+            await this.app.settingsCancel()
+            await this.app.torrentsPageIsVisible()
+          })
+
+          it("save button returns to the torrents page", async function() {
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+          })
+
+        })
+
+        describe("server equals regression", function() {
+
+          it("server equals returns false when certificate fields differ", async function() {
+            const result = await browser.execute(() => {
+              const injector = (angular as any).element(document.body).injector()
+              const Server = injector.get("Server")
+              const s1 = new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate: "cert-fingerprint-a", columns: [] })
+              const s2 = new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate: "cert-fingerprint-b", columns: [] })
+              return s1.equals(s2)
+            })
+            assert.isFalse(result, "equals() must return false when certificates differ")
+          })
+
+          it("server equals returns true when all fields including certificate are equal", async function() {
+            const result = await browser.execute(() => {
+              const injector = (angular as any).element(document.body).injector()
+              const Server = injector.get("Server")
+              const s1 = new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate: "same-cert", columns: [] })
+              const s2 = new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate: "same-cert", columns: [] })
+              return s1.equals(s2)
+            })
+            assert.isTrue(result, "equals() must return true when all fields are identical")
+          })
+
+        })
 
         describe("when a magnet link is uploaded", async function() {
           let torrent: e2e.Torrent
