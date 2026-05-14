@@ -220,26 +220,20 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
         describe("server equals regression", function() {
 
-          it("server equals returns false when certificate fields differ", async function() {
-            const result = await browser.execute(() => {
-              const injector = (angular as any).element(document.body).injector()
-              const Server = injector.get("Server")
-              const s1 = new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate: "cert-fingerprint-a", columns: [] })
-              const s2 = new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate: "cert-fingerprint-b", columns: [] })
-              return s1.equals(s2)
+          it("server equals correctly compares certificate fields", async function() {
+            const [sameResult, diffResult] = await browser.execute(() => {
+              function makeTestServer(certificate) {
+                const injector = (angular as any).element(document.body).injector()
+                const Server = injector.get("Server")
+                return new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate, columns: [] })
+              }
+              return [
+                makeTestServer("same-cert").equals(makeTestServer("same-cert")),
+                makeTestServer("cert-a").equals(makeTestServer("cert-b")),
+              ]
             })
-            assert.isFalse(result, "equals() must return false when certificates differ")
-          })
-
-          it("server equals returns true when all fields including certificate are equal", async function() {
-            const result = await browser.execute(() => {
-              const injector = (angular as any).element(document.body).injector()
-              const Server = injector.get("Server")
-              const s1 = new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate: "same-cert", columns: [] })
-              const s2 = new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate: "same-cert", columns: [] })
-              return s1.equals(s2)
-            })
-            assert.isTrue(result, "equals() must return true when all fields are identical")
+            assert.isTrue(sameResult, "equals() must return true when all fields are identical")
+            assert.isFalse(diffResult, "equals() must return false when certificates differ")
           })
 
         })
