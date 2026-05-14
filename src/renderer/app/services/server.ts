@@ -223,7 +223,7 @@ export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorr
                 this.password === other.password &&
                 this.client === other.client &&
                 this.path === other.path &&
-                this.certificate === this.certificate
+                this.certificate === other.certificate
             )
         }
 

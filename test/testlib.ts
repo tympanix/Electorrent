@@ -1,12 +1,13 @@
 import chai from "chai"
-import { describe, it, before, after } from "mocha";
+import { assert } from "chai"
+import { describe, it, before, after, beforeEach, afterEach } from "mocha";
 import path = require("path");
 import chaiAsPromised from "chai-as-promised";
 import e2e = require("./e2e");
 import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { TorrentClient } from "../src/renderer/app/bittorrent"
-import { browser, $ } from '@wdio/globals'
+import { browser, $, $$ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
 
 
@@ -36,6 +37,10 @@ const TEST_SUITE_OPTIONS_DEFAULTS = {
   timeout: 10*1000,
   stopLabel: "Stopped",
   downloadLabel: "Downloading",
+}
+
+function createUniqueLabel(prefix: string) {
+  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
 }
 
 /**
@@ -116,7 +121,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     describe("given application is running", function() {
       startApplicationHooks()
 
-      describe("given user is logged in", function() {
+        describe("given user is logged in", function() {
 
         before(async function() {
           this.retries(3)
@@ -148,6 +153,84 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             });
           });
         }
+
+        describe("settings page", function() {
+
+          beforeEach(async function() {
+            this.timeout(10 * 1000)
+            await this.app.openSettings()
+          })
+
+          it("settings page is visible", async function() {
+            await this.app.settingsPageIsVisible()
+          })
+
+          it("general settings tab is shown by default", async function() {
+            const generalTab = $("#page-settings-general")
+            await generalTab.waitForDisplayed()
+          })
+
+          it("can navigate to the connection tab", async function() {
+            await this.app.settingsGotoTab("connection")
+            const connTab = $("#page-settings-connection")
+            await connTab.waitForDisplayed()
+          })
+
+          it("can navigate to the layout tab", async function() {
+            await this.app.settingsGotoTab("layout")
+            const layoutTab = $("#page-settings-layout")
+            await layoutTab.waitForDisplayed()
+          })
+
+          it("can navigate to the servers tab", async function() {
+            await this.app.settingsGotoTab("servers")
+            const serversTab = $("#page-settings-servers")
+            await serversTab.waitForDisplayed()
+          })
+
+          it("can navigate to the about tab", async function() {
+            await this.app.settingsGotoTab("about")
+            const aboutTab = $("#page-settings-about")
+            await aboutTab.waitForDisplayed()
+          })
+
+          it("servers tab shows the connected server", async function() {
+            await this.app.settingsGotoTab("servers")
+            const serverCount = await this.app.getSettingsServerCount()
+            assert.isAtLeast(serverCount, 1, "at least one server should be listed")
+          })
+
+          it("cancel button returns to the torrents page", async function() {
+            await this.app.settingsCancel()
+            await this.app.torrentsPageIsVisible()
+          })
+
+          it("save button returns to the torrents page", async function() {
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+          })
+
+        })
+
+        describe("server equals regression", function() {
+
+          it("server equals correctly compares certificate fields", async function() {
+            const [sameResult, diffResult] = await browser.execute(() => {
+              function makeTestServer(certificate) {
+                const injector = (angular as any).element(document.body).injector()
+                const Server = injector.get("Server")
+                return new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate, columns: [] })
+              }
+              return [
+                makeTestServer("same-cert").equals(makeTestServer("same-cert")),
+                makeTestServer("cert-a").equals(makeTestServer("cert-b")),
+              ]
+            })
+            assert.isTrue(sameResult, "equals() must return true when all fields are identical")
+            assert.isFalse(diffResult, "equals() must return false when certificates differ")
+          })
+
+        })
 
         describe("when a magnet link is uploaded", async function() {
           let torrent: e2e.Torrent
@@ -220,13 +303,8 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             it("persists file wanted state via Files modal", async function () {
               this.timeout(60 * 1000)
 
-              // Open context menu for the torrent row
-              const row = $(torrent.query)
-              await row.waitForExist({ timeout: 60 * 1000 })
-              await row.click({ button: "right" })
-
+              await torrent.openContextMenu()
               const contextMenu = $("#contextmenu")
-              await contextMenu.waitForDisplayed()
 
               // Click the Files item in the context menu
               const filesItem = contextMenu.$("a=Files")
@@ -250,8 +328,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
               await modal.waitForDisplayed({ reverse: true })
 
               // Reopen Files modal and verify state persisted
-              await row.click({ button: "right" })
-              await contextMenu.waitForDisplayed()
+              await torrent.openContextMenu()
               const filesItem2 = contextMenu.$("a=Files")
               await filesItem2.waitForDisplayed()
               await filesItem2.click()
@@ -273,26 +350,35 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           describe("given labels are supported", function () {
             requireFeatureHook(options, FeatureSet.Labels)
+            const firstLabel = createUniqueLabel("testlabel")
+            const secondLabel = createUniqueLabel("someotherlabel")
+            let initialLabelCount = 0
+
+            before(async function() {
+              initialLabelCount = (await this.app.getAllSidebarLabels()).length
+            })
 
             it("apply new label", async function () {
-              const label = "testlabel123";
-              await torrent.newLabel(label);
-              await this.app.waitForLabelInDropdown(label);
-              await this.app.getAllSidebarLabels().should.eventually.have.length(1);
+              await torrent.newLabel(firstLabel);
+              await this.app.waitForLabelInDropdown(firstLabel);
+              const labels = await this.app.getAllSidebarLabels()
+              labels.should.include(firstLabel)
+              labels.should.have.length(initialLabelCount + 1)
             });
 
             it("apply another new label", async function () {
-              const label = "someotherlabel123";
-              await torrent.newLabel(label);
-              await this.app.waitForLabelInDropdown(label);
-              await torrent.checkInFilterLabel(label);
-              await this.app.getAllSidebarLabels().should.eventually.have.length(2);
+              await torrent.newLabel(secondLabel);
+              await this.app.waitForLabelInDropdown(secondLabel);
+              await torrent.checkInFilterLabel(secondLabel);
+              const labels = await this.app.getAllSidebarLabels()
+              labels.should.include(firstLabel)
+              labels.should.include(secondLabel)
+              labels.should.have.length(initialLabelCount + 2)
             });
 
             it("change back to previous label", async function () {
-              const label = "testlabel123";
-              await torrent.changeLabel(label);
-              await torrent.checkInFilterLabel(label);
+              await torrent.changeLabel(firstLabel);
+              await torrent.checkInFilterLabel(firstLabel);
             });
           });
         })
@@ -328,7 +414,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           it("torent uploaded with preexisting label", async function() {
             if (!options.client.uploadOptionsEnable?.category) return this.skip()
-            const labelName = "mylabel#1"
+            const labelName = createUniqueLabel("mylabel")
             let torrent = await this.app.uploadTorrent({ filename: this.torrentPath });
             await torrent.newLabel(labelName)
             await torrent.delete()
