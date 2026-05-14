@@ -1,7 +1,6 @@
 <modal
-    class="small"
+    size="small"
     approve="approve()"
-    data="data"
     id="updateModal">
     <i class="close icon"></i>
     <div class="header">
@@ -24,12 +23,12 @@
         <p marked="data.releaseNotes"></p>
     </div>
     <div class="actions">
-        <a class="ui black deny button">
+        <button type="button" class="ui black deny button">
             Update Later
-        </a>
-        <a class="ui positive right labeled icon button">
+        </button>
+        <button type="button" class="ui green right labeled icon approve button">
             Quit And Install
             <i class="arrow alternate circle up icon"></i>
-        </a>
+        </button>
     </div>
 </modal>

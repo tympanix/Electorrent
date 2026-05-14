@@ -135,8 +135,8 @@ import { ToggleDirective } from "./app/directives/checkbox/checkbox.directive"
 torrentApp.directive("toggle", ToggleDirective.getInstance())
 import { RepeatDoneDirective } from "./app/directives/repeat-done/repeat-done.directive"
 torrentApp.directive("repeatDone", RepeatDoneDirective.getInstance())
-import { LegacyModalDirective } from "./app/directives/legacy-modal/legacy-modal.directive"
-torrentApp.directive("modal", LegacyModalDirective.getInstance())
+import { ModalDirective } from "./app/directives/modal/modal.directive"
+torrentApp.directive("modal", ModalDirective.getInstance())
 import { ActionHeaderDirective } from "./app/directives/action-header/action-header.directive"
 torrentApp.directive("actionHeader", ActionHeaderDirective.getInstance())
 import { LabelsDropdownDirective } from "./app/directives/labels-dropdown/labels-dropdown.directive"
@@ -163,8 +163,6 @@ torrentApp.directive("time", TimeDirective.getInstance())
 import { LimitBindDirective, LimitSourceDirective } from "./app/directives/limit/limit.directive"
 torrentApp.directive("limitBind", LimitBindDirective.getInstance())
 torrentApp.directive("limitSource", LimitSourceDirective.getInstance())
-import { ModalDirective } from "./app/directives/modal/modal.directive"
-torrentApp.directive('modalNew', ModalDirective.getInstance())
 import { RenameServerModalDirective } from "./app/directives/rename-server-modal/rename-server-modal.directive"
 torrentApp.directive("renameServerModal", RenameServerModalDirective.getInstance())
 import { UpdateModalDirective } from "./app/directives/update-modal/update-modal.directive"

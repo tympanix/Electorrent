@@ -117,7 +117,10 @@ export class Torrent {
     let labelNameElem = modal.$("input[name=label]")
     await labelNameElem.setValue(labelName)
 
-    let submit = modal.$("button[type=submit]")
+    let submit = modal.$("button.approve")
+    await submit.waitForDisplayed()
+    await submit.waitForClickable()
+    await submit.waitForEnabled()
     await submit.click()
     await modal.waitForDisplayed({ reverse: true })
 
