@@ -90,14 +90,22 @@ export class Torrent {
     return cols["label"]
   }
 
-  async newLabel(labelName: string) {
-    const labels = "#torrent-action-header div[data-role=labels]";
-
+  async openLabelsDropdown() {
     let elem = $(this.query)
+    await elem.waitForExist()
+    await elem.waitForDisplayed()
     await elem.click()
 
-    let labelsElem = $(labels)
+    let labelsElem = $("#torrent-action-header div[data-role=labels]")
+    await labelsElem.waitForDisplayed()
+    await labelsElem.waitForClickable()
     await labelsElem.click()
+
+    return labelsElem
+  }
+
+  async newLabel(labelName: string) {
+    let labelsElem = await this.openLabelsDropdown()
 
     let newLabelelem = labelsElem.$("div[data-role=new-label]")
     await newLabelelem.waitForDisplayed()
@@ -119,13 +127,7 @@ export class Torrent {
   }
 
   async changeLabel(labelName: string) {
-    const labels = "#torrent-action-header div[data-role=labels]";
-
-    let elem = $(this.query)
-    await elem.click()
-
-    let labelsElem = $(labels)
-    await labelsElem.click()
+    let labelsElem = await this.openLabelsDropdown()
 
     let labelItemElem = labelsElem.$(`div[data-label='${labelName}']`)
     await labelItemElem.waitForDisplayed()
@@ -142,15 +144,22 @@ export class Torrent {
     await elem.click(options)
   }
 
-  async clickContextMenu(roleName: string) {
-    const button = `#contextmenu a[data-role=${roleName}]`;
-
+  async openContextMenu() {
     let elem = $(this.query)
     await elem.waitForExist()
+    await elem.waitForDisplayed()
     await elem.click({ button: "right" })
 
     let contextMeny = $("#contextmenu")
     await contextMeny.waitForDisplayed()
+  }
+
+  async clickContextMenu(roleName: string) {
+    const button = `#contextmenu a[data-role=${roleName}]`;
+
+    await this.openContextMenu()
+
+    let contextMeny = $("#contextmenu")
 
     let buttonElem = $(button)
     let visible = await buttonElem.isDisplayed()

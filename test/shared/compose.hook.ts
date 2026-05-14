@@ -23,6 +23,7 @@ export function dockerComposeHooks(composeDir: string | string[], extraOpts?: ID
 
   before(async function() {
     this.timeout(60 * 1000)
+    await compose.downAll({ ...composeOpts, ...extraOpts })
     await compose.upAll({ ...composeOpts, ...extraOpts })
   })
 

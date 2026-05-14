@@ -39,6 +39,10 @@ const TEST_SUITE_OPTIONS_DEFAULTS = {
   downloadLabel: "Downloading",
 }
 
+function createUniqueLabel(prefix: string) {
+  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 /**
  * Options given to a test suite execution with information about the backend bittorrent service
  * to be tested, login information, features etc.
@@ -155,16 +159,6 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           beforeEach(async function() {
             this.timeout(10 * 1000)
             await this.app.openSettings()
-          })
-
-          afterEach(async function() {
-            this.timeout(10 * 1000)
-            try {
-              const settingsPage = await $("#page-settings")
-              if (await settingsPage.isDisplayed()) {
-                await this.app.settingsCancel()
-              }
-            } catch (_) {}
           })
 
           it("settings page is visible", async function() {
@@ -309,13 +303,8 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             it("persists file wanted state via Files modal", async function () {
               this.timeout(60 * 1000)
 
-              // Open context menu for the torrent row
-              const row = $(torrent.query)
-              await row.waitForExist({ timeout: 60 * 1000 })
-              await row.click({ button: "right" })
-
+              await torrent.openContextMenu()
               const contextMenu = $("#contextmenu")
-              await contextMenu.waitForDisplayed()
 
               // Click the Files item in the context menu
               const filesItem = contextMenu.$("a=Files")
@@ -339,8 +328,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
               await modal.waitForDisplayed({ reverse: true })
 
               // Reopen Files modal and verify state persisted
-              await row.click({ button: "right" })
-              await contextMenu.waitForDisplayed()
+              await torrent.openContextMenu()
               const filesItem2 = contextMenu.$("a=Files")
               await filesItem2.waitForDisplayed()
               await filesItem2.click()
@@ -362,26 +350,35 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           describe("given labels are supported", function () {
             requireFeatureHook(options, FeatureSet.Labels)
+            const firstLabel = createUniqueLabel("testlabel")
+            const secondLabel = createUniqueLabel("someotherlabel")
+            let initialLabelCount = 0
+
+            before(async function() {
+              initialLabelCount = (await this.app.getAllSidebarLabels()).length
+            })
 
             it("apply new label", async function () {
-              const label = "testlabel123";
-              await torrent.newLabel(label);
-              await this.app.waitForLabelInDropdown(label);
-              await this.app.getAllSidebarLabels().should.eventually.have.length(1);
+              await torrent.newLabel(firstLabel);
+              await this.app.waitForLabelInDropdown(firstLabel);
+              const labels = await this.app.getAllSidebarLabels()
+              labels.should.include(firstLabel)
+              labels.should.have.length(initialLabelCount + 1)
             });
 
             it("apply another new label", async function () {
-              const label = "someotherlabel123";
-              await torrent.newLabel(label);
-              await this.app.waitForLabelInDropdown(label);
-              await torrent.checkInFilterLabel(label);
-              await this.app.getAllSidebarLabels().should.eventually.have.length(2);
+              await torrent.newLabel(secondLabel);
+              await this.app.waitForLabelInDropdown(secondLabel);
+              await torrent.checkInFilterLabel(secondLabel);
+              const labels = await this.app.getAllSidebarLabels()
+              labels.should.include(firstLabel)
+              labels.should.include(secondLabel)
+              labels.should.have.length(initialLabelCount + 2)
             });
 
             it("change back to previous label", async function () {
-              const label = "testlabel123";
-              await torrent.changeLabel(label);
-              await torrent.checkInFilterLabel(label);
+              await torrent.changeLabel(firstLabel);
+              await torrent.checkInFilterLabel(firstLabel);
             });
           });
         })
@@ -417,7 +414,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           it("torent uploaded with preexisting label", async function() {
             if (!options.client.uploadOptionsEnable?.category) return this.skip()
-            const labelName = "mylabel#1"
+            const labelName = createUniqueLabel("mylabel")
             let torrent = await this.app.uploadTorrent({ filename: this.torrentPath });
             await torrent.newLabel(labelName)
             await torrent.delete()

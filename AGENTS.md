@@ -17,3 +17,4 @@ npm run smoketest
 
 # Guidelines
 * Testing MUST be performed with the smoketest command to reduce test scope
+* Avoid using `browser.execute` in browser testing - prefer organic user interaction

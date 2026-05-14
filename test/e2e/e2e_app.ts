@@ -33,33 +33,45 @@ export class App {
 
   async login(options: LoginOptions) {
     let hostForm = $("#connection-host")
+    await hostForm.waitForDisplayed()
     await hostForm.setValue(options.host)
 
     let protoField = $("#connection-proto")
+    await protoField.waitForDisplayed()
+    await protoField.waitForClickable()
     await protoField.click()
 
     let proto = options.https ? 'https' : 'http'
     let protoHttp = $(`#connection-proto-${proto}`)
-    await protoHttp.waitForExist()
+    await protoHttp.waitForDisplayed()
+    await protoHttp.waitForClickable()
     await protoHttp.click()
 
     let user = $("#connection-user")
+    await user.waitForDisplayed()
     await user.setValue(options.username)
 
     let pass = $("#connection-password")
+    await pass.waitForDisplayed()
     await pass.setValue(options.password);
 
     let clientForm = $("#connection-client")
+    await clientForm.waitForDisplayed()
+    await clientForm.waitForClickable()
     await clientForm.click();
 
     let clientFormSelect = $(`#connection-client-${options.client.id}`)
-    await clientFormSelect.waitForExist()
+    await clientFormSelect.waitForDisplayed()
+    await clientFormSelect.waitForClickable()
     await clientFormSelect.click()
 
     let portForm = $("#connection-port")
+    await portForm.waitForDisplayed()
     await portForm.setValue(options.port);
 
     let submit = $("#connection-submit")
+    await submit.waitForDisplayed()
+    await submit.waitForClickable()
     await submit.click();
   }
 
