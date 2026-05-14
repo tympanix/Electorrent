@@ -1,8 +1,8 @@
-<div class="ui small modal" id="uploadTorrentModal" modal-new on-show="ctl.onShow()" on-hidden="ctl.onHidden()" ng-ref="ctl.modalref" ng-ref-read="modal-new">
+<modal size="small" id="uploadTorrentModal" on-show="ctl.onShow()" on-hidden="ctl.onHidden()" ng-ref="ctl.modalref">
     <i class="close icon"></i>
     <div class="header">
         Add Torrent
-        <div class="ui label" style="float:right;">
+        <div class="ui right floated label">
             <i class="file alternate icon"></i>{{ torrents.length }} {{ torrents.length > 1 ? 'files' : 'file' }} remaining
         </div>
     </div>
@@ -24,4 +24,4 @@
             <i class="plus icon"></i>
         </button>
     </div>
-</div>
+</modal>

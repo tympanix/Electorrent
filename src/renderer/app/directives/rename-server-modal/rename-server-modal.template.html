@@ -1,8 +1,6 @@
 <modal
-    class="small"
-    title="Rename Server"
+    size="small"
     approve="approve()"
-    data="data"
     id="renameModal">
     <i class="close icon"></i>
     <div class="header">
@@ -11,21 +9,25 @@
     <div class="content">
         <form class="ui form" ng-submit="applyAndClose()">
             <div class="field">
-                <div class="ui left icon action input">
+                <div class="ui fluid left icon action input">
                     <i class="user icon"></i>
                     <input type="text" name="servername" maxlength="36" ng-model="data.name" placeholder="Server Name">
-                    <a class="ui icon button" ng-click="data.reset()">
+                    <button type="button" class="ui icon button" ng-click="data.reset()">
                         <i class="refresh icon"></i>
-                    </a>
+                    </button>
                 </div>
             </div>
         </form>
     </div>
     <div class="actions">
-        <a class="ui black deny button">
+        <button type="button" class="ui black deny button">
             Cancel
-        </a>
-        <button type="submit" class="ui positive right labeled icon button">
+        </button>
+        <button
+            type="button"
+            class="ui green right labeled icon approve button"
+            ng-class="{ disabled: !data.name }"
+            ng-disabled="!data.name">
             Rename
             <i class="tag icon"></i>
         </button>

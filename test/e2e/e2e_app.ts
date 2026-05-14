@@ -99,7 +99,7 @@ export class App {
 
   async acceptCertificate() {
     let certificateModal = await this.certificateModalIsVisible()
-    let submit = certificateModal.$("button.ok")
+    let submit = certificateModal.$("button.approve")
     await submit.waitForExist()
     await submit.waitForDisplayed()
     await submit.waitForClickable()

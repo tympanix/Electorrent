@@ -12,6 +12,10 @@ export class ModalController {
 
     }
 
+    attachModal(modal: any) {
+        this.modal = modal
+    }
+
     showModal() {
         this.modal.modal('show')
     }
