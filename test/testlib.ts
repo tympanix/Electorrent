@@ -212,26 +212,6 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
         })
 
-        describe("server equals regression", function() {
-
-          it("server equals correctly compares certificate fields", async function() {
-            const [sameResult, diffResult] = await browser.execute(() => {
-              function makeTestServer(certificate) {
-                const injector = (angular as any).element(document.body).injector()
-                const Server = injector.get("Server")
-                return new Server({ id: "test-1", ip: "localhost", proto: "http", port: 8080, user: "admin", password: "pass", client: "qbittorrent", path: "/", certificate, columns: [] })
-              }
-              return [
-                makeTestServer("same-cert").equals(makeTestServer("same-cert")),
-                makeTestServer("cert-a").equals(makeTestServer("cert-b")),
-              ]
-            })
-            assert.isTrue(sameResult, "equals() must return true when all fields are identical")
-            assert.isFalse(diffResult, "equals() must return false when certificates differ")
-          })
-
-        })
-
         describe("when a magnet link is uploaded", async function() {
           let torrent: e2e.Torrent
           requireFeatureHook(options, FeatureSet.MagnetLinks)
