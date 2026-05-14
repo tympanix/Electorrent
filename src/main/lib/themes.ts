@@ -1,6 +1,21 @@
 const fs = require('fs')
 const path = require('path')
-const DIR = path.join(__dirname, '../css/themes')
+
+function resolveThemesDir() {
+    const candidates = [
+        path.join(__dirname, './css/themes'),
+        path.join(__dirname, '../css/themes'),
+    ]
+
+    const directory = candidates.find((candidate: string) => fs.existsSync(candidate))
+    if (!directory) {
+        throw new Error(`Theme directory not found. Tried: ${candidates.join(', ')}`)
+    }
+
+    return directory
+}
+
+const DIR = resolveThemesDir()
 
 function capitalize(value: string) {
     return value.charAt(0).toUpperCase() + value.slice(1)
