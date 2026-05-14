@@ -38,14 +38,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - name: Cache npm modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            */*/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-
       - name: Install npm dependencies
         run: npm install
 
