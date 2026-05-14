@@ -1,8 +1,6 @@
 <modal
-    class="tiny"
-    title="New Label"
+    size="tiny"
     approve="approve()"
-    data="data"
     id="newLabelModal">
     <i class="close icon"></i>
     <div class="header">
@@ -11,7 +9,7 @@
     <div class="content">
         <form class="ui form" ng-submit="applyAndClose()">
             <div class="field">
-                <div class="ui left icon action input">
+                <div class="ui fluid left icon input">
                     <i class="tag icon"></i>
                     <input type="text" name="label" maxlength="36" ng-model="data.label" placeholder="Label Name">
                 </div>
@@ -19,10 +17,14 @@
         </form>
     </div>
     <div class="actions">
-        <a class="ui black deny button">
+        <button type="button" class="ui black deny button">
             Cancel
-        </a>
-        <button type="submit" class="ui positive right labeled icon button" ng-class="{'disabled': !data.label}">
+        </button>
+        <button
+            type="button"
+            class="ui green right labeled icon approve button"
+            ng-class="{ disabled: !data.label }"
+            ng-disabled="!data.label">
             Apply Label
             <i class="tag icon"></i>
         </button>
