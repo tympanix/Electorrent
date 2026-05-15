@@ -172,6 +172,31 @@
     <context-menu id="contextmenu" bind="contextMenu" menu="$btclient.contextMenu" click="doContextAction" debug="debug">
     </context-menu>
 
+    <modal
+        id="deleteTorrentModal"
+        size="tiny"
+        approve="confirmDelete()"
+        deny="cancelDelete()"
+        on-hidden="cancelDelete()"
+        ng-ref="deleteModalref">
+        <div class="header">
+            <i class="trash icon"></i>
+            Confirm Delete
+        </div>
+        <div class="content">
+            <p>{{ getDeleteConfirmationMessage() }}</p>
+        </div>
+        <div class="actions">
+            <button type="button" class="ui black deny button">
+                Cancel
+            </button>
+            <button type="button" class="ui red right labeled icon approve button">
+                {{ deleteConfirmation.label || "Delete" }}
+                <i class="trash icon"></i>
+            </button>
+        </div>
+    </modal>
+
     <add-torrent-modal
         torrents="pendingTorrentFiles"
         labels="labels"

@@ -73,8 +73,26 @@ export class Torrent {
   }
 
   async delete() {
-    await this.clickContextMenu("delete");
+    await this.confirmDelete();
     await this.waitForGone();
+  }
+
+  async openDeleteConfirmation() {
+    await this.clickContextMenu("delete");
+
+    const modal = $("#deleteTorrentModal");
+    await modal.waitForDisplayed();
+    return modal;
+  }
+
+  async confirmDelete() {
+    const modal = await this.openDeleteConfirmation();
+    const submit = modal.$("button.approve");
+    await submit.waitForDisplayed();
+    await submit.waitForClickable();
+    await submit.waitForEnabled();
+    await submit.click();
+    await modal.waitForDisplayed({ reverse: true });
   }
 
   async stop({ state = "Stopped" }) {
