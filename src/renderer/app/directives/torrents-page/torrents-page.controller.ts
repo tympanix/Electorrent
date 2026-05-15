@@ -9,7 +9,7 @@ interface TorrentControllerScope extends angular.IScope {
 }
 
 export class TorrentsPageController {
-    static $inject = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "configService"];
+    static $inject = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "settingsService"];
 
     constructor(
         $rootScope: IRootScopeService & { $btclient?: any; $server?: any },
@@ -19,7 +19,7 @@ export class TorrentsPageController {
         $q: angular.IQService,
         $bittorrent: any,
         $notify: any,
-        config: any,
+        settingsService: any,
     ) {
         const LIMIT = 25;
 
@@ -28,10 +28,10 @@ export class TorrentsPageController {
         let timeout: angular.IPromise<void> | undefined;
         let reconnect: angular.IPromise<void> | undefined;
 
-        let settings = config.getAllSettings();
+        let settings = settingsService.getAllSettings();
         let refreshRate = settings.refreshRate || 2000;
 
-        $scope.settings = config.getAllSettings();
+        $scope.settings = settingsService.getAllSettings();
         $scope.connectionLost = false;
         $scope.torrents = {};
         $scope.arrayTorrents = [];
@@ -83,8 +83,8 @@ export class TorrentsPageController {
 
         $scope.$on("new:settings", (event: unknown, data: any) => {
             refreshRate = data.refreshRate;
-            settings = config.getAllSettings();
-            $scope.settings = config.getAllSettings();
+            settings = settingsService.getAllSettings();
+            $scope.settings = settingsService.getAllSettings();
             resetAll();
         });
 

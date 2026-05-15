@@ -3,7 +3,7 @@ import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from
 const is = require('electron-is')
 const { IPC_CHANNELS } = require('../../shared/ipc')
 const { bittorrentManager } = require('./bittorrent')
-const config = require('./settings')
+const settings = require('./settings')
 const updater = require('./update')
 const torrents = require('./torrents')
 const themes = require('./themes')
@@ -60,7 +60,7 @@ exports.registerHandlers = function({ isDebug, getWindow, consumePendingLaunchPa
     })
 
     ipcMain.handle(IPC_CHANNELS.app.reportCorruptSettings, async function() {
-        config.showCorruptDialog()
+        settings.showCorruptDialog()
     })
 
     ipcMain.handle(IPC_CHANNELS.shell.openExternal, async function(_event: IpcMainInvokeEvent, { url }) {
@@ -68,12 +68,12 @@ exports.registerHandlers = function({ isDebug, getWindow, consumePendingLaunchPa
     })
 
     ipcMain.handle(IPC_CHANNELS.settings.getAll, async function() {
-        return config.getAllSettings()
+        return settings.getAllSettings()
     })
 
-    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings }) {
+    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings: nextSettings }) {
         return new Promise<void>((resolve, reject) => {
-            config.saveAll(settings, function(err: Error) {
+            settings.saveAll(nextSettings, function(err: Error) {
                 if (err) {
                     reject(err)
                     return

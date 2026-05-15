@@ -45,7 +45,7 @@ function deleteConfig() {
 
 function showCorruptDialog() {
     const window: BrowserWindow | null = electorrent.getWindow()
-    const config: MessageBoxOptions = {
+    const dialogSettings: MessageBoxOptions = {
         type: 'error',
         buttons: ['Delete Configuration', 'Open Folder', 'Exit'],
         defaultId: 2,
@@ -55,8 +55,8 @@ function showCorruptDialog() {
     }
 
     const button = window
-        ? dialog.showMessageBoxSync(window, config)
-        : dialog.showMessageBoxSync(config)
+        ? dialog.showMessageBoxSync(window, dialogSettings)
+        : dialog.showMessageBoxSync(dialogSettings)
 
     if (button === 0) {
         deleteConfig()

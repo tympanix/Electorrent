@@ -23,7 +23,7 @@ if (!require('./lib/startup')) {
     yargs.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
     yargs.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
 
-    const config = require('./lib/settings')
+    const settings = require('./lib/settings')
     const updater = require('./lib/update')
     const logger = require('./lib/logger')
     const electorrent = require('./lib/electorrent')
@@ -67,7 +67,7 @@ if (!require('./lib/startup')) {
             },
         }
 
-        Object.assign(windowSettings, config.get('windowsize'))
+        Object.assign(windowSettings, settings.get('windowsize'))
 
         torrentWindow = new BrowserWindow(windowSettings)
         electorrent.setWindow(torrentWindow)
@@ -83,8 +83,8 @@ if (!require('./lib/startup')) {
 
         torrentWindow.on('close', () => {
             bittorrentManager.disconnectWindow(windowWebContents)
-            config.put('windowsize', torrentWindow?.getBounds())
-            config.write()
+            settings.put('windowsize', torrentWindow?.getBounds())
+            settings.write()
         })
 
         torrentWindow.on('closed', () => {
@@ -191,7 +191,7 @@ if (!require('./lib/startup')) {
     })
 
     app.on('certificate-error', (_event, _webContents, _url, _error, certificate, callback) => {
-        const certs = config.get('certificates') || []
+        const certs = settings.get('certificates') || []
 
         if (certs.find((c: string) => c === certificate.fingerprint)) {
             _event.preventDefault()

@@ -1,12 +1,12 @@
 export class WelcomePageController {
-    static $inject = ["$scope", "$timeout", "$bittorrent", "$btclients", "configService", "notificationService", "Server"];
+    static $inject = ["$scope", "$timeout", "$bittorrent", "$btclients", "settingsService", "notificationService", "Server"];
 
     constructor(
         $scope: any,
         $timeout: angular.ITimeoutService,
         $bittorrent: any,
         $btclients: any,
-        config: any,
+        settingsService: any,
         $notify: any,
         Server: any,
     ) {
@@ -23,7 +23,7 @@ export class WelcomePageController {
             $scope.connecting = true;
 
             $scope.server.connect().then(() => {
-                return config.saveServer($scope.server);
+                return settingsService.saveServer($scope.server);
             }).then(() => {
                 $scope.$emit("connect:server", $scope.server);
                 clearForm();
@@ -46,7 +46,7 @@ export class WelcomePageController {
 
             $bittorrent.setServer(server);
 
-            config.saveServer(server).then(() => {
+            settingsService.saveServer(server).then(() => {
                 $scope.$emit("show:torrents");
                 clearForm();
                 $notify.ok("Success!", "Hooray! Welcome to Electorrent");
