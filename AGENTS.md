@@ -1,5 +1,5 @@
 ## Development code of conduct
-After finished impkementation, perform the following:
+After finished implementation, perform the following:
 * Build the project
 * Execute smoketest for the project
 
