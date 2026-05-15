@@ -16,6 +16,7 @@ let menuState: MenuSessionState = {
     activeServerId: null,
     activeClientId: null,
 }
+let menuSettings: AppSettings = config.getAllSettings()
 
 const CLIENT_NAMES: Record<string, string> = {
     utorrent: 'µTorrent',
@@ -49,10 +50,6 @@ function serverAccelerator(index: number) {
     return undefined
 }
 
-function getSettings(): AppSettings {
-    return config.getAllSettings()
-}
-
 function getServerLabel(server: StoredServerConfig) {
     return server.name || `${CLIENT_NAMES[server.client] || server.client} @ ${server.ip}`
 }
@@ -66,8 +63,7 @@ function advancedUploadEnabled() {
 }
 
 function serverMenuItems(): MenuItemConstructorOptions[] {
-    const settings = getSettings()
-    const servers = Array.isArray(settings?.servers) ? settings.servers : []
+    const servers = Array.isArray(menuSettings?.servers) ? menuSettings.servers : []
     const submenu: MenuItemConstructorOptions[] = [
         {
             label: 'Add new server...',
@@ -332,6 +328,7 @@ function setActiveServer(server?: { id?: string | null; client?: string | null }
 }
 
 function refresh() {
+    menuSettings = config.getAllSettings()
     buildMenu()
 }
 
