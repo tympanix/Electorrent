@@ -1,5 +1,6 @@
 import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
 import type { AppSettings, StoredServerConfig } from '../../shared/ipc-contract'
+import { CLIENT_METADATA } from '../../shared/client-metadata'
 
 const { IPC_CHANNELS } = require('../../shared/ipc')
 const config = require('./config')
@@ -34,20 +35,6 @@ const DEFAULT_MENU_SETTINGS: AppSettings = {
 
 let menuSettings: AppSettings = DEFAULT_MENU_SETTINGS
 
-const CLIENT_NAMES: Record<string, string> = {
-    utorrent: 'µTorrent',
-    qbittorrent: 'qBittorrent',
-    transmission: 'Transmission',
-    rtorrent: 'rTorrent',
-    synology: 'Synology Download Station',
-    deluge: 'Deluge',
-}
-
-const ADVANCED_UPLOAD_CLIENTS = new Set([
-    'qbittorrent',
-    'transmission',
-])
-
 function setWindow(window: BrowserWindow) {
     mainWindow = window
     buildMenu()
@@ -67,7 +54,7 @@ function serverAccelerator(index: number) {
 }
 
 function getServerLabel(server: StoredServerConfig) {
-    return server.name || `${CLIENT_NAMES[server.client] || server.client} @ ${server.ip}`
+    return server.name || `${CLIENT_METADATA[server.client]?.name || server.client} @ ${server.ip}`
 }
 
 function hasActiveServer() {
@@ -75,7 +62,7 @@ function hasActiveServer() {
 }
 
 function advancedUploadEnabled() {
-    return !!menuState.activeClientId && ADVANCED_UPLOAD_CLIENTS.has(menuState.activeClientId)
+    return !!menuState.activeClientId && !!CLIENT_METADATA[menuState.activeClientId]?.showAdvancedUploadMenu
 }
 
 function serverMenuItems(): MenuItemConstructorOptions[] {

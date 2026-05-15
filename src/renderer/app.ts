@@ -11,6 +11,7 @@ import {
     SynologyClient,
     DelugeClient
 } from "./app/bittorrent"
+import { CLIENT_METADATA } from "../shared/client-metadata"
 
 var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
 
@@ -23,34 +24,34 @@ torrentApp.config(['$animateProvider', function($animateProvider) {
 // Register torrent clients
 torrentApp.constant('$btclients', {
     'utorrent': {
-        name: 'µTorrent',
+        name: CLIENT_METADATA.utorrent.name,
         service: new UtorrentClient(),
-        icon: 'utorrent'
+        icon: CLIENT_METADATA.utorrent.icon
     },
      'qbittorrent': {
-        name: 'qBittorrent',
+        name: CLIENT_METADATA.qbittorrent.name,
         service: new QBittorrentClient(),
-        icon: 'qbittorrent'
+        icon: CLIENT_METADATA.qbittorrent.icon
     },
     'transmission': {
-        name: 'Transmission',
+        name: CLIENT_METADATA.transmission.name,
         service: new TransmissionClient(),
-        icon: 'transmission'
+        icon: CLIENT_METADATA.transmission.icon
     },
     'rtorrent': {
-        name: 'rTorrent',
+        name: CLIENT_METADATA.rtorrent.name,
         service: new RtorrentClient(),
-        icon: 'rtorrent'
+        icon: CLIENT_METADATA.rtorrent.icon
     },
     'synology': {
-        name: 'Synology Download Station',
+        name: CLIENT_METADATA.synology.name,
         service: new SynologyClient(),
-        icon: 'downloadstation'
+        icon: CLIENT_METADATA.synology.icon
     },
     'deluge': {
-        name: 'Deluge',
+        name: CLIENT_METADATA.deluge.name,
         service: new DelugeClient(),
-        icon: 'deluge',
+        icon: CLIENT_METADATA.deluge.icon,
     }
 });
 
