@@ -1,6 +1,7 @@
 import chai from "chai"
 import { describe, it, before, after, beforeEach, afterEach } from "mocha";
 import path from "path";
+import { fileURLToPath } from "url";
 import chaiAsPromised from "chai-as-promised";
 import * as e2e from "./e2e";
 import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
@@ -10,6 +11,7 @@ import { browser, $, $$ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
 
 const { assert } = chai
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 
 interface TestSuiteOptionsOptional {
