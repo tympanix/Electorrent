@@ -5,9 +5,8 @@ type RendererGlobals = Window &
     angular: ng.IAngularStatic
   }
 
-const rendererWindow = window as RendererGlobals
-import jquery = require('jquery')
-import angularLib = require('angular')
+import angularLib from 'angular'
+import jquery from 'jquery'
 import 'jquery-ui-dist/jquery-ui.js'
 import 'angular-resource'
 import 'angular-animate'
@@ -17,7 +16,8 @@ import 'angular-marked'
 import 'angular-ui-sortable'
 import 'semantic-ui-css/semantic.min.js'
 
+const rendererWindow = window as RendererGlobals
+
 rendererWindow.$ = jquery
 rendererWindow.jQuery = jquery
-
 rendererWindow.angular = angularLib

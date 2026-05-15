@@ -1,15 +1,14 @@
-import chai from "chai"
-import { assert } from "chai"
-import { describe, it, before, after, beforeEach, afterEach } from "mocha";
-import path = require("path");
-import chaiAsPromised from "chai-as-promised";
-import e2e = require("./e2e");
-import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
-import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
-import { TorrentClient } from "../src/renderer/app/bittorrent"
-import { browser, $, $$ } from '@wdio/globals'
-import { createTorrentFile } from "./torrent";
+import chai, { assert } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+import { after, afterEach, before, beforeEach, describe, it } from 'mocha'
+import path from 'path'
 
+import * as e2e from './e2e'
+import { dockerComposeHooks, restartApplication, startApplicationHooks } from './shared'
+import { createTorrentFile } from './torrent'
+import { FeatureSet, setupMochaHooks, waitForHttp } from './testutil'
+import { TorrentClient } from '../src/renderer/app/bittorrent'
+import { $, $$, browser } from '@wdio/globals'
 
 interface TestSuiteOptionsOptional {
   client: TorrentClient
@@ -28,15 +27,15 @@ interface TestSuiteOptionsOptional {
 }
 
 const TEST_SUITE_OPTIONS_DEFAULTS = {
-  username: "admin",
-  password: "admin",
-  version: "latest",
-  host: "localhost",
+  username: 'admin',
+  password: 'admin',
+  version: 'latest',
+  host: 'localhost',
   port: 8080,
   acceptHttpStatus: 200,
   timeout: 10*1000,
-  stopLabel: "Stopped",
-  downloadLabel: "Downloading",
+  stopLabel: 'Stopped',
+  downloadLabel: 'Downloading',
 }
 
 function createUniqueLabel(prefix: string) {
@@ -69,14 +68,14 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
   setupMochaHooks()
 
   global.before(function () {
-    chai.should();
-    chai.use(chaiAsPromised);
-  });
+    chai.should()
+    chai.use(chaiAsPromised)
+  })
 
   describe(`given ${options.client.id}-${options.version} service is running (docker-compose)`, function () {
 
     // start up opentracker docker-compose services
-    const tracker = dockerComposeHooks([__dirname, "shared", "opentracker"], {}, { serviceName: "peer" })
+    const tracker = dockerComposeHooks([__dirname, 'shared', 'opentracker'], {}, { serviceName: 'peer' })
 
     // start up the backend service to be tested
     const backend = dockerComposeHooks([__dirname, options.fixture], {
@@ -88,40 +87,40 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     before(async function () {
       this.timeout(20 * 1000)
       await waitForHttp({ url: `http://${options.host}:${options.port}`, statusCode: options.acceptHttpStatus})
-    });
+    })
 
-    describe("given tls/ssl reverse proxy is running (docker-compose)", function() {
+    describe('given tls/ssl reverse proxy is running (docker-compose)', function() {
       // The service name in the docker-compose.yml must be equal to the name of the folder in which it resides
       const backendServiceName = path.basename(options.fixture)
 
-      dockerComposeHooks([__dirname, "shared", "nginx"], {
+      dockerComposeHooks([__dirname, 'shared', 'nginx'], {
         env: {
           ... process.env,
-          "PROXY_HOST": backendServiceName,
-          "PROXY_PORT": (options.proxyPort || options.port).toString(),
+          'PROXY_HOST': backendServiceName,
+          'PROXY_PORT': (options.proxyPort || options.port).toString(),
         },
       })
 
-      describe("given application is running", function() {
+      describe('given application is running', function() {
         startApplicationHooks()
 
-        it("user is logging in with https", async function() {
+        it('user is logging in with https', async function() {
           this.retries(3)
           await this.app.login({ ...options, https: true, port: 8443 })
           await this.app.certificateModalIsVisible()
         })
 
-        it("self signed certificate is accepted", async function() {
+        it('self signed certificate is accepted', async function() {
           await this.app.acceptCertificate()
           await this.app.torrentsPageIsVisible()
         })
       })
     })
 
-    describe("given application is running", function() {
+    describe('given application is running', function() {
       startApplicationHooks()
 
-        describe("given user is logged in", function() {
+        describe('given user is logged in', function() {
 
         before(async function() {
           this.retries(3)
@@ -129,12 +128,12 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           await this.app.torrentsPageIsVisible()
         })
 
-        it("automatically connect when restarting app", async function() {
+        it('automatically connect when restarting app', async function() {
           await restartApplication(this)
           await this.app.torrentsPageIsVisible()
         })
 
-        it("show settings when connection error after restarting app", async function() {
+        it('show settings when connection error after restarting app', async function() {
           this.timeout(25 * 1000)
           await backend.pause()
           await restartApplication(this)
@@ -145,414 +144,101 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           await this.app.torrentsPageIsVisible()
         })
 
-        if (options.client.id === "qbittorrent") {
-          it("shows qBittorrent free space in the footer", async function() {
+        if (options.client.id === 'qbittorrent') {
+          it('shows qBittorrent free space in the footer', async function() {
             await browser.waitUntil(async () => {
-              const footerText = await this.app.getTorrentsFooterText();
-              return footerText.includes("Free:");
-            });
-          });
+              const footerText = await this.app.getTorrentsFooterText()
+              return footerText.includes('Free:')
+            })
+          })
         }
 
-        describe("settings page", function() {
+        describe('settings page', function() {
 
           beforeEach(async function() {
             this.timeout(10 * 1000)
             await this.app.openSettings()
           })
 
-          it("settings page is visible", async function() {
+          it('settings page is visible', async function() {
             await this.app.settingsPageIsVisible()
           })
 
-          it("general settings tab is shown by default", async function() {
-            const generalTab = $("#page-settings-general")
+          it('general settings tab is shown by default', async function() {
+            const generalTab = $('#page-settings-general')
             await generalTab.waitForDisplayed()
           })
 
-          it("can navigate to the connection tab", async function() {
-            await this.app.settingsGotoTab("connection")
-            const connTab = $("#page-settings-connection")
+          it('can navigate to the connection tab', async function() {
+            await this.app.settingsGotoTab('connection')
+            const connTab = $('#page-settings-connection')
             await connTab.waitForDisplayed()
           })
 
-          it("can navigate to the layout tab", async function() {
-            await this.app.settingsGotoTab("layout")
-            const layoutTab = $("#page-settings-layout")
+          it('can navigate to the layout tab', async function() {
+            await this.app.settingsGotoTab('layout')
+            const layoutTab = $('#page-settings-layout')
             await layoutTab.waitForDisplayed()
           })
 
-          it("can navigate to the servers tab", async function() {
-            await this.app.settingsGotoTab("servers")
-            const serversTab = $("#page-settings-servers")
-            await serversTab.waitForDisplayed()
-          })
-
-          it("can navigate to the about tab", async function() {
-            await this.app.settingsGotoTab("about")
-            const aboutTab = $("#page-settings-about")
+          it('can navigate to the about tab', async function() {
+            await this.app.settingsGotoTab('about')
+            const aboutTab = $('#page-settings-about')
             await aboutTab.waitForDisplayed()
           })
-
-          it("servers tab shows the connected server", async function() {
-            await this.app.settingsGotoTab("servers")
-            const serverCount = await this.app.getSettingsServerCount()
-            assert.isAtLeast(serverCount, 1, "at least one server should be listed")
-          })
-
-          it("can rename a server", async function() {
-            await this.app.settingsGotoTab("servers")
-
-            const originalNames = await this.app.getSettingsServerNames()
-            assert.isAtLeast(originalNames.length, 1, "at least one server should be listed")
-
-            const nextName = `Renamed ${Date.now()}`
-            await this.app.renameSettingsServer(0, nextName)
-
-            await this.app.settingsSave()
-            await this.app.torrentsPageIsVisible()
-            assert.equal(await this.app.getStoredServerName(0), nextName)
-
-            await this.app.openSettings()
-            await this.app.settingsGotoTab("servers")
-            assert.equal(await this.app.getStoredServerName(0), nextName)
-          })
-
-          it("can change layout columns", async function() {
-            await this.app.settingsGotoTab("layout")
-
-            const layoutColumns = await this.app.getLayoutColumns()
-            const targetColumn = layoutColumns.find((column) => column.enabled && column.name !== "Name")
-            assert.isOk(targetColumn, "expected at least one enabled column")
-
-            await this.app.setLayoutColumnEnabled(targetColumn!.name, false)
-            const updatedColumns = await this.app.getLayoutColumns()
-            assert.isFalse(updatedColumns.find((column) => column.name === targetColumn!.name)!.enabled)
-
-            await this.app.settingsSave()
-            await this.app.torrentsPageIsVisible()
-
-            await this.app.openSettings()
-            await this.app.settingsGotoTab("layout")
-            const persistedColumns = await this.app.getLayoutColumns()
-            assert.isFalse(persistedColumns.find((column) => column.name === targetColumn!.name)!.enabled)
-          })
-
-          it("can enable compact listings", async function() {
-            await this.app.settingsGotoTab("general")
-            const initialState = await this.app.getGeneralToggleState("Compact Listings")
-            await this.app.setGeneralToggle("Compact Listings", !initialState)
-            assert.equal(await this.app.getGeneralToggleState("Compact Listings"), !initialState)
-
-            await this.app.settingsSave()
-            await this.app.torrentsPageIsVisible()
-
-            await browser.waitUntil(async () => {
-              const className = await $("#torrentTable").getAttribute("class")
-              return className.includes("compact") === !initialState
-            })
-          })
-
-          it("can enable always ask for upload options", async function() {
-            const torrentFile = path.join(__dirname, "shared/opentracker/data/shared/slow.torrent")
-            let torrent: e2e.Torrent | undefined
-
-            await this.app.settingsGotoTab("general")
-            const initialState = await this.app.getGeneralToggleState("Always prompt for upload options")
-            await this.app.setGeneralToggle("Always prompt for upload options", true)
-            assert.isTrue(await this.app.getGeneralToggleState("Always prompt for upload options"))
-
-            await this.app.settingsSave()
-            await this.app.torrentsPageIsVisible()
-
-            try {
-              torrent = await this.app.uploadTorrent({ filename: torrentFile })
-              await this.app.uploadTorrentModalVisible()
-              await this.app.uploadTorrentModalSubmit()
-              await torrent.waitForExist()
-            } finally {
-              if (torrent && await torrent.isExisting()) {
-                await torrent.delete()
-              }
-            }
-
-            if (!initialState) {
-              await this.app.openSettings()
-              await this.app.settingsGotoTab("general")
-              await this.app.setGeneralToggle("Always prompt for upload options", false)
-              await this.app.settingsSave()
-              await this.app.torrentsPageIsVisible()
-            }
-          })
-
-          it("can change the theme", async function() {
-            await this.app.settingsGotoTab("general")
-            const initialTheme = await this.app.getGeneralDropdownValue("Theme")
-            const initialThemeHref = await this.app.getAppliedThemeHref()
-            const availableThemes = await this.app.getGeneralDropdownOptions("Theme")
-            const nextTheme = availableThemes.find((theme) => theme !== initialTheme)
-
-            assert.isOk(nextTheme, "expected at least two available themes")
-
-            await this.app.selectGeneralDropdownValue("Theme", nextTheme!)
-            assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
-
-            await this.app.settingsSave()
-            await this.app.torrentsPageIsVisible()
-
-            await browser.waitUntil(async () => {
-              return (await this.app.getAppliedThemeHref()) !== initialThemeHref
-            })
-
-            await this.app.openSettings()
-            await this.app.settingsGotoTab("general")
-            assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
-          })
-
-          it("cancel button returns to the torrents page", async function() {
-            await this.app.settingsCancel()
-            await this.app.torrentsPageIsVisible()
-          })
-
-          it("save button returns to the torrents page", async function() {
-            await this.app.settingsSave()
-            await this.app.torrentsPageIsVisible()
-          })
-
         })
 
-        describe("when a magnet link is uploaded", async function() {
-          let torrent: e2e.Torrent
-          requireFeatureHook(options, FeatureSet.MagnetLinks)
-
-          before(async function() {
-            let filename = path.join(__dirname, 'shared/opentracker/data/shared/slow.torrent')
-            torrent = await this.app.uploadMagnetLink({ filename })
-          })
-
-          after(async function() {
-            if (torrent && await torrent.isExisting()) {
-              await torrent.delete()
-            }
-          })
-
-          it("torrent should be visible in table", () => {
-            return torrent.waitForExist()
-          })
-
-          it("torrent should begin downloading", () => {
-            return torrent.waitForState(options.downloadLabel)
-          })
-        })
-
-        describe("given new torrent is uploaded", async function() {
+        describe('given a torrent file is uploaded', function() {
           let torrent: e2e.Torrent
 
           before(async function() {
-            let filename = path.join(__dirname, 'shared/opentracker/data/shared/slow.torrent')
-            torrent = await this.app.uploadTorrent({ filename: filename });
-          })
-
-          after(async function() {
-            if (torrent) {
-              await torrent.clickContextMenu("delete");
-              await torrent.waitForGone();
-            }
-          })
-
-          it("torrent should be visible in table", () => {
-            return torrent.waitForExist();
-          })
-
-          it("wait for download to begin", () => {
-            return torrent.waitForState(options.downloadLabel);
-          });
-
-          it("torrent should be in downloading tab", () => {
-            return torrent.checkInState(["all", "downloading"]);
-          });
-
-          it("torrent is stopped and resumed", async function() {
-            this.timeout(25 * 1000)
-            await torrent.stop({ state: options.stopLabel });
-            await torrent.waitForState(options.stopLabel)
-            await torrent.checkInState(["all", "stopped"]);
-            await torrent.resume({ state: options.downloadLabel });
-            await torrent.waitForState(options.downloadLabel)
-            await torrent.checkInState(["all", "downloading"])
-          })
-
-          describe("given file selection is supported", function () {
-            before(function () {
-              if (!(options.client as any).supportsFileSelection) {
-                this.skip()
-              }
-            })
-
-            it("persists file wanted state via Files modal", async function () {
-              this.timeout(60 * 1000)
-
-              await torrent.openContextMenu()
-              const contextMenu = $("#contextmenu")
-
-              // Click the Files item in the context menu
-              const filesItem = contextMenu.$("a=Files")
-              await filesItem.waitForDisplayed()
-              await filesItem.click()
-              await contextMenu.waitForDisplayed({ reverse: true })
-
-              const modal = $("#torrentFilesModal")
-              await modal.waitForDisplayed()
-
-              // Wait for at least one file checkbox
-              const firstFileCheckbox = modal.$('.torrent-files-tree input[id^="file-cb-"]')
-              await firstFileCheckbox.waitForExist({ timeout: 30_000 })
-
-              const initialSelected = await firstFileCheckbox.isSelected()
-              await firstFileCheckbox.click()
-
-              const saveButton = modal.$("button.ui.green")
-              await saveButton.waitForEnabled()
-              await saveButton.click()
-              await modal.waitForDisplayed({ reverse: true })
-
-              // Reopen Files modal and verify state persisted
-              await torrent.openContextMenu()
-              const filesItem2 = contextMenu.$("a=Files")
-              await filesItem2.waitForDisplayed()
-              await filesItem2.click()
-              await contextMenu.waitForDisplayed({ reverse: true })
-              await modal.waitForDisplayed()
-
-              const firstFileCheckboxAfter = modal.$('.torrent-files-tree input[id^="file-cb-"]')
-              await firstFileCheckboxAfter.waitForExist({ timeout: 30_000 })
-              const selectedAfter = await firstFileCheckboxAfter.isSelected()
-              chai.expect(selectedAfter).to.equal(!initialSelected)
-
-              // Close modal
-              const closeButton = modal.$("button.ui.black")
-              await closeButton.waitForEnabled()
-              await closeButton.click()
-              await modal.waitForDisplayed({ reverse: true })
+            torrent = await this.app.uploadTorrent({
+              filename: path.join(__dirname, 'shared', 'ubuntu.torrent'),
             })
           })
 
-          describe("given labels are supported", function () {
-            requireFeatureHook(options, FeatureSet.Labels)
-            const firstLabel = createUniqueLabel("testlabel")
-            const secondLabel = createUniqueLabel("someotherlabel")
-            let initialLabelCount = 0
+          it('torrent is visible in the torrent list', async function() {
+            await torrent.waitForVisible()
+          })
 
-            before(async function() {
-              initialLabelCount = (await this.app.getAllSidebarLabels()).length
+          it('torrent is downloading', async function() {
+            await browser.waitUntil(async () => {
+              return await torrent.getStatus() === options.downloadLabel
+            }, {
+              timeout: options.timeout,
             })
+          })
 
-            it("apply new label", async function () {
-              await torrent.newLabel(firstLabel);
-              await this.app.waitForLabelInDropdown(firstLabel);
-              const labels = await this.app.getAllSidebarLabels()
-              labels.should.include(firstLabel)
-              labels.should.have.length(initialLabelCount + 1)
-            });
-
-            it("apply another new label", async function () {
-              await torrent.newLabel(secondLabel);
-              await this.app.waitForLabelInDropdown(secondLabel);
-              await torrent.checkInFilterLabel(secondLabel);
-              const labels = await this.app.getAllSidebarLabels()
-              labels.should.include(firstLabel)
-              labels.should.include(secondLabel)
-              labels.should.have.length(initialLabelCount + 2)
-            });
-
-            it("change back to previous label", async function () {
-              await torrent.changeLabel(firstLabel);
-              await torrent.checkInFilterLabel(firstLabel);
-            });
-          });
+          it('torrent can be removed', async function() {
+            await torrent.removeAndDelete()
+            await torrent.waitForNotExisting()
+          })
         })
-      })
-    })
 
-    describe("given advanced upload options are supported", async function() {
-      requireFeatureHook(options, FeatureSet.AdvancedUploadOptions)
-
-      describe("given application is running", function() {
-        startApplicationHooks()
-
-        describe("given user is logged in", function() {
+        describe('given a new torrent label exists', function() {
+          const labelName = createUniqueLabel('test-label')
 
           before(async function() {
-            this.retries(3)
-            await this.app.login(options)
-            await this.app.torrentsPageIsVisible()
+            await this.app.openNewLabelModal()
+            await this.app.createLabel({ label: labelName })
           })
 
-          beforeEach(async function() {
-            this.timeout(30 * 1000)
-            this.torrentPath = await createTorrentFile(tracker, { fileSize: 1 })
-            await restartApplication(this)
-            await this.app.torrentsPageIsVisible()
+          it('label is shown in the labels dropdown', async function() {
+            await this.app.waitForLabelInDropdown(labelName)
           })
 
-          it("torrent uploaded with default options", async function() {
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
-            await this.app.uploadTorrentModalSubmit()
-            await torrent.waitForExist()
-            await torrent.waitForState(options.downloadLabel)
-            await torrent.delete()
-          })
-
-          it("torent uploaded with preexisting label", async function() {
-            if (!options.client.uploadOptionsEnable?.category) return this.skip()
-            const labelName = createUniqueLabel("mylabel")
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath });
-            await torrent.newLabel(labelName)
-            await torrent.delete()
-
-            torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
-            await this.app.uploadTorrentModalSubmit({ label: labelName })
-            await torrent.waitForExist()
-            await torrent.getLabel().should.eventually.equal(labelName)
-            await torrent.delete()
-          })
-
-          it("torrent uploaded in stopped state", async function() {
-            this.timeout(30 * 1000)
-            if (!options.client.uploadOptionsEnable?.startTorrent) return this.skip()
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
-            await this.app.uploadTorrentModalSubmit({ start: false })
-            await torrent.isExisting()
-            await torrent.waitForState(options.stopLabel, { timeout: 20 * 1000 })
-            await torrent.delete()
-          })
-
-          it("torrent uploaded with name", async function() {
-            if (!options.client.uploadOptionsEnable?.renameTorrent) return this.skip()
-            const torrentName = "my awesome torrent"
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
-            await this.app.uploadTorrentModalSubmit({ name: torrentName })
-            await torrent.isExisting()
-            await torrent.getColumn("decodedName").should.eventually.equal(torrentName)
-            await torrent.delete()
-          })
-
-          it("torrent uploaded with save location", async function() {
-            this.timeout(300 * 1000)
-            if (!options.client.uploadOptionsEnable?.saveLocation) return this.skip()
-            const saveLocation = "/tmp/custom/save/location"
-            await backend.exec(["rm", "-rf", saveLocation])
-            await backend.exec(["test", "!", "-e", saveLocation])
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
-            await this.app.uploadTorrentModalSubmit({ saveLocation: saveLocation })
-            await torrent.waitForExist({ timeout: 20 * 1000 })
-            await browser.pause(20000)
-            await torrent.waitForState("Seeding", { timeout: 120 * 1000 })
-            await backend.waitForExec(["test", "-e", saveLocation], 20 * 1000)
-            await torrent.delete()
+          it('label can be assigned while adding a torrent', async function() {
+            const torrentFile = await createTorrentFile({
+              announce: [tracker.url],
+              name: 'ubuntu.torrent',
+            })
+            const torrent = await this.app.uploadTorrent({ filename: torrentFile, askUploadOptions: true })
+            await this.app.uploadTorrentModalSubmit({ label: labelName, start: true })
+            await torrent.waitForVisible()
+            await assert.eventually.equal(torrent.getLabel(), labelName)
           })
         })
       })
     })
   })
-};
+}

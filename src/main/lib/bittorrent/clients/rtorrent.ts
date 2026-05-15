@@ -1,8 +1,8 @@
-import type { BittorrentServerConfig } from "../../../../shared/ipc-contract"
-import { cleanPath, defer } from "../helpers"
-import type { BittorrentRuntime } from "../types"
+import Rtorrent from '@electorrent/node-rtorrent'
 
-const Rtorrent = require("@electorrent/node-rtorrent")
+import type { BittorrentServerConfig } from '../../../../shared/ipc-contract'
+import { cleanPath, defer } from '../helpers'
+import type { BittorrentRuntime } from '../types'
 
 export class RtorrentRuntime implements BittorrentRuntime {
     private rtorrent: any
@@ -14,11 +14,11 @@ export class RtorrentRuntime implements BittorrentRuntime {
             path: cleanPath(server.path),
             user: server.user,
             pass: server.password,
-            ssl: server.proto === "https",
+            ssl: server.proto === 'https',
             ca: server.certificateData,
         })
 
-        return defer((done) => this.rtorrent.get("system.client_version", [], done))
+        return defer((done) => this.rtorrent.get('system.client_version', [], done))
     }
 
     getSnapshot(): Promise<any> {

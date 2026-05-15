@@ -4,7 +4,7 @@
       "noImplicitAny": false,
       "target": "es2019",
       "pretty": true,
-      "module": "commonjs",
+      "module": "esnext",
       "sourceMap": true,
       "allowJs": true,
       "lib": [

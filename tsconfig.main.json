@@ -9,7 +9,8 @@
     ]
   },
   "include": [
-    "src/main/**/*.ts"
+    "src/main/**/*.ts",
+    "src/shared/**/*.ts"
   ],
   "exclude": [
     "node_modules",

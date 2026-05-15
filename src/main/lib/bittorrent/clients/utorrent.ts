@@ -1,23 +1,25 @@
-import axios, { AxiosInstance } from "axios"
-import FormData from "form-data"
-import qs from "qs"
-import type { BittorrentServerConfig } from "../../../../shared/ipc-contract"
-import { createHttpsAgent, serverUrl } from "../helpers"
-import type { BittorrentRuntime } from "../types"
+import axios, { AxiosInstance } from 'axios'
+import httpAdapter from 'axios/lib/adapters/http.js'
+import FormData from 'form-data'
+import qs from 'qs'
+
+import type { BittorrentServerConfig } from '../../../../shared/ipc-contract'
+import { createHttpsAgent, serverUrl } from '../helpers'
+import type { BittorrentRuntime } from '../types'
 
 export class UtorrentRuntime implements BittorrentRuntime {
     private server!: BittorrentServerConfig
     private http!: AxiosInstance
     private data = {
-        url: "",
-        username: "",
-        password: "",
-        token: "",
+        url: '',
+        username: '',
+        password: '',
+        token: '',
         cid: 0,
         build: -1,
     }
 
-    private url(pathValue = "") {
+    private url(pathValue = '') {
         return `${serverUrl(this.server)}${pathValue}`
     }
 
@@ -45,8 +47,8 @@ export class UtorrentRuntime implements BittorrentRuntime {
                 password: server.password,
             },
             httpsAgent: createHttpsAgent(server),
-            paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "repeat" }),
-            adapter: require("axios/lib/adapters/http"),
+            paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
+            adapter: httpAdapter,
         })
 
         this.http.interceptors.response.use((res) => {
@@ -57,7 +59,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
         })
 
         this.http.interceptors.response.use((res) => {
-            const cookie = res.headers["set-cookie"]
+            const cookie = res.headers['set-cookie']
             if (cookie && cookie.length) {
                 this.http.defaults.headers.common.Cookie = cookie[0]
             }
@@ -66,7 +68,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
 
         this.http.interceptors.response.use((res) => {
             const error = res?.data?.error
-            if (typeof error === "string") {
+            if (typeof error === 'string') {
                 throw new Error(error)
             }
             return res
@@ -80,13 +82,13 @@ export class UtorrentRuntime implements BittorrentRuntime {
         })
 
         if (res.status === 401 || res.status === 402) {
-            throw new Error("Invalid credentials")
+            throw new Error('Invalid credentials')
         }
         if (res.status !== 200) {
-            throw new Error("Invalid information provided to server")
+            throw new Error('Invalid information provided to server')
         }
         if (!this.extractTokenFromHTML(res.data)) {
-            throw new Error("Failed to authenticate with server")
+            throw new Error('Failed to authenticate with server')
         }
 
         this.saveConnection(serverUrl(server), server.user, server.password)
@@ -97,19 +99,19 @@ export class UtorrentRuntime implements BittorrentRuntime {
             params: {
                 token: this.data.token,
                 t: Date.now(),
-                action: "add-url",
+                action: 'add-url',
                 s: uri,
                 download_dir: options?.saveLocation || 0,
-                path: "",
+                path: '',
             },
         }).then(() => undefined)
     }
 
     async uploadTorrent(buffer: Uint8Array, filename?: string, options?: Record<string, any>): Promise<void> {
         const formData = new FormData()
-        formData.append("torrent_file", Buffer.from(buffer), {
-            filename: filename || "upload.torrent",
-            contentType: "application/x-bittorrent",
+        formData.append('torrent_file', Buffer.from(buffer), {
+            filename: filename || 'upload.torrent',
+            contentType: 'application/x-bittorrent',
         })
 
         const contentLength = await new Promise<number>((resolve, reject) => {
@@ -119,13 +121,13 @@ export class UtorrentRuntime implements BittorrentRuntime {
         await this.http.post(`${this.data.url}/`, formData, {
             params: {
                 token: this.data.token,
-                action: "add-file",
+                action: 'add-file',
                 download_dir: options?.saveLocation || 0,
-                path: "",
+                path: '',
             },
             headers: {
                 ...formData.getHeaders(),
-                "Content-Length": contentLength.toString(),
+                'Content-Length': contentLength.toString(),
             },
         })
     }
@@ -156,51 +158,51 @@ export class UtorrentRuntime implements BittorrentRuntime {
     }
 
     start(hashes: string[]): Promise<void> {
-        return this.doAction("start", hashes)
+        return this.doAction('start', hashes)
     }
 
     stop(hashes: string[]): Promise<void> {
-        return this.doAction("stop", hashes)
+        return this.doAction('stop', hashes)
     }
 
     pause(hashes: string[]): Promise<void> {
-        return this.doAction("pause", hashes)
+        return this.doAction('pause', hashes)
     }
 
     remove(hashes: string[]): Promise<void> {
-        return this.doAction("remove", hashes)
+        return this.doAction('remove', hashes)
     }
 
     removedata(hashes: string[]): Promise<void> {
-        return this.doAction("removedata", hashes)
+        return this.doAction('removedata', hashes)
     }
 
     removetorrent(hashes: string[]): Promise<void> {
-        return this.doAction("removetorrent", hashes)
+        return this.doAction('removetorrent', hashes)
     }
 
     removedatatorrent(hashes: string[]): Promise<void> {
-        return this.doAction("removedatatorrent", hashes)
+        return this.doAction('removedatatorrent', hashes)
     }
 
     forcestart(hashes: string[]): Promise<void> {
-        return this.doAction("forcestart", hashes)
+        return this.doAction('forcestart', hashes)
     }
 
     recheck(hashes: string[]): Promise<void> {
-        return this.doAction("recheck", hashes)
+        return this.doAction('recheck', hashes)
     }
 
     queueup(hashes: string[]): Promise<void> {
-        return this.doAction("queueup", hashes)
+        return this.doAction('queueup', hashes)
     }
 
     queuedown(hashes: string[]): Promise<void> {
-        return this.doAction("queuedown", hashes)
+        return this.doAction('queuedown', hashes)
     }
 
     getprops(hashes: string[]): Promise<void> {
-        return this.doAction("getprops", hashes)
+        return this.doAction('getprops', hashes)
     }
 
     setLabel(hashes: string[], label: string): Promise<void> {
@@ -208,9 +210,9 @@ export class UtorrentRuntime implements BittorrentRuntime {
             params: {
                 token: this.data.token,
                 hash: hashes,
-                s: "label",
+                s: 'label',
                 v: label,
-                action: "setprops",
+                action: 'setprops',
                 t: Date.now(),
             },
         }).then(() => undefined)

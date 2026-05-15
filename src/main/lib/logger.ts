@@ -1,9 +1,9 @@
 import { app } from 'electron'
+import path from 'path'
+import winston from 'winston'
+import yargs from 'yargs'
 
-const winston = require('winston')
-const path = require('path')
-const program = require('yargs').parse(process.argv)
-
+const program = yargs.parse(process.argv)
 const loglevel = getLogLevel()
 const logfile = path.join(app.getPath('userData'), 'logfile.log')
 
@@ -24,4 +24,4 @@ function getLogLevel() {
     return 'info'
 }
 
-module.exports = logger
+export default logger

@@ -1,6 +1,6 @@
-const path = require('path')
+import path from 'path'
 
-module.exports = {
+export default {
   files: ['./icons/*.svg'],
   fontName: 'bittorrent',
   types: ['eot', 'woff', 'ttf', 'svg'],

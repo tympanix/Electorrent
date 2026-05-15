@@ -1,14 +1,14 @@
 import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
+import is from 'electron-is'
 
-const is = require('electron-is')
-const { IPC_CHANNELS } = require('../../shared/ipc')
-const { bittorrentManager } = require('./bittorrent')
-const settings = require('./settings')
-const updater = require('./update')
-const torrents = require('./torrents')
-const themes = require('./themes')
-const certificates = require('./certificates')
-const menu = require('./menu')
+import { IPC_CHANNELS } from '../../shared/ipc'
+import { bittorrentManager } from './bittorrent'
+import * as certificates from './certificates'
+import * as menu from './menu'
+import * as settings from './settings'
+import themes from './themes'
+import * as torrents from './torrents'
+import * as updater from './update'
 
 interface RegisterHandlersOptions {
     isDebug: boolean
@@ -36,7 +36,7 @@ function getAppMeta(isDebug: boolean) {
     }
 }
 
-exports.registerHandlers = function({ isDebug, getWindow, consumePendingLaunchPayload }: RegisterHandlersOptions) {
+export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload }: RegisterHandlersOptions) {
     menu.configure({ isDebug })
 
     ipcMain.handle(IPC_CHANNELS.app.getMeta, async function() {

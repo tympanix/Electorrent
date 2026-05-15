@@ -1,9 +1,9 @@
 import { app, type Certificate } from 'electron'
-import type { CertificatePrompt } from '../../shared/ipc-contract'
+import fs from 'fs'
+import https from 'https'
+import path from 'path'
 
-const https = require('https')
-const fs = require('fs')
-const path = require('path')
+import type { CertificatePrompt } from '../../shared/ipc-contract'
 
 const CERT_DIR = path.join(app.getPath('userData'), 'certs')
 const FINGERPRINT_PATTERN = /^(?:[A-Fa-f0-9]{2}:?)+$/
@@ -80,7 +80,7 @@ function getCertificatePath(fingerprint: string) {
     }
 }
 
-function get(server: { ip: string; port: number; path: string; id: string }, callback: (err: Error | null, cert?: unknown) => void) {
+export function get(server: { ip: string; port: number; path: string; id: string }, callback: (err: Error | null, cert?: unknown) => void) {
     const options = {
         hostname: server.ip,
         port: server.port,
@@ -129,7 +129,7 @@ function get(server: { ip: string; port: number; path: string; id: string }, cal
     req.end()
 }
 
-function installCertificate(cert: { raw?: Uint8Array; fingerprint: string }, callback: (err: Error | null, fingerprint?: string) => void) {
+export function installCertificate(cert: { raw?: Uint8Array; fingerprint: string }, callback: (err: Error | null, fingerprint?: string) => void) {
     if (!cert.raw) {
         return callback(new Error('Could not install invalid certificate'))
     }
@@ -144,7 +144,7 @@ function installCertificate(cert: { raw?: Uint8Array; fingerprint: string }, cal
     }
 }
 
-function loadCertificate(fingerprint: string) {
+export function loadCertificate(fingerprint: string) {
     const { certPath } = getCertificatePath(fingerprint)
     if (!fs.existsSync(certPath)) {
         return
@@ -157,7 +157,7 @@ function loadCertificate(fingerprint: string) {
     }
 }
 
-function sanitizeCertificateError(certificate: Certificate): CertificatePrompt {
+export function sanitizeCertificateError(certificate: Certificate): CertificatePrompt {
     return {
         source: 'main-certificate-error',
         selfSigned: !certificate.issuerCert,
@@ -180,11 +180,4 @@ function sanitizeCertificateError(certificate: Certificate): CertificatePrompt {
         validTo: certificate.validExpiry,
         serialNumber: certificate.serialNumber,
     }
-}
-
-module.exports = {
-    get,
-    installCertificate,
-    loadCertificate,
-    sanitizeCertificateError,
 }

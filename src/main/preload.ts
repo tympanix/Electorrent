@@ -1,6 +1,6 @@
-import { clipboard, contextBridge, ipcRenderer } from "electron"
+import { clipboard, contextBridge, ipcRenderer } from 'electron'
 
-const { IPC_CHANNELS } = require("../shared/ipc")
+import { IPC_CHANNELS } from '../shared/ipc'
 
 function invoke<T = unknown>(channel: string, payload?: any): Promise<T> {
     return ipcRenderer.invoke(channel, payload)
@@ -12,7 +12,7 @@ function subscribe<T = unknown>(channel: string, callback: (payload: T) => void)
     return () => ipcRenderer.removeListener(channel, listener)
 }
 
-contextBridge.exposeInMainWorld("electorrent", {
+contextBridge.exposeInMainWorld('electorrent', {
     app: {
         getMeta: () => invoke(IPC_CHANNELS.app.getMeta),
         getDefaultProtocolStatus: (protocol: string) => invoke(IPC_CHANNELS.app.getDefaultProtocolStatus, { protocol }),
@@ -31,7 +31,7 @@ contextBridge.exposeInMainWorld("electorrent", {
     launch: {
         getPending: () => invoke(IPC_CHANNELS.launch.getPending),
         onMagnets: (callback: (magnets: string[]) => void) => subscribe(IPC_CHANNELS.launch.magnets, callback),
-        onTorrentFiles: (callback: (files: Array<{ type: "file"; data: Uint8Array; filename: string; askUploadOptions?: boolean }>) => void) => subscribe(IPC_CHANNELS.launch.torrentFiles, callback),
+        onTorrentFiles: (callback: (files: Array<{ type: 'file'; data: Uint8Array; filename: string; askUploadOptions?: boolean }>) => void) => subscribe(IPC_CHANNELS.launch.torrentFiles, callback),
     },
     torrents: {
         openFiles: (askUploadOptions: boolean) => invoke(IPC_CHANNELS.torrents.openFiles, { askUploadOptions }),

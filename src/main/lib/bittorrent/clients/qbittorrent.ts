@@ -1,8 +1,8 @@
-import type { BittorrentFileSelection, BittorrentServerConfig } from "../../../../shared/ipc-contract"
-import { cleanPath, defer, serverUrl } from "../helpers"
-import type { BittorrentRuntime } from "../types"
+import QBittorrent from '@electorrent/node-qbittorrent'
 
-const QBittorrent = require("@electorrent/node-qbittorrent")
+import type { BittorrentFileSelection, BittorrentServerConfig } from '../../../../shared/ipc-contract'
+import { cleanPath, defer, serverUrl } from '../helpers'
+import type { BittorrentRuntime } from '../types'
 
 const QBITTORRENT_PRIORITY_SKIP = 0
 const QBITTORRENT_PRIORITY_NORMAL = 1
@@ -115,19 +115,19 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
     async setCategory(hashes: string[], category: string, create?: boolean): Promise<void> {
         if (create === true) {
-            await defer((done) => this.qbittorrent.createCategory(category, "", done))
+            await defer((done) => this.qbittorrent.createCategory(category, '', done))
         }
         await defer((done) => this.qbittorrent.setCategory(hashes, category, done))
     }
 
     getTorrentFiles(hash: string): Promise<any> {
         const api = this.qbittorrent?.api
-        if (!api || typeof api.getJson !== "function") {
-            return Promise.reject(new Error("qBittorrent API does not support getTorrentFiles"))
+        if (!api || typeof api.getJson !== 'function') {
+            return Promise.reject(new Error('qBittorrent API does not support getTorrentFiles'))
         }
 
         return new Promise((resolve, reject) => {
-            api.getJson("torrents/files", { qs: { hash } }, (err: any, _res: any, body: any) => {
+            api.getJson('torrents/files', { qs: { hash } }, (err: any, _res: any, body: any) => {
                 if (err) {
                     reject(err)
                     return
@@ -139,8 +139,8 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {
         const api = this.qbittorrent?.api
-        if (!api || typeof api.post !== "function") {
-            throw new Error("qBittorrent API does not support setTorrentFileSelection")
+        if (!api || typeof api.post !== 'function') {
+            throw new Error('qBittorrent API does not support setTorrentFileSelection')
         }
 
         const wantedIds = files.filter((file) => file.wanted).map((file) => file.index)
@@ -152,10 +152,10 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 return
             }
 
-            api.post("torrents/filePrio", {
+            api.post('torrents/filePrio', {
                 form: {
                     hash,
-                    id: ids.join("|"),
+                    id: ids.join('|'),
                     priority: String(priority),
                 },
             }, (err: any) => {
