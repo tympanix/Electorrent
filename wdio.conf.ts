@@ -122,7 +122,7 @@ export const config: WebdriverIO.Config = {
         'wdio:electronServiceOptions': {
             // custom application args
             appEntryPoint: 'app/main.js',
-            appArgs: ['--hidden']
+            appArgs: []
         },
         'goog:chromeOptions': {
             args: [
