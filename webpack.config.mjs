@@ -79,7 +79,7 @@ const rendererConfig = {
     rules: [
       makeTsRule('tsconfig.renderer.json'),
       {
-        test: /\.font\.(?:json|m?js)$/i,
+        test: /\.font\.json$/i,
         type: 'javascript/auto',
         use: [
           'null-loader',

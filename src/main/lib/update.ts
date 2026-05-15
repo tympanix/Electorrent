@@ -10,6 +10,7 @@ import * as electorrent from './electorrent'
 import logger from './logger'
 
 const ENDPOINT = 'https://electorrent.vercel.app/'
+const UPDATE_CONNECTION_ERROR = 'Could not check version automatically. Please visit the website instead'
 const version = app.getVersion()
 
 let updateUrl: string | null = null
@@ -238,11 +239,11 @@ function notifyUpToDate() {
 function notifyConnectionError() {
     sendUpdateStatus({
         type: 'error',
-        message: 'Could not connect to update server',
+        message: UPDATE_CONNECTION_ERROR,
     })
     notify({
         title: 'Update Error',
-        message: 'Could not connect to update server',
+        message: UPDATE_CONNECTION_ERROR,
         type: 'negative',
     })
 }
