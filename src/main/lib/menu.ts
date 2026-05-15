@@ -17,16 +17,15 @@ let menuState: MenuSessionState = {
     activeServerId: null,
     activeClientId: null,
 }
-let menuSettings: AppSettings = config.getDefaultSettings()
+const defaultMenuSettings: AppSettings = config.getDefaultSettings()
+let menuSettings: AppSettings = defaultMenuSettings
 
 function normalizeMenuSettings(settings: Partial<AppSettings> | null | undefined): AppSettings {
-    const defaultSettings = config.getDefaultSettings()
-
     return {
-        ...defaultSettings,
+        ...defaultMenuSettings,
         ...settings,
         ui: {
-            ...defaultSettings.ui,
+            ...defaultMenuSettings.ui,
             ...(settings?.ui || {}),
         },
         servers: Array.isArray(settings?.servers) ? settings.servers : [],
