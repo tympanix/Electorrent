@@ -22,6 +22,7 @@ if (!require('./lib/startup')) {
     yargs.usage(`Electorrent ${app.getVersion()}`)
     yargs.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
     yargs.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
+    yargs.boolean('hidden').describe('hidden', 'Start with the app window hidden')
 
     const config = require('./lib/config')
     const updater = require('./lib/update')
@@ -52,6 +53,10 @@ if (!require('./lib/startup')) {
         torrentFilePaths: [] as string[],
     }
 
+    function shouldKeepWindowHidden() {
+        return app.commandLine.hasSwitch('hidden')
+    }
+
     function createTorrentWindow() {
         const windowSettings: BrowserWindowConstructorOptions = {
             show: false,
@@ -74,7 +79,9 @@ if (!require('./lib/startup')) {
         menu.setWindow(torrentWindow)
 
         torrentWindow.once('ready-to-show', () => {
-            torrentWindow?.show()
+            if (!shouldKeepWindowHidden()) {
+                torrentWindow?.show()
+            }
         })
 
         torrentWindow.loadURL(`file://${__dirname}/index.html`)
@@ -153,8 +160,10 @@ if (!require('./lib/startup')) {
             if (torrentWindow) {
                 sendMagnetLinks(args)
                 sendTorrentFiles(args)
-                if (torrentWindow.isMinimized()) torrentWindow.restore()
-                torrentWindow.focus()
+                if (!shouldKeepWindowHidden()) {
+                    if (torrentWindow.isMinimized()) torrentWindow.restore()
+                    torrentWindow.focus()
+                }
             } else {
                 queuePendingLaunchArgs(args)
             }

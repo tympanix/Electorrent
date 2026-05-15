@@ -122,14 +122,10 @@ export const config: WebdriverIO.Config = {
         'wdio:electronServiceOptions': {
             // custom application args
             appEntryPoint: 'app/main.js',
-            appArgs: []
+            appArgs: ['--hidden']
         },
         'goog:chromeOptions': {
-            args: [
-                '--headless',
-                '--disable-dev-shm-usage',
-                '--no-sandbox',
-            ],
+            args: [],
         },
         'goog:loggingPrefs': {
             browser: 'ALL',
