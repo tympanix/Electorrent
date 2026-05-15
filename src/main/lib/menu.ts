@@ -35,6 +35,18 @@ const DEFAULT_MENU_SETTINGS: AppSettings = {
 
 let menuSettings: AppSettings = DEFAULT_MENU_SETTINGS
 
+function normalizeMenuSettings(settings: Partial<AppSettings> | null | undefined): AppSettings {
+    return {
+        ...DEFAULT_MENU_SETTINGS,
+        ...settings,
+        ui: {
+            ...DEFAULT_MENU_SETTINGS.ui,
+            ...(settings?.ui || {}),
+        },
+        servers: Array.isArray(settings?.servers) ? settings.servers : [],
+    }
+}
+
 function setWindow(window: BrowserWindow) {
     mainWindow = window
     buildMenu()
@@ -54,7 +66,9 @@ function serverAccelerator(index: number) {
 }
 
 function getServerLabel(server: StoredServerConfig) {
-    return server.name || `${CLIENT_METADATA[server.client]?.name || server.client} @ ${server.ip}`
+    const clientName = CLIENT_METADATA[server.client]?.name || server.client || 'Server'
+    const address = server.ip || 'unknown host'
+    return server.name || `${clientName} @ ${address}`
 }
 
 function hasActiveServer() {
@@ -330,16 +344,7 @@ function setActiveServer(server?: { id?: string | null; client?: string | null }
 }
 
 function refresh() {
-    const nextSettings = config.getAllSettings()
-    menuSettings = {
-        ...DEFAULT_MENU_SETTINGS,
-        ...nextSettings,
-        ui: {
-            ...DEFAULT_MENU_SETTINGS.ui,
-            ...(nextSettings?.ui || {}),
-        },
-        servers: Array.isArray(nextSettings?.servers) ? nextSettings.servers : [],
-    }
+    menuSettings = normalizeMenuSettings(config.getAllSettings())
     buildMenu()
 }
 
