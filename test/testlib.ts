@@ -200,6 +200,115 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             assert.isAtLeast(serverCount, 1, "at least one server should be listed")
           })
 
+          it("can rename a server", async function() {
+            await this.app.settingsGotoTab("servers")
+
+            const originalNames = await this.app.getSettingsServerNames()
+            assert.isAtLeast(originalNames.length, 1, "at least one server should be listed")
+
+            const nextName = `Renamed ${Date.now()}`
+            await this.app.renameSettingsServer(0, nextName)
+
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+            assert.equal(await this.app.getStoredServerName(0), nextName)
+
+            await this.app.openSettings()
+            await this.app.settingsGotoTab("servers")
+            assert.equal(await this.app.getStoredServerName(0), nextName)
+          })
+
+          it("can change layout columns", async function() {
+            await this.app.settingsGotoTab("layout")
+
+            const layoutColumns = await this.app.getLayoutColumns()
+            const targetColumn = layoutColumns.find((column) => column.enabled && column.name !== "Name")
+            assert.isOk(targetColumn, "expected at least one enabled column")
+
+            await this.app.setLayoutColumnEnabled(targetColumn!.name, false)
+            const updatedColumns = await this.app.getLayoutColumns()
+            assert.isFalse(updatedColumns.find((column) => column.name === targetColumn!.name)!.enabled)
+
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+
+            await this.app.openSettings()
+            await this.app.settingsGotoTab("layout")
+            const persistedColumns = await this.app.getLayoutColumns()
+            assert.isFalse(persistedColumns.find((column) => column.name === targetColumn!.name)!.enabled)
+          })
+
+          it("can enable compact listings", async function() {
+            await this.app.settingsGotoTab("general")
+            const initialState = await this.app.getGeneralToggleState("Compact Listings")
+            await this.app.setGeneralToggle("Compact Listings", !initialState)
+            assert.equal(await this.app.getGeneralToggleState("Compact Listings"), !initialState)
+
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+
+            await browser.waitUntil(async () => {
+              const className = await $("#torrentTable").getAttribute("class")
+              return className.includes("compact") === !initialState
+            })
+          })
+
+          it("can enable always ask for upload options", async function() {
+            const torrentFile = path.join(__dirname, "shared/opentracker/data/shared/slow.torrent")
+            let torrent: e2e.Torrent | undefined
+
+            await this.app.settingsGotoTab("general")
+            const initialState = await this.app.getGeneralToggleState("Always prompt for upload options")
+            await this.app.setGeneralToggle("Always prompt for upload options", true)
+            assert.isTrue(await this.app.getGeneralToggleState("Always prompt for upload options"))
+
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+
+            try {
+              torrent = await this.app.uploadTorrent({ filename: torrentFile })
+              await this.app.uploadTorrentModalVisible()
+              await this.app.uploadTorrentModalSubmit()
+              await torrent.waitForExist()
+            } finally {
+              if (torrent && await torrent.isExisting()) {
+                await torrent.delete()
+              }
+            }
+
+            if (!initialState) {
+              await this.app.openSettings()
+              await this.app.settingsGotoTab("general")
+              await this.app.setGeneralToggle("Always prompt for upload options", false)
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+            }
+          })
+
+          it("can change the theme", async function() {
+            await this.app.settingsGotoTab("general")
+            const initialTheme = await this.app.getGeneralDropdownValue("Theme")
+            const initialThemeHref = await this.app.getAppliedThemeHref()
+            const availableThemes = await this.app.getGeneralDropdownOptions("Theme")
+            const nextTheme = availableThemes.find((theme) => theme !== initialTheme)
+
+            assert.isOk(nextTheme, "expected at least two available themes")
+
+            await this.app.selectGeneralDropdownValue("Theme", nextTheme!)
+            assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
+
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+
+            await browser.waitUntil(async () => {
+              return (await this.app.getAppliedThemeHref()) !== initialThemeHref
+            })
+
+            await this.app.openSettings()
+            await this.app.settingsGotoTab("general")
+            assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
+          })
+
           it("cancel button returns to the torrents page", async function() {
             await this.app.settingsCancel()
             await this.app.torrentsPageIsVisible()
