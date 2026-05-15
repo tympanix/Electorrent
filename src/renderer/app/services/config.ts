@@ -1,9 +1,8 @@
 import { IRootScopeService } from "angular";
-import type { AppMeta, AppSettings, MenuState, StoredServerConfig } from "../../../shared/ipc-contract";
+import type { AppSettings, StoredServerConfig } from "../../../shared/ipc-contract";
 
 export let configService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
     const electorrent = window.electorrent
-    const metaPromise = electorrent.app.getMeta()
 
     var settings: AppSettings<any> = {
         startup: 'default',
@@ -70,7 +69,6 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
 
     this.appendServer = function(server) {
         settings.servers.push(server)
-        this.renderServerMenu()
     }
 
     this.getAllSettings = function() {
@@ -150,7 +148,6 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
         settings.servers = settings.servers.filter((s) => {
             return s.id !== server.id
         })
-        this.renderServerMenu()
     }
 
     this.updateServer = function(update) {
@@ -183,33 +180,6 @@ export let configService = ['$rootScope', '$bittorrent', 'notificationService', 
             }
         })
         return maxServer
-    }
-
-    this.updateApplicationMenu = function() {
-        let advancedUploadEnabled = false
-        if ($rootScope.$btclient && $rootScope.$server) {
-            advancedUploadEnabled = !!$rootScope.$btclient.uploadOptionsEnable
-        }
-
-        return metaPromise.then((meta: AppMeta) => {
-            const menuState: MenuState = {
-                isDebug: !!meta.isDebug,
-                hasActiveServer: !!$rootScope.$server,
-                advancedUploadEnabled: advancedUploadEnabled,
-                servers: this.getServers().map((server, index) => ({
-                    id: server.id,
-                    label: server.getDisplayName(),
-                    accelerator: index < 10 ? 'CmdOrCtrl+' + ((index + 1) % 10) : undefined,
-                    checked: !!$rootScope.$server && server.id === $rootScope.$server.id,
-                })),
-            }
-
-            return electorrent.menu.setState(menuState)
-        })
-    }
-
-    this.renderServerMenu = function() {
-        return this.updateApplicationMenu()
     }
 
 }];

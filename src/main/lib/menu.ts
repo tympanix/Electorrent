@@ -1,27 +1,35 @@
 import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
+import type { AppSettings, StoredServerConfig } from '../../shared/ipc-contract'
+import { CLIENT_METADATA } from '../../shared/client-metadata'
 
 const { IPC_CHANNELS } = require('../../shared/ipc')
+const config = require('./config')
 
-type ServerMenuState = {
-    id: string
-    label: string
-    accelerator?: string
-    checked?: boolean
-}
-
-type MenuState = {
+type MenuSessionState = {
     isDebug: boolean
-    hasActiveServer: boolean
-    advancedUploadEnabled: boolean
-    servers: ServerMenuState[]
+    activeServerId: string | null
+    activeClientId: string | null
 }
 
 let mainWindow: BrowserWindow | null = null
-let menuState: MenuState = {
+let menuState: MenuSessionState = {
     isDebug: false,
-    hasActiveServer: false,
-    advancedUploadEnabled: false,
-    servers: [],
+    activeServerId: null,
+    activeClientId: null,
+}
+const defaultMenuSettings: AppSettings = config.getDefaultSettings()
+let menuSettings: AppSettings = defaultMenuSettings
+
+function normalizeMenuSettings(settings: Partial<AppSettings> | null | undefined): AppSettings {
+    return {
+        ...defaultMenuSettings,
+        ...settings,
+        ui: {
+            ...defaultMenuSettings.ui,
+            ...(settings?.ui || {}),
+        },
+        servers: Array.isArray(settings?.servers) ? settings.servers : [],
+    }
 }
 
 function setWindow(window: BrowserWindow) {
@@ -42,6 +50,20 @@ function serverAccelerator(index: number) {
     return undefined
 }
 
+function getServerLabel(server: StoredServerConfig) {
+    const clientName = CLIENT_METADATA[server.client]?.name || server.client || 'Server'
+    const address = server.ip || 'unknown host'
+    return server.name || `${clientName} @ ${address}`
+}
+
+function hasActiveServer() {
+    return !!menuState.activeServerId
+}
+
+function advancedUploadEnabled() {
+    return !!menuState.activeClientId && !!CLIENT_METADATA[menuState.activeClientId]?.showAdvancedUploadMenu
+}
+
 function serverMenuItems(): MenuItemConstructorOptions[] {
     const submenu: MenuItemConstructorOptions[] = [
         {
@@ -51,13 +73,13 @@ function serverMenuItems(): MenuItemConstructorOptions[] {
         },
         {
             label: 'Set current as default',
-            enabled: !!menuState.hasActiveServer,
+            enabled: hasActiveServer(),
             click: () => sendAction({ type: 'set-current-default-server' }),
         },
         { type: 'separator' },
     ]
 
-    if (!menuState.hasActiveServer) {
+    if (!hasActiveServer()) {
         submenu.push({
             label: 'Disabled...',
             enabled: false,
@@ -65,12 +87,12 @@ function serverMenuItems(): MenuItemConstructorOptions[] {
         return submenu
     }
 
-    menuState.servers.forEach((server, index) => {
+    menuSettings.servers.forEach((server, index) => {
         submenu.push({
-            label: server.label,
-            accelerator: server.accelerator || serverAccelerator(index + 1),
+            label: getServerLabel(server),
+            accelerator: serverAccelerator(index + 1),
             type: 'radio',
-            checked: !!server.checked,
+            checked: server.id === menuState.activeServerId,
             click: () => sendAction({ type: 'connect-server', serverId: server.id }),
         })
     })
@@ -88,8 +110,8 @@ function fileMenuItems(): MenuItemConstructorOptions[] {
         {
             label: 'Add Torrent (Advanced)',
             accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+O' : 'CmdOrCtrl+Shift+O',
-            visible: !!menuState.advancedUploadEnabled,
-            enabled: !!menuState.advancedUploadEnabled,
+            visible: advancedUploadEnabled(),
+            enabled: advancedUploadEnabled(),
             click: () => sendAction({ type: 'open-add-torrent', askUploadOptions: true }),
         },
         {
@@ -100,8 +122,8 @@ function fileMenuItems(): MenuItemConstructorOptions[] {
         {
             label: 'Paste Torrent URL (Advanced)',
             accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+I' : 'CmdOrCtrl+Shift+I',
-            visible: !!menuState.advancedUploadEnabled,
-            enabled: !!menuState.advancedUploadEnabled,
+            visible: advancedUploadEnabled(),
+            enabled: advancedUploadEnabled(),
             click: () => sendAction({ type: 'paste-torrent-url', askUploadOptions: true }),
         },
     ]
@@ -293,12 +315,27 @@ function buildMenu() {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-function setState(state: Partial<MenuState>) {
+function configure(state: Pick<MenuSessionState, 'isDebug'>) {
     menuState = Object.assign({}, menuState, state)
+    refresh()
+}
+
+function setActiveServer(server?: { id?: string | null; client?: string | null } | null) {
+    menuState = Object.assign({}, menuState, {
+        activeServerId: server?.id || null,
+        activeClientId: server?.client || null,
+    })
+    buildMenu()
+}
+
+function refresh() {
+    menuSettings = normalizeMenuSettings(config.getAllSettings())
     buildMenu()
 }
 
 module.exports = {
+    configure,
+    refresh,
+    setActiveServer,
     setWindow,
-    setState,
 }

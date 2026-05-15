@@ -143,10 +143,17 @@ export class App {
     }
 
     if (options?.start !== undefined) {
-      let startToggle = modal.$(`div[data-action="start-torrent"] > input`)
-      await startToggle.waitForExist()
-      if (await startToggle.isSelected() !== options.start) {
-        await startToggle.click()
+      let startToggle = modal.$(`div[data-action="start-torrent"]`)
+      let startToggleInput = startToggle.$("input")
+      await startToggle.waitForDisplayed()
+      await startToggleInput.waitForExist()
+      await startToggleInput.scrollIntoView()
+      if (await startToggleInput.isSelected() !== options.start) {
+        await startToggleInput.click()
+        await browser.waitUntil(async () => (await startToggleInput.isSelected()) === options.start, {
+          timeout: 5_000,
+          timeoutMsg: `Expected start torrent toggle to become ${options.start}`,
+        })
       }
     }
 
@@ -303,5 +310,167 @@ export class App {
   async getSettingsServerCount(): Promise<number> {
     const serverRows = await $$("#page-settings-servers tbody tr")
     return serverRows.length
+  }
+
+  async getSettingsServerNames(): Promise<string[]> {
+    const serverRows = await $$("#page-settings-servers tbody tr")
+    const names: string[] = []
+    for (const row of serverRows) {
+      names.push((await row.$("td:nth-child(2)").getText()).trim())
+    }
+    return names
+  }
+
+  async openRenameSettingsServer(serverIndex: number) {
+    const serverRows = await $$("#page-settings-servers tbody tr")
+    const row = serverRows[serverIndex]
+    await row.waitForDisplayed()
+
+    const renameButton = row.$("button.circular.blue")
+    await renameButton.waitForClickable()
+    await renameButton.click()
+
+    const modal = $("#renameModal")
+    await modal.waitForDisplayed()
+    return modal
+  }
+
+  async getRenameSettingsServerValue(serverIndex: number) {
+    const modal = await this.openRenameSettingsServer(serverIndex)
+    const input = modal.$("input[name='servername']")
+    await input.waitForDisplayed()
+    await browser.waitUntil(async () => {
+      return (await input.getValue()).length > 0
+    })
+    const value = await input.getValue()
+
+    const cancelButton = modal.$("button.deny")
+    await cancelButton.waitForClickable()
+    await cancelButton.click()
+    await modal.waitForDisplayed({ reverse: true })
+
+    return value
+  }
+
+  async renameSettingsServer(serverIndex: number, nextName: string) {
+    const modal = await this.openRenameSettingsServer(serverIndex)
+
+    const input = modal.$("input[name='servername']")
+    await input.waitForDisplayed()
+    await input.clearValue()
+    await input.setValue(nextName)
+
+    const approveButton = modal.$("button.approve")
+    await approveButton.waitForEnabled()
+    await approveButton.click()
+    await modal.waitForDisplayed({ reverse: true })
+  }
+
+  async getLayoutColumns(): Promise<Array<{ name: string, enabled: boolean }>> {
+    const rows = await $$("#page-settings-layout tbody tr")
+    const columns: Array<{ name: string, enabled: boolean }> = []
+    for (const row of rows) {
+      const name = (await row.$("td:nth-child(3)").getText()).trim()
+      const enabled = await row.$("td:nth-child(2) input[type='checkbox']").isSelected()
+      columns.push({ name, enabled })
+    }
+    return columns
+  }
+
+  async setLayoutColumnEnabled(columnName: string, enabled: boolean) {
+    const rows = await $$("#page-settings-layout tbody tr")
+    for (const row of rows) {
+      const name = (await row.$("td:nth-child(3)").getText()).trim()
+      if (name !== columnName) {
+        continue
+      }
+
+      const checkbox = row.$("td:nth-child(2) input[type='checkbox']")
+      await checkbox.waitForExist()
+      if (await checkbox.isSelected() !== enabled) {
+        await checkbox.click()
+      }
+      return
+    }
+
+    throw new Error(`Layout column "${columnName}" was not found`)
+  }
+
+  async getTorrentTableColumns(): Promise<string[]> {
+    const columns = await $$("#torrentTable thead th")
+    const names: string[] = []
+    for (const column of columns) {
+      names.push((await column.getText()).trim())
+    }
+    return names
+  }
+
+  private async getGeneralSettingsCard(settingName: string) {
+    const generalPage = $("#page-settings-general")
+    await generalPage.waitForDisplayed()
+    const card = $(`//*[@id='page-settings-general']//div[contains(@class, 'ui card')][.//*[contains(@class, 'header')][contains(., '${settingName}')]]`)
+    await card.waitForDisplayed()
+    return card
+  }
+
+  async getGeneralToggleState(settingName: string) {
+    const card = await this.getGeneralSettingsCard(settingName)
+    return await card.$("input[type='checkbox']").isSelected()
+  }
+
+  async setGeneralToggle(settingName: string, enabled: boolean) {
+    const card = await this.getGeneralSettingsCard(settingName)
+    const toggle = card.$("input[type='checkbox']")
+    await toggle.waitForExist()
+    if (await toggle.isSelected() !== enabled) {
+      await toggle.click()
+    }
+  }
+
+  async getGeneralDropdownValue(settingName: string) {
+    const card = await this.getGeneralSettingsCard(settingName)
+    const text = card.$(".ui.selection.dropdown .text")
+    await text.waitForDisplayed()
+    return (await text.getText()).trim()
+  }
+
+  async getGeneralDropdownOptions(settingName: string): Promise<string[]> {
+    const card = await this.getGeneralSettingsCard(settingName)
+    const dropdown = card.$(".ui.selection.dropdown")
+    await dropdown.waitForClickable()
+    await dropdown.click()
+
+    const options = await dropdown.$$(".menu .item")
+    const values: string[] = []
+    for (const option of options) {
+      values.push((await option.getText()).trim())
+    }
+    await dropdown.click()
+    return values.filter(Boolean)
+  }
+
+  async selectGeneralDropdownValue(settingName: string, optionText: string) {
+    const card = await this.getGeneralSettingsCard(settingName)
+    const dropdown = card.$(".ui.selection.dropdown")
+    await dropdown.waitForClickable()
+    await dropdown.click()
+
+    const option = dropdown.$(`.//div[contains(@class, 'menu')]//div[contains(@class, 'item') and normalize-space(.)='${optionText}']`)
+    await option.waitForDisplayed()
+    await option.click()
+  }
+
+  async getAppliedThemeHref() {
+    const themeLink = $("head link[ng-href]")
+    await themeLink.waitForExist()
+    return await themeLink.getAttribute("href")
+  }
+
+  async getStoredServerName(serverIndex: number) {
+    return await browser.execute((index) => {
+      const injector = angular.element(document.body).injector()
+      const config = injector.get("configService")
+      return config.getAllSettingsCopy().servers[index]?.name || ""
+    }, serverIndex)
   }
 }

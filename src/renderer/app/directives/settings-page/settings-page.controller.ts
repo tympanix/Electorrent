@@ -130,7 +130,6 @@ export class SettingsPageController {
                 return false;
             }
             $scope.renameData.server.name = $scope.renameData.name;
-            config.updateApplicationMenu();
             return true;
         };
 
@@ -181,7 +180,6 @@ export class SettingsPageController {
                 return writeSettings();
             }).then(() => {
                 $scope.close();
-                config.updateApplicationMenu();
                 $rootScope.$broadcast("new:settings", $scope.settings);
                 $notify.ok("Saved Settings", "Your settings have been updated");
             }).catch((err: unknown) => {

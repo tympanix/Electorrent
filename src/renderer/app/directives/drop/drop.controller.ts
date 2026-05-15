@@ -17,7 +17,7 @@ export class DropDownController {
 
     add_option(title: string, value: any) {
         this.$scope.options.push({ title, value });
-        if (value === this.$scope.model) {
+        if (value === this.$scope.model && this.$scope.original_title !== undefined) {
             this.update_title(value);
         }
     }

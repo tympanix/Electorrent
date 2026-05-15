@@ -37,6 +37,8 @@ function getAppMeta(isDebug: boolean) {
 }
 
 exports.registerHandlers = function({ isDebug, getWindow, consumePendingLaunchPayload }: RegisterHandlersOptions) {
+    menu.configure({ isDebug })
+
     ipcMain.handle(IPC_CHANNELS.app.getMeta, async function() {
         return getAppMeta(isDebug)
     })
@@ -72,8 +74,13 @@ exports.registerHandlers = function({ isDebug, getWindow, consumePendingLaunchPa
     ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings }) {
         return new Promise<void>((resolve, reject) => {
             config.saveAll(settings, function(err: Error) {
-                if (err) reject(err)
-                else resolve()
+                if (err) {
+                    reject(err)
+                    return
+                }
+
+                menu.refresh()
+                resolve()
             })
         })
     })
@@ -91,11 +98,13 @@ exports.registerHandlers = function({ isDebug, getWindow, consumePendingLaunchPa
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
-        return bittorrentManager.connect(event.sender, server)
+        await bittorrentManager.connect(event.sender, server)
+        menu.setActiveServer(server)
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.disconnect, async function(event: IpcMainInvokeEvent) {
-        return bittorrentManager.disconnect(event.sender)
+        await bittorrentManager.disconnect(event.sender)
+        menu.setActiveServer(null)
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.getSnapshot, async function(event: IpcMainInvokeEvent, { fullUpdate } = {}) {
@@ -164,9 +173,5 @@ exports.registerHandlers = function({ isDebug, getWindow, consumePendingLaunchPa
     ipcMain.handle(IPC_CHANNELS.certificates.load, async function(_event: IpcMainInvokeEvent, { fingerprint }) {
         const cert = certificates.loadCertificate(fingerprint)
         return cert ? new Uint8Array(cert) : null
-    })
-
-    ipcMain.handle(IPC_CHANNELS.menu.setState, async function(_event: IpcMainInvokeEvent, state) {
-        menu.setState(state)
     })
 }

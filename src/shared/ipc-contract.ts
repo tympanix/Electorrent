@@ -162,20 +162,6 @@ export interface CertificateInstallResult {
     fingerprint: string
 }
 
-export interface MenuServerState {
-    id: string
-    label: string
-    accelerator?: string
-    checked?: boolean
-}
-
-export interface MenuState {
-    isDebug: boolean
-    hasActiveServer: boolean
-    advancedUploadEnabled: boolean
-    servers: MenuServerState[]
-}
-
 export type MenuAction =
     | { type: "show-settings" }
     | { type: "show-servers" }
@@ -240,7 +226,6 @@ export interface ElectorrentBridge {
         onPush(callback: (notification: NotificationPayload) => void): Unsubscribe
     }
     menu: {
-        setState(state: MenuState): Promise<void>
         onAction(callback: (action: MenuAction) => void): Unsubscribe
     }
     clipboard: {
