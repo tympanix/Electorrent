@@ -143,10 +143,17 @@ export class App {
     }
 
     if (options?.start !== undefined) {
-      let startToggle = modal.$(`div[data-action="start-torrent"] > input`)
-      await startToggle.waitForExist()
-      if (await startToggle.isSelected() !== options.start) {
-        await startToggle.click()
+      let startToggle = modal.$(`div[data-action="start-torrent"]`)
+      let startToggleInput = startToggle.$("input")
+      await startToggle.waitForDisplayed()
+      await startToggleInput.waitForExist()
+      await startToggleInput.scrollIntoView()
+      if (await startToggleInput.isSelected() !== options.start) {
+        await startToggleInput.click()
+        await browser.waitUntil(async () => (await startToggleInput.isSelected()) === options.start, {
+          timeout: 5_000,
+          timeoutMsg: `Expected start torrent toggle to become ${options.start}`,
+        })
       }
     }
 

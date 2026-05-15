@@ -126,9 +126,8 @@ export const config: WebdriverIO.Config = {
         },
         'goog:chromeOptions': {
             args: [
-                '--headless',
-                '--disable-dev-shm-usage',
                 '--no-sandbox',
+                '--disable-dev-shm-usage',
             ],
         },
         'goog:loggingPrefs': {
