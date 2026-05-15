@@ -17,30 +17,16 @@ let menuState: MenuSessionState = {
     activeServerId: null,
     activeClientId: null,
 }
-const DEFAULT_MENU_SETTINGS: AppSettings = {
-    startup: 'default',
-    refreshRate: 2000,
-    ui: {
-        resizeMode: '',
-        notifications: true,
-        displaySize: 'normal',
-        displayCompact: false,
-        cleanNames: true,
-        fixedHeader: false,
-        theme: 'light',
-    },
-    servers: [],
-    certificates: [],
-}
-
-let menuSettings: AppSettings = DEFAULT_MENU_SETTINGS
+let menuSettings: AppSettings = config.getDefaultSettings()
 
 function normalizeMenuSettings(settings: Partial<AppSettings> | null | undefined): AppSettings {
+    const defaultSettings = config.getDefaultSettings()
+
     return {
-        ...DEFAULT_MENU_SETTINGS,
+        ...defaultSettings,
         ...settings,
         ui: {
-            ...DEFAULT_MENU_SETTINGS.ui,
+            ...defaultSettings.ui,
             ...(settings?.ui || {}),
         },
         servers: Array.isArray(settings?.servers) ? settings.servers : [],
