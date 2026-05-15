@@ -1,7 +1,7 @@
 import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
 
 const is = require('electron-is')
-const { IPC_CHANNELS } = require('../../common/ipc')
+const { IPC_CHANNELS } = require('../../shared/ipc')
 const { bittorrentManager } = require('./bittorrent')
 const config = require('./config')
 const updater = require('./update')
