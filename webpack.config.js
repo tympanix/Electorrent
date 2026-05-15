@@ -24,8 +24,8 @@ const commonPlugins = [
   new CopyWebpackPlugin({
     patterns: [
       {
-        from: path.resolve(__dirname, 'src/common'),
-        to: path.resolve(outDir, 'common'),
+        from: path.resolve(__dirname, 'src/shared'),
+        to: path.resolve(outDir, 'shared'),
       },
       {
         from: path.resolve(__dirname, 'build'),

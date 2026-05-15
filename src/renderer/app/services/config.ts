@@ -1,5 +1,5 @@
 import { IRootScopeService } from "angular";
-import type { AppMeta, AppSettings, MenuState, StoredServerConfig } from "../../../common/ipc-contract";
+import type { AppMeta, AppSettings, MenuState, StoredServerConfig } from "../../../shared/ipc-contract";
 
 export let configService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
     const electorrent = window.electorrent

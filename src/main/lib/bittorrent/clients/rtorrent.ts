@@ -1,4 +1,4 @@
-import type { BittorrentServerConfig } from "../../../../common/ipc-contract"
+import type { BittorrentServerConfig } from "../../../../shared/ipc-contract"
 import { cleanPath, defer } from "../helpers"
 import type { BittorrentRuntime } from "../types"
 

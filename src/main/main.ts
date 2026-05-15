@@ -17,7 +17,7 @@ declare const __non_webpack_require__: NodeRequire | undefined
 const yargs = require('yargs')
 const path = require('path')
 const is = require('electron-is')
-const { IPC_CHANNELS } = require('../common/ipc')
+const { IPC_CHANNELS } = require('../shared/ipc')
 const { bittorrentManager } = require('./lib/bittorrent')
 
 if (!require('./lib/startup')) {

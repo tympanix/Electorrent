@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios"
-import type { BittorrentServerConfig } from "../../../../common/ipc-contract"
+import type { BittorrentServerConfig } from "../../../../shared/ipc-contract"
 import { createHttpsAgent, serverUrl } from "../helpers"
 import type { BittorrentRuntime } from "../types"
 
