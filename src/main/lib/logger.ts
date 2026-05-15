@@ -3,7 +3,7 @@ import path from 'path'
 import winston from 'winston'
 import yargs from 'yargs'
 
-const program = yargs.parse(process.argv)
+const program = yargs(process.argv.slice(1)).parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean }
 const loglevel = getLogLevel()
 const logfile = path.join(app.getPath('userData'), 'logfile.log')
 

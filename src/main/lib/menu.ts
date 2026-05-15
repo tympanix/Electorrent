@@ -181,7 +181,7 @@ function viewMenuItems(): MenuItemConstructorOptions[] {
             accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
             click(_item, focusedWindow) {
                 if (focusedWindow) {
-                    ;(focusedWindow as BrowserWindow).webContents.toggleDevTools()
+                    (focusedWindow as BrowserWindow).webContents.toggleDevTools()
                 }
             },
         },

@@ -133,24 +133,24 @@ function manualUpdater() {
 
     request(updateUrl, function(error: Error | null, response: { statusCode: number }, body: string) {
         if (error) {
-            logger.error('Manual updater error', arguments)
+            logger.error('Manual updater error', error)
             notifyUpdateError()
             return
         }
 
         if (response.statusCode === 204) {
-            logger.verbose('Manual no new update available', arguments)
+            logger.verbose('Manual no new update available', response.statusCode)
             notifyUpToDate()
             return
         }
 
         if (response.statusCode === 200) {
-            logger.verbose('Manual updater found update', arguments)
+            logger.verbose('Manual updater found update', response.statusCode)
 
             const info = JSON.parse(body)
             const newVersion = semver.clean(info.name)
             if (!semver.valid(newVersion)) {
-                logger.error('Manual updater invalid semver', arguments)
+                logger.error('Manual updater invalid semver', info.name)
                 return
             }
 
@@ -250,7 +250,7 @@ function notifyConnectionError() {
 function squirrelUpdater() {
     if (!updateUrl || !is.windows()) return
 
-    autoUpdater.setFeedURL(updateUrl)
+    autoUpdater.setFeedURL({ url: updateUrl })
 
     autoUpdater.on('error', function(err: Error) {
         logger.error('Auto updater error', err)

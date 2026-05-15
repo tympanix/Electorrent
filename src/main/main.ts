@@ -20,11 +20,12 @@ if (!startup) {
 }
 
 async function bootstrap() {
-    yargs.version(() => app.getVersion())
-    yargs.help('h').alias('h', 'help')
-    yargs.usage(`Electorrent ${app.getVersion()}`)
-    yargs.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
-    yargs.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
+    const parser = yargs(process.argv.slice(1))
+    parser.version(app.getVersion())
+    parser.help('h').alias('h', 'help')
+    parser.usage(`Electorrent ${app.getVersion()}`)
+    parser.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
+    parser.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
 
     const [
         { IPC_CHANNELS },
@@ -53,7 +54,7 @@ async function bootstrap() {
     logger.debug('Starting Electorrent in debug mode')
     logger.verbose('Verbose logging enabled')
 
-    const program = yargs.argv
+    const program = parser.parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean }
 
     if (!app.isPackaged) {
         try {
@@ -61,11 +62,13 @@ async function bootstrap() {
                 ? __non_webpack_require__
                 : module.require.bind(module)
             runtimeRequire('electron-reloader')(module)
-        } catch {}
+        } catch {
+            // Ignore reloader setup failures in development.
+        }
     }
 
     let torrentWindow: BrowserWindow | null
-    let pendingLaunchPayload = {
+    const pendingLaunchPayload = {
         magnets: [] as string[],
         torrentFilePaths: [] as string[],
     }

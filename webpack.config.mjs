@@ -65,7 +65,7 @@ const rendererConfig = {
   entry: {
     app: [
       path.resolve(__dirname, 'src/renderer/vendor.ts'),
-      path.resolve(__dirname, 'src/renderer/assets/css/fonts/bittorrent.font.mjs'),
+      path.resolve(__dirname, 'src/renderer/assets/css/fonts/bittorrent.font.json'),
       path.resolve(__dirname, 'src/renderer/app.ts'),
     ],
   },
@@ -79,7 +79,8 @@ const rendererConfig = {
     rules: [
       makeTsRule('tsconfig.renderer.json'),
       {
-        test: /\.font\.m?js$/i,
+        test: /\.font\.(?:json|m?js)$/i,
+        type: 'javascript/auto',
         use: [
           'null-loader',
           'webfonts-loader',
