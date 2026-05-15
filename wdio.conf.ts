@@ -125,7 +125,10 @@ export const config: WebdriverIO.Config = {
             appArgs: []
         },
         'goog:chromeOptions': {
-            args: [],
+            args: [
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+            ],
         },
         'goog:loggingPrefs': {
             browser: 'ALL',
