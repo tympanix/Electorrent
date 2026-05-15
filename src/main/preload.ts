@@ -12,12 +12,6 @@ function subscribe<T = unknown>(channel: string, callback: (payload: T) => void)
     return () => ipcRenderer.removeListener(channel, listener)
 }
 
-function subscribeLegacy<T = unknown>(channel: string, callback: (payload: T) => void, mapArgs: (...args: any[]) => T) {
-    const listener = (_event: Electron.IpcRendererEvent, ...args: any[]) => callback(mapArgs(...args))
-    ipcRenderer.on(channel, listener)
-    return () => ipcRenderer.removeListener(channel, listener)
-}
-
 contextBridge.exposeInMainWorld("electorrent", {
     app: {
         getMeta: () => invoke(IPC_CHANNELS.app.getMeta),
@@ -36,25 +30,8 @@ contextBridge.exposeInMainWorld("electorrent", {
     },
     launch: {
         getPending: () => invoke(IPC_CHANNELS.launch.getPending),
-        onMagnets: (callback: (magnets: string[]) => void) => {
-            const unsubscribers = [
-                subscribe(IPC_CHANNELS.launch.magnets, callback),
-                subscribeLegacy("magnet", callback, (magnets) => magnets),
-            ]
-            return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
-        },
-        onTorrentFiles: (callback: (files: Array<{ type: "file"; data: Uint8Array; filename: string; askUploadOptions?: boolean }>) => void) => {
-            const unsubscribers = [
-                subscribe(IPC_CHANNELS.launch.torrentFiles, callback),
-                subscribeLegacy("torrentfiles", callback, (data, filename, askUploadOptions) => ([{
-                    type: "file" as const,
-                    data: new Uint8Array(data),
-                    filename: String(filename),
-                    askUploadOptions: !!askUploadOptions,
-                }])),
-            ]
-            return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
-        },
+        onMagnets: (callback: (magnets: string[]) => void) => subscribe(IPC_CHANNELS.launch.magnets, callback),
+        onTorrentFiles: (callback: (files: Array<{ type: "file"; data: Uint8Array; filename: string; askUploadOptions?: boolean }>) => void) => subscribe(IPC_CHANNELS.launch.torrentFiles, callback),
     },
     torrents: {
         openFiles: (askUploadOptions: boolean) => invoke(IPC_CHANNELS.torrents.openFiles, { askUploadOptions }),
