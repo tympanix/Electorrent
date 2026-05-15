@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+      "baseUrl": ".",
       "moduleResolution": "node",
       "noImplicitAny": false,
       "target": "es2019",
@@ -20,7 +21,27 @@
         "node_modules/@types",
         "src/shared/types"
       ],
-      "types": ["node"]
+      "types": ["node"],
+      "paths": {
+        "@main": [
+          "src/main"
+        ],
+        "@main/*": [
+          "src/main/*"
+        ],
+        "@renderer": [
+          "src/renderer"
+        ],
+        "@renderer/*": [
+          "src/renderer/*"
+        ],
+        "@shareed": [
+          "src/shared"
+        ],
+        "@shareed/*": [
+          "src/shared/*"
+        ]
+      }
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules"]

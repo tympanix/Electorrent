@@ -13,6 +13,11 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 const sharedResolve = {
   extensions: ['.ts', '.tsx', '.js', '.json'],
+  alias: {
+    '@main': path.resolve(__dirname, 'src/main'),
+    '@renderer': path.resolve(__dirname, 'src/renderer'),
+    '@shareed': path.resolve(__dirname, 'src/shared'),
+  },
   modules: ['node_modules', 'src'],
 }
 

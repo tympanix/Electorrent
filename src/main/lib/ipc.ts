@@ -1,7 +1,7 @@
 import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
 import is from 'electron-is'
 
-import { IPC_CHANNELS } from '../../shared/ipc'
+import { IPC_CHANNELS } from '@shareed/ipc'
 import { bittorrentManager } from './bittorrent'
 import * as certificates from './certificates'
 import * as menu from './menu'

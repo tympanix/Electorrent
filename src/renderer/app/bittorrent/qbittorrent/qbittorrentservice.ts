@@ -1,8 +1,8 @@
-import { Torrent } from "../abstracttorrent";
-import { TorrentActionList, TorrentClient, TorrentUpdates, ContextActionList, TorrentUploadOptions, TorrentUploadOptionsEnable } from "../torrentclient";
-import { TorrentFile } from "../abstracttorrent";
+import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
+import { TorrentActionList, TorrentClient, TorrentUpdates, ContextActionList, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@renderer/app/bittorrent/torrentclient";
+import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 import { QBittorrentTorrent } from "./torrentq";
-import { addTorrentUrl, connect, getSnapshot, getTorrentFiles, invokeAction, setTorrentFileSelection, uploadTorrent } from "../ipc";
+import { addTorrentUrl, connect, getSnapshot, getTorrentFiles, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export interface QBittorrentUploadOptions {
   savepath?: string

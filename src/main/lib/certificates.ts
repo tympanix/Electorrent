@@ -3,7 +3,7 @@ import fs from 'fs'
 import https from 'https'
 import path from 'path'
 
-import type { CertificatePrompt } from '../../shared/ipc-contract'
+import type { CertificatePrompt } from '@shareed/ipc-contract'
 
 const CERT_DIR = path.join(app.getPath('userData'), 'certs')
 const FINGERPRINT_PATTERN = /^(?:[A-Fa-f0-9]{2}:?)+$/

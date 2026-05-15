@@ -2,7 +2,7 @@
  * Builds a flat tree-like list of rows (folders + files) from TorrentFile[].
  * Folders have size = sum of file sizes inside; folders can be expanded/collapsed.
  */
-import { TorrentFile } from "../../bittorrent/abstracttorrent";
+import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 
 export interface TorrentFileRow {
   depth: number;

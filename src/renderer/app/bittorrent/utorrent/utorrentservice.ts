@@ -1,6 +1,6 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "../torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { UtorrentTorrent } from "./torrentu";
-import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "../ipc";
+import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   public name = "µTorrent"

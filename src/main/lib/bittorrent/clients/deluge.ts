@@ -1,8 +1,8 @@
 import Deluge from '@electorrent/node-deluge'
 
-import type { BittorrentServerConfig } from '../../../../shared/ipc-contract'
-import { cleanPath, defer, serverUrl } from '../helpers'
-import type { BittorrentRuntime } from '../types'
+import type { BittorrentServerConfig } from '@shareed/ipc-contract'
+import { cleanPath, defer, serverUrl } from '@main/lib/bittorrent/helpers'
+import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 
 export class DelugeRuntime implements BittorrentRuntime {
     private deluge: any

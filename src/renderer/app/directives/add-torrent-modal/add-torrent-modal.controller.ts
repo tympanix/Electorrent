@@ -1,6 +1,6 @@
 import { IRootScopeService } from "angular";
-import { TorrentUploadOptions } from "../../bittorrent/torrentclient";
-import { ModalController } from "../modal/modal.controller";
+import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import { AddTorrentModalScope } from "./add-torrent-modal.directive";
 
 export class AddTorrentModalController {

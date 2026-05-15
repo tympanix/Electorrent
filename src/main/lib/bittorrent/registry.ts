@@ -1,9 +1,9 @@
-import { DelugeRuntime } from "./clients/deluge"
-import { QBittorrentRuntime } from "./clients/qbittorrent"
-import { RtorrentRuntime } from "./clients/rtorrent"
-import { SynologyRuntime } from "./clients/synology"
-import { TransmissionRuntime } from "./clients/transmission"
-import { UtorrentRuntime } from "./clients/utorrent"
+import { DelugeRuntime } from "@main/lib/bittorrent/clients/deluge"
+import { QBittorrentRuntime } from "@main/lib/bittorrent/clients/qbittorrent"
+import { RtorrentRuntime } from "@main/lib/bittorrent/clients/rtorrent"
+import { SynologyRuntime } from "@main/lib/bittorrent/clients/synology"
+import { TransmissionRuntime } from "@main/lib/bittorrent/clients/transmission"
+import { UtorrentRuntime } from "@main/lib/bittorrent/clients/utorrent"
 import type { BittorrentRuntime } from "./types"
 
 export function createRuntime(clientId: string): BittorrentRuntime {

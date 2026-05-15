@@ -1,4 +1,4 @@
-import type { AppMeta, ThemeInfo } from "../../../../shared/ipc-contract";
+import type { AppMeta, ThemeInfo } from "@shareed/ipc-contract";
 
 export class SettingsPageController {
     static $inject = ["$rootScope", "$scope", "$injector", "$bittorrent", "$btclients", "settingsService", "notificationService"];

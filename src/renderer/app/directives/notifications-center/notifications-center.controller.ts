@@ -1,5 +1,5 @@
 import { IScope } from "angular";
-import type { CertificatePrompt, UpdateEvent } from "../../../../shared/ipc-contract";
+import type { CertificatePrompt, UpdateEvent } from "@shareed/ipc-contract";
 
 interface NotificationsCenterScope extends IScope {
     updateData: {

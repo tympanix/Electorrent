@@ -1,6 +1,6 @@
 import { IDirective, IDirectiveFactory, IScope } from "angular";
-import { Torrent } from "../../bittorrent";
-import { TorrentUploadOptions } from "../../bittorrent/torrentclient";
+import { Torrent } from "@renderer/app/bittorrent";
+import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { AddTorrentModalController } from "./add-torrent-modal.controller";
 import html from "./add-torrent-modal.template.html"
 
