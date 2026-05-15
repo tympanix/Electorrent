@@ -1,5 +1,5 @@
 import { app, type Certificate } from 'electron'
-import type { CertificatePrompt } from '../../common/ipc-contract'
+import type { CertificatePrompt } from '../../shared/ipc-contract'
 
 const https = require('https')
 const fs = require('fs')
