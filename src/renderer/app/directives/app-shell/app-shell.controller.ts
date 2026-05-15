@@ -248,7 +248,6 @@ export class AppShellController {
                 console.error(err);
                 pageSettings("connection");
             }).then(() => {
-                config.updateApplicationMenu();
                 $scope.$apply();
             });
         };

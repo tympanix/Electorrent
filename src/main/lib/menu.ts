@@ -1,28 +1,35 @@
 import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
+import type { AppSettings, StoredServerConfig } from '../../shared/ipc-contract'
 
 const { IPC_CHANNELS } = require('../../shared/ipc')
+const config = require('./config')
 
-type ServerMenuState = {
-    id: string
-    label: string
-    accelerator?: string
-    checked?: boolean
-}
-
-type MenuState = {
+type MenuSessionState = {
     isDebug: boolean
-    hasActiveServer: boolean
-    advancedUploadEnabled: boolean
-    servers: ServerMenuState[]
+    activeServerId: string | null
+    activeClientId: string | null
 }
 
 let mainWindow: BrowserWindow | null = null
-let menuState: MenuState = {
+let menuState: MenuSessionState = {
     isDebug: false,
-    hasActiveServer: false,
-    advancedUploadEnabled: false,
-    servers: [],
+    activeServerId: null,
+    activeClientId: null,
 }
+
+const CLIENT_NAMES: Record<string, string> = {
+    utorrent: 'µTorrent',
+    qbittorrent: 'qBittorrent',
+    transmission: 'Transmission',
+    rtorrent: 'rTorrent',
+    synology: 'Synology Download Station',
+    deluge: 'Deluge',
+}
+
+const ADVANCED_UPLOAD_CLIENTS = new Set([
+    'qbittorrent',
+    'transmission',
+])
 
 function setWindow(window: BrowserWindow) {
     mainWindow = window
@@ -42,7 +49,25 @@ function serverAccelerator(index: number) {
     return undefined
 }
 
+function getSettings(): AppSettings {
+    return config.getAllSettings()
+}
+
+function getServerLabel(server: StoredServerConfig) {
+    return server.name || `${CLIENT_NAMES[server.client] || server.client} @ ${server.ip}`
+}
+
+function hasActiveServer() {
+    return !!menuState.activeServerId
+}
+
+function advancedUploadEnabled() {
+    return !!menuState.activeClientId && ADVANCED_UPLOAD_CLIENTS.has(menuState.activeClientId)
+}
+
 function serverMenuItems(): MenuItemConstructorOptions[] {
+    const settings = getSettings()
+    const servers = Array.isArray(settings?.servers) ? settings.servers : []
     const submenu: MenuItemConstructorOptions[] = [
         {
             label: 'Add new server...',
@@ -51,13 +76,13 @@ function serverMenuItems(): MenuItemConstructorOptions[] {
         },
         {
             label: 'Set current as default',
-            enabled: !!menuState.hasActiveServer,
+            enabled: hasActiveServer(),
             click: () => sendAction({ type: 'set-current-default-server' }),
         },
         { type: 'separator' },
     ]
 
-    if (!menuState.hasActiveServer) {
+    if (!hasActiveServer()) {
         submenu.push({
             label: 'Disabled...',
             enabled: false,
@@ -65,12 +90,12 @@ function serverMenuItems(): MenuItemConstructorOptions[] {
         return submenu
     }
 
-    menuState.servers.forEach((server, index) => {
+    servers.forEach((server, index) => {
         submenu.push({
-            label: server.label,
-            accelerator: server.accelerator || serverAccelerator(index + 1),
+            label: getServerLabel(server),
+            accelerator: serverAccelerator(index + 1),
             type: 'radio',
-            checked: !!server.checked,
+            checked: server.id === menuState.activeServerId,
             click: () => sendAction({ type: 'connect-server', serverId: server.id }),
         })
     })
@@ -88,8 +113,8 @@ function fileMenuItems(): MenuItemConstructorOptions[] {
         {
             label: 'Add Torrent (Advanced)',
             accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+O' : 'CmdOrCtrl+Shift+O',
-            visible: !!menuState.advancedUploadEnabled,
-            enabled: !!menuState.advancedUploadEnabled,
+            visible: advancedUploadEnabled(),
+            enabled: advancedUploadEnabled(),
             click: () => sendAction({ type: 'open-add-torrent', askUploadOptions: true }),
         },
         {
@@ -100,8 +125,8 @@ function fileMenuItems(): MenuItemConstructorOptions[] {
         {
             label: 'Paste Torrent URL (Advanced)',
             accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+I' : 'CmdOrCtrl+Shift+I',
-            visible: !!menuState.advancedUploadEnabled,
-            enabled: !!menuState.advancedUploadEnabled,
+            visible: advancedUploadEnabled(),
+            enabled: advancedUploadEnabled(),
             click: () => sendAction({ type: 'paste-torrent-url', askUploadOptions: true }),
         },
     ]
@@ -293,12 +318,26 @@ function buildMenu() {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-function setState(state: Partial<MenuState>) {
+function configure(state: Pick<MenuSessionState, 'isDebug'>) {
     menuState = Object.assign({}, menuState, state)
     buildMenu()
 }
 
+function setActiveServer(server?: { id?: string | null; client?: string | null } | null) {
+    menuState = Object.assign({}, menuState, {
+        activeServerId: server?.id || null,
+        activeClientId: server?.client || null,
+    })
+    buildMenu()
+}
+
+function refresh() {
+    buildMenu()
+}
+
 module.exports = {
+    configure,
+    refresh,
+    setActiveServer,
     setWindow,
-    setState,
 }

@@ -57,7 +57,6 @@ torrentApp.constant('$btclients', {
 // Configure the client
 torrentApp.run(["configService", function(config){
     config.initSettings()
-        .then(() => config.updateApplicationMenu())
         .catch(() => {
             window.electorrent.app.reportCorruptSettings()
         })
