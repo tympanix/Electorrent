@@ -27,5 +27,7 @@
     "url": "https://github.com/tympanix/Electorrent/issues"
   },
   "homepage": "https://github.com/tympanix/Electorrent#readme",
-  "dependencies": {}
+  "dependencies": {
+    "axios": "^0.24.0"
+  }
 }
