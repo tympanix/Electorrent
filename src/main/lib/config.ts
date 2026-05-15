@@ -1,4 +1,5 @@
 import { app, dialog, shell, type BrowserWindow, type MessageBoxOptions } from 'electron'
+import type { AppSettings } from '../../shared/ipc-contract'
 
 const fs = require('fs')
 const path = require('path')
@@ -6,8 +7,17 @@ const electorrent = require('./electorrent')
 
 let data: any = null
 
-const defaultSettings = {
+type MainAppSettings = AppSettings & {
+    debugMode?: boolean
+    autoRemoveTorrents?: boolean
+    alwaysPromptUploadOptions?: boolean
+}
+
+const defaultSettings: MainAppSettings = {
+    startup: 'default',
+    refreshRate: 2000,
     servers: [],
+    certificates: [],
     automaticUpdates: true,
     debugMode: false,
     autoRemoveTorrents: false,
@@ -15,6 +25,10 @@ const defaultSettings = {
     ui: {
         resizeMode: 'FixedResizer',
         notifications: true,
+        displaySize: 'normal',
+        displayCompact: false,
+        cleanNames: true,
+        fixedHeader: false,
         theme: 'light',
     },
 }
@@ -137,6 +151,10 @@ exports.put = function(key: string, value: any, callback?: (err?: Error | null) 
 exports.getAllSettings = function() {
     load()
     return copy(data)
+}
+
+exports.getDefaultSettings = function() {
+    return copy(defaultSettings)
 }
 
 exports.settingsReference = function() {

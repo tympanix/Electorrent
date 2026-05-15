@@ -48,7 +48,6 @@ const IPC_CHANNELS = {
         push: "notifications:push",
     },
     menu: {
-        setState: "menu:set-state",
         action: "menu:action",
     },
 }

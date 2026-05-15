@@ -62,7 +62,6 @@ contextBridge.exposeInMainWorld("electorrent", {
         onPush: (callback: (notification: unknown) => void) => subscribe(IPC_CHANNELS.notifications.push, callback),
     },
     menu: {
-        setState: (state: unknown) => invoke(IPC_CHANNELS.menu.setState, state),
         onAction: (callback: (action: unknown) => void) => subscribe(IPC_CHANNELS.menu.action, callback),
     },
     clipboard: {
