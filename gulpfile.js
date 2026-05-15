@@ -10,7 +10,7 @@ import merge from 'merge-stream'
 import webpackStream from 'webpack-stream'
 import compiler from 'webpack'
 
-import webpackConfig from './webpack.config.mjs'
+import webpackConfig from './webpack.config.js'
 
 const OUT = './app'
 const CLEAN = [`${OUT}/*`, `!${OUT}/package.json`, `!${OUT}/node_modules`]
