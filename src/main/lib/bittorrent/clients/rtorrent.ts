@@ -1,6 +1,6 @@
 import Rtorrent from '@electorrent/node-rtorrent'
 
-import type { BittorrentServerConfig } from '@shareed/ipc-contract'
+import type { BittorrentServerConfig } from '@shared/ipc-contract'
 import { cleanPath, defer } from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 

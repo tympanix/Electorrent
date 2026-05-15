@@ -1,8 +1,8 @@
 import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
 
-import { CLIENT_METADATA } from '@shareed/client-metadata'
-import { IPC_CHANNELS } from '@shareed/ipc'
-import type { AppSettings, StoredServerConfig } from '@shareed/ipc-contract'
+import { CLIENT_METADATA } from '@shared/client-metadata'
+import { IPC_CHANNELS } from '@shared/ipc'
+import type { AppSettings, StoredServerConfig } from '@shared/ipc-contract'
 import * as settings from './settings'
 
 type MenuSessionState = {

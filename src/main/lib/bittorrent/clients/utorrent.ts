@@ -3,7 +3,7 @@ import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
 import qs from 'qs'
 
-import type { BittorrentServerConfig } from '@shareed/ipc-contract'
+import type { BittorrentServerConfig } from '@shared/ipc-contract'
 import { createHttpsAgent, serverUrl } from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 

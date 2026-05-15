@@ -1,6 +1,6 @@
 import QBittorrent from '@electorrent/node-qbittorrent'
 
-import type { BittorrentFileSelection, BittorrentServerConfig } from '@shareed/ipc-contract'
+import type { BittorrentFileSelection, BittorrentServerConfig } from '@shared/ipc-contract'
 import { cleanPath, defer, serverUrl } from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 

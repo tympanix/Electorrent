@@ -1,6 +1,6 @@
 import { clipboard, contextBridge, ipcRenderer } from 'electron'
 
-import { IPC_CHANNELS } from '@shareed/ipc'
+import { IPC_CHANNELS } from '@shared/ipc'
 
 function invoke<T = unknown>(channel: string, payload?: any): Promise<T> {
     return ipcRenderer.invoke(channel, payload)

@@ -11,7 +11,7 @@ import {
     SynologyClient,
     DelugeClient
 } from "@renderer/app/bittorrent"
-import { CLIENT_METADATA } from "@shareed/client-metadata"
+import { CLIENT_METADATA } from "@shared/client-metadata"
 
 var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
 

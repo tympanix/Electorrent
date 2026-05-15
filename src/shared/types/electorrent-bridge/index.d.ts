@@ -1,4 +1,4 @@
-import type { ElectorrentBridge } from "@shareed/ipc-contract"
+import type { ElectorrentBridge } from "@shared/ipc-contract"
 
 declare global {
     interface Window {

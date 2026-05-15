@@ -2,7 +2,7 @@ import { dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
 
-import { IPC_CHANNELS } from '@shareed/ipc'
+import { IPC_CHANNELS } from '@shared/ipc'
 import * as electorrent from './electorrent'
 
 function notify({ title = '', message = '', type = 'info' }) {

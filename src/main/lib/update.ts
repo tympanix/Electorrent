@@ -5,7 +5,7 @@ import path from 'path'
 import request from 'request'
 import semver from 'semver'
 
-import { IPC_CHANNELS } from '@shareed/ipc'
+import { IPC_CHANNELS } from '@shared/ipc'
 import * as electorrent from './electorrent'
 import logger from './logger'
 

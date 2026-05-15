@@ -39,7 +39,7 @@ async function bootstrap() {
         ipcHandlers,
         menu,
     ] = await Promise.all([
-        import('@shareed/ipc'),
+        import('@shared/ipc'),
         import('@main/lib/bittorrent'),
         import('@main/lib/settings'),
         import('@main/lib/update'),
