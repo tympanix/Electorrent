@@ -3,7 +3,7 @@ import type { AppSettings, StoredServerConfig } from '../../shared/ipc-contract'
 import { CLIENT_METADATA } from '../../shared/client-metadata'
 
 const { IPC_CHANNELS } = require('../../shared/ipc')
-const config = require('./config')
+const settings = require('./settings')
 
 type MenuSessionState = {
     isDebug: boolean
@@ -17,7 +17,7 @@ let menuState: MenuSessionState = {
     activeServerId: null,
     activeClientId: null,
 }
-const defaultMenuSettings: AppSettings = config.getDefaultSettings()
+const defaultMenuSettings: AppSettings = settings.getDefaultSettings()
 let menuSettings: AppSettings = defaultMenuSettings
 
 function normalizeMenuSettings(settings: Partial<AppSettings> | null | undefined): AppSettings {
@@ -329,7 +329,7 @@ function setActiveServer(server?: { id?: string | null; client?: string | null }
 }
 
 function refresh() {
-    menuSettings = normalizeMenuSettings(config.getAllSettings())
+    menuSettings = normalizeMenuSettings(settings.getAllSettings())
     buildMenu()
 }
 

@@ -15,14 +15,14 @@ interface AppShellScope extends IScope {
 }
 
 export class AppShellController {
-    static $inject = ["$rootScope", "$scope", "$timeout", "$bittorrent", "configService", "notificationService"];
+    static $inject = ["$rootScope", "$scope", "$timeout", "$bittorrent", "settingsService", "notificationService"];
 
     constructor(
         $rootScope: IRootScopeService & { $btclient?: any; $server?: any },
         $scope: AppShellScope,
         $timeout: angular.ITimeoutService,
         $bittorrent: any,
-        config: any,
+        settingsService: any,
         $notify: any,
     ) {
         const electorrent = window.electorrent
@@ -38,14 +38,14 @@ export class AppShellController {
         let pendingMagnets: string[] = [];
         let pendingTorrentFiles: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }> = [];
 
-        $scope.servers = config.getServers();
+        $scope.servers = settingsService.getServers();
         $scope.showTorrents = false;
         $scope.showLoading = true;
         $scope.statusText = "Loading";
 
         $rootScope.$on("ready", () => {
-            Promise.all([config.whenReady(), electorrent.app.getMeta()]).then(([_, meta]: [unknown, AppMeta]) => {
-                const settings = config.getAllSettings();
+            Promise.all([settingsService.whenReady(), electorrent.app.getMeta()]).then(([_, meta]: [unknown, AppMeta]) => {
+                const settings = settingsService.getAllSettings();
                 const automaticUpdates = settings?.automaticUpdates;
                 if (!meta.isDebug && automaticUpdates !== false) {
                     electorrent.updates.check();
@@ -57,7 +57,7 @@ export class AppShellController {
                 }
 
                 if (settings.startup === "default") {
-                    const server = config.getDefaultServer();
+                    const server = settingsService.getDefaultServer();
                     if (server) {
                         connectToServer(server);
                     } else {
@@ -65,7 +65,7 @@ export class AppShellController {
                         $notify.ok("No default server", "Please choose a server to connect to");
                     }
                 } else if (settings.startup === "latest") {
-                    const server = config.getRecentServer();
+                    const server = settingsService.getRecentServer();
                     if (server) {
                         connectToServer(server);
                     } else {
@@ -178,14 +178,14 @@ export class AppShellController {
                     break;
                 case "connect-server":
                     {
-                        const server = config.getServer(action.serverId);
+                        const server = settingsService.getServer(action.serverId);
                         if (server) {
                             connectToServer(server);
                         }
                     }
                     break;
                 case "set-current-default-server":
-                    config.setCurrentServerAsDefault();
+                    settingsService.setCurrentServerAsDefault();
                     break;
                 case "add-server":
                     $scope.$emit("add:server");
@@ -237,7 +237,7 @@ export class AppShellController {
 
             server.connect().then(() => {
                 $scope.statusText = "Loading Torrents";
-                config.updateServer(server);
+                settingsService.updateServer(server);
                 pageTorrents(true);
                 return electorrent.launch.getPending().then((payload: LaunchPayload) => {
                     queueMagnetLinks(payload.magnets || []);

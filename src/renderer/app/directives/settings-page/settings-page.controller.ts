@@ -1,7 +1,7 @@
 import type { AppMeta, ThemeInfo } from "../../../../shared/ipc-contract";
 
 export class SettingsPageController {
-    static $inject = ["$rootScope", "$scope", "$injector", "$bittorrent", "$btclients", "configService", "notificationService"];
+    static $inject = ["$rootScope", "$scope", "$injector", "$bittorrent", "$btclients", "settingsService", "notificationService"];
 
     constructor(
         $rootScope: angular.IRootScopeService & { $server?: any },
@@ -9,7 +9,7 @@ export class SettingsPageController {
         $injector: angular.auto.IInjectorService,
         $bittorrent: any,
         $btclients: any,
-        config: any,
+        settingsService: any,
         $notify: any,
     ) {
         const electorrent = window.electorrent
@@ -47,7 +47,7 @@ export class SettingsPageController {
         };
 
         loadPromise = Promise.all([
-            Promise.resolve(config.whenReady()),
+            Promise.resolve(settingsService.whenReady()),
             electorrent.settings.listThemes(),
             electorrent.app.getMeta(),
         ]).then(([_settingsReady, themes, meta]: [unknown, ThemeInfo[], AppMeta]) => {
@@ -67,7 +67,7 @@ export class SettingsPageController {
         });
 
         function loadAllSettings() {
-            $scope.settings = config.getAllSettingsCopy();
+            $scope.settings = settingsService.getAllSettingsCopy();
             loadServerReference();
 
             serverCopy = angular.copy($scope.server);
@@ -103,7 +103,7 @@ export class SettingsPageController {
         });
 
         function writeSettings() {
-            return config.saveAllSettings($scope.settings)
+            return settingsService.saveAllSettings($scope.settings)
                 .then(() => {
                     return subscribeToMagnets();
                 }).catch((err: unknown) => {
@@ -167,7 +167,7 @@ export class SettingsPageController {
             serverCopy = angular.copy($scope.server);
             $scope.connecting = true;
             return $scope.server.connect().then(() => {
-                return config.updateServer($scope.server);
+                return settingsService.updateServer($scope.server);
             });
         }
 

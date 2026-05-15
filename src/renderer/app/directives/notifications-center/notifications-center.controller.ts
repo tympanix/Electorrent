@@ -17,13 +17,13 @@ interface NotificationsCenterScope extends IScope {
 }
 
 export class NotificationsCenterController {
-    static $inject = ["$scope", "$rootScope", "$timeout", "configService", "notificationService", "$http"];
+    static $inject = ["$scope", "$rootScope", "$timeout", "settingsService", "notificationService", "$http"];
 
     constructor(
         $scope: NotificationsCenterScope,
         $rootScope: angular.IRootScopeService,
         $timeout: angular.ITimeoutService,
-        config: any,
+        settingsService: any,
         $notify: any,
         $http: angular.IHttpService,
     ) {
@@ -120,7 +120,7 @@ export class NotificationsCenterController {
                         $notify.alert("Could not install certificate", String(err));
                     })
                 } else {
-                    config.trustCertificate(cert).catch((err: unknown) => {
+                    settingsService.trustCertificate(cert).catch((err: unknown) => {
                         $notify.alert("Could not trust certificate", String(err));
                     });
                 }
@@ -130,7 +130,7 @@ export class NotificationsCenterController {
         });
 
         $scope.installCertificate = () => {
-            config.trustCertificate($scope.certificate);
+            settingsService.trustCertificate($scope.certificate);
         };
 
         $scope.certificateResult = (accepted: boolean) => {

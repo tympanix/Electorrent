@@ -5,10 +5,10 @@ interface AppThemeScope extends IScope {
 }
 
 export class AppThemeController {
-    static $inject = ["$scope", "configService"];
+    static $inject = ["$scope", "settingsService"];
 
-    constructor($scope: AppThemeScope, $config: any) {
-        const settings = $config.getAllSettings();
+    constructor($scope: AppThemeScope, settingsService: any) {
+        const settings = settingsService.getAllSettings();
         $scope.theme = settings.ui.theme;
 
         $scope.$on("new:settings", (e: unknown, nextSettings: any) => {

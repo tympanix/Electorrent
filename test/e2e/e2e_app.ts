@@ -469,8 +469,8 @@ export class App {
   async getStoredServerName(serverIndex: number) {
     return await browser.execute((index) => {
       const injector = angular.element(document.body).injector()
-      const config = injector.get("configService")
-      return config.getAllSettingsCopy().servers[index]?.name || ""
+      const settingsService = injector.get("settingsService")
+      return settingsService.getAllSettingsCopy().servers[index]?.name || ""
     }, serverIndex)
   }
 }
