@@ -17,7 +17,6 @@ const sharedResolve = {
     '@main': path.resolve(__dirname, 'src/main'),
     '@renderer': path.resolve(__dirname, 'src/renderer'),
     '@shared': path.resolve(__dirname, 'src/shared'),
-    '@shareed': path.resolve(__dirname, 'src/shared'),
   },
   modules: ['node_modules', 'src'],
 }

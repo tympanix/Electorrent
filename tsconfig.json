@@ -40,12 +40,6 @@
         ],
         "@shared/*": [
           "src/shared/*"
-        ],
-        "@shareed": [
-          "src/shared"
-        ],
-        "@shareed/*": [
-          "src/shared/*"
         ]
       }
     },
