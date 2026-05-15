@@ -16,7 +16,23 @@ let menuState: MenuSessionState = {
     activeServerId: null,
     activeClientId: null,
 }
-let menuSettings: AppSettings = config.getAllSettings()
+const DEFAULT_MENU_SETTINGS: AppSettings = {
+    startup: 'default',
+    refreshRate: 2000,
+    ui: {
+        resizeMode: '',
+        notifications: true,
+        displaySize: 'normal',
+        displayCompact: false,
+        cleanNames: true,
+        fixedHeader: false,
+        theme: 'light',
+    },
+    servers: [],
+    certificates: [],
+}
+
+let menuSettings: AppSettings = DEFAULT_MENU_SETTINGS
 
 const CLIENT_NAMES: Record<string, string> = {
     utorrent: 'µTorrent',
@@ -63,7 +79,6 @@ function advancedUploadEnabled() {
 }
 
 function serverMenuItems(): MenuItemConstructorOptions[] {
-    const servers = Array.isArray(menuSettings?.servers) ? menuSettings.servers : []
     const submenu: MenuItemConstructorOptions[] = [
         {
             label: 'Add new server...',
@@ -86,7 +101,7 @@ function serverMenuItems(): MenuItemConstructorOptions[] {
         return submenu
     }
 
-    servers.forEach((server, index) => {
+    menuSettings.servers.forEach((server, index) => {
         submenu.push({
             label: getServerLabel(server),
             accelerator: serverAccelerator(index + 1),
@@ -316,7 +331,7 @@ function buildMenu() {
 
 function configure(state: Pick<MenuSessionState, 'isDebug'>) {
     menuState = Object.assign({}, menuState, state)
-    buildMenu()
+    refresh()
 }
 
 function setActiveServer(server?: { id?: string | null; client?: string | null } | null) {
@@ -328,7 +343,16 @@ function setActiveServer(server?: { id?: string | null; client?: string | null }
 }
 
 function refresh() {
-    menuSettings = config.getAllSettings()
+    const nextSettings = config.getAllSettings()
+    menuSettings = {
+        ...DEFAULT_MENU_SETTINGS,
+        ...nextSettings,
+        ui: {
+            ...DEFAULT_MENU_SETTINGS.ui,
+            ...(nextSettings?.ui || {}),
+        },
+        servers: Array.isArray(nextSettings?.servers) ? nextSettings.servers : [],
+    }
     buildMenu()
 }
 
