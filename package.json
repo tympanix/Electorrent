@@ -18,7 +18,8 @@
     "release": "electron-builder",
     "version": "node ./scripts/sync-app-version.js && git add app/package.json",
     "test": "wdio run ./wdio.conf.ts",
-    "smoketest": "npm test -- --suite qbittorrent:latest --mochaOpts.grep \"torrent is stopped and resumed\""
+    "smoketest": "npm test -- --suite qbittorrent:latest --mochaOpts.grep \"torrent is stopped and resumed\"",
+    "lint": "eslint --ext .ts ./src ./test ./wdio.conf.ts"
   },
   "keywords": [
     "utorrent"
@@ -55,6 +56,8 @@
     "@types/qs": "^6.9.7",
     "@types/tapable": "^0.2.5",
     "@types/underscore": "^1.10.24",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "@wdio/cli": "^9.23.3",
     "@wdio/electron-types": "^9.2.1",
     "@wdio/local-runner": "^9.14.0",
@@ -79,6 +82,7 @@
     "electron-is": "^3.0.0",
     "electron-reloader": "^1.2.3",
     "electron-squirrel-startup": "^1.0.0",
+    "eslint": "^8.57.1",
     "form-data": "^4.0.4",
     "fuse.js": "^3.0.5",
     "gulp": "^4.0.2",
