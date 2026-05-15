@@ -355,8 +355,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           after(async function() {
             if (torrent) {
-              await torrent.clickContextMenu("delete");
-              await torrent.waitForGone();
+              await torrent.delete();
             }
           })
 
@@ -367,6 +366,19 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           it("wait for download to begin", () => {
             return torrent.waitForState(options.downloadLabel);
           });
+
+          it("delete action shows a confirmation modal", async function () {
+            const modal = await torrent.openDeleteConfirmation()
+            await modal.$(".content").getText().should.eventually.contain("Are you sure")
+
+            const cancelButton = modal.$("button.deny")
+            await cancelButton.waitForDisplayed()
+            await cancelButton.waitForClickable()
+            await cancelButton.click()
+            await modal.waitForDisplayed({ reverse: true })
+
+            await torrent.waitForExist()
+          })
 
           it("torrent should be in downloading tab", () => {
             return torrent.checkInState(["all", "downloading"]);

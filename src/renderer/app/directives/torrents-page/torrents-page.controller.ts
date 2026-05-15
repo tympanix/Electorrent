@@ -2,9 +2,16 @@ import { IRootScopeService } from "angular";
 import Fuse from "fuse.js";
 import { TorrentUploadOptions } from "../../bittorrent/torrentclient";
 import { PendingTorrentUploadItem, PendingTorrentUploadList } from "../add-torrent-modal/add-torrent-modal.directive";
+import { ModalController } from "../modal/modal.controller";
 
 interface TorrentControllerScope extends angular.IScope {
     pendingTorrentFiles: PendingTorrentUploadList;
+    deleteModalref?: ModalController;
+    deleteConfirmation?: {
+        action: ((torrents: any[]) => Promise<void>) | null;
+        label: string;
+        torrents: any[];
+    };
     [key: string]: any;
 }
 
@@ -49,6 +56,11 @@ export class TorrentsPageController {
         $scope.guiBusy = true;
         $scope.pendingTorrentFiles = [];
         $scope.uploadAdvancedOptionsKey = "Ctrl";
+        $scope.deleteConfirmation = {
+            action: null,
+            label: "",
+            torrents: [],
+        };
 
         window.electorrent.app.getMeta().then((meta) => {
             $scope.uploadAdvancedOptionsKey = meta.isMacOS ? "⌥" : "Ctrl";
@@ -168,6 +180,66 @@ export class TorrentsPageController {
         $scope.$on("remove:torrents", () => {
             remove();
         });
+
+        function clearDeleteConfirmation() {
+            $scope.deleteConfirmation = {
+                action: null,
+                label: "",
+                torrents: [],
+            };
+        }
+
+        function openDeleteConfirmation(action: (torrents: any[]) => Promise<void>, label: string) {
+            $scope.deleteConfirmation = {
+                action,
+                label,
+                torrents: selected.slice(),
+            };
+            $scope.deleteModalref?.showModal();
+        }
+
+        function getDeleteConfirmationTarget(torrents: any[]) {
+            if (torrents.length !== 1) {
+                return `${torrents.length} selected torrents`;
+            }
+
+            const [torrent] = torrents;
+            return `"${torrent.decodedName || torrent.name || "this torrent"}"`;
+        }
+
+        $scope.getDeleteConfirmationMessage = () => {
+            const label = ($scope.deleteConfirmation?.label || "Delete").toLowerCase();
+            const torrents = $scope.deleteConfirmation?.torrents || [];
+            return `Are you sure you want to ${label} ${getDeleteConfirmationTarget(torrents)}?`;
+        };
+
+        $scope.cancelDelete = () => {
+            clearDeleteConfirmation();
+        };
+
+        function runContextAction(action: ((torrents: any[]) => Promise<void>) | undefined, torrents: any[]) {
+            if (!action) {
+                return $q.resolve();
+            }
+
+            return action.call($rootScope.$btclient, torrents)
+                .then(() => {
+                    return $scope.update();
+                })
+                .catch((err: unknown) => {
+                    console.error("Context action error", err);
+                    $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
+                });
+        }
+
+        $scope.confirmDelete = () => {
+            const pendingDelete = {
+                action: $scope.deleteConfirmation?.action || null,
+                torrents: ($scope.deleteConfirmation?.torrents || []).slice(),
+            };
+            clearDeleteConfirmation();
+            return runContextAction(pendingDelete.action || undefined, pendingDelete.torrents);
+        };
 
         function remove() {
             const selectedTorrents = $scope.arrayTorrents.filter(({ selected: isSelected }: { selected: boolean }) => isSelected);
@@ -395,14 +467,11 @@ export class TorrentsPageController {
                 }
                 return $q.resolve();
             }
-            return action.call($rootScope.$btclient, selected)
-                .then(() => {
-                    return $scope.update();
-                })
-                .catch((err: unknown) => {
-                    console.error("Context action error", err);
-                    $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
-                });
+            if (item && item.role === "delete") {
+                openDeleteConfirmation(action, label);
+                return $q.resolve();
+            }
+            return runContextAction(action, selected);
         };
 
         function fetchTorrents(): any[] {
