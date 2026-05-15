@@ -6,21 +6,18 @@ type RendererGlobals = Window &
   }
 
 const rendererWindow = window as RendererGlobals
-const jquery = require('jquery')
+import jquery = require('jquery')
+import angularLib = require('angular')
+import 'jquery-ui-dist/jquery-ui.js'
+import 'angular-resource'
+import 'angular-animate'
+import 'angular-table-resize/dist/angular-table-resize.js'
+import './app/vendor/ng-infinite-scroll.js'
+import 'angular-marked'
+import 'angular-ui-sortable'
+import 'semantic-ui-css/semantic.min.js'
 
 rendererWindow.$ = jquery
 rendererWindow.jQuery = jquery
 
-require('jquery-ui-dist/jquery-ui.js')
-
-const angularLib: ng.IAngularStatic = require('angular')
-
 rendererWindow.angular = angularLib
-
-require('angular-resource')
-require('angular-animate')
-require('angular-table-resize/dist/angular-table-resize.js')
-require('./app/vendor/ng-infinite-scroll.js')
-require('angular-marked')
-require('angular-ui-sortable')
-require('semantic-ui-css/semantic.min.js')
