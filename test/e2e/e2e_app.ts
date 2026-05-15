@@ -1,8 +1,8 @@
-import fs = require("fs");
-import path = require("path");
+import fs from "fs";
+import path from "path";
 import magnet from "magnet-uri"
 import { Torrent } from "./e2e_torrent";
-import parseTorrent = require("parse-torrent")
+import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
 import { TorrentClient } from "../../src/renderer/app/bittorrent"
 import { assert } from "chai";

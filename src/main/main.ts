@@ -7,35 +7,54 @@ import {
     type Event as ElectronEvent,
     type WebContents,
 } from 'electron'
+import is from 'electron-is'
+import path from 'path'
+import yargs from 'yargs'
+
+import startup from './lib/startup'
 
 declare const __non_webpack_require__: NodeRequire | undefined
 
-const yargs = require('yargs')
-const path = require('path')
-const is = require('electron-is')
-const { IPC_CHANNELS } = require('../shared/ipc')
-const { bittorrentManager } = require('./lib/bittorrent')
+if (!startup) {
+    void bootstrap()
+}
 
-if (!require('./lib/startup')) {
-    yargs.version(() => app.getVersion())
-    yargs.help('h').alias('h', 'help')
-    yargs.usage(`Electorrent ${app.getVersion()}`)
-    yargs.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
-    yargs.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
+async function bootstrap() {
+    const parser = yargs(process.argv.slice(1))
+    parser.version(app.getVersion())
+    parser.help('h').alias('h', 'help')
+    parser.usage(`Electorrent ${app.getVersion()}`)
+    parser.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
+    parser.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
 
-    const settings = require('./lib/settings')
-    const updater = require('./lib/update')
-    const logger = require('./lib/logger')
-    const electorrent = require('./lib/electorrent')
-    const torrents = require('./lib/torrents')
-    const certificates = require('./lib/certificates')
-    const ipcHandlers = require('./lib/ipc')
-    const menu = require('./lib/menu')
+    const [
+        { IPC_CHANNELS },
+        { bittorrentManager },
+        settings,
+        updater,
+        { default: logger },
+        electorrent,
+        torrents,
+        certificates,
+        ipcHandlers,
+        menu,
+    ] = await Promise.all([
+        import('../shared/ipc'),
+        import('./lib/bittorrent'),
+        import('./lib/settings'),
+        import('./lib/update'),
+        import('./lib/logger'),
+        import('./lib/electorrent'),
+        import('./lib/torrents'),
+        import('./lib/certificates'),
+        import('./lib/ipc'),
+        import('./lib/menu'),
+    ])
 
     logger.debug('Starting Electorrent in debug mode')
     logger.verbose('Verbose logging enabled')
 
-    const program = yargs.argv
+    const program = parser.parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean }
 
     if (!app.isPackaged) {
         try {
@@ -43,11 +62,13 @@ if (!require('./lib/startup')) {
                 ? __non_webpack_require__
                 : module.require.bind(module)
             runtimeRequire('electron-reloader')(module)
-        } catch {}
+        } catch {
+            // Ignore reloader setup failures in development.
+        }
     }
 
     let torrentWindow: BrowserWindow | null
-    let pendingLaunchPayload = {
+    const pendingLaunchPayload = {
         magnets: [] as string[],
         torrentFilePaths: [] as string[],
     }

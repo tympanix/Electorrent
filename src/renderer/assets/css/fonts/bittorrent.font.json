@@ -1,0 +1,23 @@
+{
+  "files": [
+    "./icons/*.svg"
+  ],
+  "fontName": "bittorrent",
+  "types": [
+    "eot",
+    "woff",
+    "ttf",
+    "svg"
+  ],
+  "fileName": "css/fonts/[fontname].[ext]",
+  "normalize": true,
+  "fontHeight": 1024,
+  "codepoints": {
+    "deluge": 59905,
+    "downloadstation": 59906,
+    "qbittorrent": 59907,
+    "rtorrent": 59908,
+    "transmission": 59909,
+    "utorrent": 59910
+  }
+}

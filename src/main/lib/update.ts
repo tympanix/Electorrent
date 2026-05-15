@@ -1,16 +1,16 @@
-import { app, autoUpdater, shell, dialog, type BrowserWindow } from 'electron'
+import { app, autoUpdater, dialog, shell, type BrowserWindow } from 'electron'
+import fs from 'fs'
+import is from 'electron-is'
+import path from 'path'
+import request from 'request'
+import semver from 'semver'
 
-const is = require('electron-is')
-const path = require('path')
-const semver = require('semver')
-const request = require('request')
-const fs = require('fs')
-
-const logger = require('./logger')
-const electorrent = require('./electorrent')
-const { IPC_CHANNELS } = require('../../shared/ipc')
+import { IPC_CHANNELS } from '../../shared/ipc'
+import * as electorrent from './electorrent'
+import logger from './logger'
 
 const ENDPOINT = 'https://electorrent.vercel.app/'
+const UPDATE_CONNECTION_ERROR = 'Could not check version automatically. Please visit the website instead'
 const version = app.getVersion()
 
 let updateUrl: string | null = null
@@ -27,7 +27,7 @@ if (is.windows()) {
     updateUrl = `${ENDPOINT}update/appimage/${version}`
 }
 
-exports.checkForUpdates = function(notifyVerbose: boolean) {
+export function checkForUpdates(notifyVerbose: boolean) {
     verbose = notifyVerbose === true
 
     if (is.windows()) {
@@ -37,20 +37,20 @@ exports.checkForUpdates = function(notifyVerbose: boolean) {
     }
 }
 
-exports.initialise = function(initWindow: BrowserWindow) {
+export function initialise(initWindow: BrowserWindow) {
     mainWindow = initWindow
     squirrelUpdater()
     manualDownloader()
 }
 
-exports.manualQuitAndUpdate = function() {
+export function manualQuitAndUpdate() {
     if (!downloadedUpdate) return
     const updatePath = downloadedUpdate
 
     const isExecutable = fs.constants.F_OK | fs.constants.X_OK
     fs.access(updatePath, isExecutable, (err: Error | null) => {
         if (err) {
-            logger.error('Error while executing update', arguments)
+            logger.error('Error while executing update', err)
             shell.showItemInFolder(updatePath)
         } else {
             shell.openPath(updatePath)
@@ -59,11 +59,11 @@ exports.manualQuitAndUpdate = function() {
     })
 }
 
-exports.quitAndInstall = function() {
+export function quitAndInstall() {
     autoUpdater.quitAndInstall()
 }
 
-exports.openUpdateFilePath = function() {
+export function openUpdateFilePath() {
     if (!downloadedUpdate) return
     shell.showItemInFolder(downloadedUpdate)
 }
@@ -134,24 +134,24 @@ function manualUpdater() {
 
     request(updateUrl, function(error: Error | null, response: { statusCode: number }, body: string) {
         if (error) {
-            logger.error('Manual updater error', arguments)
+            logger.error('Manual updater error', error)
             notifyUpdateError()
             return
         }
 
         if (response.statusCode === 204) {
-            logger.verbose('Manual no new update available', arguments)
+            logger.verbose('Manual no new update available', response.statusCode)
             notifyUpToDate()
             return
         }
 
         if (response.statusCode === 200) {
-            logger.verbose('Manual updater found update', arguments)
+            logger.verbose('Manual updater found update', response.statusCode)
 
             const info = JSON.parse(body)
             const newVersion = semver.clean(info.name)
             if (!semver.valid(newVersion)) {
-                logger.error('Manual updater invalid semver', arguments)
+                logger.error('Manual updater invalid semver', info.name)
                 return
             }
 
@@ -239,62 +239,51 @@ function notifyUpToDate() {
 function notifyConnectionError() {
     sendUpdateStatus({
         type: 'error',
-        message: 'Could not check version automatically. Please visit the website instead',
+        message: UPDATE_CONNECTION_ERROR,
     })
     notify({
         title: 'Update Error',
-        message: 'Could not check version automatically. Please visit the website instead',
+        message: UPDATE_CONNECTION_ERROR,
         type: 'negative',
     })
 }
 
 function squirrelUpdater() {
-    if (!is.windows()) {
-        logger.verbose('Squirrel skip initialization on non-windows platforms')
-        return
-    }
+    if (!updateUrl || !is.windows()) return
 
-    if (!updateUrl) {
-        return
-    }
+    autoUpdater.setFeedURL({ url: updateUrl })
 
-    try {
-        autoUpdater.setFeedURL({ url: updateUrl })
-
-        autoUpdater.on('error', function() {
-            notifyUpdateError()
-            logger.error('Squirrel updater could not update', arguments)
-        })
-        autoUpdater.on('checking-for-update', function() {
-            notifyCheckingUpdate()
-            logger.verbose('Squirrel checking for update', arguments)
-        })
-        autoUpdater.on('update-available', function() {
-            notifyUpdateAvailable()
-            logger.verbose('Squirrel update available', arguments)
-        })
-        autoUpdater.on('update-not-available', function() {
-            notifyUpToDate()
-            logger.verbose('Squirrel no new update available', arguments)
-        })
-        autoUpdater.on('update-downloaded', function(_event, releaseNotes, releaseName, releaseDate, url) {
-            sendUpdateStatus({
-                type: 'downloaded',
-                data: {
-                    releaseNotes,
-                    releaseName,
-                    releaseDate,
-                    updateUrl: url,
-                    manual: false,
-                },
-            })
-
-            if (is.macOS()) {
-                app.dock.bounce()
-            }
-        })
-    } catch (_e) {
-        logger.error('Squirrel updater threw an exception', arguments)
+    autoUpdater.on('error', function(err: Error) {
+        logger.error('Auto updater error', err)
         notifyConnectionError()
-    }
+    })
+
+    autoUpdater.on('checking-for-update', function() {
+        logger.debug('Checking for update')
+        notifyCheckingUpdate()
+    })
+
+    autoUpdater.on('update-not-available', function() {
+        logger.verbose('No update available')
+        notifyUpToDate()
+    })
+
+    autoUpdater.on('update-available', function() {
+        logger.info('Update available')
+        notifyUpdateAvailable()
+    })
+
+    autoUpdater.on('update-downloaded', function(...args: any[]) {
+        logger.info('Auto update downloaded', args)
+        sendUpdateStatus({
+            type: 'downloaded',
+            data: {
+                releaseNotes: args[1],
+                releaseName: args[2],
+                releaseDate: args[3],
+                updateUrl,
+                manual: false,
+            },
+        })
+    })
 }

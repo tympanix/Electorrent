@@ -7,7 +7,7 @@
         "lib": [
             "es6"
         ],
-        "module": "commonjs",
+        "module": "esnext",
         "target": "es2020",
         "strict": true,
         "esModuleInterop": true,
@@ -18,7 +18,7 @@
             "node",
             "mocha",
             "chai",
-            "chai-as-promised",
+            "chai-as-promised"
         ],
         "typeRoots": [
             "types",

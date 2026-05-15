@@ -1,86 +1,88 @@
-import axios, { AxiosInstance } from "axios"
-import type { BittorrentServerConfig } from "../../../../shared/ipc-contract"
-import { createHttpsAgent, serverUrl } from "../helpers"
-import type { BittorrentRuntime } from "../types"
+import axios, { AxiosInstance } from 'axios'
+import httpAdapter from 'axios/lib/adapters/http.js'
 
-const SESSION_ID_HEADER = "X-Transmission-Session-Id"
+import type { BittorrentServerConfig } from '../../../../shared/ipc-contract'
+import { createHttpsAgent, serverUrl } from '../helpers'
+import type { BittorrentRuntime } from '../types'
+
+const SESSION_ID_HEADER = 'X-Transmission-Session-Id'
 
 const TRANSMISSION_FIELDS = [
-    "activityDate",
-    "addedDate",
-    "bandwidthPriority",
-    "comment",
-    "corruptEver",
-    "creator",
-    "dateCreated",
-    "desiredAvailable",
-    "doneDate",
-    "downloadDir",
-    "downloadedEver",
-    "downloadLimit",
-    "downloadLimited",
-    "error",
-    "errorString",
-    "eta",
-    "etaIdle",
-    "files",
-    "fileStats",
-    "hashString",
-    "haveUnchecked",
-    "haveValid",
-    "honorsSessionLimits",
-    "id",
-    "isFinished",
-    "isPrivate",
-    "isStalled",
-    "leftUntilDone",
-    "magnetLink",
-    "manualAnnounceTime",
-    "maxConnectedPeers",
-    "metadataPercentComplete",
-    "name",
-    "peer-limit",
-    "peers",
-    "peersConnected",
-    "peersFrom",
-    "peersGettingFromUs",
-    "peersSendingToUs",
-    "percentDone",
-    "pieces",
-    "pieceCount",
-    "pieceSize",
-    "priorities",
-    "queuePosition",
-    "rateDownload",
-    "rateUpload",
-    "recheckProgress",
-    "secondsDownloading",
-    "secondsSeeding",
-    "seedIdleLimit",
-    "seedIdleMode",
-    "seedRatioLimit",
-    "seedRatioMode",
-    "sizeWhenDone",
-    "startDate",
-    "status",
-    "trackers",
-    "trackerStats",
-    "totalSize",
-    "torrentFile",
-    "uploadedEver",
-    "uploadLimit",
-    "uploadLimited",
-    "uploadRatio",
-    "wanted",
-    "webseeds",
-    "webseedsSendingToUs",
+    'activityDate',
+    'addedDate',
+    'bandwidthPriority',
+    'comment',
+    'corruptEver',
+    'creator',
+    'dateCreated',
+    'desiredAvailable',
+    'doneDate',
+    'downloadDir',
+    'downloadedEver',
+    'downloadLimit',
+    'downloadLimited',
+    'error',
+    'errorString',
+    'eta',
+    'etaIdle',
+    'files',
+    'fileStats',
+    'hashString',
+    'haveUnchecked',
+    'haveValid',
+    'honorsSessionLimits',
+    'id',
+    'isFinished',
+    'isPrivate',
+    'isStalled',
+    'leftUntilDone',
+    'magnetLink',
+    'manualAnnounceTime',
+    'maxConnectedPeers',
+    'metadataPercentComplete',
+    'name',
+    'peer-limit',
+    'peers',
+    'peersConnected',
+    'peersFrom',
+    'peersGettingFromUs',
+    'peersSendingToUs',
+    'percentDone',
+    'pieces',
+    'pieceCount',
+    'pieceSize',
+    'priorities',
+    'queuePosition',
+    'rateDownload',
+    'rateUpload',
+    'recheckProgress',
+    'secondsDownloading',
+    'secondsSeeding',
+    'seedIdleLimit',
+    'seedIdleMode',
+    'seedRatioLimit',
+    'seedRatioMode',
+    'sizeWhenDone',
+    'startDate',
+    'status',
+    'trackers',
+    'trackerStats',
+    'totalSize',
+    'torrentFile',
+    'uploadedEver',
+    'uploadLimit',
+    'uploadLimited',
+    'uploadRatio',
+    'wanted',
+    'webseeds',
+    'webseedsSendingToUs',
 ]
 
 export class TransmissionRuntime implements BittorrentRuntime {
     private server!: BittorrentServerConfig
     private session?: string
 
-    private url(pathValue = "") {
+    private url(pathValue = '') {
         return `${serverUrl(this.server)}${pathValue}`
     }
 
@@ -122,7 +124,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 password: this.server.password,
             },
             httpsAgent: createHttpsAgent(this.server),
-            adapter: require("axios/lib/adapters/http"),
+            adapter: httpAdapter,
         })
 
         http.interceptors.response.use(
@@ -158,7 +160,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         this.server = server
         this.session = undefined
 
-        await this.getHttpClient().post(this.url(), { method: "session-get" }, {
+        await this.getHttpClient().post(this.url(), { method: 'session-get' }, {
             timeout: 5000,
             auth: {
                 username: server.user,
@@ -173,7 +175,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
             arguments: {
                 fields: TRANSMISSION_FIELDS,
             },
-            method: "torrent-get",
+            method: 'torrent-get',
         })
 
         return resp.data
@@ -189,7 +191,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         }
 
         return this.removeEmpty({
-            "download-dir": uploadOptions.saveLocation,
+            'download-dir': uploadOptions.saveLocation,
             paused: !uploadOptions.startTorrent,
         })
     }
@@ -200,13 +202,13 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 filename: uri,
                 ...this.getUploadOptions(uploadOptions),
             },
-            method: "torrent-add",
+            method: 'torrent-add',
         }, {})
 
-        if ("torrent-duplicate" in resp.data.arguments) {
-            throw new Error("Could not add duplicate torrent to transmission")
+        if ('torrent-duplicate' in resp.data.arguments) {
+            throw new Error('Could not add duplicate torrent to transmission')
         }
-        if (resp.data.result !== "success") {
+        if (resp.data.result !== 'success') {
             throw new Error(`Could not add torrent to transmission: ${resp.data.result}`)
         }
     }
@@ -214,16 +216,16 @@ export class TransmissionRuntime implements BittorrentRuntime {
     async uploadTorrent(buffer: Uint8Array, _filename: string, uploadOptions?: Record<string, any>): Promise<void> {
         const resp = await this.getHttpClient().post(this.url(), {
             arguments: {
-                metainfo: Buffer.from(buffer).toString("base64"),
+                metainfo: Buffer.from(buffer).toString('base64'),
                 ...this.getUploadOptions(uploadOptions),
             },
-            method: "torrent-add",
+            method: 'torrent-add',
         }, {})
 
-        if ("torrent-duplicate" in resp.data.arguments) {
-            throw new Error("Could not add duplicate torrent to transmission")
+        if ('torrent-duplicate' in resp.data.arguments) {
+            throw new Error('Could not add duplicate torrent to transmission')
         }
-        if (resp.data.result !== "success") {
+        if (resp.data.result !== 'success') {
             throw new Error(`Could not add torrent to transmission: ${resp.data.result}`)
         }
     }
@@ -246,38 +248,38 @@ export class TransmissionRuntime implements BittorrentRuntime {
     }
 
     start(hashes: string[]): Promise<void> {
-        return this.doAction("torrent-start", hashes).then(() => undefined)
+        return this.doAction('torrent-start', hashes).then(() => undefined)
     }
 
     stop(hashes: string[]): Promise<void> {
-        return this.doAction("torrent-stop", hashes).then(() => undefined)
+        return this.doAction('torrent-stop', hashes).then(() => undefined)
     }
 
     verify(hashes: string[]): Promise<void> {
-        return this.doAction("torrent-verify", hashes).then(() => undefined)
+        return this.doAction('torrent-verify', hashes).then(() => undefined)
     }
 
     pauseAll(): Promise<void> {
-        return this.doAction("torrent-stop", []).then(() => undefined)
+        return this.doAction('torrent-stop', []).then(() => undefined)
     }
 
     resumeAll(): Promise<void> {
-        return this.doAction("torrent-start", []).then(() => undefined)
+        return this.doAction('torrent-start', []).then(() => undefined)
     }
 
     queueUp(hashes: string[]): Promise<void> {
-        return this.doAction("queue-move-up", hashes).then(() => undefined)
+        return this.doAction('queue-move-up', hashes).then(() => undefined)
     }
 
     queueDown(hashes: string[]): Promise<void> {
-        return this.doAction("queue-move-down", hashes).then(() => undefined)
+        return this.doAction('queue-move-down', hashes).then(() => undefined)
     }
 
     remove(hashes: string[]): Promise<void> {
-        return this.doAction("torrent-remove", hashes).then(() => undefined)
+        return this.doAction('torrent-remove', hashes).then(() => undefined)
     }
 
     removeAndLocal(hashes: string[]): Promise<void> {
-        return this.doAction("torrent-remove", hashes, "delete-local-data", true).then(() => undefined)
+        return this.doAction('torrent-remove', hashes, 'delete-local-data', true).then(() => undefined)
     }
 }

@@ -1,16 +1,16 @@
 import { app, type BrowserWindow } from 'electron'
 
-let mainWindow: BrowserWindow | null
+let mainWindow: BrowserWindow | null = null
 
-exports.setWindow = function(newWindow: BrowserWindow) {
+export function setWindow(newWindow: BrowserWindow) {
     mainWindow = newWindow
 }
 
-exports.getWindow = function() {
+export function getWindow() {
     return mainWindow
 }
 
-exports.isDevelopment = function() {
+export function isDevelopment() {
     try {
         if (app.isPackaged) {
             return false

@@ -1,10 +1,9 @@
 import { dialog } from 'electron'
+import fs from 'fs'
+import path from 'path'
 
-const path = require('path')
-const fs = require('fs')
-
-const electorrent = require('./electorrent')
-const { IPC_CHANNELS } = require('../../shared/ipc')
+import { IPC_CHANNELS } from '../../shared/ipc'
+import * as electorrent from './electorrent'
 
 function notify({ title = '', message = '', type = 'info' }) {
     const win = electorrent.getWindow()
@@ -39,7 +38,7 @@ function serializeTorrentFile(filePath: string, askUploadOptions: boolean) {
     })
 }
 
-async function readFiles(filepaths: string[], askUploadOptions: boolean) {
+export async function readFiles(filepaths: string[], askUploadOptions: boolean) {
     if (!Array.isArray(filepaths) || filepaths.length === 0) return []
 
     const torrents = filepaths.filter(filterFiles)
@@ -56,7 +55,7 @@ async function readFiles(filepaths: string[], askUploadOptions: boolean) {
     return Promise.all(torrents.map((file) => serializeTorrentFile(file, askUploadOptions)))
 }
 
-async function browse(askUploadOptions: boolean) {
+export async function browse(askUploadOptions: boolean) {
     const win = electorrent.getWindow()
 
     const result = await dialog.showOpenDialog(win, {
@@ -74,6 +73,3 @@ async function browse(askUploadOptions: boolean) {
 
     return readFiles(result.filePaths, askUploadOptions)
 }
-
-exports.browse = browse
-exports.readFiles = readFiles

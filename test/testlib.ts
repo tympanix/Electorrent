@@ -1,9 +1,9 @@
 import chai from "chai"
 import { assert } from "chai"
 import { describe, it, before, after, beforeEach, afterEach } from "mocha";
-import path = require("path");
+import path from "path";
 import chaiAsPromised from "chai-as-promised";
-import e2e = require("./e2e");
+import * as e2e from "./e2e";
 import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { TorrentClient } from "../src/renderer/app/bittorrent"

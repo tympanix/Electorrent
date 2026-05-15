@@ -1,9 +1,9 @@
 import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
-import type { AppSettings, StoredServerConfig } from '../../shared/ipc-contract'
-import { CLIENT_METADATA } from '../../shared/client-metadata'
 
-const { IPC_CHANNELS } = require('../../shared/ipc')
-const settings = require('./settings')
+import { CLIENT_METADATA } from '../../shared/client-metadata'
+import { IPC_CHANNELS } from '../../shared/ipc'
+import type { AppSettings, StoredServerConfig } from '../../shared/ipc-contract'
+import * as settings from './settings'
 
 type MenuSessionState = {
     isDebug: boolean
@@ -20,19 +20,19 @@ let menuState: MenuSessionState = {
 const defaultMenuSettings: AppSettings = settings.getDefaultSettings()
 let menuSettings: AppSettings = defaultMenuSettings
 
-function normalizeMenuSettings(settings: Partial<AppSettings> | null | undefined): AppSettings {
+function normalizeMenuSettings(settingsValue: Partial<AppSettings> | null | undefined): AppSettings {
     return {
         ...defaultMenuSettings,
-        ...settings,
+        ...settingsValue,
         ui: {
             ...defaultMenuSettings.ui,
-            ...(settings?.ui || {}),
+            ...(settingsValue?.ui || {}),
         },
-        servers: Array.isArray(settings?.servers) ? settings.servers : [],
+        servers: Array.isArray(settingsValue?.servers) ? settingsValue.servers : [],
     }
 }
 
-function setWindow(window: BrowserWindow) {
+export function setWindow(window: BrowserWindow) {
     mainWindow = window
     buildMenu()
 }
@@ -181,7 +181,7 @@ function viewMenuItems(): MenuItemConstructorOptions[] {
             accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
             click(_item, focusedWindow) {
                 if (focusedWindow) {
-                    ;(focusedWindow as BrowserWindow).webContents.toggleDevTools()
+                    (focusedWindow as BrowserWindow).webContents.toggleDevTools()
                 }
             },
         },
@@ -315,12 +315,12 @@ function buildMenu() {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-function configure(state: Pick<MenuSessionState, 'isDebug'>) {
+export function configure(state: Pick<MenuSessionState, 'isDebug'>) {
     menuState = Object.assign({}, menuState, state)
     refresh()
 }
 
-function setActiveServer(server?: { id?: string | null; client?: string | null } | null) {
+export function setActiveServer(server?: { id?: string | null; client?: string | null } | null) {
     menuState = Object.assign({}, menuState, {
         activeServerId: server?.id || null,
         activeClientId: server?.client || null,
@@ -328,14 +328,7 @@ function setActiveServer(server?: { id?: string | null; client?: string | null }
     buildMenu()
 }
 
-function refresh() {
+export function refresh() {
     menuSettings = normalizeMenuSettings(settings.getAllSettings())
     buildMenu()
-}
-
-module.exports = {
-    configure,
-    refresh,
-    setActiveServer,
-    setWindow,
 }

@@ -51,5 +51,5 @@ fileAssociations:
     name: Bittorrent Document
     role: Viewer
     description: Torrent Files
-afterPack: ./util/after-pack.js
+afterPack: ./util/after-pack.mjs
 electronVersion: 42.0.1

@@ -1,9 +1,10 @@
 import { app } from 'electron'
+import { spawn } from 'child_process'
+import path from 'path'
+import Q from 'q'
+import electronRegedit from 'electron-regedit'
 
-const { ProgId, Regedit } = require('electron-regedit')
-const path = require('path')
-const { spawn } = require('child_process')
-const Q = require('q')
+const { ProgId, Regedit } = electronRegedit as any
 
 new ProgId({
     description: 'Torrent File',
@@ -65,4 +66,6 @@ function checkSquirrel() {
     }
 }
 
-module.exports = checkSquirrel()
+const shouldQuitFromStartup = checkSquirrel()
+
+export default shouldQuitFromStartup

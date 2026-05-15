@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 
 function resolveThemesDir() {
     const candidates = [
@@ -21,7 +21,7 @@ function capitalize(value: string) {
     return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-function themes() {
+export default function themes() {
     const themeFiles = fs.readdirSync(DIR)
         .filter(function(file: string) {
             const stat = fs.statSync(path.join(DIR, file))
@@ -36,5 +36,3 @@ function themes() {
         }
     })
 }
-
-module.exports = themes

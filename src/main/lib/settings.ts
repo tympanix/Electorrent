@@ -1,9 +1,9 @@
 import { app, dialog, shell, type BrowserWindow, type MessageBoxOptions } from 'electron'
-import type { AppSettings } from '../../shared/ipc-contract'
+import fs from 'fs'
+import path from 'path'
 
-const fs = require('fs')
-const path = require('path')
-const electorrent = require('./electorrent')
+import type { AppSettings } from '../../shared/ipc-contract'
+import * as electorrent from './electorrent'
 
 let data: any = null
 
@@ -43,7 +43,7 @@ function deleteConfig() {
     }
 }
 
-function showCorruptDialog() {
+export function showCorruptDialog() {
     const window: BrowserWindow | null = electorrent.getWindow()
     const dialogSettings: MessageBoxOptions = {
         type: 'error',
@@ -138,9 +138,7 @@ function copyArray(_obj: any[]) {
     return copiedArray
 }
 
-exports.showCorruptDialog = showCorruptDialog
-
-exports.put = function(key: string, value: any, callback?: (err?: Error | null) => void) {
+export function put(key: string, value: any, callback?: (err?: Error | null) => void) {
     load()
     data[key] = value
     if (callback !== undefined) {
@@ -148,24 +146,24 @@ exports.put = function(key: string, value: any, callback?: (err?: Error | null) 
     }
 }
 
-exports.getAllSettings = function() {
+export function getAllSettings() {
     load()
     return copy(data)
 }
 
-exports.getDefaultSettings = function() {
+export function getDefaultSettings() {
     return copy(defaultSettings)
 }
 
-exports.settingsReference = function() {
+export function settingsReference() {
     return data
 }
 
-exports.write = function() {
+export function write() {
     saveSync()
 }
 
-exports.saveAll = function(settings: any, callback?: (err?: Error | null) => void) {
+export function saveAll(settings: any, callback?: (err?: Error | null) => void) {
     load()
     data = settings
     if (callback !== undefined) {
@@ -173,7 +171,7 @@ exports.saveAll = function(settings: any, callback?: (err?: Error | null) => voi
     }
 }
 
-exports.get = function(key: string) {
+export function get(key: string) {
     load()
     let value: any = null
     if (data && key in data) {
@@ -182,12 +180,12 @@ exports.get = function(key: string) {
     return value
 }
 
-exports.getServer = function(id: string) {
+export function getServer(id: string) {
     load()
     return data.servers.find((s: { id: string }) => s.id === id)
 }
 
-exports.saveServer = function(server: { id: string }, callback: (err?: Error | null) => void) {
+export function saveServer(server: { id: string }, callback: (err?: Error | null) => void) {
     load()
     let ok = false
     data.servers = data.servers.map((s: { id: string }) => {
@@ -205,7 +203,7 @@ exports.saveServer = function(server: { id: string }, callback: (err?: Error | n
     save(callback)
 }
 
-exports.unset = function(key: string, callback: (err?: Error | null) => void) {
+export function unset(key: string, callback: (err?: Error | null) => void) {
     load()
     if (key in data) {
         delete data[key]

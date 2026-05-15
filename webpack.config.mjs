@@ -1,9 +1,12 @@
-const path = require('path')
-const webpack = require('webpack')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const nodeExternals = require('webpack-node-externals')
+import path from 'path'
+import { fileURLToPath } from 'url'
+import webpack from 'webpack'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import CopyWebpackPlugin from 'copy-webpack-plugin'
+import nodeExternals from 'webpack-node-externals'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 const defaultInclude = path.resolve(__dirname, 'src')
 const outDir = path.resolve(__dirname, 'app')
 const isProduction = process.env.NODE_ENV === 'production'
@@ -62,7 +65,7 @@ const rendererConfig = {
   entry: {
     app: [
       path.resolve(__dirname, 'src/renderer/vendor.ts'),
-      path.resolve(__dirname, 'src/renderer/assets/css/fonts/bittorrent.font.js'),
+      path.resolve(__dirname, 'src/renderer/assets/css/fonts/bittorrent.font.json'),
       path.resolve(__dirname, 'src/renderer/app.ts'),
     ],
   },
@@ -76,7 +79,8 @@ const rendererConfig = {
     rules: [
       makeTsRule('tsconfig.renderer.json'),
       {
-        test: /\.font\.js$/i,
+        test: /\.font\.json$/i,
+        type: 'javascript/auto',
         use: [
           'null-loader',
           'webfonts-loader',
@@ -167,4 +171,4 @@ const mainConfig = makeNodeConfig({
   target: 'electron-main',
 })
 
-module.exports = [rendererConfig, preloadConfig, mainConfig]
+export default [rendererConfig, preloadConfig, mainConfig]
