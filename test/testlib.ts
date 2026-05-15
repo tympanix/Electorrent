@@ -1,5 +1,4 @@
 import chai from "chai"
-import { assert } from "chai"
 import { describe, it, before, after, beforeEach, afterEach } from "mocha";
 import path from "path";
 import chaiAsPromised from "chai-as-promised";
@@ -9,6 +8,8 @@ import { dockerComposeHooks, startApplicationHooks, restartApplication } from ".
 import { TorrentClient } from "../src/renderer/app/bittorrent"
 import { browser, $, $$ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
+
+const { assert } = chai
 
 
 interface TestSuiteOptionsOptional {
