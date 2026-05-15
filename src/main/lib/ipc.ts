@@ -3,7 +3,7 @@ import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from
 const is = require('electron-is')
 const { IPC_CHANNELS } = require('../../shared/ipc')
 const { bittorrentManager } = require('./bittorrent')
-const config = require('./config')
+const config = require('./settings')
 const updater = require('./update')
 const torrents = require('./torrents')
 const themes = require('./themes')

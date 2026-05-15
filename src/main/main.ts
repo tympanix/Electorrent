@@ -23,7 +23,7 @@ if (!require('./lib/startup')) {
     yargs.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
     yargs.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
 
-    const config = require('./lib/config')
+    const config = require('./lib/settings')
     const updater = require('./lib/update')
     const logger = require('./lib/logger')
     const electorrent = require('./lib/electorrent')

@@ -3,7 +3,7 @@ import type { AppSettings, StoredServerConfig } from '../../shared/ipc-contract'
 import { CLIENT_METADATA } from '../../shared/client-metadata'
 
 const { IPC_CHANNELS } = require('../../shared/ipc')
-const config = require('./config')
+const config = require('./settings')
 
 type MenuSessionState = {
     isDebug: boolean

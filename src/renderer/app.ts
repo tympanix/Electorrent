@@ -68,7 +68,7 @@ import { httpFormService } from "./app/services/httpFormService"
 torrentApp.factory("httpFormService", httpFormService)
 import { bittorrentService } from "./app/services/bittorrent"
 torrentApp.service("$bittorrent", bittorrentService)
-import { configService } from "./app/services/config"
+import { configService } from "./app/services/settings"
 torrentApp.service("configService", configService)
 import { notificationService } from "./app/services/notification"
 torrentApp.service("notificationService", notificationService)
