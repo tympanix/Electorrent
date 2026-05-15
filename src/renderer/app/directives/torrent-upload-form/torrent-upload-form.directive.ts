@@ -1,5 +1,4 @@
 import { IAttributes, IAugmentedJQuery, ICompileService, IControllerProvider, IControllerService, IDirective, IDirectiveCompileFn, IDirectiveFactory, IDirectiveLinkFn, IDirectivePrePost, IRootElementService, IRootScopeService, IScope } from "angular";
-import { link } from "fs";
 import { TorrentUploadFormController } from "./torrent-upload-form.controller";
 import html from "./torrent-upload-form.template.html"
 

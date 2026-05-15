@@ -13,11 +13,18 @@ const sharedResolve = {
   modules: ['node_modules', 'src'],
 }
 
-const tsRule = {
-  test: /\.tsx?$/,
-  use: 'ts-loader',
-  include: defaultInclude,
-  exclude: /node_modules/,
+function makeTsRule(configFile) {
+  return {
+    test: /\.tsx?$/,
+    use: {
+      loader: 'ts-loader',
+      options: {
+        configFile: path.resolve(__dirname, configFile),
+      },
+    },
+    include: defaultInclude,
+    exclude: /node_modules/,
+  }
 }
 
 const commonPlugins = [
@@ -63,11 +70,11 @@ const rendererConfig = {
     path: outDir,
     filename: '[name].js',
   },
-  target: 'electron-renderer',
+  target: 'web',
   mode: isProduction ? 'production' : 'development',
   module: {
     rules: [
-      tsRule,
+      makeTsRule('tsconfig.renderer.json'),
       {
         test: /\.font\.js$/i,
         use: [
@@ -137,7 +144,7 @@ function makeNodeConfig({ name, entry, target }) {
       }),
     ],
     module: {
-      rules: [tsRule],
+      rules: [makeTsRule('tsconfig.main.json')],
     },
     resolve: sharedResolve,
     stats: rendererConfig.stats,
