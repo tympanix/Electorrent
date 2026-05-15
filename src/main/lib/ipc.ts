@@ -71,9 +71,9 @@ exports.registerHandlers = function({ isDebug, getWindow, consumePendingLaunchPa
         return settings.getAllSettings()
     })
 
-    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings: settingsToSave }) {
+    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings: newSettings }) {
         return new Promise<void>((resolve, reject) => {
-            settings.saveAll(settingsToSave, function(err: Error) {
+            settings.saveAll(newSettings, function(err: Error) {
                 if (err) {
                     reject(err)
                     return
