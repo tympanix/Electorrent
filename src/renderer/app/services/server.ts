@@ -1,6 +1,6 @@
 import _ from "underscore"
 import { Torrent } from "../bittorrent"
-import type { StoredServerConfig } from "../../../common/ipc-contract"
+import type { StoredServerConfig } from "../../../shared/ipc-contract"
 
 export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorrent', '$btclients',
     function($rootScope, $q, $notify, $bittorrent, $btclients) {

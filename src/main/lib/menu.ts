@@ -1,6 +1,6 @@
 import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
 
-const { IPC_CHANNELS } = require('../../common/ipc')
+const { IPC_CHANNELS } = require('../../shared/ipc')
 
 type ServerMenuState = {
     id: string

@@ -8,7 +8,7 @@ const fs = require('fs')
 
 const logger = require('./logger')
 const electorrent = require('./electorrent')
-const { IPC_CHANNELS } = require('../../common/ipc')
+const { IPC_CHANNELS } = require('../../shared/ipc')
 
 const ENDPOINT = 'https://electorrent.vercel.app/'
 const version = app.getVersion()
