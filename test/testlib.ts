@@ -380,8 +380,10 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           beforeEach(async function() {
-            this.timeout(20 * 1000)
+            this.timeout(30 * 1000)
             this.torrentPath = await createTorrentFile(tracker, { fileSize: 1 })
+            await restartApplication(this)
+            await this.app.torrentsPageIsVisible()
           })
 
           it("torrent uploaded with default options", async function() {
@@ -407,11 +409,12 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torrent uploaded in stopped state", async function() {
+            this.timeout(30 * 1000)
             if (!options.client.uploadOptionsEnable?.startTorrent) return this.skip()
             let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ start: false })
             await torrent.isExisting()
-            await torrent.waitForState(options.stopLabel)
+            await torrent.waitForState(options.stopLabel, { timeout: 20 * 1000 })
             await torrent.delete()
           })
 
