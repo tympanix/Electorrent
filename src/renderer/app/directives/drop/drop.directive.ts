@@ -42,11 +42,13 @@ export class DropdownElementDirective implements IDirective {
 
     link(scope: DropdownScope, element: IAugmentedJQuery, attrs: IAttributes, controller: DropDownController) {
         let isMouseDown = false;
+        const originalTitle = attrs.title || scope.title;
 
         scope.dropdown_class = "ui selection dropdown";
         scope.menu_class = "menu transition hidden";
+        scope.title = originalTitle;
         scope.text_class = "default text";
-        scope.original_title = scope.title;
+        scope.original_title = originalTitle;
         scope.is_open = scope.open === "true";
 
         if (scope.is_open) {
@@ -144,6 +146,9 @@ export class DropdownElementDirective implements IDirective {
             if (scope.change) {
                 scope.change();
             }
+        });
+        scope.$evalAsync(() => {
+            controller.update_title(scope.model);
         });
 
         element.on("click", toggle);
