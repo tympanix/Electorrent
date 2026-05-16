@@ -1,7 +1,7 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions, TorrentUploadOptionsEnable } from "../torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@renderer/app/bittorrent/torrentclient";
 import { TransmissionTorrent } from "./torrentt";
 import _ from "underscore"
-import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "../ipc";
+import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 

@@ -1,6 +1,6 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "../torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "@renderer/app/bittorrent/torrentclient";
 import { DelugeTorrent } from "./torrentd";
-import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "../ipc";
+import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export class DelugeClient extends TorrentClient<DelugeTorrent> {
     public name = 'Deluge'

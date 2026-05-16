@@ -1,7 +1,7 @@
 import type {
     BittorrentFileSelection,
     BittorrentServerConfig,
-} from "../../../shared/ipc-contract"
+} from "@shared/ipc-contract"
 import type { TorrentUploadOptions } from "./torrentclient"
 
 function bridge() {

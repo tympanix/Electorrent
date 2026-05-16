@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 
-import type { BittorrentServerConfig } from '../../../../shared/ipc-contract'
-import { createHttpsAgent, serverUrl } from '../helpers'
-import type { BittorrentRuntime } from '../types'
+import type { BittorrentServerConfig } from '@shared/ipc-contract'
+import { createHttpsAgent, serverUrl } from '@main/lib/bittorrent/helpers'
+import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 
 const SESSION_ID_HEADER = 'X-Transmission-Session-Id'
 

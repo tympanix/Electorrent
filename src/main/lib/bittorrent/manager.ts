@@ -5,7 +5,7 @@ import type {
     BittorrentServerConfig,
     BittorrentSetTorrentFileSelectionRequest,
     BittorrentUploadTorrentRequest,
-} from "../../../shared/ipc-contract"
+} from "@shared/ipc-contract"
 import { createRuntime } from "./registry"
 import type { BittorrentRuntime } from "./types"
 

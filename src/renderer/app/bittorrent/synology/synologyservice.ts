@@ -1,6 +1,6 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "../torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "@renderer/app/bittorrent/torrentclient";
 import { SynologyTorrent } from "./synologytorrent";
-import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "../ipc";
+import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export class SynologyClient extends TorrentClient<SynologyTorrent> {
     public name = 'Synology Download Station'

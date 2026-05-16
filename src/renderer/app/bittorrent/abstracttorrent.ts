@@ -1,4 +1,4 @@
-import { Column } from '../services/column'
+import { Column } from '@renderer/app/services/column'
 
 /**
  * Represents a single file inside a torrent. Used for file list display and

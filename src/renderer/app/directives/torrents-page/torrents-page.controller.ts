@@ -1,8 +1,8 @@
 import { IRootScopeService } from "angular";
 import Fuse from "fuse.js";
-import { TorrentUploadOptions } from "../../bittorrent/torrentclient";
-import { PendingTorrentUploadItem, PendingTorrentUploadList } from "../add-torrent-modal/add-torrent-modal.directive";
-import { ModalController } from "../modal/modal.controller";
+import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { PendingTorrentUploadItem, PendingTorrentUploadList } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
+import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 
 interface TorrentControllerScope extends angular.IScope {
     pendingTorrentFiles: PendingTorrentUploadList;

@@ -2,7 +2,7 @@ import { app, dialog, shell, type BrowserWindow, type MessageBoxOptions } from '
 import fs from 'fs'
 import path from 'path'
 
-import type { AppSettings } from '../../shared/ipc-contract'
+import type { AppSettings } from '@shared/ipc-contract'
 import * as electorrent from './electorrent'
 
 let data: any = null

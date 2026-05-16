@@ -1,5 +1,5 @@
 import https from "https"
-import type { BittorrentServerConfig } from "../../../shared/ipc-contract"
+import type { BittorrentServerConfig } from "@shared/ipc-contract"
 import type { CallbackFunc } from "./types"
 
 export function defer<T>(fn: (f: CallbackFunc<T>) => void): Promise<T> {
