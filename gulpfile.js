@@ -42,7 +42,7 @@ function stripGoogleFontImports() {
     transform(file, _encoding, callback) {
       if (file.isBuffer()) {
         const stripped = file.contents.toString()
-          .replace(/@import url\('https:\/\/fonts\.googleapis\.com\/css\?family=[^']+'\);\n?/g, '')
+          .replace(/@import url\(['"]?https:\/\/fonts\.googleapis\.com\/css\?family=[^'")\s]+['"]?\);\n?/g, '');
         file.contents = Buffer.from(stripped)
       }
 
