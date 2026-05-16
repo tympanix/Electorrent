@@ -25,8 +25,10 @@ export class DockerComposeService {
     try {
       return await compose.exec(this.serviceName, command, this.composeOptions)
     } catch (err: unknown) {
-      const error = err as { exitCode?: number }
-      throw new Error(`command for ${this.serviceName} container exited with code ${error.exitCode}: ${err}`)
+      const exitCode = typeof err === "object" && err !== null && "exitCode" in err
+        ? String(err.exitCode)
+        : "unknown"
+      throw new Error(`command for ${this.serviceName} container exited with code ${exitCode}: ${err}`)
     }
   }
 
