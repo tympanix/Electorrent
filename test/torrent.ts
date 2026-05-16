@@ -1,5 +1,8 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { DockerComposeService } from "./shared/compose";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Create a torrent file in the tracker service.

@@ -1,3 +1,3 @@
 export { QBittorrentClient } from "./qbittorrentservice"
 export { QBittorrentTorrent } from "./torrentq"
-export { QBittorrentUploadOptions } from "./qbittorrentservice"
+export type { QBittorrentUploadOptions } from "./qbittorrentservice"

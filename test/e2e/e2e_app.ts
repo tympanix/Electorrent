@@ -5,7 +5,9 @@ import { Torrent } from "./e2e_torrent";
 import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
 import { TorrentClient } from "../../src/renderer/app/bittorrent"
-import { assert } from "chai";
+import chai from "chai";
+
+const { assert } = chai
 
 /**
  * Options to use during the login screen of the app to connect to your torrent client
