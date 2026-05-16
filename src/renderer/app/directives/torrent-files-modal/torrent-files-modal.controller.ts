@@ -1,6 +1,6 @@
 import { IRootScopeService, IScope } from "angular";
-import { TorrentFile } from "../../bittorrent/abstracttorrent";
-import { ModalController } from "../modal/modal.controller";
+import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
+import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 
 export interface TorrentFilesModalScope extends IScope {
   torrent: any;

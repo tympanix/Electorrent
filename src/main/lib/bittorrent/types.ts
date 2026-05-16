@@ -1,4 +1,4 @@
-import type { BittorrentFileSelection, BittorrentServerConfig } from "../../../shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig } from "@shared/ipc-contract"
 
 export type CallbackFunc<T = any> = (err: any, val: T) => void
 

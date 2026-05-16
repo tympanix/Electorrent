@@ -1,4 +1,4 @@
-import { PendingTorrentUploadLink } from "../directives/add-torrent-modal/add-torrent-modal.directive";
+import { PendingTorrentUploadLink } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 
 export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notificationService', function($rootScope, $injector, $btclients, $notify){
     const electorrent = window.electorrent

@@ -1,5 +1,5 @@
 import { IScope } from "angular";
-import { TorrentFile } from "../../bittorrent/abstracttorrent";
+import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 import { buildTorrentFileRows, TorrentFileRow } from "./torrent-files-tree.helper";
 
 export interface TorrentFilesTreeScope extends IScope {

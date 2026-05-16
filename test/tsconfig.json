@@ -4,6 +4,7 @@
         "./"
     ],
     "compilerOptions": {
+        "baseUrl": "..",
         "lib": [
             "es6"
         ],
@@ -24,6 +25,26 @@
             "types",
             "../node_modules/@types",
             "../node_modules/webdriverio/types"
+        ],
+        "paths": {
+            "@main": [
+                "src/main"
+            ],
+            "@main/*": [
+                "src/main/*"
+            ],
+            "@renderer": [
+                "src/renderer"
+            ],
+            "@renderer/*": [
+                "src/renderer/*"
+            ],
+            "@shared": [
+                "src/shared"
+            ],
+            "@shared/*": [
+                "src/shared/*"
+            ]
         ]
     },
     "exclude": [

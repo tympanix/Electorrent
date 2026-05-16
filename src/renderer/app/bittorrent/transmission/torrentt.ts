@@ -1,4 +1,4 @@
-import {Torrent} from "../abstracttorrent";
+import {Torrent} from "@renderer/app/bittorrent/abstracttorrent";
 
 export class TransmissionTorrent extends Torrent {
 

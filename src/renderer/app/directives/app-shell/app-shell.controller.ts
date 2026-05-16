@@ -1,6 +1,6 @@
 import { IRootScopeService, IScope } from "angular";
-import { PendingTorrentUploadFile } from "../add-torrent-modal/add-torrent-modal.directive";
-import type { AppMeta, LaunchPayload, MenuAction } from "../../../../shared/ipc-contract";
+import { PendingTorrentUploadFile } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
+import type { AppMeta, LaunchPayload, MenuAction } from "@shared/ipc-contract";
 
 interface AppShellScope extends IScope {
     servers: any[];

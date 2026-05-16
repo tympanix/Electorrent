@@ -11,7 +11,7 @@ import is from 'electron-is'
 import path from 'path'
 import yargs from 'yargs'
 
-import startup from './lib/startup'
+import startup from '@main/lib/startup'
 
 declare const __non_webpack_require__: NodeRequire | undefined
 
@@ -39,16 +39,16 @@ async function bootstrap() {
         ipcHandlers,
         menu,
     ] = await Promise.all([
-        import('../shared/ipc'),
-        import('./lib/bittorrent'),
-        import('./lib/settings'),
-        import('./lib/update'),
-        import('./lib/logger'),
-        import('./lib/electorrent'),
-        import('./lib/torrents'),
-        import('./lib/certificates'),
-        import('./lib/ipc'),
-        import('./lib/menu'),
+        import('@shared/ipc'),
+        import('@main/lib/bittorrent'),
+        import('@main/lib/settings'),
+        import('@main/lib/update'),
+        import('@main/lib/logger'),
+        import('@main/lib/electorrent'),
+        import('@main/lib/torrents'),
+        import('@main/lib/certificates'),
+        import('@main/lib/ipc'),
+        import('@main/lib/menu'),
     ])
 
     logger.debug('Starting Electorrent in debug mode')

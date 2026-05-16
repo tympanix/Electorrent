@@ -1,5 +1,5 @@
 import { ICompileService, IRootScopeService, IScope } from "angular";
-import { TorrentUploadOptions, TorrentUploadOptionsEnable } from "../../bittorrent/torrentclient";
+import { TorrentUploadOptions, TorrentUploadOptionsEnable } from "@renderer/app/bittorrent/torrentclient";
 
 export class TorrentUploadFormController {
 

@@ -1,7 +1,7 @@
-import { Column } from "../../services/column";
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "../torrentclient";
+import { Column } from "@renderer/app/services/column";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "@renderer/app/bittorrent/torrentclient";
 import { RtorrentTorrent } from "./torrentr";
-import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "../ipc";
+import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     public name = "rTorrent"
