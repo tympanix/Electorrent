@@ -43,7 +43,7 @@ export async function waitForHttp(
   { url: string, statusCode?: number, timeout?: number, step?: number })
 {
   let timeSpent = 0;
-  while (timeSpent <= timeout) {
+  while (timeSpent < timeout) {
     try {
       const res = await axios.get(url, {
         timeout: 1000,
