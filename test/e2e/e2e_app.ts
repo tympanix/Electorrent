@@ -193,7 +193,7 @@ export class App {
     return torrent;
   }
 
-  async uploadMagnetLink({ magnetUri, filename, options }: { magnetUri?: string, filename?: string, options?: magnet.Instance }) {
+  async uploadMagnetLink({ magnetUri, filename }: { magnetUri?: string, filename?: string }) {
     if (!magnetUri && filename) {
       const data = fs.readFileSync(filename)
       const info = parseTorrent(data)
