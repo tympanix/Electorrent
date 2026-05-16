@@ -53,7 +53,7 @@ export async function waitForHttp(
         return;
       }
     } catch (_error) {
-      // Retry until the timeout is reached.
+      void _error
     }
     await sleep(step)
     timeSpent += step
