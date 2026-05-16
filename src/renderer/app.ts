@@ -13,7 +13,7 @@ import {
 } from "@renderer/app/bittorrent"
 import { CLIENT_METADATA } from "@shared/client-metadata"
 
-var torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
+const torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
 
 // Configure the application
 torrentApp.config(['$animateProvider', function($animateProvider) {

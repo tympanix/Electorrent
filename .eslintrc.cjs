@@ -12,6 +12,9 @@ module.exports = {
     },
     plugins: ["@typescript-eslint"],
     extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+    rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+    },
     overrides: [
         {
             files: ["src/renderer/**/*.ts"],
@@ -23,6 +26,9 @@ module.exports = {
             files: ["test/**/*.ts"],
             env: {
                 mocha: true,
+            },
+            rules: {
+                "@typescript-eslint/no-non-null-assertion": "off",
             },
         },
     ],

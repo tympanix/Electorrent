@@ -23,6 +23,6 @@ export function startApplicationHooks() {
   })
 }
 
-export async function restartApplication(context: Mocha.Context) {
+export async function restartApplication() {
   await browser.refresh()
 }
