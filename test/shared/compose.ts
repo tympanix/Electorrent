@@ -12,7 +12,7 @@ export class DockerComposeService {
   serviceName: string
   composeOptions: IDockerComposeOptions
 
-  constructor(composeDir: string | string[], { serviceName = "" } = {}) {
+  constructor(composeDir: string | string[], { serviceName = "" } = {}) {
     this.composeDir = Array.isArray(composeDir) ? path.join(...composeDir) : composeDir
     this.serviceName = serviceName || path.basename(this.composeDir)
     this.composeOptions = {
@@ -24,8 +24,9 @@ export class DockerComposeService {
   async exec(command: string | string[]) {
     try {
       return await compose.exec(this.serviceName, command, this.composeOptions)
-    } catch (err: any) {
-      throw new Error(`command for ${this.serviceName} container exited with code ${err.exitCode}: ${err}`)
+    } catch (err: unknown) {
+      const error = err as { exitCode?: number }
+      throw new Error(`command for ${this.serviceName} container exited with code ${error.exitCode}: ${err}`)
     }
   }
 

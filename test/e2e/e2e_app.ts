@@ -5,9 +5,6 @@ import { Torrent } from "./e2e_torrent";
 import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
 import { TorrentClient } from "../../src/renderer/app/bittorrent"
-import chai from "chai";
-
-const { assert } = chai
 
 /**
  * Options to use during the login screen of the app to connect to your torrent client
@@ -34,74 +31,74 @@ export class App {
   }
 
   async login(options: LoginOptions) {
-    let hostForm = $("#connection-host")
+    const hostForm = $("#connection-host")
     await hostForm.waitForDisplayed()
     await hostForm.setValue(options.host)
 
-    let protoField = $("#connection-proto")
+    const protoField = $("#connection-proto")
     await protoField.waitForDisplayed()
     await protoField.waitForClickable()
     await protoField.click()
 
-    let proto = options.https ? 'https' : 'http'
-    let protoHttp = $(`#connection-proto-${proto}`)
+    const proto = options.https ? 'https' : 'http'
+    const protoHttp = $(`#connection-proto-${proto}`)
     await protoHttp.waitForDisplayed()
     await protoHttp.waitForClickable()
     await protoHttp.click()
 
-    let user = $("#connection-user")
+    const user = $("#connection-user")
     await user.waitForDisplayed()
     await user.setValue(options.username)
 
-    let pass = $("#connection-password")
+    const pass = $("#connection-password")
     await pass.waitForDisplayed()
     await pass.setValue(options.password);
 
-    let clientForm = $("#connection-client")
+    const clientForm = $("#connection-client")
     await clientForm.waitForDisplayed()
     await clientForm.waitForClickable()
     await clientForm.click();
 
-    let clientFormSelect = $(`#connection-client-${options.client.id}`)
+    const clientFormSelect = $(`#connection-client-${options.client.id}`)
     await clientFormSelect.waitForDisplayed()
     await clientFormSelect.waitForClickable()
     await clientFormSelect.click()
 
-    let portForm = $("#connection-port")
+    const portForm = $("#connection-port")
     await portForm.waitForDisplayed()
     await portForm.setValue(options.port);
 
-    let submit = $("#connection-submit")
+    const submit = $("#connection-submit")
     await submit.waitForDisplayed()
     await submit.waitForClickable()
     await submit.click();
   }
 
   async torrentsPageIsVisible(opts?: { timeout: number }) {
-    let pageTorrents = $("#page-torrents")
+    const pageTorrents = $("#page-torrents")
     await pageTorrents.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
   }
 
   async settingsPageIsVisible(opts?: { timeout: number }) {
-    let settingsPage = $("#page-settings")
+    const settingsPage = $("#page-settings")
     await settingsPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
   }
 
   async settingsPageConnectionIsVisible() {
-    let settingsPage = $("#page-settings-connection")
+    const settingsPage = $("#page-settings-connection")
     await settingsPage.waitForDisplayed({ timeout: this.timeout })
   }
 
   async certificateModalIsVisible() {
-    let certificateModal = $("#certificateModal")
+    const certificateModal = $("#certificateModal")
     await certificateModal.waitForExist()
     await certificateModal.waitForDisplayed({ timeout: this.timeout })
     return certificateModal
   }
 
   async acceptCertificate() {
-    let certificateModal = await this.certificateModalIsVisible()
-    let submit = certificateModal.$("button.approve")
+    const certificateModal = await this.certificateModalIsVisible()
+    const submit = certificateModal.$("button.approve")
     await submit.waitForExist()
     await submit.waitForDisplayed()
     await submit.waitForClickable()
@@ -110,7 +107,7 @@ export class App {
   }
 
   async getNotificationError() {
-      let msg = $("#notifications .negative")
+      const msg = $("#notifications .negative")
       try {
         await msg.waitForExist({ timeout: 1000 })
         return {
@@ -123,30 +120,30 @@ export class App {
   }
 
   async uploadTorrentModalVisible() {
-    let modal = $("#uploadTorrentModal")
+    const modal = $("#uploadTorrentModal")
     await modal.waitForDisplayed()
     return modal
   }
 
   async uploadTorrentModalSubmit(options?: { label?: string, start?: boolean, name?: string, saveLocation?: string }) {
-    let modal = await this.uploadTorrentModalVisible()
+    const modal = await this.uploadTorrentModalVisible()
     await browser.pause(200)
 
     if (options?.name) {
-      let nameInput = modal.$("input[data-action='rename-torrent']")
+      const nameInput = modal.$("input[data-action='rename-torrent']")
       await nameInput.waitForDisplayed()
       await nameInput.setValue(options.name)
     }
 
     if (options?.saveLocation) {
-      let saveLocationInput = modal.$("input[data-action='save-location']")
+      const saveLocationInput = modal.$("input[data-action='save-location']")
       await saveLocationInput.waitForDisplayed()
       await saveLocationInput.setValue(options.saveLocation)
     }
 
     if (options?.start !== undefined) {
-      let startToggle = modal.$(`div[data-action="start-torrent"]`)
-      let startToggleInput = startToggle.$("input")
+      const startToggle = modal.$(`div[data-action="start-torrent"]`)
+      const startToggleInput = startToggle.$("input")
       await startToggle.waitForDisplayed()
       await startToggleInput.waitForExist()
       await startToggleInput.scrollIntoView()
@@ -160,25 +157,25 @@ export class App {
     }
 
     if (options?.label) {
-      let labelElem = modal.$("div[title=Label]")
+      const labelElem = modal.$("div[title=Label]")
       await labelElem.waitForClickable()
       await labelElem.click()
-      let labelItemElem = labelElem.$(`div[data-label='${options.label}']`)
+      const labelItemElem = labelElem.$(`div[data-label='${options.label}']`)
       await labelItemElem.waitForDisplayed()
       await labelItemElem.click()
     }
 
     await browser.pause(250)
-    let submitBtn = modal.$("button[type=submit]")
+    const submitBtn = modal.$("button[type=submit]")
     await submitBtn.click()
     await modal.waitForDisplayed({ reverse: true })
   }
 
   async uploadTorrent({ filename, askUploadOptions }: { filename: string, askUploadOptions?: boolean }) {
-    let data = fs.readFileSync(path.join(filename));
-    let info = parseTorrent(data)
-    let hash = info.infoHash
-    let torrent = new Torrent({ hash: hash, app: this });
+    const data = fs.readFileSync(path.join(filename));
+    const info = parseTorrent(data)
+    const hash = info.infoHash
+    const torrent = new Torrent({ hash: hash, app: this });
     await expect(await torrent.isExisting()).toBe(false);
     await browser.execute((data, filename, askUploadOptions) => {
       const injector = angular.element(document.body).injector()
@@ -194,18 +191,18 @@ export class App {
     return torrent;
   }
 
-  async uploadMagnetLink({ magnetUri, filename, options }: { magnetUri?: string, filename?: string, options?: magnet.Instance }) {
+  async uploadMagnetLink({ magnetUri, filename }: { magnetUri?: string, filename?: string }) {
     if (!magnetUri && filename) {
-      let data = fs.readFileSync(filename)
-      let info = parseTorrent(data)
+      const data = fs.readFileSync(filename)
+      const info = parseTorrent(data)
       magnetUri = magnet.encode({
         xt: [`urn:btih:${info.infoHash}`],
         tr: info.announce,
       })
     }
     if (!magnetUri) throw new Error("invalid arguments passed to generate magnet uri")
-    let info = parseTorrent(magnetUri)
-    let torrent = new Torrent({ hash: info.infoHash, app: this })
+    const info = parseTorrent(magnetUri)
+    const torrent = new Torrent({ hash: info.infoHash, app: this })
     await browser.execute((magnetUri) => {
       const injector = angular.element(document.body).injector()
       const $rootScope = injector.get("$rootScope")
@@ -223,13 +220,13 @@ export class App {
     const labels = "#torrent-action-header div[data-role=labels]";
     const labelBtn = `div[data-label='${labelName}']`;
 
-    let labelsElem = $(labels)
+    const labelsElem = $(labels)
     await labelsElem.click()
 
-    let labelBtnElem = labelsElem.$(labelBtn)
+    const labelBtnElem = labelsElem.$(labelBtn)
     await labelBtnElem.waitForDisplayed()
 
-    let labelText = await labelBtnElem.getText()
+    const labelText = await labelBtnElem.getText()
     labelText.should.contain(labelName)
 
     await browser.pause(200)
@@ -239,8 +236,8 @@ export class App {
 
   async getTorrents() {
     const table = "#torrentTable tbody tr";
-    let torrents = $$(table)
-    let data = torrents.map(
+    const torrents = $$(table)
+    const data = torrents.map(
       async (e) => new Torrent({ hash: await e.getAttribute("data-hash"), app: this })
     );
     return await data
@@ -248,8 +245,8 @@ export class App {
 
   async getSelectedTorrents() {
     const table = "#torrentTable tbody tr.active";
-    let tableElem = $$(table)
-    let data = tableElem.map(async (e) => {
+    const tableElem = $$(table)
+    const data = tableElem.map(async (e) => {
       return new Torrent({ hash: await e.getAttribute("data-hash"), app: this })
     })
     return await data
@@ -267,9 +264,9 @@ export class App {
   }
 
   async getAllSidebarLabels() {
-    let labelsElem = $$("#torrent-sidebar-labels li")
-    let data = labelsElem.map(async (e) => await e.getAttribute("data-label"));
-    let labels = await data
+    const labelsElem = $$("#torrent-sidebar-labels li")
+    const data = labelsElem.map(async (e) => await e.getAttribute("data-label"));
+    const labels = await data
     return labels || [];
   }
 
