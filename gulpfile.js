@@ -9,6 +9,7 @@ import startApp from 'gulp-run-electron'
 import merge from 'merge-stream'
 import webpackStream from 'webpack-stream'
 import compiler from 'webpack'
+import { Transform } from 'stream'
 
 import webpackConfig from './webpack.config.js'
 
@@ -33,6 +34,21 @@ function compileWebpack({ watch = false }) {
   return gulp.src('src/renderer/app.ts')
     .pipe(webpackStream({ config: webpackConfig, watch }, compiler))
     .pipe(gulp.dest(OUT))
+}
+
+function stripGoogleFontImports() {
+  return new Transform({
+    objectMode: true,
+    transform(file, _encoding, callback) {
+      if (file.isBuffer()) {
+        const stripped = file.contents.toString()
+          .replace(/@import url\('https:\/\/fonts\.googleapis\.com\/css\?family=[^']+'\);\n?/g, '')
+        file.contents = Buffer.from(stripped)
+      }
+
+      callback(null, file)
+    },
+  })
 }
 
 gulp.task('watch', function() {
@@ -90,6 +106,7 @@ gulp.task('build:less', function() {
         },
       }))
       .pipe(concat(`${theme}.css`))
+      .pipe(stripGoogleFontImports())
       .pipe(gulp.dest(path.join(OUT, 'css', 'themes')))
   })
 
