@@ -1,0 +1,17 @@
+@renderTheme: 'dark';
+@site: 'default';
+@reset: 'default';
+@theme: @renderTheme;
+@themesFolder: '../../assets/css/themes';
+@siteFolder: '../../assets/css/semantic/_site';
+
+@import "@{themesFolder}/default/globals/site.variables";
+@import "@{themesFolder}/@{site}/globals/site.variables";
+@import (optional) "@{themesFolder}/@{theme}/globals/site.variables";
+@import (optional) "@{siteFolder}/globals/site.variables";
+
+@imagePath: './default/assets/images';
+@fontPath: './default/assets/fonts';
+
+@import 'semantic-ui-less/semantic.less';
+@import '@renderer/styles/app/base/index.less';
