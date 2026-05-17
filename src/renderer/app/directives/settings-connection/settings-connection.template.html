@@ -1,5 +1,5 @@
 <h1>Connection</h1>
-<form class="ui form" id="loginForm" ng-class="{loading: connecting}">
+<form class="ui form" id="loginForm" ng-class="{loading: connecting}" ng-submit="false">
     <div class="fields">
         <div class="twelve wide field">
             <label>Bittorrent Client</label>
@@ -37,7 +37,7 @@
             <div class="ui left icon action input">
                 <i class="linkify icon"></i>
                 <input type="text" name="path" ng-model="server.path" placeholder="Path" ng-change="lockPath()">
-                <button class="ui icon button" ng-click="resetPath()">
+                <button type="button" class="ui icon button" ng-click="resetPath()">
                     <i class="refresh icon"></i>
                 </button>
             </div>
