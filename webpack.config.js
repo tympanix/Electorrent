@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename)
 const defaultInclude = path.resolve(__dirname, 'src')
 const outDir = path.resolve(__dirname, 'app')
 const semanticUiLessDir = path.resolve(__dirname, 'node_modules/semantic-ui-less')
-const semanticThemeConfigPath = path.resolve(__dirname, 'src/renderer/assets/css/semantic/theme.config')
+const semanticThemeConfigPath = path.resolve(__dirname, 'src/renderer/styles/semantic/theme.config')
 const isProduction = process.env.NODE_ENV === 'production'
 
 const sharedResolve = {
@@ -59,8 +59,10 @@ class RewriteThemeAssetUrlsPlugin {
 
             const rewritten = asset.source().toString()
               .replace(/(?:\.\.\/|\.\/)*(?:(?:\.generated\/)?semantic\/(?:light|dark)\/|node_modules\/semantic-ui-less\/)?themes\/(?:themes\/)?default\/assets\/fonts\//g, './default/assets/fonts/')
+              .replace(/(?:\.\.\/|\.\/)*src\/renderer\/styles\/themes\/default\/assets\/fonts\//g, './default/assets/fonts/')
               .replace(/(?:\.\.\/|\.\/)*assets\/css\/(?:\.\/)?default\/assets\/fonts\//g, './default/assets/fonts/')
               .replace(/(?:\.\.\/|\.\/)*(?:(?:\.generated\/)?semantic\/(?:light|dark)\/|node_modules\/semantic-ui-less\/)?themes\/default\/assets\/images\//g, './default/assets/images/')
+              .replace(/(?:\.\.\/|\.\/)*src\/renderer\/styles\/themes\/default\/assets\/images\//g, './default/assets/images/')
               .replace(/(?:\.\.\/|\.\/)*assets\/css\/(?:\.\/)?default\/assets\/images\//g, './default/assets/images/')
 
             compilation.updateAsset(assetName, new compiler.webpack.sources.RawSource(rewritten))
@@ -83,7 +85,7 @@ const commonPlugins = [
         to: path.resolve(outDir, 'build'),
       },
       {
-        from: path.resolve(__dirname, 'node_modules/semantic-ui-less/themes/default/assets'),
+        from: path.resolve(semanticUiLessDir, 'themes/default/assets'),
         to: path.resolve(outDir, 'css/themes/default/assets'),
       },
       {
@@ -106,7 +108,7 @@ const rendererConfig = {
   entry: {
     app: [
       path.resolve(__dirname, 'src/renderer/vendor.ts'),
-      path.resolve(__dirname, 'src/renderer/assets/css/fonts/bittorrent.font.json'),
+      path.resolve(__dirname, 'src/renderer/styles/assets/fonts/bittorrent.font.json'),
       path.resolve(__dirname, 'src/renderer/app.ts'),
     ],
     light: path.resolve(__dirname, 'src/renderer/styles/entries/light.less'),

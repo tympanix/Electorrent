@@ -2,8 +2,8 @@
 @site: 'default';
 @reset: 'default';
 @theme: @renderTheme;
-@themesFolder: '../../assets/css/themes';
-@siteFolder: '../../assets/css/semantic/_site';
+@themesFolder: '../themes';
+@siteFolder: '../semantic/site';
 
 @import "@{themesFolder}/default/globals/site.variables";
 @import "@{themesFolder}/@{site}/globals/site.variables";
@@ -14,4 +14,4 @@
 @fontPath: './default/assets/fonts';
 
 @import 'semantic-ui-less/semantic.less';
-@import '@renderer/styles/app/base/index.less';
+@import '@renderer/styles/app/index.less';
