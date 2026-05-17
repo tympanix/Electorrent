@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html ng-app="torrentApp">
+<html ng-app="torrentApp" ng-csp="no-unsafe-eval">
     <head app-theme>
         <meta charset="UTF-8">
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://electorrent.vercel.app https://github.com; object-src 'none'; base-uri 'none'; form-action 'self'"
+        >
         <title>Electorrent</title>
 
         <link rel="stylesheet" href="css/themes/light.css">
