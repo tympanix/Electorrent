@@ -16,23 +16,22 @@ function resolveThemesDir() {
 }
 
 const DIR = resolveThemesDir()
+const THEME_NAMES = ['light', 'dark']
 
 function capitalize(value: string) {
     return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
 export default function themes() {
-    const themeFiles = fs.readdirSync(DIR)
-        .filter(function(file: string) {
-            const stat = fs.statSync(path.join(DIR, file))
-            return stat.isFile() && path.extname(file) === '.css'
+    return THEME_NAMES
+        .filter(function(theme: string) {
+            return fs.existsSync(path.join(DIR, `${theme}.css`))
         })
-
-    return themeFiles.map(function(theme: string) {
+        .map(function(theme: string) {
         return {
-            css: path.join(DIR, theme),
-            basename: path.basename(theme, '.css'),
-            theme: capitalize(path.basename(theme, '.css')),
+            css: path.join(DIR, `${theme}.css`),
+            basename: theme,
+            theme: capitalize(theme),
         }
     })
 }
