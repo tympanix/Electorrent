@@ -1,4 +1,5 @@
 /* Text colors */
+@importGoogleFonts    : false;
 @textColor           : rgba(255, 255, 255, 0.9);
 @mutedTextColor      : rgba(255, 255, 255, 0.8);
 @lightTextColor      : rgba(255, 255, 255, 0.7);
