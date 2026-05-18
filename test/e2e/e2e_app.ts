@@ -6,6 +6,7 @@ import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
 import { TorrentClient } from "../../src/renderer/app/bittorrent"
 import chai from "chai";
+import { waitForModalClose, waitForModalOpen } from "./modal"
 
 const { assert } = chai
 
@@ -95,7 +96,7 @@ export class App {
   async certificateModalIsVisible() {
     let certificateModal = $("#certificateModal")
     await certificateModal.waitForExist()
-    await certificateModal.waitForDisplayed({ timeout: this.timeout })
+    await waitForModalOpen(certificateModal, this.timeout)
     return certificateModal
   }
 
@@ -107,6 +108,7 @@ export class App {
     await submit.waitForClickable()
     await submit.waitForEnabled()
     await submit.click()
+    await waitForModalClose(certificateModal, this.timeout)
   }
 
   async getNotificationError() {
@@ -124,7 +126,7 @@ export class App {
 
   async uploadTorrentModalVisible() {
     let modal = $("#uploadTorrentModal")
-    await modal.waitForDisplayed()
+    await waitForModalOpen(modal, this.timeout)
     return modal
   }
 
@@ -171,7 +173,7 @@ export class App {
     await browser.pause(250)
     let submitBtn = modal.$("button[type=submit]")
     await submitBtn.click()
-    await modal.waitForDisplayed({ reverse: true })
+    await waitForModalClose(modal, this.timeout)
   }
 
   async uploadTorrent({ filename, askUploadOptions }: { filename: string, askUploadOptions?: boolean }) {
@@ -333,7 +335,7 @@ export class App {
     await renameButton.click()
 
     const modal = $("#renameModal")
-    await modal.waitForDisplayed()
+    await waitForModalOpen(modal, this.timeout)
     return modal
   }
 
@@ -349,7 +351,7 @@ export class App {
     const cancelButton = modal.$("button.deny")
     await cancelButton.waitForClickable()
     await cancelButton.click()
-    await modal.waitForDisplayed({ reverse: true })
+    await waitForModalClose(modal, this.timeout)
 
     return value
   }
@@ -365,7 +367,7 @@ export class App {
     const approveButton = modal.$("button.approve")
     await approveButton.waitForEnabled()
     await approveButton.click()
-    await modal.waitForDisplayed({ reverse: true })
+    await waitForModalClose(modal, this.timeout)
   }
 
   async getLayoutColumns(): Promise<Array<{ name: string, enabled: boolean }>> {
@@ -436,11 +438,18 @@ export class App {
     return (await text.getText()).trim()
   }
 
-  async getGeneralDropdownOptions(settingName: string): Promise<string[]> {
+  async getGeneralDropdownOptions(settingName: string, minimumOptionCount = 1): Promise<string[]> {
     const card = await this.getGeneralSettingsCard(settingName)
     const dropdown = card.$(".ui.selection.dropdown")
     await dropdown.waitForClickable()
     await dropdown.click()
+
+    await browser.waitUntil(async () => {
+      const options = await dropdown.$$(".menu .item")
+      return options.length >= minimumOptionCount
+    }, {
+      timeoutMsg: `expected at least ${minimumOptionCount} options in ${settingName} dropdown`,
+    })
 
     const options = await dropdown.$$(".menu .item")
     const values: string[] = []
@@ -449,6 +458,10 @@ export class App {
     }
     await dropdown.click()
     return values.filter(Boolean)
+  }
+
+  getThemeOptions(): readonly ["Light", "Dark"] {
+    return ["Light", "Dark"] as const
   }
 
   async selectGeneralDropdownValue(settingName: string, optionText: string) {
