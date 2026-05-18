@@ -160,14 +160,14 @@ const rendererConfig = {
         test: /\.(jpe?g|png|gif)$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'img/[name]__[hash:base64:5][ext]',
+          filename: 'img/[name]__[contenthash:5][ext]',
         },
       },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'css/fonts/[name]__[hash:base64:5][ext]',
+          filename: 'css/fonts/[name]__[contenthash:5][ext]',
         },
       },
       {
