@@ -9,6 +9,7 @@ import { dockerComposeHooks, startApplicationHooks, restartApplication } from ".
 import { TorrentClient } from "../src/renderer/app/bittorrent"
 import { browser, $, $$ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
+import { waitForModalClose, waitForModalOpen } from "./e2e/modal"
 
 const { assert } = chai
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -159,6 +160,11 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
         describe("settings page", function() {
 
+          before(async function() {
+            await restartApplication(this)
+            await this.app.torrentsPageIsVisible()
+          })
+
           beforeEach(async function() {
             this.timeout(10 * 1000)
             await this.app.openSettings()
@@ -292,12 +298,12 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await this.app.settingsGotoTab("general")
             const initialTheme = await this.app.getGeneralDropdownValue("Theme")
             const initialThemeHref = await this.app.getAppliedThemeHref()
-            const availableThemes = await this.app.getGeneralDropdownOptions("Theme")
-            const nextTheme = availableThemes.find((theme) => theme !== initialTheme)
+            const availableThemes = this.app.getThemeOptions()
+            assert.deepEqual(availableThemes, ["Light", "Dark"])
+            assert.include(availableThemes, initialTheme, `expected theme to be Light or Dark, got: ${initialTheme}`)
+            const nextTheme = initialTheme === "Light" ? "Dark" : "Light"
 
-            assert.isOk(nextTheme, "expected at least two available themes")
-
-            await this.app.selectGeneralDropdownValue("Theme", nextTheme!)
+            await this.app.selectGeneralDropdownValue("Theme", nextTheme)
             assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
 
             await this.app.settingsSave()
@@ -329,7 +335,8 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           requireFeatureHook(options, FeatureSet.MagnetLinks)
 
           before(async function() {
-            let filename = path.join(__dirname, 'shared/opentracker/data/shared/slow.torrent')
+            await restartApplication(this)
+            const filename = path.join(__dirname, 'shared/opentracker/data/shared/slow.torrent')
             torrent = await this.app.uploadMagnetLink({ filename })
           })
 
@@ -352,7 +359,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           let torrent: e2e.Torrent
 
           before(async function() {
-            let filename = path.join(__dirname, 'shared/opentracker/data/shared/slow.torrent')
+            const filename = path.join(__dirname, 'shared/opentracker/data/shared/slow.torrent')
             torrent = await this.app.uploadTorrent({ filename: filename });
           })
 
@@ -378,7 +385,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await cancelButton.waitForDisplayed()
             await cancelButton.waitForClickable()
             await cancelButton.click()
-            await modal.waitForDisplayed({ reverse: true })
+            await waitForModalClose(modal)
 
             await torrent.waitForExist()
           })
@@ -417,7 +424,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
               await contextMenu.waitForDisplayed({ reverse: true })
 
               const modal = $("#torrentFilesModal")
-              await modal.waitForDisplayed()
+              await waitForModalOpen(modal)
 
               // Wait for at least one file checkbox
               const firstFileCheckbox = modal.$('.torrent-files-tree input[id^="file-cb-"]')
@@ -429,7 +436,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
               const saveButton = modal.$("button.ui.green")
               await saveButton.waitForEnabled()
               await saveButton.click()
-              await modal.waitForDisplayed({ reverse: true })
+              await waitForModalClose(modal)
 
               // Reopen Files modal and verify state persisted
               await torrent.openContextMenu()
@@ -437,7 +444,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
               await filesItem2.waitForDisplayed()
               await filesItem2.click()
               await contextMenu.waitForDisplayed({ reverse: true })
-              await modal.waitForDisplayed()
+              await waitForModalOpen(modal)
 
               const firstFileCheckboxAfter = modal.$('.torrent-files-tree input[id^="file-cb-"]')
               await firstFileCheckboxAfter.waitForExist({ timeout: 30_000 })
@@ -448,7 +455,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
               const closeButton = modal.$("button.ui.black")
               await closeButton.waitForEnabled()
               await closeButton.click()
-              await modal.waitForDisplayed({ reverse: true })
+              await waitForModalClose(modal)
             })
           })
 

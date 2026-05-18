@@ -1,6 +1,7 @@
 import { App } from "./e2e_app"
 import { ClickOptions } from "webdriverio";
 import { browser, $, $$, expect } from '@wdio/globals'
+import { waitForModalClose, waitForModalOpen } from "./modal"
 
 export type ColumnName = "decodedName" | "label" | "percent"
 
@@ -81,7 +82,7 @@ export class Torrent {
     await this.clickContextMenu("delete");
 
     const modal = $("#deleteTorrentModal");
-    await modal.waitForDisplayed();
+    await waitForModalOpen(modal, this.timeout);
     return modal;
   }
 
@@ -92,7 +93,7 @@ export class Torrent {
     await submit.waitForClickable();
     await submit.waitForEnabled();
     await submit.click();
-    await modal.waitForDisplayed({ reverse: true });
+    await waitForModalClose(modal, this.timeout);
   }
 
   async stop({ state = "Stopped" }) {
@@ -130,7 +131,7 @@ export class Torrent {
     await newLabelelem.click()
 
     let modal = $("#newLabelModal")
-    await modal.waitForDisplayed()
+    await waitForModalOpen(modal, this.timeout)
 
     let labelNameElem = modal.$("input[name=label]")
     await labelNameElem.setValue(labelName)
@@ -140,7 +141,7 @@ export class Torrent {
     await submit.waitForClickable()
     await submit.waitForEnabled()
     await submit.click()
-    await modal.waitForDisplayed({ reverse: true })
+    await waitForModalClose(modal, this.timeout)
 
     await browser.waitUntil(async () => {
       return await this.getLabel() === labelName

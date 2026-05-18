@@ -340,8 +340,15 @@ export const config: WebdriverIO.Config = {
      * @param {Array.<Object>} capabilities list of capabilities details
      * @param {Array.<String>} specs List of spec file paths that ran
      */
-    // after: function (result, capabilities, specs) {
-    // },
+    after: async function () {
+        if (!hasActiveSession || !browser.sessionId) {
+            return
+        }
+
+        await browser.electron.execute((electron) => {
+            electron.app.quit()
+        })
+    },
     /**
      * Gets executed right after terminating the webdriver session.
      * @param {object} config wdio configuration object
