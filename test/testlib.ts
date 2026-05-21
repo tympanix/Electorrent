@@ -123,7 +123,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     })
 
     describe("given application is running", function() {
-      startApplicationHooks()
+        startApplicationHooks()
 
         describe("given user is logged in", function() {
 

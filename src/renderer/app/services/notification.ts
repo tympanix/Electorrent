@@ -84,9 +84,7 @@ export let notificationService = ["$rootScope", function ($rootScope) {
             icon: 'img/electorrent-icon.png'
         })
 
-        torrentNotification.onclick = () => {
-            console.info('Notification clicked')
-        }
+        torrentNotification.onclick = () => {}
     }
 
     // Listen for incomming notifications from main process
