@@ -96,7 +96,6 @@ export class SettingsPageController {
         }
 
         $scope.$on("setting:load", () => {
-            console.info("Loading settings");
             Promise.resolve(loadPromise).then(() => loadAllSettings()).finally(() => {
                 $scope.$applyAsync();
             });

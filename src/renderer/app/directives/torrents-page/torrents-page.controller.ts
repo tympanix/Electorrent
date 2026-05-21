@@ -333,7 +333,6 @@ export class TorrentsPageController {
         }
 
         function stopTimer() {
-            console.info("Torrents stopped");
             if (timeout) {
                 $timeout.cancel(timeout);
             }
