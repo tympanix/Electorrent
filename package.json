@@ -105,7 +105,7 @@
     "ng-infinite-scroll": "github:sroze/ngInfiniteScroll#1.3.4",
     "null-loader": "^4.0.1",
     "parse-torrent": "^9.1.5",
-    "qs": "^6.14.2",
+    "qs": "^6.15.2",
     "request": "^2.88.2",
     "semantic-ui-css": "~2.4.1",
     "semantic-ui-less": "~2.4.1",
