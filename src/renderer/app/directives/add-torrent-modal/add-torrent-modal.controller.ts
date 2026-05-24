@@ -49,6 +49,20 @@ export class AddTorrentModalController {
         }
     }
 
+    getCurrentTorrentUploadLabel() {
+        const torrent = this.getCurrentTorrentUpload()
+        if (!torrent) {
+            return ""
+        }
+
+        return torrent.type === "file" ? torrent.filename : torrent.uri
+    }
+
+    getPendingUploadCountLabel() {
+        const torrentCount = this.scope.torrents?.length || 0
+        return `${torrentCount} ${torrentCount === 1 ? "upload" : "uploads"} remaining`
+    }
+
     discardCurrentTorrent() {
         this.scope.torrents.shift()
         if (this.scope.torrents.length === 0) {

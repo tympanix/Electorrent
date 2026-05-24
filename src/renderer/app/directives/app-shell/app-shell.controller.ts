@@ -1,5 +1,5 @@
 import { IRootScopeService, IScope } from "angular";
-import { PendingTorrentUploadFile } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
+import { PendingTorrentUploadFile, PendingTorrentUploadLink } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 import type { AppMeta, LaunchPayload, MenuAction } from "@shared/ipc-contract";
 
 interface AppShellScope extends IScope {
@@ -35,7 +35,7 @@ export class AppShellController {
 
         let loadingTimer: angular.IPromise<void> | undefined;
         let page: string | null = null;
-        let pendingMagnets: string[] = [];
+        let pendingMagnets: Array<PendingTorrentUploadLink & { askUploadOptions?: boolean }> = [];
         let pendingTorrentFiles: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }> = [];
 
         $scope.servers = settingsService.getServers();
@@ -96,8 +96,12 @@ export class AppShellController {
             connectToServer(server);
         };
 
-        const queueMagnetLinks = (magnets: string[]) => {
-            pendingMagnets.push(...magnets);
+        const queueMagnetLinks = (magnets: string[], askUploadOptions = false) => {
+            pendingMagnets.push(...magnets.map((uri) => ({
+                type: "link" as const,
+                uri,
+                askUploadOptions,
+            })));
         };
 
         const queueTorrentFiles = (files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
@@ -113,13 +117,20 @@ export class AppShellController {
             $scope.$broadcast("torrents:add", pendingFile, askUploadOptions);
         };
 
+        const broadcastTorrentLink = (link: PendingTorrentUploadLink, askUploadOptions: boolean) => {
+            $scope.$broadcast("torrents:add", {
+                type: "link",
+                uri: link.uri,
+            }, askUploadOptions);
+        };
+
         const drainPendingLaunchPayloads = () => {
             if (!$rootScope.$btclient || !$rootScope.$server?.isConnected) {
                 return;
             }
 
             pendingMagnets.splice(0).forEach((magnet) => {
-                $rootScope.$btclient?.addTorrentUrl(magnet);
+                broadcastTorrentLink(magnet, !!magnet.askUploadOptions);
             });
 
             pendingTorrentFiles.splice(0).forEach((file) => {
@@ -128,7 +139,7 @@ export class AppShellController {
         };
 
         electorrent.launch.onMagnets((magnets: string[]) => {
-            queueMagnetLinks(magnets);
+            queueMagnetLinks(magnets, true);
             drainPendingLaunchPayloads();
             $scope.$applyAsync();
         });
@@ -242,7 +253,7 @@ export class AppShellController {
                 settingsService.updateServer(server);
                 pageTorrents(true);
                 return electorrent.launch.getPending().then((payload: LaunchPayload) => {
-                    queueMagnetLinks(payload.magnets || []);
+                    queueMagnetLinks(payload.magnets || [], true);
                     queueTorrentFiles(payload.torrentFiles || []);
                     drainPendingLaunchPayloads();
                 });

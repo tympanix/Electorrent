@@ -525,6 +525,15 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await torrent.delete()
           })
 
+          it("magnet link opens upload options", async function() {
+            let torrent = await this.app.uploadMagnetLink({ filename: this.torrentPath, askUploadOptions: true });
+            await this.app.uploadTorrentModalVisible()
+            await this.app.uploadTorrentModalSubmit({ start: false })
+            await torrent.waitForExist()
+            await torrent.waitForState(options.stopLabel, { timeout: 20 * 1000 })
+            await torrent.delete()
+          })
+
           it("torent uploaded with preexisting label", async function() {
             if (!options.client.uploadOptionsEnable?.category) return this.skip()
             const labelName = createUniqueLabel("mylabel")

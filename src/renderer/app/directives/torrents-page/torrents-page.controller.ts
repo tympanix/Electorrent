@@ -127,8 +127,26 @@ export class TorrentsPageController {
             return !!($rootScope.$btclient && $rootScope.$server?.isConnected);
         };
 
+        const supportsMagnetUploadOptions = () => {
+            const uploadOptionsEnable = $rootScope.$btclient?.uploadOptionsEnable;
+            return uploadOptionsEnable !== null && uploadOptionsEnable !== undefined;
+        };
+
+        const shouldPromptForUploadOptions = (item: PendingTorrentUploadItem, askUploadOptions: boolean) => {
+            const wantsPrompt = settings.alwaysPromptUploadOptions === true || askUploadOptions === true;
+            if (!wantsPrompt) {
+                return false;
+            }
+
+            if (item.type === "link") {
+                return supportsMagnetUploadOptions();
+            }
+
+            return true;
+        };
+
         const processUploadItem = (item: PendingTorrentUploadItem, askUploadOptions: boolean) => {
-            if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true) {
+            if (shouldPromptForUploadOptions(item, askUploadOptions)) {
                 $scope.pendingTorrentFiles.push(item);
             } else if (item.type === "file") {
                 $scope.uploadTorrent(item.data, item.filename);
@@ -183,7 +201,7 @@ export class TorrentsPageController {
 
         $scope.uploadTorrentURL = async (uri: string, options?: TorrentUploadOptions) => {
             try {
-                await $rootScope.$btclient?.addTorrentUrl(uri);
+                await $rootScope.$btclient?.addTorrentUrl(uri, options);
             } catch (err) {
                 $notify.alert("Upload failed", "The torrent link could not be uploaded");
                 console.error(err);

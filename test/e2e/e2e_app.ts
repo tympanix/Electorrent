@@ -201,7 +201,7 @@ export class App {
     return torrent;
   }
 
-  async uploadMagnetLink({ magnetUri, filename, options }: { magnetUri?: string, filename?: string, options?: magnet.Instance }) {
+  async uploadMagnetLink({ magnetUri, filename, options, askUploadOptions }: { magnetUri?: string, filename?: string, options?: magnet.Instance, askUploadOptions?: boolean }) {
     if (!magnetUri && filename) {
       let data = fs.readFileSync(filename)
       let info = parseTorrent(data)
@@ -213,15 +213,15 @@ export class App {
     if (!magnetUri) throw new Error("invalid arguments passed to generate magnet uri")
     let info = parseTorrent(magnetUri)
     let torrent = new Torrent({ hash: info.infoHash, app: this })
-    await browser.execute((magnetUri) => {
+    await browser.execute((magnetUri, askUploadOptions) => {
       const injector = angular.element(document.body).injector()
       const $rootScope = injector.get("$rootScope")
       $rootScope.$broadcast("torrents:add", {
         type: "link",
         uri: magnetUri,
-      }, false)
+      }, !!askUploadOptions)
       $rootScope.$apply()
-    }, magnetUri)
+    }, magnetUri, askUploadOptions)
     this.torrents.push(torrent)
     return torrent
   }
