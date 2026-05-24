@@ -103,6 +103,7 @@ export interface AppSettings<TServer = StoredServerConfig> {
     startup: string
     refreshRate: number
     automaticUpdates?: boolean
+    closeToTray?: boolean
     ui: {
         resizeMode: string
         notifications: boolean

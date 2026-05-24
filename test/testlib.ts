@@ -262,6 +262,26 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             })
           })
 
+          it("can toggle background tray mode", async function() {
+            await this.app.settingsGotoTab("general")
+            const initialState = await this.app.getGeneralToggleState("Run in Background")
+            const nextState = !initialState
+
+            await this.app.setGeneralToggle("Run in Background", nextState)
+            assert.equal(await this.app.getGeneralToggleState("Run in Background"), nextState)
+
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+
+            await this.app.openSettings()
+            await this.app.settingsGotoTab("general")
+            assert.equal(await this.app.getGeneralToggleState("Run in Background"), nextState)
+
+            await this.app.setGeneralToggle("Run in Background", initialState)
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+          })
+
           it("can enable always ask for upload options", async function() {
             const torrentFile = path.join(__dirname, "shared/opentracker/data/shared/slow.torrent")
             let torrent: e2e.Torrent | undefined

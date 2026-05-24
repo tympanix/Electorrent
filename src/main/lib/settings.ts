@@ -19,6 +19,7 @@ const defaultSettings: MainAppSettings = {
     servers: [],
     certificates: [],
     automaticUpdates: true,
+    closeToTray: true,
     debugMode: false,
     autoRemoveTorrents: false,
     alwaysPromptUploadOptions: false,
@@ -86,7 +87,7 @@ function load() {
     }
 
     try {
-        data = JSON.parse(file)
+        data = mergeWithDefaults(defaultSettings, JSON.parse(file))
     } catch (_e) {
         if (app.isReady()) {
             showCorruptDialog()
@@ -138,6 +139,32 @@ function copyArray(_obj: any[]) {
     return copiedArray
 }
 
+function mergeWithDefaults<T>(defaults: T, value: any): T {
+    if (value === undefined) {
+        return copy(defaults)
+    }
+
+    if (defaults === null || typeof defaults !== 'object') {
+        return copy(value)
+    }
+
+    if (Array.isArray(defaults)) {
+        return (Array.isArray(value) ? copy(value) : copy(defaults)) as T
+    }
+
+    const mergedValue = value && typeof value === 'object' && !Array.isArray(value)
+        ? copyObject(value)
+        : {}
+
+    for (const key in defaults as Record<string, any>) {
+        if (Object.prototype.hasOwnProperty.call(defaults, key)) {
+            mergedValue[key] = mergeWithDefaults((defaults as Record<string, any>)[key], mergedValue[key])
+        }
+    }
+
+    return mergedValue as T
+}
+
 export function put(key: string, value: any, callback?: (err?: Error | null) => void) {
     load()
     data[key] = value
@@ -165,7 +192,7 @@ export function write() {
 
 export function saveAll(settings: any, callback?: (err?: Error | null) => void) {
     load()
-    data = settings
+    data = mergeWithDefaults(defaultSettings, settings)
     if (callback !== undefined) {
         save(callback)
     }
