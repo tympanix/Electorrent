@@ -114,7 +114,7 @@ export class AppShellController {
         };
 
         const drainPendingLaunchPayloads = () => {
-            if (!$rootScope.$btclient) {
+            if (!$rootScope.$btclient || !$rootScope.$server?.isConnected) {
                 return;
             }
 
@@ -232,8 +232,10 @@ export class AppShellController {
             $scope.$broadcast("wipe:torrents");
             $rootScope.$btclient = null;
             $rootScope.$server = null;
-            $bittorrent.setServer(server);
-            $scope.statusText = "Connecting to " + $rootScope.$btclient?.name;
+            const serverName = typeof server?.getDisplayName === "function"
+                ? server.getDisplayName()
+                : (server?.name || server?.ip || "server");
+            $scope.statusText = "Connecting to " + serverName;
 
             server.connect().then(() => {
                 $scope.statusText = "Loading Torrents";
