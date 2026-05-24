@@ -34,6 +34,7 @@ export class TorrentsPageController {
         let lastSelected: any = null;
         let timeout: angular.IPromise<void> | undefined;
         let reconnect: angular.IPromise<void> | undefined;
+        let deferredUploads: Array<{ item: PendingTorrentUploadItem; askUploadOptions: boolean }> = [];
 
         let settings = settingsService.getAllSettings();
         let refreshRate = settings.refreshRate || 2000;
@@ -122,9 +123,35 @@ export class TorrentsPageController {
             }, 100);
         };
 
+        const isServerReady = () => {
+            return !!($rootScope.$btclient && $rootScope.$server?.isConnected);
+        };
+
+        const processUploadItem = (item: PendingTorrentUploadItem, askUploadOptions: boolean) => {
+            if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true) {
+                $scope.pendingTorrentFiles.push(item);
+            } else if (item.type === "file") {
+                $scope.uploadTorrent(item.data, item.filename);
+            } else {
+                $scope.uploadTorrentURL(item.uri);
+            }
+        };
+
+        const flushDeferredUploads = () => {
+            if (!isServerReady() || deferredUploads.length === 0) {
+                return;
+            }
+            const uploads = deferredUploads;
+            deferredUploads = [];
+            uploads.forEach(({ item, askUploadOptions }) => {
+                processUploadItem(item, askUploadOptions);
+            });
+        };
+
         $scope.$on("start:torrents", (event: unknown, fullupdate: boolean) => {
             $scope.update(!!fullupdate);
             startTimer();
+            flushDeferredUploads();
         });
 
         $scope.$on("wipe:torrents", () => {
@@ -137,12 +164,10 @@ export class TorrentsPageController {
         });
 
         $scope.$on("torrents:add", (event: unknown, item: PendingTorrentUploadItem, askUploadOptions: boolean) => {
-            if (settings.alwaysPromptUploadOptions === true || askUploadOptions === true) {
-                $scope.pendingTorrentFiles.push(item);
-            } else if (item.type === "file") {
-                $scope.uploadTorrent(item.data, item.filename);
+            if (!isServerReady()) {
+                deferredUploads.push({ item, askUploadOptions: !!askUploadOptions });
             } else {
-                $scope.uploadTorrentURL(item.uri);
+                processUploadItem(item, !!askUploadOptions);
             }
             $scope.$apply();
         });
@@ -283,6 +308,7 @@ export class TorrentsPageController {
                     .then(() => {
                         return $scope.update(true);
                     }).then(() => {
+                        flushDeferredUploads();
                         $notify.enableAll();
                         $notify.ok("Reconnected", "The connection has been reestablished");
                         $scope.connectionLost = false;
