@@ -1,10 +1,13 @@
 import {
     app,
     BrowserWindow,
+    Menu,
     nativeImage,
     session,
+    Tray,
     type BrowserWindowConstructorOptions,
     type Event as ElectronEvent,
+    type NativeImage,
     type WebContents,
 } from 'electron'
 import is from 'electron-is'
@@ -68,9 +71,79 @@ async function bootstrap() {
     }
 
     let torrentWindow: BrowserWindow | null
+    let tray: Tray | null = null
+    let isQuitting = false
     const pendingLaunchPayload = {
         magnets: [] as string[],
         torrentFilePaths: [] as string[],
+    }
+
+    function shouldUseTray() {
+        return !app.commandLine.hasSwitch('headless') && settings.get('closeToTray') !== false
+    }
+
+    function destroyTray() {
+        if (!tray) {
+            return
+        }
+
+        tray.destroy()
+        tray = null
+
+        if (is.macOS()) {
+            app.dock.show()
+        }
+    }
+
+    function saveWindowBounds() {
+        if (!torrentWindow || torrentWindow.isDestroyed()) {
+            return
+        }
+
+        settings.put('windowsize', torrentWindow.getBounds())
+        settings.write()
+    }
+
+    function hideTorrentWindow() {
+        if (!torrentWindow || torrentWindow.isDestroyed()) {
+            return
+        }
+
+        saveWindowBounds()
+        torrentWindow.hide()
+
+        if (is.macOS()) {
+            app.dock.hide()
+        }
+    }
+
+    function showTorrentWindow() {
+        if (!torrentWindow || torrentWindow.isDestroyed()) {
+            return
+        }
+
+        if (is.macOS()) {
+            app.dock.show()
+        }
+
+        if (torrentWindow.isMinimized()) {
+            torrentWindow.restore()
+        }
+
+        if (!torrentWindow.isVisible()) {
+            torrentWindow.show()
+        }
+
+        torrentWindow.focus()
+    }
+
+    function showOrCreateTorrentWindow() {
+        if (!torrentWindow || torrentWindow.isDestroyed()) {
+            createTorrentWindow()
+            return
+        }
+
+        showTorrentWindow()
     }
 
     function createTorrentWindow() {
@@ -102,14 +175,28 @@ async function bootstrap() {
 
         const windowWebContents: WebContents = torrentWindow.webContents
 
-        torrentWindow.on('close', () => {
+        torrentWindow.on('close', (event) => {
+            if (!isQuitting && tray) {
+                event.preventDefault()
+                hideTorrentWindow()
+                return
+            }
+
+            saveWindowBounds()
             bittorrentManager.disconnectWindow(windowWebContents)
-            settings.put('windowsize', torrentWindow?.getBounds())
-            settings.write()
         })
 
         torrentWindow.on('closed', () => {
             torrentWindow = null
+            refreshTrayMenu()
+        })
+
+        torrentWindow.on('show', () => {
+            refreshTrayMenu()
+        })
+
+        torrentWindow.on('hide', () => {
+            refreshTrayMenu()
         })
     }
 
@@ -123,6 +210,83 @@ async function bootstrap() {
         }
 
         return path.join(__dirname, 'build/icon.ico')
+    }
+
+    function getTrayIcon(): NativeImage {
+        const trayIconPath = is.macOS()
+            ? path.join(__dirname, 'build/png/trayTemplate.png')
+            : is.windows()
+                ? path.join(__dirname, 'build/icon.ico')
+                : path.join(__dirname, 'build/png/32x32.png')
+
+        const trayIcon = nativeImage.createFromPath(trayIconPath)
+        if (is.macOS() && !trayIcon.isEmpty()) {
+            trayIcon.setTemplateImage(true)
+        }
+
+        return trayIcon
+    }
+
+    function refreshTrayMenu() {
+        if (!tray) {
+            return
+        }
+
+        const isWindowVisible = !!torrentWindow && !torrentWindow.isDestroyed() && torrentWindow.isVisible()
+        tray.setContextMenu(Menu.buildFromTemplate([
+            {
+                label: isWindowVisible ? 'Hide Electorrent' : 'Show Electorrent',
+                click: () => {
+                    if (isWindowVisible) {
+                        hideTorrentWindow()
+                    } else {
+                        showOrCreateTorrentWindow()
+                    }
+                },
+            },
+            { type: 'separator' },
+            {
+                label: 'Quit',
+                click: () => app.quit(),
+            },
+        ]))
+    }
+
+    function createTray() {
+        if (tray || !shouldUseTray()) {
+            return
+        }
+
+        const trayIcon = getTrayIcon()
+        if (trayIcon.isEmpty()) {
+            logger.error('Tray icon could not be loaded')
+            return
+        }
+
+        try {
+            tray = new Tray(trayIcon)
+        } catch (error) {
+            logger.error('Failed to initialise system tray', error)
+            tray = null
+            return
+        }
+
+        tray.setToolTip(app.name)
+        tray.on('click', () => {
+            refreshTrayMenu()
+            tray?.popUpContextMenu()
+        })
+        refreshTrayMenu()
+    }
+
+    function syncTray() {
+        if (shouldUseTray()) {
+            createTray()
+            refreshTrayMenu()
+            return
+        }
+
+        destroyTray()
     }
 
     function getMagnetLinks(args: string[]): string[] {
@@ -165,6 +329,9 @@ async function bootstrap() {
         isDebug: !!program.debug,
         getWindow: () => torrentWindow,
         consumePendingLaunchPayload,
+        onSettingsSaved: async () => {
+            syncTray()
+        },
     })
 
     if (!app.requestSingleInstanceLock()) {
@@ -174,10 +341,10 @@ async function bootstrap() {
             if (torrentWindow) {
                 sendMagnetLinks(args)
                 sendTorrentFiles(args)
-                if (torrentWindow.isMinimized()) torrentWindow.restore()
-                torrentWindow.focus()
+                showTorrentWindow()
             } else {
                 queuePendingLaunchArgs(args)
+                showOrCreateTorrentWindow()
             }
         })
     }
@@ -185,22 +352,27 @@ async function bootstrap() {
     app.on('open-url', function(_event: ElectronEvent, url: string) {
         if (torrentWindow) {
             sendMagnetLinks([url])
+            showTorrentWindow()
         } else {
             queuePendingLaunchArgs([url])
+            showOrCreateTorrentWindow()
         }
     })
 
     app.on('open-file', function(_event: ElectronEvent, filePath: string) {
         if (torrentWindow) {
             sendTorrentFiles([filePath])
+            showTorrentWindow()
         } else {
             queuePendingLaunchArgs([filePath])
+            showOrCreateTorrentWindow()
         }
     })
 
     app.on('ready', function() {
         queuePendingLaunchArgs(process.argv)
         createTorrentWindow()
+        syncTray()
         updater.initialise(torrentWindow)
 
         session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -225,6 +397,10 @@ async function bootstrap() {
         }
     })
 
+    app.on('before-quit', () => {
+        isQuitting = true
+    })
+
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin' || app.commandLine.hasSwitch('headless')) {
             app.quit()
@@ -234,6 +410,8 @@ async function bootstrap() {
     app.on('activate', () => {
         if (torrentWindow === null) {
             createTorrentWindow()
+        } else {
+            showTorrentWindow()
         }
     })
 }

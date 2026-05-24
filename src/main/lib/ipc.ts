@@ -2,6 +2,7 @@ import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from
 import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
+import type { AppSettings } from '@shared/ipc-contract'
 import { bittorrentManager } from './bittorrent'
 import * as certificates from './certificates'
 import * as menu from './menu'
@@ -17,6 +18,7 @@ interface RegisterHandlersOptions {
         magnets: string[]
         torrentFiles: unknown[]
     }>
+    onSettingsSaved?: (settings: AppSettings) => void | Promise<void>
 }
 
 function getAppMeta(isDebug: boolean) {
@@ -36,7 +38,7 @@ function getAppMeta(isDebug: boolean) {
     }
 }
 
-export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload }: RegisterHandlersOptions) {
+export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload, onSettingsSaved }: RegisterHandlersOptions) {
     menu.configure({ isDebug })
 
     ipcMain.handle(IPC_CHANNELS.app.getMeta, async function() {
@@ -72,17 +74,18 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
     })
 
     ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings: newSettings }) {
-        return new Promise<void>((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
             settings.saveAll(newSettings, function(err: Error) {
                 if (err) {
                     reject(err)
                     return
                 }
-
-                menu.refresh()
                 resolve()
             })
         })
+
+        menu.refresh()
+        await onSettingsSaved?.(newSettings)
     })
 
     ipcMain.handle(IPC_CHANNELS.settings.listThemes, async function() {
