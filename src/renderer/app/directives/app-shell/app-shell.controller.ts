@@ -271,7 +271,7 @@ export class AppShellController {
             }
             $scope.$broadcast("setting:load");
             page = PAGE_SETTINGS;
-            $scope.$apply();
+            $scope.$applyAsync();
         });
 
         $scope.$on("show:servers", () => {

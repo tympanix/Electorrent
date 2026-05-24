@@ -88,6 +88,11 @@ export class App {
     await settingsPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
   }
 
+  async settingsPageIsHidden(opts?: { timeout: number }) {
+    let settingsPage = $("#page-settings")
+    await settingsPage.waitForDisplayed({ reverse: true, timeout: opts?.timeout ?? this.timeout })
+  }
+
   async settingsPageConnectionIsVisible() {
     let settingsPage = $("#page-settings-connection")
     await settingsPage.waitForDisplayed({ timeout: this.timeout })
@@ -280,21 +285,26 @@ export class App {
   }
 
   async openSettings() {
-    await browser.execute(() => {
-      const injector = angular.element(document.body).injector()
-      const $rootScope = injector.get("$rootScope")
-      $rootScope.$broadcast("show:settings")
-      $rootScope.$apply()
-    })
+    const settingsPage = $("#page-settings")
+    if (await settingsPage.isDisplayed()) {
+      return
+    }
+
+    const settingsButton = $('button[data-role="show-settings"]')
+    await settingsButton.waitForDisplayed()
+    await settingsButton.waitForClickable()
+    await settingsButton.click()
     await this.settingsPageIsVisible()
   }
 
   async settingsGotoTab(tab: string) {
-    await browser.execute((tab) => {
-      const scope = angular.element(document.querySelector('settings-page')).scope() as any
-      scope.gotoPage(tab)
-      scope.$apply()
-    }, tab)
+    const settingsTab = $(`#page-settings [data-role="settings-tab-${tab}"]`)
+    await settingsTab.waitForDisplayed()
+    const className = (await settingsTab.getAttribute("class")) || ""
+    if (!className.includes("active")) {
+      await settingsTab.waitForClickable()
+      await settingsTab.click()
+    }
   }
 
   async settingsSave() {
@@ -302,6 +312,7 @@ export class App {
     await saveBtn.waitForDisplayed()
     await saveBtn.waitForClickable()
     await saveBtn.click()
+    await this.settingsPageIsHidden()
   }
 
   async settingsCancel() {
@@ -309,6 +320,7 @@ export class App {
     await cancelBtn.waitForDisplayed()
     await cancelBtn.waitForClickable()
     await cancelBtn.click()
+    await this.settingsPageIsHidden()
   }
 
   async getSettingsServerCount(): Promise<number> {

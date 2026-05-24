@@ -87,6 +87,16 @@
                 ></div>
             </div>
             <div class="actions right">
+                <button
+                    type="button"
+                    class="ui icon button"
+                    data-role="show-settings"
+                    aria-label="Show settings"
+                    title="Show settings"
+                    ng-click="$emit('show:settings')"
+                >
+                    <i class="cog icon"></i>
+                </button>
                 <div class="ui fluid search" ng-class="{loading: isSearching}">
                     <div class="ui icon input">
                         <input
