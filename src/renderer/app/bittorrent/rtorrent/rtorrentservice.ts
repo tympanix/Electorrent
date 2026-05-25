@@ -1,11 +1,14 @@
 import { Column } from "@renderer/app/services/column";
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { RtorrentTorrent } from "./torrentr";
 import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     public name = "rTorrent"
     public id = "rtorrent"
+    public uploadOptionsEnable = {
+      saveLocation: true,
+    }
 
     connect(server): Promise<void> {
         return connect(server)
@@ -28,12 +31,12 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       };
     };
 
-    addTorrentUrl(magnet: string): Promise<void> {
-      return addTorrentUrl(magnet)
+    addTorrentUrl(magnet: string, options?: TorrentUploadOptions): Promise<void> {
+      return addTorrentUrl(magnet, options)
     };
 
-    uploadTorrent(buffer: Uint8Array): Promise<void> {
-      return uploadTorrent(buffer, "upload.torrent")
+    uploadTorrent(buffer: Uint8Array, filename?: string, options?: TorrentUploadOptions): Promise<void> {
+      return uploadTorrent(buffer, filename || "upload.torrent", options)
     };
 
     start(torrents: RtorrentTorrent[]): Promise<void> {

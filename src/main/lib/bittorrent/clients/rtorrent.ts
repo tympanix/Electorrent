@@ -7,6 +7,26 @@ import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 export class RtorrentRuntime implements BittorrentRuntime {
     private rtorrent: any
 
+    private async ensureSaveLocation(saveLocation?: string) {
+        if (!saveLocation) {
+            return
+        }
+
+        await defer((done) => this.rtorrent.get('execute.throw', ['', 'mkdir', '-p', saveLocation], done))
+    }
+
+    private async loadTorrentWithSaveLocation(method: string, torrent: Uint8Array | string, saveLocation: string) {
+        const params: (Uint8Array | string | Buffer)[] = [
+            '',
+            typeof torrent === 'string' ? torrent : Buffer.from(torrent),
+        ]
+
+        await this.ensureSaveLocation(saveLocation)
+        params.push(`d.directory.set=${JSON.stringify(saveLocation)}`)
+
+        await defer((done) => this.rtorrent.get(method, params, done))
+    }
+
     connect(server: BittorrentServerConfig): Promise<void> {
         this.rtorrent = new Rtorrent({
             host: server.ip,
@@ -25,12 +45,22 @@ export class RtorrentRuntime implements BittorrentRuntime {
         return defer((done) => this.rtorrent.getTorrentsExtra(done))
     }
 
-    addTorrentUrl(uri: string): Promise<void> {
-        return defer((done) => this.rtorrent.loadLink(uri, done))
+    async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
+        if (options?.saveLocation) {
+            await this.loadTorrentWithSaveLocation('load.start', uri, options.saveLocation)
+            return
+        }
+
+        await defer((done) => this.rtorrent.loadLink(uri, done))
     }
 
-    uploadTorrent(buffer: Uint8Array): Promise<void> {
-        return defer((done) => this.rtorrent.loadFileContent(Buffer.from(buffer), done))
+    async uploadTorrent(buffer: Uint8Array, _filename: string, options?: Record<string, any>): Promise<void> {
+        if (options?.saveLocation) {
+            await this.loadTorrentWithSaveLocation('load.raw_start', buffer, options.saveLocation)
+            return
+        }
+
+        await defer((done) => this.rtorrent.loadFileContent(Buffer.from(buffer), done))
     }
 
     start(hashes: string[]): Promise<void> {

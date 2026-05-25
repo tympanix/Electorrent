@@ -28,6 +28,7 @@ interface TestSuiteOptionsOptional {
   timeout?: number,
   stopLabel?: string,
   downloadLabel?: string,
+  saveLocation?: string,
   unsupportedFeatures: FeatureSet[]
 }
 
@@ -541,16 +542,16 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit()
             await torrent.waitForExist()
-            await torrent.waitForState(options.downloadLabel)
+            await torrent.waitForStates([options.downloadLabel, "Seeding"])
             await torrent.delete()
           })
 
           it("magnet link opens upload options", async function() {
             let torrent = await this.app.uploadMagnetLink({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalVisible()
-            await this.app.uploadTorrentModalSubmit({ start: false })
+            await this.app.uploadTorrentModalSubmit()
             await torrent.waitForExist()
-            await torrent.waitForState(options.stopLabel, { timeout: 20 * 1000 })
+            await torrent.waitForStates([options.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
             await torrent.delete()
           })
 
@@ -591,7 +592,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           it("torrent uploaded with save location", async function() {
             this.timeout(300 * 1000)
             if (!options.client.uploadOptionsEnable?.saveLocation) return this.skip()
-            const saveLocation = "/tmp/custom/save/location"
+            const saveLocation = options.saveLocation || "/tmp/custom/save/location"
             await backend.exec(["rm", "-rf", saveLocation])
             await backend.exec(["test", "!", "-e", saveLocation])
             let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });

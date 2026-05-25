@@ -5,6 +5,9 @@ import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   public name = "µTorrent"
   public id = "utorrent"
+  public uploadOptionsEnable = {
+    saveLocation: true,
+  }
 
   build(array: Array<any>): UtorrentTorrent {
     return UtorrentTorrent.fromArray(array)

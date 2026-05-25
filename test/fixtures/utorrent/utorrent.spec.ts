@@ -1,5 +1,4 @@
 import { createTestSuite } from "../../testlib";
-import { FeatureSet } from "../../testutil";
 import { UtorrentClient } from "../../../src/renderer/app/bittorrent"
 
 createTestSuite({
@@ -9,7 +8,6 @@ createTestSuite({
   username: "admin",
   password: "",
   acceptHttpStatus: 400,
-  unsupportedFeatures: [
-    FeatureSet.AdvancedUploadOptions
-  ],
+  saveLocation: "/utorrent/custom/save/location",
+  unsupportedFeatures: [],
 });
