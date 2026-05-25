@@ -51,12 +51,17 @@ export class Torrent {
   }
 
   async waitForState(state: string, { timeout = this.timeout } = {}) {
+    return this.waitForStates([state], { timeout })
+  }
+
+  async waitForStates(states: string[], { timeout = this.timeout } = {}) {
     await browser.waitUntil(async () => {
       let percent = await this.getColumn("percent")
-      return percent.toLowerCase().includes(state.toLowerCase());
+      const value = percent.toLowerCase()
+      return states.some((state) => value.includes(state.toLowerCase()))
     }, {
       timeout: timeout,
-      timeoutMsg: `Torrent ${this.hash} did not reach state ${state} within ${timeout}ms`
+      timeoutMsg: `Torrent ${this.hash} did not reach states ${states.join(", ")} within ${timeout}ms`
     });
   }
 

@@ -8,7 +8,7 @@ export const CLIENT_METADATA: Record<string, ClientMetadata> = {
     utorrent: {
         name: 'µTorrent',
         icon: 'utorrent',
-        showAdvancedUploadMenu: false,
+        showAdvancedUploadMenu: true,
     },
     qbittorrent: {
         name: 'qBittorrent',
@@ -23,7 +23,7 @@ export const CLIENT_METADATA: Record<string, ClientMetadata> = {
     rtorrent: {
         name: 'rTorrent',
         icon: 'rtorrent',
-        showAdvancedUploadMenu: false,
+        showAdvancedUploadMenu: true,
     },
     synology: {
         name: 'Synology Download Station',
@@ -33,6 +33,6 @@ export const CLIENT_METADATA: Record<string, ClientMetadata> = {
     deluge: {
         name: 'Deluge',
         icon: 'deluge',
-        showAdvancedUploadMenu: false,
+        showAdvancedUploadMenu: true,
     },
 }

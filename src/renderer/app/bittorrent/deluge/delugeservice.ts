@@ -5,6 +5,9 @@ import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from
 export class DelugeClient extends TorrentClient<DelugeTorrent> {
     public name = 'Deluge'
     public id = 'deluge'
+    public uploadOptionsEnable = {
+        saveLocation: true,
+    }
 
     connect(server): Promise<void> {
         return connect(server)

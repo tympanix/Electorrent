@@ -123,12 +123,12 @@ export class RtorrentTorrent extends Torrent {
             return 'grey';
         } else if (this.isStatusSeeding()){
             return 'orange';
-        } else if (this.isStatusError()){
-            return 'error';
         } else if (this.isStatusDownloading()){
             return 'blue';
         } else if (this.isStatusPaused() || this.isStatusSeedPaused()){
             return 'grey';
+        } else if (this.isStatusError()){
+            return 'error';
         } else if (this.isStatusCompleted()){
             return 'success';
         } else {
@@ -141,16 +141,16 @@ export class RtorrentTorrent extends Torrent {
             return 'Checking';
         } else if (this.isStatusSeeding()){
             return 'Seeding';
-        } else if (this.isStatusError()){
-            return 'Error';
-        } else if (this.isStatusSeedPaused()){
-            return 'Paused Seed';
         } else if (this.isStatusDownloading()){
             return 'Downloading';
+        } else if (this.isStatusSeedPaused()){
+            return 'Paused Seed';
         } else if (this.isStatusCompleted()){
             return 'Completed';
         } else if (this.isStatusPaused()){
             return 'Paused';
+        } else if (this.isStatusError()){
+            return 'Error';
         } else if (this.isStatusStopped()){
             return 'Stopped';
         } else {

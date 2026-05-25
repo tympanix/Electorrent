@@ -38,6 +38,46 @@ export class UtorrentRuntime implements BittorrentRuntime {
         return false
     }
 
+    private normalizePath(pathValue: string) {
+        return pathValue.replace(/\\/g, '/').replace(/\/+$/, '')
+    }
+
+    private async getUploadLocationParams(options?: Record<string, any>) {
+        if (!options?.saveLocation) {
+            return {
+                download_dir: 0,
+                path: '',
+            }
+        }
+
+        const res = await this.http.get(`${this.data.url}/`, {
+            params: {
+                token: this.data.token,
+                t: Date.now(),
+                action: 'list-dirs',
+            },
+        })
+
+        const saveLocation = this.normalizePath(options.saveLocation)
+        const downloadDirs = Array.isArray(res.data?.['download-dirs']) ? res.data['download-dirs'] : []
+        const matchingDir = downloadDirs
+            .map((entry: { path?: string }, index: number) => ({
+                index,
+                path: typeof entry?.path === 'string' ? this.normalizePath(entry.path) : '',
+            }))
+            .filter((entry) => entry.index > 0 && entry.path && saveLocation.startsWith(`${entry.path}/`))
+            .sort((left, right) => right.path.length - left.path.length)[0]
+
+        if (!matchingDir) {
+            throw new Error(`uTorrent save location is outside configured download directories: ${options.saveLocation}`)
+        }
+
+        return {
+            download_dir: matchingDir.index,
+            path: saveLocation.slice(matchingDir.path.length + 1),
+        }
+    }
+
     async connect(server: BittorrentServerConfig): Promise<void> {
         this.server = server
 
@@ -94,17 +134,18 @@ export class UtorrentRuntime implements BittorrentRuntime {
         this.saveConnection(serverUrl(server), server.user, server.password)
     }
 
-    addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
-        return this.http.get(`${this.data.url}/`, {
+    async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
+        const uploadLocation = await this.getUploadLocationParams(options)
+
+        await this.http.get(`${this.data.url}/`, {
             params: {
                 token: this.data.token,
                 t: Date.now(),
                 action: 'add-url',
                 s: uri,
-                download_dir: options?.saveLocation || 0,
-                path: '',
+                ...uploadLocation,
             },
-        }).then(() => undefined)
+        })
     }
 
     async uploadTorrent(buffer: Uint8Array, filename?: string, options?: Record<string, any>): Promise<void> {
@@ -117,13 +158,13 @@ export class UtorrentRuntime implements BittorrentRuntime {
         const contentLength = await new Promise<number>((resolve, reject) => {
             formData.getLength((err, length) => err ? reject(err) : resolve(length))
         })
+        const uploadLocation = await this.getUploadLocationParams(options)
 
         await this.http.post(`${this.data.url}/`, formData, {
             params: {
                 token: this.data.token,
                 action: 'add-file',
-                download_dir: options?.saveLocation || 0,
-                path: '',
+                ...uploadLocation,
             },
             headers: {
                 ...formData.getHeaders(),

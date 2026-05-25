@@ -15,6 +15,17 @@ Validation of the codebase is performed with:
 npm run smoketest
 ```
 
+## External NodeJS packages
+The following client API implementations are maintained in separate packages:
+* `@electorrent/node-qbittorrent`
+* `@electorrent/node-deluge`
+* `@electorrent/node-rtorrent`
+
+Development of local changes in the above packages:
+1. Git clone the NodeJS package
+2. Use `npm link` in the directory of the dependency
+3. Use `npm link <package>` in this project
+
 # Guidelines
 * Testing MUST be performed with the smoketest command to reduce test scope
 * Avoid using `browser.execute` in browser testing - prefer organic user interaction
