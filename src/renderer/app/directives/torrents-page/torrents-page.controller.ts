@@ -535,12 +535,29 @@ export class TorrentsPageController {
             const column = $rootScope.$server?.columns.find((value: any) => value.attribute === sort);
             const sorter = column.sort;
 
+            const alphabeticalCompare = (left?: string, right?: string) => {
+                return (left || "").toLowerCase().localeCompare((right || "").toLowerCase());
+            };
+
+            const compareProgressState = (a: any, b: any) => {
+                if (sort !== "percent" || a.percent !== 1000 || b.percent !== 1000) {
+                    return 0;
+                }
+
+                const stateCompare = alphabeticalCompare(a.statusText?.(), b.statusText?.());
+                if (stateCompare !== 0) {
+                    return stateCompare;
+                }
+
+                return alphabeticalCompare(a.decodedName || a.name, b.decodedName || b.name);
+            };
+
             const descSort = (a: any, b: any) => {
-                return sorter(a[sort], b[sort]);
+                return sorter(a[sort], b[sort]) || compareProgressState(a, b);
             };
 
             const ascSort = (a: any, b: any) => {
-                return sorter(a[sort], b[sort]) * (-1);
+                return (sorter(a[sort], b[sort]) * (-1)) || compareProgressState(a, b);
             };
 
             if (desc) {
