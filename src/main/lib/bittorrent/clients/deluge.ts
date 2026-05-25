@@ -24,11 +24,11 @@ export class DelugeRuntime implements BittorrentRuntime {
         return defer((done) => this.deluge.getTorrents(done))
     }
 
-    addTorrentUrl(uri: string): Promise<void> {
+    addTorrentUrl(uri: string, _options?: Record<string, any>): Promise<void> {
         return defer((done) => this.deluge.addTorrentURL(uri, {}, done))
     }
 
-    uploadTorrent(buffer: Uint8Array): Promise<void> {
+    uploadTorrent(buffer: Uint8Array, _filename: string, _options?: Record<string, any>): Promise<void> {
         return defer((done) => this.deluge.addTorrent(Buffer.from(buffer), {}, done))
     }
 

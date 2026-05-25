@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/tympanix/Electorrent#readme",
   "dependencies": {
-    "@electorrent/node-deluge": "^1.0.3",
+    "@electorrent/node-deluge": "^1.0.4",
     "@electorrent/node-qbittorrent": "^1.2.2",
     "@electorrent/node-rtorrent": "^1.2.1",
     "axios": "^0.24.0",
