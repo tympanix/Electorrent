@@ -1,6 +1,6 @@
 services:
   deluge:
-    image: linuxserver/deluge:5b398f77-ls22
+    image: linuxserver/deluge:${VERSION:-latest}
     environment:
       - PUID=1000
       - PGID=1000

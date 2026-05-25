@@ -68,8 +68,11 @@ export const config: WebdriverIO.Config = {
     ],
 
     suites: {
-        'deluge': [
-            'test/fixtures/deluge/*.spec.ts',
+        'deluge:1': [
+            'test/fixtures/deluge/deluge-1.spec.ts',
+        ],
+        'deluge:2': [
+            'test/fixtures/deluge/deluge-2.spec.ts',
         ],
         'qbittorrent': [
             'test/fixtures/qbittorrent/*.spec.ts',
