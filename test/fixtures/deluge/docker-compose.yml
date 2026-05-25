@@ -1,10 +1,19 @@
 services:
   deluge:
-    image: spritsail/deluge:${VERSION:-latest}
+    image: linuxserver/deluge:5b398f77-ls22
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./core.conf:/config/core.conf:ro
     ports:
       - 8112:8112
     tmpfs:
+      - /config
       - /downloads
+      - /home/deluge
+      - /root/Downloads
 
 networks:
   default:
