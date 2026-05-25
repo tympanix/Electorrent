@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { DelugeTorrent } from "./torrentd";
 import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
@@ -26,12 +26,12 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
       return "/"
     }
 
-    addTorrentUrl(magnet: string): Promise<void> {
-        return addTorrentUrl(magnet)
+    addTorrentUrl(magnet: string, options?: TorrentUploadOptions): Promise<void> {
+        return addTorrentUrl(magnet, options)
     }
 
-    uploadTorrent(buffer: Uint8Array, filename: string): Promise<void> {
-        return uploadTorrent(buffer, filename)
+    uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions): Promise<void> {
+        return uploadTorrent(buffer, filename, options)
     }
 
     resume(torrents: DelugeTorrent[]): Promise<void> {

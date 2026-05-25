@@ -12,7 +12,6 @@ createTestSuite({
   stopLabel: "Paused",
   unsupportedFeatures: [
     FeatureSet.Labels,
-    FeatureSet.MagnetLinks,
     FeatureSet.AdvancedUploadOptions,
   ],
 });
