@@ -7,6 +7,7 @@ export interface BittorrentRuntime {
     getSnapshot(fullUpdate?: boolean): Promise<any>
     addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void>
     uploadTorrent(buffer: Uint8Array, filename: string, options?: Record<string, any>): Promise<void>
+    setLocation?(hashes: string[], location: string): Promise<void>
     getTorrentFiles?(hash: string): Promise<any>
     setTorrentFileSelection?(hash: string, files: BittorrentFileSelection[]): Promise<void>
     disconnect?(): Promise<void>

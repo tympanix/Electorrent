@@ -28,6 +28,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     public id = "qbittorrent"
 
     public supportsFileSelection = true
+    public supportsSetLocation = true
 
     connect(server): Promise<void> {
       return connect(server)
@@ -148,6 +149,13 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return invokeAction("setCategory", torrents.map((torrent) => torrent.hash), category, create);
     };
 
+    setLocation(torrents: QBittorrentTorrent[], location: string): Promise<void> {
+      const resumeHashes = torrents
+        .filter((torrent) => !torrent.isStatusPaused() && !torrent.isStatusStopped())
+        .map((torrent) => torrent.hash);
+      return invokeAction("setLocation", torrents.map((torrent) => torrent.hash), location, resumeHashes);
+    }
+
     deleteTorrents(torrents: QBittorrentTorrent[]): Promise<void> {
       return this.delete(torrents)
     }
@@ -250,6 +258,12 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         check: function (torrent: QBittorrentTorrent) {
           return torrent.sequentialDownload;
         },
+      },
+      {
+        id: "torrent-set-location",
+        label: "Set Location",
+        click: () => Promise.resolve(),
+        icon: "folder open",
       },
       {
         label: "Remove",

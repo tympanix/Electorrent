@@ -224,6 +224,10 @@ export class TorrentsPageController {
             remove();
         });
 
+        $scope.$on("torrentLocation:updated", () => {
+            $scope.update();
+        });
+
         function clearDeleteConfirmation() {
             $scope.deleteConfirmation = {
                 action: null,
@@ -507,6 +511,12 @@ export class TorrentsPageController {
             if (item && item.id === "torrent-files") {
                 if (selected.length >= 1) {
                     $rootScope.$emit("torrentFiles:open", selected[0]);
+                }
+                return $q.resolve();
+            }
+            if (item && item.id === "torrent-set-location") {
+                if (selected.length >= 1) {
+                    $rootScope.$emit("torrentLocation:open", selected.slice());
                 }
                 return $q.resolve();
             }
