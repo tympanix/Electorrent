@@ -101,6 +101,33 @@ export class Torrent {
     await waitForModalClose(modal, this.timeout);
   }
 
+  async openSetLocationModal() {
+    await this.openContextMenu()
+
+    const contextMenu = $("#contextmenu")
+    const action = contextMenu.$("a=Set Location")
+    await action.waitForDisplayed()
+    await action.click()
+    await contextMenu.waitForDisplayed({ reverse: true })
+
+    const modal = $("#setLocationModal");
+    await waitForModalOpen(modal, this.timeout);
+    return modal;
+  }
+
+  async setLocation(location: string) {
+    const modal = await this.openSetLocationModal();
+    const input = modal.$("input[name='location']");
+    await input.waitForDisplayed();
+    await input.clearValue();
+    await input.setValue(location);
+
+    const approve = modal.$("button[data-role='set-location-apply']");
+    await approve.waitForEnabled();
+    await approve.click();
+    await waitForModalClose(modal, this.timeout);
+  }
+
   async stop({ state = "Stopped" }) {
     await this.performAction({ action: "stop", state: state })
   }

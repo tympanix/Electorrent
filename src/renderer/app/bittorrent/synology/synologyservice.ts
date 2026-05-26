@@ -5,6 +5,7 @@ import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from
 export class SynologyClient extends TorrentClient<SynologyTorrent> {
     public name = 'Synology Download Station'
     public id = 'downloadstation'
+    public supportsSetLocation = true
 
     connect(server): Promise<void> {
         return connect(server)
@@ -52,6 +53,10 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
         return invokeAction("remove", torrents.map((torrent) => torrent.hash));
     }
 
+    setLocation(torrents: SynologyTorrent[], location: string): Promise<void> {
+        return invokeAction("setLocation", torrents.map((torrent) => torrent.hash), location);
+    }
+
     deleteTorrents(torrents: SynologyTorrent[]): Promise<void> {
         return this.remove(torrents)
     }
@@ -79,6 +84,12 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
     ]
 
     contextMenu: ContextActionList<SynologyTorrent> = [
+        {
+            id: "torrent-set-location",
+            label: "Set Location",
+            click: () => Promise.resolve(),
+            icon: "folder open",
+        },
         {
             label: 'Remove Torrent',
             click: this.remove,

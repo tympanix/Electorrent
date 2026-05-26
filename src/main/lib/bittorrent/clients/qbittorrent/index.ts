@@ -177,6 +177,16 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         await defer((done) => api.setCategory(hashes, category, done))
     }
 
+    async setLocation(hashes: string[], location: string, resumeHashes: string[] = []): Promise<void> {
+        const api = this.getApi()
+        await this.pause(hashes)
+        await defer((done) => api.setLocation(hashes, location, done))
+
+        if (resumeHashes.length > 0) {
+            await this.resume(resumeHashes)
+        }
+    }
+
     getTorrentFiles(hash: string): Promise<any> {
         const api = this.getApi()
         return new Promise((resolve, reject) => {

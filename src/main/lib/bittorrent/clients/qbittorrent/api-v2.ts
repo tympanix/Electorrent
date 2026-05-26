@@ -123,6 +123,10 @@ export class QBittorrentApiV2 extends QBittorrentBaseApi {
         this.performPostAction("setCategory", hashes, { category }, cb)
     }
 
+    setLocation(hashes: string[], location: string, cb: (err?: any, body?: any) => void) {
+        this.performPostAction("setLocation", hashes, { location }, cb)
+    }
+
     createCategory(category: string, savePath: string, cb: (err?: any, body?: any) => void) {
         this.post("torrents/createCategory", { form: { category, savePath } }, cb)
     }

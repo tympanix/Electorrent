@@ -185,6 +185,20 @@ export class TransmissionRuntime implements BittorrentRuntime {
         return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== null && value !== undefined))
     }
 
+    private ensureSuccess(response: any) {
+        const data = response?.data
+
+        if (data?.result === 'success') {
+            return response
+        }
+
+        if (data?.error) {
+            throw new Error(data.error.data?.error_string || data.error.message || 'Transmission request failed')
+        }
+
+        return response
+    }
+
     private getUploadOptions(uploadOptions?: Record<string, any>) {
         if (!uploadOptions) {
             return {}
@@ -230,7 +244,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         }
     }
 
-    private doAction(command: string, hashes: string[], mutator?: string, value?: any) {
+    private doAction(command: string, hashes: string[], mutator?: string | Record<string, any>, value?: any) {
         const data: Record<string, any> = {
             arguments: { ids: null },
             method: command,
@@ -240,8 +254,10 @@ export class TransmissionRuntime implements BittorrentRuntime {
             data.arguments.ids = hashes
         }
 
-        if (mutator) {
+        if (typeof mutator === 'string') {
             data.arguments[mutator] = value
+        } else if (mutator && typeof mutator === 'object') {
+            Object.assign(data.arguments, mutator)
         }
 
         return this.getHttpClient().post(this.url(), data)
@@ -281,5 +297,12 @@ export class TransmissionRuntime implements BittorrentRuntime {
 
     removeAndLocal(hashes: string[]): Promise<void> {
         return this.doAction('torrent-remove', hashes, 'delete-local-data', true).then(() => undefined)
+    }
+
+    setLocation(hashes: string[], location: string): Promise<void> {
+        return this.doAction('torrent-set-location', hashes, {
+            location,
+            move: true,
+        }).then((response) => this.ensureSuccess(response)).then(() => undefined)
     }
 }

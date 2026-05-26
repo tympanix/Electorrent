@@ -8,6 +8,7 @@ const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     public name = "Transmission";
     public id = "transmission"
+    public supportsSetLocation = true
 
     public uploadOptionsEnable: TorrentUploadOptionsEnable = {
       saveLocation: true,
@@ -104,6 +105,10 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       return invokeAction("removeAndLocal", torrents.map((torrent) => torrent.hash));
     };
 
+    setLocation(torrents: TransmissionTorrent[], location: string): Promise<void> {
+      return invokeAction("setLocation", torrents.map((torrent) => torrent.hash), location);
+    }
+
     deleteTorrents(torrents: TransmissionTorrent[]): Promise<void> {
       return this.remove(torrents)
     }
@@ -170,6 +175,12 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         label: "Move Queue Down",
         click: this.queueDown,
         icon: "arrow down",
+      },
+      {
+        id: "torrent-set-location",
+        label: "Set Location",
+        click: () => Promise.resolve(),
+        icon: "folder open",
       },
       {
         label: "Remove",

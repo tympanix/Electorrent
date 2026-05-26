@@ -1,8 +1,10 @@
 import chai from "chai"
+import fs from "fs"
 import { describe, it, before, after, beforeEach, afterEach } from "mocha";
 import path from "path";
 import { fileURLToPath } from "url";
 import chaiAsPromised from "chai-as-promised";
+import parseTorrent from "parse-torrent"
 import * as e2e from "./e2e";
 import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
@@ -513,6 +515,49 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
               await torrent.checkInFilterLabel(firstLabel);
             });
           });
+
+          describe("given set location is supported", function () {
+            before(function () {
+              if (!(options.client as any).supportsSetLocation) {
+                this.skip()
+              }
+            })
+
+            it("moves downloaded content via Set Location", async function () {
+              this.timeout(300 * 1000)
+
+              const torrentName = createUniqueLabel("set-location")
+              const torrentPath = await createTorrentFile(tracker, { fileSize: 1, torrentName })
+              const torrentInfo = parseTorrent(fs.readFileSync(torrentPath))
+              const contentName = torrentInfo.name || torrentName
+              const targetDirectory = path.posix.join("/downloads", createUniqueLabel("moved"))
+              const targetPath = path.posix.join(targetDirectory, contentName)
+              const contentExistsCommand = `find /downloads -maxdepth 4 -name '${contentName}' | grep -q .`
+              const contentMovedCommand = `matches=$(find /downloads -maxdepth 4 -name '${contentName}' | sort); [ "$(printf '%s\\n' "$matches" | grep -c .)" -eq 1 ] && printf '%s\\n' "$matches" | grep -Fqx '${targetPath}'`
+
+              await backend.exec(["rm", "-rf", targetDirectory])
+              await backend.exec(["mkdir", "-p", targetDirectory])
+              await backend.exec(["chmod", "777", targetDirectory])
+              await backend.exec(["test", "-d", targetDirectory])
+
+              const fastTorrent = await this.app.uploadTorrent({ filename: torrentPath })
+
+              try {
+                await fastTorrent.waitForExist({ timeout: 20 * 1000 })
+                await fastTorrent.waitForStates(["Seeding", "Finished"], { timeout: 120 * 1000 })
+                await backend.waitForExec(["sh", "-lc", contentExistsCommand], 20 * 1000)
+
+                await fastTorrent.setLocation(targetDirectory)
+
+                await backend.waitForExec(["sh", "-lc", contentMovedCommand], 60 * 1000)
+              } finally {
+                if (await fastTorrent.isExisting()) {
+                  await fastTorrent.delete()
+                }
+                await backend.exec(["rm", "-rf", targetDirectory])
+              }
+            })
+          })
         })
       })
     })

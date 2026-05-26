@@ -105,6 +105,17 @@ export class SynologyRuntime implements BittorrentRuntime {
                     },
                     timeout: this.timeout,
                 }
+            case 'setLocation':
+                return {
+                    params: {
+                        api: API_TASK,
+                        version: this.dlVersion,
+                        method: 'edit',
+                        id: args[0],
+                        destination: args[1],
+                    },
+                    timeout: this.timeout,
+                }
             default:
                 return {}
         }
@@ -223,5 +234,11 @@ export class SynologyRuntime implements BittorrentRuntime {
 
     remove(hashes: string[]): Promise<void> {
         return this.doAction('delete', hashes)
+    }
+
+    setLocation(hashes: string[], location: string): Promise<void> {
+        return this.http.get(`${serverUrl(this.server)}${this.taskPath}`, this.config('setLocation', [hashes.join(','), location]))
+            .then((response) => this.handleError(response))
+            .then(() => undefined)
     }
 }

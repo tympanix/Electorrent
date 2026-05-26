@@ -180,6 +180,12 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
     public supportsFileSelection: boolean = false
 
     /**
+     * When true, the client supports changing a torrent's download location after it has been added.
+     * Concrete clients that set this flag to true are expected to override {@link setLocation}.
+     */
+    public supportsSetLocation: boolean = false
+
+    /**
      * Get the list of files for a torrent.
      *
      * Default implementation always throws:
@@ -211,6 +217,21 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             throw new Error("File selection not supported for this client")
         }
         return Promise.reject(new Error("File selection not implemented for this client"))
+    }
+
+    /**
+     * Change the save location of one or more torrents.
+     *
+     * Default implementation always throws:
+     * - when {@link supportsSetLocation} is false: Error("Set location not supported for this client")
+     * - when {@link supportsSetLocation} is true but the client did not override this method:
+     *   Error("Set location not implemented for this client")
+     */
+    async setLocation(_torrents: T[], _location: string): Promise<void> {
+        if (!this.supportsSetLocation) {
+            throw new Error("Set location not supported for this client")
+        }
+        return Promise.reject(new Error("Set location not implemented for this client"))
     }
 
     /**

@@ -157,6 +157,8 @@ export abstract class QBittorrentBaseApi {
 
     abstract setCategory(hashes: string[], category: string, cb: (err?: any, body?: any) => void): void
 
+    abstract setLocation(hashes: string[], location: string, cb: (err?: any, body?: any) => void): void
+
     abstract createCategory(category: string, savePath: string, cb: (err?: any, body?: any) => void): void
 
     abstract toggleSequentialDownload(hashes: string[], cb: (err?: any, body?: any) => void): void
