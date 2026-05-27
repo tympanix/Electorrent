@@ -1,6 +1,6 @@
 const request = require("request")
 
-import type { BittorrentServerConfig } from "@shared/ipc-contract"
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
 import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 
@@ -28,6 +28,25 @@ const DELUGE_TORRENT_FIELDS = [
     "total_wanted",
     "tracker_host",
     "upload_payload_rate",
+]
+
+const DELUGE_TORRENT_DETAIL_FIELDS = [
+    ...DELUGE_TORRENT_FIELDS,
+    "files",
+    "file_progress",
+    "file_priorities",
+    "message",
+    "active_time",
+    "seeding_time",
+    "num_pieces",
+    "piece_length",
+    "distributed_copies",
+    "completed_time",
+    "last_seen_complete",
+    "owner",
+    "super_seeding",
+    "seed_rank",
+    "time_since_transfer",
 ]
 
 function buildClientPath(server: BittorrentServerConfig, endpoint: string) {
@@ -174,6 +193,61 @@ export class DelugeRuntime implements BittorrentRuntime {
 
     getSnapshot(): Promise<any> {
         return defer((done) => this.rpc("web.update_ui", [DELUGE_TORRENT_FIELDS, {}], done))
+    }
+
+    async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
+        const details = await defer<Record<string, any>>((done) => this.rpc("web.get_torrent_status", [hash, DELUGE_TORRENT_DETAIL_FIELDS], done))
+        const files = Array.isArray(details.files) ? details.files : []
+        const fileProgress = Array.isArray(details.file_progress) ? details.file_progress : []
+        const filePriorities = Array.isArray(details.file_priorities) ? details.file_priorities : []
+
+        return {
+            info: {
+                hash,
+                savePath: details.save_path ?? null,
+                pieceSize: details.piece_length ?? null,
+                totalDownloaded: details.total_done ?? null,
+                totalUploaded: details.total_uploaded ?? null,
+                timeElapsed: details.active_time ?? null,
+                seedingTime: details.seeding_time ?? null,
+                shareRatio: details.ratio ?? null,
+                additionDate: details.time_added ?? null,
+                completionDate: details.completed_time ?? null,
+                downloadSpeed: details.download_payload_rate ?? null,
+                eta: details.eta ?? null,
+                lastSeen: details.last_seen_complete ?? null,
+                peers: details.num_peers ?? null,
+                peersTotal: details.total_peers ?? null,
+                piecesTotal: details.num_pieces ?? null,
+                seeds: details.num_seeds ?? null,
+                seedsTotal: details.total_seeds ?? null,
+                totalSize: details.total_wanted ?? null,
+                uploadSpeed: details.upload_payload_rate ?? null,
+                trackerHost: details.tracker_host ?? null,
+                distributedCopies: details.distributed_copies ?? null,
+                owner: details.owner ?? null,
+                superSeeding: details.super_seeding ?? null,
+                seedRank: details.seed_rank ?? null,
+                message: details.message ?? null,
+                timeSinceTransfer: details.time_since_transfer ?? null,
+            },
+            files: files.map((file: any, index: number) => {
+                const priority = filePriorities[index] != null ? Number(filePriorities[index]) : undefined
+                const progressValue = typeof fileProgress[index] === "number"
+                    ? fileProgress[index]
+                    : (Number(fileProgress[index]) || 0)
+
+                return {
+                    index: file.index != null ? Number(file.index) : index,
+                    path: file.path || "",
+                    name: (file.path || "").split(/[/\\]/).pop() || "",
+                    size: typeof file.size === "number" ? file.size : (parseInt(String(file.size), 10) || 0),
+                    progress: Math.max(0, Math.min(1, progressValue)),
+                    priority,
+                    wanted: priority !== 0,
+                }
+            }),
+        }
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

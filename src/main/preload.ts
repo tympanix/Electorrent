@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld('electorrent', {
         addTorrentUrl: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.addTorrentUrl, request),
         uploadTorrent: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.uploadTorrent, request),
         invokeAction: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.invokeAction, request),
+        getTorrentDetails: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.getTorrentDetails, request),
         getTorrentFiles: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.getTorrentFiles, request),
         setTorrentFileSelection: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.setTorrentFileSelection, request),
     },

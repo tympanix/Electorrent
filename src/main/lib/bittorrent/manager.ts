@@ -4,6 +4,7 @@ import type {
     BittorrentInvokeActionRequest,
     BittorrentServerConfig,
     BittorrentSetTorrentFileSelectionRequest,
+    BittorrentTorrentDetailsData,
     BittorrentUploadTorrentRequest,
 } from "@shared/ipc-contract"
 import { createRuntime } from "./registry"
@@ -98,6 +99,14 @@ class BittorrentManager {
             throw new Error(`Unsupported bittorrent action: ${request.action}`)
         }
         return action.call(runtime, request.hashes || [], ...(request.args || []))
+    }
+
+    async getTorrentDetails(sender: WebContents, hash: string): Promise<BittorrentTorrentDetailsData> {
+        const runtime = await this.getSession(sender)
+        if (typeof runtime.getTorrentDetails !== "function") {
+            throw new Error("Torrent details not supported for this client")
+        }
+        return runtime.getTorrentDetails(hash)
     }
 
     async getTorrentFiles(sender: WebContents, hash: string) {

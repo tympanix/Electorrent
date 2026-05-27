@@ -115,6 +115,34 @@ export class Torrent {
     return modal;
   }
 
+  async openDetailsPanel() {
+    await this.clickContextMenu("torrent-details")
+
+    const panel = $("[data-role='torrent-details-panel']")
+    await panel.waitForDisplayed({ timeout: this.timeout })
+    return panel
+  }
+
+  async openDetailsTab(tab: "info" | "files") {
+    const panel = $("[data-role='torrent-details-panel']")
+    await panel.waitForDisplayed({ timeout: this.timeout })
+
+    const tabButton = panel.$(`[data-role='torrent-details-tab-${tab}']`)
+    await tabButton.waitForDisplayed({ timeout: this.timeout })
+    await tabButton.click()
+    return panel
+  }
+
+  async closeDetailsPanel() {
+    const panel = $("[data-role='torrent-details-panel']")
+    await panel.waitForDisplayed({ timeout: this.timeout })
+
+    const closeButton = panel.$("[data-role='torrent-details-close']")
+    await closeButton.waitForDisplayed({ timeout: this.timeout })
+    await closeButton.click()
+    await panel.waitForDisplayed({ timeout: this.timeout, reverse: true })
+  }
+
   async setLocation(location: string) {
     const modal = await this.openSetLocationModal();
     const input = modal.$("input[name='location']");

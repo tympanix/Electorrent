@@ -1,4 +1,8 @@
 import { Torrent, TorrentFile } from "./abstracttorrent"
+import type {
+    BittorrentTorrentDetailsData,
+    BittorrentTorrentDetailsFile,
+} from "@shared/ipc-contract"
 
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
@@ -71,7 +75,7 @@ export interface ContextActionButton<T extends Torrent> {
     label: string
     click(torrents: T[]): Promise<void>
     icon?: string
-    role?: TorrentActionRole
+    role?: string
     check?(torrent: T): boolean
     /** Optional id for controller to handle specially (e.g. 'torrent-files' to open file selection modal). */
     id?: string
@@ -90,6 +94,51 @@ export interface ContextActionMenu<T extends Torrent> {
 export type ContextActionElem<T extends Torrent> = ContextActionButton<T> | ContextActionMenu<T>;
 
 export type ContextActionList<T extends Torrent> = ContextActionElem<T>[]
+
+export type TorrentDetailsValueFormat =
+    | "text"
+    | "bytes"
+    | "speed"
+    | "ratio"
+    | "eta"
+    | "epoch"
+    | "boolean"
+    | "number"
+    | "path"
+    | "percent"
+
+export interface TorrentDetailsInfoField {
+    id: string
+    label: string
+    value: string | number | boolean | null
+    format?: TorrentDetailsValueFormat
+    multiline?: boolean
+}
+
+export interface TorrentDetailsInfoSection {
+    id: string
+    title: string
+    fields: TorrentDetailsInfoField[]
+}
+
+export interface TorrentDetailsFileColumn {
+    id: string
+    label: string
+    format?: "text" | "bytes" | "progress" | "percent" | "number"
+    sortType?: "alphabetical" | "numeric"
+}
+
+export interface TorrentDetailsFileItem extends BittorrentTorrentDetailsFile {}
+
+export interface TorrentDetailsPanelData {
+    info: {
+        sections: TorrentDetailsInfoSection[]
+    }
+    files: {
+        columns: TorrentDetailsFileColumn[]
+        items: TorrentDetailsFileItem[]
+    }
+}
 
 export abstract class TorrentClient<T extends Torrent = Torrent> {
 
@@ -186,6 +235,12 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
     public supportsSetLocation: boolean = false
 
     /**
+     * When true, the client supports a torrent details panel with dynamic info
+     * and file details content.
+     */
+    public supportsTorrentDetails: boolean = false
+
+    /**
      * Get the list of files for a torrent.
      *
      * Default implementation always throws:
@@ -232,6 +287,120 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             throw new Error("Set location not supported for this client")
         }
         return Promise.reject(new Error("Set location not implemented for this client"))
+    }
+
+    async getTorrentDetails(torrent: T): Promise<TorrentDetailsPanelData> {
+        if (!this.supportsTorrentDetails) {
+            throw new Error("Torrent details not supported for this client")
+        }
+
+        const details = await this.getTorrentDetailsData(torrent)
+
+        return {
+            info: {
+                sections: this.getTorrentDetailsInfoSections(torrent, details),
+            },
+            files: {
+                columns: this.getTorrentDetailsFilesColumns(torrent, details),
+                items: details.files.map((file) => this.mapTorrentDetailsFile(torrent, details, file)),
+            },
+        }
+    }
+
+    protected async getTorrentDetailsData(_torrent: T): Promise<BittorrentTorrentDetailsData> {
+        if (!this.supportsTorrentDetails) {
+            throw new Error("Torrent details not supported for this client")
+        }
+
+        return Promise.reject(new Error("Torrent details not implemented for this client"))
+    }
+
+    protected getTorrentDetailsInfoSections(_torrent: T, _details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {
+        return []
+    }
+
+    protected getTorrentDetailsFilesColumns(_torrent: T, _details: BittorrentTorrentDetailsData): TorrentDetailsFileColumn[] {
+        return [
+            { id: "name", label: "Name", format: "text", sortType: "alphabetical" },
+            { id: "size", label: "Size", format: "bytes", sortType: "numeric" },
+            { id: "progress", label: "Progress", format: "progress", sortType: "numeric" },
+            { id: "availability", label: "Availability", format: "percent", sortType: "numeric" },
+            { id: "priority", label: "Priority", format: "number", sortType: "numeric" },
+            { id: "path", label: "Path", format: "text", sortType: "alphabetical" },
+        ]
+    }
+
+    protected mapTorrentDetailsFile(
+        _torrent: T,
+        _details: BittorrentTorrentDetailsData,
+        file: BittorrentTorrentDetailsFile,
+    ): TorrentDetailsFileItem {
+        return { ...file }
+    }
+
+    protected createTorrentDetailsField(
+        id: string,
+        label: string,
+        value: string | number | boolean | null | undefined,
+        format: TorrentDetailsValueFormat = "text",
+        options: { multiline?: boolean; allowEmpty?: boolean } = {},
+    ): TorrentDetailsInfoField | null {
+        if (value == null) {
+            return null
+        }
+
+        if (typeof value === "number" && (!Number.isFinite(value) || value < 0) && options.allowEmpty !== true) {
+            return null
+        }
+
+        if (typeof value === "string" && value.trim() === "" && options.allowEmpty !== true) {
+            return null
+        }
+
+        return {
+            id,
+            label,
+            value,
+            format,
+            multiline: options.multiline,
+        }
+    }
+
+    protected createTorrentDetailsSection(
+        id: string,
+        title: string,
+        fields: Array<TorrentDetailsInfoField | null>,
+    ): TorrentDetailsInfoSection | null {
+        const visibleFields = fields.filter((field): field is TorrentDetailsInfoField => !!field)
+        if (visibleFields.length === 0) {
+            return null
+        }
+
+        return {
+            id,
+            title,
+            fields: visibleFields,
+        }
+    }
+
+    protected getTorrentDetailsInfo(details: BittorrentTorrentDetailsData): BittorrentTorrentDetailsData["info"] {
+        return details.info || {}
+    }
+
+    protected toNumber(value: unknown): number | null {
+        const numeric = typeof value === "number" ? value : Number(value)
+        return Number.isFinite(numeric) ? numeric : null
+    }
+
+    protected toEpochSeconds(value: unknown): number | null {
+        const numeric = this.toNumber(value)
+        return numeric != null && numeric > 0 ? numeric : null
+    }
+
+    protected compactTorrentDetailsSections(
+        sections: Array<TorrentDetailsInfoSection | null>,
+    ): TorrentDetailsInfoSection[] {
+        return sections.filter((section): section is TorrentDetailsInfoSection => !!section)
     }
 
     /**

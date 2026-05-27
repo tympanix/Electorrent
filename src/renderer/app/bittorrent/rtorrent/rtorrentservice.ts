@@ -1,11 +1,13 @@
 import { Column } from "@renderer/app/services/column";
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { RtorrentTorrent } from "./torrentr";
-import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, connect, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 
 export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     public name = "rTorrent"
     public id = "rtorrent"
+    public supportsTorrentDetails = true
     public uploadOptionsEnable = {
       saveLocation: true,
     }
@@ -83,6 +85,48 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       return this.remove(torrents)
     }
 
+    protected getTorrentDetailsData(torrent: RtorrentTorrent): Promise<BittorrentTorrentDetailsData> {
+      return getTorrentDetails(torrent.hash)
+    }
+
+    protected getTorrentDetailsInfoSections(torrent: RtorrentTorrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {
+      const info = this.getTorrentDetailsInfo(details)
+
+      return this.compactTorrentDetailsSections([
+        this.createTorrentDetailsSection("overview", "Overview", [
+          this.createTorrentDetailsField("name", "Name", torrent.name),
+          this.createTorrentDetailsField("hash", "Hash", typeof torrent.hash === "string" ? torrent.hash.toLowerCase() : torrent.hash),
+          this.createTorrentDetailsField("status", "Status", torrent.statusText()),
+          this.createTorrentDetailsField("label", "Label", info.label as string | null, "text", { allowEmpty: true }),
+          this.createTorrentDetailsField("save-path", "Save Path", info.savePath as string | null, "path"),
+          this.createTorrentDetailsField("total-size", "Total Size", this.toNumber(info.totalSize) ?? torrent.size, "bytes"),
+        ]),
+        this.createTorrentDetailsSection("transfer", "Transfer", [
+          this.createTorrentDetailsField("downloaded", "Downloaded", this.toNumber(info.totalDownloaded) ?? torrent.downloaded, "bytes"),
+          this.createTorrentDetailsField("uploaded", "Uploaded", this.toNumber(info.totalUploaded) ?? torrent.uploaded, "bytes"),
+          this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
+          this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
+          this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
+          this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
+        ]),
+        this.createTorrentDetailsSection("swarm", "Swarm", [
+          this.createTorrentDetailsField("seeds", "Connected Seeds", this.toNumber(info.seeds) ?? torrent.seedsConnected, "number"),
+          this.createTorrentDetailsField("seeds-total", "Total Seeds", this.toNumber(info.seedsTotal) ?? torrent.seedsInSwarm, "number"),
+          this.createTorrentDetailsField("peers", "Connected Peers", this.toNumber(info.peers) ?? torrent.peersConnected, "number"),
+          this.createTorrentDetailsField("peers-total", "Total Peers", this.toNumber(info.peersTotal) ?? torrent.peersInSwarm, "number"),
+        ]),
+        this.createTorrentDetailsSection("content", "Content", [
+          this.createTorrentDetailsField("piece-size", "Piece Size", this.toNumber(info.pieceSize), "bytes"),
+          this.createTorrentDetailsField("completed-chunks", "Completed Chunks", this.toNumber(info.chunksComplete), "number"),
+          this.createTorrentDetailsField("message", "Message", info.message as string | null, "text", { multiline: true }),
+        ]),
+        this.createTorrentDetailsSection("dates", "Dates", [
+          this.createTorrentDetailsField("added-on", "Added On", this.toEpochSeconds(info.additionDate), "epoch"),
+          this.createTorrentDetailsField("created-on", "Created On", this.toEpochSeconds(info.creationDate), "epoch"),
+        ]),
+      ])
+    }
+
     enableTrackerFilter = true;
 
     extraColumns = [
@@ -119,6 +163,13 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     ];
 
     contextMenu: ContextActionList<RtorrentTorrent> = [
+      {
+        id: "torrent-details",
+        role: "torrent-details",
+        label: "Details",
+        click: () => Promise.resolve(),
+        icon: "info circle",
+      },
       {
         label: "Recheck",
         click: this.recheck,

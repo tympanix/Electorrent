@@ -157,6 +157,13 @@ export class ContextMenuDirective implements IDirective {
                 }
 
                 if (
+                    item.id === "torrent-details"
+                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.supportsTorrentDetails)
+                ) {
+                    return;
+                }
+
+                if (
                     item.id === "torrent-files"
                     && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.supportsFileSelection)
                 ) {

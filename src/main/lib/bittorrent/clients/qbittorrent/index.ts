@@ -1,6 +1,10 @@
 const request = require("request")
 
-import type { BittorrentFileSelection, BittorrentServerConfig } from "@shared/ipc-contract"
+import type {
+    BittorrentFileSelection,
+    BittorrentServerConfig,
+    BittorrentTorrentDetailsData,
+} from "@shared/ipc-contract"
 import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { QBittorrentApiV1 } from "./api-v1"
@@ -184,6 +188,81 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
         if (resumeHashes.length > 0) {
             await this.resume(resumeHashes)
+        }
+    }
+
+    async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
+        const api = this.getApi()
+        const [properties, files] = await Promise.all([
+            new Promise<Record<string, any>>((resolve, reject) => {
+                api.getJson("torrents/properties", { qs: { hash } }, (err: any, _res: any, body: any) => {
+                    if (err) {
+                        reject(err)
+                        return
+                    }
+
+                    resolve(body || {})
+                })
+            }),
+            this.getTorrentFiles(hash),
+        ])
+
+        if (!Array.isArray(files)) {
+            throw new Error("Invalid torrent files response")
+        }
+
+        return {
+            info: {
+                hash,
+                savePath: properties.save_path ?? null,
+                creationDate: properties.creation_date ?? null,
+                pieceSize: properties.piece_size ?? null,
+                comment: properties.comment ?? null,
+                totalWasted: properties.total_wasted ?? null,
+                totalUploaded: properties.total_uploaded ?? null,
+                totalUploadedSession: properties.total_uploaded_session ?? null,
+                totalDownloaded: properties.total_downloaded ?? null,
+                totalDownloadedSession: properties.total_downloaded_session ?? null,
+                uploadLimit: properties.up_limit ?? null,
+                downloadLimit: properties.dl_limit ?? null,
+                timeElapsed: properties.time_elapsed ?? null,
+                seedingTime: properties.seeding_time ?? null,
+                connections: properties.nb_connections ?? null,
+                connectionsLimit: properties.nb_connections_limit ?? null,
+                shareRatio: properties.share_ratio ?? null,
+                additionDate: properties.addition_date ?? null,
+                completionDate: properties.completion_date ?? null,
+                createdBy: properties.created_by ?? null,
+                averageDownloadSpeed: properties.dl_speed_avg ?? null,
+                downloadSpeed: properties.dl_speed ?? null,
+                eta: properties.eta ?? null,
+                lastSeen: properties.last_seen ?? null,
+                peers: properties.peers ?? null,
+                peersTotal: properties.peers_total ?? null,
+                piecesHave: properties.pieces_have ?? null,
+                piecesTotal: properties.pieces_num ?? null,
+                reannounce: properties.reannounce ?? null,
+                seeds: properties.seeds ?? null,
+                seedsTotal: properties.seeds_total ?? null,
+                totalSize: properties.total_size ?? null,
+                averageUploadSpeed: properties.up_speed_avg ?? null,
+                uploadSpeed: properties.up_speed ?? null,
+                isPrivate: properties.isPrivate ?? null,
+            },
+            files: files.map((file: any, idx: number) => {
+                const priority = file.priority != null ? Number(file.priority) : undefined
+                return {
+                    index: file.index != null ? Number(file.index) : idx,
+                    path: file.name || "",
+                    name: (file.name || "").split(/[/\\]/).pop() || "",
+                    size: typeof file.size === "number" ? file.size : (parseInt(String(file.size), 10) || 0),
+                    progress: typeof file.progress === "number" ? file.progress : Number(file.progress) || 0,
+                    availability: typeof file.availability === "number" ? file.availability : Number(file.availability) || 0,
+                    priority,
+                    wanted: priority !== QBITTORRENT_PRIORITY_SKIP,
+                    isSeed: Boolean(file.is_seed),
+                }
+            }),
         }
     }
 
