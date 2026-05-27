@@ -126,6 +126,10 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
         return bittorrentManager.invokeAction(event.sender, request)
     })
 
+    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentDetails, async function(event: IpcMainInvokeEvent, { hash }) {
+        return bittorrentManager.getTorrentDetails(event.sender, hash)
+    })
+
     ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentFiles, async function(event: IpcMainInvokeEvent, { hash }) {
         return bittorrentManager.getTorrentFiles(event.sender, hash)
     })

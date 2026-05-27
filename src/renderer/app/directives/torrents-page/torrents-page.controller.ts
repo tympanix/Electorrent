@@ -236,6 +236,14 @@ export class TorrentsPageController {
             };
         }
 
+        function getCurrentSelectedTorrent() {
+            return lastSelected || selected[0] || null;
+        }
+
+        function syncDetailsPanel() {
+            $rootScope.$emit("torrentDetails:sync", getCurrentSelectedTorrent());
+        }
+
         function openDeleteConfirmation(action: (torrents: any[]) => Promise<void>, label: string) {
             $scope.deleteConfirmation = {
                 action,
@@ -300,6 +308,8 @@ export class TorrentsPageController {
                 torrent.selected = true;
                 selected.push(torrent);
             }
+            lastSelected = $scope.arrayTorrents[0] || null;
+            syncDetailsPanel();
             $scope.$apply();
         }
 
@@ -366,6 +376,7 @@ export class TorrentsPageController {
             $scope.filters.status = status;
             $scope.torrentLimit = LIMIT;
             refreshTorrents();
+            syncDetailsPanel();
         };
 
         $scope.filterBySearch = () => {
@@ -374,6 +385,7 @@ export class TorrentsPageController {
             lastSelected = null;
             $scope.torrentLimit = LIMIT;
             refreshTorrents();
+            syncDetailsPanel();
         };
 
         $scope.filterByLabel = (label?: string) => {
@@ -382,6 +394,7 @@ export class TorrentsPageController {
             $scope.filters.label = label;
             $scope.torrentLimit = LIMIT;
             refreshTorrents();
+            syncDetailsPanel();
         };
 
         $scope.activeLabel = (label: string) => {
@@ -394,6 +407,7 @@ export class TorrentsPageController {
             $scope.filters.tracker = tracker;
             $scope.torrentLimit = LIMIT;
             refreshTorrents();
+            syncDetailsPanel();
         };
 
         $scope.activeTracker = (tracker: string) => {
@@ -434,6 +448,7 @@ export class TorrentsPageController {
             }
             torrent.selected = !torrent.selected;
             lastSelected = torrent;
+            syncDetailsPanel();
         }
 
         function deselectAll() {
@@ -452,6 +467,7 @@ export class TorrentsPageController {
             torrent.selected = true;
             selected.push(torrent);
             lastSelected = torrent;
+            syncDetailsPanel();
         }
 
         function multiSelect(index: number) {
@@ -476,6 +492,8 @@ export class TorrentsPageController {
                 selected.push($scope.arrayTorrents[start]);
                 start += 1;
             }
+            lastSelected = $scope.arrayTorrents[index];
+            syncDetailsPanel();
         }
 
         $scope.setSelected = (event: MouseEvent, torrent: any, index: number) => {
@@ -508,6 +526,13 @@ export class TorrentsPageController {
         };
 
         $scope.doContextAction = (action: any, label: string, item: any) => {
+            if (item && item.id === "torrent-details") {
+                const currentTorrent = getCurrentSelectedTorrent();
+                if (currentTorrent) {
+                    $rootScope.$emit("torrentDetails:open", currentTorrent);
+                }
+                return $q.resolve();
+            }
             if (item && item.id === "torrent-files") {
                 if (selected.length >= 1) {
                     $rootScope.$emit("torrentFiles:open", selected[0]);
@@ -692,6 +717,7 @@ export class TorrentsPageController {
                 updateTrackers(torrents);
                 $scope.freeDiskSpace = torrents.freeDiskSpace ?? null;
             }).then(() => {
+                syncDetailsPanel();
                 if (!$scope.arrayTorrents || $scope.arrayTorrents.length === 0) {
                     $scope.renderDone();
                 }

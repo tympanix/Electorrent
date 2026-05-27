@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 
-import type { BittorrentServerConfig } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from '@shared/ipc-contract'
 import { createHttpsAgent, serverUrl } from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 
@@ -179,6 +179,78 @@ export class TransmissionRuntime implements BittorrentRuntime {
         })
 
         return resp.data
+    }
+
+    async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
+        const response = await this.getHttpClient().post(this.url(), {
+            arguments: {
+                ids: [hash],
+                fields: TRANSMISSION_FIELDS,
+            },
+            method: 'torrent-get',
+        })
+
+        const torrent = response?.data?.arguments?.torrents?.[0]
+        if (!torrent) {
+            throw new Error('Transmission did not return torrent details')
+        }
+
+        const files = Array.isArray(torrent.files) ? torrent.files : []
+        const fileStats = Array.isArray(torrent.fileStats) ? torrent.fileStats : []
+        const wanted = Array.isArray(torrent.wanted) ? torrent.wanted : []
+        const priorities = Array.isArray(torrent.priorities) ? torrent.priorities : []
+
+        return {
+            info: {
+                hash,
+                savePath: torrent.downloadDir ?? null,
+                creationDate: torrent.dateCreated ?? null,
+                pieceSize: torrent.pieceSize ?? null,
+                comment: torrent.comment ?? null,
+                totalDownloaded: torrent.downloadedEver ?? null,
+                totalUploaded: torrent.uploadedEver ?? null,
+                uploadLimit: torrent.uploadLimited ? (torrent.uploadLimit ?? null) : null,
+                downloadLimit: torrent.downloadLimited ? (torrent.downloadLimit ?? null) : null,
+                timeElapsed: (torrent.secondsDownloading ?? 0) + (torrent.secondsSeeding ?? 0),
+                seedingTime: torrent.secondsSeeding ?? null,
+                connections: torrent.peersConnected ?? null,
+                connectionsLimit: torrent.maxConnectedPeers ?? null,
+                shareRatio: torrent.uploadRatio ?? null,
+                additionDate: torrent.addedDate ?? null,
+                completionDate: torrent.doneDate ?? null,
+                createdBy: torrent.creator ?? null,
+                downloadSpeed: torrent.rateDownload ?? null,
+                eta: torrent.eta ?? null,
+                peers: torrent.peersSendingToUs ?? null,
+                peersTotal: torrent.peersConnected ?? null,
+                piecesTotal: torrent.pieceCount ?? null,
+                totalSize: torrent.totalSize ?? null,
+                uploadSpeed: torrent.rateUpload ?? null,
+                isPrivate: torrent.isPrivate ?? null,
+                errorString: torrent.errorString ?? null,
+                queuePosition: torrent.queuePosition ?? null,
+            },
+            files: files.map((file: any, index: number) => {
+                const stats = fileStats[index] || {}
+                const size = typeof file.length === 'number' ? file.length : (parseInt(String(file.length), 10) || 0)
+                const completed = typeof stats.bytesCompleted === 'number'
+                    ? stats.bytesCompleted
+                    : (typeof file.bytesCompleted === 'number' ? file.bytesCompleted : 0)
+                const priority = stats.priority != null
+                    ? Number(stats.priority)
+                    : (priorities[index] != null ? Number(priorities[index]) : undefined)
+
+                return {
+                    index,
+                    path: file.name || '',
+                    name: (file.name || '').split(/[/\\]/).pop() || '',
+                    size,
+                    progress: size > 0 ? Math.max(0, Math.min(1, completed / size)) : 0,
+                    priority,
+                    wanted: Boolean(stats.wanted ?? wanted[index] ?? true),
+                }
+            }),
+        }
     }
 
     private removeEmpty(obj: Record<string, any>) {

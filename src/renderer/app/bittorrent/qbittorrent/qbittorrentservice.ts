@@ -1,8 +1,17 @@
 import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
-import { TorrentActionList, TorrentClient, TorrentUpdates, ContextActionList, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@renderer/app/bittorrent/torrentclient";
+import {
+  TorrentActionList,
+  TorrentClient,
+  TorrentUpdates,
+  ContextActionList,
+  TorrentUploadOptions,
+  TorrentUploadOptionsEnable,
+  TorrentDetailsInfoSection,
+} from "@renderer/app/bittorrent/torrentclient";
 import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 import { QBittorrentTorrent } from "./torrentq";
-import { addTorrentUrl, connect, getSnapshot, getTorrentFiles, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, connect, getSnapshot, getTorrentDetails, getTorrentFiles, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 
 export interface QBittorrentUploadOptions {
   savepath?: string
@@ -29,6 +38,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
 
     public supportsFileSelection = true
     public supportsSetLocation = true
+    public supportsTorrentDetails = true
 
     connect(server): Promise<void> {
       return connect(server)
@@ -180,6 +190,51 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return setTorrentFileSelection(torrent.hash, files);
     }
 
+    protected getTorrentDetailsData(torrent: QBittorrentTorrent): Promise<BittorrentTorrentDetailsData> {
+      return getTorrentDetails(torrent.hash);
+    }
+
+    protected getTorrentDetailsInfoSections(torrent: QBittorrentTorrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {
+      const info = this.getTorrentDetailsInfo(details);
+      const piecesHave = this.toNumber(info.piecesHave);
+      const piecesTotal = this.toNumber(info.piecesTotal);
+
+      return this.compactTorrentDetailsSections([
+        this.createTorrentDetailsSection("overview", "Overview", [
+          this.createTorrentDetailsField("name", "Name", torrent.name),
+          this.createTorrentDetailsField("hash", "Hash", torrent.hash),
+          this.createTorrentDetailsField("status", "Status", torrent.statusText()),
+          this.createTorrentDetailsField("label", "Label", torrent.label),
+          this.createTorrentDetailsField("save-path", "Save Path", info.savePath as string | null, "path"),
+          this.createTorrentDetailsField("total-size", "Total Size", this.toNumber(info.totalSize) ?? torrent.size, "bytes"),
+        ]),
+        this.createTorrentDetailsSection("transfer", "Transfer", [
+          this.createTorrentDetailsField("downloaded", "Downloaded", this.toNumber(info.totalDownloaded) ?? torrent.downloaded, "bytes"),
+          this.createTorrentDetailsField("uploaded", "Uploaded", this.toNumber(info.totalUploaded) ?? torrent.uploaded, "bytes"),
+          this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
+          this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
+          this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
+          this.createTorrentDetailsField("download-speed-avg", "Average Download Speed", this.toNumber(info.averageDownloadSpeed), "speed"),
+          this.createTorrentDetailsField("upload-speed-avg", "Average Upload Speed", this.toNumber(info.averageUploadSpeed), "speed"),
+          this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
+          this.createTorrentDetailsField("reannounce", "Reannounce In", this.toEpochSeconds(info.reannounce), "eta"),
+        ]),
+        this.createTorrentDetailsSection("content", "Content", [
+          this.createTorrentDetailsField("piece-size", "Piece Size", this.toNumber(info.pieceSize), "bytes"),
+          this.createTorrentDetailsField("pieces", "Pieces", piecesHave != null && piecesTotal != null ? `${piecesHave} / ${piecesTotal}` : null),
+          this.createTorrentDetailsField("private", "Private Torrent", info.isPrivate as boolean | null, "boolean"),
+          this.createTorrentDetailsField("created-by", "Created By", info.createdBy as string | null),
+          this.createTorrentDetailsField("comment", "Comment", info.comment as string | null, "text", { multiline: true }),
+        ]),
+        this.createTorrentDetailsSection("dates", "Dates", [
+          this.createTorrentDetailsField("added-on", "Added On", this.toEpochSeconds(info.additionDate), "epoch"),
+          this.createTorrentDetailsField("completed-on", "Completed On", this.toEpochSeconds(info.completionDate), "epoch"),
+          this.createTorrentDetailsField("created-on", "Created On", this.toEpochSeconds(info.creationDate), "epoch"),
+          this.createTorrentDetailsField("last-seen", "Last Seen Complete", this.toEpochSeconds(info.lastSeen), "epoch"),
+        ]),
+      ]);
+    }
+
     actionHeader: TorrentActionList<QBittorrentTorrent> = [
       {
         label: "Start",
@@ -221,6 +276,13 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     ];
 
     contextMenu: ContextActionList<QBittorrentTorrent> = [
+      {
+        id: "torrent-details",
+        role: "torrent-details",
+        label: "Details",
+        click: () => Promise.resolve(),
+        icon: "info circle",
+      },
       {
         id: 'torrent-files',
         label: "Files",

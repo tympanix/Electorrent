@@ -1,6 +1,6 @@
 const xmlrpc = require("@electorrent/xmlrpc")
 
-import type { BittorrentServerConfig } from "@shared/ipc-contract"
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
 import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
@@ -9,6 +9,8 @@ type RtorrentMethodCall = {
     methodName: string
     params: any[]
 }
+
+type RtorrentMulticallCommand = string | [string, ...any[]]
 
 export class RtorrentRuntime implements BittorrentRuntime {
     private client: any
@@ -42,6 +44,24 @@ export class RtorrentRuntime implements BittorrentRuntime {
         const data = await this.call<any[][]>(method, commandParams)
 
         return doubleArrayToHash(data, Object.keys(commands))
+    }
+
+    private unwrapMulticallResult<T = any>(result: any): T {
+        return (Array.isArray(result) ? result[0] : result) as T
+    }
+
+    private async getTorrentFields(hash: string, commands: Record<string, RtorrentMulticallCommand>): Promise<Record<string, any>> {
+        const entries = Object.entries(commands)
+        const calls: RtorrentMethodCall[] = entries.map(([, command]) => {
+            const [methodName, ...extraParams] = Array.isArray(command) ? command : [command]
+            return {
+                methodName,
+                params: [hash, ...extraParams],
+            }
+        })
+        const results = await this.call<any[]>("system.multicall", [calls])
+
+        return Object.fromEntries(entries.map(([key], index) => [key, this.unwrapMulticallResult(results[index])]))
     }
 
     private async getMulticallHashes(hashes: string[], commands: string[], params: any[]) {
@@ -146,6 +166,116 @@ export class RtorrentRuntime implements BittorrentRuntime {
             torrents,
             labels,
             trackers,
+        }
+    }
+
+    async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
+        const detailCommands: Record<string, RtorrentMulticallCommand> = {
+            savePath: "d.directory",
+            name: "d.name",
+            totalSize: "d.size_bytes",
+            creationDate: "d.creation_date",
+            pieceSize: "d.chunk_size",
+            totalDownloaded: "d.down.total",
+            totalUploaded: "d.up.total",
+            downloadSpeed: "d.down.rate",
+            uploadSpeed: "d.up.rate",
+            leftBytes: "d.left_bytes",
+            label: "d.custom1",
+            chunksComplete: "d.completed_chunks",
+            message: "d.message",
+            peers: "d.peers_accounted",
+            seeds: "d.peers_complete",
+            additionDate: ["d.custom", "addtime"],
+        }
+        const numericDetailFields = [
+            "totalSize",
+            "creationDate",
+            "pieceSize",
+            "totalDownloaded",
+            "totalUploaded",
+            "downloadSpeed",
+            "uploadSpeed",
+            "leftBytes",
+            "chunksComplete",
+            "peers",
+            "seeds",
+            "additionDate",
+        ] as const
+        const fileCommands = {
+            path: "f.path",
+            size: "f.size_bytes",
+            completedChunks: "f.completed_chunks",
+            totalChunks: "f.size_chunks",
+            priority: "f.priority",
+        }
+
+        const [detailFields, files] = await Promise.all([
+            this.getTorrentFields(hash, detailCommands),
+            this.getMulticall("f.multicall", [hash, ""], fileCommands),
+        ])
+
+        numericDetailFields.forEach((field) => {
+            const numeric = Number(detailFields[field])
+            detailFields[field] = Number.isFinite(numeric) ? numeric : null
+        })
+        files.forEach((file) => stringsToNumbers(file))
+
+        const savePath = typeof detailFields.savePath === "string" ? detailFields.savePath : null
+        const name = typeof detailFields.name === "string" ? detailFields.name : null
+        const totalSize = typeof detailFields.totalSize === "number" ? detailFields.totalSize : null
+        const creationDate = typeof detailFields.creationDate === "number" ? detailFields.creationDate : null
+        const pieceSize = typeof detailFields.pieceSize === "number" ? detailFields.pieceSize : null
+        const totalDownloaded = typeof detailFields.totalDownloaded === "number" ? detailFields.totalDownloaded : null
+        const totalUploaded = typeof detailFields.totalUploaded === "number" ? detailFields.totalUploaded : null
+        const downloadSpeed = typeof detailFields.downloadSpeed === "number" ? detailFields.downloadSpeed : null
+        const uploadSpeed = typeof detailFields.uploadSpeed === "number" ? detailFields.uploadSpeed : null
+        const leftBytes = typeof detailFields.leftBytes === "number" ? detailFields.leftBytes : null
+        const label = typeof detailFields.label === "string" ? detailFields.label : null
+        const chunksComplete = typeof detailFields.chunksComplete === "number" ? detailFields.chunksComplete : null
+        const message = typeof detailFields.message === "string" ? detailFields.message : null
+        const peers = typeof detailFields.peers === "number" ? detailFields.peers : null
+        const seeds = typeof detailFields.seeds === "number" ? detailFields.seeds : null
+        const additionDate = typeof detailFields.additionDate === "number" ? detailFields.additionDate : null
+        const ratio = totalDownloaded > 0 ? totalUploaded / totalDownloaded : null
+
+        return {
+            info: {
+                hash,
+                name: name ?? null,
+                savePath: savePath ?? null,
+                creationDate: creationDate ?? null,
+                pieceSize: pieceSize ?? null,
+                totalDownloaded: totalDownloaded ?? null,
+                totalUploaded: totalUploaded ?? null,
+                shareRatio: ratio,
+                additionDate: additionDate ?? null,
+                downloadSpeed: downloadSpeed ?? null,
+                eta: downloadSpeed > 0 ? (leftBytes ?? 0) / downloadSpeed : null,
+                peers: peers ?? null,
+                seeds: seeds ?? null,
+                totalSize: totalSize ?? null,
+                uploadSpeed: uploadSpeed ?? null,
+                label: typeof label === "string" ? decodeURIComponent(label) : null,
+                chunksComplete: chunksComplete ?? null,
+                message: message ?? null,
+            },
+            files: files.map((file: Record<string, any>, index: number) => {
+                const size = typeof file.size === "number" ? file.size : 0
+                const totalChunks = typeof file.totalChunks === "number" ? file.totalChunks : 0
+                const completedChunks = typeof file.completedChunks === "number" ? file.completedChunks : 0
+                const priority = file.priority != null ? Number(file.priority) : undefined
+
+                return {
+                    index,
+                    path: file.path || "",
+                    name: (file.path || "").split(/[/\\]/).pop() || "",
+                    size,
+                    progress: totalChunks > 0 ? Math.max(0, Math.min(1, completedChunks / totalChunks)) : 0,
+                    priority,
+                    wanted: priority !== 0,
+                }
+            }),
         }
     }
 

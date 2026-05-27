@@ -179,5 +179,7 @@ import { indeterminateValueDirective } from "@renderer/app/directives/torrent-fi
 torrentApp.directive('indeterminateValue', indeterminateValueDirective)
 import { TorrentFilesModalDirective } from "@renderer/app/directives/torrent-files-modal/torrent-files-modal.directive";
 torrentApp.directive('torrentFilesModal', TorrentFilesModalDirective.getInstance())
+import { TorrentDetailsPanelDirective } from "@renderer/app/directives/torrent-details-panel/torrent-details-panel.directive";
+torrentApp.directive('torrentDetailsPanel', TorrentDetailsPanelDirective.getInstance())
 import { SetLocationModalDirective } from "@renderer/app/directives/set-location-modal/set-location-modal.directive";
 torrentApp.directive('setLocationModal', SetLocationModalDirective.getInstance())

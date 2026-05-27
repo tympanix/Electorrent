@@ -1,4 +1,5 @@
 import type {
+    BittorrentTorrentDetailsData,
     BittorrentFileSelection,
     BittorrentServerConfig,
 } from "@shared/ipc-contract"
@@ -42,6 +43,10 @@ export function uploadTorrent(data: Uint8Array, filename: string, options?: Torr
 
 export function invokeAction(action: string, hashes: string[] = [], ...args: any[]) {
     return bridge().invokeAction({ action, hashes, args })
+}
+
+export function getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
+    return bridge().getTorrentDetails({ hash })
 }
 
 export function getTorrentFiles(hash: string) {

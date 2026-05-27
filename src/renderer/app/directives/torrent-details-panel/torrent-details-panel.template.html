@@ -1,0 +1,114 @@
+<div class="torrent-details-panel" data-role="torrent-details-panel" ng-if="ctl.scope.isOpen" ng-style="ctl.panelStyle()">
+  <div class="torrent-details-panel-resizer" ng-mousedown="ctl.startResizing($event)"></div>
+  <div class="ui top attached tabular menu torrent-details-tabs">
+    <a
+      class="item"
+      data-role="torrent-details-tab-info"
+      ng-class="{ active: ctl.isActiveTab('info') }"
+      ng-click="ctl.showTab('info')"
+    >
+      Info
+    </a>
+    <a
+      class="item"
+      data-role="torrent-details-tab-files"
+      ng-class="{ active: ctl.isActiveTab('files') }"
+      ng-click="ctl.showTab('files')"
+    >
+      Files
+    </a>
+    <div class="right menu">
+      <a
+        class="item"
+        data-role="torrent-details-close"
+        aria-label="Close torrent details"
+        ng-click="ctl.close()"
+      >
+        <i class="close icon"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="torrent-details-panel-body">
+    <div ng-if="ctl.scope.loading && !ctl.scope.panel.info.sections.length && !ctl.scope.panel.files.items.length" class="torrent-details-panel-loader">
+      <div class="ui active inline loader"></div>
+    </div>
+
+    <div ng-if="ctl.scope.error" class="ui negative message torrent-details-message">
+      {{ ctl.scope.error }}
+    </div>
+
+    <div
+      class="torrent-details-info"
+      data-role="torrent-details-info"
+      ng-if="!ctl.scope.error && ctl.isActiveTab('info')"
+    >
+      <div class="torrent-details-section" ng-repeat="section in ctl.scope.panel.info.sections track by section.id">
+        <div class="ui tiny header">{{ section.title }}</div>
+        <table class="ui very basic compact table">
+          <tbody>
+            <tr
+              ng-repeat="field in section.fields track by field.id"
+              data-role="torrent-details-field"
+              data-field-id="{{ field.id }}"
+            >
+              <td class="label">{{ field.label }}</td>
+              <td class="value" ng-class="{ multiline: field.multiline }">{{ ctl.formatFieldValue(field) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div
+      class="torrent-details-files"
+      data-role="torrent-details-files"
+      ng-if="!ctl.scope.error && ctl.isActiveTab('files')"
+    >
+      <div class="torrent-details-files-content">
+        <table
+          id="torrentDetailsFilesTable"
+          data-role="torrent-details-files-table"
+          rz-table
+          rz-profile="ctl.scope.resizeProfile"
+          rz-mode="ctl.scope.resizeMode"
+          rz-container=".torrent-details-files-content"
+          columns="ctl.scope.panel.files.columns"
+          class="ui compact single line unstackable fixed torrent resize table"
+        >
+          <thead>
+            <tr>
+              <th
+                ng-repeat="column in ctl.scope.panel.files.columns track by column.id"
+                rz-col="column.id"
+                ng-class="ctl.sortClass(column)"
+                ng-click="ctl.changeSorting(column.id)"
+              >
+                {{ column.label }}
+                <i class="ui sorting icon"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="file in ctl.scope.sortedFiles track by file.index" data-file-index="{{ file.index }}">
+              <td ng-repeat="column in ctl.scope.panel.files.columns track by column.id" data-col="{{ column.id }}">
+                <div ng-switch="column.format">
+                  <div ng-switch-when="progress" class="torrent-details-file-progress">
+                    <div class="ui tiny indicating progress">
+                      <div class="bar" ng-style="{ width: ctl.fileProgressPercent(file) + '%' }"></div>
+                    </div>
+                    <span>{{ ctl.fileProgressPercent(file) | number:1 }}%</span>
+                  </div>
+                  <span ng-switch-default>{{ ctl.formatFileCell(column, file) }}</span>
+                </div>
+              </td>
+            </tr>
+            <tr ng-if="!ctl.scope.sortedFiles.length">
+              <td colspan="{{ ctl.scope.panel.files.columns.length || 1 }}">No files available.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

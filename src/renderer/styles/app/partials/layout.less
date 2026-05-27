@@ -107,9 +107,13 @@ html, body {
     float: left;
 }
 .main-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
     /*background: rgba(247, 247, 248, 1);*/
 }
 .main-panel .action.header {
+    flex: 0 0 auto;
     white-space: nowrap;
     height: 50px;
     padding: 0 7px;
@@ -163,13 +167,136 @@ html, body {
 
 .main-panel {
     .main-content {
-        height: calc(~"100% - 50px - 27px");
+        flex: 1 1 auto;
+        min-height: 0;
         overflow-x: hidden;
         /*overflow-y: auto;*/
         overflow-y: overlay; /* Chrome scrollbar on top */
     }
 
+    .torrent-details-panel {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        min-height: 0;
+        border-top: 1px solid @borderColor;
+        background-color: @pageForeground;
+
+        .torrent-details-panel-resizer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            cursor: ns-resize;
+            z-index: 2;
+        }
+
+        .torrent-details-tabs {
+            margin: 0;
+            border-bottom: 1px solid @borderColor;
+            flex: 0 0 auto;
+
+            a.item {
+
+                padding: 0.20rem 1rem;
+
+                &.active {
+                    border-top: none;
+
+                    &:first-child {
+                        border-left: none;
+                    }
+                }
+            }
+        }
+
+        .torrent-details-panel-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0;
+        }
+
+        .torrent-details-panel-loader {
+            display: flex;
+            justify-content: center;
+            padding-top: 2rem;
+        }
+
+        .torrent-details-message {
+            margin: 0.75rem 1rem;
+        }
+
+        .torrent-details-info,
+        .torrent-details-files,
+        .torrent-details-files-content {
+            height: 100%;
+            min-height: 0;
+        }
+
+        .torrent-details-info {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            padding: 0.75rem 1rem;
+            overflow-y: auto;
+        }
+
+        .torrent-details-section {
+            min-width: 0;
+
+            .table {
+                margin: 0;
+            }
+
+            td {
+                vertical-align: top;
+            }
+
+            td.label {
+                width: 120px;
+                font-weight: 600;
+                padding-left: 0;
+                white-space: nowrap;
+            }
+
+            td.value {
+                padding-right: 0;
+                word-break: break-word;
+
+                &.multiline {
+                    white-space: pre-wrap;
+                }
+            }
+        }
+
+        .torrent-details-files-content {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .torrent-details-files.table,
+        .torrent-details-files-content .torrent.table {
+            margin: 0;
+        }
+
+        .torrent-details-file-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            .progress {
+                flex: 1 1 auto;
+                margin: 0;
+            }
+        }
+    }
+
     .status-bar {
+        flex: 0 0 auto;
         display: flex;
         justify-content: flex-end;
         border-top: 1px solid @borderColor;
