@@ -421,6 +421,15 @@ export class TorrentsPageController {
             $scope.contextMenu.show(event, selected);
         };
 
+        $scope.openTorrentDetails = (torrent: any) => {
+            singleSelect(torrent);
+
+            const currentTorrent = getCurrentSelectedTorrent();
+            if (currentTorrent) {
+                $rootScope.$emit("torrentDetails:open", currentTorrent);
+            }
+        };
+
         $scope.numInFilter = (status: string) => {
             let num = 0;
             const filter = torrentFilter(status);
@@ -703,6 +712,23 @@ export class TorrentsPageController {
             }
         }
 
+        function clearDeletedSelections(deletedHashes: string[]) {
+            const deletedHashSet = new Set(deletedHashes);
+
+            selected = selected.filter((torrent) => {
+                if (deletedHashSet.has(torrent.hash)) {
+                    torrent.selected = false;
+                    return false;
+                }
+
+                return true;
+            });
+
+            if (lastSelected && deletedHashSet.has(lastSelected.hash)) {
+                lastSelected = null;
+            }
+        }
+
         $scope.update = (fullupdate?: boolean) => {
             const serverId = $rootScope.$server?.id;
             const request = $rootScope.$btclient?.torrents(!!fullupdate);
@@ -755,6 +781,7 @@ export class TorrentsPageController {
 
         function deleteTorrents(torrents: any) {
             if (torrents.deleted && torrents.deleted.length > 0) {
+                clearDeletedSelections(torrents.deleted);
                 for (let index = 0; index < torrents.deleted.length; index += 1) {
                     delete $scope.torrents[torrents.deleted[index]];
                 }

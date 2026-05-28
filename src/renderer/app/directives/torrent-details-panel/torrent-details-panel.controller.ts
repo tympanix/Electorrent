@@ -68,7 +68,7 @@ export class TorrentDetailsPanelController {
       }
 
       if (!torrent) {
-        this.close();
+        this.clearSelection();
         return;
       }
 
@@ -102,11 +102,8 @@ export class TorrentDetailsPanelController {
     this.loadRequestId += 1;
     this.stopResizeListeners?.();
     this.scope.isOpen = false;
-    this.scope.loading = false;
-    this.scope.error = null;
-    this.scope.torrent = null;
     this.scope.activeTab = "info";
-    this.scope.sortedFiles = [];
+    this.resetPanelState();
   }
 
   showTab(tab: "info" | "files") {
@@ -115,6 +112,18 @@ export class TorrentDetailsPanelController {
 
   isActiveTab(tab: "info" | "files") {
     return this.scope.activeTab === tab;
+  }
+
+  showStateMessage() {
+    return !this.scope.loading && (!!this.scope.error || !this.scope.torrent);
+  }
+
+  stateMessageIcon() {
+    return this.scope.error ? "warning circle" : "info circle";
+  }
+
+  stateMessageText() {
+    return this.scope.error || "Select a torrent to view its details.";
   }
 
   panelStyle() {
@@ -325,5 +334,21 @@ export class TorrentDetailsPanelController {
   private saveSorting() {
     this.$window.localStorage.setItem(this.getStorageKey(this.sortKeyStoragePrefix), this.fileSortKey);
     this.$window.localStorage.setItem(this.getStorageKey(this.sortOrderStoragePrefix), String(this.fileSortDescending));
+  }
+
+  private clearSelection() {
+    this.loadRequestId += 1;
+    this.resetPanelState();
+  }
+
+  private resetPanelState() {
+    this.scope.loading = false;
+    this.scope.error = null;
+    this.scope.torrent = null;
+    this.scope.panel = {
+      info: { sections: [] },
+      files: { columns: [], items: [] },
+    };
+    this.scope.sortedFiles = [];
   }
 }
