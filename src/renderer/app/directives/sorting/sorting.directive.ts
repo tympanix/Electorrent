@@ -12,6 +12,10 @@ export class SortingDirective implements IDirective {
     scope = {
         mode: "=",
         sorting: "=",
+        defaultSortKey: "@?",
+        defaultSortOrder: "<?",
+        sortKeyPrefix: "@?",
+        sortOrderPrefix: "@?",
     };
     controller = SortingController;
 

@@ -1,9 +1,57 @@
 import { IWindowService } from "angular";
 
+export interface SortingOptions {
+    defaultSortKey?: string;
+    defaultSortOrder?: boolean;
+    sortKeyPrefix?: string;
+    sortOrderPrefix?: string;
+}
+
+const DEFAULT_SORT_KEY = "dateAdded";
+const DEFAULT_SORT_ORDER = true;
+const DEFAULT_SORT_KEY_PREFIX = "sort_key";
+const DEFAULT_SORT_ORDER_PREFIX = "sort_desc";
+
+function getStorageKey(prefix: string, mode: string) {
+    return `${prefix}.${mode}`;
+}
+
+export function loadSortingState($window: IWindowService, mode: string, options: SortingOptions = {}) {
+    const defaultSortKey = options.defaultSortKey || DEFAULT_SORT_KEY;
+    const defaultSortOrder = options.defaultSortOrder ?? DEFAULT_SORT_ORDER;
+    const sortKeyPrefix = options.sortKeyPrefix || DEFAULT_SORT_KEY_PREFIX;
+    const sortOrderPrefix = options.sortOrderPrefix || DEFAULT_SORT_ORDER_PREFIX;
+    const sortKey = $window.localStorage.getItem(getStorageKey(sortKeyPrefix, mode));
+    const sortOrder = $window.localStorage.getItem(getStorageKey(sortOrderPrefix, mode));
+
+    return {
+        sortKey: sortKey && typeof sortKey === "string" ? sortKey : defaultSortKey,
+        sortOrder: sortOrder ? sortOrder === "true" : defaultSortOrder,
+    };
+}
+
+export function saveSortingState(
+    $window: IWindowService,
+    mode: string,
+    key: string,
+    order: boolean,
+    options: SortingOptions = {},
+) {
+    const sortKeyPrefix = options.sortKeyPrefix || DEFAULT_SORT_KEY_PREFIX;
+    const sortOrderPrefix = options.sortOrderPrefix || DEFAULT_SORT_ORDER_PREFIX;
+
+    $window.localStorage.setItem(getStorageKey(sortKeyPrefix, mode), key);
+    $window.localStorage.setItem(getStorageKey(sortOrderPrefix, mode), String(order));
+}
+
 export class SortingController {
     static $inject = ["$window"];
 
     mode!: string;
+    defaultSortKey?: string;
+    defaultSortOrder?: boolean;
+    sortKeyPrefix?: string;
+    sortOrderPrefix?: string;
     sorting!: (sortKey: string, descending: boolean) => void;
     sortKey!: string;
     sortOrder!: boolean;
@@ -16,30 +64,22 @@ export class SortingController {
     }
 
     updateSettings() {
-        this.sortKey = this.getSavedSortKey();
-        this.sortOrder = this.getSavedSortOrder();
+        const { sortKey, sortOrder } = loadSortingState(this.$window, this.mode, this.getOptions());
+
+        this.sortKey = sortKey;
+        this.sortOrder = sortOrder;
     }
 
     save(key: string, order: boolean) {
-        this.$window.localStorage.setItem(`sort_key.${this.mode}`, key);
-        this.$window.localStorage.setItem(`sort_desc.${this.mode}`, String(order));
+        saveSortingState(this.$window, this.mode, key, order, this.getOptions());
     }
 
-    private getSavedSortKey() {
-        const sortKey = this.$window.localStorage.getItem(`sort_key.${this.mode}`);
-        if (!sortKey || typeof sortKey !== "string") {
-            return "dateAdded";
-        }
-
-        return sortKey;
-    }
-
-    private getSavedSortOrder() {
-        const sortOrder = this.$window.localStorage.getItem(`sort_desc.${this.mode}`);
-        if (!sortOrder) {
-            return true;
-        }
-
-        return sortOrder === "true";
+    private getOptions(): SortingOptions {
+        return {
+            defaultSortKey: this.defaultSortKey,
+            defaultSortOrder: this.defaultSortOrder,
+            sortKeyPrefix: this.sortKeyPrefix,
+            sortOrderPrefix: this.sortOrderPrefix,
+        };
     }
 }

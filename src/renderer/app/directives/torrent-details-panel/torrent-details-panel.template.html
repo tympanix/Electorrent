@@ -80,15 +80,20 @@
           class="ui compact single line unstackable fixed torrent resize table"
         >
           <thead>
-            <tr>
+            <tr
+              sorting="ctl.changeSorting"
+              mode="ctl.scope.resizeProfile"
+              default-sort-key="name"
+              default-sort-order="false"
+              sort-key-prefix="torrent-details-files.sort-key"
+              sort-order-prefix="torrent-details-files.sort-desc"
+            >
               <th
                 ng-repeat="column in ctl.scope.panel.files.columns track by column.id"
                 rz-col="column.id"
-                ng-class="ctl.sortClass(column)"
-                ng-click="ctl.changeSorting(column.id)"
+                sort="column.id"
               >
                 {{ column.label }}
-                <i class="ui sorting icon"></i>
               </th>
             </tr>
           </thead>
