@@ -5,6 +5,7 @@ import {
   TorrentDetailsInfoField,
   TorrentDetailsPanelData,
 } from "@renderer/app/bittorrent/torrentclient";
+import { loadSortingState, SortingOptions } from "@renderer/app/directives/sorting/sorting.controller";
 
 export interface TorrentDetailsPanelScope extends IScope {
   settings: any;
@@ -24,8 +25,12 @@ export class TorrentDetailsPanelController {
 
   private readonly defaultPanelHeight = 320;
   private readonly minPanelHeight = 220;
-  private readonly sortKeyStoragePrefix = "torrent-details-files.sort-key";
-  private readonly sortOrderStoragePrefix = "torrent-details-files.sort-desc";
+  private readonly sortingOptions: SortingOptions = {
+    defaultSortKey: "name",
+    defaultSortOrder: false,
+    sortKeyPrefix: "torrent-details-files.sort-key",
+    sortOrderPrefix: "torrent-details-files.sort-desc",
+  };
   private fileSortKey = "name";
   private fileSortDescending = false;
   private panelHeight = this.defaultPanelHeight;
@@ -168,25 +173,11 @@ export class TorrentDetailsPanelController {
     this.stopResizeListeners = onMouseUp;
   }
 
-  changeSorting(columnId: string) {
-    if (this.fileSortKey === columnId) {
-      this.fileSortDescending = !this.fileSortDescending;
-    } else {
-      this.fileSortKey = columnId;
-      this.fileSortDescending = false;
-    }
-
-    this.saveSorting();
+  changeSorting = (columnId: string, descending: boolean) => {
+    this.fileSortKey = columnId;
+    this.fileSortDescending = descending;
     this.sortFiles();
-  }
-
-  sortClass(column: TorrentDetailsFileColumn) {
-    if (column.id !== this.fileSortKey) {
-      return "";
-    }
-
-    return this.fileSortDescending ? "sortdown" : "sortup";
-  }
+  };
 
   formatFieldValue(field: TorrentDetailsInfoField) {
     switch (field.format) {
@@ -269,7 +260,7 @@ export class TorrentDetailsPanelController {
       }
 
       this.scope.panel = panel || this.scope.panel;
-      this.loadSavedSorting();
+      this.loadSortingSettings();
       this.sortFiles();
     } catch (err) {
       if (requestId !== this.loadRequestId) {
@@ -310,30 +301,20 @@ export class TorrentDetailsPanelController {
     this.scope.sortedFiles = items;
   }
 
-  private getStorageKey(prefix: string) {
-    return `${prefix}.${this.getResizeProfile()}`;
-  }
-
   private syncResizeBindings() {
     this.scope.resizeMode = this.scope.settings?.ui?.resizeMode || "FixedResizer";
     this.scope.resizeProfile = this.getResizeProfile();
   }
 
-  private loadSavedSorting() {
+  private loadSortingSettings() {
     const columns = this.scope.panel?.files?.columns || [];
     const defaultColumn = columns[0]?.id || "name";
-    const savedSortKey = this.$window.localStorage.getItem(this.getStorageKey(this.sortKeyStoragePrefix));
-    const savedSortDesc = this.$window.localStorage.getItem(this.getStorageKey(this.sortOrderStoragePrefix));
+    const { sortKey, sortOrder } = loadSortingState(this.$window, this.scope.resizeProfile, this.sortingOptions);
 
-    this.fileSortKey = savedSortKey && columns.some((column) => column.id === savedSortKey)
-      ? savedSortKey
+    this.fileSortKey = columns.some((column) => column.id === sortKey)
+      ? sortKey
       : defaultColumn;
-    this.fileSortDescending = savedSortDesc === "true";
-  }
-
-  private saveSorting() {
-    this.$window.localStorage.setItem(this.getStorageKey(this.sortKeyStoragePrefix), this.fileSortKey);
-    this.$window.localStorage.setItem(this.getStorageKey(this.sortOrderStoragePrefix), String(this.fileSortDescending));
+    this.fileSortDescending = sortOrder;
   }
 
   private clearSelection() {
