@@ -98,6 +98,35 @@ export class App {
     await settingsPage.waitForDisplayed({ timeout: this.timeout })
   }
 
+  async serverSelectionPageIsVisible(opts?: { timeout: number }) {
+    let serverSelectionPage = $("#page-server-selection")
+    await serverSelectionPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
+  }
+
+  async getServerSelectionNames(): Promise<string[]> {
+    await this.serverSelectionPageIsVisible()
+    const serverCards = await $$("#page-server-selection .server.list .card")
+    const names: string[] = []
+    for (const card of serverCards) {
+      names.push((await card.$(".header").getText()).trim())
+    }
+    return names
+  }
+
+  async connectServerSelection(serverIndex: number) {
+    await this.serverSelectionPageIsVisible()
+    const serverCards = await $$("#page-server-selection .server.list .card")
+    const serverCard = serverCards[serverIndex]
+    if (!serverCard) {
+      throw new Error(`Server card at index ${serverIndex} was not found`)
+    }
+
+    const connectButton = serverCard.$(".bottom.attached.button")
+    await connectButton.waitForDisplayed()
+    await connectButton.waitForClickable()
+    await connectButton.click()
+  }
+
   async certificateModalIsVisible() {
     let certificateModal = $("#certificateModal")
     await certificateModal.waitForExist()

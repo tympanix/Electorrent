@@ -37,9 +37,25 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
         return Promise.all(servers.map((server) => loadServerCertificate(server))).then(() => undefined)
     }
 
+    function hydrateServer(server: any) {
+        return typeof server?.connect === "function" ? server : new Server(server)
+    }
+
+    function replaceServers(servers: any[]) {
+        settings.servers.splice(0, settings.servers.length, ...servers.map((server) => hydrateServer(server)))
+    }
+
+    function mergeSettings(newSettings: Partial<AppSettings<any>>) {
+        const { servers, ui, ...rest } = newSettings
+        Object.assign(settings, rest)
+        settings.ui = Object.assign({}, settings.ui, ui || {})
+        if (Array.isArray(servers)) {
+            replaceServers(servers)
+        }
+    }
+
     const readyPromise = electorrent.settings.getAll().then((org: AppSettings<StoredServerConfig>) => {
-        angular.merge(settings, org);
-        settings.servers = settings.servers.map((server) => new Server(server));
+        mergeSettings(org)
         return loadServerCertificates(settings.servers).then(() => settings)
     });
 
@@ -116,9 +132,9 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
 
     this.saveAllSettings = function(newSettings) {
         if (newSettings) {
-            Object.assign(settings, newSettings)
+            mergeSettings(newSettings)
         }
-        return electorrent.settings.saveAll(settingsToJson()).then(function() {
+        return loadServerCertificates(settings.servers).then(() => electorrent.settings.saveAll(settingsToJson())).then(function() {
             updateServerReference()
         });
     }
