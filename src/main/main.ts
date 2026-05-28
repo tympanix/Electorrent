@@ -4,6 +4,7 @@ import {
     Menu,
     nativeImage,
     session,
+    shell,
     Tray,
     type BrowserWindowConstructorOptions,
     type Event as ElectronEvent,
@@ -174,6 +175,36 @@ async function bootstrap() {
         torrentWindow.loadURL(`file://${__dirname}/index.html`)
 
         const windowWebContents: WebContents = torrentWindow.webContents
+        const isExternalUrl = (url: string) => {
+            try {
+                const parsedUrl = new URL(url)
+                return ['http:', 'https:', 'mailto:'].includes(parsedUrl.protocol)
+            } catch {
+                return false
+            }
+        }
+        const openInDefaultBrowser = (url: string) => {
+            void shell.openExternal(url).catch((error) => {
+                logger.error('Failed to open external URL', { url, error })
+            })
+        }
+
+        windowWebContents.setWindowOpenHandler(({ url }) => {
+            if (isExternalUrl(url)) {
+                openInDefaultBrowser(url)
+            }
+
+            return { action: 'deny' }
+        })
+
+        windowWebContents.on('will-navigate', (event, url) => {
+            if (!isExternalUrl(url)) {
+                return
+            }
+
+            event.preventDefault()
+            openInDefaultBrowser(url)
+        })
 
         torrentWindow.on('close', (event) => {
             if (!isQuitting && tray) {

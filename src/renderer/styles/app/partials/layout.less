@@ -228,26 +228,45 @@ html, body {
         }
 
         .torrent-details-panel-body {
+            display: flex;
             flex: 1 1 auto;
             min-height: 0;
-            overflow-y: auto;
+            overflow: hidden;
             overflow-x: hidden;
             padding: 0;
         }
 
-        .torrent-details-panel-loader {
+        .torrent-details-state {
             display: flex;
+            flex: 1 1 auto;
+            align-items: center;
             justify-content: center;
-            padding-top: 2rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .torrent-details-state-content {
+            color: fade(@textColor, 72%);
+
+            .icon {
+                display: block;
+                margin: 0 auto 0.75rem;
+            }
+
+            p {
+                margin: 0;
+                font-size: 1rem;
+            }
         }
 
         .torrent-details-message {
-            margin: 0.75rem 1rem;
+            color: inherit;
         }
 
         .torrent-details-info,
         .torrent-details-files,
         .torrent-details-files-content {
+            flex: 1 1 auto;
             height: 100%;
             min-height: 0;
         }
