@@ -1,0 +1,46 @@
+<h1>Advanced</h1>
+
+<table class="ui very basic table">
+    <thead>
+        <tr>
+            <th class="three wide">Setting</th>
+            <th class="seven wide">Description</th>
+            <th class="six wide">Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr data-role="advanced-watch-directory-row">
+            <td>
+                <strong>Watch folder</strong>
+            </td>
+            <td>
+                Watch a folder for new <code>.torrent</code> files. Leave this empty to disable automatic torrent uploads.
+            </td>
+            <td>
+                <div class="ui action input fluid">
+                    <input
+                        id="settings-watch-directory"
+                        data-role="settings-watch-directory-input"
+                        type="text"
+                        placeholder="Disabled"
+                        ng-model="settings.watchDirectory">
+                    <button
+                        type="button"
+                        class="ui button"
+                        data-role="settings-watch-directory-browse"
+                        ng-click="chooseWatchDirectory()">
+                        Browse
+                    </button>
+                    <button
+                        type="button"
+                        class="ui button"
+                        data-role="settings-watch-directory-clear"
+                        ng-click="clearWatchDirectory()"
+                        ng-disabled="!settings.watchDirectory">
+                        Clear
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>

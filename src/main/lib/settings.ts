@@ -11,6 +11,7 @@ type MainAppSettings = AppSettings & {
     debugMode?: boolean
     autoRemoveTorrents?: boolean
     alwaysPromptUploadOptions?: boolean
+    watchDirectory?: string
 }
 
 const defaultSettings: MainAppSettings = {
@@ -23,6 +24,7 @@ const defaultSettings: MainAppSettings = {
     debugMode: false,
     autoRemoveTorrents: false,
     alwaysPromptUploadOptions: false,
+    watchDirectory: '',
     ui: {
         resizeMode: 'FixedResizer',
         notifications: true,

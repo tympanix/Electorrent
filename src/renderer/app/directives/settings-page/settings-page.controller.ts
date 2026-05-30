@@ -117,6 +117,20 @@ export class SettingsPageController {
             }
         };
 
+        $scope.chooseWatchDirectory = () => {
+            return electorrent.settings.chooseWatchDirectory($scope.settings.watchDirectory).then((watchDirectory: string | null) => {
+                if (watchDirectory) {
+                    $scope.settings.watchDirectory = watchDirectory;
+                }
+            }).finally(() => {
+                $scope.$applyAsync();
+            });
+        };
+
+        $scope.clearWatchDirectory = () => {
+            $scope.settings.watchDirectory = "";
+        };
+
         $scope.openRenameModal = (server: any) => {
             $scope.renameData.server = server;
             $scope.renameData.name = server.getDisplayName();

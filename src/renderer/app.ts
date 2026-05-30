@@ -125,6 +125,8 @@ import { SettingsServersDirective } from "@renderer/app/directives/settings-serv
 torrentApp.directive("settingsServers", SettingsServersDirective.getInstance())
 import { SettingsAboutDirective } from "@renderer/app/directives/settings-about/settings-about.directive"
 torrentApp.directive("settingsAbout", SettingsAboutDirective.getInstance())
+import { SettingsAdvancedDirective } from "@renderer/app/directives/settings-advanced/settings-advanced.directive"
+torrentApp.directive("settingsAdvanced", SettingsAdvancedDirective.getInstance())
 import { WelcomePageDirective } from "@renderer/app/directives/welcome-page/welcome-page.directive"
 torrentApp.directive("welcomePage", WelcomePageDirective.getInstance())
 import { ServerSelectionDirective } from "@renderer/app/directives/server-selection/server-selection.directive"

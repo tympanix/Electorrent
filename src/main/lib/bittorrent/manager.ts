@@ -131,6 +131,14 @@ class BittorrentManager {
         }
         return this.disconnect(sender)
     }
+
+    hasSession(sender: WebContents | null | undefined) {
+        if (!sender) {
+            return false
+        }
+
+        return this.sessions.has(sender.id)
+    }
 }
 
 export const bittorrentManager = new BittorrentManager()

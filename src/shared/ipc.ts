@@ -13,6 +13,7 @@ export const IPC_CHANNELS = {
         getAll: 'settings:get-all',
         saveAll: 'settings:save-all',
         listThemes: 'settings:list-themes',
+        chooseWatchDirectory: 'settings:choose-watch-directory',
     },
     launch: {
         getPending: 'launch:get-pending',

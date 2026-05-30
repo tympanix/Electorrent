@@ -1,4 +1,4 @@
-import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
+import { app, dialog, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
 import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
@@ -19,6 +19,7 @@ interface RegisterHandlersOptions {
         torrentFiles: unknown[]
     }>
     onSettingsSaved?: (settings: AppSettings) => void | Promise<void>
+    onBittorrentConnected?: () => void | Promise<void>
 }
 
 function getAppMeta(isDebug: boolean) {
@@ -38,7 +39,7 @@ function getAppMeta(isDebug: boolean) {
     }
 }
 
-export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload, onSettingsSaved }: RegisterHandlersOptions) {
+export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload, onSettingsSaved, onBittorrentConnected }: RegisterHandlersOptions) {
     menu.configure({ isDebug })
 
     ipcMain.handle(IPC_CHANNELS.app.getMeta, async function() {
@@ -92,6 +93,22 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
         return themes()
     })
 
+    ipcMain.handle(IPC_CHANNELS.settings.chooseWatchDirectory, async function(_event: IpcMainInvokeEvent, { currentPath }) {
+        const window = getWindow()
+        const result = await dialog.showOpenDialog(window || undefined, {
+            title: 'Choose Folder to Watch',
+            defaultPath: typeof currentPath === 'string' && currentPath ? currentPath : undefined,
+            buttonLabel: 'Use Folder',
+            properties: ['openDirectory', 'createDirectory'],
+        })
+
+        if (result.canceled || result.filePaths.length === 0) {
+            return null
+        }
+
+        return result.filePaths[0]
+    })
+
     ipcMain.handle(IPC_CHANNELS.launch.getPending, async function() {
         return consumePendingLaunchPayload()
     })
@@ -103,6 +120,7 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
         await bittorrentManager.connect(event.sender, server)
         menu.setActiveServer(server)
+        await onBittorrentConnected?.()
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.disconnect, async function(event: IpcMainInvokeEvent) {

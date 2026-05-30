@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('electorrent', {
         getAll: () => invoke(IPC_CHANNELS.settings.getAll),
         saveAll: (settings: unknown) => invoke(IPC_CHANNELS.settings.saveAll, { settings }),
         listThemes: () => invoke(IPC_CHANNELS.settings.listThemes),
+        chooseWatchDirectory: (currentPath?: string) => invoke(IPC_CHANNELS.settings.chooseWatchDirectory, { currentPath }),
     },
     launch: {
         getPending: () => invoke(IPC_CHANNELS.launch.getPending),
