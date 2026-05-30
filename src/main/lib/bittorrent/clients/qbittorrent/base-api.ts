@@ -1,6 +1,7 @@
+import fs from "fs"
 import path from "path"
 
-const request = require("request")
+import request from "request"
 
 export const AUTH_ERRORS: Record<number, Error> = {
     403: new Error("User's IP is banned for too many failed login attempts"),
@@ -121,7 +122,7 @@ export abstract class QBittorrentBaseApi {
     }
 
     addTorrentFile(filepath: string, options: Record<string, any> | undefined, cb: (err?: any, body?: any) => void) {
-        const data = require("fs").readFileSync(filepath)
+        const data = fs.readFileSync(filepath)
         this.addTorrentFileContent(data, path.basename(filepath), options, cb)
     }
 

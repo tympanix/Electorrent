@@ -1,4 +1,4 @@
-const request = require("request")
+import request from "request"
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
 import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
@@ -110,7 +110,8 @@ export class DelugeRuntime implements BittorrentRuntime {
     }
 
     private uploadTorrentPayload(torrent: Uint8Array | Buffer, cb: (err: any, body?: any) => void) {
-        const { timeout: _timeout, ...uploadRequestOptions } = this.requestOptions
+        const uploadRequestOptions = { ...this.requestOptions }
+        delete uploadRequestOptions.timeout
         const uploadRequest = request({
             ...uploadRequestOptions,
             method: "POST",
