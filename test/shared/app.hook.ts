@@ -24,5 +24,6 @@ export function startApplicationHooks() {
 }
 
 export async function restartApplication(context: Mocha.Context) {
+  void context
   await browser.refresh()
 }

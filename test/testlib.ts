@@ -1,6 +1,6 @@
 import chai from "chai"
 import fs from "fs"
-import { describe, it, before, after, beforeEach, afterEach } from "mocha";
+import { describe, it, before, after, beforeEach } from "mocha";
 import path from "path";
 import { fileURLToPath } from "url";
 import chaiAsPromised from "chai-as-promised";
@@ -9,7 +9,7 @@ import * as e2e from "./e2e";
 import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
 import { TorrentClient } from "../src/renderer/app/bittorrent"
-import { browser, $, $$ } from '@wdio/globals'
+import { browser, $ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
 import { waitForModalClose, waitForModalOpen } from "./e2e/modal"
 
@@ -733,7 +733,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torrent uploaded with default options", async function() {
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
+            const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit()
             await torrent.waitForExist()
             await torrent.waitForStates([options.downloadLabel, "Seeding"])
@@ -741,7 +741,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("magnet link opens upload options", async function() {
-            let torrent = await this.app.uploadMagnetLink({ filename: this.torrentPath, askUploadOptions: true });
+            const torrent = await this.app.uploadMagnetLink({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalVisible()
             await this.app.uploadTorrentModalSubmit()
             await torrent.waitForExist()
@@ -766,7 +766,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           it("torrent uploaded in stopped state", async function() {
             this.timeout(30 * 1000)
             if (!options.client.uploadOptionsEnable?.startTorrent) return this.skip()
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
+            const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ start: false })
             await torrent.isExisting()
             await torrent.waitForState(options.stopLabel, { timeout: 20 * 1000 })
@@ -776,7 +776,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           it("torrent uploaded with name", async function() {
             if (!options.client.uploadOptionsEnable?.renameTorrent) return this.skip()
             const torrentName = "my awesome torrent"
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
+            const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ name: torrentName })
             await torrent.isExisting()
             await torrent.getColumn("decodedName").should.eventually.equal(torrentName)
@@ -789,7 +789,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             const saveLocation = options.saveLocation || "/tmp/custom/save/location"
             await backend.exec(["rm", "-rf", saveLocation])
             await backend.exec(["test", "!", "-e", saveLocation])
-            let torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
+            const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ saveLocation: saveLocation })
             await torrent.waitForExist({ timeout: 20 * 1000 })
             await browser.pause(20000)
@@ -801,4 +801,4 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
       })
     })
   })
-};
+}

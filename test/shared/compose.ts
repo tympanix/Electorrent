@@ -12,7 +12,7 @@ export class DockerComposeService {
   serviceName: string
   composeOptions: IDockerComposeOptions
 
-  constructor(composeDir: string | string[], { serviceName = "" } = {}) {
+  constructor(composeDir: string | string[], { serviceName = "" } = {}) {
     this.composeDir = Array.isArray(composeDir) ? path.join(...composeDir) : composeDir
     this.serviceName = serviceName || path.basename(this.composeDir)
     this.composeOptions = {

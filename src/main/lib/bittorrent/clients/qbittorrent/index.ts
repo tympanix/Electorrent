@@ -1,4 +1,4 @@
-const request = require("request")
+import request from "request"
 
 import type {
     BittorrentFileSelection,

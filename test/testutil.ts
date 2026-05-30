@@ -43,22 +43,22 @@ export async function waitForHttp(
   { url: string, statusCode?: number, timeout?: number, step?: number })
 {
   let timeSpent = 0;
-  while (true) {
-    if (timeSpent > timeout) {
-      throw new Error(`Timeout waiting for ${url}`);
-    }
+  while (timeSpent <= timeout) {
     try {
-      let res = await axios.get(url, {
+      const res = await axios.get(url, {
         timeout: 1000,
-        validateStatus: _ => true
+        validateStatus: () => true
       })
       if (res.status === statusCode) {
         return;
       }
-    } catch (err) { }
+    } catch {
+      // Retry until the timeout elapses.
+    }
     await sleep(step)
     timeSpent += step
   }
+  throw new Error(`Timeout waiting for ${url}`);
 }
 
 /**

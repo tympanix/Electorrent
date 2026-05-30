@@ -1,4 +1,4 @@
-const xmlrpc = require("@electorrent/xmlrpc")
+import xmlrpc from "@electorrent/xmlrpc"
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
 import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
