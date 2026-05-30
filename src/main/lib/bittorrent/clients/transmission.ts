@@ -58,6 +58,8 @@ const TRANSMISSION_FIELDS = [
     'recheckProgress',
     'secondsDownloading',
     'secondsSeeding',
+    'sequentialDownload',
+    'sequential_download',
     'seedIdleLimit',
     'seedIdleMode',
     'seedRatioLimit',
@@ -229,6 +231,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 isPrivate: torrent.isPrivate ?? null,
                 errorString: torrent.errorString ?? null,
                 queuePosition: torrent.queuePosition ?? null,
+                sequentialDownload: torrent.sequentialDownload ?? torrent.sequential_download ?? null,
             },
             files: files.map((file: any, index: number) => {
                 const stats = fileStats[index] || {}
@@ -278,42 +281,77 @@ export class TransmissionRuntime implements BittorrentRuntime {
 
         return this.removeEmpty({
             'download-dir': uploadOptions.saveLocation,
-            paused: !uploadOptions.startTorrent,
+            paused: uploadOptions.startTorrent === undefined ? undefined : !uploadOptions.startTorrent,
         })
     }
 
-    async addTorrentUrl(uri: string, uploadOptions?: Record<string, any>): Promise<void> {
-        const resp = await this.getHttpClient().post(this.url(), {
+    private getPostAddUploadOptions(uploadOptions?: Record<string, any>) {
+        if (!uploadOptions) {
+            return {}
+        }
+
+        const downloadLimit = uploadOptions.downloadSpeedLimit
+        const uploadLimit = uploadOptions.uploadSpeedLimit
+
+        return this.removeEmpty({
+            'peer-limit': uploadOptions.peerLimit,
+            sequentialDownload: uploadOptions.sequentialDownload,
+            sequential_download: uploadOptions.sequentialDownload,
+            downloadLimit,
+            downloadLimited: downloadLimit === undefined ? undefined : true,
+            uploadLimit,
+            uploadLimited: uploadLimit === undefined ? undefined : true,
+        })
+    }
+
+    private getAddedTorrentId(response: any) {
+        const added = response?.data?.arguments?.['torrent-added']
+            || response?.data?.arguments?.torrent_added
+
+        return typeof added?.id === 'number' ? added.id : null
+    }
+
+    private async addTorrent(argumentsData: Record<string, any>, uploadOptions?: Record<string, any>) {
+        const response = await this.getHttpClient().post(this.url(), {
             arguments: {
-                filename: uri,
+                ...argumentsData,
                 ...this.getUploadOptions(uploadOptions),
             },
             method: 'torrent-add',
         }, {})
 
-        if ('torrent-duplicate' in resp.data.arguments) {
+        if ('torrent-duplicate' in response.data.arguments) {
             throw new Error('Could not add duplicate torrent to transmission')
         }
-        if (resp.data.result !== 'success') {
-            throw new Error(`Could not add torrent to transmission: ${resp.data.result}`)
+        if (response.data.result !== 'success') {
+            throw new Error(`Could not add torrent to transmission: ${response.data.result}`)
         }
+
+        const postAddOptions = this.getPostAddUploadOptions(uploadOptions)
+        const addedTorrentId = this.getAddedTorrentId(response)
+        if (Object.keys(postAddOptions).length === 0) {
+            return
+        }
+        if (addedTorrentId == null) {
+            throw new Error('Transmission did not return the added torrent id')
+        }
+
+        await this.doAction('torrent-set', [], {
+            ids: [addedTorrentId],
+            ...postAddOptions,
+        }).then((setResponse) => this.ensureSuccess(setResponse)).then(() => undefined)
+    }
+
+    async addTorrentUrl(uri: string, uploadOptions?: Record<string, any>): Promise<void> {
+        await this.addTorrent({
+            filename: uri,
+        }, uploadOptions)
     }
 
     async uploadTorrent(buffer: Uint8Array, _filename: string, uploadOptions?: Record<string, any>): Promise<void> {
-        const resp = await this.getHttpClient().post(this.url(), {
-            arguments: {
-                metainfo: Buffer.from(buffer).toString('base64'),
-                ...this.getUploadOptions(uploadOptions),
-            },
-            method: 'torrent-add',
-        }, {})
-
-        if ('torrent-duplicate' in resp.data.arguments) {
-            throw new Error('Could not add duplicate torrent to transmission')
-        }
-        if (resp.data.result !== 'success') {
-            throw new Error(`Could not add torrent to transmission: ${resp.data.result}`)
-        }
+        await this.addTorrent({
+            metainfo: Buffer.from(buffer).toString('base64'),
+        }, uploadOptions)
     }
 
     private doAction(command: string, hashes: string[], mutator?: string | Record<string, any>, value?: any) {

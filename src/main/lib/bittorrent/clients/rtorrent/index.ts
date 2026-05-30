@@ -39,6 +39,14 @@ export class RtorrentRuntime implements BittorrentRuntime {
         await this.call(method, params)
     }
 
+    private getLoadMethod(method: "url" | "file", options?: Record<string, any>) {
+        const shouldStart = options?.startTorrent !== false
+        if (method === "url") {
+            return shouldStart ? "load.start" : "load.normal"
+        }
+        return shouldStart ? "load.raw_start" : "load.raw"
+    }
+
     private async getMulticall(method: string, params: any[], commands: Record<string, string>): Promise<Record<string, any>[]> {
         const commandParams = [...params, ...Object.values(commands).map(postfix)]
         const data = await this.call<any[][]>(method, commandParams)
@@ -280,21 +288,23 @@ export class RtorrentRuntime implements BittorrentRuntime {
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
+        const method = this.getLoadMethod("url", options)
         if (options?.saveLocation) {
-            await this.loadTorrentWithSaveLocation("load.start", uri, options.saveLocation)
+            await this.loadTorrentWithSaveLocation(method, uri, options.saveLocation)
             return
         }
 
-        await this.call("load.start", ["", uri])
+        await this.call(method, ["", uri])
     }
 
     async uploadTorrent(buffer: Uint8Array, _filename: string, options?: Record<string, any>): Promise<void> {
+        const method = this.getLoadMethod("file", options)
         if (options?.saveLocation) {
-            await this.loadTorrentWithSaveLocation("load.raw_start", buffer, options.saveLocation)
+            await this.loadTorrentWithSaveLocation(method, buffer, options.saveLocation)
             return
         }
 
-        await this.call("load.raw_start", ["", Buffer.from(buffer)])
+        await this.call(method, ["", Buffer.from(buffer)])
     }
 
     async start(hashes: string[]): Promise<void> {

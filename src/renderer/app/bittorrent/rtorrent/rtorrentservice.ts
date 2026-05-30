@@ -10,6 +10,7 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     public supportsTorrentDetails = true
     public uploadOptionsEnable = {
       saveLocation: true,
+      startTorrent: true,
     }
 
     connect(server): Promise<void> {

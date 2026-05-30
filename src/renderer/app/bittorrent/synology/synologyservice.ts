@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { SynologyTorrent } from "./synologytorrent";
 import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
@@ -6,6 +6,9 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
     public name = 'Synology Download Station'
     public id = 'downloadstation'
     public supportsSetLocation = true
+    public uploadOptionsEnable = {
+        saveLocation: true,
+    }
 
     connect(server): Promise<void> {
         return connect(server)
@@ -33,12 +36,12 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
         return "/webapi";
     }
 
-    addTorrentUrl(magnet: string): Promise<void> {
-        return addTorrentUrl(magnet)
+    addTorrentUrl(magnet: string, options?: TorrentUploadOptions): Promise<void> {
+        return addTorrentUrl(magnet, options)
     }
 
-    uploadTorrent(buffer: Uint8Array, filename?: string): Promise<void> {
-        return uploadTorrent(buffer, filename || "upload.torrent")
+    uploadTorrent(buffer: Uint8Array, filename?: string, options?: TorrentUploadOptions): Promise<void> {
+        return uploadTorrent(buffer, filename || "upload.torrent", options)
     }
 
     start(torrents: SynologyTorrent[]): Promise<void> {

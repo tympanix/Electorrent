@@ -92,6 +92,7 @@ export class SynologyRuntime implements BittorrentRuntime {
                         version: this.dlVersion,
                         method: 'create',
                         uri: args[0],
+                        destination: args[1],
                     },
                     timeout: this.timeout,
                 }
@@ -194,19 +195,28 @@ export class SynologyRuntime implements BittorrentRuntime {
         return response.data.data
     }
 
-    async addTorrentUrl(uri: string): Promise<void> {
-        const response = await this.http.get(`${serverUrl(this.server)}${this.taskPath}`, this.config('tUrl', [uri]))
+    private getUploadOptions(options?: Record<string, any>) {
+        return {
+            destination: options?.saveLocation,
+        }
+    }
+
+    async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
+        const response = await this.http.get(`${serverUrl(this.server)}${this.taskPath}`, this.config('tUrl', [uri, this.getUploadOptions(options).destination]))
         this.handleError(response)
         if (!this.isSuccess(response.data)) {
             throw new Error(`Create a DownloadStation task with the provided URL failed. Error: ${response.data.error}`)
         }
     }
 
-    async uploadTorrent(buffer: Uint8Array, filename?: string): Promise<void> {
+    async uploadTorrent(buffer: Uint8Array, filename?: string, options?: Record<string, any>): Promise<void> {
         const formData = new FormData()
         formData.append('api', API_TASK)
         formData.append('version', this.dlVersion)
         formData.append('method', 'create')
+        if (options?.saveLocation) {
+            formData.append('destination', options.saveLocation)
+        }
         formData.append('file', Buffer.from(buffer), {
             filename: filename || 'upload.torrent',
             contentType: 'application/x-bittorrent',

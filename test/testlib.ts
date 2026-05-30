@@ -829,6 +829,68 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await torrent.delete()
           })
 
+          it("torrent uploaded with peer limit", async function() {
+            this.timeout(30 * 1000)
+            if (!options.client.uploadOptionsEnable?.peerLimit) return this.skip()
+            const peerLimit = 8
+            const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
+            await this.app.uploadTorrentModalSubmit({ peerLimit })
+            await torrent.waitForExist({ timeout: 20 * 1000 })
+            await torrent.waitForStates([options.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
+            await torrent.openDetailsPanel()
+            await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("connections-limit")) === String(peerLimit), {
+              timeout: 10 * 1000,
+              timeoutMsg: `Expected peer limit to become ${peerLimit}`,
+            })
+            await torrent.closeDetailsPanel()
+            await torrent.delete()
+          })
+
+          it("torrent uploaded with speed limits", async function() {
+            this.timeout(30 * 1000)
+            if (!options.client.uploadOptionsEnable?.downloadSpeedLimit && !options.client.uploadOptionsEnable?.uploadSpeedLimit) return this.skip()
+            const downloadSpeedLimit = 111
+            const uploadSpeedLimit = 37
+            const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
+            await this.app.uploadTorrentModalSubmit({
+              downloadSpeedLimit: options.client.uploadOptionsEnable?.downloadSpeedLimit ? downloadSpeedLimit : undefined,
+              uploadSpeedLimit: options.client.uploadOptionsEnable?.uploadSpeedLimit ? uploadSpeedLimit : undefined,
+            })
+            await torrent.waitForExist({ timeout: 20 * 1000 })
+            await torrent.waitForStates([options.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
+            await torrent.openDetailsPanel()
+            if (options.client.uploadOptionsEnable?.downloadSpeedLimit) {
+              await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("download-limit")) === String(downloadSpeedLimit), {
+                timeout: 10 * 1000,
+                timeoutMsg: `Expected download limit to become ${downloadSpeedLimit}`,
+              })
+            }
+            if (options.client.uploadOptionsEnable?.uploadSpeedLimit) {
+              await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("upload-limit")) === String(uploadSpeedLimit), {
+                timeout: 10 * 1000,
+                timeoutMsg: `Expected upload limit to become ${uploadSpeedLimit}`,
+              })
+            }
+            await torrent.closeDetailsPanel()
+            await torrent.delete()
+          })
+
+          it("torrent uploaded with sequential download", async function() {
+            this.timeout(30 * 1000)
+            if (!options.client.uploadOptionsEnable?.sequentialDownload) return this.skip()
+            const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
+            await this.app.uploadTorrentModalSubmit({ sequentialDownload: true })
+            await torrent.waitForExist({ timeout: 20 * 1000 })
+            await torrent.waitForStates([options.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
+            await torrent.openDetailsPanel()
+            await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("sequential-download")) === "Yes", {
+              timeout: 10 * 1000,
+              timeoutMsg: "Expected sequential download to be enabled",
+            })
+            await torrent.closeDetailsPanel()
+            await torrent.delete()
+          })
+
           it("torrent uploaded with name", async function() {
             if (!options.client.uploadOptionsEnable?.renameTorrent) return this.skip()
             const torrentName = "my awesome torrent"
