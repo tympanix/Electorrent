@@ -161,7 +161,38 @@ export class App {
     return modal
   }
 
-  async uploadTorrentModalSubmit(options?: { label?: string, start?: boolean, name?: string, saveLocation?: string }) {
+  private async setUploadToggle(modal: WebdriverIO.Element, action: string, enabled: boolean) {
+    const toggle = modal.$(`div[data-action="${action}"]`)
+    const toggleInput = toggle.$("input")
+    await toggle.waitForDisplayed()
+    await toggleInput.waitForExist()
+    await toggleInput.scrollIntoView()
+    if (await toggleInput.isSelected() !== enabled) {
+      await toggleInput.click()
+      await browser.waitUntil(async () => (await toggleInput.isSelected()) === enabled, {
+        timeout: 5_000,
+        timeoutMsg: `Expected ${action} toggle to become ${enabled}`,
+      })
+    }
+  }
+
+  private async setUploadNumberInput(modal: WebdriverIO.Element, action: string, value: number) {
+    const input = modal.$(`input[data-action='${action}']`)
+    await input.waitForDisplayed()
+    await input.setValue(String(value))
+  }
+
+  async uploadTorrentModalSubmit(options?: {
+    label?: string
+    start?: boolean
+    name?: string
+    saveLocation?: string
+    peerLimit?: number
+    sequentialDownload?: boolean
+    firstAndLastPiecePrio?: boolean
+    downloadSpeedLimit?: number
+    uploadSpeedLimit?: number
+  }) {
     const modal = await this.uploadTorrentModalVisible()
     await browser.pause(200)
 
@@ -178,18 +209,27 @@ export class App {
     }
 
     if (options?.start !== undefined) {
-      const startToggle = modal.$(`div[data-action="start-torrent"]`)
-      const startToggleInput = startToggle.$("input")
-      await startToggle.waitForDisplayed()
-      await startToggleInput.waitForExist()
-      await startToggleInput.scrollIntoView()
-      if (await startToggleInput.isSelected() !== options.start) {
-        await startToggleInput.click()
-        await browser.waitUntil(async () => (await startToggleInput.isSelected()) === options.start, {
-          timeout: 5_000,
-          timeoutMsg: `Expected start torrent toggle to become ${options.start}`,
-        })
-      }
+      await this.setUploadToggle(modal, "start-torrent", options.start)
+    }
+
+    if (options?.sequentialDownload !== undefined) {
+      await this.setUploadToggle(modal, "sequential-download", options.sequentialDownload)
+    }
+
+    if (options?.firstAndLastPiecePrio !== undefined) {
+      await this.setUploadToggle(modal, "first-last-piece-prio", options.firstAndLastPiecePrio)
+    }
+
+    if (options?.downloadSpeedLimit !== undefined) {
+      await this.setUploadNumberInput(modal, "download-speed-limit", options.downloadSpeedLimit)
+    }
+
+    if (options?.uploadSpeedLimit !== undefined) {
+      await this.setUploadNumberInput(modal, "upload-speed-limit", options.uploadSpeedLimit)
+    }
+
+    if (options?.peerLimit !== undefined) {
+      await this.setUploadNumberInput(modal, "peer-limit", options.peerLimit)
     }
 
     if (options?.label) {

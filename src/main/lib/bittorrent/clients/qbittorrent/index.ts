@@ -244,10 +244,11 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 reannounce: properties.reannounce ?? null,
                 seeds: properties.seeds ?? null,
                 seedsTotal: properties.seeds_total ?? null,
+                sequentialDownload: properties.seq_dl ?? null,
                 totalSize: properties.total_size ?? null,
                 averageUploadSpeed: properties.up_speed_avg ?? null,
                 uploadSpeed: properties.up_speed ?? null,
-                isPrivate: properties.isPrivate ?? null,
+                isPrivate: properties.is_private ?? properties.isPrivate ?? null,
             },
             files: files.map((file: any, idx: number) => {
                 const priority = file.priority != null ? Number(file.priority) : undefined

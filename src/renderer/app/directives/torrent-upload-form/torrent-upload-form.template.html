@@ -60,15 +60,22 @@
                 <div class="field" ng-if="ctl.optionsEnabled.downloadSpeedLimit">
                     <div class="ui left icon input">
                         <i class="arrow circle down icon"></i>
-                        <input id="upload-options-downloadspeedlimit" type="number" placeholder="Download speed limit (KB/s)" ng-model="options.downloadSpeedLimit">
+                        <input data-action="download-speed-limit" id="upload-options-downloadspeedlimit" type="number" placeholder="Download speed limit (KB/s)" ng-model="options.downloadSpeedLimit">
                     </div>
                 </div>
                 <div class="field" ng-if="ctl.optionsEnabled.uploadSpeedLimit">
                     <div class="ui left icon input">
                         <i class="arrow circle up icon"></i>
-                        <input id="upload-options-uploadspeedlimit" type="number" placeholder="Upload speed limit (KB/s)" ng-model="options.uploadSpeedLimit">
+                        <input data-action="upload-speed-limit" id="upload-options-uploadspeedlimit" type="number" placeholder="Upload speed limit (KB/s)" ng-model="options.uploadSpeedLimit">
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="field" ng-if="ctl.optionsEnabled.peerLimit">
+            <div class="ui left icon input">
+                <i class="users icon"></i>
+                <input data-action="peer-limit" id="upload-options-peerlimit" type="number" placeholder="Peer limit" ng-model="options.peerLimit">
             </div>
         </div>
 

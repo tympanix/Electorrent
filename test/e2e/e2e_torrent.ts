@@ -143,6 +143,15 @@ export class Torrent {
     await panel.waitForDisplayed({ timeout: this.timeout, reverse: true })
   }
 
+  async getDetailsFieldValue(fieldId: string) {
+    const panel = $("[data-role='torrent-details-panel']")
+    await panel.waitForDisplayed({ timeout: this.timeout })
+
+    const field = panel.$(`[data-role='torrent-details-field'][data-field-id='${fieldId}'] .value`)
+    await field.waitForDisplayed({ timeout: this.timeout })
+    return await field.getText()
+  }
+
   async setLocation(location: string) {
     const modal = await this.openSetLocationModal();
     const input = modal.$("input[name='location']");

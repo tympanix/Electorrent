@@ -25,6 +25,7 @@ export interface TorrentUploadOptions {
     renameTorrent?: string
     category?: string
     startTorrent?: boolean
+    peerLimit?: number
     skipCheck?: boolean
     sequentialDownload?: boolean
     firstAndLastPiecePrio?: boolean

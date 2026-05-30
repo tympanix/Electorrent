@@ -9,6 +9,7 @@ const DELUGE_TORRENT_FIELDS = [
     "download_payload_rate",
     "eta",
     "is_auto_managed",
+    "max_connections",
     "max_download_speed",
     "max_upload_speed",
     "name",
@@ -73,6 +74,11 @@ export class DelugeRuntime implements BittorrentRuntime {
         return Object.fromEntries(
             Object.entries({
                 download_location: options.saveLocation,
+                add_paused: options.startTorrent === undefined ? undefined : !options.startTorrent,
+                max_connections: options.peerLimit,
+                max_download_speed: options.downloadSpeedLimit,
+                max_upload_speed: options.uploadSpeedLimit,
+                prioritize_first_last_pieces: options.firstAndLastPiecePrio,
             }).filter(([, value]) => value !== undefined && value !== null),
         )
     }
@@ -209,8 +215,11 @@ export class DelugeRuntime implements BittorrentRuntime {
                 pieceSize: details.piece_length ?? null,
                 totalDownloaded: details.total_done ?? null,
                 totalUploaded: details.total_uploaded ?? null,
+                uploadLimit: details.max_upload_speed ?? null,
+                downloadLimit: details.max_download_speed ?? null,
                 timeElapsed: details.active_time ?? null,
                 seedingTime: details.seeding_time ?? null,
+                connectionsLimit: details.max_connections ?? null,
                 shareRatio: details.ratio ?? null,
                 additionDate: details.time_added ?? null,
                 completionDate: details.completed_time ?? null,

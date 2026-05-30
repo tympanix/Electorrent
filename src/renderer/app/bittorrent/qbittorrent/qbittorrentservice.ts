@@ -214,6 +214,8 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
           this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
           this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
           this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
+          this.createTorrentDetailsField("download-limit", "Download Limit (KB/s)", this.toNumber(info.downloadLimit) ?? this.toNumber(torrent.downLimit), "number"),
+          this.createTorrentDetailsField("upload-limit", "Upload Limit (KB/s)", this.toNumber(info.uploadLimit) ?? this.toNumber(torrent.upLimit), "number"),
           this.createTorrentDetailsField("download-speed-avg", "Average Download Speed", this.toNumber(info.averageDownloadSpeed), "speed"),
           this.createTorrentDetailsField("upload-speed-avg", "Average Upload Speed", this.toNumber(info.averageUploadSpeed), "speed"),
           this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
@@ -222,9 +224,18 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         this.createTorrentDetailsSection("content", "Content", [
           this.createTorrentDetailsField("piece-size", "Piece Size", this.toNumber(info.pieceSize), "bytes"),
           this.createTorrentDetailsField("pieces", "Pieces", piecesHave != null && piecesTotal != null ? `${piecesHave} / ${piecesTotal}` : null),
+          this.createTorrentDetailsField("sequential-download", "Sequential Download", (info.sequentialDownload as boolean | null) ?? torrent.sequentialDownload, "boolean"),
           this.createTorrentDetailsField("private", "Private Torrent", info.isPrivate as boolean | null, "boolean"),
           this.createTorrentDetailsField("created-by", "Created By", info.createdBy as string | null),
           this.createTorrentDetailsField("comment", "Comment", info.comment as string | null, "text", { multiline: true }),
+        ]),
+        this.createTorrentDetailsSection("swarm", "Swarm", [
+          this.createTorrentDetailsField("connections", "Connected Peers", this.toNumber(info.connections), "number"),
+          this.createTorrentDetailsField("connections-limit", "Peer Limit", this.toNumber(info.connectionsLimit) ?? this.toNumber(torrent.connectionsLimit), "number"),
+          this.createTorrentDetailsField("seeds", "Connected Seeds", this.toNumber(info.seeds) ?? torrent.seedsConnected, "number"),
+          this.createTorrentDetailsField("seeds-total", "Total Seeds", this.toNumber(info.seedsTotal) ?? torrent.seedsInSwarm, "number"),
+          this.createTorrentDetailsField("peers", "Connected Peers", this.toNumber(info.peers) ?? torrent.peersConnected, "number"),
+          this.createTorrentDetailsField("peers-total", "Total Peers", this.toNumber(info.peersTotal) ?? torrent.peersInSwarm, "number"),
         ]),
         this.createTorrentDetailsSection("dates", "Dates", [
           this.createTorrentDetailsField("added-on", "Added On", this.toEpochSeconds(info.additionDate), "epoch"),

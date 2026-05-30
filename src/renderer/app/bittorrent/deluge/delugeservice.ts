@@ -9,6 +9,11 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
     public supportsTorrentDetails = true
     public uploadOptionsEnable = {
         saveLocation: true,
+        startTorrent: true,
+        peerLimit: true,
+        firstAndLastPiecePrio: true,
+        downloadSpeedLimit: true,
+        uploadSpeedLimit: true,
     }
 
     connect(server): Promise<void> {
@@ -100,6 +105,8 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
                 this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
                 this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
                 this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
+                this.createTorrentDetailsField("download-limit", "Download Limit (KB/s)", this.toNumber(info.downloadLimit), "number"),
+                this.createTorrentDetailsField("upload-limit", "Upload Limit (KB/s)", this.toNumber(info.uploadLimit), "number"),
                 this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
                 this.createTorrentDetailsField("active-time", "Active Time", this.toNumber(info.timeElapsed), "number"),
                 this.createTorrentDetailsField("seeding-time", "Seeding Time", this.toNumber(info.seedingTime), "number"),
@@ -109,6 +116,7 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
                 this.createTorrentDetailsField("seeds-total", "Total Seeds", this.toNumber(info.seedsTotal), "number"),
                 this.createTorrentDetailsField("peers", "Connected Peers", this.toNumber(info.peers), "number"),
                 this.createTorrentDetailsField("peers-total", "Total Peers", this.toNumber(info.peersTotal), "number"),
+                this.createTorrentDetailsField("connections-limit", "Peer Limit", this.toNumber(info.connectionsLimit), "number"),
                 this.createTorrentDetailsField("copies", "Distributed Copies", this.toNumber(info.distributedCopies), "number"),
                 this.createTorrentDetailsField("tracker", "Tracker", info.trackerHost as string | null),
             ]),

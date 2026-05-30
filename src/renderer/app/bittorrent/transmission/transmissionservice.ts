@@ -15,6 +15,10 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     public uploadOptionsEnable: TorrentUploadOptionsEnable = {
       saveLocation: true,
       startTorrent: true,
+      peerLimit: true,
+      sequentialDownload: true,
+      downloadSpeedLimit: true,
+      uploadSpeedLimit: true,
     }
 
     connect(server): Promise<void> {
@@ -138,11 +142,14 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
           this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
           this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
           this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
+          this.createTorrentDetailsField("download-limit", "Download Limit (KB/s)", this.toNumber(info.downloadLimit), "number"),
+          this.createTorrentDetailsField("upload-limit", "Upload Limit (KB/s)", this.toNumber(info.uploadLimit), "number"),
           this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
         ]),
         this.createTorrentDetailsSection("content", "Content", [
           this.createTorrentDetailsField("piece-size", "Piece Size", this.toNumber(info.pieceSize), "bytes"),
           this.createTorrentDetailsField("pieces", "Pieces", this.toNumber(info.piecesTotal), "number"),
+          this.createTorrentDetailsField("sequential-download", "Sequential Download", info.sequentialDownload as boolean | null, "boolean"),
           this.createTorrentDetailsField("private", "Private Torrent", info.isPrivate as boolean | null, "boolean"),
           this.createTorrentDetailsField("created-by", "Created By", info.createdBy as string | null),
           this.createTorrentDetailsField("comment", "Comment", info.comment as string | null, "text", { multiline: true }),
