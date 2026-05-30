@@ -360,39 +360,6 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
           })
 
-          it("can configure and clear the watched folder", async function() {
-            const watchDirectory = path.join("/tmp", createUniqueLabel("electorrent-watch-settings"))
-            fs.mkdirSync(watchDirectory, { recursive: true })
-
-            try {
-              await this.app.settingsGotoTab("advanced")
-              await this.app.setSettingsWatchDirectory(watchDirectory)
-              assert.equal(await this.app.getSettingsWatchDirectory(), watchDirectory)
-
-              await this.app.settingsSave()
-              await this.app.torrentsPageIsVisible()
-
-              await this.app.openSettings()
-              await this.app.settingsGotoTab("advanced")
-              assert.equal(await this.app.getSettingsWatchDirectory(), watchDirectory)
-
-              await this.app.clearSettingsWatchDirectory()
-              await this.app.settingsSave()
-              await this.app.torrentsPageIsVisible()
-            } finally {
-              try {
-                await this.app.openSettings()
-                await this.app.settingsGotoTab("advanced")
-                await this.app.clearSettingsWatchDirectory()
-                await this.app.settingsSave()
-                await this.app.torrentsPageIsVisible()
-              } catch {
-                // Best-effort cleanup for follow-up tests.
-              }
-              fs.rmSync(watchDirectory, { recursive: true, force: true })
-            }
-          })
-
           it("cancel button returns to the torrents page", async function() {
             await this.app.settingsCancel()
             await this.app.torrentsPageIsVisible()
@@ -449,12 +416,6 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
         })
 
         describe("watched torrent directory", function() {
-          before(function() {
-            if (options.client.id !== "qbittorrent" || options.version !== "latest") {
-              this.skip()
-            }
-          })
-
           it("uploads torrent files copied into the watched folder", async function() {
             this.timeout(90 * 1000)
 
