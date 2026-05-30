@@ -1,13 +1,20 @@
 import fs, { type FSWatcher } from 'fs'
 import path from 'path'
 
+import { app, Notification, type BrowserWindow } from 'electron'
+
+import { bittorrentManager } from '@main/lib/bittorrent'
+import { IPC_CHANNELS } from '@shared/ipc'
 import type { AppSettings, PendingTorrentUploadFile } from '@shared/ipc-contract'
 import logger from './logger'
 import { serializeTorrentFile } from './torrents'
 
 interface TorrentFileWatcherOptions {
     getSettings: () => Pick<AppSettings, 'watchDirectory' | 'alwaysPromptUploadOptions'>
-    onTorrentFile: (file: PendingTorrentUploadFile) => void | Promise<void>
+    getWindow: () => BrowserWindow | null
+    isRendererLoaded: () => boolean
+    showOrCreateTorrentWindow: () => void
+    showTorrentWindow: () => void
 }
 
 export class TorrentFileWatcher {
@@ -15,6 +22,8 @@ export class TorrentFileWatcher {
     private watchedDirectory = ''
     private pendingFiles = new Map<string, NodeJS.Timeout>()
     private processedFiles = new Map<string, string>()
+    private pendingPromptedTorrentFiles: PendingTorrentUploadFile[] = []
+    private pendingSilentWatcherFiles: PendingTorrentUploadFile[] = []
 
     constructor(private readonly options: TorrentFileWatcherOptions) {}
 
@@ -81,6 +90,25 @@ export class TorrentFileWatcher {
         }
     }
 
+    consumePendingPromptedTorrentFiles() {
+        return this.pendingPromptedTorrentFiles.splice(0).map((file) => this.clonePendingTorrentFile(file))
+    }
+
+    async flushPendingSilentWatcherFiles() {
+        const window = this.options.getWindow()
+        if (!window || window.isDestroyed() || !bittorrentManager.hasSession(window.webContents)) {
+            return
+        }
+
+        while (this.pendingSilentWatcherFiles.length > 0) {
+            const file = this.pendingSilentWatcherFiles.shift()
+            if (!file) {
+                continue
+            }
+            await this.uploadWatchedTorrentSilently(file)
+        }
+    }
+
     private async processFile(filePath: string) {
         const settings = this.options.getSettings()
         const askUploadOptions = settings.alwaysPromptUploadOptions === true
@@ -99,7 +127,7 @@ export class TorrentFileWatcher {
             }
 
             this.processedFiles.set(filePath, signature)
-            await this.options.onTorrentFile(file)
+            await this.handleTorrentFile(file)
         } catch (error) {
             if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
                 return
@@ -109,6 +137,79 @@ export class TorrentFileWatcher {
                 filePath,
                 error,
             })
+        }
+    }
+
+    private clonePendingTorrentFile(file: PendingTorrentUploadFile): PendingTorrentUploadFile {
+        return {
+            type: 'file',
+            filename: file.filename,
+            data: new Uint8Array(file.data),
+            askUploadOptions: !!file.askUploadOptions,
+        }
+    }
+
+    private showNativeNotification(title: string, body: string) {
+        if (app.commandLine.hasSwitch('headless') || !Notification.isSupported()) {
+            return
+        }
+
+        try {
+            new Notification({ title, body }).show()
+        } catch (error) {
+            logger.error('Failed to show native notification', { title, body, error })
+        }
+    }
+
+    private queuePendingPromptedTorrentFiles(files: PendingTorrentUploadFile[]) {
+        this.pendingPromptedTorrentFiles.push(...files.map((file) => this.clonePendingTorrentFile(file)))
+    }
+
+    private async handleTorrentFile(file: PendingTorrentUploadFile) {
+        if (file.askUploadOptions) {
+            this.deliverPromptedTorrentFiles([file])
+            return
+        }
+
+        await this.uploadWatchedTorrentSilently(file)
+    }
+
+    private deliverPromptedTorrentFiles(files: PendingTorrentUploadFile[]) {
+        if (files.length === 0) {
+            return
+        }
+
+        const window = this.options.getWindow()
+        if (!this.options.isRendererLoaded() || !window || window.isDestroyed()) {
+            this.queuePendingPromptedTorrentFiles(files)
+            this.options.showOrCreateTorrentWindow()
+            return
+        }
+
+        this.options.showTorrentWindow()
+        window.webContents.send(IPC_CHANNELS.launch.torrentFiles, files.map((file) => this.clonePendingTorrentFile(file)))
+    }
+
+    private async uploadWatchedTorrentSilently(file: PendingTorrentUploadFile) {
+        const window = this.options.getWindow()
+
+        if (!window || window.isDestroyed() || !bittorrentManager.hasSession(window.webContents)) {
+            this.pendingSilentWatcherFiles.push(this.clonePendingTorrentFile(file))
+            return
+        }
+
+        try {
+            await bittorrentManager.uploadTorrent(window.webContents, {
+                data: file.data,
+                filename: file.filename,
+            })
+            this.showNativeNotification('Torrent added', `${file.filename} is downloading in Electorrent`)
+        } catch (error) {
+            logger.error('Failed to upload watched torrent file', {
+                filename: file.filename,
+                error,
+            })
+            this.showNativeNotification('Torrent add failed', `Could not add ${file.filename}`)
         }
     }
 }
