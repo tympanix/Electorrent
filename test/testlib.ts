@@ -796,6 +796,56 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await torrent.delete()
           })
 
+          it("queues multiple main process upload requests with advanced options", async function() {
+            this.timeout(90 * 1000)
+
+            const torrentPaths: string[] = []
+            const torrents: e2e.Torrent[] = []
+
+            try {
+              for (let index = 1; index <= 3; index += 1) {
+                const torrentPath = await createTorrentFile(tracker, {
+                  fileSize: 1,
+                  torrentName: createUniqueLabel(`queued-upload-${index}`),
+                })
+                torrentPaths.push(torrentPath)
+
+                const torrent = await this.app.uploadTorrentFromMainProcess({
+                  filename: torrentPath,
+                  askUploadOptions: true,
+                })
+                torrents.push(torrent)
+
+                await this.app.uploadTorrentModalPendingCountShouldBe(index)
+                await this.app.uploadTorrentModalCurrentLabelShouldBe(path.basename(torrentPaths[0]))
+              }
+
+              for (let index = 0; index < torrents.length; index += 1) {
+                const remainingUploads = torrents.length - index
+                await this.app.uploadTorrentModalPendingCountShouldBe(remainingUploads)
+                await this.app.uploadTorrentModalCurrentLabelShouldBe(path.basename(torrentPaths[index]))
+
+                await this.app.uploadTorrentModalSubmit(undefined, index < torrents.length - 1
+                  ? { expectedRemainingCount: remainingUploads - 1 }
+                  : undefined)
+
+                if (index < torrents.length - 1) {
+                  await this.app.uploadTorrentModalCurrentLabelShouldBe(path.basename(torrentPaths[index + 1]))
+                }
+              }
+
+              for (const torrent of torrents) {
+                await torrent.waitForExist({ timeout: 20 * 1000 })
+              }
+            } finally {
+              for (const torrent of torrents) {
+                if (await torrent.isExisting()) {
+                  await torrent.delete()
+                }
+              }
+            }
+          })
+
           it("magnet link opens upload options", async function() {
             const torrent = await this.app.uploadMagnetLink({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalVisible()
