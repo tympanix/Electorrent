@@ -2,6 +2,7 @@ import {
     app,
     BrowserWindow,
     Menu,
+    Notification,
     nativeImage,
     session,
     shell,
@@ -16,6 +17,7 @@ import path from 'path'
 import yargs from 'yargs'
 
 import startup from '@main/lib/startup'
+import type { PendingTorrentUploadFile } from '@shared/ipc-contract'
 
 declare const __non_webpack_require__: NodeRequire | undefined
 
@@ -42,6 +44,7 @@ async function bootstrap() {
         certificates,
         ipcHandlers,
         menu,
+        { TorrentFileWatcher },
     ] = await Promise.all([
         import('@shared/ipc'),
         import('@main/lib/bittorrent'),
@@ -53,6 +56,7 @@ async function bootstrap() {
         import('@main/lib/certificates'),
         import('@main/lib/ipc'),
         import('@main/lib/menu'),
+        import('@main/lib/torrent-file-watcher'),
     ])
 
     logger.debug('Starting Electorrent in debug mode')
@@ -74,10 +78,101 @@ async function bootstrap() {
     let torrentWindow: BrowserWindow | null
     let tray: Tray | null = null
     let isQuitting = false
+    let rendererLoaded = false
     const pendingLaunchPayload = {
         magnets: [] as string[],
         torrentFilePaths: [] as string[],
+        torrentFiles: [] as PendingTorrentUploadFile[],
     }
+    const pendingSilentWatcherFiles: PendingTorrentUploadFile[] = []
+
+    const clonePendingTorrentFile = (file: PendingTorrentUploadFile): PendingTorrentUploadFile => ({
+        type: 'file',
+        filename: file.filename,
+        data: new Uint8Array(file.data),
+        askUploadOptions: !!file.askUploadOptions,
+    })
+
+    function showNativeNotification(title: string, body: string) {
+        if (app.commandLine.hasSwitch('headless') || !Notification.isSupported()) {
+            return
+        }
+
+        try {
+            new Notification({ title, body }).show()
+        } catch (error) {
+            logger.error('Failed to show native notification', { title, body, error })
+        }
+    }
+
+    function queuePendingTorrentFiles(files: PendingTorrentUploadFile[]) {
+        pendingLaunchPayload.torrentFiles.push(...files.map(clonePendingTorrentFile))
+    }
+
+    async function uploadWatchedTorrentSilently(file: PendingTorrentUploadFile) {
+        const window = torrentWindow
+
+        if (!window || window.isDestroyed() || !bittorrentManager.hasSession(window.webContents)) {
+            pendingSilentWatcherFiles.push(clonePendingTorrentFile(file))
+            return
+        }
+
+        try {
+            await bittorrentManager.uploadTorrent(window.webContents, {
+                data: file.data,
+                filename: file.filename,
+            })
+            showNativeNotification('Torrent added', `${file.filename} is downloading in Electorrent`)
+        } catch (error) {
+            logger.error('Failed to upload watched torrent file', {
+                filename: file.filename,
+                error,
+            })
+            showNativeNotification('Torrent add failed', `Could not add ${file.filename}`)
+        }
+    }
+
+    async function flushPendingSilentWatcherFiles() {
+        const window = torrentWindow
+        if (!window || window.isDestroyed() || !bittorrentManager.hasSession(window.webContents)) {
+            return
+        }
+
+        while (pendingSilentWatcherFiles.length > 0) {
+            const file = pendingSilentWatcherFiles.shift()
+            if (!file) {
+                continue
+            }
+            await uploadWatchedTorrentSilently(file)
+        }
+    }
+
+    function deliverPromptedTorrentFiles(files: PendingTorrentUploadFile[]) {
+        if (files.length === 0) {
+            return
+        }
+
+        if (!rendererLoaded || !torrentWindow || torrentWindow.isDestroyed()) {
+            queuePendingTorrentFiles(files)
+            showOrCreateTorrentWindow()
+            return
+        }
+
+        showTorrentWindow()
+        torrentWindow.webContents.send(IPC_CHANNELS.launch.torrentFiles, files.map(clonePendingTorrentFile))
+    }
+
+    const torrentFileWatcher = new TorrentFileWatcher({
+        getSettings: () => settings.getAllSettings(),
+        onTorrentFile: async (file) => {
+            if (file.askUploadOptions) {
+                deliverPromptedTorrentFiles([file])
+                return
+            }
+
+            await uploadWatchedTorrentSilently(file)
+        },
+    })
 
     function shouldUseTray() {
         return !app.commandLine.hasSwitch('headless') && settings.get('closeToTray') !== false
@@ -165,6 +260,7 @@ async function bootstrap() {
         Object.assign(windowSettings, settings.get('windowsize'))
 
         torrentWindow = new BrowserWindow(windowSettings)
+        rendererLoaded = false
         electorrent.setWindow(torrentWindow)
         menu.setWindow(torrentWindow)
 
@@ -175,6 +271,12 @@ async function bootstrap() {
         torrentWindow.loadURL(`file://${__dirname}/index.html`)
 
         const windowWebContents: WebContents = torrentWindow.webContents
+        windowWebContents.on('did-start-loading', () => {
+            rendererLoaded = false
+        })
+        windowWebContents.on('did-finish-load', () => {
+            rendererLoaded = true
+        })
         const isExternalUrl = (url: string) => {
             try {
                 const parsedUrl = new URL(url)
@@ -219,6 +321,7 @@ async function bootstrap() {
 
         torrentWindow.on('closed', () => {
             torrentWindow = null
+            rendererLoaded = false
             refreshTrayMenu()
         })
 
@@ -346,13 +449,20 @@ async function bootstrap() {
         logger.info('Main sending torrent files', torrentFiles)
         const files = await torrents.readFiles(torrentFiles, false)
         if (files.length === 0) return
+        if (!rendererLoaded) {
+            queuePendingTorrentFiles(files)
+            return
+        }
         torrentWindow.webContents.send(IPC_CHANNELS.launch.torrentFiles, files)
     }
 
     async function consumePendingLaunchPayload() {
         return {
             magnets: pendingLaunchPayload.magnets.splice(0),
-            torrentFiles: await torrents.readFiles(pendingLaunchPayload.torrentFilePaths.splice(0), false),
+            torrentFiles: [
+                ...(await torrents.readFiles(pendingLaunchPayload.torrentFilePaths.splice(0), false)),
+                ...pendingLaunchPayload.torrentFiles.splice(0).map(clonePendingTorrentFile),
+            ],
         }
     }
 
@@ -362,6 +472,10 @@ async function bootstrap() {
         consumePendingLaunchPayload,
         onSettingsSaved: async () => {
             syncTray()
+            torrentFileWatcher.refresh()
+        },
+        onBittorrentConnected: async () => {
+            await flushPendingSilentWatcherFiles()
         },
     })
 
@@ -404,6 +518,7 @@ async function bootstrap() {
         queuePendingLaunchArgs(process.argv)
         createTorrentWindow()
         syncTray()
+        torrentFileWatcher.start()
         updater.initialise(torrentWindow)
 
         session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -430,6 +545,7 @@ async function bootstrap() {
 
     app.on('before-quit', () => {
         isQuitting = true
+        torrentFileWatcher.stop()
     })
 
     app.on('window-all-closed', () => {

@@ -127,6 +127,10 @@ export interface AppSettings<TServer = StoredServerConfig> {
     refreshRate: number
     automaticUpdates?: boolean
     closeToTray?: boolean
+    debugMode?: boolean
+    autoRemoveTorrents?: boolean
+    alwaysPromptUploadOptions?: boolean
+    watchDirectory?: string
     ui: {
         resizeMode: string
         notifications: boolean
@@ -215,6 +219,7 @@ export interface ElectorrentBridge {
         getAll(): Promise<AppSettings>
         saveAll(settings: AppSettings): Promise<void>
         listThemes(): Promise<ThemeInfo[]>
+        chooseWatchDirectory(currentPath?: string): Promise<string | null>
     }
     launch: {
         getPending(): Promise<LaunchPayload>

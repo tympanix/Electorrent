@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 
 import { IPC_CHANNELS } from '@shared/ipc'
+import type { PendingTorrentUploadFile } from '@shared/ipc-contract'
 import * as electorrent from './electorrent'
 
 function notify({ title = '', message = '', type = 'info' }) {
@@ -20,22 +21,49 @@ function filterFiles(filePath: string) {
     return filePath.endsWith('.torrent')
 }
 
-function serializeTorrentFile(filePath: string, askUploadOptions: boolean) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, (err: Error | null, data: Buffer) => {
-            if (err) {
-                reject(err)
+function sleep(timeout: number) {
+    return new Promise((resolve) => setTimeout(resolve, timeout))
+}
+
+async function waitForStableFile(filePath: string, attempts = 6, delay = 250) {
+    let previousSize = -1
+
+    for (let index = 0; index < attempts; index += 1) {
+        let stats: fs.Stats
+
+        try {
+            stats = await fs.promises.stat(filePath)
+        } catch (error) {
+            if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
                 return
             }
+            throw error
+        }
 
-            resolve({
-                type: 'file',
-                filename: path.basename(filePath),
-                data: new Uint8Array(data),
-                askUploadOptions: !!askUploadOptions,
-            })
-        })
-    })
+        if (!stats.isFile()) {
+            return
+        }
+
+        if (stats.size === previousSize) {
+            return
+        }
+
+        previousSize = stats.size
+        await sleep(delay)
+    }
+}
+
+export async function serializeTorrentFile(filePath: string, askUploadOptions: boolean): Promise<PendingTorrentUploadFile> {
+    await waitForStableFile(filePath)
+
+    const data = await fs.promises.readFile(filePath)
+
+    return {
+        type: 'file',
+        filename: path.basename(filePath),
+        data: new Uint8Array(data),
+        askUploadOptions: !!askUploadOptions,
+    }
 }
 
 export async function readFiles(filepaths: string[], askUploadOptions: boolean) {

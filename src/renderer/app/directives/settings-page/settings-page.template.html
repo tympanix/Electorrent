@@ -18,6 +18,10 @@
                     <i class="large server icon"></i>
                     Servers
                 </li>
+                <li data-role="settings-tab-advanced" ng-class="activeOn('advanced')" ng-click="gotoPage('advanced')">
+                    <i class="large lab icon"></i>
+                    Advanced
+                </li>
                 <li data-role="settings-tab-about" ng-class="activeOn('about')" ng-click="gotoPage('about')">
                     <i class="large at icon"></i>
                     About
@@ -40,6 +44,10 @@
 
                 <div ng-switch-when="servers" id="page-settings-servers">
                     <settings-servers></settings-servers>
+                </div>
+
+                <div ng-switch-when="advanced" id="page-settings-advanced">
+                    <settings-advanced></settings-advanced>
                 </div>
 
                 <div ng-switch-when="about" id="page-settings-about">

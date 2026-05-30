@@ -213,6 +213,12 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await serversTab.waitForDisplayed()
           })
 
+          it("can navigate to the advanced tab", async function() {
+            await this.app.settingsGotoTab("advanced")
+            const advancedTab = $("#page-settings-advanced")
+            await advancedTab.waitForDisplayed()
+          })
+
           it("can navigate to the about tab", async function() {
             await this.app.settingsGotoTab("about")
             const aboutTab = $("#page-settings-about")
@@ -354,6 +360,39 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
           })
 
+          it("can configure and clear the watched folder", async function() {
+            const watchDirectory = path.join("/tmp", createUniqueLabel("electorrent-watch-settings"))
+            fs.mkdirSync(watchDirectory, { recursive: true })
+
+            try {
+              await this.app.settingsGotoTab("advanced")
+              await this.app.setSettingsWatchDirectory(watchDirectory)
+              assert.equal(await this.app.getSettingsWatchDirectory(), watchDirectory)
+
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+
+              await this.app.openSettings()
+              await this.app.settingsGotoTab("advanced")
+              assert.equal(await this.app.getSettingsWatchDirectory(), watchDirectory)
+
+              await this.app.clearSettingsWatchDirectory()
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+            } finally {
+              try {
+                await this.app.openSettings()
+                await this.app.settingsGotoTab("advanced")
+                await this.app.clearSettingsWatchDirectory()
+                await this.app.settingsSave()
+                await this.app.torrentsPageIsVisible()
+              } catch {
+                // Best-effort cleanup for follow-up tests.
+              }
+              fs.rmSync(watchDirectory, { recursive: true, force: true })
+            }
+          })
+
           it("cancel button returns to the torrents page", async function() {
             await this.app.settingsCancel()
             await this.app.torrentsPageIsVisible()
@@ -406,6 +445,62 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
             await this.app.connectServerSelection(0)
             await this.app.torrentsPageIsVisible()
+          })
+        })
+
+        describe("watched torrent directory", function() {
+          before(function() {
+            if (options.client.id !== "qbittorrent" || options.version !== "latest") {
+              this.skip()
+            }
+          })
+
+          it("uploads torrent files copied into the watched folder", async function() {
+            this.timeout(90 * 1000)
+
+            const watchDirectory = path.join("/tmp", createUniqueLabel("electorrent-watch"))
+            const torrentPath = await createTorrentFile(tracker, { fileSize: 1 })
+            const watchedTorrentPath = path.join(watchDirectory, path.basename(torrentPath))
+            const torrentInfo = parseTorrent(fs.readFileSync(torrentPath))
+            const watchedTorrent = new e2e.Torrent({ hash: torrentInfo.infoHash, app: this.app })
+            let initialPromptSetting = false
+
+            fs.mkdirSync(watchDirectory, { recursive: true })
+
+            try {
+              await restartApplication(this)
+              await this.app.torrentsPageIsVisible()
+              await this.app.openSettings()
+              await this.app.settingsGotoTab("general")
+              initialPromptSetting = await this.app.getGeneralToggleState("Always prompt for upload options")
+              if (initialPromptSetting) {
+                await this.app.setGeneralToggle("Always prompt for upload options", false)
+              }
+
+              await this.app.settingsGotoTab("advanced")
+              await this.app.setSettingsWatchDirectory(watchDirectory)
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+
+              await fs.promises.copyFile(torrentPath, watchedTorrentPath)
+              await watchedTorrent.waitForExist({ timeout: 30 * 1000 })
+            } finally {
+              if (await watchedTorrent.isExisting()) {
+                await watchedTorrent.delete()
+              }
+
+              await this.app.openSettings()
+              await this.app.settingsGotoTab("advanced")
+              await this.app.clearSettingsWatchDirectory()
+              await this.app.settingsGotoTab("general")
+              if (await this.app.getGeneralToggleState("Always prompt for upload options") !== initialPromptSetting) {
+                await this.app.setGeneralToggle("Always prompt for upload options", initialPromptSetting)
+              }
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+
+              fs.rmSync(watchDirectory, { recursive: true, force: true })
+            }
           })
         })
 

@@ -519,6 +519,29 @@ export class App {
     return await themeLink.getAttribute("href")
   }
 
+  async getSettingsWatchDirectory() {
+    const input = $("#settings-watch-directory")
+    await input.waitForDisplayed()
+    return await input.getValue()
+  }
+
+  async setSettingsWatchDirectory(watchDirectory: string) {
+    const input = $("#settings-watch-directory")
+    await input.waitForDisplayed()
+    await input.clearValue()
+    if (watchDirectory) {
+      await input.setValue(watchDirectory)
+    }
+  }
+
+  async clearSettingsWatchDirectory() {
+    const clearButton = $("#page-settings-advanced [data-role='settings-watch-directory-clear']")
+    await clearButton.waitForDisplayed()
+    if (await clearButton.isEnabled()) {
+      await clearButton.click()
+    }
+  }
+
   async getStoredServerName(serverIndex: number) {
     return await browser.execute((index) => {
       const injector = angular.element(document.body).injector()

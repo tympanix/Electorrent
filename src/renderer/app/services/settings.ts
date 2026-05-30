@@ -9,6 +9,10 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
         refreshRate: 2000,
         automaticUpdates: true,
         closeToTray: true,
+        debugMode: false,
+        autoRemoveTorrents: false,
+        alwaysPromptUploadOptions: false,
+        watchDirectory: '',
         ui: {
             resizeMode: '',
             notifications: true,
