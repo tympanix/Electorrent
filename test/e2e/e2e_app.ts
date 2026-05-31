@@ -350,6 +350,27 @@ export class App {
     return await $("#page-torrents .status-bar").getText()
   }
 
+  async isTorrentSidebarCollapsed() {
+    const className = (await $("#page-torrents").getAttribute("class")) || ""
+    return className.includes("is-sidebar-collapsed")
+  }
+
+  async setTorrentSidebarCollapsed(collapsed: boolean) {
+    const toggle = $("[data-role='torrent-sidebar-toggle']")
+    await toggle.waitForDisplayed()
+
+    if (await this.isTorrentSidebarCollapsed() !== collapsed) {
+      await toggle.waitForClickable()
+      await toggle.click()
+      await browser.waitUntil(async () => {
+      return await this.isTorrentSidebarCollapsed() === collapsed
+      }, {
+      timeout: this.timeout,
+      timeoutMsg: `Expected torrent sidebar collapsed state to become ${collapsed}`,
+      })
+    }
+  }
+
   async openSettings() {
     const settingsPage = $("#page-settings")
     if (await settingsPage.isDisplayed()) {

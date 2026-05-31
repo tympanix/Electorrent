@@ -154,6 +154,21 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           await this.app.torrentsPageIsVisible()
         })
 
+        it("sidebar can be collapsed and restored after refresh", async function() {
+          await this.app.setTorrentSidebarCollapsed(false)
+          await this.app.setTorrentSidebarCollapsed(true)
+
+          assert.isTrue(await this.app.isTorrentSidebarCollapsed())
+          await $("[data-role='torrent-sidebar-labels-toggle']").waitForDisplayed()
+
+          await restartApplication(this)
+          await this.app.torrentsPageIsVisible()
+          assert.isTrue(await this.app.isTorrentSidebarCollapsed())
+
+          await this.app.setTorrentSidebarCollapsed(false)
+          assert.isFalse(await this.app.isTorrentSidebarCollapsed())
+        })
+
         it("show settings when connection error after restarting app", async function() {
           this.timeout(25 * 1000)
           await backend.pause()

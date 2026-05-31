@@ -116,6 +116,21 @@ export class TorrentsPageController {
             return $scope.filters.status === filter ? "active" : "";
         };
 
+        $scope.isSidebarCollapsed = () => {
+            return $scope.settings.ui.sidebarCollapsed === true;
+        };
+
+        $scope.toggleSidebarCollapsed = () => {
+            const previousValue = $scope.isSidebarCollapsed();
+            $scope.settings.ui.sidebarCollapsed = !previousValue;
+
+            return settingsService.saveAllSettings().catch((err: unknown) => {
+                $scope.settings.ui.sidebarCollapsed = previousValue;
+                $notify.alert("Could not save layout", "The sidebar preference could not be saved");
+                console.error("Sidebar layout save error", err);
+            });
+        };
+
         $scope.renderDone = () => {
             $scope.guiBusy = false;
             $timeout(() => {

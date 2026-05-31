@@ -139,6 +139,7 @@ export interface AppSettings<TServer = StoredServerConfig> {
         cleanNames: boolean
         fixedHeader: boolean
         theme: string
+        sidebarCollapsed: boolean
     }
     servers: TServer[]
     certificates: string[]
