@@ -5,6 +5,7 @@ import { Torrent } from "./e2e_torrent";
 import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
 import { TorrentClient } from "../../src/renderer/app/bittorrent"
+import { IPC_CHANNELS } from "../../src/shared/ipc"
 import { waitForModalClose, waitForModalOpen } from "./modal"
 
 /**
@@ -161,6 +162,39 @@ export class App {
     return modal
   }
 
+  private getUploadPendingCountLabel(count: number) {
+    return `${count} ${count === 1 ? "upload" : "uploads"} remaining`
+  }
+
+  async getUploadTorrentModalPendingCountLabel() {
+    const modal = await this.uploadTorrentModalVisible()
+    const label = modal.$(".ui.right.floated.label")
+    await label.waitForDisplayed()
+    return (await label.getText()).trim()
+  }
+
+  async uploadTorrentModalPendingCountShouldBe(count: number) {
+    const expected = this.getUploadPendingCountLabel(count)
+    await browser.waitUntil(async () => (await this.getUploadTorrentModalPendingCountLabel()) === expected, {
+      timeout: this.timeout,
+      timeoutMsg: `Expected upload modal pending count to be "${expected}"`,
+    })
+  }
+
+  async getUploadTorrentModalCurrentLabel() {
+    const modal = await this.uploadTorrentModalVisible()
+    const label = modal.$(".sub.header")
+    await label.waitForDisplayed()
+    return (await label.getText()).trim()
+  }
+
+  async uploadTorrentModalCurrentLabelShouldBe(expectedLabel: string) {
+    await browser.waitUntil(async () => (await this.getUploadTorrentModalCurrentLabel()) === expectedLabel, {
+      timeout: this.timeout,
+      timeoutMsg: `Expected current upload label to be "${expectedLabel}"`,
+    })
+  }
+
   private async setUploadToggle(modal: WebdriverIO.Element, action: string, enabled: boolean) {
     const toggle = modal.$(`div[data-action="${action}"]`)
     const toggleInput = toggle.$("input")
@@ -192,6 +226,8 @@ export class App {
     firstAndLastPiecePrio?: boolean
     downloadSpeedLimit?: number
     uploadSpeedLimit?: number
+  }, behavior?: {
+    expectedRemainingCount?: number
   }) {
     const modal = await this.uploadTorrentModalVisible()
     await browser.pause(200)
@@ -244,6 +280,11 @@ export class App {
     await browser.pause(250)
     const submitBtn = modal.$("button[type=submit]")
     await submitBtn.click()
+    if (behavior?.expectedRemainingCount !== undefined) {
+      await this.uploadTorrentModalPendingCountShouldBe(behavior.expectedRemainingCount)
+      return
+    }
+
     await waitForModalClose(modal, this.timeout)
   }
 
@@ -263,6 +304,41 @@ export class App {
       }, !!askUploadOptions)
       $rootScope.$apply()
     }, Array.from(data), path.basename(filename), askUploadOptions)
+    this.torrents.push(torrent);
+    return torrent;
+  }
+
+  async uploadTorrentFromMainProcess({ filename, askUploadOptions }: { filename: string, askUploadOptions?: boolean }) {
+    const data = fs.readFileSync(path.join(filename));
+    const info = parseTorrent(data)
+    const hash = info.infoHash
+    const torrent = new Torrent({ hash: hash, app: this });
+    await expect(await torrent.isExisting()).toBe(false);
+    await browser.electron.execute((electron, { channel, files }) => {
+      const windows = electron.BrowserWindow.getAllWindows()
+        .filter((candidate) => !candidate.isDestroyed() && !candidate.webContents.isDestroyed())
+        .sort((left, right) => right.id - left.id)
+      const torrentWindow = windows.find((candidate) => candidate.isFocused())
+        ?? windows.find((candidate) => candidate.isVisible())
+        ?? windows[0]
+      if (!torrentWindow) {
+        throw new Error("No torrent window available")
+      }
+
+      torrentWindow.webContents.send(channel, files.map((file) => ({
+        type: "file",
+        data: Uint8Array.from(file.data),
+        filename: file.filename,
+        askUploadOptions: file.askUploadOptions,
+      })))
+    }, {
+      channel: IPC_CHANNELS.launch.torrentFiles,
+      files: [{
+        data: Array.from(data),
+        filename: path.basename(filename),
+        askUploadOptions: !!askUploadOptions,
+      }],
+    })
     this.torrents.push(torrent);
     return torrent;
   }
