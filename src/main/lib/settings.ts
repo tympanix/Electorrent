@@ -33,6 +33,7 @@ const defaultSettings: MainAppSettings = {
         cleanNames: true,
         fixedHeader: false,
         theme: 'light',
+        sidebarCollapsed: false,
     },
 }
 
