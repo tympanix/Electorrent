@@ -95,6 +95,11 @@ export class App {
     await settingsPage.waitForDisplayed({ timeout: this.timeout })
   }
 
+  async welcomePageIsVisible(opts?: { timeout: number }) {
+    const welcomePage = $("#page-welcome")
+    await welcomePage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
+  }
+
   async serverSelectionPageIsVisible(opts?: { timeout: number }) {
     const serverSelectionPage = $("#page-server-selection")
     await serverSelectionPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
@@ -129,6 +134,38 @@ export class App {
     await certificateModal.waitForExist()
     await waitForModalOpen(certificateModal, this.timeout)
     return certificateModal
+  }
+
+  async updateModalIsVisible() {
+    const updateModal = $("#updateModal")
+    await updateModal.waitForExist()
+    await waitForModalOpen(updateModal, this.timeout)
+    return updateModal
+  }
+
+  async getUpdateModalContentText() {
+    const updateModal = await this.updateModalIsVisible()
+    const updateContent = updateModal.$(".content")
+    await updateContent.waitForDisplayed()
+    return updateContent.getText()
+  }
+
+  async installUpdate(opts?: { allowWindowClose?: boolean }) {
+    const updateModal = await this.updateModalIsVisible()
+    const submit = updateModal.$("button.approve")
+    await submit.waitForExist()
+    await submit.waitForDisplayed()
+    await submit.waitForClickable()
+    await submit.waitForEnabled()
+    await submit.click()
+    try {
+      await waitForModalClose(updateModal, this.timeout)
+    } catch (error) {
+      if (opts?.allowWindowClose && String(error).includes("no such window")) {
+        return
+      }
+      throw error
+    }
   }
 
   async acceptCertificate() {

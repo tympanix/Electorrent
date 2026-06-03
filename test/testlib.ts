@@ -7,7 +7,7 @@ import chaiAsPromised from "chai-as-promised";
 import parseTorrent from "parse-torrent"
 import * as e2e from "./e2e";
 import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
-import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
+import { dockerComposeHooks, startApplicationHooks, restartApplication, updateHooks } from "./shared"
 import { TorrentClient } from "../src/renderer/app/bittorrent"
 import { browser, $ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
@@ -123,7 +123,8 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
       })
 
       describe("given application is running", function() {
-        startApplicationHooks()
+          updateHooks()
+          startApplicationHooks()
 
         it("user is logging in with https", async function() {
           this.retries(3)
@@ -139,6 +140,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     })
 
     describe("given application is running", function() {
+        updateHooks()
         startApplicationHooks()
 
         describe("given user is logged in", function() {
@@ -786,6 +788,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
       requireFeatureHook(options, FeatureSet.AdvancedUploadOptions)
 
       describe("given application is running", function() {
+        updateHooks()
         startApplicationHooks()
 
         describe("given user is logged in", function() {

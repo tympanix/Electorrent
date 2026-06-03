@@ -24,12 +24,35 @@ if (!startup) {
 }
 
 async function bootstrap() {
+    function getCliOptionValue(name: string) {
+        const exact = `--${name}`
+        const inline = `--${name}=`
+        const argv = process.argv.slice(1)
+
+        for (let index = 0; index < argv.length; index += 1) {
+            const value = argv[index]
+            if (value === exact) {
+                return argv[index + 1]
+            }
+
+            if (value.startsWith(inline)) {
+                return value.slice(inline.length)
+            }
+        }
+
+        return undefined
+    }
+
     const parser = yargs(process.argv.slice(1))
     parser.version(app.getVersion())
     parser.help('h').alias('h', 'help')
     parser.usage(`Electorrent ${app.getVersion()}`)
     parser.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
     parser.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
+    parser.string('update-url').describe('update-url', 'Override the application update URL')
+    parser.string('downloads-path').describe('downloads-path', 'Override the application downloads path')
+    parser.string('test-update-download-path').describe('test-update-download-path', 'Write update downloads directly to this path for testing')
+    parser.boolean('test-capture-install-path').describe('test-capture-install-path', 'Capture the update installer path instead of launching it during tests')
 
     const [
         { IPC_CHANNELS },
@@ -60,7 +83,14 @@ async function bootstrap() {
     logger.debug('Starting Electorrent in debug mode')
     logger.verbose('Verbose logging enabled')
 
-    const program = parser.parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean }
+    const program = parser.parse(process.argv.slice(1)) as {
+        debug?: boolean
+        verbose?: boolean
+    }
+    const updateUrl = getCliOptionValue('update-url')
+    const downloadsPath = getCliOptionValue('downloads-path')
+    const testUpdateDownloadPath = getCliOptionValue('test-update-download-path')
+    const captureInstallPath = process.argv.slice(1).includes('--test-capture-install-path')
 
     if (!app.isPackaged) {
         try {
@@ -435,7 +465,15 @@ async function bootstrap() {
         createTorrentWindow()
         syncTray()
         torrentFileWatcher.start()
-        updater.initialise(torrentWindow)
+        updater.initialise(torrentWindow, {
+            updateUrl,
+            downloadsPath,
+            testUpdateDownloadPath,
+            captureInstallPath,
+        })
+        if (updateUrl) {
+            updater.checkForUpdates(false)
+        }
 
         session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
             const { requestHeaders } = details

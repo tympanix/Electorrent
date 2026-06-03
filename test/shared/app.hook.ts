@@ -1,7 +1,6 @@
 import { browser } from '@wdio/globals'
 import { App } from "../e2e"
 
-let hasReusedInitialSession = false
 const APPLICATION_SESSION_TIMEOUT = 30 * 1000
 
 /**
@@ -12,12 +11,7 @@ export function startApplicationHooks() {
 
   before(async function (this: Mocha.Context) {
     this.timeout(APPLICATION_SESSION_TIMEOUT)
-
-    if (hasReusedInitialSession) {
-      await browser.reloadSession()
-    } else {
-      hasReusedInitialSession = true
-    }
+    await browser.reloadSession()
 
     this.app = new App();
   })

@@ -13,18 +13,33 @@ const ENDPOINT = 'https://electorrent.vercel.app/'
 const UPDATE_CONNECTION_ERROR = 'Could not check version automatically. Please visit the website instead'
 const version = app.getVersion()
 
-let updateUrl: string | null = null
 let mainWindow: BrowserWindow | null = null
 let update: any = null
 let downloadedUpdate: string | null = null
 let verbose = false
+let configuredUpdateUrl: string | null = null
+let configuredTestDownloadPath: string | null = null
+let configuredCaptureInstallPath = false
+let configuredInstallCaptureMarkerPath: string | null = null
 
-if (is.windows()) {
-    updateUrl = `${ENDPOINT}update/win32/${version}`
-} else if (is.macOS()) {
-    updateUrl = `${ENDPOINT}update/dmg/${version}`
-} else if (is.linux()) {
-    updateUrl = `${ENDPOINT}update/appimage/${version}`
+function getDefaultUpdateUrl() {
+    if (is.windows()) {
+        return `${ENDPOINT}update/win32/${version}`
+    }
+
+    if (is.macOS()) {
+        return `${ENDPOINT}update/dmg/${version}`
+    }
+
+    if (is.linux()) {
+        return `${ENDPOINT}update/appimage/${version}`
+    }
+
+    return null
+}
+
+function getUpdateUrl() {
+    return configuredUpdateUrl || getDefaultUpdateUrl()
 }
 
 export function checkForUpdates(notifyVerbose: boolean) {
@@ -37,8 +52,28 @@ export function checkForUpdates(notifyVerbose: boolean) {
     }
 }
 
-export function initialise(initWindow: BrowserWindow) {
+export function initialise(initWindow: BrowserWindow, {
+    updateUrl,
+    downloadsPath,
+    testUpdateDownloadPath,
+    captureInstallPath,
+}: {
+    updateUrl?: string
+    downloadsPath?: string
+    testUpdateDownloadPath?: string
+    captureInstallPath?: boolean
+} = {}) {
     mainWindow = initWindow
+    configuredUpdateUrl = updateUrl || null
+    configuredTestDownloadPath = testUpdateDownloadPath || null
+    configuredCaptureInstallPath = captureInstallPath === true
+    configuredInstallCaptureMarkerPath = testUpdateDownloadPath ? `${testUpdateDownloadPath}.install-target` : null
+    if (configuredInstallCaptureMarkerPath) {
+        fs.rmSync(configuredInstallCaptureMarkerPath, { force: true })
+    }
+    if (downloadsPath) {
+        app.setPath('downloads', downloadsPath)
+    }
     squirrelUpdater()
     manualDownloader()
 }
@@ -53,8 +88,7 @@ export function manualQuitAndUpdate() {
             logger.error('Error while executing update', err)
             shell.showItemInFolder(updatePath)
         } else {
-            shell.openPath(updatePath)
-            app.quit()
+            launchManualUpdate(updatePath)
         }
     })
 }
@@ -69,7 +103,78 @@ export function openUpdateFilePath() {
 }
 
 function downloadUpdate(url: string) {
+    if (configuredTestDownloadPath) {
+        downloadUpdateForTest(url, configuredTestDownloadPath)
+        return
+    }
+
     mainWindow?.webContents.downloadURL(url)
+}
+
+function sendManualDownloadedUpdate() {
+    sendUpdateStatus({
+        type: 'downloaded',
+        data: {
+            releaseNotes: update.notes,
+            releaseName: update.name,
+            releaseDate: update.pub_date,
+            updateUrl: update.url,
+            manual: true,
+        },
+    })
+}
+
+function downloadUpdateForTest(url: string, targetPath: string) {
+    const downloadStream = fs.createWriteStream(targetPath)
+    let didFinish = false
+
+    const completeDownload = () => {
+        if (didFinish) return
+        didFinish = true
+        downloadedUpdate = targetPath
+        sendManualDownloadedUpdate()
+    }
+
+    const failDownload = (error: Error) => {
+        if (didFinish) return
+        didFinish = true
+        logger.error('Test update download error', error)
+        notifyUpdateError()
+    }
+
+    const requestStream = request.get(url)
+
+    requestStream.on('response', (response: { statusCode?: number }) => {
+        if ((response.statusCode || 0) >= 400) {
+            requestStream.destroy(new Error(`Unexpected update download status ${response.statusCode}`))
+        }
+    })
+    requestStream.on('error', failDownload)
+    downloadStream.on('error', failDownload)
+    downloadStream.on('finish', () => {
+        downloadStream.close((error) => {
+            if (error) {
+                failDownload(error)
+                return
+            }
+
+            completeDownload()
+        })
+    })
+
+    requestStream.pipe(downloadStream)
+}
+
+function launchManualUpdate(updatePath: string) {
+    if (configuredCaptureInstallPath) {
+        if (configuredInstallCaptureMarkerPath) {
+            fs.writeFileSync(configuredInstallCaptureMarkerPath, updatePath, 'utf8')
+        }
+        return
+    }
+
+    shell.openPath(updatePath)
+    app.quit()
 }
 
 function filePostfix() {
@@ -114,22 +219,14 @@ function manualDownloader() {
             if (state === 'completed') {
                 downloadedUpdate = item.getSavePath()
 
-                sendUpdateStatus({
-                    type: 'downloaded',
-                    data: {
-                        releaseNotes: update.notes,
-                        releaseName: update.name,
-                        releaseDate: update.pub_date,
-                        updateUrl: update.url,
-                        manual: true,
-                    },
-                })
+                sendManualDownloadedUpdate()
             }
         })
     })
 }
 
 function manualUpdater() {
+    const updateUrl = getUpdateUrl()
     if (!updateUrl) return
 
     request(updateUrl, function(error: Error | null, response: { statusCode: number }, body: string) {
@@ -249,6 +346,7 @@ function notifyConnectionError() {
 }
 
 function squirrelUpdater() {
+    const updateUrl = getUpdateUrl()
     if (!updateUrl || !is.windows()) return
 
     autoUpdater.setFeedURL({ url: updateUrl })
