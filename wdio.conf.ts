@@ -1,6 +1,11 @@
 /// <reference types="wdio-electron-service" />
 
 import { browser } from '@wdio/globals'
+import {
+    TEST_UPDATE_DOWNLOAD_ARTIFACT_PATH,
+    TEST_UPDATE_DOWNLOADS_PATH,
+    TEST_UPDATE_URL,
+} from './test/shared/update.hook'
 
 type BrowserLogEntry = {
     level?: string
@@ -95,6 +100,9 @@ export const config: WebdriverIO.Config = {
         'rtorrent': [
             'test/fixtures/rtorrent/*.spec.ts',
         ],
+        'updates': [
+            'test/fixtures/update/*.spec.ts',
+        ],
     },
 
     //
@@ -126,7 +134,12 @@ export const config: WebdriverIO.Config = {
         'wdio:electronServiceOptions': {
             // custom application args
             appEntryPoint: 'app/main.js',
-            appArgs: []
+            appArgs: [
+                `--update-url=${TEST_UPDATE_URL}`,
+                `--downloads-path=${TEST_UPDATE_DOWNLOADS_PATH}`,
+                `--test-update-download-path=${TEST_UPDATE_DOWNLOAD_ARTIFACT_PATH}`,
+                '--test-capture-install-path',
+            ]
         },
         'goog:chromeOptions': {
             args: [
