@@ -10,10 +10,11 @@
     </div>
 </div>
 
-<update-modal data="updateData" approve="installUpdate()"></update-modal>
+<update-modal data="updateData" approve="installUpdate()" modal-ref="updateModalRef"></update-modal>
 
 <certificate-modal
     approve="installCertificate()"
     after="certificateResult"
-    data="certificate">
+    data="certificate"
+    modal-ref="certificateModalRef">
 </certificate-modal>

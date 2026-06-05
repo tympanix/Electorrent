@@ -1,5 +1,6 @@
-import { IRootScopeService, IScope } from "angular";
+import { IScope } from "angular";
 import { TorrentUploadOptions, TorrentUploadOptionsEnable } from "@renderer/app/bittorrent/torrentclient";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { SavedLocationConfig } from "@shared/ipc-contract";
 
 interface TorrentUploadFormScope extends IScope {
@@ -13,12 +14,12 @@ export class TorrentUploadFormController {
     static $inject = ["$scope", "$rootScope", "settingsService"]
 
     scope: TorrentUploadFormScope
-    rootScope: IRootScopeService & { $server?: { id?: string }, $btclient?: any }
+    rootScope: ElectorrentRootScope
     optionsEnabled: TorrentUploadOptionsEnable = {}
     savedLocations: SavedLocationConfig[] = []
     selectedSavedLocationPath = ""
 
-    constructor(scope: TorrentUploadFormScope, rootScope: IRootScopeService & { $server?: { id?: string }, $btclient?: any }, private readonly settingsService: { getServer: (id: string) => { savedLocations?: SavedLocationConfig[] } | undefined }) {
+    constructor(scope: TorrentUploadFormScope, rootScope: ElectorrentRootScope, private readonly settingsService: { getServer: (id: string) => { savedLocations?: SavedLocationConfig[] } | undefined }) {
         this.scope = scope
         this.rootScope = rootScope
         this.refreshFormState()

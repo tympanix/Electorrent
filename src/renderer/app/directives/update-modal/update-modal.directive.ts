@@ -6,6 +6,7 @@ export class UpdateModalDirective implements IDirective {
     scope = {
         data: "=",
         approve: "&",
+        modalRef: "=",
     };
     template = html;
 

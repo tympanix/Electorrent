@@ -3,6 +3,7 @@ import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
 import type { AppSettings } from '@shared/ipc-contract'
+import { getAppVersion } from './app-meta'
 import { bittorrentManager } from './bittorrent'
 import * as certificates from './certificates'
 import * as menu from './menu'
@@ -25,7 +26,7 @@ interface RegisterHandlersOptions {
 function getAppMeta(isDebug: boolean) {
     return {
         appName: app.name,
-        appVersion: app.getVersion(),
+        appVersion: getAppVersion(),
         isMacOS: is.macOS(),
         isWindows: is.windows(),
         isLinux: is.linux(),

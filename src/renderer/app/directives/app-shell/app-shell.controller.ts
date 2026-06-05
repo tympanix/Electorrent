@@ -1,5 +1,6 @@
-import { IRootScopeService, IScope } from "angular";
+import { IScope } from "angular";
 import { PendingTorrentUploadFile, PendingTorrentUploadLink } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { AppMeta, LaunchPayload, MenuAction } from "@shared/ipc-contract";
 
 interface AppShellScope extends IScope {
@@ -18,7 +19,7 @@ export class AppShellController {
     static $inject = ["$rootScope", "$scope", "$timeout", "$bittorrent", "settingsService", "notificationService"];
 
     constructor(
-        $rootScope: IRootScopeService & { $btclient?: any; $server?: any },
+        $rootScope: ElectorrentRootScope,
         $scope: AppShellScope,
         $timeout: angular.ITimeoutService,
         $bittorrent: any,

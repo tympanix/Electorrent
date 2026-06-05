@@ -1,5 +1,6 @@
-import { IRootScopeService, IScope } from "angular";
+import { IScope } from "angular";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
 export interface SetLocationModalScope extends IScope {
   torrents: any[];
@@ -12,13 +13,13 @@ export class SetLocationModalController {
   static $inject = ["$scope", "$rootScope"];
 
   scope: SetLocationModalScope;
-  rootScope: IRootScopeService & { $btclient?: any };
+  rootScope: ElectorrentRootScope;
   modalref: ModalController;
   private unsubscribeOpen?: () => void;
 
   constructor(
     scope: SetLocationModalScope,
-    rootScope: IRootScopeService & { $btclient?: any },
+    rootScope: ElectorrentRootScope,
   ) {
     this.scope = scope;
     this.rootScope = rootScope;

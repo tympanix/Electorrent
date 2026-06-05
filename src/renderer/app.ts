@@ -72,6 +72,8 @@ import { settingsService } from "@renderer/app/services/settings"
 torrentApp.service("settingsService", settingsService)
 import { notificationService } from "@renderer/app/services/notification"
 torrentApp.service("notificationService", notificationService)
+import { CertificateResponseService } from "@renderer/app/services/certificate-response"
+torrentApp.service("certificateResponseService", CertificateResponseService)
 import { serverService} from "@renderer/app/services/server"
 torrentApp.factory("Server", serverService)
 
