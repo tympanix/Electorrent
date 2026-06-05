@@ -1,8 +1,7 @@
-import { IRootScopeService } from "angular";
 import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import { SavedLocationModalController } from "@renderer/app/directives/saved-location-modal/saved-location-modal.controller";
-import type { SavedLocationConfig } from "@shared/ipc-contract";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import { AddTorrentModalScope } from "./add-torrent-modal.directive";
 
 export class AddTorrentModalController {
@@ -14,7 +13,7 @@ export class AddTorrentModalController {
     }
 
     scope: AddTorrentModalScope
-    rootScope: IRootScopeService & { $btclient?: { uploadOptionsEnable?: { saveLocation?: boolean } }, $server?: { savedLocations?: SavedLocationConfig[] } }
+    rootScope: ElectorrentRootScope
     modalref: ModalController
     savedLocationModalRef: SavedLocationModalController
     uploadOptions: TorrentUploadOptions
@@ -22,7 +21,7 @@ export class AddTorrentModalController {
     private preserveUploadsOnHide: boolean
     private restoreUploadOptionsOnShow: boolean
 
-    constructor(scope: AddTorrentModalScope, rootScope: IRootScopeService) {
+    constructor(scope: AddTorrentModalScope, rootScope: ElectorrentRootScope) {
         this.scope = scope
         this.rootScope = rootScope
         this.isLoading = false

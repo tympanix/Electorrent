@@ -1,9 +1,10 @@
 import _ from "underscore"
 import { Torrent } from "@renderer/app/bittorrent"
+import type { CertificateResponseService } from "@renderer/app/services/certificate-response"
 import type { SavedLocationConfig, StoredServerConfig } from "@shared/ipc-contract"
 
-export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorrent', '$btclients',
-    function($rootScope, $q, $notify, $bittorrent, $btclients) {
+export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclients', 'certificateResponseService',
+    function($q, $notify, $bittorrent, $btclients, certificateResponseService: CertificateResponseService) {
         const electorrent = window.electorrent
 
         /*
@@ -193,37 +194,20 @@ export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorr
 
         Server.prototype.askForCertificate = function() {
             let self = this
-            let defer = $q.defer()
-
-            let unsubscribe = $rootScope.$on('certificate-modal', function(e, id, fingerprint) {
-                if (!id) {
-                    unsubscribe()
-                    defer.reject()
-                    return
-                }
-
-                if (id !== self.id) {
-                    return
-                }
-
-                unsubscribe()
-                self.certificate = fingerprint
-                electorrent.certificates.load(fingerprint).then((certificateData) => {
-                    self.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
-                    defer.resolve()
-                }).catch((err: unknown) => {
-                    defer.reject(err)
-                })
-            })
+            const response = certificateResponseService.wait(self.id)
 
             electorrent.certificates.fetch({
                 server: self.json() as StoredServerConfig,
             }).catch((err: unknown) => {
-                unsubscribe()
-                defer.reject(err)
+                certificateResponseService.reject(self.id, err)
             })
 
-            return defer.promise
+            return $q.when(response).then((fingerprint) => {
+                self.certificate = fingerprint
+                return electorrent.certificates.load(fingerprint)
+            }).then((certificateData) => {
+                self.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
+            })
         }
 
         Server.prototype.getCertificate = function() {

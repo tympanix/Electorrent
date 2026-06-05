@@ -7,6 +7,7 @@ export class CertificateModalDirective implements IDirective {
         data: "=",
         approve: "&",
         after: "=",
+        modalRef: "=",
     };
     template = html;
 

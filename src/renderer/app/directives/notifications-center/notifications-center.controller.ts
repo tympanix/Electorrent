@@ -1,4 +1,6 @@
 import { IScope } from "angular";
+import type { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import type { CertificateResponseService } from "@renderer/app/services/certificate-response";
 import type { CertificatePrompt, UpdateEvent } from "@shared/ipc-contract";
 
 interface NotificationsCenterScope extends IScope {
@@ -14,10 +16,12 @@ interface NotificationsCenterScope extends IScope {
     installCertificate: () => void;
     certificate: any;
     certificateResult: (accepted: boolean) => void;
+    certificateModalRef?: ModalController;
+    updateModalRef?: ModalController;
 }
 
 export class NotificationsCenterController {
-    static $inject = ["$scope", "$rootScope", "$timeout", "settingsService", "notificationService", "$http"];
+    static $inject = ["$scope", "$rootScope", "$timeout", "settingsService", "notificationService", "$http", "certificateResponseService"];
 
     constructor(
         $scope: NotificationsCenterScope,
@@ -26,6 +30,7 @@ export class NotificationsCenterController {
         settingsService: any,
         $notify: any,
         $http: angular.IHttpService,
+        certificateResponseService: CertificateResponseService,
     ) {
         const electorrent = window.electorrent
         let id = 0;
@@ -58,8 +63,7 @@ export class NotificationsCenterController {
 
         const showCertModal = () => {
             $timeout(() => {
-                const modal: any = $("#certificateModal");
-                modal.modal("show");
+                $scope.certificateModalRef?.showModal();
             }, 0);
         };
 
@@ -91,8 +95,7 @@ export class NotificationsCenterController {
                 .then(() => {
                     $scope.updateData = data;
                     $timeout(() => {
-                        const modal: any = $("#updateModal");
-                        modal.modal("show");
+                        $scope.updateModalRef?.showModal();
                     }, $scope.manualUpdate ? 500 : 0);
                 });
         });
@@ -112,11 +115,11 @@ export class NotificationsCenterController {
                         fingerprint: cert.fingerprint,
                         raw: cert.raw,
                     }).then((result) => {
-                        $rootScope.$emit("certificate-modal", cert.serverId, result.fingerprint);
+                        certificateResponseService.resolve(cert.serverId, result.fingerprint);
                         $rootScope.$broadcast("certificate-installed", cert.serverId, result.fingerprint);
                         $notify.ok("Certificate installed", "The certificate has been trusted for this server to use");
                     }).catch((err: unknown) => {
-                        $rootScope.$emit("certificate-modal", false);
+                        certificateResponseService.reject(cert.serverId, err);
                         $notify.alert("Could not install certificate", String(err));
                     })
                 } else {
@@ -135,7 +138,7 @@ export class NotificationsCenterController {
 
         $scope.certificateResult = (accepted: boolean) => {
             if (!accepted) {
-                $rootScope.$emit("certificate-modal", false);
+                certificateResponseService.reject($scope.certificate?.serverId);
             }
         };
     }

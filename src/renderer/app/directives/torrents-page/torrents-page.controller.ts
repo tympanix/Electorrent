@@ -1,8 +1,8 @@
-import { IRootScopeService } from "angular";
 import Fuse from "fuse.js";
 import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { PendingTorrentUploadItem, PendingTorrentUploadList } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
 interface TorrentControllerScope extends angular.IScope {
     pendingTorrentFiles: PendingTorrentUploadList;
@@ -19,7 +19,7 @@ export class TorrentsPageController {
     static $inject = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "settingsService"];
 
     constructor(
-        $rootScope: IRootScopeService & { $btclient?: any; $server?: any },
+        $rootScope: ElectorrentRootScope,
         $scope: TorrentControllerScope,
         $timeout: angular.ITimeoutService,
         $filter: angular.IFilterService,
@@ -749,7 +749,7 @@ export class TorrentsPageController {
             const request = $rootScope.$btclient?.torrents(!!fullupdate);
             return request.then((torrents: any) => {
                 if (serverId !== $rootScope.$server?.id) {
-                    return $q.resolve();
+                    return;
                 }
                 newTorrents(torrents);
                 deleteTorrents(torrents);

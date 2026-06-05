@@ -1,10 +1,11 @@
 import type { AppMeta, ThemeInfo } from "@shared/ipc-contract";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
 export class SettingsPageController {
     static $inject = ["$rootScope", "$scope", "$injector", "$bittorrent", "$btclients", "settingsService", "notificationService"];
 
     constructor(
-        $rootScope: angular.IRootScopeService & { $server?: any },
+        $rootScope: ElectorrentRootScope,
         $scope: any,
         $injector: angular.auto.IInjectorService,
         $bittorrent: any,

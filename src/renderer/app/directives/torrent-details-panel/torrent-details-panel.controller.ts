@@ -1,4 +1,4 @@
-import { IDocumentService, IFilterService, IRootScopeService, IScope, IWindowService } from "angular";
+import { IDocumentService, IFilterService, IScope, IWindowService } from "angular";
 import {
   TorrentDetailsFileColumn,
   TorrentDetailsFileItem,
@@ -6,6 +6,7 @@ import {
   TorrentDetailsPanelData,
 } from "@renderer/app/bittorrent/torrentclient";
 import { loadSortingState, SortingOptions } from "@renderer/app/directives/sorting/sorting.controller";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
 export interface TorrentDetailsPanelScope extends IScope {
   settings: any;
@@ -39,7 +40,7 @@ export class TorrentDetailsPanelController {
 
   constructor(
     public scope: TorrentDetailsPanelScope,
-    private rootScope: IRootScopeService & { $btclient?: any; $server?: any },
+    private rootScope: ElectorrentRootScope,
     private $filter: IFilterService,
     private $window: IWindowService,
     private $document: IDocumentService,
