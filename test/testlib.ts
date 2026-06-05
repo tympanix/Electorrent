@@ -916,20 +916,24 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await torrent.delete()
           })
 
-          it("torrent uploaded with save location", async function() {
+          it("saved location added from upload modal persists", async function() {
             this.timeout(300 * 1000)
             if (!options.client.uploadOptionsEnable?.saveLocation) return this.skip()
-            const saveLocation = options.saveLocation || "/tmp/custom/save/location"
+
+            const saveLocation = `${options.saveLocation || "/tmp/custom/save/location"}-saved`
             await backend.exec(["rm", "-rf", saveLocation])
             await backend.exec(["test", "!", "-e", saveLocation])
+
             const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
-            await this.app.uploadTorrentModalSubmit({ saveLocation: saveLocation })
+            await this.app.addUploadModalSavedLocation({ path: saveLocation, icon: "folder open" })
+            await this.app.uploadTorrentModalSubmit()
             await torrent.waitForExist({ timeout: 20 * 1000 })
             await browser.pause(20000)
             await torrent.waitForState("Seeding", { timeout: 120 * 1000 })
             await backend.waitForExec(["test", "-e", saveLocation], 20 * 1000)
             await torrent.delete()
           })
+
         })
       })
     })

@@ -120,6 +120,12 @@ export interface StoredServerConfig {
     lastused?: number
     certificate?: string
     columns: string[]
+    savedLocations?: SavedLocationConfig[]
+}
+
+export interface SavedLocationConfig {
+    path: string
+    icon: string
 }
 
 export interface AppSettings<TServer = StoredServerConfig> {

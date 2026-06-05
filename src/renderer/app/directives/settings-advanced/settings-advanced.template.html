@@ -1,46 +1,80 @@
 <h1>Advanced</h1>
 
-<table class="ui very basic table">
-    <thead>
-        <tr>
-            <th class="three wide">Setting</th>
-            <th class="seven wide">Description</th>
-            <th class="six wide">Value</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr data-role="advanced-watch-directory-row">
-            <td>
-                <strong>Watch folder</strong>
-            </td>
-            <td>
-                Watch a folder for new <code>.torrent</code> files. Leave this empty to disable automatic torrent uploads.
-            </td>
-            <td>
-                <div class="ui action input fluid">
-                    <input
-                        id="settings-watch-directory"
-                        data-role="settings-watch-directory-input"
-                        type="text"
-                        placeholder="Disabled"
-                        ng-model="settings.watchDirectory">
-                    <button
-                        type="button"
-                        class="ui button"
-                        data-role="settings-watch-directory-browse"
-                        ng-click="chooseWatchDirectory()">
-                        Browse
-                    </button>
-                    <button
-                        type="button"
-                        class="ui button"
-                        data-role="settings-watch-directory-clear"
-                        ng-click="clearWatchDirectory()"
-                        ng-disabled="!settings.watchDirectory">
-                        Clear
-                    </button>
+<div id="page-settings-advanced-options">
+    <div data-role="advanced-watch-directory-row">
+        <div class="ui small header">Watch folder</div>
+        <p>Watch a folder for new <code>.torrent</code> files. Leave this empty to disable automatic torrent uploads.</p>
+        <div style="margin-left: 2rem;">
+            <div class="ui action input fluid">
+                <input
+                    id="settings-watch-directory"
+                    data-role="settings-watch-directory-input"
+                    type="text"
+                    placeholder="Disabled"
+                    ng-model="settings.watchDirectory">
+                <button
+                    type="button"
+                    class="ui button"
+                    data-role="settings-watch-directory-browse"
+                    ng-click="chooseWatchDirectory()">
+                    Browse
+                </button>
+                <button
+                    type="button"
+                    class="ui button"
+                    data-role="settings-watch-directory-clear"
+                    ng-click="clearWatchDirectory()"
+                    ng-disabled="!settings.watchDirectory">
+                    Clear
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui divider"></div>
+
+    <div data-role="advanced-saved-locations-row">
+        <div class="ui small header">Saved locations</div>
+        <p>Save reusable upload locations for <strong>{{ ctl.getServerName() }}</strong>. These locations appear in the upload modal for this server.</p>
+        <div style="margin-left: 2rem;">
+            <div class="ui divided list settings-saved-location-list" ng-if="ctl.getSavedLocations().length">
+                <div
+                    class="item settings-saved-location-item"
+                    ng-repeat="savedLocation in ctl.getSavedLocations() track by savedLocation.path"
+                    data-role="settings-saved-location-item">
+                    <div class="settings-saved-location-row">
+                        <i class="{{ savedLocation.icon }} icon"></i>
+                        <div class="content">
+                            <div class="header" title="{{ savedLocation.path }}">{{ savedLocation.path }}</div>
+                        </div>
+                        <button
+                            class="ui tiny icon button"
+                            title="Remove saved location"
+                            ng-click="ctl.removeSavedLocation(savedLocation.path)">
+                            <i class="trash icon"></i>
+                        </button>
+                    </div>
                 </div>
-            </td>
-        </tr>
-    </tbody>
-</table>
+            </div>
+
+            <div class="ui info message" ng-if="ctl.hasServer() && !ctl.getSavedLocations().length">
+                <p>No saved locations configured for this server yet.</p>
+            </div>
+
+            <div class="ui warning message" ng-if="!ctl.hasServer()">
+                <p>Connect to a server to manage its saved locations.</p>
+            </div>
+
+            <button
+                type="button"
+                class="ui primary button"
+                data-role="settings-saved-location-add"
+                ng-click="ctl.openSavedLocationModal()"
+                ng-disabled="!ctl.hasServer()">
+                Add saved location
+            </button>
+        </div>
+    </div>
+</div>
+
+<saved-location-modal modal-id="settingsSavedLocationModal" ng-ref="ctl.savedLocationModalRef"></saved-location-modal>

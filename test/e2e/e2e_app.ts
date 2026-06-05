@@ -161,6 +161,13 @@ export class App {
     return modal
   }
 
+  async isUploadSavedLocationDropdownOpen() {
+    const modal = await this.uploadTorrentModalVisible()
+    const dropdown = modal.$("#upload-options-saved-location")
+    await dropdown.waitForDisplayed()
+    return (await dropdown.getAttribute("class")).includes("active visible")
+  }
+
   private async setUploadToggle(modal: WebdriverIO.Element, action: string, enabled: boolean) {
     const toggle = modal.$(`div[data-action="${action}"]`)
     const toggleInput = toggle.$("input")
@@ -186,7 +193,7 @@ export class App {
     label?: string
     start?: boolean
     name?: string
-    saveLocation?: string
+    savedLocationPath?: string
     peerLimit?: number
     sequentialDownload?: boolean
     firstAndLastPiecePrio?: boolean
@@ -202,10 +209,24 @@ export class App {
       await nameInput.setValue(options.name)
     }
 
-    if (options?.saveLocation) {
-      const saveLocationInput = modal.$("input[data-action='save-location']")
-      await saveLocationInput.waitForDisplayed()
-      await saveLocationInput.setValue(options.saveLocation)
+    if (options?.savedLocationPath) {
+      const savedLocationDropdown = modal.$("#upload-options-saved-location")
+      await savedLocationDropdown.waitForDisplayed()
+      await savedLocationDropdown.waitForClickable()
+      await savedLocationDropdown.click()
+      await savedLocationDropdown.getHTML(false)
+      await browser.execute((path) => {
+        const dropdown = document.querySelector("#upload-options-saved-location")
+        const item = dropdown?.querySelector(`[data-path="${path}"]`) as HTMLElement | null
+        item?.click()
+      }, options.savedLocationPath)
+      const selectedText = savedLocationDropdown.$(".text")
+      await browser.waitUntil(async () => {
+        return (await selectedText.getText()).includes(options.savedLocationPath || "")
+      }, {
+        timeout: 5_000,
+        timeoutMsg: `Expected saved location dropdown to select ${options.savedLocationPath}`,
+      })
     }
 
     if (options?.start !== undefined) {
@@ -601,6 +622,55 @@ export class App {
     if (await clearButton.isEnabled()) {
       await clearButton.click()
     }
+  }
+
+  async addSettingsSavedLocation({ path, icon }: { path: string, icon: string }) {
+    const addButton = $("#page-settings-advanced [data-role='settings-saved-location-add']")
+    await addButton.waitForDisplayed()
+    await addButton.waitForClickable()
+    await addButton.click()
+
+    const modal = $("#settingsSavedLocationModal")
+    await waitForModalOpen(modal, this.timeout)
+
+    const pathInput = modal.$("input[data-role='saved-location-path']")
+    await pathInput.waitForDisplayed()
+    await pathInput.clearValue()
+    await pathInput.setValue(path)
+
+    const iconButton = modal.$(`button[data-role='saved-location-icon-option'][data-icon='${icon}']`)
+    await iconButton.waitForDisplayed()
+    await iconButton.click()
+
+    const saveButton = modal.$("button[data-role='saved-location-save']")
+    await saveButton.waitForEnabled()
+    await saveButton.click()
+    await waitForModalClose(modal, this.timeout)
+  }
+
+  async addUploadModalSavedLocation({ path, icon }: { path: string, icon: string }) {
+    const modal = await this.uploadTorrentModalVisible()
+    const addButton = modal.$("button[data-role='upload-add-saved-location']")
+    await addButton.waitForDisplayed()
+    await addButton.waitForClickable()
+    await addButton.click()
+
+    const savedLocationModal = $("#uploadSavedLocationModal")
+    await waitForModalOpen(savedLocationModal, this.timeout)
+
+    const pathInput = savedLocationModal.$("input[data-role='saved-location-path']")
+    await pathInput.waitForDisplayed()
+    await pathInput.clearValue()
+    await pathInput.setValue(path)
+
+    const iconButton = savedLocationModal.$(`button[data-role='saved-location-icon-option'][data-icon='${icon}']`)
+    await iconButton.waitForDisplayed()
+    await iconButton.click()
+
+    const saveButton = savedLocationModal.$("button[data-role='saved-location-save']")
+    await saveButton.waitForEnabled()
+    await saveButton.click()
+    await waitForModalClose(savedLocationModal, this.timeout)
   }
 
   async getStoredServerName(serverIndex: number) {

@@ -6,6 +6,7 @@ import dropdownGroupHtml from "./dropdown-group.template.html";
 interface DropdownScope extends IScope {
     title: string;
     open?: string;
+    openOnFocus?: string;
     model: any;
     change?: () => void;
     dropdown_class: string;
@@ -31,6 +32,7 @@ export class DropdownElementDirective implements IDirective {
     scope = {
         title: "@",
         open: "@",
+        openOnFocus: "@?",
         model: "=ngModel",
         change: "&?ngChange",
     };
@@ -43,6 +45,7 @@ export class DropdownElementDirective implements IDirective {
     link(scope: DropdownScope, element: IAugmentedJQuery, attrs: IAttributes, controller: DropDownController) {
         let isMouseDown = false;
         const originalTitle = attrs.title || scope.title;
+        const openOnFocus = scope.openOnFocus !== "false";
 
         scope.dropdown_class = "ui selection dropdown";
         scope.menu_class = "menu transition hidden";
@@ -81,7 +84,7 @@ export class DropdownElementDirective implements IDirective {
         };
 
         const onFocus = () => {
-            if (!scope.is_open && !isMouseDown) {
+            if (openOnFocus && !scope.is_open && !isMouseDown) {
                 open();
             }
         };
