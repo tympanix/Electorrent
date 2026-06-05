@@ -185,3 +185,5 @@ import { TorrentDetailsPanelDirective } from "@renderer/app/directives/torrent-d
 torrentApp.directive('torrentDetailsPanel', TorrentDetailsPanelDirective.getInstance())
 import { SetLocationModalDirective } from "@renderer/app/directives/set-location-modal/set-location-modal.directive";
 torrentApp.directive('setLocationModal', SetLocationModalDirective.getInstance())
+import { SavedLocationModalDirective } from "@renderer/app/directives/saved-location-modal/saved-location-modal.directive";
+torrentApp.directive('savedLocationModal', SavedLocationModalDirective.getInstance())

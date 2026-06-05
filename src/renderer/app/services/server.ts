@@ -1,6 +1,6 @@
 import _ from "underscore"
 import { Torrent } from "@renderer/app/bittorrent"
-import type { StoredServerConfig } from "@shared/ipc-contract"
+import type { SavedLocationConfig, StoredServerConfig } from "@shared/ipc-contract"
 
 export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorrent', '$btclients',
     function($rootScope, $q, $notify, $bittorrent, $btclients) {
@@ -42,8 +42,22 @@ export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorr
                 this.path = path
                 this.lastused = -1
                 this.columns = this.defaultColumns()
+                this.savedLocations = []
             }
             this.isConnected = false
+        }
+
+        function normalizeSavedLocations(savedLocations?: SavedLocationConfig[]) {
+            if (!Array.isArray(savedLocations)) {
+                return []
+            }
+
+            return savedLocations
+                .filter((savedLocation) => !!savedLocation?.path && !!savedLocation?.icon)
+                .map((savedLocation) => ({
+                    path: savedLocation.path,
+                    icon: savedLocation.icon,
+                }))
         }
 
         Server.prototype.fromJson = function(data) {
@@ -61,6 +75,7 @@ export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorr
             this.certificate = data.certificate
             this.certificateData = data.certificateData ? new Uint8Array(data.certificateData) : undefined
             this.columns = this.parseColumns(data.columns)
+            this.savedLocations = normalizeSavedLocations(data.savedLocations)
         };
 
         Server.prototype.json = function() {
@@ -78,6 +93,7 @@ export let serverService = ['$rootScope', '$q', 'notificationService', '$bittorr
                 lastused: this.lastused || -1,
                 certificate: this.certificate,
                 columns: this.columns.filter((column) => column.enabled).map((column) => column.name),
+                savedLocations: normalizeSavedLocations(this.savedLocations),
             }
         };
 

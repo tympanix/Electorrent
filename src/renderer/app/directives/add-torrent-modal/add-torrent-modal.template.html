@@ -13,7 +13,12 @@
                 <div class="sub header">{{ ctl.getCurrentTorrentUploadLabel() }}</div>
             </div>
         </h4>
-        <torrent-upload-form loading="ctl.isLoading" options="ctl.uploadOptions" labels="labels" />
+        <torrent-upload-form
+            loading="ctl.isLoading"
+            options="ctl.uploadOptions"
+            labels="labels"
+            can-add-saved-location="!!ctl.rootScope.$server"
+            on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
     </div>
     <div class="actions">
         <button class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
@@ -25,3 +30,4 @@
         </button>
     </div>
 </modal>
+<saved-location-modal modal-id="uploadSavedLocationModal" ng-ref="ctl.savedLocationModalRef"></saved-location-modal>

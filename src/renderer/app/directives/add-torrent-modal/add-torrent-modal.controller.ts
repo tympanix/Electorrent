@@ -1,6 +1,8 @@
 import { IRootScopeService } from "angular";
 import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import { SavedLocationModalController } from "@renderer/app/directives/saved-location-modal/saved-location-modal.controller";
+import type { SavedLocationConfig } from "@shared/ipc-contract";
 import { AddTorrentModalScope } from "./add-torrent-modal.directive";
 
 export class AddTorrentModalController {
@@ -12,15 +14,20 @@ export class AddTorrentModalController {
     }
 
     scope: AddTorrentModalScope
-    rootScope: IRootScopeService
+    rootScope: IRootScopeService & { $btclient?: { uploadOptionsEnable?: { saveLocation?: boolean } }, $server?: { savedLocations?: SavedLocationConfig[] } }
     modalref: ModalController
+    savedLocationModalRef: SavedLocationModalController
     uploadOptions: TorrentUploadOptions
     isLoading: boolean
+    private preserveUploadsOnHide: boolean
+    private restoreUploadOptionsOnShow: boolean
 
     constructor(scope: AddTorrentModalScope, rootScope: IRootScopeService) {
         this.scope = scope
         this.rootScope = rootScope
         this.isLoading = false
+        this.preserveUploadsOnHide = false
+        this.restoreUploadOptionsOnShow = false
         this.uploadOptions = {}
         this.scope.$watch(() => {
             return this.scope.torrents && this.scope.torrents.length
@@ -34,13 +41,25 @@ export class AddTorrentModalController {
     }
 
     onShow() {
+        if (this.restoreUploadOptionsOnShow) {
+            this.restoreUploadOptionsOnShow = false
+            return
+        }
+
         this.uploadOptions = Object.assign({},
             AddTorrentModalController.defaultTorrentUploadOptions
         )
     }
 
     onHidden() {
+        if (this.preserveUploadsOnHide) {
+            return
+        }
         this.scope.torrents = []
+    }
+
+    supportsSavedLocations() {
+        return !!this.rootScope.$btclient?.uploadOptionsEnable?.saveLocation
     }
 
     getCurrentTorrentUpload() {
@@ -86,6 +105,28 @@ export class AddTorrentModalController {
         } finally {
             this.isLoading = false
         }
+    }
+
+    openSavedLocationModal() {
+        if (!this.rootScope.$server) {
+            return
+        }
+
+        this.preserveUploadsOnHide = true
+        this.savedLocationModalRef?.open({
+            autoSave: true,
+            onClose: () => {
+                this.preserveUploadsOnHide = false
+                this.restoreUploadOptionsOnShow = true
+                this.modalref.showModal()
+            },
+            onSuccess: (savedLocation) => {
+                this.uploadOptions.saveLocation = savedLocation.path
+            },
+            server: this.rootScope.$server,
+            submitLabel: "Save location",
+            title: "Add Saved Location",
+        })
     }
 
     async performTorrentURIUpload(uri: string, options: TorrentUploadOptions) {

@@ -18,6 +18,11 @@ import html from './torrent-upload-form.template.html'
 
 export interface TorrentUploadFormScope extends IScope {
     torrents: {data: Uint8Array, filename: string}[]
+    options?: unknown
+    labels?: string[]
+    loading?: boolean
+    canAddSavedLocation?: boolean
+    onAddSavedLocation?: () => void
 }
 
 export abstract class Directive implements IDirective {
@@ -52,6 +57,8 @@ export class TorrentUploadFormDirective extends Directive {
             options: "=",
             labels: "=",
             loading: "<",
+            canAddSavedLocation: "<",
+            onAddSavedLocation: "&?",
         }
         this.controller = TorrentUploadFormController
         this.controllerAs = "ctl"

@@ -1,9 +1,38 @@
 <div>
     <div class="ui form" ng-class="{'loading': loading}">
-        <div class="field" ng-if="ctl.optionsEnabled.saveLocation">
-            <div class="ui left icon input">
-                <i class="save icon"></i>
-                <input data-action="save-location" id="upload-options-savelocation" placeholder="Download location" type="text" ng-model="options.saveLocation">
+        <div class="fields" ng-if="ctl.optionsEnabled.saveLocation">
+            <div class="thirteen wide field">
+                <dropdown
+                    title="Default location"
+                    id="upload-options-saved-location"
+                    class="fluid"
+                    open-on-focus="false"
+                    ng-model="ctl.selectedSavedLocationPath"
+                    ng-change="ctl.applySelectedSavedLocation()">
+                    <dropdown-group title="'Default location'" value="''">
+                        <i class="save outline icon"></i>
+                        <span>Default location</span>
+                    </dropdown-group>
+                    <dropdown-group
+                        ng-repeat="savedLocation in ctl.savedLocations track by savedLocation.path"
+                        title="savedLocation.path"
+                        value="savedLocation.path"
+                        data-path="{{ savedLocation.path }}">
+                        <i class="{{ savedLocation.icon }} icon"></i>
+                        <span>{{ savedLocation.path }}</span>
+                    </dropdown-group>
+                </dropdown>
+            </div>
+            <div class="three wide field" ng-if="ctl.hasSavedLocationAction()">
+                <button
+                    type="button"
+                    class="ui basic icon button fluid"
+                    title="Add saved location"
+                    data-role="upload-add-saved-location"
+                    ng-click="ctl.openSavedLocationModal()"
+                    ng-disabled="!ctl.canOpenSavedLocationModal() || loading">
+                    <i class="plus icon"></i>
+                </button>
             </div>
         </div>
 
