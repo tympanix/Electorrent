@@ -1,5 +1,7 @@
 import { IAugmentedJQuery } from "angular";
 
+const OVERFLOW_BUFFER_ROWS = 5;
+
 export class LimitBindController {
     limit!: number;
     private container?: IAugmentedJQuery;
@@ -14,7 +16,8 @@ export class LimitBindController {
             return;
         }
 
-        const limit = Math.ceil((this.container.innerHeight() || 0) / this.elementHeight);
+        const visibleRows = Math.ceil((this.container.innerHeight() || 0) / this.elementHeight);
+        const limit = visibleRows + OVERFLOW_BUFFER_ROWS;
         if (limit > this.limit || force) {
             this.limit = limit;
         }

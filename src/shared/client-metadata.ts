@@ -15,6 +15,11 @@ export const CLIENT_METADATA: Record<string, ClientMetadata> = {
         icon: 'qbittorrent',
         showAdvancedUploadMenu: true,
     },
+    mock: {
+        name: 'Mock Bittorrent',
+        icon: 'qbittorrent',
+        showAdvancedUploadMenu: true,
+    },
     transmission: {
         name: 'Transmission',
         icon: 'transmission',
