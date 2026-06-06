@@ -3,3 +3,5 @@
 *******************************/
 
 @importGoogleFonts: false;
+@imagePath: './default/assets/images';
+@fontPath: './default/assets/fonts';
