@@ -11,7 +11,15 @@ export class AppThemeController {
         const settings = settingsService.getAllSettings();
         $scope.theme = settings.ui.theme;
 
-        $scope.$on("new:settings", (e: unknown, nextSettings: any) => {
+        settingsService.whenReady().then(() => {
+            $scope.theme = settingsService.getAllSettings().ui.theme;
+        }).catch(() => {
+            // Settings load errors are reported by the application bootstrap.
+        }).finally(() => {
+            $scope.$applyAsync();
+        });
+
+        $scope.$on("new:settings", (_event: unknown, nextSettings: any) => {
             $scope.theme = nextSettings.ui.theme || $scope.theme;
         });
     }
