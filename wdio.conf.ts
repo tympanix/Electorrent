@@ -95,6 +95,9 @@ export const config: WebdriverIO.Config = {
         'rtorrent': [
             'test/fixtures/rtorrent/*.spec.ts',
         ],
+        'mock': [
+            'test/fixtures/mock/*.spec.ts',
+        ],
     },
 
     //

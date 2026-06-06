@@ -3,6 +3,7 @@ export { TorrentClient } from "./torrentclient"
 
 // Client API implementations for bittorrent providers
 export { DelugeClient, DelugeTorrent } from "./deluge"
+export { MockBittorrentClient } from "./mock"
 export { QBittorrentClient, QBittorrentTorrent } from "./qbittorrent"
 export { RtorrentClient, RtorrentTorrent } from "./rtorrent"
 export { SynologyClient, SynologyTorrent } from "./synology"

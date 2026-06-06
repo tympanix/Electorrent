@@ -1,6 +1,7 @@
 import { DelugeRuntime } from "@main/lib/bittorrent/clients/deluge"
 import { QBittorrentRuntime } from "@main/lib/bittorrent/clients/qbittorrent"
 import { RtorrentRuntime } from "@main/lib/bittorrent/clients/rtorrent"
+import { MockBittorrentRuntime } from "@main/lib/bittorrent/clients/mock"
 import { SynologyRuntime } from "@main/lib/bittorrent/clients/synology"
 import { TransmissionRuntime } from "@main/lib/bittorrent/clients/transmission"
 import { UtorrentRuntime } from "@main/lib/bittorrent/clients/utorrent"
@@ -14,6 +15,8 @@ export function createRuntime(clientId: string): BittorrentRuntime {
             return new RtorrentRuntime()
         case "deluge":
             return new DelugeRuntime()
+        case "mock":
+            return new MockBittorrentRuntime()
         case "transmission":
             return new TransmissionRuntime()
         case "utorrent":

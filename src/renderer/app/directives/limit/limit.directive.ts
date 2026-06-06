@@ -15,6 +15,10 @@ export class LimitBindDirective implements IDirective {
     link(scope: IScope, element: IAugmentedJQuery, attr: unknown, controller: LimitBindController) {
         controller.setContainer(element);
 
+        scope.$watch(() => controller.limit, () => {
+            controller.updateLimit();
+        });
+
         const onResize = () => {
             scope.$apply(() => {
                 controller.updateLimit();
@@ -37,8 +41,14 @@ export class LimitSourceDirective implements IDirective {
     }
 
     link(scope: IScope & { $first?: boolean }, element: IAugmentedJQuery, attr: unknown, controller: LimitBindController) {
-        if (scope.$first) {
+        const updateLimit = () => {
             controller.updateLimit(element, true);
-        }
+        };
+
+        scope.$watch("$first", (isFirst) => {
+            if (isFirst) {
+                updateLimit();
+            }
+        });
     }
 }
