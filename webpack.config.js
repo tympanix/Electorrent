@@ -40,40 +40,6 @@ function makeTsRule(configFile) {
   }
 }
 
-class RewriteThemeAssetUrlsPlugin {
-  apply(compiler) {
-    compiler.hooks.thisCompilation.tap('RewriteThemeAssetUrlsPlugin', (compilation) => {
-      compilation.hooks.processAssets.tap(
-        {
-          name: 'RewriteThemeAssetUrlsPlugin',
-          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE,
-        },
-        (assets) => {
-          const themeCssFiles = ['css/themes/light.css', 'css/themes/dark.css']
-
-          for (const assetName of themeCssFiles) {
-            const asset = assets[assetName]
-            if (!asset) {
-              continue
-            }
-
-            const rewritten = asset.source().toString()
-              .replace(/(?:\.\.\/|\.\/)*(?:(?:\.generated\/)?semantic\/(?:light|dark)\/|node_modules\/semantic-ui-less\/)?themes\/(?:themes\/)?default\/assets\/fonts\//g, './default/assets/fonts/')
-              .replace(/(?:\.\.\/|\.\/)*src\/renderer\/styles\/themes\/default\/assets\/fonts\//g, './default/assets/fonts/')
-              .replace(/(?:\.\.\/|\.\/)*assets\/css\/(?:\.\/)?default\/assets\/fonts\//g, './default/assets/fonts/')
-              .replace(/(?:\.\.\/|\.\/)*css\/fonts\/bittorrent\./g, '../fonts/bittorrent.')
-              .replace(/(?:\.\.\/|\.\/)*(?:(?:\.generated\/)?semantic\/(?:light|dark)\/|node_modules\/semantic-ui-less\/)?themes\/default\/assets\/images\//g, './default/assets/images/')
-              .replace(/(?:\.\.\/|\.\/)*src\/renderer\/styles\/themes\/default\/assets\/images\//g, './default/assets/images/')
-              .replace(/(?:\.\.\/|\.\/)*assets\/css\/(?:\.\/)?default\/assets\/images\//g, './default/assets/images/')
-
-            compilation.updateAsset(assetName, new compiler.webpack.sources.RawSource(rewritten))
-          }
-        },
-      )
-    })
-  }
-}
-
 const commonPlugins = [
   new CopyWebpackPlugin({
     patterns: [
@@ -151,6 +117,7 @@ const rendererConfig = {
               sourceMap: !isProduction,
               lessOptions: {
                 math: 'always',
+                relativeUrls: false,
                 paths: [path.resolve(__dirname, 'node_modules')],
               },
             },
@@ -197,7 +164,6 @@ const rendererConfig = {
         return 'css/[name].css'
       },
     }),
-    new RewriteThemeAssetUrlsPlugin(),
     new webpack.ProvidePlugin({
       'window.jQuery': 'jquery',
       jQuery: 'jquery',
