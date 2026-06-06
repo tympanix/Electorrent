@@ -61,6 +61,7 @@ class RewriteThemeAssetUrlsPlugin {
               .replace(/(?:\.\.\/|\.\/)*(?:(?:\.generated\/)?semantic\/(?:light|dark)\/|node_modules\/semantic-ui-less\/)?themes\/(?:themes\/)?default\/assets\/fonts\//g, './default/assets/fonts/')
               .replace(/(?:\.\.\/|\.\/)*src\/renderer\/styles\/themes\/default\/assets\/fonts\//g, './default/assets/fonts/')
               .replace(/(?:\.\.\/|\.\/)*assets\/css\/(?:\.\/)?default\/assets\/fonts\//g, './default/assets/fonts/')
+              .replace(/(?:\.\.\/|\.\/)*css\/fonts\/bittorrent\./g, '../fonts/bittorrent.')
               .replace(/(?:\.\.\/|\.\/)*(?:(?:\.generated\/)?semantic\/(?:light|dark)\/|node_modules\/semantic-ui-less\/)?themes\/default\/assets\/images\//g, './default/assets/images/')
               .replace(/(?:\.\.\/|\.\/)*src\/renderer\/styles\/themes\/default\/assets\/images\//g, './default/assets/images/')
               .replace(/(?:\.\.\/|\.\/)*assets\/css\/(?:\.\/)?default\/assets\/images\//g, './default/assets/images/')
@@ -140,7 +141,7 @@ const rendererConfig = {
             options: {
               sourceMap: !isProduction,
               url: {
-                filter: (url) => !url.includes('default/assets/'),
+                filter: (url) => !url.includes('default/assets/') && !url.includes('fonts/bittorrent.'),
               },
             },
           },
