@@ -19,6 +19,14 @@ import startup from '@main/lib/startup'
 
 declare const __non_webpack_require__: NodeRequire | undefined
 
+function isMagnetLink(arg: string) {
+    return /^magnet:\?/i.test(arg)
+}
+
+function isTorrentFilePath(arg: string) {
+    return !isMagnetLink(arg) && arg.toLowerCase().endsWith('.torrent')
+}
+
 if (!startup) {
     void bootstrap()
 }
@@ -340,11 +348,11 @@ async function bootstrap() {
     }
 
     function getMagnetLinks(args: string[]): string[] {
-        return args.filter((url) => url.startsWith('magnet'))
+        return args.filter(isMagnetLink)
     }
 
     function getTorrentFilePaths(args: string[]): string[] {
-        return args.filter((filePath) => filePath.endsWith('.torrent'))
+        return args.filter(isTorrentFilePath)
     }
 
     function queuePendingLaunchArgs(args: string[]) {
