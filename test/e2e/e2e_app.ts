@@ -586,8 +586,8 @@ export class App {
     return values.filter(Boolean)
   }
 
-  getThemeOptions(): readonly ["Light", "Dark"] {
-    return ["Light", "Dark"] as const
+  getThemeOptions(): readonly ["System", "Light", "Dark"] {
+    return ["System", "Light", "Dark"] as const
   }
 
   async selectGeneralDropdownValue(settingName: string, optionText: string) {
