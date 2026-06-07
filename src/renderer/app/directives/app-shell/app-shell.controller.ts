@@ -140,7 +140,7 @@ export class AppShellController {
         };
 
         electorrent.launch.onMagnets((magnets: string[]) => {
-            queueMagnetLinks(magnets, true);
+            queueMagnetLinks(magnets);
             drainPendingLaunchPayloads();
             $scope.$applyAsync();
         });
@@ -254,7 +254,7 @@ export class AppShellController {
                 settingsService.updateServer(server);
                 pageTorrents(true);
                 return electorrent.launch.getPending().then((payload: LaunchPayload) => {
-                    queueMagnetLinks(payload.magnets || [], true);
+                    queueMagnetLinks(payload.magnets || []);
                     queueTorrentFiles(payload.torrentFiles || []);
                     drainPendingLaunchPayloads();
                 });
