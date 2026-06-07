@@ -75,8 +75,8 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       return addTorrentUrl(magnet, uploadOptions)
     };
 
-    uploadTorrent(buffer: Uint8Array, filename?: string, uploadOptions?: TorrentUploadOptions): Promise<void> {
-      return uploadTorrent(buffer, filename || "upload.torrent", uploadOptions)
+    uploadTorrent(buffer: Uint8Array, filename?: string, uploadOptions?: TorrentUploadOptions, sourcePath?: string): Promise<void> {
+      return uploadTorrent(buffer, filename || "upload.torrent", uploadOptions, sourcePath)
     };
 
     start(torrents: TransmissionTorrent[]): Promise<void> {

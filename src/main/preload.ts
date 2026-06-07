@@ -1,4 +1,4 @@
-import { clipboard, contextBridge, ipcRenderer } from 'electron'
+import { clipboard, contextBridge, ipcRenderer, webUtils } from 'electron'
 
 import { IPC_CHANNELS } from '@shared/ipc'
 import type { PendingTorrentUploadFile, PendingTorrentUploadLink } from '@shared/ipc-contract'
@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld('electorrent', {
     torrents: {
         openFiles: (askUploadOptions: boolean) => invoke(IPC_CHANNELS.torrents.openFiles, { askUploadOptions }),
         parse: (request: unknown) => invoke(IPC_CHANNELS.torrents.parse, request),
+        getPathForFile: (file: any) => webUtils.getPathForFile(file),
     },
     bittorrent: {
         connect: (server: unknown) => invoke(IPC_CHANNELS.bittorrent.connect, { server }),

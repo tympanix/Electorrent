@@ -40,8 +40,8 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
         return addTorrentUrl(magnet, options)
     }
 
-    uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions): Promise<void> {
-        return uploadTorrent(buffer, filename, options)
+    uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions, sourcePath?: string): Promise<void> {
+        return uploadTorrent(buffer, filename, options, sourcePath)
     }
 
     resume(torrents: DelugeTorrent[]): Promise<void> {

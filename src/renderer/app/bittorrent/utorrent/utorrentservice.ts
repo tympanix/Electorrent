@@ -25,8 +25,8 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
     return addTorrentUrl(url, options)
   };
 
-  uploadTorrent(buffer: Uint8Array, filename?: string, options?: TorrentUploadOptions): Promise<void> {
-    return uploadTorrent(buffer, filename || "upload.torrent", options)
+  uploadTorrent(buffer: Uint8Array, filename?: string, options?: TorrentUploadOptions, sourcePath?: string): Promise<void> {
+    return uploadTorrent(buffer, filename || "upload.torrent", options, sourcePath)
   };
 
   async torrents(): Promise<TorrentUpdates> {

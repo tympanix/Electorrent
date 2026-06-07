@@ -29,13 +29,16 @@ export class DragAndDropDirective implements IDirective {
         return file.name.toLowerCase().endsWith(".torrent");
     }
 
-    private readDroppedFile(file: File, askUploadOptions: boolean): Promise<PendingTorrentUploadFile> {
-        return file.arrayBuffer().then((buffer) => ({
+    private async serializeDroppedTorrent(file: File, askUploadOptions: boolean): Promise<PendingTorrentUploadFile> {
+        const sourcePath = window.electorrent.torrents.getPathForFile(file);
+
+        return {
             type: "file",
             filename: file.name,
-            data: new Uint8Array(buffer),
+            data: new Uint8Array(await file.arrayBuffer()),
+            sourcePath: sourcePath || undefined,
             askUploadOptions,
-        }));
+        };
     }
 
     private broadcastTorrentFiles(files: PendingTorrentUploadFile[]) {
@@ -44,6 +47,7 @@ export class DragAndDropDirective implements IDirective {
                 type: "file",
                 filename: file.filename,
                 data: new Uint8Array(file.data),
+                sourcePath: file.sourcePath,
             }, !!file.askUploadOptions);
         });
     }
@@ -98,7 +102,7 @@ export class DragAndDropDirective implements IDirective {
                     return [];
                 }
 
-                return Promise.all(torrentFiles.map((file) => this.readDroppedFile(file, advancedKey)));
+                return Promise.all(torrentFiles.map((file) => this.serializeDroppedTorrent(file, advancedKey)));
             }).then((files: PendingTorrentUploadFile[]) => {
                 this.$rootScope.$applyAsync(() => {
                     this.broadcastTorrentFiles(files);
