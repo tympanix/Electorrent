@@ -51,6 +51,7 @@ async function bootstrap() {
         ipcHandlers,
         menu,
         { TorrentFileWatcher },
+        titleBar,
     ] = await Promise.all([
         import('@shared/ipc'),
         import('@main/lib/bittorrent'),
@@ -63,6 +64,7 @@ async function bootstrap() {
         import('@main/lib/ipc'),
         import('@main/lib/menu'),
         import('@main/lib/torrent-file-watcher'),
+        import('@main/lib/title-bar'),
     ])
 
     logger.debug('Starting Electorrent in debug mode')
@@ -167,11 +169,12 @@ async function bootstrap() {
     }
 
     function createTorrentWindow() {
+        const titleBarOptions = titleBar.getTitleBarWindowOptions(settings.get('ui')?.theme)
         const windowSettings: BrowserWindowConstructorOptions = {
+            ...titleBarOptions,
             show: false,
             width: 1200,
             height: 800,
-            backgroundColor: '#ffffff',
             icon: nativeImage.createFromPath(getApplicationIcon()),
             webPreferences: {
                 nodeIntegration: false,
@@ -394,9 +397,12 @@ async function bootstrap() {
         isDebug: !!program.debug,
         getWindow: () => torrentWindow,
         consumePendingLaunchPayload,
-        onSettingsSaved: async () => {
+        onSettingsSaved: async (newSettings) => {
             syncTray()
             torrentFileWatcher.refresh()
+            if (torrentWindow) {
+                titleBar.updateTitleBarOverlay(torrentWindow, newSettings.ui.theme)
+            }
         },
         onBittorrentConnected: async () => {
             await torrentFileWatcher.flushPendingSilentWatcherFiles()

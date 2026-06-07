@@ -15,6 +15,7 @@ npm run lint
 ```
 
 ## Test exection
+> IMPORTANT: Test must be executed without sandbox
 ```shell
 npm run smoketest
 ```
