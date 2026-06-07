@@ -405,6 +405,12 @@ async function bootstrap() {
                 titleBar.updateTitleBarOverlay(torrentWindow, newSettings.ui.theme)
             }
         },
+        onSystemThemeChanged: () => {
+            const theme = settings.get('ui')?.theme
+            if (theme === 'system' && torrentWindow) {
+                titleBar.updateTitleBarOverlay(torrentWindow, theme)
+            }
+        },
         onBittorrentConnected: async () => {
             await torrentFileWatcher.flushPendingSilentWatcherFiles()
         },

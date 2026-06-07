@@ -20,7 +20,7 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
             displayCompact: false,
             cleanNames: true,
             fixedHeader: false,
-            theme: 'light',
+            theme: 'system',
             sidebarCollapsed: false,
         },
         servers: [],

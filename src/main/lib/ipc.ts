@@ -1,4 +1,4 @@
-import { app, dialog, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
+import { app, dialog, ipcMain, nativeTheme, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
 import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
@@ -8,7 +8,7 @@ import { bittorrentManager } from './bittorrent'
 import * as certificates from './certificates'
 import * as menu from './menu'
 import * as settings from './settings'
-import themes from './themes'
+import themes, { getSystemTheme } from './themes'
 import * as torrents from './torrents'
 import * as updater from './update'
 
@@ -20,6 +20,7 @@ interface RegisterHandlersOptions {
         torrentFiles: unknown[]
     }>
     onSettingsSaved?: (settings: AppSettings) => void | Promise<void>
+    onSystemThemeChanged?: () => void
     onBittorrentConnected?: () => void | Promise<void>
 }
 
@@ -40,7 +41,7 @@ function getAppMeta(isDebug: boolean) {
     }
 }
 
-export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload, onSettingsSaved, onBittorrentConnected }: RegisterHandlersOptions) {
+export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload, onSettingsSaved, onSystemThemeChanged, onBittorrentConnected }: RegisterHandlersOptions) {
     menu.configure({ isDebug })
 
     ipcMain.handle(IPC_CHANNELS.app.getMeta, async function() {
@@ -92,6 +93,18 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
 
     ipcMain.handle(IPC_CHANNELS.settings.listThemes, async function() {
         return themes()
+    })
+
+    ipcMain.handle(IPC_CHANNELS.settings.getSystemTheme, async function() {
+        return getSystemTheme()
+    })
+
+    nativeTheme.on('updated', function() {
+        const window = getWindow()
+        if (window && !window.isDestroyed()) {
+            window.webContents.send(IPC_CHANNELS.settings.systemThemeChanged, getSystemTheme())
+        }
+        onSystemThemeChanged?.()
     })
 
     ipcMain.handle(IPC_CHANNELS.settings.chooseWatchDirectory, async function(_event: IpcMainInvokeEvent, { currentPath }) {

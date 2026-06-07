@@ -1,18 +1,40 @@
 import { IScope } from "angular";
+import type { ColorTheme, ThemePreference } from "@shared/ipc-contract";
 
 interface AppThemeScope extends IScope {
-    theme: string;
+    theme: ColorTheme;
 }
 
 export class AppThemeController {
     static $inject = ["$scope", "settingsService"];
 
     constructor($scope: AppThemeScope, settingsService: any) {
-        const settings = settingsService.getAllSettings();
-        $scope.theme = settings.ui.theme;
+        const electorrent = window.electorrent;
+        let systemTheme: ColorTheme = "light";
+        let themePreference: ThemePreference = settingsService.getAllSettings().ui.theme;
+
+        const applyTheme = () => {
+            $scope.theme = themePreference === "system" ? systemTheme : themePreference;
+        };
+
+        applyTheme();
+
+        const unsubscribeSystemTheme = electorrent.settings.onSystemThemeChanged((theme) => {
+            systemTheme = theme;
+            applyTheme();
+            $scope.$applyAsync();
+        });
+
+        electorrent.settings.getSystemTheme().then((theme) => {
+            systemTheme = theme;
+            applyTheme();
+        }).finally(() => {
+            $scope.$applyAsync();
+        });
 
         settingsService.whenReady().then(() => {
-            $scope.theme = settingsService.getAllSettings().ui.theme;
+            themePreference = settingsService.getAllSettings().ui.theme;
+            applyTheme();
         }).catch(() => {
             // Settings load errors are reported by the application bootstrap.
         }).finally(() => {
@@ -20,7 +42,12 @@ export class AppThemeController {
         });
 
         $scope.$on("new:settings", (_event: unknown, nextSettings: any) => {
-            $scope.theme = nextSettings.ui.theme || $scope.theme;
+            themePreference = nextSettings.ui.theme || themePreference;
+            applyTheme();
+        });
+
+        $scope.$on("$destroy", () => {
+            unsubscribeSystemTheme();
         });
     }
 }
