@@ -176,7 +176,7 @@ export function put(key: string, value: any, callback?: (err?: Error | null) => 
     }
 }
 
-export function getAllSettings() {
+export function getAllSettings(): MainAppSettings {
     load()
     return copy(data)
 }

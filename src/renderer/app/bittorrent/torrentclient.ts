@@ -205,7 +205,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * @param {string} filename
      * @return {promise} isAdded
      */
-    abstract uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions): Promise<void>
+    abstract uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions, sourcePath?: string): Promise<void>
 
     /**
      * Delete torrent(s) from the client. If the client has multiple methods of deleting a torrent,

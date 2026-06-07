@@ -268,22 +268,23 @@ export class App {
     await waitForModalClose(modal, this.timeout)
   }
 
-  async uploadTorrent({ filename, askUploadOptions }: { filename: string, askUploadOptions?: boolean }) {
+  async uploadTorrent({ filename, askUploadOptions, sourcePath }: { filename: string, askUploadOptions?: boolean, sourcePath?: string }) {
     const data = fs.readFileSync(path.join(filename));
     const info = parseTorrent(data)
     const hash = info.infoHash
     const torrent = new Torrent({ hash: hash, app: this });
     await expect(await torrent.isExisting()).toBe(false);
-    await browser.execute((data, filename, askUploadOptions) => {
+    await browser.execute((data, filename, askUploadOptions, sourcePath) => {
       const injector = angular.element(document.body).injector()
       const $rootScope = injector.get("$rootScope")
       $rootScope.$broadcast("torrents:add", {
         type: "file",
         data: new Uint8Array(data),
         filename,
+        sourcePath,
       }, !!askUploadOptions)
       $rootScope.$apply()
-    }, Array.from(data), path.basename(filename), askUploadOptions)
+    }, Array.from(data), path.basename(filename), askUploadOptions, sourcePath)
     this.torrents.push(torrent);
     return torrent;
   }

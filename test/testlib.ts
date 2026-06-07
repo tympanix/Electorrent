@@ -480,6 +480,49 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
         })
 
+        describe("automatic torrent file removal", function() {
+          it("removes local torrent file after successful upload", async function() {
+            this.timeout(90 * 1000)
+
+            const torrentPath = await createTorrentFile(tracker, { fileSize: 1 })
+            let initialAutoRemoveSetting = false
+            let torrent: e2e.Torrent | undefined
+
+            try {
+              await restartApplication(this)
+              await this.app.torrentsPageIsVisible()
+              await this.app.openSettings()
+              await this.app.settingsGotoTab("general")
+              initialAutoRemoveSetting = await this.app.getGeneralToggleState("Delete Torrent Files")
+              await this.app.setGeneralToggle("Delete Torrent Files", true)
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+
+              torrent = await this.app.uploadTorrent({
+                filename: torrentPath,
+                sourcePath: torrentPath,
+              })
+              await torrent.waitForExist({ timeout: 30 * 1000 })
+              await browser.waitUntil(async () => !fs.existsSync(torrentPath), {
+                timeout: 10 * 1000,
+                timeoutMsg: `expected torrent file ${torrentPath} to be removed after upload`,
+              })
+            } finally {
+              if (torrent && await torrent.isExisting()) {
+                await torrent.delete()
+              }
+
+              await this.app.openSettings()
+              await this.app.settingsGotoTab("general")
+              if (await this.app.getGeneralToggleState("Delete Torrent Files") !== initialAutoRemoveSetting) {
+                await this.app.setGeneralToggle("Delete Torrent Files", initialAutoRemoveSetting)
+              }
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+            }
+          })
+        })
+
         describe("when a magnet link is uploaded", async function() {
           let torrent: e2e.Torrent
           requireFeatureHook(options, FeatureSet.MagnetLinks)

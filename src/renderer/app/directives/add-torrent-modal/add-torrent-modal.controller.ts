@@ -93,7 +93,7 @@ export class AddTorrentModalController {
             this.isLoading = true
             let torrent = this.getCurrentTorrentUpload()
             if (torrent.type === 'file') {
-                await this.performTorrentUpload(torrent.data, torrent.filename, this.uploadOptions)
+                await this.performTorrentUpload(torrent.data, torrent.filename, this.uploadOptions, torrent.sourcePath)
             } else {
                 await this.performTorrentURIUpload(torrent.uri, this.uploadOptions)
             }
@@ -136,11 +136,11 @@ export class AddTorrentModalController {
         }
     }
 
-    async performTorrentUpload(torrent: Uint8Array, filename: string, options: TorrentUploadOptions) {
+    async performTorrentUpload(torrent: Uint8Array, filename: string, options: TorrentUploadOptions, sourcePath?: string) {
         if (this.scope.uploadTorrentAction) {
-            await this.scope.uploadTorrentAction(torrent, filename, options)
+            await this.scope.uploadTorrentAction(torrent, filename, options, sourcePath)
         } else {
-            await this.rootScope.$btclient.uploadTorrent(torrent, filename, options)
+            await this.rootScope.$btclient.uploadTorrent(torrent, filename, options, sourcePath)
         }
     }
 

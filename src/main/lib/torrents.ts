@@ -24,7 +24,7 @@ function notify({ title = '', message = '', type = 'info' }) {
 }
 
 function filterFiles(filePath: string) {
-    return filePath.endsWith('.torrent')
+    return filePath.toLowerCase().endsWith('.torrent')
 }
 
 function sleep(timeout: number) {
@@ -102,6 +102,7 @@ export async function serializeTorrentFile(filePath: string, askUploadOptions: b
         type: 'file',
         filename: path.basename(filePath),
         data: torrentData,
+        sourcePath: filePath,
         askUploadOptions: !!askUploadOptions,
         metadata: parse({ data: torrentData }),
     }

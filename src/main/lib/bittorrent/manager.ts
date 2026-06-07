@@ -1,3 +1,5 @@
+import fs from "fs"
+import path from "path"
 import type { WebContents } from "electron"
 import type {
     BittorrentAddTorrentUrlRequest,
@@ -7,6 +9,8 @@ import type {
     BittorrentTorrentDetailsData,
     BittorrentUploadTorrentRequest,
 } from "@shared/ipc-contract"
+import logger from "../logger"
+import * as settings from "../settings"
 import { createRuntime } from "./registry"
 import type { BittorrentRuntime } from "./types"
 
@@ -32,6 +36,20 @@ class BittorrentManager {
         }
 
         throw new Error("No active bittorrent session")
+    }
+
+    private canAutoRemoveUploadedTorrent(request: BittorrentUploadTorrentRequest) {
+        if (!request.sourcePath) {
+            return false
+        }
+
+        const filename = typeof request.filename === "string" ? request.filename : ""
+        if (!filename || filename !== path.basename(filename) || !filename.toLowerCase().endsWith(".torrent")) {
+            return false
+        }
+
+        const sourceBasename = path.basename(request.sourcePath)
+        return sourceBasename === filename && sourceBasename.toLowerCase().endsWith(".torrent")
     }
 
     async connect(sender: WebContents, server: BittorrentServerConfig): Promise<void> {
@@ -89,7 +107,24 @@ class BittorrentManager {
 
     async uploadTorrent(sender: WebContents, request: BittorrentUploadTorrentRequest) {
         const session = await this.getSession(sender)
-        return session.uploadTorrent(request.data, request.filename, request.options)
+        await session.uploadTorrent(request.data, request.filename, request.options)
+
+        if (settings.getAllSettings().autoRemoveTorrents !== true || !this.canAutoRemoveUploadedTorrent(request)) {
+            return
+        }
+
+        try {
+            await fs.promises.unlink(request.sourcePath)
+        } catch (error) {
+            if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+                return
+            }
+
+            logger.error("Failed to delete uploaded torrent file", {
+                filePath: request.sourcePath,
+                error,
+            })
+        }
     }
 
     async invokeAction(sender: WebContents, request: BittorrentInvokeActionRequest) {

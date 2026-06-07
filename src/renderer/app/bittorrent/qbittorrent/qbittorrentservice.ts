@@ -83,8 +83,8 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return "/";
     };
 
-    uploadTorrent(buffer: Uint8Array, filename: string, options: TorrentUploadOptions): Promise<void> {
-      return uploadTorrent(buffer, filename, options);
+    uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions, sourcePath?: string): Promise<void> {
+      return uploadTorrent(buffer, filename, options, sourcePath);
     };
 
     addTorrentUrl(magnet: string, options?: TorrentUploadOptions): Promise<void> {
