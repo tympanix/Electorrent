@@ -3,6 +3,36 @@ html, body {
     -webkit-user-select: none;
     color: @textColor;
 }
+.title-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 38px;
+    z-index: 1000;
+    background-color: @pageBackground;
+    border-bottom: 1px solid @borderColor;
+    app-region: drag;
+}
+.app-content {
+    position: absolute;
+    top: 38px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+}
+.app-content > div,
+.app-content torrents-page,
+.app-content settings-page,
+.app-content welcome-page,
+.app-content server-selection {
+    display: block;
+    height: 100%;
+}
+.app-content .wrapper {
+    height: 100%;
+}
 .wrapper {
     position: relative;
     top: 0;

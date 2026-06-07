@@ -1,25 +1,29 @@
 <div class="main wrapper">
-    <div ng-show="showLoading" class="overlay animated">
-        <div class="ui active inverted solid dimmer">
-            <div class="ui huge text loader">{{statusText}}</div>
+    <header class="title-bar" aria-label="Window title bar"></header>
+
+    <div class="app-content">
+        <div ng-show="showLoading" class="overlay animated">
+            <div class="ui active inverted solid dimmer">
+                <div class="ui huge text loader">{{statusText}}</div>
+            </div>
         </div>
-    </div>
 
-    <notifications-center></notifications-center>
+        <notifications-center></notifications-center>
 
-    <div ng-show="showSettings()" class="overlay animated">
-        <settings-page></settings-page>
-    </div>
+        <div ng-show="showSettings()" class="overlay animated">
+            <settings-page></settings-page>
+        </div>
 
-    <div ng-show="showWelcome()" class="overlay animated">
-        <welcome-page></welcome-page>
-    </div>
+        <div ng-show="showWelcome()" class="overlay animated">
+            <welcome-page></welcome-page>
+        </div>
 
-    <div ng-show="showServers()" class="overlay animated">
-        <server-selection servers="servers" connect-to-server="connectToServer(server)"></server-selection>
-    </div>
+        <div ng-show="showServers()" class="overlay animated">
+            <server-selection servers="servers" connect-to-server="connectToServer(server)"></server-selection>
+        </div>
 
-    <div ng-show="showTorrents" drag-and-drop>
-        <torrents-page></torrents-page>
+        <div ng-show="showTorrents" drag-and-drop>
+            <torrents-page></torrents-page>
+        </div>
     </div>
 </div>
