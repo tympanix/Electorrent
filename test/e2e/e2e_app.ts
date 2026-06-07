@@ -294,6 +294,7 @@ export class App {
       const info = parseTorrent(data)
       magnetUri = magnet.encode({
         xt: [`urn:btih:${info.infoHash}`],
+        dn: info.name,
         tr: info.announce,
       })
     }
@@ -311,6 +312,11 @@ export class App {
     }, magnetUri, askUploadOptions)
     this.torrents.push(torrent)
     return torrent
+  }
+
+  async uploadTorrentModalLabel() {
+    const modal = await this.uploadTorrentModalVisible()
+    return modal.$(".content .sub.header").getText()
   }
 
   async waitForLabelInDropdown(labelName) {

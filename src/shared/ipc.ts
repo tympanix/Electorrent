@@ -22,6 +22,7 @@ export const IPC_CHANNELS = {
     },
     torrents: {
         openFiles: 'torrents:open-files',
+        parse: 'torrents:parse',
     },
     bittorrent: {
         connect: 'bittorrent:connect',

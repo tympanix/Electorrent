@@ -2,7 +2,7 @@ import { app, dialog, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEven
 import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { AppSettings } from '@shared/ipc-contract'
+import type { AppSettings, PendingTorrentUploadLink } from '@shared/ipc-contract'
 import { getAppVersion } from './app-meta'
 import { bittorrentManager } from './bittorrent'
 import * as certificates from './certificates'
@@ -16,7 +16,7 @@ interface RegisterHandlersOptions {
     isDebug: boolean
     getWindow: () => BrowserWindow | null
     consumePendingLaunchPayload: () => Promise<{
-        magnets: string[]
+        magnets: PendingTorrentUploadLink[]
         torrentFiles: unknown[]
     }>
     onSettingsSaved?: (settings: AppSettings) => void | Promise<void>
@@ -116,6 +116,10 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
 
     ipcMain.handle(IPC_CHANNELS.torrents.openFiles, async function(_event: IpcMainInvokeEvent, { askUploadOptions }) {
         return torrents.browse(askUploadOptions)
+    })
+
+    ipcMain.handle(IPC_CHANNELS.torrents.parse, async function(_event: IpcMainInvokeEvent, request) {
+        return torrents.parse(request)
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {

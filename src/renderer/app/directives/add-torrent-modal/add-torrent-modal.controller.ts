@@ -73,7 +73,7 @@ export class AddTorrentModalController {
             return ""
         }
 
-        return torrent.type === "file" ? torrent.filename : torrent.uri
+        return torrent.metadata?.name || (torrent.type === "file" ? torrent.filename : torrent.uri)
     }
 
     getPendingUploadCountLabel() {

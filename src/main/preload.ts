@@ -1,6 +1,7 @@
 import { clipboard, contextBridge, ipcRenderer } from 'electron'
 
 import { IPC_CHANNELS } from '@shared/ipc'
+import type { PendingTorrentUploadFile, PendingTorrentUploadLink } from '@shared/ipc-contract'
 
 function invoke<T = unknown>(channel: string, payload?: any): Promise<T> {
     return ipcRenderer.invoke(channel, payload)
@@ -31,11 +32,12 @@ contextBridge.exposeInMainWorld('electorrent', {
     },
     launch: {
         getPending: () => invoke(IPC_CHANNELS.launch.getPending),
-        onMagnets: (callback: (magnets: string[]) => void) => subscribe(IPC_CHANNELS.launch.magnets, callback),
-        onTorrentFiles: (callback: (files: Array<{ type: 'file'; data: Uint8Array; filename: string; askUploadOptions?: boolean }>) => void) => subscribe(IPC_CHANNELS.launch.torrentFiles, callback),
+        onMagnets: (callback: (magnets: PendingTorrentUploadLink[]) => void) => subscribe(IPC_CHANNELS.launch.magnets, callback),
+        onTorrentFiles: (callback: (files: PendingTorrentUploadFile[]) => void) => subscribe(IPC_CHANNELS.launch.torrentFiles, callback),
     },
     torrents: {
         openFiles: (askUploadOptions: boolean) => invoke(IPC_CHANNELS.torrents.openFiles, { askUploadOptions }),
+        parse: (request: unknown) => invoke(IPC_CHANNELS.torrents.parse, request),
     },
     bittorrent: {
         connect: (server: unknown) => invoke(IPC_CHANNELS.bittorrent.connect, { server }),
