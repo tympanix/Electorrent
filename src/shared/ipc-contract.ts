@@ -1,5 +1,8 @@
 export type Unsubscribe = () => void
 
+export type ColorTheme = "light" | "dark"
+export type ThemePreference = ColorTheme | "system"
+
 export interface AppMeta {
     appName: string
     appVersion: string
@@ -17,7 +20,7 @@ export interface AppMeta {
 
 export interface ThemeInfo {
     css: string
-    basename: string
+    basename: ThemePreference
     theme: string
 }
 
@@ -170,7 +173,7 @@ export interface AppSettings<TServer = StoredServerConfig> {
         displayCompact: boolean
         cleanNames: boolean
         fixedHeader: boolean
-        theme: string
+        theme: ThemePreference
         sidebarCollapsed: boolean
     }
     servers: TServer[]
@@ -252,6 +255,8 @@ export interface ElectorrentBridge {
         getAll(): Promise<AppSettings>
         saveAll(settings: AppSettings): Promise<void>
         listThemes(): Promise<ThemeInfo[]>
+        getSystemTheme(): Promise<ColorTheme>
+        onSystemThemeChanged(callback: (theme: ColorTheme) => void): Unsubscribe
         chooseWatchDirectory(currentPath?: string): Promise<string | null>
     }
     launch: {

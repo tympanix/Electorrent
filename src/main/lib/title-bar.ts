@@ -1,4 +1,6 @@
 import type { BrowserWindow, BrowserWindowConstructorOptions } from 'electron'
+import type { ThemePreference } from '@shared/ipc-contract'
+import { resolveTheme } from './themes'
 
 const TITLE_BAR_HEIGHT = 38
 
@@ -13,11 +15,11 @@ const THEME_COLORS = {
     },
 }
 
-function getThemeColors(theme?: string) {
-    return theme === 'dark' ? THEME_COLORS.dark : THEME_COLORS.light
+function getThemeColors(theme?: ThemePreference) {
+    return THEME_COLORS[resolveTheme(theme)]
 }
 
-export function getTitleBarWindowOptions(theme?: string): BrowserWindowConstructorOptions {
+export function getTitleBarWindowOptions(theme?: ThemePreference): BrowserWindowConstructorOptions {
     const colors = getThemeColors(theme)
     const options: BrowserWindowConstructorOptions = {
         titleBarStyle: 'hidden',
@@ -35,7 +37,7 @@ export function getTitleBarWindowOptions(theme?: string): BrowserWindowConstruct
     return options
 }
 
-export function updateTitleBarOverlay(window: BrowserWindow, theme?: string) {
+export function updateTitleBarOverlay(window: BrowserWindow, theme?: ThemePreference) {
     if (process.platform === 'darwin' || window.isDestroyed()) {
         return
     }
