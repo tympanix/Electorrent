@@ -35,6 +35,7 @@ const TRANSMISSION_FIELDS = [
     'isFinished',
     'isPrivate',
     'isStalled',
+    'labels',
     'leftUntilDone',
     'magnetLink',
     'manualAnnounceTime',
@@ -281,6 +282,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
 
         return this.removeEmpty({
             'download-dir': uploadOptions.saveLocation,
+            labels: uploadOptions.category ? [uploadOptions.category] : undefined,
             paused: uploadOptions.startTorrent === undefined ? undefined : !uploadOptions.startTorrent,
         })
     }
@@ -413,6 +415,12 @@ export class TransmissionRuntime implements BittorrentRuntime {
         return this.doAction('torrent-set-location', hashes, {
             location,
             move: true,
+        }).then((response) => this.ensureSuccess(response)).then(() => undefined)
+    }
+
+    label(hashes: string[], label: string): Promise<void> {
+        return this.doAction('torrent-set', hashes, {
+            labels: [label],
         }).then((response) => this.ensureSuccess(response)).then(() => undefined)
     }
 }

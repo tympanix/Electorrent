@@ -1,5 +1,4 @@
 import { createTestSuite } from "../../testlib";
-import { FeatureSet } from "../../testutil";
 import { TransmissionClient } from "../../../src/renderer/app/bittorrent"
 
 createTestSuite({
@@ -9,7 +8,5 @@ createTestSuite({
   username: "username",
   password: "password",
   acceptHttpStatus: 401,
-  unsupportedFeatures: [
-    FeatureSet.Labels,
-  ],
+  unsupportedFeatures: [],
 });
