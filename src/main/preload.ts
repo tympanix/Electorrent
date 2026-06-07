@@ -1,4 +1,4 @@
-import { clipboard, contextBridge, ipcRenderer } from 'electron'
+import { clipboard, contextBridge, ipcRenderer, webUtils } from 'electron'
 
 import { IPC_CHANNELS } from '@shared/ipc'
 
@@ -36,6 +36,8 @@ contextBridge.exposeInMainWorld('electorrent', {
     },
     torrents: {
         openFiles: (askUploadOptions: boolean) => invoke(IPC_CHANNELS.torrents.openFiles, { askUploadOptions }),
+        readFiles: (filePaths: string[], askUploadOptions: boolean) => invoke(IPC_CHANNELS.torrents.readFiles, { filePaths, askUploadOptions }),
+        getPathForFile: (file: any) => webUtils.getPathForFile(file),
     },
     bittorrent: {
         connect: (server: unknown) => invoke(IPC_CHANNELS.bittorrent.connect, { server }),

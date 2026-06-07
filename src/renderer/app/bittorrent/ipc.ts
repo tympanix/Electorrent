@@ -37,8 +37,8 @@ export function addTorrentUrl(uri: string, options?: TorrentUploadOptions) {
     return bridge().addTorrentUrl({ uri, options })
 }
 
-export function uploadTorrent(data: Uint8Array, filename: string, options?: TorrentUploadOptions) {
-    return bridge().uploadTorrent({ data, filename, options })
+export function uploadTorrent(data: Uint8Array, filename: string, options?: TorrentUploadOptions, sourcePath?: string) {
+    return bridge().uploadTorrent({ data, filename, options, sourcePath })
 }
 
 export function invokeAction(action: string, hashes: string[] = [], ...args: any[]) {

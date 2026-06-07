@@ -12,6 +12,7 @@ export interface PendingTorrentUploadFile {
     type: 'file',
     data: Uint8Array,
     filename: string,
+    sourcePath?: string,
 }
 
 export interface PendingTorrentUploadLink {
@@ -21,7 +22,7 @@ export interface PendingTorrentUploadLink {
 
 export interface AddTorrentModalScope extends IScope {
     torrents: PendingTorrentUploadList
-    uploadTorrentAction: (torrent: Uint8Array, filename: string, options: TorrentUploadOptions) => Promise<void>
+    uploadTorrentAction: (torrent: Uint8Array, filename: string, options: TorrentUploadOptions, sourcePath?: string) => Promise<void>
     uploadTorrentUrlAction: (uri: string, options: TorrentUploadOptions) => Promise<void>
 }
 

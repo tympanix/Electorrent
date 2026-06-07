@@ -32,6 +32,7 @@ export interface PendingTorrentUploadFile {
     type: "file"
     data: Uint8Array
     filename: string
+    sourcePath?: string
     askUploadOptions?: boolean
 }
 
@@ -52,6 +53,7 @@ export interface BittorrentUploadTorrentRequest {
     data: Uint8Array
     filename: string
     options?: Record<string, any>
+    sourcePath?: string
 }
 
 export interface BittorrentInvokeActionRequest {
@@ -235,6 +237,8 @@ export interface ElectorrentBridge {
     }
     torrents: {
         openFiles(askUploadOptions: boolean): Promise<PendingTorrentUploadFile[]>
+        readFiles(filePaths: string[], askUploadOptions: boolean): Promise<PendingTorrentUploadFile[]>
+        getPathForFile(file: unknown): string
     }
     bittorrent: {
         connect(server: BittorrentServerConfig): Promise<void>

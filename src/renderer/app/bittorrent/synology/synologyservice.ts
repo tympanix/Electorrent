@@ -40,8 +40,8 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
         return addTorrentUrl(magnet, options)
     }
 
-    uploadTorrent(buffer: Uint8Array, filename?: string, options?: TorrentUploadOptions): Promise<void> {
-        return uploadTorrent(buffer, filename || "upload.torrent", options)
+    uploadTorrent(buffer: Uint8Array, filename?: string, options?: TorrentUploadOptions, sourcePath?: string): Promise<void> {
+        return uploadTorrent(buffer, filename || "upload.torrent", options, sourcePath)
     }
 
     start(torrents: SynologyTorrent[]): Promise<void> {

@@ -164,7 +164,7 @@ export class TorrentsPageController {
             if (shouldPromptForUploadOptions(item, askUploadOptions)) {
                 $scope.pendingTorrentFiles.push(item);
             } else if (item.type === "file") {
-                $scope.uploadTorrent(item.data, item.filename);
+                $scope.uploadTorrent(item.data, item.filename, undefined, item.sourcePath);
             } else {
                 $scope.uploadTorrentURL(item.uri);
             }
@@ -205,9 +205,9 @@ export class TorrentsPageController {
             $scope.$apply();
         });
 
-        $scope.uploadTorrent = async (torrent: Uint8Array, filename: string, options?: TorrentUploadOptions) => {
+        $scope.uploadTorrent = async (torrent: Uint8Array, filename: string, options?: TorrentUploadOptions, sourcePath?: string) => {
             try {
-                await $rootScope.$btclient?.uploadTorrent(torrent, filename, options);
+                await $rootScope.$btclient?.uploadTorrent(torrent, filename, options, sourcePath);
             } catch (e) {
                 $notify.alert("Could not upload torrent", "The torrent could not be uploaded to the server");
                 console.error(e);

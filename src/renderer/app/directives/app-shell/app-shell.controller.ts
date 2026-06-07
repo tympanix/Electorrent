@@ -114,6 +114,7 @@ export class AppShellController {
                 type: "file",
                 data: new Uint8Array(file.data),
                 filename: file.filename,
+                sourcePath: file.sourcePath,
             };
             $scope.$broadcast("torrents:add", pendingFile, askUploadOptions);
         };

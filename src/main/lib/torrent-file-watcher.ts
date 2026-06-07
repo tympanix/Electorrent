@@ -145,6 +145,7 @@ export class TorrentFileWatcher {
             type: 'file',
             filename: file.filename,
             data: new Uint8Array(file.data),
+            sourcePath: file.sourcePath,
             askUploadOptions: !!file.askUploadOptions,
         }
     }
@@ -202,6 +203,7 @@ export class TorrentFileWatcher {
             await bittorrentManager.uploadTorrent(window.webContents, {
                 data: file.data,
                 filename: file.filename,
+                sourcePath: file.sourcePath,
             })
             this.showNativeNotification('Torrent added', `${file.filename} is downloading in Electorrent`)
         } catch (error) {

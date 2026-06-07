@@ -1,3 +1,4 @@
+import fs from "fs"
 import type { WebContents } from "electron"
 import type {
     BittorrentAddTorrentUrlRequest,
@@ -7,6 +8,8 @@ import type {
     BittorrentTorrentDetailsData,
     BittorrentUploadTorrentRequest,
 } from "@shared/ipc-contract"
+import logger from "../logger"
+import * as settings from "../settings"
 import { createRuntime } from "./registry"
 import type { BittorrentRuntime } from "./types"
 
@@ -89,7 +92,24 @@ class BittorrentManager {
 
     async uploadTorrent(sender: WebContents, request: BittorrentUploadTorrentRequest) {
         const session = await this.getSession(sender)
-        return session.uploadTorrent(request.data, request.filename, request.options)
+        await session.uploadTorrent(request.data, request.filename, request.options)
+
+        if (!request.sourcePath || settings.getAllSettings().autoRemoveTorrents !== true) {
+            return
+        }
+
+        try {
+            await fs.promises.unlink(request.sourcePath)
+        } catch (error) {
+            if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+                return
+            }
+
+            logger.error("Failed to delete uploaded torrent file", {
+                filePath: request.sourcePath,
+                error,
+            })
+        }
     }
 
     async invokeAction(sender: WebContents, request: BittorrentInvokeActionRequest) {

@@ -118,6 +118,10 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
         return torrents.browse(askUploadOptions)
     })
 
+    ipcMain.handle(IPC_CHANNELS.torrents.readFiles, async function(_event: IpcMainInvokeEvent, { filePaths, askUploadOptions }) {
+        return torrents.readFiles(filePaths, askUploadOptions)
+    })
+
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
         await bittorrentManager.connect(event.sender, server)
         menu.setActiveServer(server)
