@@ -1,9 +1,15 @@
 import { dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
+import parseTorrent from 'parse-torrent'
 
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { PendingTorrentUploadFile } from '@shared/ipc-contract'
+import type {
+    ParseTorrentRequest,
+    PendingTorrentUploadFile,
+    PendingTorrentUploadLink,
+    TorrentMetadata,
+} from '@shared/ipc-contract'
 import * as electorrent from './electorrent'
 
 function notify({ title = '', message = '', type = 'info' }) {
@@ -53,16 +59,51 @@ async function waitForStableFile(filePath: string, attempts = 6, delay = 250) {
     }
 }
 
+export function parse(request: ParseTorrentRequest): TorrentMetadata {
+    const source = 'uri' in request ? request.uri : Buffer.from(request.data)
+    const parsed = parseTorrent(source)
+
+    return {
+        name: parsed.name,
+        infoHash: parsed.infoHash,
+        length: parsed.length,
+        announce: parsed.announce || [],
+        files: (parsed.files || []).map((file) => ({
+            name: file.name,
+            path: file.path,
+            length: file.length,
+        })),
+    }
+}
+
+export function serializeMagnetLink(uri: string, askUploadOptions = false): PendingTorrentUploadLink {
+    const link: PendingTorrentUploadLink = {
+        type: 'link',
+        uri,
+        askUploadOptions,
+    }
+
+    try {
+        link.metadata = parse({ uri })
+    } catch {
+        // Invalid links are still passed through so the client can handle them.
+    }
+
+    return link
+}
+
 export async function serializeTorrentFile(filePath: string, askUploadOptions: boolean): Promise<PendingTorrentUploadFile> {
     await waitForStableFile(filePath)
 
     const data = await fs.promises.readFile(filePath)
+    const torrentData = new Uint8Array(data)
 
     return {
         type: 'file',
         filename: path.basename(filePath),
-        data: new Uint8Array(data),
+        data: torrentData,
         askUploadOptions: !!askUploadOptions,
+        metadata: parse({ data: torrentData }),
     }
 }
 

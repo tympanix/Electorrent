@@ -16,6 +16,7 @@ import path from 'path'
 import yargs from 'yargs'
 
 import startup from '@main/lib/startup'
+import type { PendingTorrentUploadLink } from '@shared/ipc-contract'
 
 declare const __non_webpack_require__: NodeRequire | undefined
 
@@ -88,7 +89,7 @@ async function bootstrap() {
     let isQuitting = false
     let rendererLoaded = false
     const pendingLaunchPayload = {
-        magnets: [] as string[],
+        magnets: [] as PendingTorrentUploadLink[],
         torrentFilePaths: [] as string[],
     }
 
@@ -359,12 +360,12 @@ async function bootstrap() {
     }
 
     function queuePendingLaunchArgs(args: string[]) {
-        pendingLaunchPayload.magnets.push(...getMagnetLinks(args))
+        pendingLaunchPayload.magnets.push(...getMagnetLinks(args).map((uri) => torrents.serializeMagnetLink(uri)))
         pendingLaunchPayload.torrentFilePaths.push(...getTorrentFilePaths(args))
     }
 
     async function sendMagnetLinks(args: string[]) {
-        const magnetLinks = getMagnetLinks(args)
+        const magnetLinks = getMagnetLinks(args).map((uri) => torrents.serializeMagnetLink(uri))
         if (magnetLinks.length === 0 || !torrentWindow || torrentWindow.isDestroyed()) return
         torrentWindow.webContents.send(IPC_CHANNELS.launch.magnets, magnetLinks)
     }

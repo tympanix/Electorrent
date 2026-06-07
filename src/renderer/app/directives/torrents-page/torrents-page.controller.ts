@@ -160,14 +160,34 @@ export class TorrentsPageController {
             return true;
         };
 
-        const processUploadItem = (item: PendingTorrentUploadItem, askUploadOptions: boolean) => {
+        const addTorrentMetadata = async (item: PendingTorrentUploadItem) => {
+            if (item.metadata) {
+                return item;
+            }
+
+            try {
+                item.metadata = item.type === "file"
+                    ? await window.electorrent.torrents.parse({ data: item.data })
+                    : await window.electorrent.torrents.parse({ uri: item.uri });
+            } catch (error) {
+                console.warn("Could not parse torrent metadata", error);
+            }
+
+            return item;
+        };
+
+        const processUploadItem = async (item: PendingTorrentUploadItem, askUploadOptions: boolean) => {
+            await addTorrentMetadata(item);
+
             if (shouldPromptForUploadOptions(item, askUploadOptions)) {
                 $scope.pendingTorrentFiles.push(item);
             } else if (item.type === "file") {
-                $scope.uploadTorrent(item.data, item.filename);
+                await $scope.uploadTorrent(item.data, item.filename);
             } else {
-                $scope.uploadTorrentURL(item.uri);
+                await $scope.uploadTorrentURL(item.uri);
             }
+
+            $scope.$applyAsync();
         };
 
         const flushDeferredUploads = () => {

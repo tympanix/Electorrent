@@ -97,11 +97,10 @@ export class AppShellController {
             connectToServer(server);
         };
 
-        const queueMagnetLinks = (magnets: string[], askUploadOptions = false) => {
-            pendingMagnets.push(...magnets.map((uri) => ({
-                type: "link" as const,
-                uri,
-                askUploadOptions,
+        const queueMagnetLinks = (magnets: PendingTorrentUploadLink[], askUploadOptions = false) => {
+            pendingMagnets.push(...magnets.map((link) => ({
+                ...link,
+                askUploadOptions: link.askUploadOptions ?? askUploadOptions,
             })));
         };
 
@@ -114,6 +113,7 @@ export class AppShellController {
                 type: "file",
                 data: new Uint8Array(file.data),
                 filename: file.filename,
+                metadata: file.metadata,
             };
             $scope.$broadcast("torrents:add", pendingFile, askUploadOptions);
         };
@@ -122,6 +122,7 @@ export class AppShellController {
             $scope.$broadcast("torrents:add", {
                 type: "link",
                 uri: link.uri,
+                metadata: link.metadata,
             }, askUploadOptions);
         };
 
@@ -139,7 +140,7 @@ export class AppShellController {
             });
         };
 
-        electorrent.launch.onMagnets((magnets: string[]) => {
+        electorrent.launch.onMagnets((magnets: PendingTorrentUploadLink[]) => {
             queueMagnetLinks(magnets);
             drainPendingLaunchPayloads();
             $scope.$applyAsync();

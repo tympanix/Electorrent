@@ -813,7 +813,10 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           it("magnet link opens upload options", async function() {
             const torrent = await this.app.uploadMagnetLink({ filename: this.torrentPath, askUploadOptions: true });
+            const torrentMetadata = parseTorrent(fs.readFileSync(this.torrentPath))
+
             await this.app.uploadTorrentModalVisible()
+            await this.app.uploadTorrentModalLabel().should.eventually.equal(torrentMetadata.name)
             await this.app.uploadTorrentModalSubmit()
             await torrent.waitForExist()
             await torrent.waitForStates([options.downloadLabel, "Seeding"], { timeout: 20 * 1000 })

@@ -33,7 +33,33 @@ export interface PendingTorrentUploadFile {
     data: Uint8Array
     filename: string
     askUploadOptions?: boolean
+    metadata?: TorrentMetadata
 }
+
+export interface PendingTorrentUploadLink {
+    type: "link"
+    uri: string
+    askUploadOptions?: boolean
+    metadata?: TorrentMetadata
+}
+
+export interface TorrentMetadataFile {
+    name: string
+    path: string
+    length: number
+}
+
+export interface TorrentMetadata {
+    name?: string
+    infoHash?: string
+    length?: number
+    announce: string[]
+    files: TorrentMetadataFile[]
+}
+
+export type ParseTorrentRequest =
+    | { uri: string }
+    | { data: Uint8Array }
 
 export interface BittorrentServerConfig extends StoredServerConfig {
     certificateData?: Uint8Array
@@ -102,7 +128,7 @@ export interface BittorrentSetTorrentFileSelectionRequest {
 }
 
 export interface LaunchPayload {
-    magnets: string[]
+    magnets: PendingTorrentUploadLink[]
     torrentFiles: PendingTorrentUploadFile[]
 }
 
@@ -230,11 +256,12 @@ export interface ElectorrentBridge {
     }
     launch: {
         getPending(): Promise<LaunchPayload>
-        onMagnets(callback: (magnets: string[]) => void): Unsubscribe
+        onMagnets(callback: (magnets: PendingTorrentUploadLink[]) => void): Unsubscribe
         onTorrentFiles(callback: (files: PendingTorrentUploadFile[]) => void): Unsubscribe
     }
     torrents: {
         openFiles(askUploadOptions: boolean): Promise<PendingTorrentUploadFile[]>
+        parse(request: ParseTorrentRequest): Promise<TorrentMetadata>
     }
     bittorrent: {
         connect(server: BittorrentServerConfig): Promise<void>
