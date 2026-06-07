@@ -356,9 +356,9 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             const initialTheme = await this.app.getGeneralDropdownValue("Theme")
             const initialThemeHref = await this.app.getAppliedThemeHref()
             const availableThemes = this.app.getThemeOptions()
-            assert.deepEqual(availableThemes, ["Light", "Dark"])
-            assert.include(availableThemes, initialTheme, `expected theme to be Light or Dark, got: ${initialTheme}`)
-            const nextTheme = initialTheme === "Light" ? "Dark" : "Light"
+            assert.deepEqual(availableThemes, ["System", "Light", "Dark"])
+            assert.include(availableThemes, initialTheme, `expected a supported theme, got: ${initialTheme}`)
+            const nextTheme = initialThemeHref.includes("/dark.css") ? "Light" : "Dark"
 
             await this.app.selectGeneralDropdownValue("Theme", nextTheme)
             assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
