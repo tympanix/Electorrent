@@ -14,6 +14,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
     public uploadOptionsEnable: TorrentUploadOptionsEnable = {
       saveLocation: true,
+      category: true,
       startTorrent: true,
       peerLimit: true,
       sequentialDownload: true,
@@ -43,6 +44,9 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         trackers: [],
       };
       torrents.all = data.arguments.torrents.map(this.build);
+      torrents.labels = Array.from(new Set(
+        torrents.all.flatMap((torrent) => torrent.labels)
+      ));
       torrents.trackers = this.getTrackers(torrents.all);
       return torrents;
     }
@@ -113,6 +117,10 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
 
     setLocation(torrents: TransmissionTorrent[], location: string): Promise<void> {
       return invokeAction("setLocation", torrents.map((torrent) => torrent.hash), location);
+    }
+
+    label(torrents: TransmissionTorrent[], label: string): Promise<void> {
+      return invokeAction("label", torrents.map((torrent) => torrent.hash), label);
     }
 
     deleteTorrents(torrents: TransmissionTorrent[]): Promise<void> {
@@ -202,6 +210,11 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
             click: this.resumeAll,
           },
         ],
+      },
+      {
+        label: "Labels",
+        click: this.label,
+        type: "labels",
       },
     ];
 

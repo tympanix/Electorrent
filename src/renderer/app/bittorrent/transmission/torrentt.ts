@@ -4,6 +4,7 @@ export class TransmissionTorrent extends Torrent {
 
     data: Record<string, any>
     error: number
+    labels: string[]
     trackers: string[]
 
     constructor(data: Record<string, any>) {
@@ -18,7 +19,7 @@ export class TransmissionTorrent extends Torrent {
             uploadSpeed: data.rateUpload,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: data.rateDownload, /* Download Speed (integer): bytes per second */
             eta: data.eta, /* ETA (integer): second to completion */
-            label: data.comment, /* Label (string): group/category identification */
+            label: data.labels?.[0] || "", /* Label (string): group/category identification */
             peersConnected: data.peersSendingToUs, /* Peers Connected (integer): number of peers connected */
             peersInSwarm: data.peersConnected, /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: data.peersGettingFromUs, /* Seeds Connected (integer): number of connected seeds */
@@ -35,6 +36,7 @@ export class TransmissionTorrent extends Torrent {
 
         this.status = data.status;
         this.error = data.error;
+        this.labels = Array.isArray(data.labels) ? data.labels : []
         this.trackers = data.trackers.map((tracker: Record<string, any>) => tracker.announce)
 
         // Extra Field: Recheck Progress aka Verifying.
@@ -98,4 +100,3 @@ export class TransmissionTorrent extends Torrent {
     }
 
 }
-
