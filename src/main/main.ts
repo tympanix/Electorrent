@@ -53,6 +53,7 @@ async function bootstrap() {
         menu,
         { TorrentFileWatcher },
         titleBar,
+        windowState,
     ] = await Promise.all([
         import('@shared/ipc'),
         import('@main/lib/bittorrent'),
@@ -66,6 +67,7 @@ async function bootstrap() {
         import('@main/lib/menu'),
         import('@main/lib/torrent-file-watcher'),
         import('@main/lib/title-bar'),
+        import('@main/lib/window-state'),
     ])
 
     logger.debug('Starting Electorrent in debug mode')
@@ -123,8 +125,7 @@ async function bootstrap() {
             return
         }
 
-        settings.put('windowsize', torrentWindow.getBounds())
-        settings.write()
+        windowState.saveWindowState(torrentWindow, settings)
     }
 
     function hideTorrentWindow() {
@@ -185,9 +186,13 @@ async function bootstrap() {
             },
         }
 
-        Object.assign(windowSettings, settings.get('windowsize'))
+        const storedWindowState = settings.get('windowsize')
+        Object.assign(windowSettings, windowState.getWindowBoundsOptions(storedWindowState))
 
         torrentWindow = new BrowserWindow(windowSettings)
+        if (windowState.shouldRestoreFullscreen(storedWindowState)) {
+            torrentWindow.setFullScreen(true)
+        }
         rendererLoaded = false
         electorrent.setWindow(torrentWindow)
         menu.setWindow(torrentWindow)
