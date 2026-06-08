@@ -45,6 +45,10 @@ export function shouldRestoreFullscreen(value: unknown): boolean {
     return isObject(value) && value.fullscreen === true
 }
 
+export function getStoredWindowState(settings: Pick<WindowStateSettings, 'get'>): unknown {
+    return settings.get(WINDOW_STATE_KEY)
+}
+
 export function saveWindowState(window: BrowserWindow, settings: WindowStateSettings) {
     const fullscreen = window.isFullScreen()
     const bounds = fullscreen

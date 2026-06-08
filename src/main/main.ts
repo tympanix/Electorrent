@@ -186,7 +186,7 @@ async function bootstrap() {
             },
         }
 
-        const storedWindowState = settings.get('windowsize')
+        const storedWindowState = windowState.getStoredWindowState(settings)
         Object.assign(windowSettings, windowState.getWindowBoundsOptions(storedWindowState))
 
         torrentWindow = new BrowserWindow(windowSettings)
