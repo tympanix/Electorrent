@@ -10,7 +10,7 @@ export class AppThemeController {
 
     constructor($scope: AppThemeScope, settingsService: any) {
         const electorrent = window.electorrent;
-        let systemTheme: ColorTheme = "light";
+        let systemTheme: ColorTheme = electorrent.app.initialTheme;
         let themePreference: ThemePreference = settingsService.getAllSettings().ui.theme;
 
         const applyTheme = () => {
@@ -22,13 +22,6 @@ export class AppThemeController {
         const unsubscribeSystemTheme = electorrent.settings.onSystemThemeChanged((theme) => {
             systemTheme = theme;
             applyTheme();
-            $scope.$applyAsync();
-        });
-
-        electorrent.settings.getSystemTheme().then((theme) => {
-            systemTheme = theme;
-            applyTheme();
-        }).finally(() => {
             $scope.$applyAsync();
         });
 
