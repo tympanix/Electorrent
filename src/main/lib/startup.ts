@@ -76,7 +76,7 @@ export function configureSystemStartup(option: SystemStartupOption) {
         return
     }
 
-    const openAtLogin = option === 'open' || option === 'minimized'
+    const openAtLogin = option === 'open' || option === 'background'
 
     if (process.platform === 'win32') {
         const appFolder = path.dirname(process.execPath)
@@ -94,8 +94,8 @@ export function configureSystemStartup(option: SystemStartupOption) {
     app.setLoginItemSettings({ openAtLogin })
 }
 
-export function shouldStartMinimized(option: SystemStartupOption) {
-    if (option !== 'minimized') {
+export function shouldStartInBackground(option: SystemStartupOption) {
+    if (option !== 'background') {
         return false
     }
 

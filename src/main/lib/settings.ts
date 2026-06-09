@@ -92,6 +92,9 @@ function load() {
 
     try {
         data = mergeWithDefaults(defaultSettings, JSON.parse(file))
+        if (data.systemStartup === 'minimized') {
+            data.systemStartup = 'background'
+        }
     } catch (_e) {
         if (app.isReady()) {
             showCorruptDialog()

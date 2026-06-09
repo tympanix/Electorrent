@@ -392,9 +392,9 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
             await this.app.settingsGotoTab("general")
             const initialSystemStartup = await this.app.getGeneralDropdownValue("System Startup")
-            const nextSystemStartup = initialSystemStartup === "Start Electorrent"
+            const nextSystemStartup = initialSystemStartup === "Start"
               ? "Disabled"
-              : "Start Electorrent"
+              : "Start"
 
             await this.app.selectGeneralDropdownValue("System Startup", nextSystemStartup)
             await this.app.settingsSave()

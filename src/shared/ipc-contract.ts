@@ -2,7 +2,7 @@ export type Unsubscribe = () => void
 
 export type ColorTheme = "light" | "dark"
 export type ThemePreference = ColorTheme | "system"
-export type SystemStartupOption = "disabled" | "open" | "minimized"
+export type SystemStartupOption = "disabled" | "open" | "background"
 
 export interface AppMeta {
     appName: string
