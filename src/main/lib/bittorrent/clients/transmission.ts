@@ -281,7 +281,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         }
 
         return this.removeEmpty({
-            'download-dir': uploadOptions.saveLocation,
+            'download-dir': uploadOptions.saveLocation || undefined,
             labels: uploadOptions.category ? [uploadOptions.category] : undefined,
             paused: uploadOptions.startTorrent === undefined ? undefined : !uploadOptions.startTorrent,
         })
