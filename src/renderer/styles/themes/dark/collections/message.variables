@@ -1,2 +1,32 @@
-@background: @gray;
+@background: @gray-dark;
 @boxShadow: none;
+
+@positiveBackgroundColor: #304a35;
+@positiveBorderColor: #47634c;
+@positiveHeaderColor: #a9dfa9;
+@positiveTextColor: #9ad69a;
+
+@warningBackgroundColor: #513e27;
+@warningBorderColor: #705936;
+@warningHeaderColor: #ffd084;
+@warningTextColor: #ffc36b;
+
+@negativeBackgroundColor: #512f31;
+@negativeBorderColor: #704347;
+@negativeHeaderColor: #ffaaa7;
+@negativeTextColor: #ff9c99;
+
+@infoBackgroundColor: #2d444d;
+@infoBorderColor: #40616e;
+@infoHeaderColor: #a8dce8;
+@infoTextColor: #98d1df;
+
+@successBackgroundColor: @positiveBackgroundColor;
+@successBorderColor: @positiveBorderColor;
+@successHeaderColor: @positiveHeaderColor;
+@successTextColor: @positiveTextColor;
+
+@errorBackgroundColor: @negativeBackgroundColor;
+@errorBorderColor: @negativeBorderColor;
+@errorHeaderColor: @negativeHeaderColor;
+@errorTextColor: @negativeTextColor;

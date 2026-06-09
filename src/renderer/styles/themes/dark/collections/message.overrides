@@ -3,5 +3,10 @@
     text-decoration: underline;
   }
 
-  border: 1px solid rgba(0,0,0,.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ui.positive.message,
+.ui.negative.message {
+  border: none;
 }
