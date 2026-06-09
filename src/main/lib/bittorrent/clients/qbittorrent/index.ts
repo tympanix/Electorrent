@@ -5,7 +5,7 @@ import type {
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
 } from "@shared/ipc-contract"
-import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
+import { cleanPath, defer, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { QBittorrentApiV1 } from "./api-v1"
 import { QBittorrentApiV2 } from "./api-v2"
@@ -27,7 +27,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
     private async selectApi(server: BittorrentServerConfig) {
         const origin = `${server.proto}://${server.ip}:${server.port}`
         const requestOptions = {
-            timeout: 5000,
+            timeout: HTTP_REQUEST_TIMEOUT,
             ca: server.certificateData,
             method: "GET",
             headers: {
@@ -46,7 +46,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
             user: server.user,
             pass: server.password,
             ca: server.certificateData,
-            timeout: 5000,
+            timeout: HTTP_REQUEST_TIMEOUT,
         }
 
         return hasLegacyApi ? new QBittorrentApiV1(options) : new QBittorrentApiV2(options)

@@ -2,7 +2,12 @@ import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from '@shared/ipc-contract'
-import { createHttpsAgent, serverUrl } from '@main/lib/bittorrent/helpers'
+import {
+    createHttpsAgent,
+    HTTP_LOGIN_TIMEOUT,
+    HTTP_REQUEST_TIMEOUT,
+    serverUrl,
+} from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 
 const SESSION_ID_HEADER = 'X-Transmission-Session-Id'
@@ -128,6 +133,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
             },
             httpsAgent: createHttpsAgent(this.server),
             adapter: httpAdapter,
+            timeout: HTTP_REQUEST_TIMEOUT,
         })
 
         http.interceptors.response.use(
@@ -164,7 +170,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         this.session = undefined
 
         await this.getHttpClient().post(this.url(), { method: 'session-get' }, {
-            timeout: 5000,
+            timeout: HTTP_LOGIN_TIMEOUT,
             auth: {
                 username: server.user,
                 password: server.password,

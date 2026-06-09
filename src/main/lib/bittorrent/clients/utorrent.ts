@@ -4,7 +4,12 @@ import FormData from 'form-data'
 import qs from 'qs'
 
 import type { BittorrentServerConfig } from '@shared/ipc-contract'
-import { createHttpsAgent, serverUrl } from '@main/lib/bittorrent/helpers'
+import {
+    createHttpsAgent,
+    HTTP_LOGIN_TIMEOUT,
+    HTTP_REQUEST_TIMEOUT,
+    serverUrl,
+} from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 
 export class UtorrentRuntime implements BittorrentRuntime {
@@ -89,6 +94,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
             httpsAgent: createHttpsAgent(server),
             paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
             adapter: httpAdapter,
+            timeout: HTTP_REQUEST_TIMEOUT,
         })
 
         this.http.interceptors.response.use((res) => {
@@ -115,7 +121,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
         })
 
         const res = await this.http.get(`${this.url()}/token.html`, {
-            timeout: 5000,
+            timeout: HTTP_LOGIN_TIMEOUT,
             params: {
                 t: Date.now(),
             },
