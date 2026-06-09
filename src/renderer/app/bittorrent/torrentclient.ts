@@ -2,7 +2,10 @@ import { Torrent, TorrentFile } from "./abstracttorrent"
 import type {
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
+    TorrentUploadOptions,
 } from "@shared/ipc-contract"
+
+export type { TorrentUploadOptions } from "@shared/ipc-contract"
 
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
@@ -20,19 +23,6 @@ export interface TorrentUpdates {
  * Options to apply to a torrent upon uploading a new torrent to the client.
  * The torrent API may accept any subset of the interface below.
  */
-export interface TorrentUploadOptions {
-    saveLocation?: string
-    renameTorrent?: string
-    category?: string
-    startTorrent?: boolean
-    peerLimit?: number
-    skipCheck?: boolean
-    sequentialDownload?: boolean
-    firstAndLastPiecePrio?: boolean
-    downloadSpeedLimit?: number
-    uploadSpeedLimit?: number
-}
-
 /**
  * A record of which upload options to enable for a torrent client. The options you enable
  * must be supported by the API. Any features that are enabled will have the corrosponding UI

@@ -73,7 +73,7 @@ export class DelugeRuntime implements BittorrentRuntime {
 
         return Object.fromEntries(
             Object.entries({
-                download_location: options.saveLocation,
+                download_location: options.saveLocation || undefined,
                 add_paused: options.startTorrent === undefined ? undefined : !options.startTorrent,
                 max_connections: options.peerLimit,
                 max_download_speed: options.downloadSpeedLimit,

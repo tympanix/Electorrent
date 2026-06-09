@@ -878,6 +878,35 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await torrent.delete()
           })
 
+          it("add torrent dialog uses current server default upload options", async function() {
+            if (!options.client.uploadOptionsEnable?.startTorrent) return this.skip()
+
+            let torrent: e2e.Torrent | undefined
+
+            try {
+              await this.app.openSettings()
+              await this.app.settingsGotoTab("advanced")
+              await this.app.setDefaultUploadOptions({ enabled: true, start: false })
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+
+              torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true })
+              await this.app.uploadTorrentModalSubmit()
+              await torrent.waitForExist()
+              await torrent.waitForState(options.stopLabel, { timeout: 20 * 1000 })
+            } finally {
+              if (torrent && await torrent.isExisting()) {
+                await torrent.delete()
+              }
+
+              await this.app.openSettings()
+              await this.app.settingsGotoTab("advanced")
+              await this.app.setDefaultUploadOptions({ enabled: false })
+              await this.app.settingsSave()
+              await this.app.torrentsPageIsVisible()
+            }
+          })
+
           it("magnet link opens upload options", async function() {
             const torrent = await this.app.uploadMagnetLink({ filename: this.torrentPath, askUploadOptions: true });
             const torrentMetadata = parseTorrent(fs.readFileSync(this.torrentPath))

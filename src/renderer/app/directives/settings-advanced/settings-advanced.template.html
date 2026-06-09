@@ -33,6 +33,30 @@
 
     <div class="ui divider"></div>
 
+    <div data-role="advanced-default-upload-options-row">
+        <div class="ui small header">Default upload options</div>
+        <p>Choose initial values for the Add Torrent dialog on <strong>{{ ctl.getServerName() }}</strong>.</p>
+        <div style="margin-left: 2rem;">
+            <toggle
+                data-role="settings-default-upload-options-toggle"
+                ng-model="server.defaultUploadOptionsEnabled"
+                ng-disabled="!ctl.hasServer()">
+                Use default upload options
+            </toggle>
+
+            <div
+                data-role="settings-default-upload-options-form"
+                ng-if="ctl.hasServer() && server.defaultUploadOptionsEnabled"
+                style="margin-top: 1rem;">
+                <torrent-upload-form
+                    options="server.defaultUploadOptions"
+                    labels="labels"></torrent-upload-form>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui divider"></div>
+
     <div data-role="advanced-saved-locations-row">
         <div class="ui small header">Saved locations</div>
         <p>Save reusable upload locations for <strong>{{ ctl.getServerName() }}</strong>. These locations appear in the upload modal for this server.</p>

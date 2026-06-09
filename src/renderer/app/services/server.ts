@@ -1,7 +1,7 @@
 import _ from "underscore"
 import { Torrent } from "@renderer/app/bittorrent"
 import type { CertificateResponseService } from "@renderer/app/services/certificate-response"
-import type { SavedLocationConfig, StoredServerConfig } from "@shared/ipc-contract"
+import type { SavedLocationConfig, StoredServerConfig, TorrentUploadOptions } from "@shared/ipc-contract"
 
 export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclients', 'certificateResponseService',
     function($q, $notify, $bittorrent, $btclients, certificateResponseService: CertificateResponseService) {
@@ -44,6 +44,8 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 this.lastused = -1
                 this.columns = this.defaultColumns()
                 this.savedLocations = []
+                this.defaultUploadOptionsEnabled = false
+                this.defaultUploadOptions = normalizeDefaultUploadOptions()
             }
             this.isConnected = false
         }
@@ -59,6 +61,10 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                     path: savedLocation.path,
                     icon: savedLocation.icon,
                 }))
+        }
+
+        function normalizeDefaultUploadOptions(options?: TorrentUploadOptions) {
+            return Object.assign({ startTorrent: true }, options || {})
         }
 
         Server.prototype.fromJson = function(data) {
@@ -77,6 +83,8 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             this.certificateData = data.certificateData ? new Uint8Array(data.certificateData) : undefined
             this.columns = this.parseColumns(data.columns)
             this.savedLocations = normalizeSavedLocations(data.savedLocations)
+            this.defaultUploadOptionsEnabled = data.defaultUploadOptionsEnabled === true
+            this.defaultUploadOptions = normalizeDefaultUploadOptions(data.defaultUploadOptions)
         };
 
         Server.prototype.json = function() {
@@ -95,6 +103,8 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 certificate: this.certificate,
                 columns: this.columns.filter((column) => column.enabled).map((column) => column.name),
                 savedLocations: normalizeSavedLocations(this.savedLocations),
+                defaultUploadOptionsEnabled: this.defaultUploadOptionsEnabled === true,
+                defaultUploadOptions: normalizeDefaultUploadOptions(this.defaultUploadOptions),
             }
         };
 
