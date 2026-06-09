@@ -2,6 +2,7 @@ export type Unsubscribe = () => void
 
 export type ColorTheme = "light" | "dark"
 export type ThemePreference = ColorTheme | "system"
+export type SystemStartupOption = "disabled" | "open" | "background"
 
 export interface AppMeta {
     appName: string
@@ -161,6 +162,7 @@ export interface SavedLocationConfig {
 
 export interface AppSettings<TServer = StoredServerConfig> {
     startup: string
+    systemStartup: SystemStartupOption
     refreshRate: number
     automaticUpdates?: boolean
     closeToTray?: boolean

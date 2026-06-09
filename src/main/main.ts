@@ -15,7 +15,7 @@ import is from 'electron-is'
 import path from 'path'
 import yargs from 'yargs'
 
-import startup from '@main/lib/startup'
+import startup, { configureSystemStartup, shouldStartInBackground } from '@main/lib/startup'
 import type { PendingTorrentUploadLink } from '@shared/ipc-contract'
 
 declare const __non_webpack_require__: NodeRequire | undefined
@@ -92,6 +92,7 @@ async function bootstrap() {
     let tray: Tray | null = null
     let isQuitting = false
     let rendererLoaded = false
+    let startedInBackground = false
     const pendingLaunchPayload = {
         magnets: [] as PendingTorrentUploadLink[],
         torrentFilePaths: [] as string[],
@@ -106,7 +107,8 @@ async function bootstrap() {
     })
 
     function shouldUseTray() {
-        return !app.commandLine.hasSwitch('headless') && settings.get('closeToTray') !== false
+        return !app.commandLine.hasSwitch('headless')
+            && (startedInBackground || settings.get('closeToTray') !== false)
     }
 
     function destroyTray() {
@@ -172,7 +174,7 @@ async function bootstrap() {
         showTorrentWindow()
     }
 
-    function createTorrentWindow() {
+    function createTorrentWindow(startInBackground = false) {
         const themePreference = settings.get('ui')?.theme
         const initialTheme = themes.resolveTheme(themePreference)
         const titleBarOptions = titleBar.getTitleBarWindowOptions(themePreference)
@@ -203,7 +205,9 @@ async function bootstrap() {
         menu.setWindow(torrentWindow)
 
         torrentWindow.once('ready-to-show', () => {
-            torrentWindow?.show()
+            if (!startInBackground) {
+                torrentWindow?.show()
+            }
         })
 
         torrentWindow.loadURL(`file://${__dirname}/index.html`)
@@ -410,6 +414,7 @@ async function bootstrap() {
         getWindow: () => torrentWindow,
         consumePendingLaunchPayload,
         onSettingsSaved: async (newSettings) => {
+            configureSystemStartup(newSettings.systemStartup)
             syncTray()
             torrentFileWatcher.refresh()
             if (torrentWindow) {
@@ -464,7 +469,12 @@ async function bootstrap() {
 
     app.on('ready', function() {
         queuePendingLaunchArgs(process.argv)
-        createTorrentWindow()
+        configureSystemStartup(settings.getAllSettings().systemStartup)
+        startedInBackground = shouldStartInBackground(settings.getAllSettings().systemStartup)
+        if (startedInBackground && is.macOS()) {
+            app.dock.hide()
+        }
+        createTorrentWindow(startedInBackground)
         syncTray()
         torrentFileWatcher.start()
         updater.initialise(torrentWindow)

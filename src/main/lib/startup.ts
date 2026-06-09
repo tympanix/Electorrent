@@ -4,7 +4,10 @@ import path from 'path'
 import Q from 'q'
 import electronRegedit from 'electron-regedit'
 
+import type { SystemStartupOption } from '@shared/ipc-contract'
+
 const { ProgId, Regedit } = electronRegedit as any
+const STARTED_AT_LOGIN_ARG = '--started-at-login'
 
 new ProgId({
     description: 'Torrent File',
@@ -67,5 +70,40 @@ function checkSquirrel() {
 }
 
 const shouldQuitFromStartup = checkSquirrel()
+
+export function configureSystemStartup(option: SystemStartupOption) {
+    if (!app.isPackaged || !['darwin', 'win32'].includes(process.platform)) {
+        return
+    }
+
+    const openAtLogin = option === 'open' || option === 'background'
+
+    if (process.platform === 'win32') {
+        const appFolder = path.dirname(process.execPath)
+        const executableName = path.basename(process.execPath)
+        const stubLauncher = path.resolve(appFolder, '..', executableName)
+
+        app.setLoginItemSettings({
+            openAtLogin,
+            path: stubLauncher,
+            args: openAtLogin ? [STARTED_AT_LOGIN_ARG] : [],
+        })
+        return
+    }
+
+    app.setLoginItemSettings({ openAtLogin })
+}
+
+export function shouldStartInBackground(option: SystemStartupOption) {
+    if (option !== 'background') {
+        return false
+    }
+
+    if (process.platform === 'win32') {
+        return process.argv.includes(STARTED_AT_LOGIN_ARG)
+    }
+
+    return process.platform === 'darwin' && app.getLoginItemSettings().wasOpenedAtLogin
+}
 
 export default shouldQuitFromStartup

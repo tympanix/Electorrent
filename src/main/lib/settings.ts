@@ -16,6 +16,7 @@ type MainAppSettings = AppSettings & {
 
 const defaultSettings: MainAppSettings = {
     startup: 'default',
+    systemStartup: 'disabled',
     refreshRate: 2000,
     servers: [],
     certificates: [],

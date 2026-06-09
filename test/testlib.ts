@@ -385,6 +385,30 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await this.app.torrentsPageIsVisible()
           })
 
+          it("persists system startup preference", async function() {
+            if (process.platform === "linux") {
+              this.skip()
+            }
+
+            await this.app.settingsGotoTab("general")
+            const initialSystemStartup = await this.app.getGeneralDropdownValue("System Startup")
+            const nextSystemStartup = initialSystemStartup === "Start"
+              ? "Disabled"
+              : "Start"
+
+            await this.app.selectGeneralDropdownValue("System Startup", nextSystemStartup)
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+
+            await this.app.openSettings()
+            await this.app.settingsGotoTab("general")
+            assert.equal(await this.app.getGeneralDropdownValue("System Startup"), nextSystemStartup)
+
+            await this.app.selectGeneralDropdownValue("System Startup", initialSystemStartup)
+            await this.app.settingsSave()
+            await this.app.torrentsPageIsVisible()
+          })
+
         })
 
         describe("server selection page", function() {
