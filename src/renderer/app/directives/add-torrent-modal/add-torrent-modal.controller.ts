@@ -45,8 +45,15 @@ export class AddTorrentModalController {
             return
         }
 
-        this.uploadOptions = Object.assign({},
-            AddTorrentModalController.defaultTorrentUploadOptions
+        const server = this.rootScope.$server
+        const configuredOptions = server?.defaultUploadOptionsEnabled
+            ? server.defaultUploadOptions
+            : undefined
+
+        this.uploadOptions = Object.assign(
+            {},
+            AddTorrentModalController.defaultTorrentUploadOptions,
+            configuredOptions || {},
         )
     }
 

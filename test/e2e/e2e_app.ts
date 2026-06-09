@@ -631,6 +631,20 @@ export class App {
     }
   }
 
+  async setDefaultUploadOptions({ enabled, start }: { enabled: boolean, start?: boolean }) {
+    const toggle = $("#page-settings-advanced [data-role='settings-default-upload-options-toggle'] input")
+    await toggle.waitForExist()
+    if (await toggle.isSelected() !== enabled) {
+      await toggle.click()
+    }
+
+    if (enabled && start !== undefined) {
+      const form = $("#page-settings-advanced [data-role='settings-default-upload-options-form']")
+      await form.waitForDisplayed()
+      await this.setUploadToggle(form, "start-torrent", start)
+    }
+  }
+
   async addSettingsSavedLocation({ path, icon }: { path: string, icon: string }) {
     const addButton = $("#page-settings-advanced [data-role='settings-saved-location-add']")
     await addButton.waitForDisplayed()

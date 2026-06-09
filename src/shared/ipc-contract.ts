@@ -152,11 +152,26 @@ export interface StoredServerConfig {
     certificate?: string
     columns: string[]
     savedLocations?: SavedLocationConfig[]
+    defaultUploadOptionsEnabled?: boolean
+    defaultUploadOptions?: TorrentUploadOptions
 }
 
 export interface SavedLocationConfig {
     path: string
     icon: string
+}
+
+export interface TorrentUploadOptions {
+    saveLocation?: string
+    renameTorrent?: string
+    category?: string
+    startTorrent?: boolean
+    peerLimit?: number
+    skipCheck?: boolean
+    sequentialDownload?: boolean
+    firstAndLastPiecePrio?: boolean
+    downloadSpeedLimit?: number
+    uploadSpeedLimit?: number
 }
 
 export interface AppSettings<TServer = StoredServerConfig> {
