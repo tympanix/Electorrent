@@ -348,6 +348,7 @@ async function bootstrap() {
             refreshTrayMenu()
             tray?.popUpContextMenu()
         })
+        tray.on('double-click', showOrCreateTorrentWindow)
         refreshTrayMenu()
     }
 
