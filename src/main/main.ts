@@ -52,6 +52,7 @@ async function bootstrap() {
         ipcHandlers,
         menu,
         { TorrentFileWatcher },
+        themes,
         titleBar,
     ] = await Promise.all([
         import('@shared/ipc'),
@@ -65,6 +66,7 @@ async function bootstrap() {
         import('@main/lib/ipc'),
         import('@main/lib/menu'),
         import('@main/lib/torrent-file-watcher'),
+        import('@main/lib/themes'),
         import('@main/lib/title-bar'),
     ])
 
@@ -170,7 +172,9 @@ async function bootstrap() {
     }
 
     function createTorrentWindow() {
-        const titleBarOptions = titleBar.getTitleBarWindowOptions(settings.get('ui')?.theme)
+        const themePreference = settings.get('ui')?.theme
+        const initialTheme = themes.resolveTheme(themePreference)
+        const titleBarOptions = titleBar.getTitleBarWindowOptions(themePreference)
         const windowSettings: BrowserWindowConstructorOptions = {
             ...titleBarOptions,
             show: false,
@@ -182,6 +186,7 @@ async function bootstrap() {
                 contextIsolation: true,
                 sandbox: true,
                 preload: path.join(__dirname, 'preload.js'),
+                additionalArguments: [`--theme=${initialTheme}`],
             },
         }
 

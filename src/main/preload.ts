@@ -3,6 +3,11 @@ import { clipboard, contextBridge, ipcRenderer, webUtils } from 'electron'
 import { IPC_CHANNELS } from '@shared/ipc'
 import type { ColorTheme, PendingTorrentUploadFile, PendingTorrentUploadLink } from '@shared/ipc-contract'
 
+const INITIAL_THEME_ARGUMENT = '--theme='
+const initialThemeArgument = process.argv.find((argument) => argument.startsWith(INITIAL_THEME_ARGUMENT))
+const initialThemeValue = initialThemeArgument?.slice(INITIAL_THEME_ARGUMENT.length)
+const initialTheme: ColorTheme = initialThemeValue === 'dark' ? 'dark' : 'light'
+
 function invoke<T = unknown>(channel: string, payload?: any): Promise<T> {
     return ipcRenderer.invoke(channel, payload)
 }
@@ -15,6 +20,7 @@ function subscribe<T = unknown>(channel: string, callback: (payload: T) => void)
 
 contextBridge.exposeInMainWorld('electorrent', {
     app: {
+        initialTheme,
         getMeta: () => invoke(IPC_CHANNELS.app.getMeta),
         getDefaultProtocolStatus: (protocol: string) => invoke(IPC_CHANNELS.app.getDefaultProtocolStatus, { protocol }),
         setDefaultProtocolStatus: (protocol: string, enabled: boolean) => invoke(IPC_CHANNELS.app.setDefaultProtocolStatus, { protocol, enabled }),

@@ -4,7 +4,13 @@
         <meta charset="UTF-8">
         <title>Electorrent</title>
 
-        <link rel="stylesheet" href="css/themes/light.css" ng-href="css/themes/{{theme || 'light'}}.css">
+        <script>
+            const themeStylesheet = document.createElement("link");
+            themeStylesheet.rel = "stylesheet";
+            themeStylesheet.href = `css/themes/${window.electorrent.app.initialTheme}.css`;
+            themeStylesheet.setAttribute("ng-href", "css/themes/{{theme}}.css");
+            document.head.appendChild(themeStylesheet);
+        </script>
     </head>
     <body ready-broadcast>
         <app-shell></app-shell>
