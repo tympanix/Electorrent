@@ -1,7 +1,7 @@
 import xmlrpc from "@electorrent/xmlrpc"
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
-import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
+import { cleanPath, defer, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
 
@@ -105,7 +105,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 Connection: "Close",
             },
             ca: server.certificateData,
-            timeout: 5000,
+            timeout: HTTP_REQUEST_TIMEOUT,
         }
 
         if (server.user && server.password) {

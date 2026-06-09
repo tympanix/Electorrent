@@ -3,7 +3,12 @@ import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
 
 import type { BittorrentServerConfig } from '@shared/ipc-contract'
-import { createHttpsAgent, serverUrl } from '@main/lib/bittorrent/helpers'
+import {
+    createHttpsAgent,
+    HTTP_LOGIN_TIMEOUT,
+    HTTP_REQUEST_TIMEOUT,
+    serverUrl,
+} from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 
 const API_INFO = 'SYNO.API.Info'
@@ -49,8 +54,6 @@ export class SynologyRuntime implements BittorrentRuntime {
     private dlPath = ''
     private dlVersion = ''
     private taskPath = '/DownloadStation/task.cgi'
-    private timeout = 6000
-
     private config(choice: string, args: any[] = []) {
         switch (choice) {
             case 'query':
@@ -61,7 +64,7 @@ export class SynologyRuntime implements BittorrentRuntime {
                         method: 'query',
                         query: 'SYNO.API.Auth,SYNO.DownloadStation.Task',
                     },
-                    timeout: this.timeout,
+                    timeout: HTTP_REQUEST_TIMEOUT,
                 }
             case 'auth':
                 return {
@@ -73,7 +76,7 @@ export class SynologyRuntime implements BittorrentRuntime {
                         passwd: args[1],
                         session: 'DownloadStation',
                     },
-                    timeout: this.timeout,
+                    timeout: HTTP_LOGIN_TIMEOUT,
                 }
             case 'torrents':
                 return {
@@ -83,7 +86,7 @@ export class SynologyRuntime implements BittorrentRuntime {
                         method: 'list',
                         additional: 'detail,transfer,tracker',
                     },
-                    timeout: this.timeout,
+                    timeout: HTTP_REQUEST_TIMEOUT,
                 }
             case 'tUrl':
                 return {
@@ -94,7 +97,7 @@ export class SynologyRuntime implements BittorrentRuntime {
                         uri: args[0],
                         destination: args[1],
                     },
-                    timeout: this.timeout,
+                    timeout: HTTP_REQUEST_TIMEOUT,
                 }
             case 'action':
                 return {
@@ -104,7 +107,7 @@ export class SynologyRuntime implements BittorrentRuntime {
                         method: args[0],
                         id: args[1],
                     },
-                    timeout: this.timeout,
+                    timeout: HTTP_REQUEST_TIMEOUT,
                 }
             case 'setLocation':
                 return {
@@ -115,7 +118,7 @@ export class SynologyRuntime implements BittorrentRuntime {
                         id: args[0],
                         destination: args[1],
                     },
-                    timeout: this.timeout,
+                    timeout: HTTP_REQUEST_TIMEOUT,
                 }
             default:
                 return {}
@@ -158,6 +161,7 @@ export class SynologyRuntime implements BittorrentRuntime {
         this.http = axios.create({
             httpsAgent: createHttpsAgent(server),
             adapter: httpAdapter,
+            timeout: HTTP_REQUEST_TIMEOUT,
         })
 
         this.http.interceptors.response.use((res) => {

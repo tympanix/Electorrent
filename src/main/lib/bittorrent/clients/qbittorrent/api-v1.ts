@@ -7,12 +7,12 @@ export class QBittorrentApiV1 extends QBittorrentBaseApi {
     }
 
     login(cb: (err?: any, body?: any) => void) {
-        this.post("login", {
+        this.post("login", this.loginRequestOptions({
             form: {
                 username: this.user,
                 password: this.pass,
             },
-        }, (err, res, body) => {
+        }), (err, res, body) => {
             if (!err && res && !Object.prototype.hasOwnProperty.call(res.headers || {}, "set-cookie")) {
                 cb(new Error("Invalid login"), body)
                 return

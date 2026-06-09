@@ -1,7 +1,12 @@
 import request from "request"
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
-import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
+import {
+    cleanPath,
+    defer,
+    HTTP_LOGIN_TIMEOUT,
+    HTTP_REQUEST_TIMEOUT,
+} from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 
 const DELUGE_TORRENT_FIELDS = [
@@ -83,9 +88,10 @@ export class DelugeRuntime implements BittorrentRuntime {
         )
     }
 
-    private rpc(method: string, params: any[], cb: (err: any, value?: any) => void) {
+    private rpc(method: string, params: any[], cb: (err: any, value?: any) => void, timeout = HTTP_REQUEST_TIMEOUT) {
         request({
             ...this.requestOptions,
+            timeout,
             method: "POST",
             json: true,
             gzip: true,
@@ -116,10 +122,8 @@ export class DelugeRuntime implements BittorrentRuntime {
     }
 
     private uploadTorrentPayload(torrent: Uint8Array | Buffer, cb: (err: any, body?: any) => void) {
-        const uploadRequestOptions = { ...this.requestOptions }
-        delete uploadRequestOptions.timeout
         const uploadRequest = request({
-            ...uploadRequestOptions,
+            ...this.requestOptions,
             method: "POST",
             url: this.uploadUrl,
             json: true,
@@ -182,12 +186,12 @@ export class DelugeRuntime implements BittorrentRuntime {
         this.uploadUrl = `${origin}${buildClientPath(server, "upload")}`
         this.requestId = 0
         this.requestOptions = {
-            timeout: 5000,
+            timeout: HTTP_REQUEST_TIMEOUT,
             ca: server.certificateData,
             jar: request.jar(),
         }
 
-        await defer((done) => this.rpc("auth.login", [server.password], done))
+        await defer((done) => this.rpc("auth.login", [server.password], done, HTTP_LOGIN_TIMEOUT))
 
         const hosts = await this.getHosts()
         const hostId = hosts[0]?.[0]

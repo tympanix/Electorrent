@@ -3,6 +3,8 @@ import path from "path"
 
 import request from "request"
 
+import { HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
+
 export const AUTH_ERRORS: Record<number, Error> = {
     403: new Error("User's IP is banned for too many failed login attempts"),
 }
@@ -40,7 +42,7 @@ export abstract class QBittorrentBaseApi {
         this.user = options.user
         this.pass = options.pass
         this.origin = options.origin
-        this.timeout = options.timeout || 5000
+        this.timeout = options.timeout || HTTP_REQUEST_TIMEOUT
 
         this.options = {
             timeout: this.timeout,
@@ -102,6 +104,13 @@ export abstract class QBittorrentBaseApi {
 
     protected isSuccessfulStatusCode(statusCode: number) {
         return statusCode >= 200 && statusCode < 300
+    }
+
+    protected loginRequestOptions(requestOptions: Record<string, any>) {
+        return {
+            ...requestOptions,
+            timeout: HTTP_LOGIN_TIMEOUT,
+        }
     }
 
     get(apiPath: string, requestOptions: Record<string, any>, cb: (err: any, res?: any, body?: any) => void) {
