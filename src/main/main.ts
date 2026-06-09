@@ -15,7 +15,7 @@ import is from 'electron-is'
 import path from 'path'
 import yargs from 'yargs'
 
-import startup from '@main/lib/startup'
+import startup, { configureSystemStartup, shouldStartMinimized } from '@main/lib/startup'
 import type { PendingTorrentUploadLink } from '@shared/ipc-contract'
 
 declare const __non_webpack_require__: NodeRequire | undefined
@@ -172,7 +172,7 @@ async function bootstrap() {
         showTorrentWindow()
     }
 
-    function createTorrentWindow() {
+    function createTorrentWindow(startMinimized = false) {
         const themePreference = settings.get('ui')?.theme
         const initialTheme = themes.resolveTheme(themePreference)
         const titleBarOptions = titleBar.getTitleBarWindowOptions(themePreference)
@@ -204,6 +204,9 @@ async function bootstrap() {
 
         torrentWindow.once('ready-to-show', () => {
             torrentWindow?.show()
+            if (startMinimized) {
+                torrentWindow?.minimize()
+            }
         })
 
         torrentWindow.loadURL(`file://${__dirname}/index.html`)
@@ -409,6 +412,7 @@ async function bootstrap() {
         getWindow: () => torrentWindow,
         consumePendingLaunchPayload,
         onSettingsSaved: async (newSettings) => {
+            configureSystemStartup(newSettings.systemStartup)
             syncTray()
             torrentFileWatcher.refresh()
             if (torrentWindow) {
@@ -463,7 +467,8 @@ async function bootstrap() {
 
     app.on('ready', function() {
         queuePendingLaunchArgs(process.argv)
-        createTorrentWindow()
+        configureSystemStartup(settings.getAllSettings().systemStartup)
+        createTorrentWindow(shouldStartMinimized(settings.getAllSettings().systemStartup))
         syncTray()
         torrentFileWatcher.start()
         updater.initialise(torrentWindow)

@@ -34,6 +34,24 @@
             </dropdown>
         </div>
     </div>
+    <div class="ui card" ng-if="!is.linux()">
+        <div class="content">
+            <div class="header">
+                <i class="power icon"></i>
+                System Startup
+            </div>
+            <div class="description">
+                Configure whether Electorrent starts automatically when you log in
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="System Startup" ng-model="settings.systemStartup">
+                <dropdown-group data-value="disabled">Disabled</dropdown-group>
+                <dropdown-group data-value="open">Start Electorrent</dropdown-group>
+                <dropdown-group data-value="minimized">Start Electorrent Minimized</dropdown-group>
+            </dropdown>
+        </div>
+    </div>
     <div class="ui card">
         <div class="content">
             <div class="header">

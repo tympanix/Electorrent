@@ -6,6 +6,7 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
 
     var settings: AppSettings<any> = {
         startup: 'default',
+        systemStartup: 'disabled',
         refreshRate: 2000,
         automaticUpdates: true,
         closeToTray: true,
