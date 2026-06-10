@@ -3,15 +3,6 @@ import readline from "readline"
 import { afterEach } from "mocha";
 
 /**
- * Enum representing the different features of a bittorrent client to be tested
- */
-export enum FeatureSet {
-  Labels,
-  MagnetLinks,
-  AdvancedUploadOptions,
-}
-
-/**
  * Asks for a qestion is console and wait for answer
  * @param query Question to be asked
  */

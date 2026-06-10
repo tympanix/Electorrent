@@ -4,7 +4,7 @@ import magnet from "magnet-uri"
 import { Torrent } from "./e2e_torrent";
 import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
-import { TorrentClient } from "../../src/renderer/app/bittorrent"
+import type { ClientId } from "../../src/shared/client-metadata"
 import { waitForModalClose, waitForModalOpen } from "./modal"
 
 /**
@@ -15,7 +15,7 @@ export interface LoginOptions {
   username: string
   password: string
   port: number
-  client: TorrentClient
+  clientId: ClientId
   https?: boolean
 }
 
@@ -60,7 +60,7 @@ export class App {
     await clientForm.waitForClickable()
     await clientForm.click();
 
-    const clientFormSelect = $(`#connection-client-${options.client.id}`)
+    const clientFormSelect = $(`#connection-client-${options.clientId}`)
     await clientFormSelect.waitForDisplayed()
     await clientFormSelect.waitForClickable()
     await clientFormSelect.click()

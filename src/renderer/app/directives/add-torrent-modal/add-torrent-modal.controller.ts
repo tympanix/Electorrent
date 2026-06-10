@@ -65,7 +65,7 @@ export class AddTorrentModalController {
     }
 
     supportsSavedLocations() {
-        return !!this.rootScope.$btclient?.uploadOptionsEnable?.saveLocation
+        return !!this.rootScope.$btclient?.features.uploadOptions.saveLocation
     }
 
     getCurrentTorrentUpload() {

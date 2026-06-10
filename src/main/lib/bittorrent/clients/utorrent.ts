@@ -3,7 +3,7 @@ import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
 import qs from 'qs'
 
-import type { BittorrentServerConfig } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, TorrentClientFeatures } from '@shared/ipc-contract'
 import {
     createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
@@ -83,7 +83,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    async connect(server: BittorrentServerConfig): Promise<void> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
         this.server = server
 
         this.http = axios.create({
@@ -138,6 +138,14 @@ export class UtorrentRuntime implements BittorrentRuntime {
         }
 
         this.saveConnection(serverUrl(server), server.user, server.password)
+
+        return {
+            magnetLinks: true,
+            labels: true,
+            uploadOptions: {
+                saveLocation: true,
+            },
+        }
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
 
-import type { BittorrentServerConfig } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, TorrentClientFeatures } from '@shared/ipc-contract'
 import {
     createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
@@ -156,7 +156,7 @@ export class SynologyRuntime implements BittorrentRuntime {
         return !!data?.success
     }
 
-    async connect(server: BittorrentServerConfig): Promise<void> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
         this.server = server
         this.http = axios.create({
             httpsAgent: createHttpsAgent(server),
@@ -187,6 +187,14 @@ export class SynologyRuntime implements BittorrentRuntime {
         this.handleError(authResponse)
         if (!this.isSuccess(authResponse.data)) {
             throw new Error(`Login failed. Error: ${authResponse.data.error}`)
+        }
+
+        return {
+            magnetLinks: true,
+            setLocation: true,
+            uploadOptions: {
+                saveLocation: true,
+            },
         }
     }
 

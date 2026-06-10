@@ -5,12 +5,11 @@ import {
   TorrentUpdates,
   ContextActionList,
   TorrentUploadOptions,
-  TorrentUploadOptionsEnable,
   TorrentDetailsInfoSection,
 } from "@renderer/app/bittorrent/torrentclient";
 import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 import { QBittorrentTorrent } from "./torrentq";
-import { addTorrentUrl, connect, getSnapshot, getTorrentDetails, getTorrentFiles, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, getSnapshot, getTorrentDetails, getTorrentFiles, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 
 export interface QBittorrentUploadOptions {
@@ -35,14 +34,6 @@ const QBITTORRENT_PRIORITY_SKIP = 0;
 export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     public name = "qBittorrent"
     public id = "qbittorrent"
-
-    public supportsFileSelection = true
-    public supportsSetLocation = true
-    public supportsTorrentDetails = true
-
-    connect(server): Promise<void> {
-      return connect(server)
-    };
 
     torrents(fullupdate?: boolean): Promise<TorrentUpdates> {
       return getSnapshot(fullupdate).then((data: Record<string, any>) => this.processData(data));
@@ -90,20 +81,6 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     addTorrentUrl(magnet: string, options?: TorrentUploadOptions): Promise<void> {
       return addTorrentUrl(magnet, options);
     };
-
-    public uploadOptionsEnable: TorrentUploadOptionsEnable = {
-      saveLocation: true,
-      renameTorrent: true,
-      category: true,
-      startTorrent: true,
-      skipCheck: true,
-      sequentialDownload: true,
-      firstAndLastPiecePrio: true,
-      downloadSpeedLimit: true,
-      uploadSpeedLimit: true,
-    }
-
-    enableTrackerFilter = false;
 
     extraColumns = [];
 
@@ -246,7 +223,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       ]);
     }
 
-    actionHeader: TorrentActionList<QBittorrentTorrent> = [
+    private baseActionHeader: TorrentActionList<QBittorrentTorrent> = [
       {
         label: "Start",
         type: "button",
@@ -285,6 +262,12 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         type: "labels",
       },
     ];
+
+    get actionHeader(): TorrentActionList<QBittorrentTorrent> {
+      return this.features.labels
+        ? this.baseActionHeader
+        : this.baseActionHeader.filter((action) => action.type !== "labels")
+    }
 
     contextMenu: ContextActionList<QBittorrentTorrent> = [
       {

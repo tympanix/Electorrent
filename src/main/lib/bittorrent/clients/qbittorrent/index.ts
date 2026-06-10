@@ -4,6 +4,7 @@ import type {
     BittorrentFileSelection,
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
+    TorrentClientFeatures,
 } from "@shared/ipc-contract"
 import { cleanPath, defer, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
@@ -60,10 +61,27 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         return this.api
     }
 
-    connect(server: BittorrentServerConfig): Promise<void> {
+    connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
         return this.selectApi(server).then((api) => {
             this.api = api
-            return defer((done) => api.login(done))
+            return defer((done) => api.login(done)).then(() => ({
+                magnetLinks: true,
+                labels: true,
+                fileSelection: true,
+                setLocation: true,
+                torrentDetails: true,
+                uploadOptions: {
+                    saveLocation: true,
+                    renameTorrent: true,
+                    category: true,
+                    startTorrent: true,
+                    skipCheck: true,
+                    sequentialDownload: true,
+                    firstAndLastPiecePrio: true,
+                    downloadSpeedLimit: true,
+                    uploadSpeedLimit: true,
+                },
+            }))
         })
     }
 

@@ -1,8 +1,17 @@
 import { createTestSuite } from "../../testlib";
-import { RtorrentClient } from "../../../src/renderer/app/bittorrent"
 
 createTestSuite({
-  client: new RtorrentClient(),
+  clientId: "rtorrent",
+  features: {
+    magnetLinks: true,
+    labels: true,
+    torrentDetails: true,
+    trackerFilter: true,
+    uploadOptions: {
+      saveLocation: true,
+      startTorrent: true,
+    },
+  },
   fixture: "fixtures/rtorrent",
   port: 8080,
   proxyPort: 80,
@@ -10,5 +19,4 @@ createTestSuite({
   username: "admin",
   password: "admin",
   saveLocation: "/downloads/custom/save/location",
-  unsupportedFeatures: [],
 });

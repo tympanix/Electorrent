@@ -1,24 +1,16 @@
 import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { UtorrentTorrent } from "./torrentu";
-import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   public name = "µTorrent"
   public id = "utorrent"
-  public uploadOptionsEnable = {
-    saveLocation: true,
-  }
-
   build(array: Array<any>): UtorrentTorrent {
     return UtorrentTorrent.fromArray(array)
   }
 
   defaultPath(): string {
     return "/gui";
-  };
-
-  connect(server): Promise<void> {
-    return connect(server)
   };
 
   addTorrentUrl(url: string, options?: TorrentUploadOptions) {
@@ -100,7 +92,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
     return invokeAction("setLabel", torrents.map((torrent) => torrent.hash), label);
   };
 
-  actionHeader: TorrentActionList<UtorrentTorrent> = [
+  private baseActionHeader: TorrentActionList<UtorrentTorrent> = [
     {
       label: "Start",
       type: "button",
@@ -130,6 +122,12 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       type: "labels",
     },
   ];
+
+  get actionHeader(): TorrentActionList<UtorrentTorrent> {
+    return this.features.labels
+      ? this.baseActionHeader
+      : this.baseActionHeader.filter((action) => action.type !== "labels")
+  }
 
   contextMenu: ContextActionList<UtorrentTorrent> = [
     {

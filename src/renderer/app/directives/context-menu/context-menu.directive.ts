@@ -158,14 +158,14 @@ export class ContextMenuDirective implements IDirective {
 
                 if (
                     item.id === "torrent-details"
-                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.supportsTorrentDetails)
+                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.torrentDetails)
                 ) {
                     return;
                 }
 
                 if (
                     item.id === "torrent-files"
-                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.supportsFileSelection)
+                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.fileSelection)
                 ) {
                     return;
                 }

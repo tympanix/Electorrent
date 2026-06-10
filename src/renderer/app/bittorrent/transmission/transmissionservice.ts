@@ -1,7 +1,7 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentUpdates, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { TransmissionTorrent } from "./torrentt";
 import _ from "underscore"
-import { addTorrentUrl, connect, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 
 const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
@@ -9,23 +9,6 @@ const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     public name = "Transmission";
     public id = "transmission"
-    public supportsSetLocation = true
-    public supportsTorrentDetails = true
-
-    public uploadOptionsEnable: TorrentUploadOptionsEnable = {
-      saveLocation: true,
-      category: true,
-      startTorrent: true,
-      peerLimit: true,
-      sequentialDownload: true,
-      downloadSpeedLimit: true,
-      uploadSpeedLimit: true,
-    }
-
-    connect(server): Promise<void> {
-      return connect(server)
-    };
-
     defaultPath(): string {
       return "/transmission/rpc";
     };
@@ -176,9 +159,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       ]);
     }
 
-    enableTrackerFilter = true;
-
-    actionHeader: TorrentActionList<TransmissionTorrent> = [
+    private baseActionHeader: TorrentActionList<TransmissionTorrent> = [
       {
         label: "Start",
         type: "button",
@@ -217,6 +198,12 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         type: "labels",
       },
     ];
+
+    get actionHeader(): TorrentActionList<TransmissionTorrent> {
+      return this.features.labels
+        ? this.baseActionHeader
+        : this.baseActionHeader.filter((action) => action.type !== "labels")
+    }
 
     contextMenu: ContextActionList<TransmissionTorrent> = [
       {

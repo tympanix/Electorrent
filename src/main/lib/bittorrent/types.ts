@@ -1,13 +1,14 @@
 import type {
     BittorrentFileSelection,
     BittorrentServerConfig,
+    TorrentClientFeatures,
     BittorrentTorrentDetailsData,
 } from "@shared/ipc-contract"
 
 export type CallbackFunc<T = any> = (err: any, val: T) => void
 
 export interface BittorrentRuntime {
-    connect(server: BittorrentServerConfig): Promise<void>
+    connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures>
     getSnapshot(fullUpdate?: boolean): Promise<any>
     addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void>
     uploadTorrent(buffer: Uint8Array, filename: string, options?: Record<string, any>): Promise<void>

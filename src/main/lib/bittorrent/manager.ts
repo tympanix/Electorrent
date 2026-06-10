@@ -6,6 +6,7 @@ import type {
     BittorrentInvokeActionRequest,
     BittorrentServerConfig,
     BittorrentSetTorrentFileSelectionRequest,
+    TorrentClientFeatures,
     BittorrentTorrentDetailsData,
     BittorrentUploadTorrentRequest,
 } from "@shared/ipc-contract"
@@ -16,7 +17,7 @@ import type { BittorrentRuntime } from "./types"
 
 class BittorrentManager {
     private sessions = new Map<number, BittorrentRuntime>()
-    private pendingConnections = new Map<number, Promise<void>>()
+    private pendingConnections = new Map<number, Promise<TorrentClientFeatures>>()
 
     private async getSession(sender: WebContents) {
         const senderId = sender.id
@@ -52,7 +53,7 @@ class BittorrentManager {
         return sourceBasename === filename && sourceBasename.toLowerCase().endsWith(".torrent")
     }
 
-    async connect(sender: WebContents, server: BittorrentServerConfig): Promise<void> {
+    async connect(sender: WebContents, server: BittorrentServerConfig) {
         const senderId = sender.id
         const pendingConnect = (async () => {
             const existing = this.sessions.get(senderId)
@@ -64,13 +65,14 @@ class BittorrentManager {
             }
 
             const runtime = createRuntime(server.client)
-            await runtime.connect(server)
+            const features = await runtime.connect(server)
             this.sessions.set(senderId, runtime)
+            return features
         })()
 
         this.pendingConnections.set(senderId, pendingConnect)
         try {
-            await pendingConnect
+            return await pendingConnect
         } finally {
             if (this.pendingConnections.get(senderId) === pendingConnect) {
                 this.pendingConnections.delete(senderId)

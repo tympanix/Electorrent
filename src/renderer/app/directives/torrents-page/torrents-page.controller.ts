@@ -143,9 +143,10 @@ export class TorrentsPageController {
         };
 
         const supportsMagnetUploadOptions = () => {
-            const uploadOptionsEnable = $rootScope.$btclient?.uploadOptionsEnable;
-            return uploadOptionsEnable !== null && uploadOptionsEnable !== undefined;
+            return Object.values($rootScope.$btclient?.features.uploadOptions || {}).some(Boolean);
         };
+
+        $scope.supportsUploadOptions = supportsMagnetUploadOptions;
 
         const shouldPromptForUploadOptions = (item: PendingTorrentUploadItem, askUploadOptions: boolean) => {
             const wantsPrompt = settings.alwaysPromptUploadOptions === true || askUploadOptions === true;

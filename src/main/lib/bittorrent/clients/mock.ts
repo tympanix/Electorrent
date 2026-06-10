@@ -2,6 +2,7 @@ import type {
     BittorrentFileSelection,
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
+    TorrentClientFeatures,
 } from "@shared/ipc-contract"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 
@@ -49,7 +50,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
     private files = new Map<string, MockTorrentFile[]>()
     private removedHashes: string[] = []
 
-    async connect(server: BittorrentServerConfig): Promise<void> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
         const count = this.getTorrentCount(server)
         this.torrents.clear()
         this.files.clear()
@@ -88,6 +89,25 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         }
 
         this.connected = true
+
+        return {
+            magnetLinks: true,
+            labels: true,
+            fileSelection: true,
+            setLocation: true,
+            torrentDetails: true,
+            uploadOptions: {
+                saveLocation: true,
+                renameTorrent: true,
+                category: true,
+                startTorrent: true,
+                skipCheck: true,
+                sequentialDownload: true,
+                firstAndLastPiecePrio: true,
+                downloadSpeedLimit: true,
+                uploadSpeedLimit: true,
+            },
+        }
     }
 
     async disconnect(): Promise<void> {

@@ -1,39 +1,16 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentUpdates, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { DelugeTorrent } from "./torrentd";
-import { addTorrentUrl, connect, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 
 export class DelugeClient extends TorrentClient<DelugeTorrent> {
     public name = 'Deluge'
     public id = 'deluge'
-    public supportsTorrentDetails = true
-    public supportsLabels = false
-    public uploadOptionsEnable: TorrentUploadOptionsEnable = {
-        saveLocation: true,
-        category: true,
-        startTorrent: true,
-        peerLimit: true,
-        firstAndLastPiecePrio: true,
-        downloadSpeedLimit: true,
-        uploadSpeedLimit: true,
-    }
-
-    connect(server): Promise<void> {
-        return connect(server)
-    }
-
     async torrents(): Promise<TorrentUpdates> {
         const data: Record<string, any> = await getSnapshot()
-        const supportsLabels = data.supportsLabels === true
-        if (this.supportsLabels !== supportsLabels) {
-            this.supportsLabels = supportsLabels
-            this.updateLabelActions()
-        }
-        this.uploadOptionsEnable.category = this.supportsLabels
 
         return {
             labels: Array.isArray(data.labels) ? data.labels : [],
-            supportsLabels: this.supportsLabels,
             all: Object.keys(data.torrents || {}).map((hash) => new DelugeTorrent(hash, data.torrents[hash])),
             changed: [],
             deleted: [],
@@ -93,19 +70,6 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
         return invokeAction("setLabel", torrents.map((torrent) => torrent.hash), label, create)
     }
 
-    private updateLabelActions() {
-        const labelAction = {
-            label: "Labels",
-            click: this.setLabel,
-            type: "labels" as const,
-        }
-
-        this.actionHeader = [
-            ...this.baseActionHeader,
-            ...(this.supportsLabels ? [labelAction] : []),
-        ]
-    }
-
     deleteTorrents(torrents: DelugeTorrent[]): Promise<void> {
         return this.remove(torrents)
     }
@@ -163,8 +127,6 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
         ])
     }
 
-    enableTrackerFilter = false
-
     extraColumns = []
 
     private baseActionHeader: TorrentActionList<DelugeTorrent> = [
@@ -186,7 +148,16 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
         },
     ]
 
-    actionHeader: TorrentActionList<DelugeTorrent> = this.baseActionHeader
+    get actionHeader(): TorrentActionList<DelugeTorrent> {
+        return [
+            ...this.baseActionHeader,
+            ...(this.features.labels ? [{
+                label: "Labels",
+                click: this.setLabel,
+                type: "labels" as const,
+            }] : []),
+        ]
+    }
 
     contextMenu: ContextActionList<DelugeTorrent> = [
         {

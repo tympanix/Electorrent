@@ -1,7 +1,7 @@
 import request from "request"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientFeatures } from "@shared/ipc-contract"
 import {
     cleanPath,
     defer,
@@ -197,7 +197,7 @@ export class DelugeRuntime implements BittorrentRuntime {
         return defer<any[]>((done) => this.rpc("web.get_hosts", [], done))
     }
 
-    async connect(server: BittorrentServerConfig): Promise<void> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
         const origin = `${server.proto}://${server.ip}:${server.port}`
 
         this.rpcUrl = `${origin}${buildClientPath(server, "json")}`
@@ -219,8 +219,27 @@ export class DelugeRuntime implements BittorrentRuntime {
 
         await defer((done) => this.rpc("web.connect", [hostId], done))
 
-        const enabledPlugins = await defer<string[]>((done) => this.rpc("core.get_enabled_plugins", [], done))
-        this.supportsLabels = Array.isArray(enabledPlugins) && enabledPlugins.includes("Label")
+        try {
+            const enabledPlugins = await defer<string[]>((done) => this.rpc("core.get_enabled_plugins", [], done))
+            this.supportsLabels = Array.isArray(enabledPlugins) && enabledPlugins.includes("Label")
+        } catch {
+            this.supportsLabels = false
+        }
+
+        return {
+            magnetLinks: String(hosts[0]?.[4] || "").startsWith("2."),
+            labels: this.supportsLabels,
+            torrentDetails: true,
+            uploadOptions: {
+                saveLocation: true,
+                category: this.supportsLabels,
+                startTorrent: true,
+                peerLimit: true,
+                firstAndLastPiecePrio: true,
+                downloadSpeedLimit: true,
+                uploadSpeedLimit: true,
+            },
+        }
     }
 
     async getSnapshot(): Promise<any> {
@@ -235,7 +254,6 @@ export class DelugeRuntime implements BittorrentRuntime {
         return {
             ...snapshot,
             labels: Array.isArray(labels) ? labels : [],
-            supportsLabels: this.supportsLabels,
         }
     }
 

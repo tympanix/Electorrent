@@ -1,19 +1,10 @@
 import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { SynologyTorrent } from "./synologytorrent";
-import { addTorrentUrl, connect, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export class SynologyClient extends TorrentClient<SynologyTorrent> {
     public name = 'Synology Download Station'
     public id = 'downloadstation'
-    public supportsSetLocation = true
-    public uploadOptionsEnable = {
-        saveLocation: true,
-    }
-
-    connect(server): Promise<void> {
-        return connect(server)
-    }
-
     torrents(): Promise<TorrentUpdates> {
         return getSnapshot().then((data) => this.processData(data))
     }
@@ -63,8 +54,6 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
     deleteTorrents(torrents: SynologyTorrent[]): Promise<void> {
         return this.remove(torrents)
     }
-
-    enableTrackerFilter = false
 
     extraColumns = []
 

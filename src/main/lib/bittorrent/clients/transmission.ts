@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientFeatures } from '@shared/ipc-contract'
 import {
     createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
@@ -165,7 +165,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         return http
     }
 
-    async connect(server: BittorrentServerConfig): Promise<void> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
         this.server = server
         this.session = undefined
 
@@ -177,6 +177,23 @@ export class TransmissionRuntime implements BittorrentRuntime {
             },
             validateStatus: (status) => status === 200 || status === 409,
         })
+
+        return {
+            magnetLinks: true,
+            labels: true,
+            setLocation: true,
+            torrentDetails: true,
+            trackerFilter: true,
+            uploadOptions: {
+                saveLocation: true,
+                category: true,
+                startTorrent: true,
+                peerLimit: true,
+                sequentialDownload: true,
+                downloadSpeedLimit: true,
+                uploadSpeedLimit: true,
+            },
+        }
     }
 
     async getSnapshot(): Promise<any> {

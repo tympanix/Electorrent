@@ -53,7 +53,7 @@ export class TorrentUploadFormController {
     }
 
     refreshFormState() {
-        this.optionsEnabled = this.rootScope?.$btclient?.uploadOptionsEnable || {}
+        this.optionsEnabled = this.rootScope?.$btclient?.features.uploadOptions || {}
         this.refreshSavedLocations()
     }
 

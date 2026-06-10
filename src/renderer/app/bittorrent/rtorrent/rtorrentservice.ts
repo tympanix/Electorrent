@@ -1,22 +1,12 @@
 import { Column } from "@renderer/app/services/column";
 import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { RtorrentTorrent } from "./torrentr";
-import { addTorrentUrl, connect, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 
 export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     public name = "rTorrent"
     public id = "rtorrent"
-    public supportsTorrentDetails = true
-    public uploadOptionsEnable = {
-      saveLocation: true,
-      startTorrent: true,
-    }
-
-    connect(server): Promise<void> {
-        return connect(server)
-    };
-
     defaultPath(): string {
       return "/RPC2";
     };
@@ -128,8 +118,6 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       ])
     }
 
-    enableTrackerFilter = true;
-
     extraColumns = [
       new Column({
         name: "Tracker",
@@ -139,7 +127,7 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       }),
     ];
 
-    actionHeader: TorrentActionList<RtorrentTorrent> = [
+    private baseActionHeader: TorrentActionList<RtorrentTorrent> = [
       {
         label: "Start",
         type: "button",
@@ -162,6 +150,12 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
         type: "labels",
       },
     ];
+
+    get actionHeader(): TorrentActionList<RtorrentTorrent> {
+      return this.features.labels
+        ? this.baseActionHeader
+        : this.baseActionHeader.filter((action) => action.type !== "labels")
+    }
 
     contextMenu: ContextActionList<RtorrentTorrent> = [
       {

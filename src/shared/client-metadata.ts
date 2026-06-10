@@ -4,7 +4,7 @@ export interface ClientMetadata {
     showAdvancedUploadMenu: boolean
 }
 
-export const CLIENT_METADATA: Record<string, ClientMetadata> = {
+export const CLIENT_METADATA = {
     utorrent: {
         name: 'µTorrent',
         icon: 'utorrent',
@@ -40,4 +40,6 @@ export const CLIENT_METADATA: Record<string, ClientMetadata> = {
         icon: 'deluge',
         showAdvancedUploadMenu: true,
     },
-}
+} as const satisfies Record<string, ClientMetadata>
+
+export type ClientId = keyof typeof CLIENT_METADATA
