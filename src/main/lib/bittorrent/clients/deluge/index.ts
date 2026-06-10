@@ -1,4 +1,5 @@
 import request from "request"
+import parseTorrent from "parse-torrent"
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
 import { cleanPath, defer } from "@main/lib/bittorrent/helpers"
@@ -9,6 +10,7 @@ const DELUGE_TORRENT_FIELDS = [
     "download_payload_rate",
     "eta",
     "is_auto_managed",
+    "label",
     "max_connections",
     "max_download_speed",
     "max_upload_speed",
@@ -66,6 +68,8 @@ export class DelugeRuntime implements BittorrentRuntime {
 
     private requestOptions: Record<string, any> = {}
 
+    private supportsLabels = false
+
     private getUploadOptions(options?: Record<string, any>) {
         if (!options) {
             return {}
@@ -79,6 +83,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 max_download_speed: options.downloadSpeedLimit,
                 max_upload_speed: options.uploadSpeedLimit,
                 prioritize_first_last_pieces: options.firstAndLastPiecePrio,
+                label: options.category,
             }).filter(([, value]) => value !== undefined && value !== null),
         )
     }
@@ -132,7 +137,7 @@ export class DelugeRuntime implements BittorrentRuntime {
     }
 
     private addUploadedTorrent(path: string, config: Record<string, any> | undefined, cb: (err: any, value?: any) => void) {
-        const options = {
+        const options: Record<string, any> = {
             file_priorities: [],
             add_paused: false,
             compact_allocation: false,
@@ -143,8 +148,21 @@ export class DelugeRuntime implements BittorrentRuntime {
             prioritize_first_last_pieces: false,
             ...config,
         }
+        delete options.label
 
         this.rpc("web.add_torrents", [[{ path, options }]], cb)
+    }
+
+    private async applyUploadedTorrentLabel(hash: string | undefined, label?: string) {
+        if (!label) {
+            return
+        }
+
+        if (!hash) {
+            throw new Error("Unable to determine the uploaded torrent hash")
+        }
+
+        await this.setLabel([hash], label)
     }
 
     private isMagnetUrl(uri: string) {
@@ -196,10 +214,25 @@ export class DelugeRuntime implements BittorrentRuntime {
         }
 
         await defer((done) => this.rpc("web.connect", [hostId], done))
+
+        const enabledPlugins = await defer<string[]>((done) => this.rpc("core.get_enabled_plugins", [], done))
+        this.supportsLabels = Array.isArray(enabledPlugins) && enabledPlugins.includes("Label")
     }
 
-    getSnapshot(): Promise<any> {
-        return defer((done) => this.rpc("web.update_ui", [DELUGE_TORRENT_FIELDS, {}], done))
+    async getSnapshot(): Promise<any> {
+        const fields = this.supportsLabels
+            ? DELUGE_TORRENT_FIELDS
+            : DELUGE_TORRENT_FIELDS.filter((field) => field !== "label")
+        const snapshot = await defer<Record<string, any>>((done) => this.rpc("web.update_ui", [fields, {}], done))
+        const labels = this.supportsLabels
+            ? await defer<string[]>((done) => this.rpc("label.get_labels", [], done))
+            : []
+
+        return {
+            ...snapshot,
+            labels: Array.isArray(labels) ? labels : [],
+            supportsLabels: this.supportsLabels,
+        }
     }
 
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
@@ -265,12 +298,16 @@ export class DelugeRuntime implements BittorrentRuntime {
 
         if (this.isMagnetUrl(uri)) {
             const magnetOptions = await this.resolveMagnetConfig(uploadOptions)
+            const hash = parseTorrent(uri).infoHash
             await defer((done) => this.addUploadedTorrent(uri, magnetOptions, done))
+            await this.applyUploadedTorrentLabel(hash, magnetOptions.label)
             return
         }
 
         const uploadPath = await defer<string>((done) => this.rpc("web.download_torrent_from_url", [uri, ""], done))
+        const torrentInfo = await defer<Record<string, any>>((done) => this.rpc("web.get_torrent_info", [uploadPath], done))
         await defer((done) => this.addUploadedTorrent(uploadPath, uploadOptions, done))
+        await this.applyUploadedTorrentLabel(torrentInfo?.info_hash, uploadOptions.label)
     }
 
     async uploadTorrent(buffer: Uint8Array, _filename: string, options?: Record<string, any>): Promise<void> {
@@ -281,7 +318,10 @@ export class DelugeRuntime implements BittorrentRuntime {
             throw new Error("Deluge upload did not return a torrent path")
         }
 
-        await defer((done) => this.addUploadedTorrent(uploadPath, this.getUploadOptions(options), done))
+        const uploadOptions = this.getUploadOptions(options)
+        const hash = parseTorrent(Buffer.from(buffer)).infoHash
+        await defer((done) => this.addUploadedTorrent(uploadPath, uploadOptions, done))
+        await this.applyUploadedTorrentLabel(hash, uploadOptions.label)
     }
 
     resume(hashes: string[]): Promise<void> {
@@ -318,5 +358,17 @@ export class DelugeRuntime implements BittorrentRuntime {
 
     queueBottom(hashes: string[]): Promise<void> {
         return defer((done) => this.rpc("core.queue_bottom", [hashes], done))
+    }
+
+    async setLabel(hashes: string[], label: string, create?: boolean): Promise<void> {
+        if (!this.supportsLabels) {
+            throw new Error("Deluge labels require the Label plugin to be enabled")
+        }
+
+        if (create === true) {
+            await defer((done) => this.rpc("label.add", [label], done))
+        }
+
+        await Promise.all(hashes.map((hash) => defer((done) => this.rpc("label.set_torrent", [hash, label], done))))
     }
 }

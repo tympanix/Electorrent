@@ -11,6 +11,7 @@ export type TorrentActionRole = "resume" | "stop" | "delete"
 
 export interface TorrentUpdates {
     labels?: string[],
+    supportsLabels?: boolean,
     all?: any[],
     changed?: any[],
     deleted?: any[],
@@ -230,6 +231,11 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * and file details content.
      */
     public supportsTorrentDetails: boolean = false
+
+    /**
+     * When true, the client supports listing and assigning torrent labels.
+     */
+    public supportsLabels: boolean = true
 
     /**
      * Get the list of files for a torrent.

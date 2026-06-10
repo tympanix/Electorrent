@@ -16,7 +16,7 @@ export class DelugeTorrent extends Torrent {
             uploadSpeed: data.upload_payload_rate,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: data.download_payload_rate, /* Download Speed (integer): bytes per second */
             eta: data.eta, /* ETA (integer): second to completion */
-            label: undefined, /* Label (string): group/category identification */
+            label: data.label || "", /* Label (string): group/category identification */
             peersConnected: data.num_peers, /* Peers Connected (integer): number of peers connected */
             peersInSwarm: data.total_peers, /* Peers In Swarm (integer): number of peers in the swarm */
             seedsConnected: data.num_seeds, /* Seeds Connected (integer): number of connected seeds */

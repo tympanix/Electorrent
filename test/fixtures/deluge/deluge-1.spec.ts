@@ -11,7 +11,6 @@ createTestSuite({
   password: "deluge",
   stopLabel: "Paused",
   unsupportedFeatures: [
-    FeatureSet.Labels,
     FeatureSet.MagnetLinks,
   ],
 });
