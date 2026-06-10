@@ -1,5 +1,4 @@
 import { createTestSuite } from "../../testlib";
-import { FeatureSet } from "../../testutil";
 import { DelugeClient } from "../../../src/renderer/app/bittorrent"
 
 createTestSuite({
@@ -10,7 +9,5 @@ createTestSuite({
   username: "admin",
   password: "deluge",
   stopLabel: "Paused",
-  unsupportedFeatures: [
-    FeatureSet.Labels,
-  ],
+  unsupportedFeatures: [],
 });

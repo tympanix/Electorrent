@@ -53,7 +53,7 @@
                 <div class="ui torrent sort label">{{numInFilter('error')}}</div>
             </li>
             </ul>
-            <div id="torrent-sidebar-labels" ng-if="!isSidebarCollapsed()">
+            <div id="torrent-sidebar-labels" ng-if="$btclient.supportsLabels && !isSidebarCollapsed()">
                 <div class="section">
                     <span>Labels</span>
                     <a data-role="labels-clear" class="ui gray basic mini clear button" ng-click="filterByLabel()">Clear</a>
@@ -87,7 +87,7 @@
             </div>
         </div>
         <div class="sidebar-collapsed-sections" ng-if="isSidebarCollapsed()">
-            <div class="sidebar-collapsed-section">
+            <div class="sidebar-collapsed-section" ng-if="$btclient.supportsLabels">
             <div class="torrent-sidebar-section-trigger" data-role="torrent-sidebar-labels-toggle" title="Labels">
                 <i class="tags icon"></i>
             </div>
