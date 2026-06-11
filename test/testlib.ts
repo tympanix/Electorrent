@@ -622,6 +622,27 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             return torrent.waitForState(options.downloadLabel);
           });
 
+          it("opens the context menu at the mouse position", async function () {
+            const torrentRow = $(torrent.query)
+            const rowLocation = await torrentRow.getLocation()
+            const rowSize = await torrentRow.getSize()
+            const clickOffset = {
+              x: -Math.floor(rowSize.width / 4),
+              y: 0,
+            }
+            const expectedMenuLocation = {
+              x: rowLocation.x + Math.floor(rowSize.width / 2) + clickOffset.x,
+              y: rowLocation.y + Math.floor(rowSize.height / 2) + clickOffset.y,
+            }
+
+            await torrent.openContextMenu({ button: "right", ...clickOffset })
+
+            const contextMenuLocation = await $("#contextmenu").getLocation()
+            const tolerance = 2
+            assert.closeTo(contextMenuLocation.x, expectedMenuLocation.x, tolerance)
+            assert.closeTo(contextMenuLocation.y, expectedMenuLocation.y, tolerance)
+          })
+
           it("delete action shows a confirmation modal", async function () {
             const modal = await torrent.openDeleteConfirmation()
             await modal.$(".content").getText().should.eventually.contain("Are you sure")

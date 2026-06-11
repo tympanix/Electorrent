@@ -202,8 +202,8 @@ export class ContextMenuDirective implements IDirective {
                 const menuWidth = $(element).width() || 0;
                 const menuHeight = $(element).height() || 0;
 
-                const menuX = event.pageX + menuWidth >= totalWidth ? event.pageX - menuWidth : event.pageX;
-                const menuY = event.pageY + menuHeight >= totalHeight ? event.pageY - menuHeight : event.pageY;
+                const menuX = event.clientX + menuWidth >= totalWidth ? event.clientX - menuWidth : event.clientX;
+                const menuY = event.clientY + menuHeight >= totalHeight ? event.clientY - menuHeight : event.clientY;
 
                 $(element).css({
                     left: menuX,

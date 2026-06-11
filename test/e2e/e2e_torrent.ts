@@ -235,11 +235,11 @@ export class Torrent {
     await elem.click(options)
   }
 
-  async openContextMenu() {
+  async openContextMenu(options: Partial<ClickOptions> = { button: "right" }) {
     const elem = $(this.query)
     await elem.waitForExist()
     await elem.waitForDisplayed()
-    await elem.click({ button: "right" })
+    await elem.click(options)
 
     const contextMeny = $("#contextmenu")
     await contextMeny.waitForDisplayed()
