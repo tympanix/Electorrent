@@ -1,7 +1,6 @@
 import chai from "chai"
 import { $, $$, browser } from "@wdio/globals"
 import { before, describe, it } from "mocha"
-import { MockBittorrentClient } from "../../../src/renderer/app/bittorrent"
 import { App } from "../../e2e"
 import { startApplicationHooks } from "../../shared"
 import { setupMochaHooks } from "../../testutil"
@@ -22,7 +21,7 @@ describe("given mocked bittorrent backend is running", function () {
     this.app = this.app || new App()
 
     await this.app.login({
-      client: new MockBittorrentClient(),
+      clientId: "mock",
       host: "mock",
       username: "mock",
       password: "mock",

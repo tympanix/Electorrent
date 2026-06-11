@@ -63,7 +63,7 @@ export class TorrentFilesModalController {
 
   loadFiles(): Promise<TorrentFile[] | void> {
     const torrent = this.scope.torrent;
-    if (!torrent || !this.rootScope.$btclient || !this.rootScope.$btclient.supportsFileSelection) {
+    if (!torrent || !this.rootScope.$btclient || !this.rootScope.$btclient.features.fileSelection) {
       return Promise.resolve();
     }
     this.scope.loading = true;

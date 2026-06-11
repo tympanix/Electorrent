@@ -6,19 +6,21 @@ import { fileURLToPath } from "url";
 import chaiAsPromised from "chai-as-promised";
 import parseTorrent from "parse-torrent"
 import * as e2e from "./e2e";
-import { FeatureSet, setupMochaHooks, waitForHttp } from "./testutil"
+import { setupMochaHooks, waitForHttp } from "./testutil"
 import { dockerComposeHooks, startApplicationHooks, restartApplication } from "./shared"
-import { TorrentClient } from "../src/renderer/app/bittorrent"
 import { browser, $ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
 import { waitForModalClose, waitForModalOpen } from "./e2e/modal"
+import type { ClientId } from "../src/shared/client-metadata"
+import type { TorrentClientFeatures } from "../src/shared/ipc-contract"
 
 const { assert } = chai
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 
 interface TestSuiteOptionsOptional {
-  client: TorrentClient
+  clientId: ClientId
+  features: TorrentClientFeatures
   fixture: string,
   version?: string,
   username: string,
@@ -31,7 +33,6 @@ interface TestSuiteOptionsOptional {
   stopLabel?: string,
   downloadLabel?: string,
   saveLocation?: string,
-  unsupportedFeatures: FeatureSet[]
 }
 
 const TEST_SUITE_OPTIONS_DEFAULTS = {
@@ -75,11 +76,24 @@ export type TestSuiteOptions = TestSuiteOptionsOptional & (typeof TEST_SUITE_OPT
  * @param options test suite options
  * @param feature the feature that is required to continue
  */
-function requireFeatureHook(options: TestSuiteOptions, feature: FeatureSet) {
+function requireFeatureHook(options: TestSuiteOptions, isSupported: (features: TorrentClientFeatures) => boolean) {
   before(function() {
-    if (options.unsupportedFeatures.includes(feature)) {
+    if (!isSupported(options.features)) {
       this.skip()
     }
+  })
+}
+
+function enabledFeaturePaths(features: Record<string, unknown>, prefix = ""): string[] {
+  return Object.entries(features).flatMap(([key, value]) => {
+    const path = prefix ? `${prefix}.${key}` : key
+    if (value === true) {
+      return [path]
+    }
+    if (value && typeof value === "object") {
+      return enabledFeaturePaths(value as Record<string, unknown>, path)
+    }
+    return []
   })
 }
 
@@ -93,7 +107,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     chai.use(chaiAsPromised);
   });
 
-  describe(`given ${options.client.id}-${options.version} service is running (docker-compose)`, function () {
+  describe(`given ${options.clientId}-${options.version} service is running (docker-compose)`, function () {
 
     // start up opentracker docker-compose services
     const tracker = dockerComposeHooks([__dirname, "shared", "opentracker"], {}, { serviceName: "peer" })
@@ -149,6 +163,17 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           await this.app.torrentsPageIsVisible()
         })
 
+        it("reports expected client features", async function() {
+          const actualFeatures = await browser.execute(() => {
+            const angular = (window as any).angular
+            return angular.element(document.documentElement).injector().get("$rootScope").$btclient.features
+          })
+          const missingFeatures = enabledFeaturePaths(options.features as Record<string, unknown>)
+            .filter((path) => path.split(".").reduce((value, key) => value?.[key], actualFeatures) !== true)
+
+          assert.deepEqual(missingFeatures, [], `Missing enabled client features: ${missingFeatures.join(", ")}`)
+        })
+
         it("automatically connect when restarting app", async function() {
           await restartApplication(this)
           await this.app.torrentsPageIsVisible()
@@ -180,7 +205,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           await this.app.torrentsPageIsVisible()
         })
 
-        if (options.client.id === "qbittorrent") {
+        if (options.clientId === "qbittorrent") {
           it("shows qBittorrent free space in the footer", async function() {
             await browser.waitUntil(async () => {
               const footerText = await this.app.getTorrentsFooterText();
@@ -549,7 +574,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
         describe("when a magnet link is uploaded", async function() {
           let torrent: e2e.Torrent
-          requireFeatureHook(options, FeatureSet.MagnetLinks)
+          requireFeatureHook(options, (features) => features.magnetLinks === true)
 
           before(async function() {
             await restartApplication(this)
@@ -625,7 +650,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           describe("given file selection is supported", function () {
             before(function () {
-              if (!(options.client as any).supportsFileSelection) {
+              if (options.features.fileSelection !== true) {
                 this.skip()
               }
             })
@@ -680,7 +705,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           describe("given torrent details are supported", function () {
             before(function () {
-              if (!(options.client as any).supportsTorrentDetails) {
+              if (options.features.torrentDetails !== true) {
                 this.skip()
               }
             })
@@ -770,7 +795,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           describe("given labels are supported", function () {
-            requireFeatureHook(options, FeatureSet.Labels)
+            requireFeatureHook(options, (features) => features.labels === true)
             const firstLabel = createUniqueLabel("testlabel")
             const secondLabel = createUniqueLabel("someotherlabel")
             let initialLabelCount = 0
@@ -805,7 +830,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           describe("given set location is supported", function () {
             before(function () {
-              if (!(options.client as any).supportsSetLocation) {
+              if (options.features.setLocation !== true) {
                 this.skip()
               }
             })
@@ -850,7 +875,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
     })
 
     describe("given advanced upload options are supported", async function() {
-      requireFeatureHook(options, FeatureSet.AdvancedUploadOptions)
+      requireFeatureHook(options, (features) => Object.values(features.uploadOptions || {}).some((enabled) => enabled === true))
 
       describe("given application is running", function() {
         startApplicationHooks()
@@ -879,7 +904,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("add torrent dialog uses current server default upload options", async function() {
-            if (!options.client.uploadOptionsEnable?.startTorrent) return this.skip()
+            if (options.features.uploadOptions?.startTorrent !== true) return this.skip()
 
             let torrent: e2e.Torrent | undefined
 
@@ -920,7 +945,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torent uploaded with preexisting label", async function() {
-            if (!options.client.uploadOptionsEnable?.category) return this.skip()
+            if (options.features.uploadOptions?.category !== true) return this.skip()
             const labelName = createUniqueLabel("mylabel")
             let torrent = await this.app.uploadTorrent({ filename: this.torrentPath });
             await torrent.newLabel(labelName)
@@ -935,7 +960,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           it("torrent uploaded in stopped state", async function() {
             this.timeout(30 * 1000)
-            if (!options.client.uploadOptionsEnable?.startTorrent) return this.skip()
+            if (options.features.uploadOptions?.startTorrent !== true) return this.skip()
             const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ start: false })
             await torrent.isExisting()
@@ -945,7 +970,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           it("torrent uploaded with peer limit", async function() {
             this.timeout(30 * 1000)
-            if (!options.client.uploadOptionsEnable?.peerLimit) return this.skip()
+            if (options.features.uploadOptions?.peerLimit !== true) return this.skip()
             const peerLimit = 8
             const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ peerLimit })
@@ -962,24 +987,24 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           it("torrent uploaded with speed limits", async function() {
             this.timeout(30 * 1000)
-            if (!options.client.uploadOptionsEnable?.downloadSpeedLimit && !options.client.uploadOptionsEnable?.uploadSpeedLimit) return this.skip()
+            if (options.features.uploadOptions?.downloadSpeedLimit !== true && options.features.uploadOptions?.uploadSpeedLimit !== true) return this.skip()
             const downloadSpeedLimit = 111
             const uploadSpeedLimit = 37
             const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({
-              downloadSpeedLimit: options.client.uploadOptionsEnable?.downloadSpeedLimit ? downloadSpeedLimit : undefined,
-              uploadSpeedLimit: options.client.uploadOptionsEnable?.uploadSpeedLimit ? uploadSpeedLimit : undefined,
+              downloadSpeedLimit: options.features.uploadOptions?.downloadSpeedLimit === true ? downloadSpeedLimit : undefined,
+              uploadSpeedLimit: options.features.uploadOptions?.uploadSpeedLimit === true ? uploadSpeedLimit : undefined,
             })
             await torrent.waitForExist({ timeout: 20 * 1000 })
             await torrent.waitForStates([options.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
             await torrent.openDetailsPanel()
-            if (options.client.uploadOptionsEnable?.downloadSpeedLimit) {
+            if (options.features.uploadOptions?.downloadSpeedLimit === true) {
               await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("download-limit")) === String(downloadSpeedLimit), {
                 timeout: 10 * 1000,
                 timeoutMsg: `Expected download limit to become ${downloadSpeedLimit}`,
               })
             }
-            if (options.client.uploadOptionsEnable?.uploadSpeedLimit) {
+            if (options.features.uploadOptions?.uploadSpeedLimit === true) {
               await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("upload-limit")) === String(uploadSpeedLimit), {
                 timeout: 10 * 1000,
                 timeoutMsg: `Expected upload limit to become ${uploadSpeedLimit}`,
@@ -991,7 +1016,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           it("torrent uploaded with sequential download", async function() {
             this.timeout(30 * 1000)
-            if (!options.client.uploadOptionsEnable?.sequentialDownload) return this.skip()
+            if (options.features.uploadOptions?.sequentialDownload !== true) return this.skip()
             const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ sequentialDownload: true })
             await torrent.waitForExist({ timeout: 20 * 1000 })
@@ -1006,7 +1031,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           })
 
           it("torrent uploaded with name", async function() {
-            if (!options.client.uploadOptionsEnable?.renameTorrent) return this.skip()
+            if (options.features.uploadOptions?.renameTorrent !== true) return this.skip()
             const torrentName = "my awesome torrent"
             const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
             await this.app.uploadTorrentModalSubmit({ name: torrentName })
@@ -1017,7 +1042,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
 
           it("saved location added from upload modal persists", async function() {
             this.timeout(300 * 1000)
-            if (!options.client.uploadOptionsEnable?.saveLocation) return this.skip()
+            if (options.features.uploadOptions?.saveLocation !== true) return this.skip()
 
             const saveLocation = `${options.saveLocation || "/tmp/custom/save/location"}-saved`
             await backend.exec(["rm", "-rf", saveLocation])

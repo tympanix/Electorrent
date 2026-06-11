@@ -53,7 +53,7 @@
                 <div class="ui torrent sort label">{{numInFilter('error')}}</div>
             </li>
             </ul>
-            <div id="torrent-sidebar-labels" ng-if="$btclient.supportsLabels && !isSidebarCollapsed()">
+            <div id="torrent-sidebar-labels" ng-if="$btclient.features.labels && !isSidebarCollapsed()">
                 <div class="section">
                     <span>Labels</span>
                     <a data-role="labels-clear" class="ui gray basic mini clear button" ng-click="filterByLabel()">Clear</a>
@@ -67,7 +67,7 @@
                     </li>
                 </ul>
             </div>
-            <div id="torrent-sidebar-trackers" ng-if="$btclient.enableTrackerFilter && !isSidebarCollapsed()">
+            <div id="torrent-sidebar-trackers" ng-if="$btclient.features.trackerFilter && !isSidebarCollapsed()">
                 <div class="section">
                     <span>Trackers</span>
                     <a data-role="trackers-clear" class="ui gray basic mini clear button" ng-click="filterByTracker()">Clear</a>
@@ -87,7 +87,7 @@
             </div>
         </div>
         <div class="sidebar-collapsed-sections" ng-if="isSidebarCollapsed()">
-            <div class="sidebar-collapsed-section" ng-if="$btclient.supportsLabels">
+            <div class="sidebar-collapsed-section" ng-if="$btclient.features.labels">
             <div class="torrent-sidebar-section-trigger" data-role="torrent-sidebar-labels-toggle" title="Labels">
                 <i class="tags icon"></i>
             </div>
@@ -106,7 +106,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="sidebar-collapsed-section" ng-if="$btclient.enableTrackerFilter">
+            <div class="sidebar-collapsed-section" ng-if="$btclient.features.trackerFilter">
                 <div class="torrent-sidebar-section-trigger" data-role="torrent-sidebar-trackers-toggle" title="Trackers">
                     <i class="sitemap icon"></i>
                 </div>
@@ -177,7 +177,7 @@
                     <h2 class="ui center aligned icon header">
                         <i class="add circle icon"></i>
                         Upload Torrent Files
-                        <div class="sub header" ng-if="!settings.alwaysPromptUploadOptions && $btclient.uploadOptionsEnable">
+                        <div class="sub header" ng-if="!settings.alwaysPromptUploadOptions && supportsUploadOptions()">
                             Hold down <div class="ui label">{{ uploadAdvancedOptionsKey }}</div> key for advanced options
                         </div>
                     </h2>

@@ -2,16 +2,18 @@ import { Torrent, TorrentFile } from "./abstracttorrent"
 import type {
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
+    ResolvedTorrentClientFeatures,
+    TorrentClientFeatures,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
+import { connect } from "./ipc"
 
-export type { TorrentUploadOptions } from "@shared/ipc-contract"
+export type { TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
 export interface TorrentUpdates {
     labels?: string[],
-    supportsLabels?: boolean,
     all?: any[],
     changed?: any[],
     deleted?: any[],
@@ -29,7 +31,39 @@ export interface TorrentUpdates {
  * must be supported by the API. Any features that are enabled will have the corrosponding UI
  * components rendered when uploading a torrent
  */
-export type TorrentUploadOptionsEnable = Partial<Record<keyof TorrentUploadOptions, boolean>>
+const DEFAULT_UPLOAD_OPTIONS: ResolvedTorrentClientFeatures["uploadOptions"] = Object.freeze({
+    saveLocation: false,
+    renameTorrent: false,
+    category: false,
+    startTorrent: false,
+    peerLimit: false,
+    skipCheck: false,
+    sequentialDownload: false,
+    firstAndLastPiecePrio: false,
+    downloadSpeedLimit: false,
+    uploadSpeedLimit: false,
+})
+
+const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
+    magnetLinks: false,
+    labels: false,
+    fileSelection: false,
+    setLocation: false,
+    torrentDetails: false,
+    trackerFilter: false,
+    uploadOptions: DEFAULT_UPLOAD_OPTIONS,
+})
+
+function resolveFeatures(features: TorrentClientFeatures = {}): ResolvedTorrentClientFeatures {
+    return Object.freeze({
+        ...DEFAULT_FEATURES,
+        ...features,
+        uploadOptions: Object.freeze({
+            ...DEFAULT_UPLOAD_OPTIONS,
+            ...features.uploadOptions,
+        }),
+    })
+}
 
 export interface TorrentActionButton<T extends Torrent> {
     label: string,
@@ -133,6 +167,11 @@ export interface TorrentDetailsPanelData {
 }
 
 export abstract class TorrentClient<T extends Torrent = Torrent> {
+    private resolvedFeatures = DEFAULT_FEATURES
+
+    public get features(): ResolvedTorrentClientFeatures {
+        return this.resolvedFeatures
+    }
 
     /**
      * The semantic name of the torrent service as presented in the UI
@@ -153,7 +192,10 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * @param {server} server
      * @return {promise} connection
      */
-    abstract connect(any): Promise<void>
+    async connect(server: any): Promise<void> {
+        this.resolvedFeatures = DEFAULT_FEATURES
+        this.resolvedFeatures = resolveFeatures(await connect(server))
+    }
 
     /**
      * Return any new information about torrents to be rendered in the GUI. Should return a
@@ -208,47 +250,17 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
 
 
     /**
-     * Whether the client supports sorting by trackers or not
-     */
-    public enableTrackerFilter: boolean
-
-    /**
-     * When true, the client supports listing torrent files and setting which files to download
-     * (selective download). When false, the "Files" context menu item and file selection UI are hidden.
-     * Concrete clients that set this flag to true are expected to override
-     * {@link getTorrentFiles} and {@link setTorrentFileSelection}.
-     */
-    public supportsFileSelection: boolean = false
-
-    /**
-     * When true, the client supports changing a torrent's download location after it has been added.
-     * Concrete clients that set this flag to true are expected to override {@link setLocation}.
-     */
-    public supportsSetLocation: boolean = false
-
-    /**
-     * When true, the client supports a torrent details panel with dynamic info
-     * and file details content.
-     */
-    public supportsTorrentDetails: boolean = false
-
-    /**
-     * When true, the client supports listing and assigning torrent labels.
-     */
-    public supportsLabels: boolean = true
-
-    /**
      * Get the list of files for a torrent.
      *
      * Default implementation always throws:
-     * - when {@link supportsFileSelection} is false: Error("File selection not supported for this client")
-     * - when {@link supportsFileSelection} is true but the client did not override this method:
+     * - when {@link features.fileSelection} is false: Error("File selection not supported for this client")
+     * - when {@link features.fileSelection} is true but the client did not override this method:
      *   Error("File selection not implemented for this client")
      *
      * Concrete clients that support file selection must override this method.
      */
     async getTorrentFiles(torrent: T): Promise<TorrentFile[]> {
-        if (!this.supportsFileSelection) {
+        if (!this.features.fileSelection) {
             throw new Error("File selection not supported for this client")
         }
         return Promise.reject(new Error("File selection not implemented for this client"))
@@ -258,14 +270,14 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * Apply wanted/unwanted selection for torrent files.
      *
      * Default implementation always throws:
-     * - when {@link supportsFileSelection} is false: Error("File selection not supported for this client")
-     * - when {@link supportsFileSelection} is true but the client did not override this method:
+     * - when {@link features.fileSelection} is false: Error("File selection not supported for this client")
+     * - when {@link features.fileSelection} is true but the client did not override this method:
      *   Error("File selection not implemented for this client")
      *
      * Concrete clients that support file selection must override this method.
      */
     async setTorrentFileSelection(torrent: T, files: TorrentFile[]): Promise<void> {
-        if (!this.supportsFileSelection) {
+        if (!this.features.fileSelection) {
             throw new Error("File selection not supported for this client")
         }
         return Promise.reject(new Error("File selection not implemented for this client"))
@@ -275,19 +287,19 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * Change the save location of one or more torrents.
      *
      * Default implementation always throws:
-     * - when {@link supportsSetLocation} is false: Error("Set location not supported for this client")
-     * - when {@link supportsSetLocation} is true but the client did not override this method:
+     * - when {@link features.setLocation} is false: Error("Set location not supported for this client")
+     * - when {@link features.setLocation} is true but the client did not override this method:
      *   Error("Set location not implemented for this client")
      */
     async setLocation(_torrents: T[], _location: string): Promise<void> {
-        if (!this.supportsSetLocation) {
+        if (!this.features.setLocation) {
             throw new Error("Set location not supported for this client")
         }
         return Promise.reject(new Error("Set location not implemented for this client"))
     }
 
     async getTorrentDetails(torrent: T): Promise<TorrentDetailsPanelData> {
-        if (!this.supportsTorrentDetails) {
+        if (!this.features.torrentDetails) {
             throw new Error("Torrent details not supported for this client")
         }
 
@@ -305,7 +317,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
     }
 
     protected async getTorrentDetailsData(_torrent: T): Promise<BittorrentTorrentDetailsData> {
-        if (!this.supportsTorrentDetails) {
+        if (!this.features.torrentDetails) {
             throw new Error("Torrent details not supported for this client")
         }
 
@@ -405,8 +417,6 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * or links). The set of supported options will effect how UI is rendered. If "undefined", then
      * the client API does not support any upload options.
      */
-    public uploadOptionsEnable: TorrentUploadOptionsEnable
-
     /**
      * Provides the option to include extra columns for displaying data. This may concern columns
      * which are specific to this client. The extra columns will be merged with the default columns.

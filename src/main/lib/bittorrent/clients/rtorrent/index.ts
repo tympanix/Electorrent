@@ -1,6 +1,6 @@
 import xmlrpc from "@electorrent/xmlrpc"
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData } from "@shared/ipc-contract"
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientFeatures } from "@shared/ipc-contract"
 import { cleanPath, defer, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
@@ -92,7 +92,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         await this.getMulticallHashes(hashes, commands, params)
     }
 
-    connect(server: BittorrentServerConfig): Promise<void> {
+    connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
         const options: Record<string, any> = {
             host: server.ip,
             port: server.port,
@@ -115,7 +115,16 @@ export class RtorrentRuntime implements BittorrentRuntime {
 
         this.client = server.proto === "https" ? xmlrpc.createSecureClient(options) : xmlrpc.createClient(options)
 
-        return this.call("system.client_version", []).then(() => undefined)
+        return this.call("system.client_version", []).then(() => ({
+            magnetLinks: true,
+            labels: true,
+            torrentDetails: true,
+            trackerFilter: true,
+            uploadOptions: {
+                saveLocation: true,
+                startTorrent: true,
+            },
+        }))
     }
 
     async getSnapshot(): Promise<any> {

@@ -1,9 +1,13 @@
 import type {
     BittorrentTorrentDetailsData,
+    ElectorrentBridge,
     BittorrentFileSelection,
     BittorrentServerConfig,
+    TorrentClientFeatures,
+    TorrentUploadOptions,
 } from "@shared/ipc-contract"
-import type { TorrentUploadOptions } from "./torrentclient"
+
+declare const window: Window & { electorrent: ElectorrentBridge }
 
 function bridge() {
     return window.electorrent.bittorrent
@@ -21,7 +25,7 @@ export function serializeServer(server: any): BittorrentServerConfig {
     }
 }
 
-export function connect(server: any) {
+export function connect(server: any): Promise<TorrentClientFeatures> {
     return bridge().connect(serializeServer(server))
 }
 

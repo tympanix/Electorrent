@@ -175,6 +175,28 @@ export interface TorrentUploadOptions {
     uploadSpeedLimit?: number
 }
 
+export type TorrentUploadOptionsEnable = Partial<Record<keyof TorrentUploadOptions, boolean>>
+
+export interface TorrentClientFeatures {
+    readonly magnetLinks?: boolean
+    readonly labels?: boolean
+    readonly fileSelection?: boolean
+    readonly setLocation?: boolean
+    readonly torrentDetails?: boolean
+    readonly trackerFilter?: boolean
+    readonly uploadOptions?: Readonly<TorrentUploadOptionsEnable>
+}
+
+export interface ResolvedTorrentClientFeatures {
+    readonly magnetLinks: boolean
+    readonly labels: boolean
+    readonly fileSelection: boolean
+    readonly setLocation: boolean
+    readonly torrentDetails: boolean
+    readonly trackerFilter: boolean
+    readonly uploadOptions: Readonly<Required<Record<keyof TorrentUploadOptions, boolean>>>
+}
+
 export interface AppSettings<TServer = StoredServerConfig> {
     startup: string
     systemStartup: SystemStartupOption
@@ -290,7 +312,7 @@ export interface ElectorrentBridge {
         getPathForFile(file: unknown): string
     }
     bittorrent: {
-        connect(server: BittorrentServerConfig): Promise<void>
+        connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures>
         disconnect(): Promise<void>
         getSnapshot(request?: BittorrentSnapshotRequest): Promise<any>
         addTorrentUrl(request: BittorrentAddTorrentUrlRequest): Promise<void>
