@@ -136,10 +136,10 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
-        const features = await bittorrentManager.connect(event.sender, server)
+        const connection = await bittorrentManager.connect(event.sender, server)
         menu.setActiveServer(server)
         await onBittorrentConnected?.()
-        return features
+        return connection
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.disconnect, async function(event: IpcMainInvokeEvent) {

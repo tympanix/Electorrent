@@ -168,9 +168,14 @@ export interface TorrentDetailsPanelData {
 
 export abstract class TorrentClient<T extends Torrent = Torrent> {
     private resolvedFeatures = DEFAULT_FEATURES
+    private clientVersion = ""
 
     public get features(): ResolvedTorrentClientFeatures {
         return this.resolvedFeatures
+    }
+
+    public get version(): string {
+        return this.clientVersion
     }
 
     /**
@@ -194,7 +199,10 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      */
     async connect(server: any): Promise<void> {
         this.resolvedFeatures = DEFAULT_FEATURES
-        this.resolvedFeatures = resolveFeatures(await connect(server))
+        this.clientVersion = ""
+        const connection = await connect(server)
+        this.resolvedFeatures = resolveFeatures(connection.features)
+        this.clientVersion = connection.version
     }
 
     /**

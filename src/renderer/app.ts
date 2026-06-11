@@ -34,6 +34,11 @@ torrentApp.constant('$btclients', {
         service: new QBittorrentClient(),
         icon: CLIENT_METADATA.qbittorrent.icon
     },
+    'mock': {
+        name: CLIENT_METADATA.mock.name,
+        service: new MockBittorrentClient(),
+        icon: CLIENT_METADATA.mock.icon
+    },
     'transmission': {
         name: CLIENT_METADATA.transmission.name,
         service: new TransmissionClient(),

@@ -22,6 +22,12 @@ export class QBittorrentApiV1 extends QBittorrentBaseApi {
         })
     }
 
+    getVersion(cb: (err?: any, version?: string) => void) {
+        this.get("version/qbittorrent", {}, (err, res, body) => {
+            this.handleError(cb)(err, res, body)
+        })
+    }
+
     syncMaindata(cb: (err?: any, body?: any) => void) {
         this.getJson("sync/maindata", { qs: { rid: this.rid } }, (err, res, body) => {
             if (!err) {

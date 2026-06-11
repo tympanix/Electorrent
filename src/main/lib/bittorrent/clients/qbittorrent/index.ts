@@ -4,7 +4,7 @@ import type {
     BittorrentFileSelection,
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
-    TorrentClientFeatures,
+    TorrentClientConnection,
 } from "@shared/ipc-contract"
 import { cleanPath, defer, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
@@ -61,10 +61,18 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         return this.api
     }
 
-    connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
-        return this.selectApi(server).then((api) => {
-            this.api = api
-            return defer((done) => api.login(done)).then(() => ({
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+        const api = await this.selectApi(server)
+        this.api = api
+        await defer((done) => api.login(done))
+        const version = await defer<string>((done) => api.getVersion(done))
+        if (typeof version !== "string" || !version.trim()) {
+            throw new Error("qBittorrent did not return its version")
+        }
+
+        return {
+            version: version.trim().replace(/^v(?=\d)/i, ""),
+            features: {
                 magnetLinks: true,
                 labels: true,
                 fileSelection: true,
@@ -81,8 +89,8 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                     downloadSpeedLimit: true,
                     uploadSpeedLimit: true,
                 },
-            }))
-        })
+            },
+        }
     }
 
     getSnapshot(fullUpdate?: boolean): Promise<any> {

@@ -224,6 +224,9 @@
         </div>
         <torrent-details-panel settings="settings"></torrent-details-panel>
         <div class="action footer status-bar">
+            <div class="client-version" ng-if="$btclient.version">
+                {{$btclient.name}} {{$btclient.version}}
+            </div>
             <div class="download-speed">
                 <i class="ui blue arrow down icon"></i>
                 {{ totalDownloadSpeed | speed }} <span ng-if="totalDownloaded">({{ totalDownloaded | bytes:2 }})</span>

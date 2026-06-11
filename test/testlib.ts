@@ -11,7 +11,7 @@ import { dockerComposeHooks, startApplicationHooks, restartApplication } from ".
 import { browser, $ } from '@wdio/globals'
 import { createTorrentFile } from "./torrent";
 import { waitForModalClose, waitForModalOpen } from "./e2e/modal"
-import type { ClientId } from "../src/shared/client-metadata"
+import { CLIENT_METADATA, type ClientId } from "../src/shared/client-metadata"
 import type { TorrentClientFeatures } from "../src/shared/ipc-contract"
 
 const { assert } = chai
@@ -172,6 +172,15 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             .filter((path) => path.split(".").reduce((value, key) => value?.[key], actualFeatures) !== true)
 
           assert.deepEqual(missingFeatures, [], `Missing enabled client features: ${missingFeatures.join(", ")}`)
+        })
+
+        it("shows client version in status bar", async function() {
+          const version = $(".status-bar .client-version")
+          await version.waitForDisplayed()
+          assert.match(
+            await version.getText(),
+            new RegExp(`^${CLIENT_METADATA[options.clientId].name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+\\S+`),
+          )
         })
 
         it("automatically connect when restarting app", async function() {

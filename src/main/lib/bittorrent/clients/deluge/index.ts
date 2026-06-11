@@ -1,7 +1,7 @@
 import request from "request"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientFeatures } from "@shared/ipc-contract"
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
 import {
     cleanPath,
     defer,
@@ -197,7 +197,7 @@ export class DelugeRuntime implements BittorrentRuntime {
         return defer<any[]>((done) => this.rpc("web.get_hosts", [], done))
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         const origin = `${server.proto}://${server.ip}:${server.port}`
 
         this.rpcUrl = `${origin}${buildClientPath(server, "json")}`
@@ -218,6 +218,11 @@ export class DelugeRuntime implements BittorrentRuntime {
         }
 
         const methods = await defer<string[]>((done) => this.rpc("web.connect", [hostId], done))
+        const hostStatus = await defer<[string, string, string]>((done) => this.rpc("web.get_host_status", [hostId], done))
+        const version = hostStatus?.[2]
+        if (typeof version !== "string" || !version.trim()) {
+            throw new Error("Deluge did not return its version")
+        }
 
         try {
             const enabledPlugins = await defer<string[]>((done) => this.rpc("core.get_enabled_plugins", [], done))
@@ -227,17 +232,20 @@ export class DelugeRuntime implements BittorrentRuntime {
         }
 
         return {
-            magnetLinks: Array.isArray(methods) && methods.includes("core.add_torrent_magnet"),
-            labels: this.supportsLabels,
-            torrentDetails: true,
-            uploadOptions: {
-                saveLocation: true,
-                category: this.supportsLabels,
-                startTorrent: true,
-                peerLimit: true,
-                firstAndLastPiecePrio: true,
-                downloadSpeedLimit: true,
-                uploadSpeedLimit: true,
+            version: version.trim(),
+            features: {
+                magnetLinks: Array.isArray(methods) && methods.includes("core.add_torrent_magnet"),
+                labels: this.supportsLabels,
+                torrentDetails: true,
+                uploadOptions: {
+                    saveLocation: true,
+                    category: this.supportsLabels,
+                    startTorrent: true,
+                    peerLimit: true,
+                    firstAndLastPiecePrio: true,
+                    downloadSpeedLimit: true,
+                    uploadSpeedLimit: true,
+                },
             },
         }
     }
