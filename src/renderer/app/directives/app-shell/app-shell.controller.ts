@@ -5,6 +5,7 @@ import type { AppMeta, LaunchPayload, MenuAction } from "@shared/ipc-contract";
 
 interface AppShellScope extends IScope {
     servers: any[];
+    connectedServerName: () => string;
     showTorrents: boolean;
     showLoading: boolean;
     statusText: string;
@@ -40,6 +41,7 @@ export class AppShellController {
         let pendingTorrentFiles: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }> = [];
 
         $scope.servers = settingsService.getServers();
+        $scope.connectedServerName = () => $rootScope.$server?.getDisplayName() || "";
         $scope.showTorrents = false;
         $scope.showLoading = true;
         $scope.statusText = "Loading";
