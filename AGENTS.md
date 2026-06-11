@@ -2,7 +2,7 @@
 After finished implementation, perform the following in order:
 * Lint
 * Build
-* Smoketest
+* Test
 
 ## Building
 ```shell
@@ -14,15 +14,25 @@ npm run build
 npm run lint
 ```
 
-## Test exection
-> IMPORTANT: Test must be executed without sandbox
+## Test
+Pick a test strategy from context:
+* If user requested particular tests -> run user requested tests
+* If changes scoped to particular feature -> run targeted tests
+* Otherwise -> run smoketest
+
+### Targeted test
+* <suite>: affected bittorrent client or `qbittorrent:latest` by default
+* <testcase>: glob for test case related to impacted feature
+```shell
+npm run test -- --suite "<suite>" --mochaOpts.grep "<testcase>"
+```
+
+### Smoketest
 ```shell
 npm run smoketest
 ```
 
 # Coding Guidelines
-* Testing MUST be performed with the smoketest command to reduce test scope
 * Avoid using `browser.execute` in browser testing - prefer organic user interaction
 * Avoid conditional logic based on client ID - deduce feature support from `TorrentClient`
 * Use the Conventional Commits specification for commit messages and pull-requests
-* Avoid unrelated code in `src/main/main.ts` to keep lean - prefer relevant module in `src/main/lib`
