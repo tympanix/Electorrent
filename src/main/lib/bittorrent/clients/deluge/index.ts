@@ -217,7 +217,7 @@ export class DelugeRuntime implements BittorrentRuntime {
             throw new Error("Deluge did not return any hosts")
         }
 
-        await defer((done) => this.rpc("web.connect", [hostId], done))
+        const methods = await defer<string[]>((done) => this.rpc("web.connect", [hostId], done))
 
         try {
             const enabledPlugins = await defer<string[]>((done) => this.rpc("core.get_enabled_plugins", [], done))
@@ -227,7 +227,7 @@ export class DelugeRuntime implements BittorrentRuntime {
         }
 
         return {
-            magnetLinks: String(hosts[0]?.[4] || "").startsWith("2."),
+            magnetLinks: Array.isArray(methods) && methods.includes("core.add_torrent_magnet"),
             labels: this.supportsLabels,
             torrentDetails: true,
             uploadOptions: {

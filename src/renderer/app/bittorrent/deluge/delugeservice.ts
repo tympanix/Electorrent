@@ -146,17 +146,17 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
             icon: 'pause',
             role: 'stop'
         },
+        {
+            label: "Labels",
+            click: this.setLabel,
+            type: "labels",
+        },
     ]
 
     get actionHeader(): TorrentActionList<DelugeTorrent> {
-        return [
-            ...this.baseActionHeader,
-            ...(this.features.labels ? [{
-                label: "Labels",
-                click: this.setLabel,
-                type: "labels" as const,
-            }] : []),
-        ]
+        return this.features.labels
+            ? this.baseActionHeader
+            : this.baseActionHeader.filter((action) => action.type !== "labels")
     }
 
     contextMenu: ContextActionList<DelugeTorrent> = [
