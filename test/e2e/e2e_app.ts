@@ -80,6 +80,12 @@ export class App {
     await pageTorrents.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
   }
 
+  async getTitleBarServerName(): Promise<string> {
+    const serverName = $(".title-bar-server-name")
+    await serverName.waitForDisplayed()
+    return (await serverName.getText()).trim()
+  }
+
   async settingsPageIsVisible(opts?: { timeout: number }) {
     const settingsPage = $("#page-settings")
     await settingsPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })

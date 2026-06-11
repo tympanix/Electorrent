@@ -1,5 +1,7 @@
 <div class="main wrapper">
-    <header class="title-bar" aria-label="Window title bar"></header>
+    <header class="title-bar" aria-label="Window title bar">
+        <span class="title-bar-server-name">{{connectedServerName()}}</span>
+    </header>
 
     <div class="app-content">
         <div ng-show="showLoading" class="overlay animated">

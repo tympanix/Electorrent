@@ -283,6 +283,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             await this.app.settingsSave()
             await this.app.torrentsPageIsVisible()
             assert.equal(await this.app.getStoredServerName(0), nextName)
+            assert.equal(await this.app.getTitleBarServerName(), nextName)
 
             await this.app.openSettings()
             await this.app.settingsGotoTab("servers")
