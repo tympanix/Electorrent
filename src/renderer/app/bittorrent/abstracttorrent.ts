@@ -135,7 +135,8 @@ export abstract class Torrent implements TorrentProps {
     abstract isStatusStopped(): boolean;
 
     getPercentStr(): string {
-        return(Number((this.percent || 0) / 10)).toFixed(0) + '%';
+        const percent = Math.floor(Math.min(this.percent || 0, 1000)) / 10;
+        return percent.toFixed(1) + '%';
     };
 
     statusColor(): string {
@@ -343,4 +344,3 @@ export abstract class Torrent implements TorrentProps {
         return a - b
     }
 }
-
