@@ -222,7 +222,7 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
         })
 
         if (options.clientId === "qbittorrent") {
-          it("shows qBittorrent free space in the footer", async function() {
+          it("keeps qBittorrent free space in the footer after incremental syncs", async function() {
             await browser.waitUntil(async () => {
               const footerText = await this.app.getTorrentsFooterText();
               return footerText.includes("Free:");
