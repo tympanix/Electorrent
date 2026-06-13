@@ -6,7 +6,6 @@
 import {
     UtorrentClient,
     QBittorrentClient,
-    MockBittorrentClient,
     TransmissionClient,
     RtorrentClient,
     SynologyClient,
@@ -33,11 +32,6 @@ torrentApp.constant('$btclients', {
         name: CLIENT_METADATA.qbittorrent.name,
         service: new QBittorrentClient(),
         icon: CLIENT_METADATA.qbittorrent.icon
-    },
-    'mock': {
-        name: CLIENT_METADATA.mock.name,
-        service: new MockBittorrentClient(),
-        icon: CLIENT_METADATA.mock.icon
     },
     'transmission': {
         name: CLIENT_METADATA.transmission.name,
