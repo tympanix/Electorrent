@@ -218,8 +218,8 @@ export class DelugeRuntime implements BittorrentRuntime {
         }
 
         const methods = await defer<string[]>((done) => this.rpc("web.connect", [hostId], done))
-        const hostStatus = await defer<[string, string, string]>((done) => this.rpc("web.get_host_status", [hostId], done))
-        const version = hostStatus?.[2]
+        const hostStatus = await defer<string[]>((done) => this.rpc("web.get_host_status", [hostId], done))
+        const version = hostStatus?.[hostStatus.length - 1]
         if (typeof version !== "string" || !version.trim()) {
             throw new Error("Deluge did not return its version")
         }
