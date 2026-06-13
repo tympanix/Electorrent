@@ -13,11 +13,8 @@ setupMochaHooks()
 describe("given mocked bittorrent backend is running", function () {
   startApplicationHooks()
 
-  before(function () {
+  before(async function () {
     chai.should()
-  })
-
-  it("renders 100 mocked torrents over IPC", async function () {
     this.app = this.app || new App()
 
     await this.app.login({
@@ -28,7 +25,9 @@ describe("given mocked bittorrent backend is running", function () {
       port: 1,
     })
     await this.app.torrentsPageIsVisible({ timeout: 10 * 1000 })
+  })
 
+  it("renders 100 mocked torrents over IPC", async function () {
     await revealAllTorrentRows()
 
     const rows = await $$("#torrentTable tbody tr")
@@ -38,6 +37,12 @@ describe("given mocked bittorrent backend is running", function () {
     const lastName = await getTorrentNameText("0000000000000000000000000000000000000064")
     assert.include(firstName, "Mock Torrent 001")
     assert.include(lastName, "Mock Torrent 100")
+  })
+
+  it("shows client version in status bar", async function () {
+    const version = $(".status-bar .client-version")
+    await version.waitForDisplayed()
+    assert.equal(await version.getText(), "Mock Bittorrent 1.0.0")
   })
 })
 

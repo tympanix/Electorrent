@@ -187,6 +187,11 @@ export interface TorrentClientFeatures {
     readonly uploadOptions?: Readonly<TorrentUploadOptionsEnable>
 }
 
+export interface TorrentClientConnection {
+    readonly version: string
+    readonly features: TorrentClientFeatures
+}
+
 export interface ResolvedTorrentClientFeatures {
     readonly magnetLinks: boolean
     readonly labels: boolean
@@ -312,7 +317,7 @@ export interface ElectorrentBridge {
         getPathForFile(file: unknown): string
     }
     bittorrent: {
-        connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures>
+        connect(server: BittorrentServerConfig): Promise<TorrentClientConnection>
         disconnect(): Promise<void>
         getSnapshot(request?: BittorrentSnapshotRequest): Promise<any>
         addTorrentUrl(request: BittorrentAddTorrentUrlRequest): Promise<void>

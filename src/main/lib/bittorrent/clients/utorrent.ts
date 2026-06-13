@@ -3,7 +3,7 @@ import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
 import qs from 'qs'
 
-import type { BittorrentServerConfig, TorrentClientFeatures } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, TorrentClientConnection } from '@shared/ipc-contract'
 import {
     createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
@@ -83,7 +83,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         this.server = server
 
         this.http = axios.create({
@@ -139,11 +139,26 @@ export class UtorrentRuntime implements BittorrentRuntime {
 
         this.saveConnection(serverUrl(server), server.user, server.password)
 
+        const versionResponse = await this.http.get(`${this.data.url}/`, {
+            params: {
+                token: this.data.token,
+                t: Date.now(),
+                list: 1,
+            },
+        })
+        const build = versionResponse.data?.build
+        if ((typeof build !== 'string' && typeof build !== 'number') || !String(build).trim()) {
+            throw new Error('µTorrent did not return its build version')
+        }
+
         return {
-            magnetLinks: true,
-            labels: true,
-            uploadOptions: {
-                saveLocation: true,
+            version: String(build).trim(),
+            features: {
+                magnetLinks: true,
+                labels: true,
+                uploadOptions: {
+                    saveLocation: true,
+                },
             },
         }
     }

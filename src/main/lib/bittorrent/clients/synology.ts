@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
 
-import type { BittorrentServerConfig, TorrentClientFeatures } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, TorrentClientConnection } from '@shared/ipc-contract'
 import {
     createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
@@ -13,6 +13,7 @@ import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
 
 const API_INFO = 'SYNO.API.Info'
 const API_TASK = 'SYNO.DownloadStation.Task'
+const API_DOWNLOAD_STATION_INFO = 'SYNO.DownloadStation.Info'
 const API_AUTH = 'SYNO.API.Auth'
 
 const ERR_COM: Record<number, string> = {
@@ -53,6 +54,8 @@ export class SynologyRuntime implements BittorrentRuntime {
     private authVersion = ''
     private dlPath = ''
     private dlVersion = ''
+    private infoPath = ''
+    private infoVersion = ''
     private taskPath = '/DownloadStation/task.cgi'
     private config(choice: string, args: any[] = []) {
         switch (choice) {
@@ -62,7 +65,7 @@ export class SynologyRuntime implements BittorrentRuntime {
                         api: API_INFO,
                         version: '1',
                         method: 'query',
-                        query: 'SYNO.API.Auth,SYNO.DownloadStation.Task',
+                        query: 'SYNO.API.Auth,SYNO.DownloadStation.Info,SYNO.DownloadStation.Task',
                     },
                     timeout: HTTP_REQUEST_TIMEOUT,
                 }
@@ -85,6 +88,15 @@ export class SynologyRuntime implements BittorrentRuntime {
                         version: this.dlVersion,
                         method: 'list',
                         additional: 'detail,transfer,tracker',
+                    },
+                    timeout: HTTP_REQUEST_TIMEOUT,
+                }
+            case 'info':
+                return {
+                    params: {
+                        api: API_DOWNLOAD_STATION_INFO,
+                        version: this.infoVersion,
+                        method: 'getinfo',
                     },
                     timeout: HTTP_REQUEST_TIMEOUT,
                 }
@@ -156,7 +168,7 @@ export class SynologyRuntime implements BittorrentRuntime {
         return !!data?.success
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         this.server = server
         this.http = axios.create({
             httpsAgent: createHttpsAgent(server),
@@ -182,6 +194,8 @@ export class SynologyRuntime implements BittorrentRuntime {
         this.authVersion = queryResponse.data.data[API_AUTH].maxVersion
         this.dlPath = `/${queryResponse.data.data[API_TASK].path}`
         this.dlVersion = queryResponse.data.data[API_TASK].maxVersion
+        this.infoPath = `/${queryResponse.data.data[API_DOWNLOAD_STATION_INFO].path}`
+        this.infoVersion = queryResponse.data.data[API_DOWNLOAD_STATION_INFO].maxVersion
 
         const authResponse = await this.http.get(`${serverUrl(this.server)}${this.authPath}`, this.config('auth', [server.user, server.password]))
         this.handleError(authResponse)
@@ -189,11 +203,21 @@ export class SynologyRuntime implements BittorrentRuntime {
             throw new Error(`Login failed. Error: ${authResponse.data.error}`)
         }
 
+        const infoResponse = await this.http.get(`${serverUrl(this.server)}${this.infoPath}`, this.config('info'))
+        this.handleError(infoResponse)
+        const version = infoResponse.data?.data?.version_string ?? infoResponse.data?.data?.version
+        if ((typeof version !== 'string' && typeof version !== 'number') || !String(version).trim()) {
+            throw new Error('Synology Download Station did not return its version')
+        }
+
         return {
-            magnetLinks: true,
-            setLocation: true,
-            uploadOptions: {
-                saveLocation: true,
+            version: String(version).trim(),
+            features: {
+                magnetLinks: true,
+                setLocation: true,
+                uploadOptions: {
+                    saveLocation: true,
+                },
             },
         }
     }

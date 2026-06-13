@@ -55,6 +55,7 @@ export abstract class QBittorrentBaseApi {
     }
 
     protected abstract buildPath(name: string): string
+    abstract getVersion(cb: (err?: any, version?: string) => void): void
 
     protected handleError(cb: (err: any, body?: any) => void, errors?: Record<number, Error>) {
         return (err: any, res: any, body: any) => {

@@ -3,7 +3,7 @@ import type {
     ElectorrentBridge,
     BittorrentFileSelection,
     BittorrentServerConfig,
-    TorrentClientFeatures,
+    TorrentClientConnection,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
 
@@ -25,7 +25,7 @@ export function serializeServer(server: any): BittorrentServerConfig {
     }
 }
 
-export function connect(server: any): Promise<TorrentClientFeatures> {
+export function connect(server: any): Promise<TorrentClientConnection> {
     return bridge().connect(serializeServer(server))
 }
 

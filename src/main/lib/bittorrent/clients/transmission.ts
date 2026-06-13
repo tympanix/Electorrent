@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientFeatures } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from '@shared/ipc-contract'
 import {
     createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
@@ -165,11 +165,11 @@ export class TransmissionRuntime implements BittorrentRuntime {
         return http
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientFeatures> {
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         this.server = server
         this.session = undefined
 
-        await this.getHttpClient().post(this.url(), { method: 'session-get' }, {
+        let response = await this.getHttpClient().post(this.url(), { method: 'session-get' }, {
             timeout: HTTP_LOGIN_TIMEOUT,
             auth: {
                 username: server.user,
@@ -177,21 +177,34 @@ export class TransmissionRuntime implements BittorrentRuntime {
             },
             validateStatus: (status) => status === 200 || status === 409,
         })
+        if (response.status === 409) {
+            response = await this.getHttpClient().post(this.url(), { method: 'session-get' }, {
+                timeout: HTTP_LOGIN_TIMEOUT,
+            })
+        }
+
+        const version = response.data?.arguments?.version
+        if (typeof version !== 'string' || !version.trim()) {
+            throw new Error('Transmission did not return its version')
+        }
 
         return {
-            magnetLinks: true,
-            labels: true,
-            setLocation: true,
-            torrentDetails: true,
-            trackerFilter: true,
-            uploadOptions: {
-                saveLocation: true,
-                category: true,
-                startTorrent: true,
-                peerLimit: true,
-                sequentialDownload: true,
-                downloadSpeedLimit: true,
-                uploadSpeedLimit: true,
+            version: version.trim(),
+            features: {
+                magnetLinks: true,
+                labels: true,
+                setLocation: true,
+                torrentDetails: true,
+                trackerFilter: true,
+                uploadOptions: {
+                    saveLocation: true,
+                    category: true,
+                    startTorrent: true,
+                    peerLimit: true,
+                    sequentialDownload: true,
+                    downloadSpeedLimit: true,
+                    uploadSpeedLimit: true,
+                },
             },
         }
     }
