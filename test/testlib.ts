@@ -200,6 +200,13 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
           await restartApplication(this)
           await this.app.settingsPageIsVisible({ timeout: 10 * 1000})
           await this.app.settingsPageConnectionIsVisible()
+          await browser.waitUntil(async () => {
+            return await $("#page-settings-connection input[name='ip']").getValue() === options.host
+          })
+          assert.equal(await $("#page-settings-connection input[name='ip']").getValue(), options.host)
+          assert.equal(await $("#page-settings-connection input[name='port']").getValue(), String(options.port))
+          assert.equal(await $("#page-settings-connection input[name='username']").getValue(), options.username)
+          assert.equal(await $("#page-settings-connection input[name='password']").getValue(), options.password)
           await backend.unpause()
           await restartApplication(this)
           await this.app.torrentsPageIsVisible()

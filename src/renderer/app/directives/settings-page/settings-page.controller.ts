@@ -67,9 +67,9 @@ export class SettingsPageController {
             $scope.$applyAsync();
         });
 
-        function loadAllSettings() {
+        function loadAllSettings(serverId?: string) {
             $scope.settings = settingsService.getAllSettingsCopy();
-            loadServerReference();
+            loadServerReference(serverId);
 
             serverCopy = angular.copy($scope.server);
 
@@ -80,10 +80,11 @@ export class SettingsPageController {
             });
         }
 
-        function loadServerReference() {
-            if ($rootScope.$server) {
+        function loadServerReference(serverId?: string) {
+            const selectedServerId = serverId || $rootScope.$server?.id;
+            if (selectedServerId) {
                 $scope.server = $scope.settings.servers.find((server: any) => {
-                    return server.id === $rootScope.$server?.id;
+                    return server.id === selectedServerId;
                 });
             }
         }
@@ -96,8 +97,8 @@ export class SettingsPageController {
             }
         }
 
-        $scope.$on("setting:load", () => {
-            Promise.resolve(loadPromise).then(() => loadAllSettings()).finally(() => {
+        $scope.$on("setting:load", (_event: unknown, serverId?: string) => {
+            Promise.resolve(loadPromise).then(() => loadAllSettings(serverId)).finally(() => {
                 $scope.$applyAsync();
             });
         });

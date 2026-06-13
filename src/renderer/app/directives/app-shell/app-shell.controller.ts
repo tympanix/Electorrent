@@ -222,8 +222,8 @@ export class AppShellController {
             $scope.showLoading = true;
         };
 
-        const pageSettings = (settingsPage?: string) => {
-            $scope.$broadcast("setting:load");
+        const pageSettings = (settingsPage?: string, serverId?: string) => {
+            $scope.$broadcast("setting:load", serverId);
             $scope.showLoading = false;
             if (settingsPage) {
                 $scope.$broadcast("settings:page", settingsPage, true);
@@ -264,7 +264,7 @@ export class AppShellController {
                 });
             }).catch((err: unknown) => {
                 console.error(err);
-                pageSettings("connection");
+                pageSettings("connection", server.id);
             }).then(() => {
                 $scope.$apply();
             });
