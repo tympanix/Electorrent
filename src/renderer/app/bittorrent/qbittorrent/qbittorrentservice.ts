@@ -40,13 +40,16 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     };
 
     processData(data: Record<string, any>) {
-      const torrents = {
+      const torrents: TorrentUpdates = {
         labels: [],
         all: [],
         changed: [],
         deleted: [],
-        freeDiskSpace: data?.server_state?.free_space_on_disk ?? null,
       };
+
+      if (data?.server_state?.free_space_on_disk !== undefined) {
+        torrents.freeDiskSpace = data.server_state.free_space_on_disk ?? null;
+      }
 
       if (Array.isArray(data.categories) || Array.isArray(data.labels)) {
         torrents.labels = data.categories || data.labels;

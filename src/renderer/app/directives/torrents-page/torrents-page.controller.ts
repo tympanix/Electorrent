@@ -777,7 +777,9 @@ export class TorrentsPageController {
                 changeTorrents(torrents);
                 updateLabels(torrents);
                 updateTrackers(torrents);
-                $scope.freeDiskSpace = torrents.freeDiskSpace ?? null;
+                if (Object.prototype.hasOwnProperty.call(torrents, "freeDiskSpace")) {
+                    $scope.freeDiskSpace = torrents.freeDiskSpace ?? null;
+                }
             }).then(() => {
                 syncDetailsPanel();
                 if (!$scope.arrayTorrents || $scope.arrayTorrents.length === 0) {
