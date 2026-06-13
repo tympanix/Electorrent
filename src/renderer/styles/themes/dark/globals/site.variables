@@ -36,6 +36,7 @@
 @pageForeground: lighten(@gray-darker, 5%);
 @overlayBackground: @pageBackground;
 @highlightBackground: @gray;
+@subtleShadow: 0px 1px 2px 0 rgba(0, 0, 0, 0.2);
 @linkColor: #fff;
 @linkHoverColor: #fff;
 @padding-base-vertical: 8px;
