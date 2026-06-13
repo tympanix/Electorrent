@@ -24,6 +24,7 @@ export function getTitleBarWindowOptions(theme?: ThemePreference): BrowserWindow
     const options: BrowserWindowConstructorOptions = {
         titleBarStyle: 'hidden',
         backgroundColor: colors.background,
+        trafficLightPosition: { x: 11, y: 11 },
     }
 
     if (process.platform !== 'darwin') {
