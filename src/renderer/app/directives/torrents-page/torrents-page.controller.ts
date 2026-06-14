@@ -855,12 +855,8 @@ export class TorrentsPageController {
         }
 
         function updateTrackers(torrents: any) {
-            if (torrents.trackers && torrents.trackers.length > 0) {
-                torrents.trackers.forEach((tracker: string) => {
-                    if (!$scope.trackers.includes(tracker)) {
-                        $scope.trackers.push(tracker);
-                    }
-                });
+            if (Array.isArray(torrents.trackers)) {
+                $scope.trackers = torrents.trackers;
             }
         }
     }

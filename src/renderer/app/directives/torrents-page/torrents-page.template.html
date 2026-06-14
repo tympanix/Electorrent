@@ -74,7 +74,7 @@
                 </div>
                 <ul class="filter label">
                     <span ng-if="trackers.length == 0" class="meta text">No trackers...</span>
-                    <li ng-repeat="tracker in trackers">
+                    <li data-tracker="{{tracker}}" ng-repeat="tracker in trackers">
                         <div
                             class="ui fluid torrent tag label"
                             ng-click="filterByTracker(tracker)"
@@ -117,7 +117,7 @@
                     </div>
                     <ul class="filter label">
                         <span ng-if="trackers.length == 0" class="meta text">No trackers...</span>
-                        <li ng-repeat="tracker in trackers">
+                        <li data-tracker="{{tracker}}" ng-repeat="tracker in trackers">
                             <div
                                 class="ui fluid torrent tag label"
                                 ng-click="filterByTracker(tracker)"

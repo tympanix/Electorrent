@@ -21,7 +21,11 @@ services:
       - 6969:6969
       - 6969:6969/udp
     networks:
-      - p2p
+      p2p:
+        aliases:
+          - tracker-one.test
+          - tracker-two.test
+          - tracker-three.test
 
   # Peer nodes in the P2P network
   peer:

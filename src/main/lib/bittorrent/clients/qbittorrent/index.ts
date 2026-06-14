@@ -25,6 +25,8 @@ function buildClientPath(server: BittorrentServerConfig, endpoint: string) {
 export class QBittorrentRuntime implements BittorrentRuntime {
     private api: QBittorrentBaseApi | null = null
 
+    private trackerToHashes = new Map<string, Set<string>>()
+
     private async selectApi(server: BittorrentServerConfig) {
         const origin = `${server.proto}://${server.ip}:${server.port}`
         const requestOptions = {
@@ -65,6 +67,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         const api = await this.selectApi(server)
         this.api = api
         await defer((done) => api.login(done))
+        this.trackerToHashes.clear()
         const version = await defer<string>((done) => api.getVersion(done))
         if (typeof version !== "string" || !version.trim()) {
             throw new Error("qBittorrent did not return its version")
@@ -78,6 +81,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 fileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
+                trackerFilter: true,
                 uploadOptions: {
                     saveLocation: true,
                     renameTorrent: true,
@@ -93,15 +97,118 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    getSnapshot(fullUpdate?: boolean): Promise<any> {
+    async getSnapshot(fullUpdate?: boolean): Promise<any> {
         const api = this.getApi()
-        let promise = Promise.resolve()
 
         if (fullUpdate) {
-            promise = promise.then(() => defer((done) => api.reset(done)))
+            await defer<void>((done) => api.reset(done))
+            this.trackerToHashes.clear()
         }
 
-        return promise.then(() => defer((done) => api.syncMaindata(done)))
+        const data = await defer<Record<string, any>>((done) => api.syncMaindata(done))
+        const changedTrackerHashes = new Set<string>()
+        this.mergeTrackerCache(data, changedTrackerHashes)
+        this.removeRemovedTrackerUrls(data?.trackers_removed, changedTrackerHashes)
+        this.removeDeletedTorrentHashes(data?.torrents_removed, changedTrackerHashes)
+        this.prepareTrackerData(data, changedTrackerHashes)
+
+        return data
+    }
+
+    private mergeTrackerCache(data: Record<string, any>, changedHashes: Set<string>) {
+        const trackers = data?.trackers || data?.tracker
+
+        if (!trackers || typeof trackers !== "object" || Array.isArray(trackers)) {
+            return
+        }
+
+        Object.entries(trackers).forEach(([tracker, hashes]) => {
+            if (!Array.isArray(hashes)) {
+                return
+            }
+
+            const hashSet = this.trackerToHashes.get(tracker) || new Set<string>()
+            hashes.forEach((hash) => {
+                if (typeof hash === "string") {
+                    hashSet.add(hash)
+                    changedHashes.add(hash)
+                }
+            })
+
+            if (hashSet.size > 0) {
+                this.trackerToHashes.set(tracker, hashSet)
+            }
+        })
+    }
+
+    private removeRemovedTrackerUrls(trackers: any, changedHashes: Set<string>) {
+        if (!Array.isArray(trackers) || trackers.length === 0) {
+            return
+        }
+
+        trackers.forEach((tracker) => {
+            if (typeof tracker !== "string") {
+                return
+            }
+
+            const hashes = this.trackerToHashes.get(tracker)
+            hashes?.forEach((hash) => changedHashes.add(hash))
+            this.trackerToHashes.delete(tracker)
+        })
+    }
+
+    private removeDeletedTorrentHashes(hashes: any, changedHashes: Set<string>) {
+        if (!Array.isArray(hashes) || hashes.length === 0) {
+            return
+        }
+
+        const deletedHashes = new Set(hashes.filter((hash): hash is string => typeof hash === "string"))
+        deletedHashes.forEach((hash) => changedHashes.delete(hash))
+        this.trackerToHashes.forEach((trackerHashes, tracker) => {
+            deletedHashes.forEach((hash) => trackerHashes.delete(hash))
+            if (trackerHashes.size === 0) {
+                this.trackerToHashes.delete(tracker)
+            }
+        })
+    }
+
+    private prepareTrackerData(data: Record<string, any>, changedHashes: Set<string>) {
+        const torrents = data.torrents && typeof data.torrents === "object" ? data.torrents : {}
+        data.torrents = torrents
+
+        Object.keys(torrents).forEach((hash) => changedHashes.add(hash))
+        changedHashes.forEach((hash) => {
+            const torrentData = torrents[hash] && typeof torrents[hash] === "object" ? torrents[hash] : {}
+            torrentData.trackers = this.getTorrentTrackerHosts(hash)
+            torrents[hash] = torrentData
+        })
+
+        data.trackers = this.getAllTrackerHosts()
+        delete data.tracker
+    }
+
+    private getTorrentTrackerHosts(hash: string) {
+        const trackers = new Set<string>()
+        this.trackerToHashes.forEach((hashes, tracker) => {
+            if (hashes.has(hash)) {
+                trackers.add(this.parseTrackerHost(tracker))
+            }
+        })
+        return [...trackers]
+    }
+
+    private getAllTrackerHosts() {
+        const trackers = new Set<string>()
+        this.trackerToHashes.forEach((_hashes, tracker) => trackers.add(this.parseTrackerHost(tracker)))
+        return [...trackers]
+    }
+
+    private parseTrackerHost(tracker: string) {
+        try {
+            return new URL(tracker).hostname || tracker
+        } catch (_err) {
+            return tracker
+        }
     }
 
     private getHttpUploadOptions(options?: Record<string, any>) {

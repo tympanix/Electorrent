@@ -2,20 +2,22 @@
 
 set -e
 
-# Parse CLI options for upload speed, download speed, file size, and torrent file name
+# Parse CLI options for upload speed, download speed, file size, torrent file name, and tracker URL
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --upload-speed) UP_SPEED="$2"; shift ;;
         --download-speed) DL_SPEED="$2"; shift ;;
         --file-size) FILE_SIZE="$2"; shift ;;
         --torrent-name) TORRENT_NAME="$2"; shift ;;
-        *) echo >&2 "Usage: $0 --upload-speed <up-speed> --download-speed <dl-speed> --file-size <file-size> --torrent-name <torrent-name>" >&2; exit 1 ;;
+        --tracker-url) TRACKER_URL="$2"; shift ;;
+        *) echo >&2 "Usage: $0 --upload-speed <up-speed> --download-speed <dl-speed> --file-size <file-size> --torrent-name <torrent-name> --tracker-url <tracker-url>" >&2; exit 1 ;;
     esac
     shift
 done
 
 # Set default values if not provided
 FILE_SIZE="${FILE_SIZE:-1}"
+TRACKER_URL="${TRACKER_URL:-http://tracker:6969/announce}"
 # Generate a random suffix for unique file names
 RANDOM_SUFFIX=$(date +%s%N | sha256sum | head -c 8)
 # Create a random test file with the specified file size and unique name
@@ -25,7 +27,7 @@ dd if=/dev/urandom of="$TEST_FILE" bs=1k count="$FILE_SIZE" 2>/dev/null
 TORRENT_FILE="/shared/${TORRENT_NAME}.torrent"
 # Create a torrent file and save it in the shared folder with specified upload and download speeds
 rm -f "$TORRENT_FILE"
-ctorrent -t -s $TORRENT_FILE -u http://tracker:6969/announce $TEST_FILE >/dev/null
+ctorrent -t -s $TORRENT_FILE -u "$TRACKER_URL" $TEST_FILE >/dev/null
 # Generate a random unprivileged port (1024-65535)
 P2P_PORT=$((1024 + RANDOM % 64512))
 # Seed the torrent file (and contents)
