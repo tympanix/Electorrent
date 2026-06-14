@@ -8,6 +8,7 @@ createTestSuite({
     fileSelection: true,
     setLocation: true,
     torrentDetails: true,
+    trackerFilter: true,
     uploadOptions: {
       saveLocation: true,
       renameTorrent: true,

@@ -63,6 +63,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         torrents.changed = this.buildAll(data.torrents);
       }
 
+      torrents.trackers = Array.isArray(data.trackers) ? data.trackers : [];
       torrents.deleted = data.torrents_removed || [];
       return torrents;
     }

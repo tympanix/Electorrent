@@ -380,6 +380,13 @@ export class App {
     return labels || [];
   }
 
+  async filterTracker(tracker?: string) {
+    const trackerItem = `#torrent-sidebar-trackers li[data-tracker="${tracker}"]`
+    const clear = `#torrent-sidebar-trackers [data-role="trackers-clear"]`
+
+    await $(tracker === undefined ? clear : trackerItem).click()
+  }
+
   async getTorrentsFooterText() {
     return await $("#page-torrents .status-bar").getText()
   }

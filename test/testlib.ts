@@ -676,6 +676,18 @@ export function createTestSuite(optionsArg: TestSuiteOptionsOptional) {
             return torrent.checkInState(["all", "downloading"]);
           });
 
+          it("filters torrents by tracker", async function() {
+            if (options.features.trackerFilter !== true) {
+              this.skip()
+            }
+
+            const trackerItem = $("#torrent-sidebar-trackers li[data-tracker='tracker']")
+            await trackerItem.waitForDisplayed()
+            await this.app.filterTracker("tracker")
+            await torrent.waitForExist()
+            await this.app.filterTracker()
+          })
+
           it("torrent is stopped and resumed", async function() {
             this.timeout(25 * 1000)
             await torrent.stop({ state: options.stopLabel });
