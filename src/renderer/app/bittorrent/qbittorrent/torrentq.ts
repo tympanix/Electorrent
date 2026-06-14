@@ -25,6 +25,8 @@ export class QBittorrentTorrent extends Torrent {
     upSpeedAvg: number
     forceStart: boolean
     sequentialDownload: boolean
+    tracker?: string
+    trackers?: string[]
 
 
     constructor(hash: string, data: Record<string, any>) {
@@ -73,6 +75,14 @@ export class QBittorrentTorrent extends Torrent {
         this.upSpeedAvg = data.up_speed_avg;
         this.forceStart = data.force_start;
         this.sequentialDownload = data.seq_dl;
+
+        if (Array.isArray(data.trackers)) {
+            this.trackers = data.trackers;
+            this.tracker = this.trackers[0];
+        } else if (typeof data.tracker === "string") {
+            this.tracker = data.tracker;
+            this.trackers = data.tracker ? [data.tracker] : [];
+        }
     }
 
     getStatus(...statusOr: string[]) {

@@ -1,6 +1,8 @@
 import { AUTH_ERRORS, QBittorrentBaseApi, TORRENT_ERRORS } from "./base-api"
 
 export class QBittorrentApiV2 extends QBittorrentBaseApi {
+    readonly supportsTrackerFilter = true
+
     private useStartStopEndpoints = false
 
     protected buildPath(name: string) {
@@ -44,6 +46,12 @@ export class QBittorrentApiV2 extends QBittorrentBaseApi {
                 this.rid = body?.rid || 0
             }
             this.handleError(cb)(err, res, body)
+        })
+    }
+
+    getTorrentTrackers(hash: string, cb: (err?: any, body?: any) => void) {
+        this.getJson("torrents/trackers", { qs: { hash } }, (err, res, body) => {
+            this.handleError(cb, TORRENT_ERRORS)(err, res, body)
         })
     }
 

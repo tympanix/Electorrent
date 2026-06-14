@@ -30,6 +30,7 @@ export interface QBittorrentUploadOptions {
 }
 
 const QBITTORRENT_PRIORITY_SKIP = 0;
+const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/i;
 
 export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     public name = "qBittorrent"
@@ -45,6 +46,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         all: [],
         changed: [],
         deleted: [],
+        trackers: [],
       };
 
       if (data?.server_state?.free_space_on_disk !== undefined) {
@@ -59,8 +61,10 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
 
       if (data.full_update) {
         torrents.all = this.buildAll(data.torrents);
+        torrents.trackers = this.getTrackers(torrents.all);
       } else {
         torrents.changed = this.buildAll(data.torrents);
+        torrents.trackers = this.getTrackers(torrents.changed);
       }
 
       torrents.deleted = data.torrents_removed || [];
@@ -71,6 +75,25 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       if (!torrents) return [];
 
       return Object.keys(torrents).map((hash) => new QBittorrentTorrent(hash, torrents[hash]));
+    }
+
+    getTrackers(torrents: QBittorrentTorrent[]) {
+      const trackers = new Set<string>();
+      torrents.forEach((torrent) => {
+        torrent.trackers?.forEach((tracker) => {
+          const parsed = this.parseTrackerUrl(tracker);
+          if (parsed) {
+            trackers.add(parsed);
+          }
+        });
+      });
+
+      return Array.from(trackers);
+    }
+
+    parseTrackerUrl(url: string) {
+      const match = url.match(URL_REGEX);
+      return match ? match[1] : url || undefined;
     }
 
     defaultPath() {

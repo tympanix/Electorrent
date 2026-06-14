@@ -78,6 +78,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 fileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
+                trackerFilter: api.supportsTrackerFilter,
                 uploadOptions: {
                     saveLocation: true,
                     renameTorrent: true,
@@ -93,15 +94,36 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    getSnapshot(fullUpdate?: boolean): Promise<any> {
+    async getSnapshot(fullUpdate?: boolean): Promise<any> {
         const api = this.getApi()
-        let promise = Promise.resolve()
 
         if (fullUpdate) {
-            promise = promise.then(() => defer((done) => api.reset(done)))
+            await defer<void>((done) => api.reset((err) => done(err)))
         }
 
-        return promise.then(() => defer((done) => api.syncMaindata(done)))
+        const data = await defer<any>((done) => api.syncMaindata(done))
+        await this.addTrackersToSnapshot(data)
+        return data
+    }
+
+    private async addTrackersToSnapshot(data: any) {
+        const api = this.getApi()
+        const torrents = data?.torrents
+        if (!api.supportsTrackerFilter || !torrents || typeof torrents !== "object") {
+            return
+        }
+
+        await Promise.all(Object.entries(torrents).map(async ([hash, torrent]) => {
+            if (!torrent || typeof torrent !== "object") {
+                return
+            }
+
+            const torrentData = torrent as Record<string, any>
+            const trackers = await defer<any[]>((done) => api.getTorrentTrackers(hash, done))
+            torrentData.trackers = Array.isArray(trackers)
+                ? trackers.map((tracker) => tracker?.url).filter((url) => typeof url === "string" && url.length > 0)
+                : []
+        }))
     }
 
     private getHttpUploadOptions(options?: Record<string, any>) {
