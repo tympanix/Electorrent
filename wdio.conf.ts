@@ -1,7 +1,7 @@
 /// <reference types="wdio-electron-service" />
 
 import { browser } from '@wdio/globals'
-import { TEST_CLIENTS } from './test/framework/client'
+import { TEST_CLIENTS } from './test/clients'
 import ElectorrentTestService from './test/framework/service'
 
 delete process.env.ELECTRON_RUN_AS_NODE
@@ -16,11 +16,7 @@ let hasActiveSession = false
 let isFlushingBrowserLogs = false
 
 const featureSpecs = [
-    'test/specs/tls.spec.ts',
-    'test/specs/application.spec.ts',
-    'test/specs/settings.spec.ts',
-    'test/specs/torrents.spec.ts',
-    'test/specs/upload-options.spec.ts',
+    'test/specs/**/*.spec.ts',
 ]
 
 function requestedSuites() {

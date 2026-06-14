@@ -69,7 +69,7 @@ describe("upload options", function () {
     await torrent.delete()
   })
 
-  it("torent uploaded with preexisting label", async function () {
+  it("torrent uploaded with preexisting label", async function () {
     if (client.features.uploadOptions?.category !== true) return this.skip()
     const labelName = createUniqueLabel("mylabel")
     let torrent = await this.app.uploadTorrent({ filename: this.torrentPath });

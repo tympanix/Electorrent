@@ -1,7 +1,7 @@
 import compose from "docker-compose"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import { TEST_CLIENTS, type TestClient } from "./client"
+import { TEST_CLIENTS, type TestClient } from "../clients"
 import { initializeTestFixture } from "./fixture"
 import { DockerComposeService } from "../shared/compose"
 import { waitForHttp } from "../testutil"
