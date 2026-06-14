@@ -18,8 +18,8 @@ services:
     init: true
     build: tracker
     ports:
-      - 6969:6969
-      - 6969:6969/udp
+      - ${TRACKER_PORT:-6969}:6969
+      - ${TRACKER_PORT:-6969}:6969/udp
     networks:
       p2p:
         aliases:
@@ -41,4 +41,4 @@ volumes:
 
 networks:
   p2p:
-    name: electorrent_p2p
+    name: ${NETWORK_NAME:-electorrent_p2p}

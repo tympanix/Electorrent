@@ -2,11 +2,11 @@ services:
   utorrent:
     image: ekho/utorrent:${VERSION:-latest}
     ports:
-      - 8080:8080
+      - ${HOST_PORT:-8080}:8080
     tmpfs:
       - /data:uid=1001,gid=1001
 
 networks:
   default:
-    name: electorrent_p2p
+    name: ${NETWORK_NAME:-electorrent_p2p}
     external: true

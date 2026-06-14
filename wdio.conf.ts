@@ -1,6 +1,10 @@
 /// <reference types="wdio-electron-service" />
 
 import { browser } from '@wdio/globals'
+import { TEST_CLIENTS } from './test/framework/client'
+import ElectorrentTestService from './test/framework/service'
+
+delete process.env.ELECTRON_RUN_AS_NODE
 
 type BrowserLogEntry = {
     level?: string
@@ -10,6 +14,49 @@ type BrowserLogEntry = {
 
 let hasActiveSession = false
 let isFlushingBrowserLogs = false
+
+const featureSpecs = [
+    'test/specs/tls.spec.ts',
+    'test/specs/application.spec.ts',
+    'test/specs/settings.spec.ts',
+    'test/specs/torrents.spec.ts',
+    'test/specs/upload-options.spec.ts',
+]
+
+function requestedSuites() {
+    return process.argv.flatMap((argument, index, arguments_) => {
+        if (argument === '--suite') {
+            return arguments_[index + 1] ? [arguments_[index + 1]] : []
+        }
+        return argument.startsWith('--suite=') ? [argument.slice('--suite='.length)] : []
+    })
+}
+
+const selectedClientKeys = requestedSuites().filter((suite) => suite in TEST_CLIENTS)
+const selectedClients = selectedClientKeys.length
+    ? selectedClientKeys.map((key) => TEST_CLIENTS[key])
+    : Object.values(TEST_CLIENTS)
+
+function electronCapability(client: (typeof selectedClients)[number]): WebdriverIO.Capabilities {
+    return {
+        browserName: 'electron',
+        specs: [featureSpecs],
+        'electorrent:client': client,
+        'wdio:electronServiceOptions': {
+            appEntryPoint: 'app/main.js',
+            appArgs: [],
+        },
+        'goog:chromeOptions': {
+            args: [
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+            ],
+        },
+        'goog:loggingPrefs': {
+            browser: 'ALL',
+        },
+    } as WebdriverIO.Capabilities
+}
 
 async function flushBrowserConsoleLogs() {
     if (!hasActiveSession || isFlushingBrowserLogs || !browser.sessionId || typeof browser.getLogs !== 'function') {
@@ -57,47 +104,14 @@ export const config: WebdriverIO.Config = {
     // The path of the spec files will be resolved relative from the directory of
     // of the config file unless it's absolute.
     //
-    specs: [
-        'test/**/*.spec.ts',
-        //'test/simple.spec.ts',
-        // ToDo: define location for spec files here
-    ],
+    specs: [featureSpecs],
     // Patterns to exclude.
     exclude: [
         // 'path/to/excluded/files'
     ],
 
     suites: {
-        'deluge:1': [
-            'test/fixtures/deluge/deluge-1.spec.ts',
-        ],
-        'deluge:2': [
-            'test/fixtures/deluge/deluge-2.spec.ts',
-        ],
-        'qbittorrent': [
-            'test/fixtures/qbittorrent/*.spec.ts',
-        ],
-        'qbittorrent:latest': [
-            'test/fixtures/qbittorrent/qbittorrent-latest.spec.ts',
-        ],
-         'qbittorrent:5': [
-            'test/fixtures/qbittorrent/qbittorrent-5.spec.ts',
-        ],
-         'qbittorrent:4': [
-            'test/fixtures/qbittorrent/qbittorrent-4.spec.ts',
-        ],
-        'transmission': [
-            'test/fixtures/transmission/*.spec.ts',
-        ],
-        'utorrent': [
-            'test/fixtures/utorrent/*.spec.ts',
-        ],
-        'rtorrent': [
-            'test/fixtures/rtorrent/*.spec.ts',
-        ],
-        'mock': [
-            'test/fixtures/mock/*.spec.ts',
-        ],
+        ...Object.fromEntries(Object.keys(TEST_CLIENTS).map((key) => [key, [featureSpecs]])),
     },
 
     //
@@ -116,31 +130,13 @@ export const config: WebdriverIO.Config = {
     // and 30 processes will get spawned. The property handles how many capabilities
     // from the same test should run tests.
     //
-    maxInstances: 1,
+    maxInstances: selectedClients.length,
     //
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
-    capabilities: [{
-        browserName: 'electron',
-        // Electron service options
-        // see https://webdriver.io/docs/desktop-testing/electron/configuration/#service-options
-        'wdio:electronServiceOptions': {
-            // custom application args
-            appEntryPoint: 'app/main.js',
-            appArgs: []
-        },
-        'goog:chromeOptions': {
-            args: [
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
-            ],
-        },
-        'goog:loggingPrefs': {
-            browser: 'ALL',
-        },
-    }],
+    capabilities: selectedClients.map(electronCapability),
 
     //
     // ===================
@@ -189,7 +185,7 @@ export const config: WebdriverIO.Config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: ['electron'],
+    services: ['electron', [ElectorrentTestService, {}]],
 
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber

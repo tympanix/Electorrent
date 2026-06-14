@@ -5,12 +5,11 @@ services:
       - USER=username
       - PASS=password
     ports:
-      - 9091:9091
+      - ${HOST_PORT:-9091}:9091
     tmpfs:
       - /downloads
 
 networks:
   default:
-    name: electorrent_p2p
+    name: ${NETWORK_NAME:-electorrent_p2p}
     external: true
-
