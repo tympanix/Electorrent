@@ -2,9 +2,9 @@
   <img src="assets/electron-icon.png" width="256">
 </p>
 <p align="center">
-  <a href="https://travis-ci.org/tympanix/Electorrent"><img src="https://travis-ci.org/tympanix/Electorrent.svg?branch=master"></a>
+  <a href="https://github.com/tympanix/Electorrent/actions/workflows/electorrent-workflow.yml"><img src="https://github.com/tympanix/Electorrent/actions/workflows/electorrent-workflow.yml/badge.svg"></a>
   <a href="https://github.com/tympanix/Electorrent/releases/latest"><img src="https://img.shields.io/github/release/tympanix/Electorrent.svg?maxAge=86400"></a>
-  <a href="http://www.somsubhra.com/github-release-stats/?username=tympanix&repository=Electorrent"><img src="https://img.shields.io/github/downloads/tympanix/Electorrent/total.svg?maxAge=86400"></a>
+  <a href="https://github.com/tympanix/Electorrent/releases"><img src="https://img.shields.io/github/downloads/tympanix/Electorrent/total.svg?maxAge=86400"></a>
 </p>
 
 # Electorrent
