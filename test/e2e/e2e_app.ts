@@ -387,6 +387,13 @@ export class App {
     await $(tracker === undefined ? clear : trackerItem).click()
   }
 
+  async getAllSidebarTrackers() {
+    const trackersElem = $$("#torrent-sidebar-trackers li")
+    const data = trackersElem.map(async (e) => await e.getAttribute("data-tracker"));
+    const trackers = await data
+    return trackers || [];
+  }
+
   async getTorrentsFooterText() {
     return await $("#page-torrents .status-bar").getText()
   }
