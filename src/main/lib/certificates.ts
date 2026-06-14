@@ -10,9 +10,7 @@ const FINGERPRINT_PATTERN = /^(?:[A-Fa-f0-9]{2}:?)+$/
 
 function ensureDir() {
     try {
-        if (!fs.existsSync(CERT_DIR)) {
-            fs.mkdirSync(CERT_DIR)
-        }
+        fs.mkdirSync(CERT_DIR, { recursive: true })
     } catch (e) {
         console.error(e)
     }
@@ -135,6 +133,7 @@ export function installCertificate(cert: { raw?: Uint8Array; fingerprint: string
     }
 
     try {
+        ensureDir()
         const pemData = pemEncode(cert.raw, 64)
         const { certPath, fingerprint } = getCertificatePath(cert.fingerprint)
 

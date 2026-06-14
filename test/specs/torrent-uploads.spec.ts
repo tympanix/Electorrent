@@ -11,54 +11,55 @@ const client = fixture.client
 describe("torrent uploads", function () {
   configureSpec()
 
-  let torrent: e2e.Torrent
-  before(async function () {
-    const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
-    torrent = await this.app.uploadTorrent({ filename })
+  describe("torrent file uploads", function () {
+    let torrent: e2e.Torrent
+    before(async function () {
+      const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+      torrent = await this.app.uploadTorrent({ filename })
+    })
+
+    after(async function () {
+      if (torrent && await torrent.isExisting()) {
+        await torrent.delete()
+      }
+    })
+
+    it("torrent is visible in the table", () => {
+      return torrent.waitForExist()
+    })
+
+    it("torrent begins downloading", function () {
+      return torrent.waitForState(client.downloadLabel)
+    })
+
+    it("torrent is in the downloading tab", function () {
+      return torrent.checkInState(["all", "downloading"])
+    })
+
   })
 
-  after(async function () {
-    if (torrent && await torrent.isExisting()) {
-      await torrent.delete()
-    }
-  })
+  describe("magnet link uploads", function () {
+    requireFeature(({ features }) => features.magnetLinks === true)
+    let torrent: e2e.Torrent
 
-  it("torrent is visible in the table", () => {
-    return torrent.waitForExist()
-  })
+    before(async function () {
+      await restartApplication(this)
+      const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+      torrent = await this.app.uploadMagnetLink({ filename })
+    })
 
-  it("torrent begins downloading", function () {
-    return torrent.waitForState(client.downloadLabel)
-  })
+    after(async function () {
+      if (torrent && await torrent.isExisting()) {
+        await torrent.delete()
+      }
+    })
 
-  it("torrent is in the downloading tab", function () {
-    return torrent.checkInState(["all", "downloading"])
-  })
-})
+    it("torrent is visible in the table", () => {
+      return torrent.waitForExist()
+    })
 
-describe("magnet link uploads", function () {
-  configureSpec()
-  requireFeature(({ features }) => features.magnetLinks === true)
-
-  let torrent: e2e.Torrent
-
-  before(async function () {
-    await restartApplication(this)
-    const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
-    torrent = await this.app.uploadMagnetLink({ filename })
-  })
-
-  after(async function () {
-    if (torrent && await torrent.isExisting()) {
-      await torrent.delete()
-    }
-  })
-
-  it("torrent is visible in the table", () => {
-    return torrent.waitForExist()
-  })
-
-  it("torrent begins downloading", () => {
-    return torrent.waitForState(client.downloadLabel)
+    it("torrent begins downloading", () => {
+      return torrent.waitForState(client.downloadLabel)
+    })
   })
 })
