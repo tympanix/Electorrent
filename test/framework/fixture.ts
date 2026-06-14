@@ -5,8 +5,8 @@ import fs from "node:fs"
 import path from "node:path"
 import { App, Torrent } from "../e2e"
 import { DockerComposeService } from "../shared/compose"
-import { setupMochaHooks } from "../testutil"
-import type { TestClient } from "./client"
+import { setupMochaHooks, waitUntil } from "../testutil"
+import type { TestClient } from "../clients"
 
 export interface TestFixture {
   client: TestClient
@@ -38,7 +38,16 @@ export function configureSpec(options: { login?: boolean } = {}) {
     chai.use(chaiAsPromised)
 
     const current = getTestFixture()
-    const userDataPath = await browser.electron.execute((electron) => electron.app.getPath("userData"))
+    const userDataPath = await waitUntil(async () => {
+      try {
+        return await browser.electron.execute((electron) => electron.app.getPath("userData"))
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("Cannot find context with specified id")) {
+          await browser.reloadSession()
+        }
+        throw error
+      }
+    }, 10 * 1000)
     fs.rmSync(path.join(userDataPath, "config.json"), { force: true })
     fs.rmSync(path.join(userDataPath, "certs"), { recursive: true, force: true })
     await browser.execute(() => window.localStorage.clear())
