@@ -39,19 +39,11 @@ export function configureSpec(options: { login?: boolean } = {}) {
 
     const current = getTestFixture()
     const userDataPath = await waitUntil(async () => {
-      try {
         return await browser.electron.execute((electron) => electron.app.getPath("userData"))
-      } catch (error) {
-        if (error instanceof Error && error.message.includes("Cannot find context with specified id")) {
-          await browser.reloadSession()
-        }
-        throw error
-      }
     }, 10 * 1000)
     fs.rmSync(path.join(userDataPath, "config.json"), { force: true })
     fs.rmSync(path.join(userDataPath, "certs"), { recursive: true, force: true })
     await browser.execute(() => window.localStorage.clear())
-    await browser.reloadSession()
 
     current.app = new App()
     this.app = current.app

@@ -6,15 +6,6 @@ import ElectorrentTestService from './test/framework/service'
 
 delete process.env.ELECTRON_RUN_AS_NODE
 
-type BrowserLogEntry = {
-    level?: string
-    message?: string
-    source?: string
-}
-
-let hasActiveSession = false
-let isFlushingBrowserLogs = false
-
 const featureSpecs = [
     'test/specs/**/*.spec.ts',
 ]
@@ -36,7 +27,8 @@ const selectedClients = selectedClientKeys.length
 function electronCapability(client: (typeof selectedClients)[number]): WebdriverIO.Capabilities {
     return {
         browserName: 'electron',
-        specs: [featureSpecs],
+        maxInstances: 1,
+        specs: featureSpecs,
         'electorrent:client': client,
         'wdio:electronServiceOptions': {
             appEntryPoint: 'app/main.js',
@@ -54,25 +46,14 @@ function electronCapability(client: (typeof selectedClients)[number]): Webdriver
     } as WebdriverIO.Capabilities
 }
 
-async function flushBrowserConsoleLogs() {
-    if (!hasActiveSession || isFlushingBrowserLogs || !browser.sessionId || typeof browser.getLogs !== 'function') {
-        return
-    }
+async function quitElectronApp() {
+    await browser.electron.execute((electron) => {
+        electron.app.quit()
 
-    isFlushingBrowserLogs = true
-
-    try {
-        const logs = await browser.getLogs('browser').catch(() => [])
-
-        for (const log of logs as BrowserLogEntry[]) {
-            const source = log.source || 'browser'
-            const level = log.level || 'INFO'
-            const message = log.message || ''
-            process.stdout.write(`[chrome:${source}:${level}] ${message}\n`)
-        }
-    } finally {
-        isFlushingBrowserLogs = false
-    }
+        setTimeout(() => {
+            electron.app.exit(0)
+        }, 1000).unref?.()
+    }).catch(() => undefined)
 }
 
 export const config: WebdriverIO.Config = {
@@ -100,14 +81,14 @@ export const config: WebdriverIO.Config = {
     // The path of the spec files will be resolved relative from the directory of
     // of the config file unless it's absolute.
     //
-    specs: [featureSpecs],
+    specs: featureSpecs,
     // Patterns to exclude.
     exclude: [
         // 'path/to/excluded/files'
     ],
 
     suites: {
-        ...Object.fromEntries(Object.keys(TEST_CLIENTS).map((key) => [key, [featureSpecs]])),
+        ...Object.fromEntries(Object.keys(TEST_CLIENTS).map((key) => [key, featureSpecs])),
     },
 
     //
@@ -126,7 +107,8 @@ export const config: WebdriverIO.Config = {
     // and 30 processes will get spawned. The property handles how many capabilities
     // from the same test should run tests.
     //
-    maxInstances: selectedClients.length,
+    maxInstances: 1,
+    maxInstancesPerCapability: 1,
     //
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
@@ -168,11 +150,11 @@ export const config: WebdriverIO.Config = {
     // baseUrl: 'http://localhost:8080',
     //
     // Default timeout for all waitFor* commands.
-    waitforTimeout: 30000,
+    waitforTimeout: 10_000,
     //
     // Default timeout in milliseconds for request
     // if browser driver or grid doesn't send response
-    connectionRetryTimeout: 120000,
+    connectionRetryTimeout: 120_000,
     //
     // Default request retries count
     connectionRetryCount: 3,
@@ -181,7 +163,15 @@ export const config: WebdriverIO.Config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: ['electron', [ElectorrentTestService, {}]],
+    services: [
+        ['electron', {
+            captureMainProcessLogs: true,
+            captureRendererLogs: true,
+            mainProcessLogLevel: 'info',
+            rendererLogLevel: 'info'
+        }],
+        [ElectorrentTestService, {}]
+    ],
 
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -265,20 +255,15 @@ export const config: WebdriverIO.Config = {
      * @param {Array.<String>} specs        List of spec file paths that are to be run
      * @param {object}         browser      instance of created browser/device session
      */
-    before: async function () {
-        hasActiveSession = true
-        await flushBrowserConsoleLogs()
-    },
+    // before: async function () {
+    // },
     /**
      * Runs before a WebdriverIO command gets executed.
      * @param {string} commandName hook command name
      * @param {Array} args arguments that command would receive
      */
-    beforeCommand: async function (commandName) {
-        if (commandName !== 'getLogs' && commandName !== 'deleteSession') {
-            await flushBrowserConsoleLogs()
-        }
-    },
+    // beforeCommand: async function (commandName) {
+    // },
     /**
      * Hook that gets executed before the suite starts
      * @param {object} suite suite details
@@ -339,13 +324,7 @@ export const config: WebdriverIO.Config = {
      * @param {Array.<String>} specs List of spec file paths that ran
      */
     after: async function () {
-        if (!hasActiveSession || !browser.sessionId) {
-            return
-        }
-
-        await browser.electron.execute((electron) => {
-            electron.app.quit()
-        })
+        await quitElectronApp()
     },
     /**
      * Gets executed right after terminating the webdriver session.
@@ -353,8 +332,8 @@ export const config: WebdriverIO.Config = {
      * @param {Array.<Object>} capabilities list of capabilities details
      * @param {Array.<String>} specs List of spec file paths that ran
      */
-    afterSession: function () {
-        hasActiveSession = false
+    afterSession: async function () {
+        await quitElectronApp()
     },
     /**
      * Gets executed after all workers got shut down and the process is about to exit. An error
