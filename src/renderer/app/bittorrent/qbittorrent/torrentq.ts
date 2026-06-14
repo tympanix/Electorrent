@@ -2,6 +2,24 @@ import { Torrent } from '@renderer/app/bittorrent/abstracttorrent';
 
 export class QBittorrentTorrent extends Torrent {
 
+    private static normalizeQueueOrder(data: Record<string, any>) {
+        const queueOrder = Number(data.priority);
+
+        if (!Number.isInteger(queueOrder)) {
+            return undefined;
+        }
+
+        if (queueOrder === 0 && QBittorrentTorrent.isCompletedData(data)) {
+            return -1;
+        }
+
+        return queueOrder;
+    }
+
+    private static isCompletedData(data: Record<string, any>) {
+        return data.progress === 1 || ['checkingUP', 'moving'].includes(data.state);
+    }
+
     // Field specific for qBittorrent
     state: string
     creationDate: string
@@ -44,7 +62,7 @@ export class QBittorrentTorrent extends Torrent {
             peersInSwarm: data.num_incomplete,
             seedsConnected: data.num_seeds,
             seedsInSwarm: data.num_complete,
-            torrentQueueOrder: data.priority,
+            torrentQueueOrder: QBittorrentTorrent.normalizeQueueOrder(data),
             statusMessage: undefined, // Not supplied
             dateAdded: (data.addition_date || data.added_on) * 1000 || undefined,
             dateCompleted: (data.completion_date || data.completion_on) * 1000 || undefined,
