@@ -28,7 +28,9 @@ export class QBittorrentRuntime implements BittorrentRuntime {
     private trackerToHashes = new Map<string, Set<string>>()
 
     private async selectApi(server: BittorrentServerConfig) {
-        const origin = `${server.proto}://${server.ip}:${server.port}`
+        const defaultPort = server.proto === "https" ? 443 : 80
+        const portSuffix = server.port !== defaultPort ? `:${server.port}` : ""
+        const origin = `${server.proto}://${server.ip}${portSuffix}`
         const requestOptions = {
             timeout: HTTP_REQUEST_TIMEOUT,
             ca: server.certificateData,
