@@ -183,7 +183,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
 
             let service = $bittorrent.getClient(this.client);
 
-            let connectOrTimeout = promiseWithTimeout(service.connect(this), 15000)
+            let connectOrTimeout = promiseWithTimeout(service.connect(this), 3000)
 
             return connectOrTimeout.catch(function(err) {
                 self.isConnected = false
