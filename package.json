@@ -84,7 +84,7 @@
     "electron-reloader": "^1.2.3",
     "electron-squirrel-startup": "^1.0.0",
     "eslint": "^8.57.1",
-    "form-data": "^4.0.4",
+    "form-data": "^4.0.6",
     "fuse.js": "^3.0.5",
     "hoek": "^5.0.4",
     "html-loader": "^3.0.1",
