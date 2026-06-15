@@ -6,6 +6,7 @@ import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
 import type { ClientId } from "../../src/shared/client-metadata"
 import { waitForModalClose, waitForModalOpen } from "./modal"
+import type { ChainablePromiseElement } from "webdriverio"
 
 /**
  * Options to use during the login screen of the app to connect to your torrent client
@@ -174,7 +175,7 @@ export class App {
     return (await dropdown.getAttribute("class")).includes("active visible")
   }
 
-  private async setUploadToggle(modal: WebdriverIO.Element, action: string, enabled: boolean) {
+  private async setUploadToggle(modal: ChainablePromiseElement, action: string, enabled: boolean) {
     const toggle = modal.$(`div[data-action="${action}"]`)
     const toggleInput = toggle.$("input")
     await toggle.waitForDisplayed()
@@ -189,7 +190,7 @@ export class App {
     }
   }
 
-  private async setUploadNumberInput(modal: WebdriverIO.Element, action: string, value: number) {
+  private async setUploadNumberInput(modal: ChainablePromiseElement, action: string, value: number) {
     const input = modal.$(`input[data-action='${action}']`)
     await input.waitForDisplayed()
     await input.setValue(String(value))
@@ -220,7 +221,6 @@ export class App {
       await savedLocationDropdown.waitForDisplayed()
       await savedLocationDropdown.waitForClickable()
       await savedLocationDropdown.click()
-      await savedLocationDropdown.getHTML(false)
       await browser.execute((path) => {
         const dropdown = document.querySelector("#upload-options-saved-location")
         const item = dropdown?.querySelector(`[data-path="${path}"]`) as HTMLElement | null
@@ -593,7 +593,7 @@ export class App {
 
     await browser.waitUntil(async () => {
       const options = await dropdown.$$(".menu .item")
-      return options.length >= minimumOptionCount
+      return await options.length >= minimumOptionCount
     }, {
       timeoutMsg: `expected at least ${minimumOptionCount} options in ${settingName} dropdown`,
     })

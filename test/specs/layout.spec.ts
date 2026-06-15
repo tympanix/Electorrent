@@ -3,7 +3,7 @@ import { $, browser } from "@wdio/globals"
 import { configureSpec } from "../framework/fixture"
 import { restartApplication } from "../shared"
 
-const { assert } = chai
+const assert: Chai.AssertStatic = chai.assert
 
 describe("layout", function () {
   configureSpec()
@@ -56,7 +56,7 @@ describe("layout", function () {
 
     await browser.waitUntil(async () => {
       const className = await $("#torrentTable").getAttribute("class")
-      return className.includes("compact") === !initialState
+      return (className || "").includes("compact") === !initialState
     })
   })
 })

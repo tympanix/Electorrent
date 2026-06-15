@@ -1,53 +1,42 @@
 {
-    "extends": "@tsconfig/node14/tsconfig.json",
-    "include": [
-        "./"
-    ],
+    "extends": "../tsconfig.base.json",
     "compilerOptions": {
-        "baseUrl": "..",
         "lib": [
-            "es6"
+            "dom",
+            "es2019"
         ],
         "module": "esnext",
         "target": "es2020",
-        "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "noImplicitAny": false,
-        "forceConsistentCasingInFileNames": true,
+        "strict": false,
         "types": [
             "node",
             "mocha",
             "chai",
-            "chai-as-promised"
+            "chai-as-promised",
+            "@wdio/globals/types",
+            "@wdio/electron-types"
         ],
         "typeRoots": [
             "types",
             "../node_modules/@types",
-            "../node_modules/webdriverio/types"
+            "../node_modules/webdriverio/types",
+            "../src/shared/types"
         ],
-        "paths": {
-            "@main": [
-                "src/main"
-            ],
-            "@main/*": [
-                "src/main/*"
-            ],
-            "@renderer": [
-                "src/renderer"
-            ],
-            "@renderer/*": [
-                "src/renderer/*"
-            ],
-            "@shared": [
-                "src/shared"
-            ],
-            "@shared/*": [
-                "src/shared/*"
-            ]
-        }
+        "rootDir": "..",
+        "outDir": "../node_modules/.cache/tsc/test",
+        "tsBuildInfoFile": "../node_modules/.cache/tsbuildinfo/test.tsbuildinfo"
     },
+    "include": [
+        "**/*.ts",
+        "../wdio.conf.ts"
+    ],
     "exclude": [
-        "node_modules"
+        "../node_modules"
+    ],
+    "references": [
+        { "path": "../src/shared" },
+        { "path": "../src/main" },
+        { "path": "../src/renderer" },
+        { "path": "../src/preload" }
     ]
 }

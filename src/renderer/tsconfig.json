@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "es2019"
+    ],
+    "types": [
+      "angular",
+      "angular-animate",
+      "angular-resource",
+      "jquery",
+      "magnet-uri",
+      "moment",
+      "mousetrap",
+      "parse-torrent",
+      "qs",
+      "underscore",
+      "electorrent-bridge",
+      "html"
+    ],
+    "rootDir": "../..",
+    "outDir": "../../node_modules/.cache/tsc/renderer",
+    "tsBuildInfoFile": "../../node_modules/.cache/tsbuildinfo/renderer.tsbuildinfo"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.js"
+  ],
+  "exclude": [
+    "../../node_modules"
+  ],
+  "references": [
+    { "path": "../shared" }
+  ]
+}

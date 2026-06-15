@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "es2019"
+    ],
+    "types": [
+      "node"
+    ],
+    "rootDir": "../..",
+    "outDir": "../../node_modules/.cache/tsc/shared",
+    "tsBuildInfoFile": "../../node_modules/.cache/tsbuildinfo/shared.tsbuildinfo"
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "../../node_modules"
+  ]
+}

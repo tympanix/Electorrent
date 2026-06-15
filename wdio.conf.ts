@@ -1,5 +1,3 @@
-/// <reference types="wdio-electron-service" />
-
 import { browser } from '@wdio/globals'
 import { TEST_CLIENTS } from './test/clients'
 import ElectorrentTestService from './test/framework/service'
@@ -64,7 +62,7 @@ export const config: WebdriverIO.Config = {
     // WebdriverIO supports running e2e tests as well as unit and component tests.
     runner: 'local',
     autoXvfb: true,
-    tsConfigPath: './tsconfig.e2e.json',
+    tsConfigPath: './test/tsconfig.json',
 
     //
     // ==================

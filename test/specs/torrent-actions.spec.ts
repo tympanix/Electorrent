@@ -86,7 +86,7 @@ describe("torrent actions", function () {
     const torrentName = createUniqueLabel("set-location")
     const torrentPath = await createTorrentFile(tracker, { fileSize: 1, torrentName })
     const torrentInfo = parseTorrent(fs.readFileSync(torrentPath))
-    const contentName = torrentInfo.name || torrentName
+    const contentName = String(torrentInfo.name || torrentName)
     const targetDirectory = path.posix.join("/downloads", createUniqueLabel("moved"))
     const targetPath = path.posix.join(targetDirectory, contentName)
     const contentExistsCommand = `find /downloads -maxdepth 4 -name '${contentName}' | grep -q .`
