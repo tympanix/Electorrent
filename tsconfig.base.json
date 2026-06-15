@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "moduleResolution": "node",
     "noImplicitAny": false,
     "target": "es2019",

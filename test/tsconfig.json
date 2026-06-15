@@ -12,9 +12,7 @@
             "node",
             "mocha",
             "chai",
-            "chai-as-promised",
-            "@wdio/globals/types",
-            "@wdio/electron-types"
+            "chai-as-promised"
         ],
         "typeRoots": [
             "types",

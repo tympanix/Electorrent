@@ -12,6 +12,13 @@ module.exports = {
     },
     plugins: ["@typescript-eslint"],
     extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+    rules: {
+        "@typescript-eslint/no-unused-vars": ["error", {
+            argsIgnorePattern: "^_",
+            caughtErrorsIgnorePattern: "^_",
+            varsIgnorePattern: "^_",
+        }],
+    },
     overrides: [
         {
             files: ["src/renderer/**/*.ts"],
@@ -23,6 +30,7 @@ module.exports = {
             files: [
                 "src/main/**/*.ts",
                 "src/preload/**/*.ts",
+                "src/shared/**/*.ts",
             ],
             rules: {
                 "@typescript-eslint/no-explicit-any": "off",
