@@ -35,6 +35,8 @@ export abstract class QBittorrentBaseApi {
 
     public rid = 0
 
+    public resolvedVersion = ""
+
     protected readonly options: Record<string, any>
 
     constructor(options: QBittorrentApiOptions) {

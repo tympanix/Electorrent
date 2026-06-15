@@ -25,6 +25,7 @@ export class QBittorrentApiV2 extends QBittorrentBaseApi {
                 if (!versionErr && typeof versionBody === "string") {
                     const majorVersion = Number(versionBody.replace(/^v/, "").split(".")[0])
                     this.useStartStopEndpoints = majorVersion >= 5
+                    this.resolvedVersion = versionBody.trim()
                 }
 
                 this.handleError(cb, AUTH_ERRORS)(err, res, body)

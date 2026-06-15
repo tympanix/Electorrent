@@ -28,7 +28,9 @@ export class QBittorrentRuntime implements BittorrentRuntime {
     private trackerToHashes = new Map<string, Set<string>>()
 
     private async selectApi(server: BittorrentServerConfig) {
-        const origin = `${server.proto}://${server.ip}:${server.port}`
+        const defaultPort = server.proto === "https" ? 443 : 80
+        const portSuffix = server.port !== defaultPort ? `:${server.port}` : ""
+        const origin = `${server.proto}://${server.ip}${portSuffix}`
         const requestOptions = {
             timeout: HTTP_REQUEST_TIMEOUT,
             ca: server.certificateData,
@@ -68,13 +70,10 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         this.api = api
         await defer((done) => api.login(done))
         this.trackerToHashes.clear()
-        const version = await defer<string>((done) => api.getVersion(done))
-        if (typeof version !== "string" || !version.trim()) {
-            throw new Error("qBittorrent did not return its version")
-        }
+        const version = api.resolvedVersion
 
         return {
-            version: version.trim().replace(/^v(?=\d)/i, ""),
+            version: version.replace(/^v(?=\d)/i, ""),
             features: {
                 magnetLinks: true,
                 labels: true,
