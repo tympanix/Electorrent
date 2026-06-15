@@ -1,3 +1,4 @@
+import { URL } from "node:url"
 import request from "request"
 
 import type {
@@ -6,7 +7,7 @@ import type {
     BittorrentTorrentDetailsData,
     TorrentClientConnection,
 } from "@shared/ipc-contract"
-import { cleanPath, defer, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
+import { defer, HTTP_REQUEST_TIMEOUT, serverOriginUrl, serverUrl, urlPath } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { QBittorrentApiV1 } from "./api-v1"
 import { QBittorrentApiV2 } from "./api-v2"
@@ -15,20 +16,17 @@ import type { QBittorrentBaseApi } from "./base-api"
 const QBITTORRENT_PRIORITY_SKIP = 0
 const QBITTORRENT_PRIORITY_NORMAL = 1
 
-function buildClientPath(server: BittorrentServerConfig, endpoint: string) {
-    const prefix = cleanPath(server.path)
-    const suffix = endpoint.replace(/^\/+/, "")
-
-    return prefix ? `${prefix}/${suffix}` : `/${suffix}`
-}
-
 export class QBittorrentRuntime implements BittorrentRuntime {
+    private url(server: BittorrentServerConfig, endpoint?: string) {
+        return serverUrl(server, endpoint)
+    }
+
     private api: QBittorrentBaseApi | null = null
 
     private trackerToHashes = new Map<string, Set<string>>()
 
     private async selectApi(server: BittorrentServerConfig) {
-        const origin = `${server.proto}://${server.ip}:${server.port}`
+        const origin = serverOriginUrl(server)
         const requestOptions = {
             timeout: HTTP_REQUEST_TIMEOUT,
             ca: server.certificateData,
@@ -36,7 +34,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
             headers: {
                 Referer: origin,
             },
-            uri: `${origin}${buildClientPath(server, "version/api")}`,
+            uri: this.url(server, "version/api"),
         }
 
         const hasLegacyApi = await new Promise<boolean>((resolve) => {
@@ -45,7 +43,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
         const options = {
             origin,
-            path: cleanPath(server.path),
+            path: urlPath(server.path),
             user: server.user,
             pass: server.password,
             ca: server.certificateData,

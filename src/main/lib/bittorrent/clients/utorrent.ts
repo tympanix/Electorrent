@@ -1,3 +1,4 @@
+import { URL } from 'node:url'
 import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
@@ -16,7 +17,6 @@ export class UtorrentRuntime implements BittorrentRuntime {
     private server!: BittorrentServerConfig
     private http!: AxiosInstance
     private data = {
-        url: '',
         username: '',
         password: '',
         token: '',
@@ -24,14 +24,18 @@ export class UtorrentRuntime implements BittorrentRuntime {
         build: -1,
     }
 
-    private url(pathValue = '') {
-        return `${serverUrl(this.server)}${pathValue}`
+    private url(endpoint = '') {
+        const url = new URL(serverUrl(this.server, endpoint || undefined))
+        if (!endpoint) {
+            url.pathname = `${url.pathname.replace(/\/?$/, '')}/`
+        }
+
+        return url.toString()
     }
 
-    private saveConnection(urlValue: string, username: string, password: string) {
+    private saveConnection(username: string, password: string) {
         this.data.username = username
         this.data.password = password
-        this.data.url = urlValue
     }
 
     private extractTokenFromHTML(str: string) {
@@ -55,7 +59,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
             }
         }
 
-        const res = await this.http.get(`${this.data.url}/`, {
+        const res = await this.http.get(this.url(), {
             params: {
                 token: this.data.token,
                 t: Date.now(),
@@ -120,7 +124,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
             return res
         })
 
-        const res = await this.http.get(`${this.url()}/token.html`, {
+        const res = await this.http.get(this.url('token.html'), {
             timeout: HTTP_LOGIN_TIMEOUT,
             params: {
                 t: Date.now(),
@@ -137,9 +141,9 @@ export class UtorrentRuntime implements BittorrentRuntime {
             throw new Error('Failed to authenticate with server')
         }
 
-        this.saveConnection(serverUrl(server), server.user, server.password)
+        this.saveConnection(server.user, server.password)
 
-        const versionResponse = await this.http.get(`${this.data.url}/`, {
+        const versionResponse = await this.http.get(this.url(), {
             params: {
                 token: this.data.token,
                 t: Date.now(),
@@ -166,7 +170,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
         const uploadLocation = await this.getUploadLocationParams(options)
 
-        await this.http.get(`${this.data.url}/`, {
+        await this.http.get(this.url(), {
             params: {
                 token: this.data.token,
                 t: Date.now(),
@@ -189,7 +193,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
         })
         const uploadLocation = await this.getUploadLocationParams(options)
 
-        await this.http.post(`${this.data.url}/`, formData, {
+        await this.http.post(this.url(), formData, {
             params: {
                 token: this.data.token,
                 action: 'add-file',
@@ -203,7 +207,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
     }
 
     async getSnapshot(): Promise<any> {
-        const res = await this.http.get(`${this.data.url}/`, {
+        const res = await this.http.get(this.url(), {
             params: {
                 token: this.data.token,
                 cid: this.data.cid,
@@ -216,7 +220,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
     }
 
     private doAction(action: string, hashes: string[]): Promise<void> {
-        return this.http.get(`${this.data.url}/`, {
+        return this.http.get(this.url(), {
             params: {
                 action,
                 hash: hashes,
@@ -276,7 +280,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
     }
 
     setLabel(hashes: string[], label: string): Promise<void> {
-        return this.http.get(`${this.data.url}/`, {
+        return this.http.get(this.url(), {
             params: {
                 token: this.data.token,
                 hash: hashes,

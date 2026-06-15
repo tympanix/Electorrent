@@ -56,7 +56,12 @@ export class SynologyRuntime implements BittorrentRuntime {
     private dlVersion = ''
     private infoPath = ''
     private infoVersion = ''
-    private taskPath = '/DownloadStation/task.cgi'
+    private taskPath = 'DownloadStation/task.cgi'
+
+    private url(endpoint = '') {
+        return serverUrl(this.server, endpoint)
+    }
+
     private config(choice: string, args: any[] = []) {
         switch (choice) {
             case 'query':
@@ -184,26 +189,26 @@ export class SynologyRuntime implements BittorrentRuntime {
             return res
         })
 
-        const queryResponse = await this.http.get(`${serverUrl(this.server)}/query.cgi`, this.config('query'))
+        const queryResponse = await this.http.get(this.url('query.cgi'), this.config('query'))
         this.handleError(queryResponse)
         if (!this.isSuccess(queryResponse.data)) {
             throw new Error(`Getting initial API information from Auth and DownloadStation failed. Error: ${queryResponse.data.error}`)
         }
 
-        this.authPath = `/${queryResponse.data.data[API_AUTH].path}`
+        this.authPath = queryResponse.data.data[API_AUTH].path
         this.authVersion = queryResponse.data.data[API_AUTH].maxVersion
-        this.dlPath = `/${queryResponse.data.data[API_TASK].path}`
+        this.dlPath = queryResponse.data.data[API_TASK].path
         this.dlVersion = queryResponse.data.data[API_TASK].maxVersion
-        this.infoPath = `/${queryResponse.data.data[API_DOWNLOAD_STATION_INFO].path}`
+        this.infoPath = queryResponse.data.data[API_DOWNLOAD_STATION_INFO].path
         this.infoVersion = queryResponse.data.data[API_DOWNLOAD_STATION_INFO].maxVersion
 
-        const authResponse = await this.http.get(`${serverUrl(this.server)}${this.authPath}`, this.config('auth', [server.user, server.password]))
+        const authResponse = await this.http.get(this.url(this.authPath), this.config('auth', [server.user, server.password]))
         this.handleError(authResponse)
         if (!this.isSuccess(authResponse.data)) {
             throw new Error(`Login failed. Error: ${authResponse.data.error}`)
         }
 
-        const infoResponse = await this.http.get(`${serverUrl(this.server)}${this.infoPath}`, this.config('info'))
+        const infoResponse = await this.http.get(this.url(this.infoPath), this.config('info'))
         this.handleError(infoResponse)
         const version = infoResponse.data?.data?.version_string ?? infoResponse.data?.data?.version
         if ((typeof version !== 'string' && typeof version !== 'number') || !String(version).trim()) {
@@ -223,7 +228,7 @@ export class SynologyRuntime implements BittorrentRuntime {
     }
 
     async getSnapshot(): Promise<any> {
-        const response = await this.http.get(`${serverUrl(this.server)}${this.dlPath}`, this.config('torrents'))
+        const response = await this.http.get(this.url(this.dlPath), this.config('torrents'))
         this.handleError(response)
         if (!this.isSuccess(response.data)) {
             throw new Error(`Retrieving torrent data failed. Error: ${response.data.error}`)
@@ -238,7 +243,7 @@ export class SynologyRuntime implements BittorrentRuntime {
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
-        const response = await this.http.get(`${serverUrl(this.server)}${this.taskPath}`, this.config('tUrl', [uri, this.getUploadOptions(options).destination]))
+        const response = await this.http.get(this.url(this.taskPath), this.config('tUrl', [uri, this.getUploadOptions(options).destination]))
         this.handleError(response)
         if (!this.isSuccess(response.data)) {
             throw new Error(`Create a DownloadStation task with the provided URL failed. Error: ${response.data.error}`)
@@ -258,14 +263,14 @@ export class SynologyRuntime implements BittorrentRuntime {
             contentType: 'application/x-bittorrent',
         })
 
-        const response = await this.http.post(`${serverUrl(this.server)}${this.taskPath}`, formData, {
+        const response = await this.http.post(this.url(this.taskPath), formData, {
             headers: formData.getHeaders(),
         })
         this.handleError(response)
     }
 
     private doAction(action: string, hashes: string[]) {
-        return this.http.get(`${serverUrl(this.server)}${this.taskPath}`, this.config('action', [action, hashes.join(',')]))
+        return this.http.get(this.url(this.taskPath), this.config('action', [action, hashes.join(',')]))
             .then((response) => this.handleError(response))
             .then(() => undefined)
     }
@@ -283,7 +288,7 @@ export class SynologyRuntime implements BittorrentRuntime {
     }
 
     setLocation(hashes: string[], location: string): Promise<void> {
-        return this.http.get(`${serverUrl(this.server)}${this.taskPath}`, this.config('setLocation', [hashes.join(','), location]))
+        return this.http.get(this.url(this.taskPath), this.config('setLocation', [hashes.join(','), location]))
             .then((response) => this.handleError(response))
             .then(() => undefined)
     }

@@ -1,9 +1,9 @@
+import { urlPath } from "@main/lib/bittorrent/helpers"
 import { AUTH_ERRORS, QBittorrentBaseApi, TORRENT_ERRORS } from "./base-api"
 
 export class QBittorrentApiV1 extends QBittorrentBaseApi {
     protected buildPath(name: string) {
-        const suffix = name.replace(/^\/+/, "")
-        return this.basePath ? `${this.basePath}/${suffix}` : `/${suffix}`
+        return urlPath(this.basePath, name)
     }
 
     login(cb: (err?: any, body?: any) => void) {

@@ -1,4 +1,4 @@
-export const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/
+import { URL } from "node:url"
 
 export const rtorrentFields = {
     trackers: {
@@ -52,8 +52,11 @@ export function postfix(param: string) {
 }
 
 export function urlHostname(trackerUrl: string) {
-    const match = trackerUrl.match(URL_REGEX)
-    return match && match[1]
+    try {
+        return new URL(trackerUrl).hostname
+    } catch {
+        return undefined
+    }
 }
 
 export function stringsToNumbers(object: Record<string, any>) {

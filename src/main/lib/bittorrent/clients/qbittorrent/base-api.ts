@@ -3,7 +3,7 @@ import path from "path"
 
 import request from "request"
 
-import { HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
+import { appendUrlPath, HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
 
 export const AUTH_ERRORS: Record<number, Error> = {
     403: new Error("User's IP is banned for too many failed login attempts"),
@@ -79,7 +79,7 @@ export abstract class QBittorrentBaseApi {
     }
 
     protected url(name: string) {
-        return `${this.origin}${this.buildPath(name)}`
+        return appendUrlPath(this.origin, this.buildPath(name))
     }
 
     protected http(method: string, apiPath: string, requestOptions: Record<string, any>, cb: (err: any, res?: any, body?: any) => void) {
