@@ -1,7 +1,8 @@
+import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
-import { cleanPath, defer, HTTP_REQUEST_TIMEOUT } from "@main/lib/bittorrent/helpers"
+import { defer, HTTP_REQUEST_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
 
@@ -14,6 +15,10 @@ type RtorrentMulticallCommand = string | [string, ...any[]]
 
 export class RtorrentRuntime implements BittorrentRuntime {
     private client: any
+
+    private url(server: BittorrentServerConfig) {
+        return server.path ? serverUrl(server) : serverUrl(server, "RPC2")
+    }
 
     private async call<T = any>(method: string, params: any[]): Promise<T> {
         return defer<T>((done) => this.client.methodCall(method, params, done))
@@ -93,10 +98,11 @@ export class RtorrentRuntime implements BittorrentRuntime {
     }
 
     async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+        const rpcUrl = new URL(this.url(server))
         const options: Record<string, any> = {
-            host: server.ip,
-            port: server.port,
-            path: cleanPath(server.path) || "/RPC2",
+            host: rpcUrl.hostname.replace(/^\[|\]$/g, ""),
+            port: Number(rpcUrl.port),
+            path: rpcUrl.pathname,
             headers: {
                 "User-Agent": "NodeJS XML-RPC Client",
                 "Content-Type": "text/xml",

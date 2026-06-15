@@ -90,8 +90,8 @@ export class TransmissionRuntime implements BittorrentRuntime {
     private server!: BittorrentServerConfig
     private session?: string
 
-    private url(pathValue = '') {
-        return `${serverUrl(this.server)}${pathValue}`
+    private url(endpoint = '') {
+        return serverUrl(this.server, endpoint)
     }
 
     private updateSession(res: any) {

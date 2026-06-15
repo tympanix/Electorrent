@@ -1,4 +1,5 @@
 import https from "https"
+import { URL } from "node:url"
 import type { BittorrentServerConfig } from "@shared/ipc-contract"
 import type { CallbackFunc } from "./types"
 
@@ -17,14 +18,35 @@ export function defer<T>(fn: (f: CallbackFunc<T>) => void): Promise<T> {
     })
 }
 
-export function cleanPath(pathValue?: string) {
-    const raw = pathValue || ""
-    const trimmed = raw.replace(/^\/+|\/+$/g, "")
-    return trimmed ? `/${trimmed}` : ""
+export function urlPath(...pathValues: Array<string | undefined>) {
+    const path = pathValues
+        .map((pathValue) => (pathValue || "").replace(/^\/+|\/+$/g, ""))
+        .filter(Boolean)
+        .join("/")
+
+    return path ? `/${path}` : ""
 }
 
-export function serverUrl(server: BittorrentServerConfig) {
-    return `${server.proto}://${server.ip}:${server.port}${cleanPath(server.path)}`
+export function serverOriginUrl(server: BittorrentServerConfig) {
+    const url = new URL("http://localhost")
+    url.protocol = `${server.proto.replace(/:$/, "")}:`
+    url.host = `${server.ip.includes(":") && !server.ip.startsWith("[") ? `[${server.ip}]` : server.ip}:${server.port}`
+
+    return url.origin
+}
+
+export function serverUrl(server: BittorrentServerConfig, endpoint?: string) {
+    const url = new URL(serverOriginUrl(server))
+    url.pathname = urlPath(server.path, endpoint) || "/"
+
+    return url.pathname === "/" ? url.origin : url.toString()
+}
+
+export function appendUrlPath(baseUrl: string, endpoint?: string) {
+    const url = new URL(baseUrl)
+    url.pathname = urlPath(url.pathname, endpoint) || "/"
+
+    return url.pathname === "/" ? url.origin : url.toString()
 }
 
 export function createHttpsAgent(server: BittorrentServerConfig) {

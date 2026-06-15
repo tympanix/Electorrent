@@ -3,10 +3,10 @@ import parseTorrent from "parse-torrent"
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
 import {
-    cleanPath,
     defer,
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
+    serverUrl,
 } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 
@@ -57,14 +57,11 @@ const DELUGE_TORRENT_DETAIL_FIELDS = [
     "time_since_transfer",
 ]
 
-function buildClientPath(server: BittorrentServerConfig, endpoint: string) {
-    const prefix = cleanPath(server.path)
-    const suffix = endpoint.replace(/^\/+/, "")
-
-    return prefix ? `${prefix}/${suffix}` : `/${suffix}`
-}
-
 export class DelugeRuntime implements BittorrentRuntime {
+    private url(server: BittorrentServerConfig, endpoint?: string) {
+        return serverUrl(server, endpoint)
+    }
+
     private requestId = 0
 
     private rpcUrl = ""
@@ -198,10 +195,8 @@ export class DelugeRuntime implements BittorrentRuntime {
     }
 
     async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
-        const origin = `${server.proto}://${server.ip}:${server.port}`
-
-        this.rpcUrl = `${origin}${buildClientPath(server, "json")}`
-        this.uploadUrl = `${origin}${buildClientPath(server, "upload")}`
+        this.rpcUrl = this.url(server, "json")
+        this.uploadUrl = this.url(server, "upload")
         this.requestId = 0
         this.requestOptions = {
             timeout: HTTP_REQUEST_TIMEOUT,
