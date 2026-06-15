@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noImplicitAny": false,
     "target": "es2019",
     "pretty": true,
@@ -26,22 +24,22 @@
     ],
     "paths": {
       "@main": [
-        "src/main"
+        "./src/main"
       ],
       "@main/*": [
-        "src/main/*"
+        "./src/main/*"
       ],
       "@renderer": [
-        "src/renderer"
+        "./src/renderer"
       ],
       "@renderer/*": [
-        "src/renderer/*"
+        "./src/renderer/*"
       ],
       "@shared": [
-        "src/shared"
+        "./src/shared"
       ],
       "@shared/*": [
-        "src/shared/*"
+        "./src/shared/*"
       ]
     }
   }
