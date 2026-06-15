@@ -16,7 +16,7 @@ describe("torrent details", function () {
 
   before(async function () {
     const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
-    torrentMetadata = parseTorrent(fs.readFileSync(filename))
+    torrentMetadata = parseTorrent(fs.readFileSync(filename)) as parseTorrent.Instance
     torrent = await this.app.uploadTorrent({ filename })
     await torrent.waitForExist()
   })
@@ -85,7 +85,7 @@ describe("torrent details", function () {
 
     await browser.waitUntil(async () => {
       const headers = await filesTable.$$("thead th")
-      return headers.length > 1
+      return await headers.length > 1
     }, {
       timeout: 30_000,
       timeoutMsg: "Torrent details files table did not render enough columns to resize",

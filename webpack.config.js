@@ -33,6 +33,7 @@ function makeTsRule(configFile) {
       loader: 'ts-loader',
       options: {
         configFile: path.resolve(__dirname, configFile),
+        transpileOnly: true,
       },
     },
     include: defaultInclude,
@@ -46,6 +47,9 @@ const commonPlugins = [
       {
         from: path.resolve(__dirname, 'src/shared'),
         to: path.resolve(outDir, 'shared'),
+        globOptions: {
+          ignore: ['**/tsconfig.json'],
+        },
       },
       {
         from: path.resolve(__dirname, 'build'),
@@ -89,7 +93,7 @@ const rendererConfig = {
   mode: isProduction ? 'production' : 'development',
   module: {
     rules: [
-      makeTsRule('tsconfig.renderer.json'),
+      makeTsRule('src/renderer/tsconfig.json'),
       {
         test: /\.font\.json$/i,
         type: 'javascript/auto',
@@ -178,7 +182,7 @@ const rendererConfig = {
   },
 }
 
-function makeNodeConfig({ name, entry, target }) {
+function makeNodeConfig({ name, entry, target, tsConfig }) {
   return {
     name,
     devtool: 'source-map',
@@ -196,7 +200,7 @@ function makeNodeConfig({ name, entry, target }) {
       }),
     ],
     module: {
-      rules: [makeTsRule('tsconfig.main.json')],
+      rules: [makeTsRule(tsConfig)],
     },
     resolve: sharedResolve,
     stats: rendererConfig.stats,
@@ -206,9 +210,10 @@ function makeNodeConfig({ name, entry, target }) {
 const preloadConfig = makeNodeConfig({
   name: 'preload',
   entry: {
-    preload: path.resolve(__dirname, 'src/main/preload.ts'),
+    preload: path.resolve(__dirname, 'src/preload/preload.ts'),
   },
   target: 'electron-preload',
+  tsConfig: 'src/preload/tsconfig.json',
 })
 
 const mainConfig = makeNodeConfig({
@@ -217,6 +222,7 @@ const mainConfig = makeNodeConfig({
     main: path.resolve(__dirname, 'src/main/main.ts'),
   },
   target: 'electron-main',
+  tsConfig: 'src/main/tsconfig.json',
 })
 
 export default [rendererConfig, preloadConfig, mainConfig]

@@ -60,7 +60,7 @@ export function configureSpec(options: { login?: boolean } = {}) {
 async function removeAllTorrents(app: App) {
   const rows = await $$("[data-hash]")
   const hashes: string[] = []
-  for (let index = 0; index < rows.length; index += 1) {
+  for (let index = 0; index < await rows.length; index += 1) {
     const hash = await rows[index].getAttribute("data-hash")
     if (hash) {
       hashes.push(hash)

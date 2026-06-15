@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "target": "es2019",
+    "pretty": true,
+    "module": "esnext",
+    "sourceMap": true,
+    "allowJs": true,
+    "lib": [
+      "dom",
+      "es2019"
+    ],
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "composite": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "src/shared/types"
+    ],
+    "paths": {
+      "@main": [
+        "src/main"
+      ],
+      "@main/*": [
+        "src/main/*"
+      ],
+      "@renderer": [
+        "src/renderer"
+      ],
+      "@renderer/*": [
+        "src/renderer/*"
+      ],
+      "@shared": [
+        "src/shared"
+      ],
+      "@shared/*": [
+        "src/shared/*"
+      ]
+    }
+  }
+}

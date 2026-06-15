@@ -1,7 +1,7 @@
 import { browser } from "@wdio/globals"
 import type { ChainablePromiseElement } from "webdriverio"
 
-type ModalElement = ChainablePromiseElement<WebdriverIO.Element>
+type ModalElement = ChainablePromiseElement
 
 async function hasAnimatingClass(modal: ModalElement): Promise<boolean> {
   const className = (await modal.getAttribute("class")) || ""

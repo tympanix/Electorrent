@@ -6,7 +6,7 @@ import * as e2e from "../e2e"
 import { configureSpec } from "../framework/fixture"
 import { restartApplication } from "../shared"
 
-const { assert } = chai
+const assert: Chai.AssertStatic = chai.assert
 const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 describe("settings", function () {
   configureSpec()
@@ -144,7 +144,7 @@ describe("settings", function () {
     const availableThemes = this.app.getThemeOptions()
     assert.deepEqual(availableThemes, ["System", "Light", "Dark"])
     assert.include(availableThemes, initialTheme, `expected a supported theme, got: ${initialTheme}`)
-    const nextTheme = initialThemeHref.includes("/dark.css") ? "Light" : "Dark"
+    const nextTheme = (initialThemeHref || "").includes("/dark.css") ? "Light" : "Dark"
 
     await this.app.selectGeneralDropdownValue("Theme", nextTheme)
     assert.equal(await this.app.getGeneralDropdownValue("Theme"), nextTheme)
