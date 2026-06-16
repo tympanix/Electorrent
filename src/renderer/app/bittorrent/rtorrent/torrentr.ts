@@ -32,7 +32,7 @@ export class RtorrentTorrent extends Torrent {
             torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
             statusMessage: undefined, /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: data.addtime * 1000, /* Date Added (integer): number of milliseconds unix time */
-            dateCompleted: data.completed, /* Date Completed (integer): number of milliseconds unix time */
+            dateCompleted: data.completedAt > 0 ? data.completedAt * 1000 : undefined, /* Date Completed (integer): number of milliseconds unix time */
             savePath: data.directory, /* Save Path (string): the path at which the downloaded content is saved */
         });
 

@@ -27,7 +27,7 @@ export class TransmissionTorrent extends Torrent {
             torrentQueueOrder: data.queuePosition, /* Queue (integer): the number in the download queue */
             statusMessage: '', /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: data.addedDate * 1000, /* Date Added (integer): number of milliseconds unix time */
-            dateCompleted: data.doneDate, /* Date Completed (integer): number of milliseconds unix time */
+            dateCompleted: data.doneDate > 0 ? data.doneDate * 1000 : undefined, /* Date Completed (integer): number of milliseconds unix time */
             savePath: data.downloadDir, /* Save Path (string): the path at which the downloaded content is saved */
         });
 

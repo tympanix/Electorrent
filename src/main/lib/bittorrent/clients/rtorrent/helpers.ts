@@ -24,6 +24,7 @@ export const rtorrentFields = {
         size: "d.size_bytes",
         skip: "d.skip.total",
         completed: "d.completed_bytes",
+        completedAt: "d.timestamp.finished",
         down_rate: "d.down.rate",
         down_total: "d.down.total",
         up_rate: "d.up.rate",
