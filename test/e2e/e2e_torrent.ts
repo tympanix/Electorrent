@@ -3,7 +3,7 @@ import { ClickOptions } from "webdriverio";
 import { browser, $, $$ } from '@wdio/globals'
 import { waitForModalClose, waitForModalOpen } from "./modal"
 
-export type ColumnName = "decodedName" | "label" | "percent"
+export type ColumnName = "decodedName" | "label" | "percent" | "dateCompleted"
 
 export class Torrent {
   app: App

@@ -67,8 +67,14 @@ export class TimeDirective implements IDirective {
             }, next);
         };
 
-        updateTime();
-        startTimer();
+        scope.$watch("time", () => {
+            if (timer) {
+                this.$timeout.cancel(timer);
+                timer = undefined;
+            }
+            updateTime();
+            startTimer();
+        });
 
         scope.$on("$destroy", () => {
             if (timer) {

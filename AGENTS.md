@@ -35,4 +35,5 @@ npm run smoketest
 # Coding Guidelines
 * Avoid using `browser.execute` in browser testing - prefer organic user interaction
 * Avoid conditional logic based on client ID - deduce feature support from `TorrentClient`
+* The `BittorrentRuntime` MUST return all `n` torrents from `getSnapshot` in `O(1)` HTTP calls
 * Use the Conventional Commits specification for commit messages and pull-requests

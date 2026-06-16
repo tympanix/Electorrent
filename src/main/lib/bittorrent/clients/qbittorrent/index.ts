@@ -25,6 +25,8 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
     private trackerToHashes = new Map<string, Set<string>>()
 
+    private torrentCache = new Map<string, Record<string, any>>()
+
     private async selectApi(server: BittorrentServerConfig) {
         const origin = serverOriginUrl(server)
         const requestOptions = {
@@ -101,16 +103,39 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         if (fullUpdate) {
             await defer<void>((done) => api.reset(done))
             this.trackerToHashes.clear()
+            this.torrentCache.clear()
         }
 
         const data = await defer<Record<string, any>>((done) => api.syncMaindata(done))
+        if (data?.full_update) {
+            this.torrentCache.clear()
+        }
+
         const changedTrackerHashes = new Set<string>()
         this.mergeTrackerCache(data, changedTrackerHashes)
         this.removeRemovedTrackerUrls(data?.trackers_removed, changedTrackerHashes)
         this.removeDeletedTorrentHashes(data?.torrents_removed, changedTrackerHashes)
+        this.mergeTorrentCache(data)
         this.prepareTrackerData(data, changedTrackerHashes)
 
         return data
+    }
+
+    private mergeTorrentCache(data: Record<string, any>) {
+        const torrents = data?.torrents && typeof data.torrents === "object" ? data.torrents : {}
+
+        Object.entries(torrents).forEach(([hash, torrent]) => {
+            if (!torrent || typeof torrent !== "object" || Array.isArray(torrent)) {
+                return
+            }
+
+            const merged = {
+                ...(this.torrentCache.get(hash) || {}),
+                ...torrent,
+            }
+            this.torrentCache.set(hash, merged)
+            torrents[hash] = merged
+        })
     }
 
     private mergeTrackerCache(data: Record<string, any>, changedHashes: Set<string>) {
@@ -161,7 +186,10 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         }
 
         const deletedHashes = new Set(hashes.filter((hash): hash is string => typeof hash === "string"))
-        deletedHashes.forEach((hash) => changedHashes.delete(hash))
+        deletedHashes.forEach((hash) => {
+            changedHashes.delete(hash)
+            this.torrentCache.delete(hash)
+        })
         this.trackerToHashes.forEach((trackerHashes, tracker) => {
             deletedHashes.forEach((hash) => trackerHashes.delete(hash))
             if (trackerHashes.size === 0) {
@@ -176,9 +204,14 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
         Object.keys(torrents).forEach((hash) => changedHashes.add(hash))
         changedHashes.forEach((hash) => {
-            const torrentData = torrents[hash] && typeof torrents[hash] === "object" ? torrents[hash] : {}
+            const torrentData = torrents[hash] && typeof torrents[hash] === "object"
+                ? torrents[hash]
+                : { ...(this.torrentCache.get(hash) || {}) }
             torrentData.trackers = this.getTorrentTrackerHosts(hash)
             torrents[hash] = torrentData
+            if (this.torrentCache.has(hash)) {
+                this.torrentCache.set(hash, torrentData)
+            }
         })
 
         data.trackers = this.getAllTrackerHosts()

@@ -20,6 +20,11 @@ export class QBittorrentTorrent extends Torrent {
         return data.progress === 1 || ['checkingUP', 'moving'].includes(data.state);
     }
 
+    private static normalizeEpochMilliseconds(...values: any[]) {
+        const value = values.find((entry) => typeof entry === 'number' && entry > 0);
+        return value ? value * 1000 : undefined;
+    }
+
     // Field specific for qBittorrent
     state: string
     creationDate: string
@@ -65,8 +70,8 @@ export class QBittorrentTorrent extends Torrent {
             seedsInSwarm: data.num_complete,
             torrentQueueOrder: QBittorrentTorrent.normalizeQueueOrder(data),
             statusMessage: undefined, // Not supplied
-            dateAdded: (data.addition_date || data.added_on) * 1000 || undefined,
-            dateCompleted: (data.completion_date || data.completion_on) * 1000 || undefined,
+            dateAdded: QBittorrentTorrent.normalizeEpochMilliseconds(data.addition_date, data.added_on),
+            dateCompleted: QBittorrentTorrent.normalizeEpochMilliseconds(data.completed_on, data.completion_on, data.completion_date),
             savePath: data.save_path,
         });
 

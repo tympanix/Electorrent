@@ -32,7 +32,7 @@ export class UtorrentTorrent extends Torrent {
             torrentQueueOrder: data.torrentQueueOrder,
             statusMessage: data.statusMessage,
             dateAdded: data.dateAdded * 1000,
-            dateCompleted: data.dateCompleted * 100,
+            dateCompleted: data.dateCompleted > 0 ? data.dateCompleted * 1000 : undefined,
             savePath: data.savePath}
         );
 
