@@ -1,10 +1,6 @@
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import * as e2e from "../e2e"
-import { configureSpec, getTestFixture, requireFeature } from "../framework/fixture"
+import { configureSpec, getTestFixture, getTorrentFilePath, requireFeature } from "../framework/fixture"
 import { restartApplication } from "../shared"
-
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const fixture = getTestFixture()
 const client = fixture.client
 
@@ -14,7 +10,7 @@ describe("torrent uploads", function () {
   describe("torrent file uploads", function () {
     let torrent: e2e.Torrent
     before(async function () {
-      const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+      const filename = getTorrentFilePath()
       torrent = await this.app.uploadTorrent({ filename })
     })
 
@@ -44,7 +40,7 @@ describe("torrent uploads", function () {
 
     before(async function () {
       await restartApplication(this)
-      const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+      const filename = getTorrentFilePath()
       torrent = await this.app.uploadMagnetLink({ filename })
     })
 

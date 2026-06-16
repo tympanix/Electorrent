@@ -1,9 +1,5 @@
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import * as e2e from "../e2e"
-import { configureSpec, createUniqueLabel, requireFeature } from "../framework/fixture"
-
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+import { configureSpec, createUniqueLabel, getTorrentFilePath, requireFeature } from "../framework/fixture"
 
 describe("torrent labels", function () {
   configureSpec()
@@ -15,7 +11,7 @@ describe("torrent labels", function () {
   let torrent: e2e.Torrent
 
   before(async function () {
-    const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+    const filename = getTorrentFilePath()
     torrent = await this.app.uploadTorrent({ filename })
     await torrent.waitForExist()
     initialLabelCount = (await this.app.getAllSidebarLabels()).length

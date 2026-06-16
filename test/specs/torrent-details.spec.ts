@@ -1,12 +1,8 @@
 import fs from "node:fs"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import parseTorrent from "parse-torrent"
 import { browser } from "@wdio/globals"
 import * as e2e from "../e2e"
-import { configureSpec, formatBytes, requireFeature } from "../framework/fixture"
-
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+import { configureSpec, formatBytes, getTorrentFilePath, requireFeature } from "../framework/fixture"
 describe("torrent details", function () {
   configureSpec()
   requireFeature(({ features }) => features.torrentDetails === true)
@@ -15,7 +11,7 @@ describe("torrent details", function () {
   let torrentMetadata: parseTorrent.Instance
 
   before(async function () {
-    const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+    const filename = getTorrentFilePath()
     torrentMetadata = parseTorrent(fs.readFileSync(filename)) as parseTorrent.Instance
     torrent = await this.app.uploadTorrent({ filename })
     await torrent.waitForExist()

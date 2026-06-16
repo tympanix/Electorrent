@@ -4,7 +4,7 @@ x-peer: &peer
   networks:
     - p2p
   volumes:
-    - ./data/shared:/shared
+    - ${SHARED_DIR:-./data/shared}:/shared
   tmpfs:
     - /srv
   entrypoint: ["/start"]

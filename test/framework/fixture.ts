@@ -13,6 +13,7 @@ export interface TestFixture {
   backend: DockerComposeService
   tracker: DockerComposeService
   proxyPort: number
+  sharedDir: string
   app: App
 }
 
@@ -84,6 +85,10 @@ export function requireFeature(isSupported: (client: TestClient) => boolean) {
 
 export function createUniqueLabel(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+export function getTorrentFilePath(torrentName = "slow") {
+  return path.join(getTestFixture().sharedDir, `${torrentName}.torrent`)
 }
 
 export function formatBytes(bytes: number, fractionSize = 1) {

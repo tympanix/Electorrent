@@ -1,8 +1,6 @@
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { DockerComposeService } from "./shared/compose";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+import { getTestFixture } from "./framework/fixture";
 
 /**
  * Create a torrent file in the tracker service.
@@ -35,6 +33,5 @@ export async function createTorrentFile(tracker: DockerComposeService, options: 
         cmd.push("--tracker-url", options.trackerUrl);
     }
     await tracker.exec(cmd);
-    const torrentPath = path.join(__dirname, `shared/opentracker/data/shared/${torrentName}.torrent`)
-    return torrentPath;
+    return path.join(getTestFixture().sharedDir, `${torrentName}.torrent`);
 }
