@@ -27,15 +27,11 @@ dd if=/dev/urandom of="$TEST_FILE" bs=1k count="$FILE_SIZE" 2>/dev/null
 TORRENT_FILE="/shared/${TORRENT_NAME}.torrent"
 # Create a torrent file and save it in the shared folder with specified upload and download speeds
 rm -f "$TORRENT_FILE"
-ctorrent -t -s $TORRENT_FILE -u "$TRACKER_URL" $TEST_FILE >/dev/null
+ctorrent -t -s $TORRENT_FILE -u "$TRACKER_URL" $TEST_FILE >/dev/null 2>&1
 # Generate a random unprivileged port (1024-65535)
 P2P_PORT=$((1024 + RANDOM % 64512))
 # Seed the torrent file (and contents)
 [ -n "$UP_SPEED" ] && CTORRENT_ARGS+=" -U$UP_SPEED"
 [ -n "$DL_SPEED" ] && CTORRENT_ARGS+=" -D$DL_SPEED"
-ctorrent $CTORRENT_ARGS -P "$HOSTNAME" -p "$P2P_PORT" -s "$TEST_FILE" "$TORRENT_FILE" >/dev/null &
-PID=$!
-
-# Write info on the torrent to stdout in JSON format
-echo "{\"torrent_file\": \"$TORRENT_FILE\", \"port\": $P2P_PORT, \"pid\": $pid}"
+ctorrent $CTORRENT_ARGS -P "$HOSTNAME" -p "$P2P_PORT" -s "$TEST_FILE" "$TORRENT_FILE" >/dev/null 2>&1 &
 exit 0
