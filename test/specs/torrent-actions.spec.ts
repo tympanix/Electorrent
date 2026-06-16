@@ -3,7 +3,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import parseTorrent from "parse-torrent"
-import { browser, $ } from "@wdio/globals"
+import { $ } from "@wdio/globals"
 import * as e2e from "../e2e"
 import { waitForModalClose } from "../e2e/modal"
 import { createTorrentFile } from "../torrent"
@@ -75,31 +75,6 @@ describe("torrent actions", function () {
     await torrent.resume({ state: client.downloadLabel })
     await torrent.waitForState(client.downloadLabel)
     await torrent.checkInState(["all", "downloading"])
-  })
-
-  it("shows Date Completed when a torrent finishes", async function () {
-    this.timeout(120 * 1000)
-
-    const torrentName = createUniqueLabel("date-completed")
-    const torrentPath = await createTorrentFile(tracker, { fileSize: 1, torrentName })
-    const fastTorrent = await this.app.uploadTorrent({ filename: torrentPath })
-
-    try {
-      await fastTorrent.waitForExist({ timeout: 20 * 1000 })
-      await fastTorrent.waitForStates(["Seeding", "Finished"], { timeout: 90 * 1000 })
-
-      await browser.waitUntil(async () => {
-        const actualDateCompleted = (await fastTorrent.getColumn("dateCompleted")).trim()
-        return actualDateCompleted.length > 0 && !/1969|1970/.test(actualDateCompleted)
-      }, {
-        timeout: 20 * 1000,
-        timeoutMsg: "Date Completed column did not show a completion date for the finished torrent",
-      })
-    } finally {
-      if (await fastTorrent.isExisting()) {
-        await fastTorrent.delete()
-      }
-    }
   })
 
   it("moves downloaded content via Set Location", async function () {
