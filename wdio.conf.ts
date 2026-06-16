@@ -1,6 +1,8 @@
 import { browser } from '@wdio/globals'
+import { fileURLToPath } from 'node:url'
 import { TEST_CLIENTS } from './test/clients'
 import ElectorrentTestService from './test/framework/service'
+import ElectorrentSpecReporter from './test/framework/spec-reporter'
 
 delete process.env.ELECTRON_RUN_AS_NODE
 
@@ -21,6 +23,8 @@ const selectedClientKeys = requestedSuites().filter((suite) => suite in TEST_CLI
 const selectedClients = selectedClientKeys.length
     ? selectedClientKeys.map((key) => TEST_CLIENTS[key])
     : Object.values(TEST_CLIENTS)
+const workerClientLabels = new Map<string, string>()
+const specReporterPath = fileURLToPath(new URL('./test/framework/spec-reporter.ts', import.meta.url))
 
 function electronCapability(client: (typeof selectedClients)[number]): WebdriverIO.Capabilities {
     return {
@@ -41,6 +45,10 @@ function electronCapability(client: (typeof selectedClients)[number]): Webdriver
             browser: 'ALL',
         },
     } as WebdriverIO.Capabilities
+}
+
+function clientLabel(capabilities: WebdriverIO.Capabilities) {
+    return (capabilities['electorrent:client'] as { key?: string } | undefined)?.key ?? 'unknown client'
 }
 
 async function quitElectronApp() {
@@ -191,7 +199,9 @@ export const config: WebdriverIO.Config = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: https://webdriver.io/docs/dot-reporter
-    reporters: ['spec'],
+    reporters: [[ElectorrentSpecReporter, {
+        realtimeReporting: true,
+    }]],
 
     // Options to be passed to Mocha.
     // See the full list at http://mochajs.org/
@@ -224,8 +234,16 @@ export const config: WebdriverIO.Config = {
      * @param  {object} args     object that will be merged with the main configuration once worker is initialized
      * @param  {object} execArgv list of string arguments passed to the worker process
      */
-    // onWorkerStart: function (cid, caps, specs, args, execArgv) {
-    // },
+    onWorkerStart: function (cid, caps, specs, args) {
+        const label = clientLabel(caps)
+        workerClientLabels.set(cid, label)
+        args.reporters = [[specReporterPath, {
+            clientLabel: label,
+            realtimeReporting: true,
+        }]]
+
+        console.log(`\n─────────────────────────────────────────────\n▶ Starting WDIO worker ${cid}: ${label}\n  Specs: ${specs.join(', ')}\n─────────────────────────────────────────────`)
+    },
     /**
      * Gets executed just after a worker process has exited.
      * @param  {string} cid      capability id (e.g 0-0)
@@ -233,8 +251,12 @@ export const config: WebdriverIO.Config = {
      * @param  {object} specs    specs to be run in the worker process
      * @param  {number} retries  number of retries used
      */
-    // onWorkerEnd: function (cid, exitCode, specs, retries) {
-    // },
+    onWorkerEnd: function (cid, exitCode, _specs, retries) {
+        const label = workerClientLabels.get(cid) ?? 'unknown client'
+        workerClientLabels.delete(cid)
+
+        console.log(`\n─────────────────────────────────────────────\n◀ Finished WDIO worker ${cid}: ${label}\n  Exit code: ${exitCode}\n  Retries: ${retries}\n─────────────────────────────────────────────`)
+    },
     /**
      * Gets executed just before initialising the webdriver session and test framework. It allows you
      * to manipulate configurations depending on the capability or spec.
