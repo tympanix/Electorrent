@@ -2,9 +2,13 @@ import {Torrent} from "@renderer/app/bittorrent/abstracttorrent";
 
 export class DelugeTorrent extends Torrent {
 
+    private static fallbackCompletionTimes = new Map<string, number>()
+
     public state: string
 
     constructor(hash: string, data: Record<string, any>) {
+        const dateCompleted = DelugeTorrent.normalizeDateCompleted(hash, data)
+
         super({
             hash: hash, /* Hash (string): unique identifier for the torrent */
             name: data.name, /* Name (string): the name of the torrent */
@@ -24,7 +28,7 @@ export class DelugeTorrent extends Torrent {
             torrentQueueOrder: data.queue+1, /* Queue (integer): the number in the download queue */
             statusMessage: data.state, /* Status (string): the current status of the torrent (e.g. downloading)  */
             dateAdded: data.time_added*1000, /* Date Added (integer): number of milliseconds unix time */
-            dateCompleted: data.completed_time > 0 ? data.completed_time * 1000 : undefined, /* Date Completed (integer): number of milliseconds unix time */
+            dateCompleted, /* Date Completed (integer): number of milliseconds unix time */
             savePath: data.save_path, /* Save Path (string): the path at which the downloaded content is saved */
         });
 
@@ -33,6 +37,24 @@ export class DelugeTorrent extends Torrent {
          * may be added as extra fields. This can be done in the manner below
          */
         this.state = data.state
+    }
+
+    private static normalizeDateCompleted(hash: string, data: Record<string, any>) {
+        if (data.completed_time > 0) {
+            const dateCompleted = data.completed_time * 1000
+            DelugeTorrent.fallbackCompletionTimes.set(hash, dateCompleted)
+            return dateCompleted
+        }
+
+        const isCompleted = data.progress >= 100
+        if (!isCompleted) {
+            DelugeTorrent.fallbackCompletionTimes.delete(hash)
+            return undefined
+        }
+
+        const dateCompleted = DelugeTorrent.fallbackCompletionTimes.get(hash) || Date.now()
+        DelugeTorrent.fallbackCompletionTimes.set(hash, dateCompleted)
+        return dateCompleted
     }
 
     isStatusError(): boolean {
