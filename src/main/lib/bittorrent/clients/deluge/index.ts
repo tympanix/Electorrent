@@ -11,6 +11,7 @@ import {
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 
 const DELUGE_TORRENT_FIELDS = [
+    "completed_time",
     "distributed_copies",
     "download_payload_rate",
     "eta",
