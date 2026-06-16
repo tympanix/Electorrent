@@ -123,5 +123,8 @@
   "resolutions": {
     "graceful-fs": "^4.2.4",
     "@types/tapable": "1.0.0"
+  },
+  "overrides": {
+    "form-data": "$form-data"
   }
 }
