@@ -10,18 +10,24 @@ const featureSpecs = [
     'test/specs/**/*.spec.ts',
 ]
 
-function requestedSuites() {
+function requestedClients() {
     return process.argv.flatMap((argument, index, arguments_) => {
-        if (argument === '--suite') {
+        if (argument === '--client') {
             return arguments_[index + 1] ? [arguments_[index + 1]] : []
         }
-        return argument.startsWith('--suite=') ? [argument.slice('--suite='.length)] : []
+        return argument.startsWith('--client=') ? [argument.slice('--client='.length)] : []
     })
 }
 
-const selectedClientKeys = requestedSuites().filter((suite) => suite in TEST_CLIENTS)
+const selectedClientKeys = requestedClients()
+const unknownClientKeys = selectedClientKeys.filter((client) => !(client in TEST_CLIENTS))
+
+if (unknownClientKeys.length) {
+    throw new Error(`Unknown test client(s): ${unknownClientKeys.join(', ')}`)
+}
+
 const selectedClients = selectedClientKeys.length
-    ? selectedClientKeys.map((key) => TEST_CLIENTS[key])
+    ? selectedClientKeys.map((key) => TEST_CLIENTS[key as keyof typeof TEST_CLIENTS])
     : Object.values(TEST_CLIENTS)
 const workerClientLabels = new Map<string, string>()
 const specReporterPath = fileURLToPath(new URL('./test/framework/spec-reporter.ts', import.meta.url))
@@ -91,10 +97,6 @@ export const config: WebdriverIO.Config = {
     exclude: [
         // 'path/to/excluded/files'
     ],
-
-    suites: {
-        ...Object.fromEntries(Object.keys(TEST_CLIENTS).map((key) => [key, featureSpecs])),
-    },
 
     //
     // ============
