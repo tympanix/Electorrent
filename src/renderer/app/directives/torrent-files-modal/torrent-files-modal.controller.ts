@@ -1,8 +1,9 @@
-import { IRootScopeService, IScope } from "angular";
+import { IRootScopeService } from "angular";
 import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import type { TorrentFilesModalScope as TorrentFilesModalDirectiveScope } from "./torrent-files-modal.directive";
 
-export interface TorrentFilesModalScope extends IScope {
+export interface TorrentFilesModalScope extends TorrentFilesModalDirectiveScope {
   torrent: any;
   files: TorrentFile[];
   loading: boolean;
@@ -105,6 +106,7 @@ export class TorrentFilesModalController {
     try {
       this.scope.loading = true;
       await this.rootScope.$btclient.setTorrentFileSelection(torrent, files);
+      await this.scope.onSaved?.();
       this.close();
     } catch (err) {
       this.scope.error = err && err.message ? err.message : "Failed to save selection";
