@@ -18,7 +18,7 @@
     "release": "electron-builder",
     "version": "node ./scripts/sync-app-version.js && git add app/package.json",
     "test": "wdio run ./wdio.conf.ts",
-    "smoketest": "npm test -- --suite qbittorrent:latest --mochaOpts.grep \"torrent is stopped and resumed\"",
+    "smoketest": "npm test -- --client qbittorrent:latest --mochaOpts.grep \"torrent is stopped and resumed\"",
     "lint": "eslint --ext .ts ./src ./test ./wdio.conf.ts && tsc --build"
   },
   "keywords": [

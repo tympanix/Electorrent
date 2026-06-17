@@ -21,10 +21,10 @@ Pick a test strategy from context:
 * Otherwise -> run smoketest
 
 ### Targeted test
-* <suite>: affected bittorrent client or `qbittorrent:latest` by default
+* <client>: affected bittorrent client or `qbittorrent:latest` by default
 * <spec>: a spec file in the directory `test/specs`
 ```shell
-npm run test -- --suite "<suite>" --spec "<spec>"
+npm run test -- --client "<client>" --spec "<spec>"
 ```
 
 ### Smoketest
