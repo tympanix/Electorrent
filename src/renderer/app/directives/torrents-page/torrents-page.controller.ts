@@ -229,6 +229,7 @@ export class TorrentsPageController {
         $scope.uploadTorrent = async (torrent: Uint8Array, filename: string, options?: TorrentUploadOptions, sourcePath?: string) => {
             try {
                 await $rootScope.$btclient?.uploadTorrent(torrent, filename, options, sourcePath);
+                await syncAfterTorrentMutation();
             } catch (e) {
                 $notify.alert("Could not upload torrent", "The torrent could not be uploaded to the server");
                 console.error(e);
@@ -238,6 +239,7 @@ export class TorrentsPageController {
         $scope.uploadTorrentURL = async (uri: string, options?: TorrentUploadOptions) => {
             try {
                 await $rootScope.$btclient?.addTorrentUrl(uri, options);
+                await syncAfterTorrentMutation();
             } catch (err) {
                 $notify.alert("Upload failed", "The torrent link could not be uploaded");
                 console.error(err);
@@ -261,7 +263,7 @@ export class TorrentsPageController {
         });
 
         $scope.$on("torrentLocation:updated", () => {
-            $scope.update();
+            syncAfterTorrentMutation();
         });
 
         function clearDeleteConfirmation() {
@@ -278,6 +280,13 @@ export class TorrentsPageController {
 
         function syncDetailsPanel() {
             $rootScope.$emit("torrentDetails:sync", getCurrentSelectedTorrent());
+        }
+
+        function syncAfterTorrentMutation() {
+            return $scope.update().catch((err: unknown) => {
+                console.error("Torrent sync error", err);
+                $notify.alert("Refresh failed", "The torrent list could not be refreshed");
+            });
         }
 
         function openDeleteConfirmation(action: (torrents: any[]) => Promise<void>, label: string) {
@@ -315,7 +324,7 @@ export class TorrentsPageController {
 
             return action.call($rootScope.$btclient, torrents)
                 .then(() => {
-                    return $scope.update();
+                    return syncAfterTorrentMutation();
                 })
                 .catch((err: unknown) => {
                     console.error("Context action error", err);
@@ -334,7 +343,14 @@ export class TorrentsPageController {
 
         function remove() {
             const selectedTorrents = $scope.arrayTorrents.filter(({ selected: isSelected }: { selected: boolean }) => isSelected);
-            $rootScope.$btclient?.deleteTorrents(selectedTorrents);
+            return $rootScope.$btclient?.deleteTorrents(selectedTorrents)
+                .then(() => {
+                    return syncAfterTorrentMutation();
+                })
+                .catch((err: unknown) => {
+                    console.error("Remove torrents error", err);
+                    $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
+                });
         }
 
         function selectAll() {
@@ -562,12 +578,16 @@ export class TorrentsPageController {
         $scope.doAction = (action: any, name: string, data: any, ...args: any[]) => {
             return action.call($rootScope.$btclient, selected, data, ...args)
                 .then(() => {
-                    return $scope.update();
+                    return syncAfterTorrentMutation();
                 })
                 .catch((err: unknown) => {
                     console.error("Action error", err);
                     $notify.alert("Invalid action", "The action could not be performed because the server responded with a faulty reply");
                 });
+        };
+
+        $scope.syncAfterTorrentMutation = () => {
+            return syncAfterTorrentMutation();
         };
 
         $scope.doContextAction = (action: any, label: string, item: any) => {
