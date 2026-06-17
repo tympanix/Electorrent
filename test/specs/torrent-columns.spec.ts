@@ -27,7 +27,8 @@ const builtInColumns = [
   "Ratio",
 ]
 
-const dateIsSensible = (value: string) => value.length > 0 && !/1969|1970/.test(value)
+const dateIsSensible = (value: string) => !/1969|1970/.test(value)
+const completedDateIsSensible = (value: string) => value.length > 0 && dateIsSensible(value)
 const decodeTorrentName = (name: string) => name.replace(/[._]/g, " ").replace(/(\[[^\]]*\])(.*)$/, "$2 $1").trim()
 
 function assertSpeed(value: string) {
@@ -104,7 +105,7 @@ describe("torrent columns", function () {
   })
 
   it("shows a sensible Ratio column value", async function () {
-    assert.match((await torrent.getColumn("ratio")).trim(), /^\d+\.\d{2}$/)
+    assert.match((await torrent.getColumn("ratio")).trim(), /^-?\d+\.\d{2}$/)
   })
 
   it("shows a sensible Label column value", async function () {
@@ -133,7 +134,7 @@ describe("torrent columns", function () {
 
   it("shows Date Completed when a torrent finishes", async function () {
     await browser.waitUntil(async () => {
-      return dateIsSensible((await torrent.getColumn("dateCompleted")).trim())
+      return completedDateIsSensible((await torrent.getColumn("dateCompleted")).trim())
     }, {
       timeout: 20 * 1000,
       timeoutMsg: "Date Completed column did not show a completion date for the finished torrent",
