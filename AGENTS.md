@@ -22,9 +22,9 @@ Pick a test strategy from context:
 
 ### Targeted test
 * <suite>: affected bittorrent client or `qbittorrent:latest` by default
-* <testcase>: glob for test case related to impacted feature
+* <spec>: a spec file in the directory `test/specs`
 ```shell
-npm run test -- --suite "<suite>" --mochaOpts.grep "<testcase>"
+npm run test -- --suite "<suite>" --spec "<spec>"
 ```
 
 ### Smoketest
