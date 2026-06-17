@@ -25,7 +25,6 @@ const selectedClients = selectedClientKeys.length
 function electronCapability(client: (typeof selectedClients)[number]): WebdriverIO.Capabilities {
     return {
         browserName: 'electron',
-        maxInstances: 1,
         specs: featureSpecs,
         'electorrent:client': client,
         'wdio:electronServiceOptions': {
@@ -105,7 +104,7 @@ export const config: WebdriverIO.Config = {
     // and 30 processes will get spawned. The property handles how many capabilities
     // from the same test should run tests.
     //
-    maxInstances: 1,
+    maxInstances: 4,
     maxInstancesPerCapability: 1,
     //
     // If you have trouble getting all important capabilities together, check out the

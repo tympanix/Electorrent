@@ -1,26 +1,24 @@
 import compose, { IDockerComposeOptions } from "docker-compose";
-import path from "path";
 import { waitUntil } from "../testutil";
 
 /**
- * Backend is a utility class to interact with the docker-compose containers runing the Bittorrent
- * backend being tested
+ * Backend is a utility class to interact with a service in the test docker compose project.
  */
 export class DockerComposeService {
 
-  composeDir: string
+  composeProjectDir: string
   serviceName: string
   composeOptions: IDockerComposeOptions
 
   constructor(
-    composeDir: string | string[],
-    { serviceName = "" } = {},
+    composeProjectDir: string,
+    { serviceName }: { serviceName: string },
     composeOptions: Partial<IDockerComposeOptions> = {},
   ) {
-    this.composeDir = Array.isArray(composeDir) ? path.join(...composeDir) : composeDir
-    this.serviceName = serviceName || path.basename(this.composeDir)
+    this.composeProjectDir = composeProjectDir
+    this.serviceName = serviceName
     this.composeOptions = {
-      cwd: this.composeDir,
+      cwd: this.composeProjectDir,
       log: true,
       ...composeOptions,
     }
