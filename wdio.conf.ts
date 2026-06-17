@@ -115,7 +115,7 @@ export const config: WebdriverIO.Config = {
     // from the same test should run tests.
     //
     maxInstances: 4,
-    maxInstancesPerCapability: 1,
+    maxInstancesPerCapability: 4,
     //
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
