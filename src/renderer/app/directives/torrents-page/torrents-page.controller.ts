@@ -48,6 +48,7 @@ export class TorrentsPageController {
         $scope.totalDownloaded = 0;
         $scope.totalUploaded = 0;
         $scope.freeDiskSpace = null;
+        $scope.alternativeSpeedLimitsEnabled = false;
         $scope.contextMenu = null;
         $scope.showDragAndDrop = false;
         $scope.labelsDrowdown = null;
@@ -590,6 +591,15 @@ export class TorrentsPageController {
             return syncAfterTorrentMutation();
         };
 
+        $scope.setAlternativeSpeedLimitsMode = (enabled: boolean) => {
+            return $rootScope.$btclient.setAlternativeSpeedLimitsMode(enabled)
+                .then(() => syncAfterTorrentMutation())
+                .catch((err: unknown) => {
+                    console.error("Alternative speed limits error", err);
+                    $notify.alert("Invalid action", "The alternative rate limits mode could not be changed");
+                });
+        };
+
         $scope.doContextAction = (action: any, label: string, item: any) => {
             if (item && item.id === "torrent-details") {
                 const currentTorrent = getCurrentSelectedTorrent();
@@ -799,6 +809,9 @@ export class TorrentsPageController {
                 updateTrackers(torrents);
                 if (Object.prototype.hasOwnProperty.call(torrents, "freeDiskSpace")) {
                     $scope.freeDiskSpace = torrents.freeDiskSpace ?? null;
+                }
+                if (Object.prototype.hasOwnProperty.call(torrents, "alternativeSpeedLimitsEnabled")) {
+                    $scope.alternativeSpeedLimitsEnabled = torrents.alternativeSpeedLimitsEnabled === true;
                 }
             }).then(() => {
                 syncDetailsPanel();

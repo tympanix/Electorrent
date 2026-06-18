@@ -235,6 +235,22 @@
                 <i class="ui orange arrow up icon"></i>
                 {{ totalUploadSpeed | speed }} <span ng-if="totalUploaded">({{ totalUploaded | bytes:2 }})</span>
             </div>
+            <div ng-if="$btclient.features.alternativeSpeedLimits" class="alternative-speed-limits-control">
+                <a
+                    href=""
+                    class="alternative-speed-limits"
+                    ng-class="{active: alternativeSpeedLimitsEnabled}"
+                    data-role="alternative-speed-limits"
+                    aria-label="Alternative rate limits"
+                    title="Alternative rate limits"
+                    ng-click="$event.preventDefault(); setAlternativeSpeedLimitsMode(!alternativeSpeedLimitsEnabled)"
+                >
+                    <i class="ui" ng-class="alternativeSpeedLimitsEnabled ? 'red tachometer alternate icon' : 'green tachometer alternate icon'"></i>
+                </a>
+                <div class="ui top center popup transition alternative-speed-limits-popup">
+                    {{ alternativeSpeedLimitsEnabled ? 'Slow speed mode' : 'Normal speed mode' }}
+                </div>
+            </div>
             <div class="free-space" ng-if="freeDiskSpace != null">
                 <i class="ui grey database icon"></i>
                 Free: {{ freeDiskSpace | bytes }}
