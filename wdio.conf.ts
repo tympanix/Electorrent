@@ -7,7 +7,11 @@ import ElectorrentSpecReporter from './test/framework/spec-reporter'
 delete process.env.ELECTRON_RUN_AS_NODE
 
 const featureSpecs = [
-    'test/specs/**/*.spec.ts',
+    'test/specs/application-flow.spec.ts',
+    'test/specs/connection-flow.spec.ts',
+    'test/specs/torrent-management-flow.spec.ts',
+    'test/specs/torrent-organization-flow.spec.ts',
+    'test/specs/torrent-upload-flow.spec.ts',
 ]
 
 function requestedClients() {

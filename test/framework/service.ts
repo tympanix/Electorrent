@@ -9,6 +9,10 @@ import { waitForHttp } from "../testutil"
 const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const stackComposeFile = path.join(testDir, "docker-compose.yml")
 
+function shouldCleanupCompose() {
+  return process.argv.some((argument) => argument === "--cleanup" || argument === "--cleanup=true")
+}
+
 interface ElectorrentCapabilities extends WebdriverIO.Capabilities {
   "electorrent:client"?: TestClient
 }
@@ -61,7 +65,9 @@ export default class ElectorrentTestService {
       return
     }
 
-    await compose.down(this.workerComposeOptions)
+    if (shouldCleanupCompose()) {
+      await compose.down(this.workerComposeOptions)
+    }
     this.workerComposeOptions = undefined
   }
 
