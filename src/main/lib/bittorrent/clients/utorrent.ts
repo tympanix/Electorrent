@@ -160,6 +160,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
             features: {
                 magnetLinks: true,
                 labels: true,
+                speedLimits: true,
                 uploadOptions: {
                     saveLocation: true,
                 },
@@ -290,5 +291,29 @@ export class UtorrentRuntime implements BittorrentRuntime {
                 t: Date.now(),
             },
         }).then(() => undefined)
+    }
+
+    private setProperty(hashes: string[], property: string, value: number): Promise<void> {
+        return this.http.get(this.url(), {
+            params: {
+                token: this.data.token,
+                hash: hashes,
+                s: property,
+                v: value,
+                action: 'setprops',
+                t: Date.now(),
+            },
+        }).then(() => undefined)
+    }
+
+    async setSpeedLimits(hashes: string[], options: Record<string, any>): Promise<void> {
+        const requests: Promise<void>[] = []
+        if (options.downloadSpeedLimit !== undefined) {
+            requests.push(this.setProperty(hashes, 'dlrate', Number(options.downloadSpeedLimit)))
+        }
+        if (options.uploadSpeedLimit !== undefined) {
+            requests.push(this.setProperty(hashes, 'ulrate', Number(options.uploadSpeedLimit)))
+        }
+        await Promise.all(requests)
     }
 }

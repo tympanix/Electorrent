@@ -46,6 +46,7 @@ export const rtorrentFields = {
         label: "d.custom1",
         addtime: "d.custom=addtime",
         loadDate: "d.load_date",
+        throttle_name: "d.throttle_name",
     },
 }
 

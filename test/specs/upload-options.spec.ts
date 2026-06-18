@@ -124,15 +124,15 @@ describe("upload options", function () {
     await torrent.waitForStates([client.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
     await torrent.openDetailsPanel()
     if (client.features.uploadOptions?.downloadSpeedLimit === true) {
-      await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("download-limit")) === String(downloadSpeedLimit), {
+      await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("download-limit")) === `${downloadSpeedLimit} KB/s`, {
         timeout: 10 * 1000,
-        timeoutMsg: `Expected download limit to become ${downloadSpeedLimit}`,
+        timeoutMsg: `Expected download limit to become ${downloadSpeedLimit} KB/s`,
       })
     }
     if (client.features.uploadOptions?.uploadSpeedLimit === true) {
-      await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("upload-limit")) === String(uploadSpeedLimit), {
+      await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("upload-limit")) === `${uploadSpeedLimit} KB/s`, {
         timeout: 10 * 1000,
-        timeoutMsg: `Expected upload limit to become ${uploadSpeedLimit}`,
+        timeoutMsg: `Expected upload limit to become ${uploadSpeedLimit} KB/s`,
       })
     }
     await torrent.closeDetailsPanel()

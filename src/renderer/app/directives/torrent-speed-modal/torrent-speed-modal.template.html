@@ -1,0 +1,54 @@
+<modal
+    id="setSpeedLimitModal"
+    size="tiny"
+    on-hidden="ctl.onHidden()"
+    ng-ref="ctl.modalref">
+    <i class="close icon"></i>
+    <div class="header">
+        <i class="dashboard icon"></i>
+        Set Speed Limits
+    </div>
+    <div class="content">
+        <form class="ui form" ng-submit="ctl.apply()">
+            <p>Enter limits in KB/s. Leave a field blank to keep the existing limit. Use 0 for unlimited.</p>
+            <div class="field">
+                <label for="torrent-speed-limit-download">Download limit (KB/s)</label>
+                <input
+                    id="torrent-speed-limit-download"
+                    data-role="torrent-speed-limit-download"
+                    type="number"
+                    min="0"
+                    placeholder="Leave unchanged"
+                    ng-model="ctl.scope.downloadSpeedLimit">
+            </div>
+            <div class="field">
+                <label for="torrent-speed-limit-upload">Upload limit (KB/s)</label>
+                <input
+                    id="torrent-speed-limit-upload"
+                    data-role="torrent-speed-limit-upload"
+                    type="number"
+                    min="0"
+                    placeholder="Leave unchanged"
+                    ng-model="ctl.scope.uploadSpeedLimit">
+            </div>
+            <div class="ui negative message" ng-if="ctl.scope.error">
+                <p>{{ ctl.scope.error }}</p>
+            </div>
+        </form>
+    </div>
+    <div class="actions">
+        <button type="button" class="ui black deny button" ng-class="{ disabled: ctl.scope.loading }" ng-click="ctl.close()">
+            Cancel
+        </button>
+        <button
+            type="button"
+            class="ui green right labeled icon button"
+            data-role="torrent-speed-limit-apply"
+            ng-class="{ disabled: ctl.scope.loading }"
+            ng-disabled="ctl.scope.loading"
+            ng-click="ctl.apply()">
+            Apply
+            <i class="checkmark icon"></i>
+        </button>
+    </div>
+</modal>

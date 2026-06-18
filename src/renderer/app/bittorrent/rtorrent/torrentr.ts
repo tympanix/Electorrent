@@ -31,6 +31,8 @@ export class RtorrentTorrent extends Torrent {
             ratio: data.ratio, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
             uploadSpeed: data.up_rate,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: data.down_rate, /* Download Speed (integer): bytes per second */
+            uploadLimit: RtorrentTorrent.parseThrottleLimit(data.throttle_name, "up"),
+            downloadLimit: RtorrentTorrent.parseThrottleLimit(data.throttle_name, "down"),
             eta: undefined, /* ETA (integer): second to completion MISSING */
             label: data.label, /* Label (string): group/category identification MISSING */
             peersConnected: data.leechers, /* Peers Connected (integer): number of peers connected */
@@ -61,6 +63,16 @@ export class RtorrentTorrent extends Torrent {
         this.eta = data.left_bytes / this.downloadSpeed
     }
 
+
+    private static parseThrottleLimit(throttleName: string | undefined, direction: "down" | "up") {
+        const match = String(throttleName || "").match(/^electorrent-d(\d+)-u(\d+)$/)
+        if (!match) {
+            return 0
+        }
+
+        const value = Number(direction === "down" ? match[1] : match[2])
+        return Number.isFinite(value) && value > 0 ? value * 1024 : 0
+    }
 
     isStatusError(): boolean {
         return (!!this.message)

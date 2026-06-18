@@ -12,6 +12,7 @@ interface TorrentControllerScope extends angular.IScope {
         label: string;
         torrents: any[];
     };
+    speedLimitModalRef?: { open(torrents: any[]): void };
     [key: string]: any;
 }
 
@@ -617,6 +618,12 @@ export class TorrentsPageController {
             if (item && item.id === "torrent-set-location") {
                 if (selected.length >= 1) {
                     $rootScope.$emit("torrentLocation:open", selected.slice());
+                }
+                return $q.resolve();
+            }
+            if (item && item.id === "torrent-set-speed-limits") {
+                if (selected.length >= 1) {
+                    $scope.speedLimitModalRef?.open(selected.slice());
                 }
                 return $q.resolve();
             }

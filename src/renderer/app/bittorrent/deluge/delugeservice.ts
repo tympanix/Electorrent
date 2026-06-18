@@ -1,4 +1,5 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
 import { DelugeTorrent } from "./torrentd";
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
@@ -74,12 +75,20 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
         return this.remove(torrents)
     }
 
+    setSpeedLimits(torrents: DelugeTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
+        return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options)
+    }
+
     protected getTorrentDetailsData(torrent: DelugeTorrent): Promise<BittorrentTorrentDetailsData> {
         return getTorrentDetails(torrent.hash)
     }
 
     protected getTorrentDetailsInfoSections(torrent: DelugeTorrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {
         const info = this.getTorrentDetailsInfo(details)
+        const toSpeedLimitBytes = (value: unknown) => {
+            const limit = this.toNumber(value)
+            return limit == null ? null : (limit < 0 ? -1 : limit * 1024)
+        }
 
         return this.compactTorrentDetailsSections([
             this.createTorrentDetailsSection("overview", "Overview", [
@@ -95,8 +104,8 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
                 this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
                 this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
                 this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
-                this.createTorrentDetailsField("download-limit", "Download Limit (KB/s)", this.toNumber(info.downloadLimit), "number"),
-                this.createTorrentDetailsField("upload-limit", "Upload Limit (KB/s)", this.toNumber(info.uploadLimit), "number"),
+                this.createTorrentDetailsField("download-limit", "Download Limit", toSpeedLimitBytes(info.downloadLimit), "speedLimit", { allowEmpty: true }),
+                this.createTorrentDetailsField("upload-limit", "Upload Limit", toSpeedLimitBytes(info.uploadLimit), "speedLimit", { allowEmpty: true }),
                 this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
                 this.createTorrentDetailsField("active-time", "Active Time", this.toNumber(info.timeElapsed), "number"),
                 this.createTorrentDetailsField("seeding-time", "Seeding Time", this.toNumber(info.seedingTime), "number"),
@@ -127,7 +136,7 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
         ])
     }
 
-    extraColumns = []
+    extraColumns = [Torrent.COL_DOWNLIMIT, Torrent.COL_UPLIMIT]
 
     private baseActionHeader: TorrentActionList<DelugeTorrent> = [
         {
@@ -191,6 +200,12 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
             label: 'Queue Bottom',
             click: this.queueBottom,
             icon: 'chevron circle down'
+        },
+        {
+            id: "torrent-set-speed-limits",
+            label: "Set Speed Limits",
+            click: () => Promise.resolve(),
+            icon: "dashboard",
         },
         {
             label: 'Remove',

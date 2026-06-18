@@ -145,6 +145,14 @@ export class QBittorrentApiV1 extends QBittorrentBaseApi {
         this.performPostAction("setLocation", hashes, { location }, cb)
     }
 
+    setDownloadLimit(hashes: string[], limit: number, cb: (err?: any, body?: any) => void) {
+        this.performPostAction("setDownloadLimit", hashes, { limit }, cb)
+    }
+
+    setUploadLimit(hashes: string[], limit: number, cb: (err?: any, body?: any) => void) {
+        this.performPostAction("setUploadLimit", hashes, { limit }, cb)
+    }
+
     createCategory(category: string, _savePath: string, cb: (err?: any, body?: any) => void) {
         this.post("command/addCategory", { form: { category } }, (err, res, body) => this.handleError(cb)(err, res, body))
     }

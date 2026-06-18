@@ -5,6 +5,7 @@ import { defineClient } from "../define"
 const features = {
   magnetLinks: true,
   labels: true,
+  speedLimits: true,
   uploadOptions: {
     saveLocation: true,
   },

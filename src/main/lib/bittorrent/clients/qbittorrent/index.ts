@@ -83,6 +83,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 torrentDetails: true,
                 trackerFilter: true,
                 alternativeSpeedLimits: true,
+                speedLimits: true,
                 uploadOptions: {
                     saveLocation: true,
                     renameTorrent: true,
@@ -260,8 +261,8 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 paused: !options.startTorrent,
                 stopped: !options.startTorrent,
                 rename: options.renameTorrent,
-                upLimit: options.uploadSpeedLimit,
-                dlLimit: options.downloadSpeedLimit,
+                upLimit: options.uploadSpeedLimit === undefined ? undefined : Number(options.uploadSpeedLimit) * 1024,
+                dlLimit: options.downloadSpeedLimit === undefined ? undefined : Number(options.downloadSpeedLimit) * 1024,
                 sequentialDownload: options.sequentialDownload,
                 firstLastPiecePrio: options.firstAndLastPiecePrio,
             })
@@ -363,6 +364,20 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         if (resumeHashes.length > 0) {
             await this.resume(resumeHashes)
         }
+    }
+
+    async setSpeedLimits(hashes: string[], options: Record<string, any>): Promise<void> {
+        const api = this.getApi()
+        const requests: Promise<void>[] = []
+
+        if (options.downloadSpeedLimit !== undefined) {
+            requests.push(defer((done) => api.setDownloadLimit(hashes, Number(options.downloadSpeedLimit) * 1024, done)))
+        }
+        if (options.uploadSpeedLimit !== undefined) {
+            requests.push(defer((done) => api.setUploadLimit(hashes, Number(options.uploadSpeedLimit) * 1024, done)))
+        }
+
+        await Promise.all(requests)
     }
 
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {

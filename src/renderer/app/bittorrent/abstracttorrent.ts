@@ -24,6 +24,8 @@ export interface TorrentProps {
     ratio?: number
     uploadSpeed?: number
     downloadSpeed?: number
+    uploadLimit?: number
+    downloadLimit?: number
     eta?: number
     label?: string
     peersConnected?: number
@@ -57,6 +59,8 @@ export abstract class Torrent implements TorrentProps {
     ratio: number
     uploadSpeed: number
     downloadSpeed: number
+    uploadLimit: number
+    downloadLimit: number
     eta: number
     label: string
     peersConnected: number
@@ -244,6 +248,20 @@ export abstract class Torrent implements TorrentProps {
       enabled: true,
       template: '{{torrent.uploadSpeed | speed}}',
       attribute: 'uploadSpeed'
+    })
+
+    static COL_DOWNLIMIT = new Column({
+      name: 'Down Limit',
+      enabled: false,
+      template: '{{torrent.downloadLimit | speedLimit}}',
+      attribute: 'downloadLimit'
+    })
+
+    static COL_UPLIMIT = new Column({
+      name: 'Up Limit',
+      enabled: false,
+      template: '{{torrent.uploadLimit | speedLimit}}',
+      attribute: 'uploadLimit'
     })
 
     static COL_PROGRESS = new Column({

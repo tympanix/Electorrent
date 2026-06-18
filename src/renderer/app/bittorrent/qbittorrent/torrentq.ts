@@ -62,6 +62,8 @@ export class QBittorrentTorrent extends Torrent {
             ratio: data.share_ration || data.ratio,
             uploadSpeed: data.up_speed || data.upspeed,
             downloadSpeed: data.dl_speed || data.dlspeed,
+            uploadLimit: data.up_limit,
+            downloadLimit: data.dl_limit,
             eta: data.eta,
             label: data.category || data.label,
             peersConnected: data.num_leechs,

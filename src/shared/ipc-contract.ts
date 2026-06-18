@@ -175,6 +175,11 @@ export interface TorrentUploadOptions {
     uploadSpeedLimit?: number
 }
 
+export interface TorrentSpeedLimitOptions {
+    downloadSpeedLimit?: number
+    uploadSpeedLimit?: number
+}
+
 export type TorrentUploadOptionsEnable = Partial<Record<keyof TorrentUploadOptions, boolean>>
 
 export interface TorrentClientFeatures {
@@ -185,6 +190,7 @@ export interface TorrentClientFeatures {
     readonly torrentDetails?: boolean
     readonly trackerFilter?: boolean
     readonly alternativeSpeedLimits?: boolean
+    readonly speedLimits?: boolean
     readonly uploadOptions?: Readonly<TorrentUploadOptionsEnable>
 }
 
@@ -201,6 +207,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly torrentDetails: boolean
     readonly trackerFilter: boolean
     readonly alternativeSpeedLimits: boolean
+    readonly speedLimits: boolean
     readonly uploadOptions: Readonly<Required<Record<keyof TorrentUploadOptions, boolean>>>
 }
 
