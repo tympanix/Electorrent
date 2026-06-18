@@ -578,13 +578,21 @@ html, body {
             display: inline-flex;
             align-items: center;
 
+            &:hover .alternative-speed-limits-popup {
+                display: block;
+                opacity: 1;
+                visibility: visible;
+            }
+
             .alternative-speed-limits-popup {
                 position: absolute;
-                right: 50%;
-                bottom: 1.75rem;
-                display: block;
+                left: 50%;
+                right: auto;
+                bottom: calc(100% + 0.75rem);
+                display: none;
                 white-space: nowrap;
-                transform: translateX(50%);
+                transform: translateX(-50%);
+                z-index: 1000;
             }
         }
     }

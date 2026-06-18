@@ -247,11 +247,8 @@
                 >
                     <i class="ui" ng-class="alternativeSpeedLimitsEnabled ? 'green tachometer alternate icon' : 'grey clock outline icon'"></i>
                 </a>
-                <div
-                    ng-if="alternativeSpeedLimitsPopupMessage"
-                    class="ui top center popup visible transition alternative-speed-limits-popup"
-                >
-                    {{ alternativeSpeedLimitsPopupMessage }}
+                <div class="ui top center popup transition alternative-speed-limits-popup">
+                    Alternative rate limits {{ alternativeSpeedLimitsEnabled ? 'enabled' : 'disabled' }}
                 </div>
             </div>
             <div class="free-space" ng-if="freeDiskSpace != null">
