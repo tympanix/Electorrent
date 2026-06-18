@@ -11,6 +11,7 @@ const features = {
   trackerFilter: true,
   alternativeSpeedLimits: true,
   speedLimits: true,
+  freeDiskSpace: true,
   uploadOptions: {
     saveLocation: true,
     renameTorrent: true,

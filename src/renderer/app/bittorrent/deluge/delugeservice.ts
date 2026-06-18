@@ -3,6 +3,7 @@ import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
 import { DelugeTorrent } from "./torrentd";
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
+import { applyFreeDiskSpace } from "@renderer/app/bittorrent/free-disk-space";
 
 export class DelugeClient extends TorrentClient<DelugeTorrent> {
     public name = 'Deluge'
@@ -10,13 +11,13 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
     async torrents(): Promise<TorrentUpdates> {
         const data: Record<string, any> = await getSnapshot()
 
-        return {
+        return applyFreeDiskSpace({
             labels: Array.isArray(data.labels) ? data.labels : [],
             all: Object.keys(data.torrents || {}).map((hash) => new DelugeTorrent(hash, data.torrents[hash])),
             changed: [],
             deleted: [],
             dirty: true,
-        }
+        }, data.freeDiskSpace)
     }
 
     defaultPath(): string {

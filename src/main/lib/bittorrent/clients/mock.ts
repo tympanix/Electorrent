@@ -98,6 +98,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 fileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
+                freeDiskSpace: true,
                 uploadOptions: {
                     saveLocation: true,
                     renameTorrent: true,

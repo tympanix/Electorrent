@@ -197,6 +197,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 torrentDetails: true,
                 trackerFilter: true,
                 speedLimits: true,
+                freeDiskSpace: true,
                 uploadOptions: {
                     saveLocation: true,
                     category: true,
@@ -211,14 +212,23 @@ export class TransmissionRuntime implements BittorrentRuntime {
     }
 
     async getSnapshot(): Promise<any> {
-        const resp = await this.getHttpClient().post(this.url(), {
-            arguments: {
-                fields: TRANSMISSION_FIELDS,
-            },
-            method: 'torrent-get',
-        })
+        const [torrentsResponse, sessionResponse] = await Promise.all([
+            this.getHttpClient().post(this.url(), {
+                arguments: {
+                    fields: TRANSMISSION_FIELDS,
+                },
+                method: 'torrent-get',
+            }),
+            this.getHttpClient().post(this.url(), { method: 'session-get' }),
+        ])
 
-        return resp.data
+        return {
+            ...torrentsResponse.data,
+            arguments: {
+                ...torrentsResponse.data?.arguments,
+                freeDiskSpace: sessionResponse.data?.arguments?.['download-dir-free-space'],
+            },
+        }
     }
 
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {

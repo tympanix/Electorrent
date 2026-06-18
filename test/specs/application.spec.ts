@@ -31,8 +31,8 @@ describe("application", function () {
     assert.match(await version.getText(), new RegExp(`^${escapeRegExp(CLIENT_METADATA[client.clientId].name)}\\s+\\S+`))
   })
 
-  if (client.clientId === "qbittorrent") {
-    it("keeps qBittorrent free space in the footer after incremental syncs", async function () {
+  if (client.features.freeDiskSpace) {
+    it("shows free disk space in the footer for clients that support it", async function () {
       await browser.waitUntil(async () => {
         const footerText = await this.app.getTorrentsFooterText()
         return footerText.includes("Free:")

@@ -12,6 +12,7 @@ import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 import { QBittorrentTorrent } from "./torrentq";
 import { addTorrentUrl, getSnapshot, getTorrentDetails, getTorrentFiles, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
+import { applyFreeDiskSpace } from "@renderer/app/bittorrent/free-disk-space";
 
 export interface QBittorrentUploadOptions {
   savepath?: string
@@ -48,9 +49,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         deleted: [],
       };
 
-      if (data?.server_state?.free_space_on_disk !== undefined) {
-        torrents.freeDiskSpace = data.server_state.free_space_on_disk ?? null;
-      }
+      applyFreeDiskSpace(torrents, data?.server_state?.free_space_on_disk);
 
       if (data?.server_state?.use_alt_speed_limits !== undefined) {
         torrents.alternativeSpeedLimitsEnabled = data.server_state.use_alt_speed_limits === true || data.server_state.use_alt_speed_limits === 1;
