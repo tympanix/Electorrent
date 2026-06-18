@@ -51,6 +51,10 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         torrents.freeDiskSpace = data.server_state.free_space_on_disk ?? null;
       }
 
+      if (data?.server_state?.use_alt_speed_limits !== undefined) {
+        torrents.alternativeSpeedLimitsEnabled = data.server_state.use_alt_speed_limits === true || data.server_state.use_alt_speed_limits === 1;
+      }
+
       if (Array.isArray(data.categories) || Array.isArray(data.labels)) {
         torrents.labels = data.categories || data.labels;
       } else if (typeof data.categories === "object") {
@@ -102,6 +106,10 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
 
     pauseAll(): Promise<void> {
       return invokeAction("pauseAll");
+    };
+
+    setAlternativeSpeedLimitsMode(enabled: boolean): Promise<void> {
+      return invokeAction("setAlternativeSpeedLimitsMode", [], enabled);
     };
 
     recheck(torrents: Torrent[]): Promise<void> {

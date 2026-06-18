@@ -174,5 +174,9 @@ export abstract class QBittorrentBaseApi {
 
     abstract createCategory(category: string, savePath: string, cb: (err?: any, body?: any) => void): void
 
+    abstract getSpeedLimitsMode(cb: (err?: any, enabled?: boolean) => void): void
+
+    abstract setSpeedLimitsMode(enabled: boolean, cb: (err?: any, body?: any) => void): void
+
     abstract toggleSequentialDownload(hashes: string[], cb: (err?: any, body?: any) => void): void
 }

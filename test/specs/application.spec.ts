@@ -38,5 +38,25 @@ describe("application", function () {
         return footerText.includes("Free:")
       })
     })
+
+    it("toggles alternative rate limits from the status bar", async function () {
+      const button = $("[data-role='alternative-speed-limits']")
+      await button.waitForDisplayed()
+
+      const isActive = async () => ((await button.getAttribute("class")) || "").split(/\s+/).includes("active")
+      const initial = await isActive()
+
+      try {
+        await button.waitForClickable()
+        await button.click()
+        await browser.waitUntil(async () => await isActive() !== initial)
+      } finally {
+        if (await isActive() !== initial) {
+          await button.waitForClickable()
+          await button.click()
+          await browser.waitUntil(async () => await isActive() === initial)
+        }
+      }
+    })
   }
 })

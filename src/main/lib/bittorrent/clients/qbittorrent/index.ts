@@ -82,6 +82,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 setLocation: true,
                 torrentDetails: true,
                 trackerFilter: true,
+                alternativeSpeedLimits: true,
                 uploadOptions: {
                     saveLocation: true,
                     renameTorrent: true,
@@ -117,6 +118,10 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         this.removeDeletedTorrentHashes(data?.torrents_removed, changedTrackerHashes)
         this.mergeTorrentCache(data)
         this.prepareTrackerData(data, changedTrackerHashes)
+
+        if (data?.server_state && data.server_state.use_alt_speed_limits === undefined) {
+            data.server_state.use_alt_speed_limits = await defer<boolean>((done) => api.getSpeedLimitsMode(done))
+        }
 
         return data
     }
@@ -293,6 +298,11 @@ export class QBittorrentRuntime implements BittorrentRuntime {
     pauseAll(): Promise<void> {
         const api = this.getApi()
         return defer((done) => api.pauseAll(done))
+    }
+
+    setAlternativeSpeedLimitsMode(_hashes: string[], enabled: boolean): Promise<void> {
+        const api = this.getApi()
+        return defer((done) => api.setSpeedLimitsMode(enabled, done))
     }
 
     recheck(hashes: string[]): Promise<void> {

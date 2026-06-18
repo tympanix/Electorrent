@@ -20,6 +20,7 @@ export interface TorrentUpdates {
     dirty?: boolean,
     trackers?: any[],
     freeDiskSpace?: number | null,
+    alternativeSpeedLimitsEnabled?: boolean,
 }
 
 /**
@@ -51,6 +52,7 @@ const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     setLocation: false,
     torrentDetails: false,
     trackerFilter: false,
+    alternativeSpeedLimits: false,
     uploadOptions: DEFAULT_UPLOAD_OPTIONS,
 })
 
@@ -304,6 +306,13 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             throw new Error("Set location not supported for this client")
         }
         return Promise.reject(new Error("Set location not implemented for this client"))
+    }
+
+    async setAlternativeSpeedLimitsMode(_enabled: boolean): Promise<void> {
+        if (!this.features.alternativeSpeedLimits) {
+            throw new Error("Alternative speed limits not supported for this client")
+        }
+        return Promise.reject(new Error("Alternative speed limits not implemented for this client"))
     }
 
     async getTorrentDetails(torrent: T): Promise<TorrentDetailsPanelData> {

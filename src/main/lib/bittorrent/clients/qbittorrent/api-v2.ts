@@ -142,6 +142,18 @@ export class QBittorrentApiV2 extends QBittorrentBaseApi {
         this.post("torrents/createCategory", { form: { category, savePath } }, cb)
     }
 
+    getSpeedLimitsMode(cb: (err?: any, enabled?: boolean) => void) {
+        this.get("transfer/speedLimitsMode", {}, (err, res, body) => {
+            this.handleError((actionErr, mode) => cb(actionErr, String(mode).trim() === "1"))(err, res, body)
+        })
+    }
+
+    setSpeedLimitsMode(enabled: boolean, cb: (err?: any, body?: any) => void) {
+        this.post("transfer/setSpeedLimitsMode", { form: { mode: enabled ? "1" : "0" } }, (err, res, body) => {
+            this.handleError(cb)(err, res, body)
+        })
+    }
+
     toggleSequentialDownload(hashes: string[], cb: (err?: any, body?: any) => void) {
         this.performPostAction("toggleSequentialDownload", hashes, {}, cb)
     }

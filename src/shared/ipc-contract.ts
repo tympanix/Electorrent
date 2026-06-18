@@ -184,6 +184,7 @@ export interface TorrentClientFeatures {
     readonly setLocation?: boolean
     readonly torrentDetails?: boolean
     readonly trackerFilter?: boolean
+    readonly alternativeSpeedLimits?: boolean
     readonly uploadOptions?: Readonly<TorrentUploadOptionsEnable>
 }
 
@@ -199,6 +200,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly setLocation: boolean
     readonly torrentDetails: boolean
     readonly trackerFilter: boolean
+    readonly alternativeSpeedLimits: boolean
     readonly uploadOptions: Readonly<Required<Record<keyof TorrentUploadOptions, boolean>>>
 }
 
