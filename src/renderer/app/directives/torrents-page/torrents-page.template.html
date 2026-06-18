@@ -245,7 +245,7 @@
                     title="Alternative rate limits"
                     ng-click="$event.preventDefault(); setAlternativeSpeedLimitsMode(!alternativeSpeedLimitsEnabled)"
                 >
-                    <i class="ui" ng-class="alternativeSpeedLimitsEnabled ? 'green tachometer alternate icon' : 'grey clock outline icon'"></i>
+                    <i class="ui" ng-class="alternativeSpeedLimitsEnabled ? 'red tachometer alternate icon' : 'green tachometer alternate icon'"></i>
                 </a>
                 <div class="ui top center popup transition alternative-speed-limits-popup">
                     {{ alternativeSpeedLimitsEnabled ? 'Slow speed mode' : 'Normal speed mode' }}
