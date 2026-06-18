@@ -572,6 +572,21 @@ html, body {
             color: @unselectedTextColor;
             font-size: 0.8rem;
         }
+
+        .alternative-speed-limits-control {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+
+            .alternative-speed-limits-popup {
+                position: absolute;
+                right: 50%;
+                bottom: 1.75rem;
+                display: block;
+                white-space: nowrap;
+                transform: translateX(50%);
+            }
+        }
     }
 }
 .ui.welcome.form.loading:before {

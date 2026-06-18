@@ -34,6 +34,7 @@ export class TorrentsPageController {
         let lastSelected: any = null;
         let timeout: angular.IPromise<void> | undefined;
         let reconnect: angular.IPromise<void> | undefined;
+        let alternativeSpeedLimitsPopupTimeout: angular.IPromise<void> | undefined;
         let deferredUploads: Array<{ item: PendingTorrentUploadItem; askUploadOptions: boolean }> = [];
 
         let settings = settingsService.getAllSettings();
@@ -49,6 +50,7 @@ export class TorrentsPageController {
         $scope.totalUploaded = 0;
         $scope.freeDiskSpace = null;
         $scope.alternativeSpeedLimitsEnabled = false;
+        $scope.alternativeSpeedLimitsPopupMessage = "";
         $scope.contextMenu = null;
         $scope.showDragAndDrop = false;
         $scope.labelsDrowdown = null;
@@ -288,6 +290,20 @@ export class TorrentsPageController {
                 console.error("Torrent sync error", err);
                 $notify.alert("Refresh failed", "The torrent list could not be refreshed");
             });
+        }
+
+        function showAlternativeSpeedLimitsPopup() {
+            if (alternativeSpeedLimitsPopupTimeout) {
+                $timeout.cancel(alternativeSpeedLimitsPopupTimeout);
+            }
+
+            $scope.alternativeSpeedLimitsPopupMessage = $scope.alternativeSpeedLimitsEnabled
+                ? "Alternative rate limits enabled"
+                : "Alternative rate limits disabled";
+            alternativeSpeedLimitsPopupTimeout = $timeout(() => {
+                $scope.alternativeSpeedLimitsPopupMessage = "";
+                alternativeSpeedLimitsPopupTimeout = undefined;
+            }, 2000);
         }
 
         function openDeleteConfirmation(action: (torrents: any[]) => Promise<void>, label: string) {
@@ -594,6 +610,7 @@ export class TorrentsPageController {
         $scope.setAlternativeSpeedLimitsMode = (enabled: boolean) => {
             return $rootScope.$btclient.setAlternativeSpeedLimitsMode(enabled)
                 .then(() => syncAfterTorrentMutation())
+                .then(() => showAlternativeSpeedLimitsPopup())
                 .catch((err: unknown) => {
                     console.error("Alternative speed limits error", err);
                     $notify.alert("Invalid action", "The alternative rate limits mode could not be changed");
