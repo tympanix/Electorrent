@@ -218,6 +218,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
             peers: "d.peers_accounted",
             seeds: "d.peers_complete",
             additionDate: ["d.custom", "addtime"],
+            loadDate: "d.load_date",
         }
         const numericDetailFields = [
             "totalSize",
@@ -232,6 +233,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
             "peers",
             "seeds",
             "additionDate",
+            "loadDate",
         ] as const
         const fileCommands = {
             path: "f.path",
@@ -267,7 +269,8 @@ export class RtorrentRuntime implements BittorrentRuntime {
         const message = typeof detailFields.message === "string" ? detailFields.message : null
         const peers = typeof detailFields.peers === "number" ? detailFields.peers : null
         const seeds = typeof detailFields.seeds === "number" ? detailFields.seeds : null
-        const additionDate = typeof detailFields.additionDate === "number" ? detailFields.additionDate : null
+        const loadDate = typeof detailFields.loadDate === "number" ? detailFields.loadDate : null
+        const additionDate = typeof detailFields.additionDate === "number" && detailFields.additionDate > 0 ? detailFields.additionDate : loadDate
         const ratio = totalDownloaded > 0 ? totalUploaded / totalDownloaded : null
 
         return {
