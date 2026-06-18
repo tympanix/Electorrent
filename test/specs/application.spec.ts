@@ -31,32 +31,38 @@ describe("application", function () {
     assert.match(await version.getText(), new RegExp(`^${escapeRegExp(CLIENT_METADATA[client.clientId].name)}\\s+\\S+`))
   })
 
-  if (client.features.freeDiskSpace) {
-    it("shows free disk space in the footer for clients that support it", async function () {
-      await browser.waitUntil(async () => {
-        const footerText = await this.app.getTorrentsFooterText()
-        return footerText.includes("Free:")
-      })
+  it("shows free disk space in the footer for clients that support it", async function () {
+    if (client.features.freeDiskSpace !== true) {
+      return this.skip()
+    }
+
+    await browser.waitUntil(async () => {
+      const footerText = await this.app.getTorrentsFooterText()
+      return footerText.includes("Free:")
     })
+  })
 
-    it("toggles alternative rate limits from the status bar", async function () {
-      const button = $("[data-role='alternative-speed-limits']")
-      await button.waitForDisplayed()
+  it("toggles alternative rate limits from the status bar", async function () {
+    if (client.features.alternativeSpeedLimits !== true) {
+      return this.skip()
+    }
 
-      const isActive = async () => ((await button.getAttribute("class")) || "").split(/\s+/).includes("active")
-      const initial = await isActive()
+    const button = $("[data-role='alternative-speed-limits']")
+    await button.waitForDisplayed()
 
-      try {
+    const isActive = async () => ((await button.getAttribute("class")) || "").split(/\s+/).includes("active")
+    const initial = await isActive()
+
+    try {
+      await button.waitForClickable()
+      await button.click()
+      await browser.waitUntil(async () => await isActive() !== initial)
+    } finally {
+      if (await isActive() !== initial) {
         await button.waitForClickable()
         await button.click()
-        await browser.waitUntil(async () => await isActive() !== initial)
-      } finally {
-        if (await isActive() !== initial) {
-          await button.waitForClickable()
-          await button.click()
-          await browser.waitUntil(async () => await isActive() === initial)
-        }
+        await browser.waitUntil(async () => await isActive() === initial)
       }
-    })
-  }
+    }
+  })
 })

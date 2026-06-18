@@ -87,6 +87,8 @@ services:
       - ${CLIENT_HOST_PORT:-9091}:9091
     tmpfs:
       - /downloads
+      - /downloads/complete
+      - /downloads/incomplete
 
   utorrent:
     image: ekho/utorrent:${VERSION:-latest}
