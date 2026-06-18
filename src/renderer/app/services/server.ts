@@ -21,8 +21,22 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 return true
             }
 
-            const message = String(err.message || err)
-            return message.toLowerCase().includes("self signed certificate")
+            if (Array.isArray(err.errors) && err.errors.some(isSelfSignedCertificateError)) {
+                return true
+            }
+
+            if (err.cause && isSelfSignedCertificateError(err.cause)) {
+                return true
+            }
+
+            const message = String(err.message || err).toLowerCase()
+            return message.includes("self signed certificate")
+                || message.includes(ERR_SELF_SIGNED_CERT.toLowerCase())
+        }
+
+        function isAggregateConnectionError(err: any) {
+            const message = String(err?.message || err).toLowerCase()
+            return err?.name === "AggregateError" || message.includes("aggregateerror")
         }
 
         /**
@@ -187,7 +201,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
 
             return connectOrTimeout.catch(function(err) {
                 self.isConnected = false
-                if (isSelfSignedCertificateError(err)) {
+                if (isSelfSignedCertificateError(err) || (self.isHTTPS() && isAggregateConnectionError(err))) {
                     return self.askForCertificate().then(function() {
                         return self.connect()
                     })

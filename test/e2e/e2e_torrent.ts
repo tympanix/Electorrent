@@ -285,9 +285,18 @@ export class Torrent {
     const elem = $(this.query)
     await elem.waitForExist()
     await elem.waitForDisplayed()
-    await elem.click(options)
+    await elem.scrollIntoView({ block: "center", inline: "center" })
+    await elem.moveTo()
 
     const contextMeny = $("#contextmenu")
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await elem.click(options)
+      if (await contextMeny.isDisplayed()) {
+        return
+      }
+      await browser.pause(100)
+    }
+
     await contextMeny.waitForDisplayed()
   }
 
