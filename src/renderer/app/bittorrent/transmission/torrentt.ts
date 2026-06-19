@@ -100,6 +100,8 @@ export class TransmissionTorrent extends Torrent {
             return 'Verifying';
         } else if (this.isStatusQueuedToVerify()) {
             return 'Queued to Verify';
+        } else if (this.isStatusQueued()) {
+            return 'Queued';
         } else if (this.isStatusSeeding()){
             return 'Seeding';
         } else if (this.isStatusDownloading()){
