@@ -1,6 +1,13 @@
 import {Torrent} from "@renderer/app/bittorrent/abstracttorrent";
 
 export class TransmissionTorrent extends Torrent {
+    private static STATUS_STOPPED = 0
+    private static STATUS_CHECK_WAIT = 1
+    private static STATUS_CHECK = 2
+    private static STATUS_DOWNLOAD_WAIT = 3
+    private static STATUS_DOWNLOAD = 4
+    private static STATUS_SEED_WAIT = 5
+    private static STATUS_SEED = 6
 
     data: Record<string, any>
     error: number
@@ -49,7 +56,11 @@ export class TransmissionTorrent extends Torrent {
     }
 
     isStatusVerifying(): boolean {
-        return this.status === 2;
+        return this.status === TransmissionTorrent.STATUS_CHECK;
+    };
+
+    isStatusQueuedToVerify(): boolean {
+        return this.status === TransmissionTorrent.STATUS_CHECK_WAIT;
     };
 
     isStatusError(): boolean {
@@ -58,23 +69,25 @@ export class TransmissionTorrent extends Torrent {
     };
 
     isStatusStopped(): boolean {
-        return this.status === 0 && this.percent !== 1000;
+        return this.status === TransmissionTorrent.STATUS_STOPPED && this.percent !== 1000;
     };
 
     isStatusQueued(): boolean {
-        return
+        return this.status === TransmissionTorrent.STATUS_CHECK_WAIT
+            || this.status === TransmissionTorrent.STATUS_DOWNLOAD_WAIT
+            || this.status === TransmissionTorrent.STATUS_SEED_WAIT;
     };
 
     isStatusCompleted(): boolean {
-        return this.percent === 1000 && this.status === 0 && this.error === 0;
+        return this.percent === 1000 && this.status === TransmissionTorrent.STATUS_STOPPED && this.error === 0;
     };
 
     isStatusDownloading(): boolean {
-        return this.status === 4 || this.status === 2;
+        return this.status === TransmissionTorrent.STATUS_DOWNLOAD || this.isStatusVerifying();
     };
 
     isStatusSeeding(): boolean {
-        return this.status === 6;
+        return this.status === TransmissionTorrent.STATUS_SEED;
     };
 
     isStatusPaused(): boolean {
@@ -83,7 +96,11 @@ export class TransmissionTorrent extends Torrent {
 
 
     statusText(): string {
-        if (this.isStatusSeeding()){
+        if (this.isStatusVerifying()){
+            return 'Verifying';
+        } else if (this.isStatusQueuedToVerify()) {
+            return 'Queued to Verify';
+        } else if (this.isStatusSeeding()){
             return 'Seeding';
         } else if (this.isStatusDownloading()){
             return 'Downloading';
