@@ -45,6 +45,7 @@ export const rtorrentFields = {
         left_bytes: "d.left_bytes",
         label: "d.custom1",
         addtime: "d.custom=addtime",
+        loadDate: "d.load_date",
     },
 }
 

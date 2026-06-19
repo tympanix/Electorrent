@@ -2,6 +2,14 @@ import {Torrent} from "@renderer/app/bittorrent/abstracttorrent";
 
 export class RtorrentTorrent extends Torrent {
 
+    private static normalizeEpochMilliseconds(...timestamps: any[]) {
+        const timestamp = timestamps
+            .map((value) => Number(value))
+            .find((value) => Number.isFinite(value) && value > 0)
+
+        return timestamp ? timestamp * 1000 : undefined
+    }
+
     active: boolean;
     checked: boolean;
     checking: boolean;
@@ -31,7 +39,7 @@ export class RtorrentTorrent extends Torrent {
             seedsInSwarm: data.seeders_total, /* Seeds In Swarm (integer): number of connected seeds in swarm */
             torrentQueueOrder: undefined, /* Queue (integer): the number in the download queue */
             statusMessage: undefined, /* Status (string): the current status of the torrent (e.g. downloading)  */
-            dateAdded: data.addtime * 1000, /* Date Added (integer): number of milliseconds unix time */
+            dateAdded: RtorrentTorrent.normalizeEpochMilliseconds(data.addtime, data.loadDate), /* Date Added (integer): number of milliseconds unix time */
             dateCompleted: data.completedAt > 0 ? data.completedAt * 1000 : undefined, /* Date Completed (integer): number of milliseconds unix time */
             savePath: data.directory, /* Save Path (string): the path at which the downloaded content is saved */
         });

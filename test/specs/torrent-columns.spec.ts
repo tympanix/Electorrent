@@ -27,9 +27,9 @@ const builtInColumns = [
   "Ratio",
 ]
 
-const dateIsSensible = (value: string) => !/1969|1970/.test(value)
-const completedDateIsSensible = (value: string) => value.length > 0 && dateIsSensible(value)
+const dateIsSensible = (value: string) => value.length > 0 && !/1969|1970/.test(value)
 const decodeTorrentName = (name: string) => name.replace(/[._]/g, " ").replace(/(\[[^\]]*\])(.*)$/, "$2 $1").trim()
+const totalPeers = (value: string) => Number(value.match(/^\d+ of (\d+)$/)?.[1] ?? 0)
 
 function assertSpeed(value: string) {
   assert.match(value, /^\d+(?:\.\d+)? [KMGT]?B\/s$/)
@@ -89,10 +89,24 @@ describe("torrent columns", function () {
   })
 
   it("shows a sensible Peers column value", async function () {
+    await browser.waitUntil(async () => {
+      return totalPeers((await torrent.getColumn("peersConnected")).trim()) > 0
+    }, {
+      timeout: 20 * 1000,
+      timeoutMsg: "Peers column did not show a positive total peer count",
+    })
+
     assert.match((await torrent.getColumn("peersConnected")).trim(), /^\d+ of \d+$/)
   })
 
   it("shows a sensible Seeds column value", async function () {
+    await browser.waitUntil(async () => {
+      return totalPeers((await torrent.getColumn("seedsConnected")).trim()) > 0
+    }, {
+      timeout: 20 * 1000,
+      timeoutMsg: "Seeds column did not show a positive total seed count",
+    })
+
     assert.match((await torrent.getColumn("seedsConnected")).trim(), /^\d+ of \d+$/)
   })
 
@@ -128,13 +142,22 @@ describe("torrent columns", function () {
       return dateIsSensible((await torrent.getColumn("dateAdded")).trim())
     }, {
       timeout: 20 * 1000,
-      timeoutMsg: "Date Added column did not show a sensible date",
+      timeoutMsg: "Date Added column did not show a non-empty sensible date",
+    })
+  })
+
+  it("shows 100.0% progress when a torrent finishes", async function () {
+    await browser.waitUntil(async () => {
+      return (await torrent.getColumn("percent")).includes("100.0%")
+    }, {
+      timeout: 20 * 1000,
+      timeoutMsg: "Progress column did not show 100.0% for the finished torrent",
     })
   })
 
   it("shows Date Completed when a torrent finishes", async function () {
     await browser.waitUntil(async () => {
-      return completedDateIsSensible((await torrent.getColumn("dateCompleted")).trim())
+      return dateIsSensible((await torrent.getColumn("dateCompleted")).trim())
     }, {
       timeout: 20 * 1000,
       timeoutMsg: "Date Completed column did not show a completion date for the finished torrent",

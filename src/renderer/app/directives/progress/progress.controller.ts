@@ -7,7 +7,7 @@ export class ProgressController {
 
     label() {
         let label = this.torrent.statusText();
-        if (this.torrent.isStatusDownloading()) {
+        if (this.torrent.isStatusDownloading() || this.torrent.isStatusCompleted() || this.torrent.isStatusSeeding()) {
             label += ` ${this.torrent.getPercentStr()}`;
         }
 
