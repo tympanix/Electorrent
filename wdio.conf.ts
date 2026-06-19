@@ -202,7 +202,7 @@ export const config: WebdriverIO.Config = {
     // The only one supported by default is 'dot'
     // see also: https://webdriver.io/docs/dot-reporter
     reporters: [[ElectorrentSpecReporter, {
-        realtimeReporting: true,
+        realtimeReporting: false,
     }]],
 
     // Options to be passed to Mocha.
@@ -241,10 +241,8 @@ export const config: WebdriverIO.Config = {
         workerClientLabels.set(cid, label)
         args.reporters = [[specReporterPath, {
             clientLabel: label,
-            realtimeReporting: true,
+            realtimeReporting: false,
         }]]
-
-        console.log(`\n─────────────────────────────────────────────\n▶ Starting WDIO worker ${cid}: ${label}\n  Specs: ${specs.join(', ')}\n─────────────────────────────────────────────`)
     },
     /**
      * Gets executed just after a worker process has exited.
@@ -256,8 +254,6 @@ export const config: WebdriverIO.Config = {
     onWorkerEnd: function (cid, exitCode, _specs, retries) {
         const label = workerClientLabels.get(cid) ?? 'unknown client'
         workerClientLabels.delete(cid)
-
-        console.log(`\n─────────────────────────────────────────────\n◀ Finished WDIO worker ${cid}: ${label}\n  Exit code: ${exitCode}\n  Retries: ${retries}\n─────────────────────────────────────────────`)
     },
     /**
      * Gets executed just before initialising the webdriver session and test framework. It allows you
