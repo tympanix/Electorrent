@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
+import https from 'https'
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from '@shared/ipc-contract'
 import {
-    createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
     serverUrl,
@@ -131,7 +131,10 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 username: this.server.user,
                 password: this.server.password,
             },
-            httpsAgent: createHttpsAgent(this.server),
+            httpsAgent: new https.Agent({
+                ca: this.server.certificateData ? Buffer.from(this.server.certificateData) : undefined,
+                rejectUnauthorized: this.server.tlsSecurity !== "insecure",
+            }),
             adapter: httpAdapter,
             timeout: HTTP_REQUEST_TIMEOUT,
         })

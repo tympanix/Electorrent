@@ -175,6 +175,8 @@ import { UpdateModalDirective } from "@renderer/app/directives/update-modal/upda
 torrentApp.directive("updateModal", UpdateModalDirective.getInstance())
 import { CertificateModalDirective } from "@renderer/app/directives/certificate-modal/certificate-modal.directive"
 torrentApp.directive("certificateModal", CertificateModalDirective.getInstance())
+import { InsecureTlsModalDirective } from "@renderer/app/directives/insecure-tls-modal/insecure-tls-modal.directive"
+torrentApp.directive("insecureTlsModal", InsecureTlsModalDirective.getInstance())
 import { AddTorrentModalDirective } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 torrentApp.directive('addTorrentModal', AddTorrentModalDirective.getInstance())
 import { TorrentUploadFormDirective } from "@renderer/app/directives/torrent-upload-form/torrent-upload-form.directive";

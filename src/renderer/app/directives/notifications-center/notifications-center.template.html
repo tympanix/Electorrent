@@ -14,7 +14,15 @@
 
 <certificate-modal
     approve="installCertificate()"
+    allow-insecure-tls="allowInsecureTls()"
     after="certificateResult"
     data="certificate"
     modal-ref="certificateModalRef">
 </certificate-modal>
+
+<insecure-tls-modal
+    approve="confirmInsecureTls()"
+    after="insecureTlsResult"
+    data="insecureTlsCertificate"
+    modal-ref="insecureTlsModalRef">
+</insecure-tls-modal>

@@ -1,4 +1,3 @@
-import https from "https"
 import { URL } from "node:url"
 import type { BittorrentServerConfig } from "@shared/ipc-contract"
 import type { CallbackFunc } from "./types"
@@ -49,8 +48,3 @@ export function appendUrlPath(baseUrl: string, endpoint?: string) {
     return url.pathname === "/" ? url.origin : url.toString()
 }
 
-export function createHttpsAgent(server: BittorrentServerConfig) {
-    return new https.Agent({
-        ca: server.certificateData ? Buffer.from(server.certificateData) : undefined,
-    })
-}

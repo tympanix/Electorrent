@@ -119,6 +119,13 @@ describe("torrent columns", function () {
   })
 
   it("shows a sensible Ratio column value", async function () {
+    await browser.waitUntil(async () => {
+      return /^-?\d+\.\d{2}$/.test((await torrent.getColumn("ratio")).trim())
+    }, {
+      timeout: 20 * 1000,
+      timeoutMsg: "Ratio column did not show a decimal value",
+    })
+
     assert.match((await torrent.getColumn("ratio")).trim(), /^-?\d+\.\d{2}$/)
   })
 

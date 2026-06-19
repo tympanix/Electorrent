@@ -2,11 +2,11 @@ import { URL } from 'node:url'
 import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
+import https from 'https'
 import qs from 'qs'
 
 import type { BittorrentServerConfig, TorrentClientConnection } from '@shared/ipc-contract'
 import {
-    createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
     serverUrl,
@@ -95,7 +95,10 @@ export class UtorrentRuntime implements BittorrentRuntime {
                 username: server.user,
                 password: server.password,
             },
-            httpsAgent: createHttpsAgent(server),
+            httpsAgent: new https.Agent({
+                ca: server.certificateData ? Buffer.from(server.certificateData) : undefined,
+                rejectUnauthorized: server.tlsSecurity !== "insecure",
+            }),
             paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
             adapter: httpAdapter,
             timeout: HTTP_REQUEST_TIMEOUT,

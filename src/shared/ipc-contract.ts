@@ -66,6 +66,8 @@ export type ParseTorrentRequest =
     | { uri: string }
     | { data: Uint8Array }
 
+export type TlsSecurity = "default" | "insecure"
+
 export interface BittorrentServerConfig extends StoredServerConfig {
     certificateData?: Uint8Array
 }
@@ -151,6 +153,7 @@ export interface StoredServerConfig {
     default?: boolean
     lastused?: number
     certificate?: string
+    tlsSecurity?: TlsSecurity
     columns: string[]
     savedLocations?: SavedLocationConfig[]
     defaultUploadOptionsEnabled?: boolean

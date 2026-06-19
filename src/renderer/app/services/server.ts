@@ -10,28 +10,35 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         /*
          * Well known error values used for error handling
          */
-        const ERR_SELF_SIGNED_CERT = "DEPTH_ZERO_SELF_SIGNED_CERT"
+        const TLS_CERTIFICATE_ERROR_CODES = new Set([
+            "DEPTH_ZERO_SELF_SIGNED_CERT",
+            "SELF_SIGNED_CERT_IN_CHAIN",
+            "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+            "CERT_HAS_EXPIRED",
+            "ERR_TLS_CERT_ALTNAME_INVALID",
+        ])
 
-        function isSelfSignedCertificateError(err: any) {
+        function isTlsCertificateError(err: any) {
             if (!err) {
                 return false
             }
 
-            if (err.code === ERR_SELF_SIGNED_CERT) {
+            if (err.code && TLS_CERTIFICATE_ERROR_CODES.has(err.code)) {
                 return true
             }
 
-            if (Array.isArray(err.errors) && err.errors.some(isSelfSignedCertificateError)) {
+            if (Array.isArray(err.errors) && err.errors.some(isTlsCertificateError)) {
                 return true
             }
 
-            if (err.cause && isSelfSignedCertificateError(err.cause)) {
+            if (err.cause && isTlsCertificateError(err.cause)) {
                 return true
             }
 
             const message = String(err.message || err).toLowerCase()
-            return message.includes("self signed certificate")
-                || message.includes(ERR_SELF_SIGNED_CERT.toLowerCase())
+            return Array.from(TLS_CERTIFICATE_ERROR_CODES).some((code) => message.includes(code.toLowerCase()))
+                || message.includes("self signed certificate")
+                || message.includes("certificate")
         }
 
         function isAggregateConnectionError(err: any) {
@@ -94,6 +101,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             this.default = data.default
             this.lastused = data.lastused
             this.certificate = data.certificate
+            this.tlsSecurity = data.tlsSecurity === "insecure" ? "insecure" : "default"
             this.certificateData = data.certificateData ? new Uint8Array(data.certificateData) : undefined
             this.columns = this.parseColumns(data.columns)
             this.savedLocations = normalizeSavedLocations(data.savedLocations)
@@ -114,7 +122,8 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 path: this.path,
                 default: this.default,
                 lastused: this.lastused || -1,
-                certificate: this.certificate,
+                certificate: this.tlsSecurity === "insecure" ? undefined : this.certificate,
+                tlsSecurity: this.isHTTPS() && this.tlsSecurity === "insecure" ? "insecure" : undefined,
                 columns: this.columns.filter((column) => column.enabled).map((column) => column.name),
                 savedLocations: normalizeSavedLocations(this.savedLocations),
                 defaultUploadOptionsEnabled: this.defaultUploadOptionsEnabled === true,
@@ -201,7 +210,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
 
             return connectOrTimeout.catch(function(err) {
                 self.isConnected = false
-                if (isSelfSignedCertificateError(err) || (self.isHTTPS() && isAggregateConnectionError(err))) {
+                if (self.isHTTPS() && (isTlsCertificateError(err) || isAggregateConnectionError(err))) {
                     return self.askForCertificate().then(function() {
                         return self.connect()
                     })
@@ -226,16 +235,24 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 certificateResponseService.reject(self.id, err)
             })
 
-            return $q.when(response).then((fingerprint) => {
-                self.certificate = fingerprint
-                return electorrent.certificates.load(fingerprint)
-            }).then((certificateData) => {
-                self.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
+            return $q.when(response).then((result) => {
+                if (result && result.tlsSecurity === "insecure") {
+                    self.tlsSecurity = "insecure"
+                    self.certificate = undefined
+                    self.certificateData = undefined
+                    return
+                }
+
+                self.tlsSecurity = "default"
+                self.certificate = result.fingerprint
+                return electorrent.certificates.load(result.fingerprint).then((certificateData) => {
+                    self.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
+                })
             })
         }
 
         Server.prototype.getCertificate = function() {
-            return this.certificateData
+            return this.tlsSecurity === "insecure" ? undefined : this.certificateData
         }
 
         Server.prototype.equals = function(other) {
@@ -247,7 +264,8 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 this.password === other.password &&
                 this.client === other.client &&
                 this.path === other.path &&
-                this.certificate === other.certificate
+                this.certificate === other.certificate &&
+                this.tlsSecurity === other.tlsSecurity
             )
         }
 

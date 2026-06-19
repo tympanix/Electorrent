@@ -149,6 +149,35 @@ export class App {
     await waitForModalClose(certificateModal, this.timeout)
   }
 
+  async openInsecureTlsConfirmation() {
+    const certificateModal = await this.certificateModalIsVisible()
+    const submit = certificateModal.$("button=Insecure TLS")
+    await submit.waitForExist()
+    await submit.waitForDisplayed()
+    await submit.waitForClickable()
+    await submit.waitForEnabled()
+    await submit.click()
+    return this.insecureTlsModalIsVisible()
+  }
+
+  async insecureTlsModalIsVisible() {
+    const insecureTlsModal = $("#insecureTlsModal")
+    await insecureTlsModal.waitForExist()
+    await waitForModalOpen(insecureTlsModal, this.timeout)
+    return insecureTlsModal
+  }
+
+  async acceptInsecureTls() {
+    const insecureTlsModal = await this.insecureTlsModalIsVisible()
+    const submit = insecureTlsModal.$("button.approve")
+    await submit.waitForExist()
+    await submit.waitForDisplayed()
+    await submit.waitForClickable()
+    await submit.waitForEnabled()
+    await submit.click()
+    await waitForModalClose(insecureTlsModal, this.timeout)
+  }
+
   async getNotificationError() {
       const msg = $("#notifications .negative")
       try {
