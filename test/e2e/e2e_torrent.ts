@@ -55,17 +55,41 @@ export class Torrent {
   }
 
   async waitForStates(states: string[], { timeout = this.timeout } = {}) {
-    await browser.waitUntil(async () => {
-      const percent = await this.getColumn("percent")
-      const value = percent.toLowerCase()
-      return states.some((state) => value.includes(state.toLowerCase()))
-    }, {
-      timeout: timeout,
-      timeoutMsg: `Torrent ${this.hash} did not reach states ${states.join(", ")} within ${timeout}ms`
-    });
+    let currentValue = ""
+    try {
+      await browser.waitUntil(async () => {
+        const percent = await this.getColumn("percent")
+        currentValue = percent
+        const value = percent.toLowerCase()
+        return states.some((state) => value.includes(state.toLowerCase()))
+      }, {
+        timeout: timeout,
+        timeoutMsg: `Torrent ${this.hash} did not reach states ${states.join(", ")} within ${timeout}ms`
+      });
+    } catch (err: any) {
+      throw new Error(`${err.message}. Current percent column: ${currentValue || "<empty>"}`)
+    }
   }
 
-  async performAction({ action, state }) {
+  async waitForDownloading({ timeout = 20 * 1000 } = {}) {
+    const downloadingState = $("#page-torrents li[data-state=downloading]")
+    await downloadingState.click()
+
+    const elem = $(this.query)
+    try {
+      await elem.waitForExist({
+        timeout,
+        timeoutMsg: `Torrent ${this.hash} did not appear in the downloading filter within ${timeout}ms`,
+      })
+    } catch (err: any) {
+      const allState = $("#page-torrents li[data-state=all]")
+      await allState.click()
+      const currentValue = await elem.isExisting() ? await this.getColumn("percent") : "<missing>"
+      throw new Error(`${err.message}. Current percent column: ${currentValue || "<empty>"}`)
+    }
+  }
+
+  async performAction({ action, state, timeout = this.timeout }) {
     const button = `#torrent-action-header a[data-role=${action}]`;
 
     const elem = $(this.query)
@@ -75,7 +99,9 @@ export class Torrent {
     const buttonElem = $(button)
     await buttonElem.waitForEnabled()
     await buttonElem.click()
-    await this.waitForState(state)
+    if (state) {
+      await this.waitForState(state, { timeout })
+    }
   }
 
   async delete() {
@@ -211,12 +237,12 @@ export class Torrent {
     return { download, upload };
   }
 
-  async stop({ state = "Stopped" }) {
-    await this.performAction({ action: "stop", state: state })
+  async stop({ state = "Stopped", timeout = this.timeout } = {}) {
+    await this.performAction({ action: "stop", state: state, timeout })
   }
 
-  async resume({ state = "Downloading" }) {
-    await this.performAction({ action: "resume", state: state })
+  async resume({ state = "Downloading", timeout = this.timeout, waitForState = true } = {}) {
+    await this.performAction({ action: "resume", state: waitForState ? state : undefined, timeout })
   }
 
   async getLabel() {
