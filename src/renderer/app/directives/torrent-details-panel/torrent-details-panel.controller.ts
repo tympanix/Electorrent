@@ -186,6 +186,8 @@ export class TorrentDetailsPanelController {
         return this.applyFilter("bytes", field.value);
       case "speed":
         return this.applyFilter("speed", field.value);
+      case "speedLimit":
+        return this.applyFilter("speedLimit", field.value);
       case "ratio": {
         const value = Number(field.value);
         return Number.isFinite(value) ? value.toFixed(2) : "";

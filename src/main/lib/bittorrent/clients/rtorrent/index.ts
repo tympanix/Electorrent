@@ -133,6 +133,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 labels: true,
                 torrentDetails: true,
                 trackerFilter: true,
+                speedLimits: true,
                 uploadOptions: {
                     saveLocation: true,
                     startTorrent: true,
@@ -212,6 +213,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
             downloadSpeed: "d.down.rate",
             uploadSpeed: "d.up.rate",
             leftBytes: "d.left_bytes",
+            throttleName: "d.throttle_name",
             label: "d.custom1",
             chunksComplete: "d.completed_chunks",
             message: "d.message",
@@ -272,6 +274,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         const loadDate = typeof detailFields.loadDate === "number" ? detailFields.loadDate : null
         const additionDate = typeof detailFields.additionDate === "number" && detailFields.additionDate > 0 ? detailFields.additionDate : loadDate
         const ratio = totalDownloaded > 0 ? totalUploaded / totalDownloaded : null
+        const throttle = this.parseElectorrentThrottleName(typeof detailFields.throttleName === "string" ? detailFields.throttleName : undefined)
 
         return {
             info: {
@@ -290,6 +293,8 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 seeds: seeds ?? null,
                 totalSize: totalSize ?? null,
                 uploadSpeed: uploadSpeed ?? null,
+                downloadLimit: throttle.downloadLimit,
+                uploadLimit: throttle.uploadLimit,
                 label: typeof label === "string" ? decodeURIComponent(label) : null,
                 chunksComplete: chunksComplete ?? null,
                 message: message ?? null,
@@ -373,5 +378,40 @@ export class RtorrentRuntime implements BittorrentRuntime {
 
     priorityOff(hashes: string[]): Promise<void> {
         return this.setTorrentHashes(hashes, ["d.priority.set"], [0])
+    }
+
+    private parseElectorrentThrottleName(throttleName: string | undefined) {
+        const match = String(throttleName || "").match(/^electorrent-d(\d+)-u(\d+)$/)
+        return {
+            downloadLimit: match ? Number(match[1]) : 0,
+            uploadLimit: match ? Number(match[2]) : 0,
+        }
+    }
+
+    async setSpeedLimits(hashes: string[], options: Record<string, any>): Promise<void> {
+        await Promise.all(hashes.map(async (hash) => {
+            const [wasOpen, wasActive, throttleNameValue] = await Promise.all([
+                this.call<string>("d.is_open", [hash]),
+                this.call<string>("d.is_active", [hash]),
+                this.call<string>("d.throttle_name", [hash]),
+            ])
+            const current = this.parseElectorrentThrottleName(throttleNameValue)
+            const downloadLimit = options.downloadSpeedLimit === undefined ? current.downloadLimit : Number(options.downloadSpeedLimit)
+            const uploadLimit = options.uploadSpeedLimit === undefined ? current.uploadLimit : Number(options.uploadSpeedLimit)
+            const safeDownloadLimit = Math.max(0, downloadLimit || 0)
+            const safeUploadLimit = Math.max(0, uploadLimit || 0)
+            const throttleName = `electorrent-d${safeDownloadLimit}-u${safeUploadLimit}`
+
+            await this.call("throttle.down", ["", throttleName, String(safeDownloadLimit)])
+            await this.call("throttle.up", ["", throttleName, String(safeUploadLimit)])
+            await this.setTorrentHashes([hash], ["d.stop", "d.close"], [])
+            await this.setTorrentHashes([hash], ["d.throttle_name.set"], [throttleName])
+            if (Number(wasOpen) > 0) {
+                await this.setTorrentHashes([hash], ["d.open"], [])
+            }
+            if (Number(wasActive) > 0) {
+                await this.setTorrentHashes([hash], ["d.start"], [])
+            }
+        }))
     }
 }

@@ -233,6 +233,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 magnetLinks: Array.isArray(methods) && methods.includes("core.add_torrent_magnet"),
                 labels: this.supportsLabels,
                 torrentDetails: true,
+                speedLimits: true,
                 uploadOptions: {
                     saveLocation: true,
                     category: this.supportsLabels,
@@ -396,5 +397,17 @@ export class DelugeRuntime implements BittorrentRuntime {
         }
 
         await Promise.all(hashes.map((hash) => defer((done) => this.rpc("label.set_torrent", [hash, label], done))))
+    }
+
+    setSpeedLimits(hashes: string[], options: Record<string, any>): Promise<void> {
+        const torrentOptions: Record<string, number> = {}
+        if (options.downloadSpeedLimit !== undefined) {
+            torrentOptions.max_download_speed = options.downloadSpeedLimit > 0 ? Number(options.downloadSpeedLimit) : -1
+        }
+        if (options.uploadSpeedLimit !== undefined) {
+            torrentOptions.max_upload_speed = options.uploadSpeedLimit > 0 ? Number(options.uploadSpeedLimit) : -1
+        }
+
+        return defer((done) => this.rpc("core.set_torrent_options", [hashes, torrentOptions], done)).then(() => undefined)
     }
 }

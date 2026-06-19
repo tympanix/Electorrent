@@ -7,6 +7,7 @@ const features = {
   labels: true,
   torrentDetails: true,
   trackerFilter: true,
+  speedLimits: true,
   uploadOptions: {
     saveLocation: true,
     startTorrent: true,

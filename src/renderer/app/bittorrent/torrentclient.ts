@@ -4,11 +4,12 @@ import type {
     BittorrentTorrentDetailsFile,
     ResolvedTorrentClientFeatures,
     TorrentClientFeatures,
+    TorrentSpeedLimitOptions,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
 import { connect } from "./ipc"
 
-export type { TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
+export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
@@ -53,6 +54,7 @@ const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     torrentDetails: false,
     trackerFilter: false,
     alternativeSpeedLimits: false,
+    speedLimits: false,
     uploadOptions: DEFAULT_UPLOAD_OPTIONS,
 })
 
@@ -127,6 +129,7 @@ export type TorrentDetailsValueFormat =
     | "text"
     | "bytes"
     | "speed"
+    | "speedLimit"
     | "ratio"
     | "eta"
     | "epoch"
@@ -313,6 +316,13 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             throw new Error("Alternative speed limits not supported for this client")
         }
         return Promise.reject(new Error("Alternative speed limits not implemented for this client"))
+    }
+
+    async setSpeedLimits(_torrents: T[], _options: TorrentSpeedLimitOptions): Promise<void> {
+        if (!this.features.speedLimits) {
+            throw new Error("Speed limits not supported for this client")
+        }
+        return Promise.reject(new Error("Speed limits not implemented for this client"))
     }
 
     async getTorrentDetails(torrent: T): Promise<TorrentDetailsPanelData> {

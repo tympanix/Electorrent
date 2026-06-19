@@ -5,6 +5,7 @@ import {
   TorrentUpdates,
   ContextActionList,
   TorrentUploadOptions,
+  TorrentSpeedLimitOptions,
   TorrentDetailsInfoSection,
 } from "@renderer/app/bittorrent/torrentclient";
 import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
@@ -90,7 +91,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return addTorrentUrl(magnet, options);
     };
 
-    extraColumns = [];
+    extraColumns = [Torrent.COL_DOWNLIMIT, Torrent.COL_UPLIMIT];
 
     resume(torrents: Torrent[]): Promise<void> {
       return invokeAction("resume", torrents.map((torrent) => torrent.hash));
@@ -155,6 +156,10 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return invokeAction("setLocation", torrents.map((torrent) => torrent.hash), location, resumeHashes);
     }
 
+    setSpeedLimits(torrents: QBittorrentTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
+      return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
+    }
+
     deleteTorrents(torrents: QBittorrentTorrent[]): Promise<void> {
       return this.delete(torrents)
     }
@@ -203,8 +208,8 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
           this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
           this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
           this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
-          this.createTorrentDetailsField("download-limit", "Download Limit (KB/s)", this.toNumber(info.downloadLimit) ?? this.toNumber(torrent.downLimit), "number"),
-          this.createTorrentDetailsField("upload-limit", "Upload Limit (KB/s)", this.toNumber(info.uploadLimit) ?? this.toNumber(torrent.upLimit), "number"),
+          this.createTorrentDetailsField("download-limit", "Download Limit", this.toNumber(info.downloadLimit) ?? this.toNumber(torrent.downLimit), "speedLimit", { allowEmpty: true }),
+          this.createTorrentDetailsField("upload-limit", "Upload Limit", this.toNumber(info.uploadLimit) ?? this.toNumber(torrent.upLimit), "speedLimit", { allowEmpty: true }),
           this.createTorrentDetailsField("download-speed-avg", "Average Download Speed", this.toNumber(info.averageDownloadSpeed), "speed"),
           this.createTorrentDetailsField("upload-speed-avg", "Average Upload Speed", this.toNumber(info.averageUploadSpeed), "speed"),
           this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
@@ -332,6 +337,12 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         label: "Set Location",
         click: () => Promise.resolve(),
         icon: "folder open",
+      },
+      {
+        id: "torrent-set-speed-limits",
+        label: "Set Speed Limits",
+        click: () => Promise.resolve(),
+        icon: "dashboard",
       },
       {
         label: "Remove",

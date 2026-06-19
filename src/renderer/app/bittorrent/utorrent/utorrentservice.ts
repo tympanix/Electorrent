@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { UtorrentTorrent } from "./torrentu";
 import { addTorrentUrl, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
@@ -92,6 +92,10 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
     return invokeAction("setLabel", torrents.map((torrent) => torrent.hash), label);
   };
 
+  setSpeedLimits(torrents: UtorrentTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
+    return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
+  };
+
   private baseActionHeader: TorrentActionList<UtorrentTorrent> = [
     {
       label: "Start",
@@ -149,6 +153,12 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       label: "Move Queue Down",
       click: this.queuedown,
       icon: "arrow down",
+    },
+    {
+      id: "torrent-set-speed-limits",
+      label: "Set Speed Limits",
+      click: () => Promise.resolve(),
+      icon: "dashboard",
     },
     {
       label: "Remove",

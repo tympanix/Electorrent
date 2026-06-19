@@ -1,5 +1,6 @@
 import { Column } from "@renderer/app/services/column";
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { RtorrentTorrent } from "./torrentr";
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
@@ -76,12 +77,20 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       return this.remove(torrents)
     }
 
+    setSpeedLimits(torrents: RtorrentTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
+      return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options)
+    }
+
     protected getTorrentDetailsData(torrent: RtorrentTorrent): Promise<BittorrentTorrentDetailsData> {
       return getTorrentDetails(torrent.hash)
     }
 
     protected getTorrentDetailsInfoSections(torrent: RtorrentTorrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {
       const info = this.getTorrentDetailsInfo(details)
+      const toSpeedLimitBytes = (value: unknown) => {
+        const limit = this.toNumber(value)
+        return limit == null ? null : (limit < 0 ? -1 : limit * 1024)
+      }
 
       return this.compactTorrentDetailsSections([
         this.createTorrentDetailsSection("overview", "Overview", [
@@ -98,6 +107,8 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
           this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
           this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
           this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
+          this.createTorrentDetailsField("download-limit", "Download Limit", toSpeedLimitBytes(info.downloadLimit), "speedLimit", { allowEmpty: true }),
+          this.createTorrentDetailsField("upload-limit", "Upload Limit", toSpeedLimitBytes(info.uploadLimit), "speedLimit", { allowEmpty: true }),
           this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
         ]),
         this.createTorrentDetailsSection("swarm", "Swarm", [
@@ -119,6 +130,8 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     }
 
     extraColumns = [
+      Torrent.COL_DOWNLIMIT,
+      Torrent.COL_UPLIMIT,
       new Column({
         name: "Tracker",
         attribute: "tracker",
@@ -190,6 +203,12 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
             click: this.priorityOff,
           },
         ],
+      },
+      {
+        id: "torrent-set-speed-limits",
+        label: "Set Speed Limits",
+        click: () => Promise.resolve(),
+        icon: "dashboard",
       },
       {
         label: "Remove",

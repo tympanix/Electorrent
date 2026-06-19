@@ -18,6 +18,8 @@ export class TransmissionTorrent extends Torrent {
             ratio: data.uploadRatio, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
             uploadSpeed: data.rateUpload,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: data.rateDownload, /* Download Speed (integer): bytes per second */
+            uploadLimit: data.uploadLimited ? data.uploadLimit * 1024 : 0,
+            downloadLimit: data.downloadLimited ? data.downloadLimit * 1024 : 0,
             eta: data.eta, /* ETA (integer): second to completion */
             label: data.labels?.[0] || "", /* Label (string): group/category identification */
             peersConnected: data.peersSendingToUs, /* Peers Connected (integer): number of peers connected */

@@ -172,6 +172,10 @@ export abstract class QBittorrentBaseApi {
 
     abstract setLocation(hashes: string[], location: string, cb: (err?: any, body?: any) => void): void
 
+    abstract setDownloadLimit(hashes: string[], limit: number, cb: (err?: any, body?: any) => void): void
+
+    abstract setUploadLimit(hashes: string[], limit: number, cb: (err?: any, body?: any) => void): void
+
     abstract createCategory(category: string, savePath: string, cb: (err?: any, body?: any) => void): void
 
     abstract getSpeedLimitsMode(cb: (err?: any, enabled?: boolean) => void): void

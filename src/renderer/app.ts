@@ -90,6 +90,8 @@ import { BytesFilter } from "@renderer/app/filters/bytes.filter"
 torrentApp.filter("bytes", BytesFilter.getInstance())
 import { SpeedFilter } from "@renderer/app/filters/speed.filter"
 torrentApp.filter("speed", SpeedFilter.getInstance())
+import { SpeedLimitFilter } from "@renderer/app/filters/speed-limit.filter"
+torrentApp.filter("speedLimit", SpeedLimitFilter.getInstance())
 import { TorrentQueueFilter } from "@renderer/app/filters/torrent-queue.filter"
 torrentApp.filter("torrentQueue", TorrentQueueFilter.getInstance())
 import { TorrentRatioFilter } from "@renderer/app/filters/torrent-ratio.filter"
@@ -187,5 +189,7 @@ import { TorrentDetailsPanelDirective } from "@renderer/app/directives/torrent-d
 torrentApp.directive('torrentDetailsPanel', TorrentDetailsPanelDirective.getInstance())
 import { SetLocationModalDirective } from "@renderer/app/directives/set-location-modal/set-location-modal.directive";
 torrentApp.directive('setLocationModal', SetLocationModalDirective.getInstance())
+import { TorrentSpeedModalDirective } from "@renderer/app/directives/torrent-speed-modal/torrent-speed-modal.directive";
+torrentApp.directive('torrentSpeedModal', TorrentSpeedModalDirective.getInstance())
 import { SavedLocationModalDirective } from "@renderer/app/directives/saved-location-modal/saved-location-modal.directive";
 torrentApp.directive('savedLocationModal', SavedLocationModalDirective.getInstance())

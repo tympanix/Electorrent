@@ -3,7 +3,7 @@ import { ClickOptions } from "webdriverio";
 import { browser, $, $$ } from '@wdio/globals'
 import { waitForModalClose, waitForModalOpen } from "./modal"
 
-export type ColumnName = "decodedName" | "size" | "downloadSpeed" | "uploadSpeed" | "percent" | "label" | "dateAdded" | "dateCompleted" | "peersConnected" | "seedsConnected" | "torrentQueueOrder" | "eta" | "ratio"
+export type ColumnName = "decodedName" | "size" | "downloadSpeed" | "uploadSpeed" | "downloadLimit" | "uploadLimit" | "percent" | "label" | "dateAdded" | "dateCompleted" | "peersConnected" | "seedsConnected" | "torrentQueueOrder" | "eta" | "ratio"
 
 export class Torrent {
   app: App
@@ -115,6 +115,20 @@ export class Torrent {
     return modal;
   }
 
+  async openSetSpeedLimitModal() {
+    await this.openContextMenu()
+
+    const contextMenu = $("#contextmenu")
+    const action = contextMenu.$("a=Set Speed Limits")
+    await action.waitForDisplayed()
+    await action.click()
+    await contextMenu.waitForDisplayed({ reverse: true })
+
+    const modal = $("#setSpeedLimitModal");
+    await waitForModalOpen(modal, this.timeout);
+    return modal;
+  }
+
   async openDetailsPanel() {
     await this.clickContextMenu("torrent-details")
 
@@ -163,6 +177,38 @@ export class Torrent {
     await approve.waitForEnabled();
     await approve.click();
     await waitForModalClose(modal, this.timeout);
+  }
+
+  async setSpeedLimits({ downloadSpeedLimit, uploadSpeedLimit }: { downloadSpeedLimit?: number, uploadSpeedLimit?: number }) {
+    const modal = await this.openSetSpeedLimitModal();
+    if (downloadSpeedLimit !== undefined) {
+      const input = modal.$("input[data-role='torrent-speed-limit-download']");
+      await input.waitForDisplayed();
+      await input.clearValue();
+      await input.setValue(String(downloadSpeedLimit));
+    }
+    if (uploadSpeedLimit !== undefined) {
+      const input = modal.$("input[data-role='torrent-speed-limit-upload']");
+      await input.waitForDisplayed();
+      await input.clearValue();
+      await input.setValue(String(uploadSpeedLimit));
+    }
+
+    const approve = modal.$("button[data-role='torrent-speed-limit-apply']");
+    await approve.waitForEnabled();
+    await approve.click();
+    await waitForModalClose(modal, this.timeout);
+  }
+
+  async getSpeedLimitModalValues() {
+    const modal = await this.openSetSpeedLimitModal();
+    const download = await modal.$("input[data-role='torrent-speed-limit-download']").getValue();
+    const upload = await modal.$("input[data-role='torrent-speed-limit-upload']").getValue();
+    const cancel = modal.$("button.deny");
+    await cancel.waitForClickable();
+    await cancel.click();
+    await waitForModalClose(modal, this.timeout);
+    return { download, upload };
   }
 
   async stop({ state = "Stopped" }) {
@@ -239,9 +285,18 @@ export class Torrent {
     const elem = $(this.query)
     await elem.waitForExist()
     await elem.waitForDisplayed()
-    await elem.click(options)
+    await elem.scrollIntoView({ block: "center", inline: "center" })
+    await elem.moveTo()
 
     const contextMeny = $("#contextmenu")
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await elem.click(options)
+      if (await contextMeny.isDisplayed()) {
+        return
+      }
+      await browser.pause(100)
+    }
+
     await contextMeny.waitForDisplayed()
   }
 
