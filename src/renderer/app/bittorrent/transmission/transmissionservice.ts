@@ -4,6 +4,7 @@ import { TransmissionTorrent } from "./torrentt";
 import _ from "underscore"
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
+import { applyFreeDiskSpace } from "@renderer/app/bittorrent/free-disk-space";
 
 const URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;
 
@@ -32,7 +33,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         torrents.all.flatMap((torrent) => torrent.labels)
       ));
       torrents.trackers = this.getTrackers(torrents.all);
-      return torrents;
+      return applyFreeDiskSpace(torrents, data?.arguments?.freeDiskSpace);
     }
 
     build(data: Record<string, any>) {

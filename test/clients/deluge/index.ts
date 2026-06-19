@@ -6,6 +6,7 @@ const baseFeatures = {
   labels: true,
   torrentDetails: true,
   speedLimits: true,
+  freeDiskSpace: true,
   uploadOptions: {
     saveLocation: true,
     category: true,

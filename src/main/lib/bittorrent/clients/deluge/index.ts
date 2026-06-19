@@ -73,6 +73,8 @@ export class DelugeRuntime implements BittorrentRuntime {
 
     private supportsLabels = false
 
+    private downloadLocation: string | null = null
+
     private getUploadOptions(options?: Record<string, any>) {
         if (!options) {
             return {}
@@ -227,6 +229,11 @@ export class DelugeRuntime implements BittorrentRuntime {
             this.supportsLabels = false
         }
 
+        const coreConfig = await this.getCoreConfigValues(["download_location"])
+        this.downloadLocation = typeof coreConfig?.download_location === "string" && coreConfig.download_location.trim()
+            ? coreConfig.download_location
+            : null
+
         return {
             version: version.trim(),
             features: {
@@ -234,6 +241,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 labels: this.supportsLabels,
                 torrentDetails: true,
                 speedLimits: true,
+                freeDiskSpace: true,
                 uploadOptions: {
                     saveLocation: true,
                     category: this.supportsLabels,
@@ -251,15 +259,29 @@ export class DelugeRuntime implements BittorrentRuntime {
         const fields = this.supportsLabels
             ? DELUGE_TORRENT_FIELDS
             : DELUGE_TORRENT_FIELDS.filter((field) => field !== "label")
-        const snapshot = await defer<Record<string, any>>((done) => this.rpc("web.update_ui", [fields, {}], done))
-        const labels = this.supportsLabels
-            ? await defer<string[]>((done) => this.rpc("label.get_labels", [], done))
-            : []
+        const [snapshot, labels, freeDiskSpace] = await Promise.all([
+            defer<Record<string, any>>((done) => this.rpc("web.update_ui", [fields, {}], done)),
+            this.supportsLabels
+                ? defer<string[]>((done) => this.rpc("label.get_labels", [], done))
+                : Promise.resolve([]),
+            this.getFreeDiskSpace(),
+        ])
 
         return {
             ...snapshot,
             labels: Array.isArray(labels) ? labels : [],
+            freeDiskSpace,
         }
+    }
+
+    private async getFreeDiskSpace(): Promise<number | null> {
+        if (!this.downloadLocation) {
+            return null
+        }
+
+        const value = await defer<number>((done) => this.rpc("core.get_free_space", [this.downloadLocation], done))
+        const numeric = typeof value === "number" ? value : Number(value)
+        return Number.isFinite(numeric) && numeric >= 0 ? numeric : null
     }
 
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {

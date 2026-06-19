@@ -251,7 +251,7 @@
                     {{ alternativeSpeedLimitsEnabled ? 'Slow speed mode' : 'Normal speed mode' }}
                 </div>
             </div>
-            <div class="free-space" ng-if="freeDiskSpace != null">
+            <div class="free-space" ng-if="$btclient.features.freeDiskSpace && freeDiskSpace != null">
                 <i class="ui grey database icon"></i>
                 Free: {{ freeDiskSpace | bytes }}
             </div>

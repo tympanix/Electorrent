@@ -814,7 +814,7 @@ export class TorrentsPageController {
                 changeTorrents(torrents);
                 updateLabels(torrents);
                 updateTrackers(torrents);
-                if (Object.prototype.hasOwnProperty.call(torrents, "freeDiskSpace")) {
+                if ($rootScope.$btclient?.features?.freeDiskSpace && Object.prototype.hasOwnProperty.call(torrents, "freeDiskSpace")) {
                     $scope.freeDiskSpace = torrents.freeDiskSpace ?? null;
                 }
                 if (Object.prototype.hasOwnProperty.call(torrents, "alternativeSpeedLimitsEnabled")) {

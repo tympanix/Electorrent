@@ -55,6 +55,7 @@ const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     trackerFilter: false,
     alternativeSpeedLimits: false,
     speedLimits: false,
+    freeDiskSpace: false,
     uploadOptions: DEFAULT_UPLOAD_OPTIONS,
 })
 
