@@ -1,7 +1,6 @@
 import chai from "chai"
 import fs from "node:fs"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 import parseTorrent from "parse-torrent"
 import { $ } from "@wdio/globals"
 import * as e2e from "../e2e"
@@ -10,7 +9,6 @@ import { createTorrentFile } from "../torrent"
 import { configureSpec, createUniqueLabel, getTestFixture } from "../framework/fixture"
 
 const { assert } = chai
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const fixture = getTestFixture()
 const client = fixture.client
 const backend = fixture.backend
@@ -22,7 +20,13 @@ describe("torrent actions", function () {
   let torrent: e2e.Torrent
 
   before(async function () {
-    const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+    this.timeout(60 * 1000)
+    const filename = await createTorrentFile(tracker, {
+      torrentName: createUniqueLabel("actions"),
+      fileSize: 100000,
+      downloadSpeed: 1,
+      uploadSpeed: 1,
+    })
     torrent = await this.app.uploadTorrent({ filename })
     await torrent.waitForExist()
   })
@@ -68,12 +72,12 @@ describe("torrent actions", function () {
   })
 
   it("torrent is stopped and resumed", async function () {
-    this.timeout(25 * 1000)
-    await torrent.stop({ state: client.stopLabel })
-    await torrent.waitForState(client.stopLabel)
+    this.timeout(40 * 1000)
+    await torrent.stop({ state: client.stopLabel, timeout: 20 * 1000 })
+    await torrent.waitForState(client.stopLabel, { timeout: 20 * 1000 })
     await torrent.checkInState(["all", "stopped"])
-    await torrent.resume({ state: client.downloadLabel })
-    await torrent.waitForState(client.downloadLabel)
+    await torrent.resume({ waitForState: false })
+    await torrent.waitForDownloading({ timeout: 20 * 1000 })
     await torrent.checkInState(["all", "downloading"])
   })
 

@@ -1,12 +1,10 @@
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import * as e2e from "../e2e"
-import { configureSpec, getTestFixture, requireFeature } from "../framework/fixture"
+import { createTorrentFile } from "../torrent"
+import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from "../framework/fixture"
 import { restartApplication } from "../shared"
 
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const fixture = getTestFixture()
-const client = fixture.client
+const tracker = fixture.tracker
 
 describe("torrent uploads", function () {
   configureSpec()
@@ -14,7 +12,13 @@ describe("torrent uploads", function () {
   describe("torrent file uploads", function () {
     let torrent: e2e.Torrent
     before(async function () {
-      const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+      this.timeout(60 * 1000)
+      const filename = await createTorrentFile(tracker, {
+        torrentName: createUniqueLabel("upload-file"),
+        fileSize: 100000,
+        downloadSpeed: 1,
+        uploadSpeed: 1,
+      })
       torrent = await this.app.uploadTorrent({ filename })
     })
 
@@ -29,7 +33,7 @@ describe("torrent uploads", function () {
     })
 
     it("torrent begins downloading", function () {
-      return torrent.waitForState(client.downloadLabel)
+      return torrent.waitForDownloading({ timeout: 20 * 1000 })
     })
 
     it("torrent is in the downloading tab", function () {
@@ -43,8 +47,14 @@ describe("torrent uploads", function () {
     let torrent: e2e.Torrent
 
     before(async function () {
+      this.timeout(60 * 1000)
       await restartApplication(this)
-      const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+      const filename = await createTorrentFile(tracker, {
+        torrentName: createUniqueLabel("upload-magnet"),
+        fileSize: 100000,
+        downloadSpeed: 1,
+        uploadSpeed: 1,
+      })
       torrent = await this.app.uploadMagnetLink({ filename })
     })
 
@@ -59,7 +69,7 @@ describe("torrent uploads", function () {
     })
 
     it("torrent begins downloading", () => {
-      return torrent.waitForState(client.downloadLabel)
+      return torrent.waitForDownloading({ timeout: 20 * 1000 })
     })
   })
 })
