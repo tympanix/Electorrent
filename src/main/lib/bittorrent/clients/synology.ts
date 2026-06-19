@@ -1,10 +1,10 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
+import https from 'https'
 
 import type { BittorrentServerConfig, TorrentClientConnection } from '@shared/ipc-contract'
 import {
-    createHttpsAgent,
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
     serverUrl,
@@ -176,7 +176,10 @@ export class SynologyRuntime implements BittorrentRuntime {
     async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         this.server = server
         this.http = axios.create({
-            httpsAgent: createHttpsAgent(server),
+            httpsAgent: new https.Agent({
+                ca: server.certificateData ? Buffer.from(server.certificateData) : undefined,
+                rejectUnauthorized: server.tlsSecurity !== "insecure",
+            }),
             adapter: httpAdapter,
             timeout: HTTP_REQUEST_TIMEOUT,
         })

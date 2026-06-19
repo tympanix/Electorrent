@@ -1,18 +1,17 @@
 import { IDirective, IDirectiveFactory } from "angular";
-import html from "./certificate-modal.template.html";
+import html from "./insecure-tls-modal.template.html";
 
-export class CertificateModalDirective implements IDirective {
+export class InsecureTlsModalDirective implements IDirective {
     restrict = "E";
     scope = {
         data: "=",
         approve: "&",
-        allowInsecureTls: "&",
         after: "=",
         modalRef: "=",
     };
     template = html;
 
     static getInstance(): IDirectiveFactory {
-        return () => new CertificateModalDirective();
+        return () => new InsecureTlsModalDirective();
     }
 }

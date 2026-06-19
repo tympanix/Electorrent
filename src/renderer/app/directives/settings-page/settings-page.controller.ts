@@ -202,6 +202,7 @@ export class SettingsPageController {
                 console.error("Settings Error", err);
             }).finally(() => {
                 $scope.connecting = false;
+                $scope.$applyAsync();
             });
         };
 
@@ -217,6 +218,12 @@ export class SettingsPageController {
                     }
                 });
             }
+        };
+
+        $scope.disableInsecureTls = (server: any) => {
+            server.tlsSecurity = "default";
+            server.certificate = undefined;
+            server.certificateData = undefined;
         };
 
         $scope.removeServer = (server: any) => {

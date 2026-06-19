@@ -6,6 +6,7 @@
             <th>Client</th>
             <th>IP Address</th>
             <th>Protocol</th>
+            <th>TLS</th>
             <th>Port</th>
             <th>Username</th>
             <th class="center aligned">Actions</th>
@@ -40,6 +41,12 @@
                     </div>
                 </div>
             </td>
+            <td class="collapsing">
+                <div class="ui orange label" ng-if="server.proto === 'https' && server.tlsSecurity === 'insecure'">
+                    <i class="exclamation triangle icon"></i> Insecure TLS
+                </div>
+                <span ng-if="server.proto !== 'https' || server.tlsSecurity !== 'insecure'">—</span>
+            </td>
             <td>{{server.port}}</td>
             <td>{{server.user}}</td>
             <td class="collapsing center aligned">
@@ -48,6 +55,9 @@
                 </button>
                 <button class="circular blue ui icon mini button" ng-click="openRenameModal(server)">
                     <i class="icon tag"></i>
+                </button>
+                <button ng-if="server.proto === 'https' && server.tlsSecurity === 'insecure'" class="circular orange ui icon mini button" ng-click="disableInsecureTls(server)" title="Disable Insecure TLS">
+                    <i class="icon shield alternate"></i>
                 </button>
                 <button class="circular red ui icon mini button" ng-click="removeServer(server)">
                     <i class="icon remove"></i>

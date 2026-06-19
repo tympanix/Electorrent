@@ -1,5 +1,9 @@
+export type CertificateResponse =
+    | { fingerprint: string }
+    | { tlsSecurity: "insecure" }
+
 interface PendingCertificateResponse {
-    resolve: (fingerprint: string) => void
+    resolve: (response: CertificateResponse) => void
     reject: (reason?: unknown) => void
 }
 
@@ -7,12 +11,12 @@ export class CertificateResponseService {
     private pending = new Map<string, PendingCertificateResponse>()
 
     wait(serverId: string) {
-        return new Promise<string>((resolve, reject) => {
+        return new Promise<CertificateResponse>((resolve, reject) => {
             this.pending.set(serverId, { resolve, reject })
         })
     }
 
-    resolve(serverId: string | undefined, fingerprint: string) {
+    resolve(serverId: string | undefined, response: CertificateResponse) {
         if (!serverId) {
             return
         }
@@ -23,7 +27,7 @@ export class CertificateResponseService {
         }
 
         this.pending.delete(serverId)
-        pending.resolve(fingerprint)
+        pending.resolve(response)
     }
 
     reject(serverId: string | undefined, reason?: unknown) {

@@ -1,0 +1,29 @@
+<modal
+    size="small"
+    approve="approve()"
+    after="after"
+    id="insecureTlsModal"
+    ng-ref="modalRef">
+    <i class="close icon"></i>
+    <div class="header">
+        Allow Insecure TLS?
+    </div>
+    <div class="content">
+        <div class="ui warning message">
+            <div class="header">TLS certificate verification will be disabled for this server.</div>
+            <p>Electorrent will no longer verify that the server certificate is trusted, valid, or issued for this hostname. This can expose your connection to interception.</p>
+        </div>
+        <p>Only continue if you control this server or understand the security risk.</p>
+        <div class="ui fluid input" ng-if="data.fingerprint">
+            <input name="Fingerprint" type="text" readonly ng-model="data.fingerprint">
+        </div>
+    </div>
+    <div class="actions">
+        <button type="button" class="ui black deny button">
+            Cancel
+        </button>
+        <button type="button" class="ui orange approve button">
+            I Understand, Use Insecure TLS
+        </button>
+    </div>
+</modal>

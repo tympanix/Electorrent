@@ -111,6 +111,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 Connection: "Close",
             },
             ca: server.certificateData,
+            rejectUnauthorized: server.tlsSecurity !== "insecure",
             timeout: HTTP_REQUEST_TIMEOUT,
         }
 

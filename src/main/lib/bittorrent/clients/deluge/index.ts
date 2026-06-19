@@ -204,6 +204,7 @@ export class DelugeRuntime implements BittorrentRuntime {
         this.requestOptions = {
             timeout: HTTP_REQUEST_TIMEOUT,
             ca: server.certificateData,
+            strictSSL: server.tlsSecurity !== "insecure",
             jar: request.jar(),
         }
 

@@ -32,6 +32,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         const requestOptions = {
             timeout: HTTP_REQUEST_TIMEOUT,
             ca: server.certificateData,
+            strictSSL: server.tlsSecurity !== "insecure",
             method: "GET",
             headers: {
                 Referer: origin,
@@ -49,6 +50,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
             user: server.user,
             pass: server.password,
             ca: server.certificateData,
+            strictSSL: server.tlsSecurity !== "insecure",
             timeout: HTTP_REQUEST_TIMEOUT,
         }
 

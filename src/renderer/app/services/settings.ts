@@ -29,6 +29,12 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
     };
 
     function loadServerCertificate(server: any) {
+        if (server?.tlsSecurity === "insecure") {
+            server.certificate = undefined
+            server.certificateData = undefined
+            return Promise.resolve()
+        }
+
         if (!server?.certificate) {
             server.certificateData = undefined
             return Promise.resolve()
@@ -71,6 +77,7 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
             return
         }
 
+        server.tlsSecurity = "default"
         server.certificate = fingerprint
         loadServerCertificate(server).then(() => {
             return this.saveAllSettings()
@@ -156,6 +163,23 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
 
     this.trustCertificate = function(cert) {
         settings.certificates.push(cert.fingerprint)
+        return this.saveAllSettings()
+    }
+
+    this.enableInsecureTls = function(serverId: string) {
+        const server = this.getServer(serverId)
+        if (!server) {
+            return $q.reject(`Server with id ${serverId} not found`)
+        }
+
+        server.tlsSecurity = "insecure"
+        server.certificate = undefined
+        server.certificateData = undefined
+        return this.saveAllSettings()
+    }
+
+    this.disableInsecureTls = function(server) {
+        server.tlsSecurity = "default"
         return this.saveAllSettings()
     }
 

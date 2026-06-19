@@ -19,6 +19,7 @@ export type QBittorrentApiOptions = {
     user: string
     pass: string
     ca?: Uint8Array
+    strictSSL?: boolean
     timeout?: number
 }
 
@@ -47,6 +48,7 @@ export abstract class QBittorrentBaseApi {
         this.options = {
             timeout: this.timeout,
             ca: options.ca,
+            strictSSL: options.strictSSL,
             jar: request.jar(),
             headers: {
                 Referer: this.origin,

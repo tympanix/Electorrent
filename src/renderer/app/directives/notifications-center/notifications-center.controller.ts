@@ -14,9 +14,14 @@ interface NotificationsCenterScope extends IScope {
     close: (index: number) => void;
     installUpdate: () => void;
     installCertificate: () => void;
+    allowInsecureTls: () => void;
+    confirmInsecureTls: () => boolean | void;
+    insecureTlsResult: (accepted: boolean) => void;
     certificate: any;
+    insecureTlsCertificate: any;
     certificateResult: (accepted: boolean) => void;
     certificateModalRef?: ModalController;
+    insecureTlsModalRef?: ModalController;
     updateModalRef?: ModalController;
 }
 
@@ -34,6 +39,7 @@ export class NotificationsCenterController {
     ) {
         const electorrent = window.electorrent
         let id = 0;
+        let insecureTlsFlowActive = false;
 
         $scope.updateData = {
             releaseDate: "Just now...",
@@ -115,7 +121,7 @@ export class NotificationsCenterController {
                         fingerprint: cert.fingerprint,
                         raw: cert.raw,
                     }).then((result) => {
-                        certificateResponseService.resolve(cert.serverId, result.fingerprint);
+                        certificateResponseService.resolve(cert.serverId, { fingerprint: result.fingerprint });
                         $rootScope.$broadcast("certificate-installed", cert.serverId, result.fingerprint);
                         $notify.ok("Certificate installed", "The certificate has been trusted for this server to use");
                     }).catch((err: unknown) => {
@@ -128,6 +134,38 @@ export class NotificationsCenterController {
                     });
                 }
             };
+            $scope.allowInsecureTls = () => {
+                if (!cert.serverId) {
+                    return;
+                }
+                insecureTlsFlowActive = true;
+                $scope.insecureTlsCertificate = cert;
+                $scope.insecureTlsModalRef?.showModal();
+            };
+            $scope.confirmInsecureTls = () => {
+                if (!cert.serverId) {
+                    return false;
+                }
+
+                const saveInsecureTls = settingsService.getServer(cert.serverId)
+                    ? settingsService.enableInsecureTls(cert.serverId)
+                    : Promise.resolve();
+
+                saveInsecureTls.then(() => {
+                    $scope.certificateModalRef?.hideModal();
+                    certificateResponseService.resolve(cert.serverId, { tlsSecurity: "insecure" });
+                    $notify.warning("Insecure TLS enabled", "TLS certificate verification is disabled for this server");
+                }).catch((err: unknown) => {
+                    certificateResponseService.reject(cert.serverId, err);
+                    $notify.alert("Could not enable Insecure TLS", String(err));
+                });
+                return true;
+            };
+            $scope.insecureTlsResult = (accepted: boolean) => {
+                if (!accepted) {
+                    insecureTlsFlowActive = false;
+                }
+            };
             $scope.certificate = cert;
             showCertModal();
         });
@@ -137,9 +175,10 @@ export class NotificationsCenterController {
         };
 
         $scope.certificateResult = (accepted: boolean) => {
-            if (!accepted) {
+            if (!accepted && !insecureTlsFlowActive) {
                 certificateResponseService.reject($scope.certificate?.serverId);
             }
+            insecureTlsFlowActive = false;
         };
     }
 }
