@@ -272,8 +272,34 @@ export const config: WebdriverIO.Config = {
      * @param {Array.<String>} specs        List of spec file paths that are to be run
      * @param {object}         browser      instance of created browser/device session
      */
-    // before: async function () {
-    // },
+    before: function () {
+        const overwriteBrowserCommand = browser.overwriteCommand as (
+            commandName: string,
+            customCommand: (...args: unknown[]) => unknown,
+            attachToElement?: boolean,
+        ) => void
+
+        overwriteBrowserCommand('getWindowRect', async function () {
+            // ChromeDriver 148 forwards WebDriver GET /window/rect to the CDP
+            // Browser.getWindowForTarget command, which Electron 42 does not expose.
+            // Read the Electron BrowserWindow bounds directly instead.
+            const bounds = await browser.electron.execute((electron) => {
+                const window = electron.BrowserWindow.getFocusedWindow() ?? electron.BrowserWindow.getAllWindows()[0]
+
+                if (window == null) {
+                    return null
+                }
+
+                return window.getBounds()
+            })
+
+            if (bounds == null) {
+                throw new Error('Unable to determine Electron window bounds')
+            }
+
+            return bounds
+        })
+    },
     /**
      * Runs before a WebdriverIO command gets executed.
      * @param {string} commandName hook command name
