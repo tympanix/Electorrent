@@ -15,6 +15,17 @@ const semanticUiLessDir = path.resolve(__dirname, 'node_modules/semantic-ui-less
 const semanticThemeConfigPath = path.resolve(__dirname, 'src/renderer/styles/semantic/theme.config')
 const isProduction = process.env.NODE_ENV === 'production'
 
+const sharedCache = {
+  type: 'filesystem',
+  buildDependencies: {
+    config: [__filename],
+  },
+}
+
+const sharedOptimization = {
+  minimize: false,
+}
+
 const sharedResolve = {
   extensions: ['.ts', '.tsx', '.js', '.json'],
   alias: {
@@ -75,6 +86,8 @@ const commonPlugins = [
 
 const rendererConfig = {
   name: 'renderer',
+  cache: sharedCache,
+  optimization: sharedOptimization,
   devtool: 'source-map',
   entry: {
     app: [
@@ -185,6 +198,8 @@ const rendererConfig = {
 function makeNodeConfig({ name, entry, target, tsConfig }) {
   return {
     name,
+    cache: sharedCache,
+    optimization: sharedOptimization,
     devtool: 'source-map',
     entry,
     output: {
