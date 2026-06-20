@@ -113,12 +113,6 @@ export class SettingsPageController {
                 });
         }
 
-        $scope.setPath = () => {
-            if ($scope.pathPristine) {
-                $scope.server.setPath();
-            }
-        };
-
         $scope.chooseWatchDirectory = () => {
             return electorrent.settings.chooseWatchDirectory($scope.settings.watchDirectory).then((watchDirectory: string | null) => {
                 if (watchDirectory) {
@@ -155,15 +149,6 @@ export class SettingsPageController {
                 $scope.settings.servers[index - 1] = server;
                 $scope.settings.servers[index] = previous;
             }
-        };
-
-        $scope.resetPath = () => {
-            $scope.server.setPath();
-            $scope.pathPristine = true;
-        };
-
-        $scope.lockPath = () => {
-            $scope.pathPristine = false;
         };
 
         $scope.close = () => {
