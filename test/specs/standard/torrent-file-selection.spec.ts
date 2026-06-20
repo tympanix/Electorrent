@@ -6,7 +6,7 @@ import * as e2e from "../../e2e"
 import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
 import { configureSpec, requireFeature } from "../../framework/fixture"
 
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 
 describe("torrent file selection", function () {
   configureSpec()

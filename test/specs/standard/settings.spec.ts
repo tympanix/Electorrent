@@ -7,7 +7,7 @@ import { configureSpec } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
 
 const assert: Chai.AssertStatic = chai.assert
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 describe("settings", function () {
   configureSpec()
 

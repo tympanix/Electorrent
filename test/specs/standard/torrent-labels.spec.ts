@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 import * as e2e from "../../e2e"
 import { configureSpec, createUniqueLabel, requireFeature } from "../../framework/fixture"
 
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 
 describe("torrent labels", function () {
   configureSpec()
