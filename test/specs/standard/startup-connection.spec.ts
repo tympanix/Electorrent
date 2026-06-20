@@ -1,7 +1,7 @@
 import chai from "chai"
 import { $ } from "@wdio/globals"
-import { configureSpec } from "../framework/fixture"
-import { restartApplication } from "../shared"
+import { configureSpec } from "../../framework/fixture"
+import { restartApplication } from "../../shared"
 
 const { assert } = chai
 

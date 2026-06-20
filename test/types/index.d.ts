@@ -7,7 +7,7 @@ declare global {
   namespace Mocha {
     interface Context {
       app: import("../e2e").App
-      backend: import("../shared/compose").DockerComposeService
+      backend?: import("../shared/compose").DockerComposeService
       torrentPath: string
     }
   }

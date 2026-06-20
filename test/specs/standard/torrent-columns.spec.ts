@@ -2,9 +2,9 @@ import chai from "chai"
 import fs from "node:fs"
 import parseTorrent from "parse-torrent"
 import { browser } from "@wdio/globals"
-import * as e2e from "../e2e"
-import { createTorrentFile } from "../torrent"
-import { configureSpec, createUniqueLabel, formatBytes, getTestFixture } from "../framework/fixture"
+import * as e2e from "../../e2e"
+import { createTorrentFile } from "../../torrent"
+import { configureSpec, createUniqueLabel, formatBytes, getTestFixture } from "../../framework/fixture"
 
 const { assert } = chai
 const fixture = getTestFixture()

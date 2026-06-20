@@ -1,7 +1,7 @@
 import chai from "chai"
 import { $, browser } from "@wdio/globals"
-import { configureSpec, enabledFeaturePaths, getTestFixture } from "../framework/fixture"
-import { CLIENT_METADATA } from "../../src/shared/client-metadata"
+import { configureSpec, enabledFeaturePaths, getTestFixture } from "../../framework/fixture"
+import { CLIENT_METADATA } from "../../../src/shared/client-metadata"
 
 const { assert } = chai
 const fixture = getTestFixture()

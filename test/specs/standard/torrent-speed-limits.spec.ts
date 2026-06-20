@@ -1,6 +1,6 @@
 import { browser } from '@wdio/globals'
-import { createTorrentFile } from '../torrent'
-import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from '../framework/fixture'
+import { createTorrentFile } from '../../torrent'
+import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from '../../framework/fixture'
 
 const fixture = getTestFixture()
 const client = fixture.client

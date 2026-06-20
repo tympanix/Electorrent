@@ -22,6 +22,7 @@ export default class ElectorrentTestService {
       capabilities
         .map((capability) => capability["electorrent:client"])
         .filter((client): client is TestClient => Boolean(client))
+        .filter((client) => Boolean(client.fixture))
         .map((client) => [client.key, client]),
     )
 
@@ -47,6 +48,11 @@ export default class ElectorrentTestService {
   ) {
     const client = capabilities["electorrent:client"]
     if (!client) {
+      return
+    }
+
+    if (!client.fixture) {
+      initializeTestFixture({ client, proxyPort: client.port })
       return
     }
 
@@ -81,7 +87,7 @@ export default class ElectorrentTestService {
       TRACKER_PORT: String(trackerPort),
       NGINX_HOST_PORT: String(proxyPort),
       PROXY_HOST: this.getClientServiceName(client),
-      PROXY_PORT: String(client.proxyPort ?? client.containerPort),
+      PROXY_PORT: String(client.proxyPort ?? client.containerPort ?? client.port),
       RPC_PORT: String(52000 + clientIndex),
       PEER_PORT: String(53000 + clientIndex),
       PEER_UDP_PORT: String(54000 + clientIndex),
@@ -97,6 +103,9 @@ export default class ElectorrentTestService {
   }
 
   private getClientServiceName(client: TestClient) {
+    if (!client.fixture) {
+      throw new Error(`Test client ${client.key} does not use a docker fixture`)
+    }
     return path.basename(client.fixture)
   }
 }

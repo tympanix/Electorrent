@@ -1,4 +1,4 @@
-import { configureSpec, getTestFixture } from "../framework/fixture"
+import { configureSpec, getTestFixture } from "../../framework/fixture"
 
 const fixture = getTestFixture()
 

@@ -2,12 +2,12 @@ import chai from "chai"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { $, browser } from "@wdio/globals"
-import * as e2e from "../e2e"
-import { configureSpec } from "../framework/fixture"
-import { restartApplication } from "../shared"
+import * as e2e from "../../e2e"
+import { configureSpec } from "../../framework/fixture"
+import { restartApplication } from "../../shared"
 
 const assert: Chai.AssertStatic = chai.assert
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 describe("settings", function () {
   configureSpec()
 

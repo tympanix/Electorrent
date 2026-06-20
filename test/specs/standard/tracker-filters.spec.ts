@@ -1,7 +1,7 @@
 import { browser } from "@wdio/globals"
-import * as e2e from "../e2e"
-import { createTorrentFile } from "../torrent"
-import { configureSpec, getTestFixture, requireFeature } from "../framework/fixture"
+import * as e2e from "../../e2e"
+import { createTorrentFile } from "../../torrent"
+import { configureSpec, getTestFixture, requireFeature } from "../../framework/fixture"
 
 const fixture = getTestFixture()
 const tracker = fixture.tracker

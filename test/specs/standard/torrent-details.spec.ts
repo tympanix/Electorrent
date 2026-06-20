@@ -3,10 +3,10 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import parseTorrent from "parse-torrent"
 import { browser } from "@wdio/globals"
-import * as e2e from "../e2e"
-import { configureSpec, formatBytes, requireFeature } from "../framework/fixture"
+import * as e2e from "../../e2e"
+import { configureSpec, formatBytes, requireFeature } from "../../framework/fixture"
 
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 describe("torrent details", function () {
   configureSpec()
   requireFeature(({ features }) => features.torrentDetails === true)
