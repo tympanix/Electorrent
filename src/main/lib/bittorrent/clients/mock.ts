@@ -6,7 +6,6 @@ import type {
 } from "@shared/ipc-contract"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 
-const DEFAULT_TORRENT_COUNT = 100
 const PRIORITY_SKIP = 0
 const PRIORITY_NORMAL = 1
 
@@ -44,50 +43,21 @@ interface MockTorrentFile {
     is_seed: boolean
 }
 
+type MockTorrentInput = Partial<MockTorrent> & {
+    hash?: string
+    files?: MockTorrentFile[]
+}
+
 export class MockBittorrentRuntime implements BittorrentRuntime {
     private connected = false
     private torrents = new Map<string, MockTorrent>()
     private files = new Map<string, MockTorrentFile[]>()
     private removedHashes: string[] = []
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
-        const count = this.getTorrentCount(server)
+    async connect(_server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         this.torrents.clear()
         this.files.clear()
         this.removedHashes = []
-
-        for (let index = 1; index <= count; index += 1) {
-            const hash = this.createHash(index)
-            const size = (512 + index) * 1024 * 1024
-            const progress = index % 4 === 0 ? 1 : Number((index / (count + 1)).toFixed(4))
-            const state = progress === 1 ? "uploading" : (index % 3 === 0 ? "stalledDL" : "downloading")
-
-            this.torrents.set(hash, {
-                added_on: 1_700_000_000 + index,
-                category: `mock-label-${index % 5}`,
-                completion_on: progress === 1 ? 1_700_100_000 + index : undefined,
-                dl_speed: progress === 1 ? 0 : index * 1024,
-                eta: progress === 1 ? 0 : (count - index + 1) * 60,
-                name: `Mock Torrent ${index.toString().padStart(3, "0")}`,
-                num_complete: 20 + index,
-                num_incomplete: 3 + (index % 7),
-                num_leechs: 1 + (index % 5),
-                num_seeds: 4 + (index % 9),
-                priority: index,
-                progress,
-                ratio: Number((index / 10).toFixed(2)),
-                save_path: "/mock/downloads",
-                seq_dl: index % 2 === 0,
-                size,
-                state,
-                total_downloaded: Math.floor(size * progress),
-                total_size: size,
-                total_uploaded: index * 256 * 1024,
-                up_speed: index * 256,
-            })
-            this.files.set(hash, this.createFiles(index, size, progress))
-        }
-
         this.connected = true
 
         return {
@@ -136,12 +106,56 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
         this.assertConnected()
-        this.addTorrent(options?.renameTorrent || uri.replace(/^magnet:\?xt=urn:btih:/, "Mock Magnet "))
+        await this.addTorrent(options?.renameTorrent || uri.replace(/^magnet:\?xt=urn:btih:/, "Mock Magnet "))
     }
 
     async uploadTorrent(_buffer: Uint8Array, filename: string, options?: Record<string, any>): Promise<void> {
         this.assertConnected()
-        this.addTorrent(options?.renameTorrent || filename.replace(/\.torrent$/i, ""))
+        await this.addTorrent(options?.renameTorrent || filename.replace(/\.torrent$/i, ""))
+    }
+
+    async addMockedTorrent(_hashes: string[], input: MockTorrentInput = {}): Promise<string> {
+        this.assertConnected()
+
+        const index = this.torrents.size + 1
+        const hash = input.hash || this.createHash(index)
+        const progress = input.progress ?? 0
+        const size = input.size ?? 1024 * 1024 * 1024
+        const name = input.name || `Mock Torrent ${index.toString().padStart(3, "0")}`
+        const addedOn = input.added_on ?? (1_700_000_000 + index)
+
+        this.torrents.set(hash, {
+            added_on: addedOn,
+            category: input.category ?? `mock-label-${index % 5}`,
+            completion_on: input.completion_on ?? (progress === 1 ? addedOn + 3600 : undefined),
+            dl_speed: input.dl_speed ?? (progress === 1 ? 0 : index * 1024),
+            eta: input.eta ?? (progress === 1 ? 0 : index * 60),
+            name,
+            num_complete: input.num_complete ?? (20 + index),
+            num_incomplete: input.num_incomplete ?? (3 + (index % 7)),
+            num_leechs: input.num_leechs ?? (1 + (index % 5)),
+            num_seeds: input.num_seeds ?? (4 + (index % 9)),
+            priority: input.priority ?? index,
+            progress,
+            ratio: input.ratio ?? Number((index / 10).toFixed(2)),
+            save_path: input.save_path ?? "/mock/downloads",
+            seq_dl: input.seq_dl ?? (index % 2 === 0),
+            size,
+            state: input.state ?? (progress === 1 ? "uploading" : "downloading"),
+            total_downloaded: input.total_downloaded ?? Math.floor(size * progress),
+            total_size: input.total_size ?? size,
+            total_uploaded: input.total_uploaded ?? (index * 256 * 1024),
+            up_speed: input.up_speed ?? (index * 256),
+        })
+        this.files.set(hash, input.files || this.createFiles(name, size, progress))
+        return hash
+    }
+
+    async clearMockedTorrents(): Promise<void> {
+        this.assertConnected()
+        this.removedHashes.push(...this.torrents.keys())
+        this.torrents.clear()
+        this.files.clear()
     }
 
     async resume(hashes: string[]): Promise<void> {
@@ -300,20 +314,15 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    private getTorrentCount(server: BittorrentServerConfig) {
-        const parsedCount = Number(server.path?.match(/torrentCount=(\d+)/)?.[1])
-        return Number.isInteger(parsedCount) && parsedCount > 0 ? parsedCount : DEFAULT_TORRENT_COUNT
-    }
-
     private createHash(index: number) {
         return index.toString(16).padStart(40, "0")
     }
 
-    private createFiles(index: number, size: number, progress: number): MockTorrentFile[] {
+    private createFiles(name: string, size: number, progress: number): MockTorrentFile[] {
         return [
             {
                 index: 0,
-                name: `Mock Torrent ${index.toString().padStart(3, "0")}/video.mkv`,
+                name: `${name}/video.mkv`,
                 size: Math.floor(size * 0.9),
                 progress,
                 availability: 1,
@@ -322,7 +331,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             },
             {
                 index: 1,
-                name: `Mock Torrent ${index.toString().padStart(3, "0")}/notes.txt`,
+                name: `${name}/notes.txt`,
                 size: Math.floor(size * 0.1),
                 progress,
                 availability: 1,
@@ -340,11 +349,8 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         )
     }
 
-    private addTorrent(name: string) {
-        const index = this.torrents.size + 1
-        const hash = this.createHash(index)
-        const size = 1024 * 1024 * 1024
-        this.torrents.set(hash, {
+    private async addTorrent(name: string) {
+        await this.addMockedTorrent([], {
             added_on: Math.floor(Date.now() / 1000),
             category: "mock-label-new",
             dl_speed: 512 * 1024,
@@ -354,19 +360,16 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             num_incomplete: 5,
             num_leechs: 1,
             num_seeds: 2,
-            priority: index,
             progress: 0,
             ratio: 0,
             save_path: "/mock/downloads",
             seq_dl: false,
-            size,
+            size: 1024 * 1024 * 1024,
             state: "downloading",
             total_downloaded: 0,
-            total_size: size,
             total_uploaded: 0,
             up_speed: 0,
         })
-        this.files.set(hash, this.createFiles(index, size, 0))
     }
 
     private updateState(hashes: string[], state: string) {

@@ -657,7 +657,7 @@ export class TorrentsPageController {
             };
 
             const compareProgressState = (a: any, b: any) => {
-                if (sort !== "percent" || a.percent !== 1000 || b.percent !== 1000) {
+                if (sort !== "percent" || a.percent !== b.percent) {
                     return 0;
                 }
 

@@ -2,10 +2,10 @@ import fs from "node:fs"
 import path from "node:path"
 import parseTorrent from "parse-torrent"
 import { browser } from "@wdio/globals"
-import * as e2e from "../e2e"
-import { createTorrentFile } from "../torrent"
-import { configureSpec, createUniqueLabel, getTestFixture } from "../framework/fixture"
-import { restartApplication } from "../shared"
+import * as e2e from "../../e2e"
+import { createTorrentFile } from "../../torrent"
+import { configureSpec, createUniqueLabel, getTestFixture } from "../../framework/fixture"
+import { restartApplication } from "../../shared"
 
 const fixture = getTestFixture()
 const tracker = fixture.tracker

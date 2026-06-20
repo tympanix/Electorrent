@@ -4,10 +4,11 @@ import { TEST_CLIENTS } from './test/clients'
 import ElectorrentTestService from './test/framework/service'
 import ElectorrentSpecReporter from './test/framework/spec-reporter'
 
+process.env.NODE_ENV = 'test'
 delete process.env.ELECTRON_RUN_AS_NODE
 
-const featureSpecs = [
-    'test/specs/**/*.spec.ts',
+const standardSpecs = [
+    'test/specs/standard/**/*.spec.ts',
 ]
 
 function requestedClients() {
@@ -35,7 +36,7 @@ const specReporterPath = fileURLToPath(new URL('./test/framework/spec-reporter.t
 function electronCapability(client: (typeof selectedClients)[number]): WebdriverIO.Capabilities {
     return {
         browserName: 'electron',
-        specs: featureSpecs,
+        'wdio:specs': client.specs ?? standardSpecs,
         'electorrent:client': client,
         'wdio:electronServiceOptions': {
             appEntryPoint: 'app/main.js',
@@ -92,7 +93,7 @@ export const config: WebdriverIO.Config = {
     // The path of the spec files will be resolved relative from the directory of
     // of the config file unless it's absolute.
     //
-    specs: featureSpecs,
+    specs: standardSpecs,
     // Patterns to exclude.
     exclude: [
         // 'path/to/excluded/files'
@@ -251,8 +252,7 @@ export const config: WebdriverIO.Config = {
      * @param  {object} specs    specs to be run in the worker process
      * @param  {number} retries  number of retries used
      */
-    onWorkerEnd: function (cid, exitCode, _specs, retries) {
-        const label = workerClientLabels.get(cid) ?? 'unknown client'
+    onWorkerEnd: function (cid, _exitCode, _specs, _retries) {
         workerClientLabels.delete(cid)
     },
     /**

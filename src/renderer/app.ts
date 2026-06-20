@@ -9,7 +9,8 @@ import {
     TransmissionClient,
     RtorrentClient,
     SynologyClient,
-    DelugeClient
+    DelugeClient,
+    MockBittorrentClient
 } from "@renderer/app/bittorrent"
 import { CLIENT_METADATA } from "@shared/client-metadata"
 
@@ -21,8 +22,7 @@ torrentApp.config(['$animateProvider', function($animateProvider) {
     }
 ]);
 
-// Register torrent clients
-torrentApp.constant('$btclients', {
+const btclients: Record<string, { name: string; service: unknown; icon: string }> = {
     'utorrent': {
         name: CLIENT_METADATA.utorrent.name,
         service: new UtorrentClient(),
@@ -53,7 +53,18 @@ torrentApp.constant('$btclients', {
         service: new DelugeClient(),
         icon: CLIENT_METADATA.deluge.icon,
     }
-});
+};
+
+if (window.electorrent.app.isTestEnvironment) {
+    btclients.mock = {
+        name: CLIENT_METADATA.mock.name,
+        service: new MockBittorrentClient(),
+        icon: CLIENT_METADATA.mock.icon,
+    };
+}
+
+// Register torrent clients
+torrentApp.constant('$btclients', btclients);
 
 // Configure the client
 torrentApp.run(["settingsService", function(settingsService){

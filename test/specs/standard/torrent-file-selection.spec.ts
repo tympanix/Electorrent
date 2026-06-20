@@ -2,9 +2,9 @@ import chai from "chai"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { $ } from "@wdio/globals"
-import * as e2e from "../e2e"
-import { waitForModalClose, waitForModalOpen } from "../e2e/modal"
-import { configureSpec, requireFeature } from "../framework/fixture"
+import * as e2e from "../../e2e"
+import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
+import { configureSpec, requireFeature } from "../../framework/fixture"
 
 const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 

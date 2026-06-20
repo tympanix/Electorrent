@@ -10,8 +10,8 @@ import type { TestClient } from "../clients"
 
 export interface TestFixture {
   client: TestClient
-  backend: DockerComposeService
-  tracker: DockerComposeService
+  backend?: DockerComposeService
+  tracker?: DockerComposeService
   proxyPort: number
   app: App
 }
@@ -29,7 +29,7 @@ export function getTestFixture(): TestFixture {
   return fixture
 }
 
-export function configureSpec(options: { login?: boolean } = {}) {
+export function configureSpec(options: { login?: boolean, clearTorrents?: boolean } = {}) {
   setupMochaHooks()
 
   before(async function() {
@@ -52,7 +52,9 @@ export function configureSpec(options: { login?: boolean } = {}) {
     if (options.login !== false) {
       await current.app.login(current.client)
       await current.app.torrentsPageIsVisible()
-      await removeAllTorrents(current.app)
+      if (options.clearTorrents !== false) {
+        await removeAllTorrents(current.app)
+      }
     }
   })
 }

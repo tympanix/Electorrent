@@ -303,6 +303,7 @@ export type MenuAction =
 export interface ElectorrentBridge {
     app: {
         initialTheme: ColorTheme
+        isTestEnvironment: boolean
         getMeta(): Promise<AppMeta>
         getDefaultProtocolStatus(protocol: string): Promise<boolean>
         setDefaultProtocolStatus(protocol: string, enabled: boolean): Promise<void>

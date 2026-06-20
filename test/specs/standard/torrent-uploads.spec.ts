@@ -1,7 +1,7 @@
-import * as e2e from "../e2e"
-import { createTorrentFile } from "../torrent"
-import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from "../framework/fixture"
-import { restartApplication } from "../shared"
+import * as e2e from "../../e2e"
+import { createTorrentFile } from "../../torrent"
+import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from "../../framework/fixture"
+import { restartApplication } from "../../shared"
 
 const fixture = getTestFixture()
 const tracker = fixture.tracker

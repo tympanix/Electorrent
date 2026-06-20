@@ -1,7 +1,7 @@
 import chai from "chai"
 import { $, browser } from "@wdio/globals"
-import { configureSpec } from "../framework/fixture"
-import { restartApplication } from "../shared"
+import { configureSpec } from "../../framework/fixture"
+import { restartApplication } from "../../shared"
 
 const assert: Chai.AssertStatic = chai.assert
 

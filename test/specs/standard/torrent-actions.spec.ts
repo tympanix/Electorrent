@@ -3,10 +3,10 @@ import fs from "node:fs"
 import path from "node:path"
 import parseTorrent from "parse-torrent"
 import { $ } from "@wdio/globals"
-import * as e2e from "../e2e"
-import { waitForModalClose } from "../e2e/modal"
-import { createTorrentFile } from "../torrent"
-import { configureSpec, createUniqueLabel, getTestFixture } from "../framework/fixture"
+import * as e2e from "../../e2e"
+import { waitForModalClose } from "../../e2e/modal"
+import { createTorrentFile } from "../../torrent"
+import { configureSpec, createUniqueLabel, getTestFixture } from "../../framework/fixture"
 
 const { assert } = chai
 const fixture = getTestFixture()
