@@ -7,7 +7,7 @@ import type {
     BittorrentTorrentDetailsData,
     TorrentClientConnection,
 } from "@shared/ipc-contract"
-import { defer, HTTP_REQUEST_TIMEOUT, serverOriginUrl, serverUrl, urlPath } from "@main/lib/bittorrent/helpers"
+import { defer, HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT, serverOriginUrl, serverUrl, urlPath } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { QBittorrentApiV1 } from "./api-v1"
 import { QBittorrentApiV2 } from "./api-v2"
@@ -30,7 +30,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
     private async selectApi(server: BittorrentServerConfig) {
         const origin = serverOriginUrl(server)
         const requestOptions = {
-            timeout: HTTP_REQUEST_TIMEOUT,
+            timeout: HTTP_LOGIN_TIMEOUT,
             ca: server.certificateData,
             strictSSL: server.tlsSecurity !== "insecure",
             method: "GET",
@@ -40,8 +40,15 @@ export class QBittorrentRuntime implements BittorrentRuntime {
             uri: this.url(server, "version/api"),
         }
 
-        const hasLegacyApi = await new Promise<boolean>((resolve) => {
-            request(requestOptions, (err: any, res: any) => resolve(!err && res?.statusCode === 200))
+        const hasLegacyApi = await new Promise<boolean>((resolve, reject) => {
+            request(requestOptions, (err: any, res: any) => {
+                if (err) {
+                    reject(err)
+                    return
+                }
+
+                resolve(res?.statusCode === 200)
+            })
         })
 
         const options = {

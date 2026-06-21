@@ -191,14 +191,6 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             }
         };
 
-        const promiseWithTimeout = (promise: Promise<any>, timeout: number) => {
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Request timed out')), timeout);
-            })
-            return Promise.race([promise, timeoutPromise])
-        };
-
-
         Server.prototype.connect = function() {
             let self = this
             Object.assign(this, sanitizeServerAddress(this))
@@ -210,9 +202,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
 
             let service = $bittorrent.getClient(this.client);
 
-            let connectOrTimeout = promiseWithTimeout(service.connect(this), 3000)
-
-            return connectOrTimeout.catch(function(err) {
+            return service.connect(this).catch(function(err) {
                 self.isConnected = false
                 if (self.isHTTPS() && (isTlsCertificateError(err) || isAggregateConnectionError(err))) {
                     return self.askForCertificate().then(function() {
