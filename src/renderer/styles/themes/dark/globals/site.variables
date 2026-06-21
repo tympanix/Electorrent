@@ -13,11 +13,14 @@
 @focusedFormBorderColor: #446f90;
 @focusedFormMutedBorderColor: #446f90;
 @inputBackground: @gray-darker;
-@inputColor: @white;
+@inputColor: @textColor;
+@inputPlaceholderColor: @unselectedTextColor;
+@inputPlaceholderFocusColor: @lightTextColor;
 @selectionTextColor: @textColor;
 @solidInternalBorderColor: lighten(@gray-darker, 10%);
-@focusColor: @white;
-@inputHighlightColor: @white;
+@selectedBorderColor: @gray-light;
+@focusColor: @selectedTextColor;
+@inputHighlightColor: @selectedTextColor;
 
 /* Page background and primary colors */
 @gray-base: #000;
@@ -35,6 +38,7 @@
 @pageMiddleground: lighten(@gray-darker, 2.5%);
 @pageForeground: lighten(@gray-darker, 5%);
 @overlayBackground: @pageBackground;
+@popupBackground: fade(@pageBackground, 85%);
 @highlightBackground: @gray;
 @subtleShadow: 0px 1px 2px 0 rgba(0, 0, 0, 0.2);
 @linkColor: #fff;
@@ -65,4 +69,3 @@
 @invertedSelectedTextColor           : rgba(0, 0, 0, 0.95);
 @invertedDisabledTextColor           : rgba(0, 0, 0, 0.2);
 
-@inputPlaceholderColor: @gray-lighter;
