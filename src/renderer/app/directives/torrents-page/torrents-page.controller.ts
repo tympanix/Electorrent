@@ -32,6 +32,7 @@ export class TorrentsPageController {
         const LIMIT = 25;
         const SYNC_LATENCY_SAMPLE_SIZE = 5;
         const MIN_SLOW_LATENCY_MS = 1000;
+        const MAX_SLOW_LATENCY_MS = 2000;
         const SLOW_LATENCY_FACTOR = 3;
 
         let selected: any[] = [];
@@ -239,7 +240,7 @@ export class TorrentsPageController {
         $scope.uploadTorrent = async (torrent: Uint8Array, filename: string, options?: TorrentUploadOptions, sourcePath?: string) => {
             try {
                 await $rootScope.$btclient?.uploadTorrent(torrent, filename, options, sourcePath);
-                await syncAfterTorrentMutation();
+                void syncAfterTorrentMutation();
             } catch (e) {
                 $notify.alert("Could not upload torrent", "The torrent could not be uploaded to the server");
                 console.error(e);
@@ -249,7 +250,7 @@ export class TorrentsPageController {
         $scope.uploadTorrentURL = async (uri: string, options?: TorrentUploadOptions) => {
             try {
                 await $rootScope.$btclient?.addTorrentUrl(uri, options);
-                await syncAfterTorrentMutation();
+                void syncAfterTorrentMutation();
             } catch (err) {
                 $notify.alert("Upload failed", "The torrent link could not be uploaded");
                 console.error(err);
@@ -488,7 +489,7 @@ export class TorrentsPageController {
 
             const sortedResponseTimes = responseTimes.slice().sort((left, right) => left - right);
             const medianResponseTime = sortedResponseTimes[Math.floor(sortedResponseTimes.length / 2)];
-            return Math.max(MIN_SLOW_LATENCY_MS, medianResponseTime * SLOW_LATENCY_FACTOR);
+            return Math.min(MAX_SLOW_LATENCY_MS, Math.max(MIN_SLOW_LATENCY_MS, medianResponseTime * SLOW_LATENCY_FACTOR));
         }
 
         function trackSyncRequestLatency(startedAt: number, serverId?: string | number) {
@@ -903,9 +904,6 @@ export class TorrentsPageController {
             return request.then((torrents: any) => {
                 cancelSlowSyncRequestTimer();
                 trackSyncRequestLatency(startedAt, serverId);
-                if (serverId !== $rootScope.$server?.id) {
-                    return;
-                }
                 if (serverId !== $rootScope.$server?.id) {
                     return;
                 }
