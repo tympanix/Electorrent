@@ -114,25 +114,6 @@ export class TorrentsPageController {
             return $q.when();
         };
 
-        $scope.activeOn = (filter: string) => {
-            return $scope.filters.status === filter ? "active" : "";
-        };
-
-        $scope.isSidebarCollapsed = () => {
-            return $scope.settings.ui.sidebarCollapsed === true;
-        };
-
-        $scope.toggleSidebarCollapsed = () => {
-            const previousValue = $scope.isSidebarCollapsed();
-            $scope.settings.ui.sidebarCollapsed = !previousValue;
-
-            return settingsService.saveAllSettings().catch((err: unknown) => {
-                $scope.settings.ui.sidebarCollapsed = previousValue;
-                $notify.alert("Could not save layout", "The sidebar preference could not be saved");
-                console.error("Sidebar layout save error", err);
-            });
-        };
-
         $scope.renderDone = () => {
             $scope.guiBusy = false;
             $timeout(() => {
@@ -451,10 +432,6 @@ export class TorrentsPageController {
             syncDetailsPanel();
         };
 
-        $scope.activeLabel = (label: string) => {
-            return $scope.filters.label === label;
-        };
-
         $scope.filterByTracker = (tracker?: string) => {
             deselectAll();
             lastSelected = null;
@@ -462,10 +439,6 @@ export class TorrentsPageController {
             $scope.torrentLimit = LIMIT;
             refreshTorrents();
             syncDetailsPanel();
-        };
-
-        $scope.activeTracker = (tracker: string) => {
-            return $scope.filters.tracker === tracker;
         };
 
         $scope.showContextMenu = (event: Event, torrent: any) => {
@@ -482,18 +455,6 @@ export class TorrentsPageController {
             if (currentTorrent) {
                 $rootScope.$emit("torrentDetails:open", currentTorrent);
             }
-        };
-
-        $scope.numInFilter = (status: string) => {
-            let num = 0;
-            const filter = torrentFilter(status);
-
-            angular.forEach($scope.torrents, (torrent: any) => {
-                if (filter(torrent)) {
-                    num += 1;
-                }
-            });
-            return num;
         };
 
         $scope.noneSelected = () => {

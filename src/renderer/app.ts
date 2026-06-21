@@ -150,6 +150,10 @@ import { ServerSelectionDirective } from "@renderer/app/directives/server-select
 torrentApp.directive("serverSelection", ServerSelectionDirective.getInstance())
 import { TorrentsPageDirective } from "@renderer/app/directives/torrents-page/torrents-page.directive"
 torrentApp.directive("torrentsPage", TorrentsPageDirective.getInstance())
+import { TorrentSidebarDirective } from "@renderer/app/directives/torrent-sidebar/torrent-sidebar.directive"
+torrentApp.directive("torrentSidebar", TorrentSidebarDirective.getInstance())
+import { TorrentSidebarSectionDirective } from "@renderer/app/directives/torrent-sidebar/torrent-sidebar-section.directive"
+torrentApp.directive("torrentSidebarSection", TorrentSidebarSectionDirective.getInstance())
 import { ToggleDirective } from "@renderer/app/directives/checkbox/checkbox.directive"
 torrentApp.directive("toggle", ToggleDirective.getInstance())
 import { RepeatDoneDirective } from "@renderer/app/directives/repeat-done/repeat-done.directive"
