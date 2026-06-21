@@ -1,6 +1,16 @@
 <div class="main wrapper">
     <header class="title-bar" aria-label="Window title bar">
-        <span class="title-bar-server-name">{{connectedServerName()}}</span>
+        <span class="title-bar-server-name-anchor">
+            <span class="title-bar-server-name">{{connectedServerName()}}</span>
+            <span
+                ng-if="showSyncConnectionIndicator()"
+                class="title-bar-sync-connection-indicator"
+                ng-class="'is-' + syncConnectionState()"
+                aria-label="Sync connection status">
+                <i class="plug icon"></i>
+                <span class="ui bottom center popup transition">{{syncConnectionMessage()}}</span>
+            </span>
+        </span>
     </header>
 
     <div class="app-content">

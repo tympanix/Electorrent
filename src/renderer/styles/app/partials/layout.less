@@ -21,12 +21,53 @@ html, body {
     border-bottom: 1px solid @borderColor;
     app-region: drag;
 }
-.title-bar-server-name {
+.title-bar-server-name-anchor {
+    position: relative;
+    display: flex;
+    justify-content: center;
     max-width: 50%;
+    min-width: 0;
+}
+.title-bar-server-name {
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     pointer-events: none;
+}
+.title-bar-sync-connection-indicator {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 8px;
+    app-region: no-drag;
+    pointer-events: auto;
+    cursor: default;
+}
+.title-bar-sync-connection-indicator.is-slow {
+    color: #fbbd08;
+}
+.title-bar-sync-connection-indicator.is-broken {
+    color: #db2828;
+}
+.title-bar-sync-connection-indicator > .ui.popup {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    display: none;
+    min-width: 180px;
+    text-align: center;
+    white-space: normal;
+    transform: translateX(-50%);
+    z-index: 1001;
+}
+.title-bar-sync-connection-indicator:hover > .ui.popup {
+    display: block;
+    opacity: 1;
+    visibility: visible;
 }
 .app-content {
     position: absolute;
