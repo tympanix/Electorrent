@@ -35,7 +35,7 @@ export default class ElectorrentTestService {
           composeOptions,
         )
         await waitForHttp({
-          url: `http://${client.host}:${client.port}`,
+          url: `http://${client.host}:${client.containerHostPort ?? client.port}`,
           statusCode: client.acceptHttpStatus,
         })
       }),
@@ -79,13 +79,16 @@ export default class ElectorrentTestService {
     const clientIndex = Object.keys(TEST_CLIENTS).indexOf(client.key)
     const proxyPort = 50000 + clientIndex
     const trackerPort = 51000 + clientIndex
+    const authProxyPort = client.authProxyHostPort ?? 55000 + clientIndex
     const env = {
       ...process.env,
       COMPOSE_PROJECT_NAME: `electorrent-${suffix}`,
       VERSION: client.version,
-      CLIENT_HOST_PORT: String(client.port),
+      CLIENT_HOST_PORT: String(client.containerHostPort ?? client.port),
       TRACKER_PORT: String(trackerPort),
       NGINX_HOST_PORT: String(proxyPort),
+      NGINX_AUTH_HOST_PORT: String(authProxyPort),
+      NGINX_AUTH_PORT: "8081",
       PROXY_HOST: this.getClientServiceName(client),
       PROXY_PORT: String(client.proxyPort ?? client.containerPort ?? client.port),
       RPC_PORT: String(52000 + clientIndex),
