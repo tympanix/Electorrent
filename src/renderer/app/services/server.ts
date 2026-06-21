@@ -1,5 +1,6 @@
 import _ from "underscore"
 import { Torrent } from "@renderer/app/bittorrent"
+import { parseServerAddressInput, sanitizeServerAddress } from "@shared/server-address"
 import type { CertificateResponseService } from "@renderer/app/services/certificate-response"
 import type { SavedLocationConfig, StoredServerConfig, TorrentUploadOptions } from "@shared/ipc-contract"
 
@@ -161,11 +162,13 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         };
 
         Server.prototype.url = function() {
-            return `${this.proto}://${this.ip}:${this.port}${this.cleanPath()}`
+            const server = sanitizeServerAddress(this)
+            return `${server.proto}://${server.ip}:${server.port}${this.cleanPath()}`
         };
 
         Server.prototype.isHTTPS = function() {
-            return this.proto === 'https'
+            const parsed = parseServerAddressInput(this.ip, this.proto)
+            return (parsed.protocol || this.proto) === 'https'
         }
 
         function trim(s, mask) {
@@ -198,6 +201,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
 
         Server.prototype.connect = function() {
             let self = this
+            Object.assign(this, sanitizeServerAddress(this))
 
             if(!this.client) {
                 $notify.alert("Opps!", "Please select a client to connect to!")

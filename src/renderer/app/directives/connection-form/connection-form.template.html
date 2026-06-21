@@ -1,0 +1,74 @@
+<form
+    class="ui form"
+    id="loginForm"
+    ng-class="{loading: connecting, large: large, welcome: large}"
+    ng-submit="submitForm()"
+    onsubmit="return false;"
+>
+    <div class="fields">
+        <div class="ten wide field">
+            <label ng-if="showLabels">Host</label>
+            <div class="ui left icon input">
+                <i class="world icon"></i>
+                <input type="text" id="connection-host" name="ip" ng-model="server.ip" placeholder="Host" />
+            </div>
+        </div>
+        <div class="six wide field">
+            <label ng-if="showLabels">Protocol</label>
+            <dropdown title="Protocol" id="connection-proto" class="fluid" ng-model="server.proto" ng-disabled="hostLocks.scheme">
+                <dropdown-group value="http" id="connection-proto-http" title="http">http</dropdown-group>
+                <dropdown-group value="https" id="connection-proto-https" title="https">https</dropdown-group>
+            </dropdown>
+        </div>
+    </div>
+
+    <div class="two fields">
+        <div class="field">
+            <label ng-if="showLabels">Username</label>
+            <div class="ui left icon input">
+                <i class="user icon"></i>
+                <input type="text" id="connection-user" name="username" ng-model="server.user" placeholder="Username" />
+            </div>
+        </div>
+        <div class="field">
+            <label ng-if="showLabels">Password</label>
+            <div class="ui left icon input">
+                <i class="lock icon"></i>
+                <input type="password" id="connection-password" name="password" ng-model="server.password" placeholder="Password" />
+            </div>
+        </div>
+    </div>
+
+    <div class="field">
+        <label ng-if="showLabels">Bittorrent Client</label>
+        <dropdown title="Client Program" id="connection-client" class="fluid" ng-model="server.client" ng-change="setPath()">
+            <dropdown-group value="id" id="connection-client-{{id}}" title="client.name" ng-repeat="(id, client) in btclients">
+                <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}}
+            </dropdown-group>
+        </dropdown>
+    </div>
+
+    <div class="fields">
+        <div class="six wide field">
+            <label ng-if="showLabels">Port</label>
+            <div class="ui left icon input">
+                <i class="sitemap icon"></i>
+                <input type="number" name="port" id="connection-port" ng-model="server.port" placeholder="Port" ng-disabled="hostLocks.port" />
+            </div>
+        </div>
+        <div class="ten wide field">
+            <label ng-if="showLabels">Path</label>
+            <div class="ui left icon action input">
+                <i class="linkify icon"></i>
+                <input type="text" id="connection-path" name="path" ng-model="server.path" placeholder="Path" ng-change="lockPath()" />
+                <button type="button" class="ui icon button" ng-click="resetPath()">
+                    <i class="refresh icon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <button ng-if="showSubmit" id="connection-submit" class="ui fluid large green labeled icon submit button">
+        <i class="checkmark icon"></i> Connect
+    </button>
+</form>

@@ -9,6 +9,7 @@ interface DropdownScope extends IScope {
     openOnFocus?: string;
     model: any;
     change?: () => void;
+    disabled?: boolean;
     dropdown_class: string;
     menu_class: string;
     text_class: string;
@@ -35,6 +36,7 @@ export class DropdownElementDirective implements IDirective {
         openOnFocus: "@?",
         model: "=ngModel",
         change: "&?ngChange",
+        disabled: "=?ngDisabled",
     };
     template = html;
 
@@ -59,23 +61,33 @@ export class DropdownElementDirective implements IDirective {
             scope.menu_class = `${scope.menu_class} visible`;
         }
 
+        const dropdownClass = (state = "") => {
+            return ["ui selection dropdown", state, scope.disabled ? "disabled" : ""].filter(Boolean).join(" ");
+        };
+
         const close = () => {
             scope.is_open = false;
             scope.$apply(() => {
-                scope.dropdown_class = "ui selection dropdown";
+                scope.dropdown_class = dropdownClass();
                 scope.menu_class = "menu transition hidden";
             });
         };
 
         const open = () => {
+            if (scope.disabled) {
+                return;
+            }
             scope.is_open = true;
             scope.$apply(() => {
-                scope.dropdown_class = "ui selection dropdown active visible";
+                scope.dropdown_class = dropdownClass("active visible");
                 scope.menu_class = "menu transition visible";
             });
         };
 
         const toggle = () => {
+            if (scope.disabled) {
+                return;
+            }
             if (scope.is_open) {
                 close();
             } else {
@@ -148,6 +160,13 @@ export class DropdownElementDirective implements IDirective {
             controller.update_title(value);
             if (scope.change) {
                 scope.change();
+            }
+        });
+        scope.$watch("disabled", () => {
+            if (scope.disabled && scope.is_open) {
+                close();
+            } else {
+                scope.dropdown_class = dropdownClass(scope.is_open ? "active visible" : "");
             }
         });
         scope.$evalAsync(() => {

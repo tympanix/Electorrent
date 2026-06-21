@@ -5,6 +5,7 @@ import { Torrent } from "./e2e_torrent";
 import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
 import type { ClientId } from "../../src/shared/client-metadata"
+import { parseServerAddressInput } from "../../src/shared/server-address"
 import { waitForModalClose, waitForModalOpen } from "./modal"
 import type { ChainablePromiseElement } from "webdriverio"
 
@@ -37,16 +38,19 @@ export class App {
     await hostForm.waitForDisplayed()
     await hostForm.setValue(options.host)
 
+    const parsedHost = parseServerAddressInput(options.host, options.https ? 'https' : 'http')
     const protoField = $("#connection-proto")
     await protoField.waitForDisplayed()
-    await protoField.waitForClickable()
-    await protoField.click()
+    if (!parsedHost.hasExplicitProtocol) {
+      await protoField.waitForClickable()
+      await protoField.click()
 
-    const proto = options.https ? 'https' : 'http'
-    const protoHttp = $(`#connection-proto-${proto}`)
-    await protoHttp.waitForDisplayed()
-    await protoHttp.waitForClickable()
-    await protoHttp.click()
+      const proto = options.https ? 'https' : 'http'
+      const protoHttp = $(`#connection-proto-${proto}`)
+      await protoHttp.waitForDisplayed()
+      await protoHttp.waitForClickable()
+      await protoHttp.click()
+    }
 
     const user = $("#connection-user")
     await user.waitForDisplayed()
@@ -68,7 +72,9 @@ export class App {
 
     const portForm = $("#connection-port")
     await portForm.waitForDisplayed()
-    await portForm.setValue(options.port);
+    if (!parsedHost.hasExplicitPort) {
+      await portForm.setValue(options.port);
+    }
 
     const submit = $("#connection-submit")
     await submit.waitForDisplayed()

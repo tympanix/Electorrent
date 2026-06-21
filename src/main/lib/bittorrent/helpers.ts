@@ -1,5 +1,6 @@
 import { URL } from "node:url"
 import type { BittorrentServerConfig } from "@shared/ipc-contract"
+import { sanitizeServerAddress } from "@shared/server-address"
 import type { CallbackFunc } from "./types"
 
 export const HTTP_LOGIN_TIMEOUT = 10_000
@@ -27,9 +28,10 @@ export function urlPath(...pathValues: Array<string | undefined>) {
 }
 
 export function serverOriginUrl(server: BittorrentServerConfig) {
+    const sanitizedServer = sanitizeServerAddress(server)
     const url = new URL("http://localhost")
-    url.protocol = `${server.proto.replace(/:$/, "")}:`
-    url.host = `${server.ip.includes(":") && !server.ip.startsWith("[") ? `[${server.ip}]` : server.ip}:${server.port}`
+    url.protocol = `${sanitizedServer.proto.replace(/:$/, "")}:`
+    url.host = `${sanitizedServer.ip.includes(":") && !sanitizedServer.ip.startsWith("[") ? `[${sanitizedServer.ip}]` : sanitizedServer.ip}:${sanitizedServer.port}`
 
     return url.origin
 }

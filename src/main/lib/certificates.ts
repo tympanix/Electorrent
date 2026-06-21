@@ -4,6 +4,7 @@ import https from 'https'
 import path from 'path'
 
 import type { CertificatePrompt } from '@shared/ipc-contract'
+import { sanitizeServerAddress } from '@shared/server-address'
 
 const CERT_DIR = path.join(app.getPath('userData'), 'certs')
 const FINGERPRINT_PATTERN = /^(?:[A-Fa-f0-9]{2}:?)+$/
@@ -79,8 +80,9 @@ function getCertificatePath(fingerprint: string) {
 }
 
 export function get(server: { ip: string; port: number; path: string; id: string }, callback: (err: Error | null, cert?: unknown) => void) {
+    const sanitizedServer = sanitizeServerAddress({ ...server, proto: 'https' })
     const options = {
-        hostname: server.ip,
+        hostname: sanitizedServer.ip,
         port: server.port,
         path: server.path,
         agent: false,

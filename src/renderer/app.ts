@@ -134,6 +134,8 @@ import { SettingsGeneralDirective } from "@renderer/app/directives/settings-gene
 torrentApp.directive("settingsGeneral", SettingsGeneralDirective.getInstance())
 import { SettingsConnectionDirective } from "@renderer/app/directives/settings-connection/settings-connection.directive"
 torrentApp.directive("settingsConnection", SettingsConnectionDirective.getInstance())
+import { ConnectionFormDirective } from "@renderer/app/directives/connection-form/connection-form.directive"
+torrentApp.directive("connectionForm", ConnectionFormDirective.getInstance())
 import { SettingsLayoutDirective } from "@renderer/app/directives/settings-layout/settings-layout.directive"
 torrentApp.directive("settingsLayout", SettingsLayoutDirective.getInstance())
 import { SettingsServersDirective } from "@renderer/app/directives/settings-servers/settings-servers.directive"

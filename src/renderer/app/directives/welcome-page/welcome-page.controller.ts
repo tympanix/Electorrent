@@ -13,8 +13,6 @@ export class WelcomePageController {
         $scope.connecting = false;
         $scope.btclients = $btclients;
         $scope.server = new Server();
-        $scope.advanced = false;
-
         function clearForm() {
             $scope.server = new Server();
         }
@@ -35,11 +33,6 @@ export class WelcomePageController {
             });
         };
 
-        $scope.setPath = () => {
-            if ($scope.server.client) {
-                $scope.server.setPath();
-            }
-        };
 
         function saveServer(ip: string, port: number, username: string, password: string, client: string) {
             const server = new Server(ip, port, username, password, client);
