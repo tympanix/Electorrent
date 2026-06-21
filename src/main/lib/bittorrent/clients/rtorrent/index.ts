@@ -2,7 +2,7 @@ import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
 
 import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
-import { defer, HTTP_REQUEST_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
+import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
 
@@ -112,7 +112,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
             },
             ca: server.certificateData,
             rejectUnauthorized: server.tlsSecurity !== "insecure",
-            timeout: HTTP_REQUEST_TIMEOUT,
+            timeout: HTTP_LOGIN_TIMEOUT,
         }
 
         if (server.user && server.password) {
