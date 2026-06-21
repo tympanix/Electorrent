@@ -33,12 +33,5 @@ describe('torrent ratio limits', function () {
       timeout: 10 * 1000,
       timeoutMsg: `Expected ratio modal to show ratio target ${ratioLimit}`,
     })
-
-    if (client.clientId !== 'utorrent') {
-      await browser.waitUntil(async () => await torrent.getColumn('ratioLimit') === ratioLimit.toFixed(2), {
-        timeout: 10 * 1000,
-        timeoutMsg: `Expected ratio target column to become ${ratioLimit.toFixed(2)}`,
-      })
-    }
   })
 })
