@@ -23,6 +23,7 @@ interface MockTorrent {
     priority: number
     progress: number
     ratio: number
+    ratio_limit?: number
     save_path: string
     seq_dl: boolean
     size: number
@@ -68,6 +69,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 fileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
+                ratioLimits: true,
                 freeDiskSpace: true,
                 uploadOptions: {
                     saveLocation: true,
@@ -138,6 +140,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             priority: input.priority ?? index,
             progress,
             ratio: input.ratio ?? Number((index / 10).toFixed(2)),
+            ratio_limit: input.ratio_limit,
             save_path: input.save_path ?? "/mock/downloads",
             seq_dl: input.seq_dl ?? (index % 2 === 0),
             size,
@@ -259,6 +262,16 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         })
     }
 
+    async setRatioLimit(hashes: string[], options: Record<string, any>): Promise<void> {
+        this.assertConnected()
+        hashes.forEach((hash) => {
+            const torrent = this.torrents.get(hash)
+            if (torrent) {
+                torrent.ratio_limit = Number(options.ratioLimit)
+            }
+        })
+    }
+
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
         this.assertConnected()
         const torrent = this.torrents.get(hash)
@@ -283,6 +296,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 connections: torrent.num_leechs + torrent.num_seeds,
                 connectionsLimit: 100,
                 shareRatio: torrent.ratio,
+                ratioLimit: torrent.ratio_limit ?? null,
                 additionDate: torrent.added_on,
                 completionDate: torrent.completion_on ?? null,
                 createdBy: "Electorrent Mock",

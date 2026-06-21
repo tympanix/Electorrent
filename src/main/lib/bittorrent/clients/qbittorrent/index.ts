@@ -93,6 +93,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 trackerFilter: true,
                 alternativeSpeedLimits: true,
                 speedLimits: true,
+                ratioLimits: true,
                 freeDiskSpace: true,
                 uploadOptions: {
                     saveLocation: true,
@@ -390,6 +391,28 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         await Promise.all(requests)
     }
 
+    async setRatioLimit(hashes: string[], options: Record<string, any>): Promise<void> {
+        const api = this.getApi()
+        const ratioLimit = Number(options.ratioLimit)
+        await new Promise<void>((resolve, reject) => {
+            api.post("torrents/setShareLimits", {
+                form: {
+                    hashes: hashes.join("|"),
+                    ratioLimit: String(ratioLimit),
+                    seedingTimeLimit: "-2",
+                    inactiveSeedingTimeLimit: "-2",
+                    shareLimitAction: "0",
+                },
+            }, (err: any) => {
+                if (err) {
+                    reject(err)
+                    return
+                }
+                resolve()
+            })
+        })
+    }
+
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
         const api = this.getApi()
         const [properties, files] = await Promise.all([
@@ -429,6 +452,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 connections: properties.nb_connections ?? null,
                 connectionsLimit: properties.nb_connections_limit ?? null,
                 shareRatio: properties.share_ratio ?? null,
+                ratioLimit: properties.ratio_limit ?? properties.ratioLimit ?? null,
                 additionDate: properties.addition_date ?? null,
                 completionDate: properties.completion_date ?? null,
                 createdBy: properties.created_by ?? null,

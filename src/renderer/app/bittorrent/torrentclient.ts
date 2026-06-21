@@ -11,6 +11,10 @@ import { connect } from "./ipc"
 
 export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
+export interface TorrentRatioLimitOptions {
+    ratioLimit: number
+}
+
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
 export interface TorrentUpdates {
@@ -55,6 +59,7 @@ const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     trackerFilter: false,
     alternativeSpeedLimits: false,
     speedLimits: false,
+    ratioLimits: false,
     freeDiskSpace: false,
     uploadOptions: DEFAULT_UPLOAD_OPTIONS,
 })
@@ -324,6 +329,13 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             throw new Error("Speed limits not supported for this client")
         }
         return Promise.reject(new Error("Speed limits not implemented for this client"))
+    }
+
+    async setRatioLimit(_torrents: T[], _options: TorrentRatioLimitOptions): Promise<void> {
+        if (!this.features.ratioLimits) {
+            throw new Error("Ratio limits not supported for this client")
+        }
+        return Promise.reject(new Error("Ratio limits not implemented for this client"))
     }
 
     async getTorrentDetails(torrent: T): Promise<TorrentDetailsPanelData> {

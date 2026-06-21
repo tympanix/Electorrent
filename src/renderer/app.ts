@@ -210,5 +210,7 @@ import { SetLocationModalDirective } from "@renderer/app/directives/set-location
 torrentApp.directive('setLocationModal', SetLocationModalDirective.getInstance())
 import { TorrentSpeedModalDirective } from "@renderer/app/directives/torrent-speed-modal/torrent-speed-modal.directive";
 torrentApp.directive('torrentSpeedModal', TorrentSpeedModalDirective.getInstance())
+import { TorrentSetRatioModalDirective } from "@renderer/app/directives/torrent-set-ratio-modal/torrent-set-ratio-modal.directive";
+torrentApp.directive('torrentSetRatioModal', TorrentSetRatioModalDirective.getInstance())
 import { SavedLocationModalDirective } from "@renderer/app/directives/saved-location-modal/saved-location-modal.directive";
 torrentApp.directive('savedLocationModal', SavedLocationModalDirective.getInstance())

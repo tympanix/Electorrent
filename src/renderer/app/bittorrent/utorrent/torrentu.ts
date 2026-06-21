@@ -21,6 +21,7 @@ export class UtorrentTorrent extends Torrent {
             downloaded: data.downloaded,
             uploaded: data.uploaded,
             ratio: (data.ratio / 1000),
+            ratioLimit: data.additionalData?.seed_override ? (data.additionalData.seed_ratio / 1000) : undefined,
             uploadSpeed: data.uploadSpeed,
             downloadSpeed: data.downloadSpeed,
             eta: data.eta,

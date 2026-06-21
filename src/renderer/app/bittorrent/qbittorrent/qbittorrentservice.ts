@@ -6,6 +6,7 @@ import {
   ContextActionList,
   TorrentUploadOptions,
   TorrentSpeedLimitOptions,
+  TorrentRatioLimitOptions,
   TorrentDetailsInfoSection,
 } from "@renderer/app/bittorrent/torrentclient";
 import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
@@ -159,6 +160,10 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
     }
 
+    setRatioLimit(torrents: QBittorrentTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
+      return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.hash), options);
+    }
+
     deleteTorrents(torrents: QBittorrentTorrent[]): Promise<void> {
       return this.delete(torrents)
     }
@@ -205,6 +210,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
           this.createTorrentDetailsField("downloaded", "Downloaded", this.toNumber(info.totalDownloaded) ?? torrent.downloaded, "bytes"),
           this.createTorrentDetailsField("uploaded", "Uploaded", this.toNumber(info.totalUploaded) ?? torrent.uploaded, "bytes"),
           this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
+          this.createTorrentDetailsField("ratio-limit", "Ratio Target", this.toNumber(info.ratioLimit) ?? torrent.ratioLimit, "ratio"),
           this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
           this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
           this.createTorrentDetailsField("download-limit", "Download Limit", this.toNumber(info.downloadLimit) ?? this.toNumber(torrent.downLimit), "speedLimit", { allowEmpty: true }),
@@ -342,6 +348,12 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         label: "Set Speed Limits",
         click: () => Promise.resolve(),
         icon: "dashboard",
+      },
+      {
+        id: "torrent-set-ratio",
+        label: "Set Ratio",
+        click: () => Promise.resolve(),
+        icon: "percent",
       },
       {
         label: "Remove",

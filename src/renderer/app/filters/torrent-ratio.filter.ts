@@ -6,7 +6,7 @@ export class TorrentRatioFilter {
     }
 
     public transform: IFilterNumber = (ratio): string => {
-        if (this.isNumeric(ratio)) {
+        if (this.isNumeric(ratio) && Number(ratio) >= 0) {
             return parseFloat(String(ratio)).toFixed(2);
         }
 

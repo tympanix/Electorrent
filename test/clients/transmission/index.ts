@@ -9,6 +9,7 @@ const features = {
   torrentDetails: true,
   trackerFilter: true,
   speedLimits: true,
+  ratioLimits: true,
   freeDiskSpace: true,
   uploadOptions: {
     saveLocation: true,

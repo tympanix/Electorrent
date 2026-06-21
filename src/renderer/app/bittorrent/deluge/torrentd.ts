@@ -17,6 +17,7 @@ export class DelugeTorrent extends Torrent {
             downloaded: data.total_done, /* Downloaded (integer): number of bytes */
             uploaded: data.total_uploaded, /* Uploaded (integer): number of bytes */
             ratio: data.ratio, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
+            ratioLimit: data.stop_at_ratio ? data.stop_ratio : undefined,
             uploadSpeed: data.upload_payload_rate,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: data.download_payload_rate, /* Download Speed (integer): bytes per second */
             uploadLimit: data.max_upload_speed >= 0 ? data.max_upload_speed * 1024 : 0,

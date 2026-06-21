@@ -23,6 +23,7 @@ export class TransmissionTorrent extends Torrent {
             downloaded: data.downloadedEver, /* Downloaded (integer): number of bytes */
             uploaded: data.uploadedEver, /* Uploaded (integer): number of bytes */
             ratio: data.uploadRatio, /* Ratio (integer): integer i per-mille (1:1 = 1000) */
+            ratioLimit: data.seedRatioMode > 0 ? data.seedRatioLimit : undefined,
             uploadSpeed: data.rateUpload,  /* Upload Speed (integer): bytes per second */
             downloadSpeed: data.rateDownload, /* Download Speed (integer): bytes per second */
             uploadLimit: data.uploadLimited ? data.uploadLimit * 1024 : 0,

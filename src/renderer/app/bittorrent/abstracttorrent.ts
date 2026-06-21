@@ -22,6 +22,7 @@ export interface TorrentProps {
     downloaded?: number
     uploaded?: number
     ratio?: number
+    ratioLimit?: number
     uploadSpeed?: number
     downloadSpeed?: number
     uploadLimit?: number
@@ -57,6 +58,7 @@ export abstract class Torrent implements TorrentProps {
     downloaded: number
     uploaded: number
     ratio: number
+    ratioLimit: number
     uploadSpeed: number
     downloadSpeed: number
     uploadLimit: number
@@ -330,6 +332,13 @@ export abstract class Torrent implements TorrentProps {
       attribute: 'ratio'
     })
 
+    static COL_RATIO_LIMIT = new Column({
+      name: 'Ratio Target',
+      enabled: true,
+      template: '{{torrent.ratioLimit | torrentRatio}}',
+      attribute: 'ratioLimit'
+    })
+
     static COLUMNS = [
         Torrent.COL_NAME,
         Torrent.COL_SIZE,
@@ -343,7 +352,8 @@ export abstract class Torrent implements TorrentProps {
         Torrent.COL_SEEDS,
         Torrent.COL_QUEUE,
         Torrent.COL_ETA,
-        Torrent.COL_RATIO
+        Torrent.COL_RATIO,
+        Torrent.COL_RATIO_LIMIT
     ]
 
     private static alphabetical(a: string, b: string) {

@@ -24,6 +24,9 @@ export class UtorrentRuntime implements BittorrentRuntime {
         build: -1,
     }
 
+    private ratioLimits = new Map<string, number>()
+    private torrentCache = new Map<string, any[]>()
+
     private url(endpoint = '') {
         const url = new URL(serverUrl(this.server, endpoint || undefined))
         if (!endpoint) {
@@ -164,6 +167,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 speedLimits: true,
+                ratioLimits: true,
                 uploadOptions: {
                     saveLocation: true,
                 },
@@ -218,6 +222,50 @@ export class UtorrentRuntime implements BittorrentRuntime {
                 t: Date.now(),
                 list: 1,
             },
+        })
+
+        const injectRatioLimit = (torrent: any[]) => {
+            const hash = typeof torrent?.[0] === 'string' ? torrent[0] : undefined
+            const ratioLimit = hash ? this.ratioLimits.get(hash) ?? this.ratioLimits.get(hash.toLowerCase()) : undefined
+            if (!hash) {
+                return
+            }
+            if (ratioLimit !== undefined) {
+                const additionalDataIndex = 27
+                torrent[additionalDataIndex] = {
+                    ...(torrent[additionalDataIndex] || {}),
+                    seed_override: 1,
+                    seed_ratio: ratioLimit,
+                }
+            }
+            this.torrentCache.set(hash, torrent)
+            this.torrentCache.set(hash.toLowerCase(), torrent)
+        }
+        const seenHashes = new Set<string>()
+        const track = (torrent: any[]) => {
+            const hash = typeof torrent?.[0] === 'string' ? torrent[0] : undefined
+            if (hash) {
+                seenHashes.add(hash)
+                seenHashes.add(hash.toLowerCase())
+            }
+            injectRatioLimit(torrent)
+        }
+        if (Array.isArray(res.data?.torrents)) {
+            res.data.torrents.forEach(track)
+        }
+        if (Array.isArray(res.data?.torrentp)) {
+            res.data.torrentp.forEach(track)
+        }
+        this.ratioLimits.forEach((_ratioLimit, hash) => {
+            if (seenHashes.has(hash)) {
+                return
+            }
+            const cached = this.torrentCache.get(hash)
+            if (!cached) {
+                return
+            }
+            injectRatioLimit(cached)
+            res.data.torrentp = [...(Array.isArray(res.data?.torrentp) ? res.data.torrentp : []), cached]
         })
 
         return res.data
@@ -318,5 +366,18 @@ export class UtorrentRuntime implements BittorrentRuntime {
             requests.push(this.setProperty(hashes, 'ulrate', Number(options.uploadSpeedLimit)))
         }
         await Promise.all(requests)
+    }
+
+    async setRatioLimit(hashes: string[], options: Record<string, any>): Promise<void> {
+        const ratioLimit = Math.round(Number(options.ratioLimit) * 1000)
+        await Promise.all([
+            this.setProperty(hashes, 'seed_override', 1),
+            this.setProperty(hashes, 'seed_ratio', ratioLimit),
+        ])
+        hashes.forEach((hash) => {
+            this.ratioLimits.set(hash, ratioLimit / 1000)
+            this.ratioLimits.set(hash.toLowerCase(), ratioLimit / 1000)
+        })
+        this.data.cid = 0
     }
 }

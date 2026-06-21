@@ -64,6 +64,8 @@ const TRANSMISSION_FIELDS = [
     'recheckProgress',
     'secondsDownloading',
     'secondsSeeding',
+    'seedRatioLimit',
+    'seedRatioMode',
     'sequentialDownload',
     'sequential_download',
     'seedIdleLimit',
@@ -200,6 +202,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 torrentDetails: true,
                 trackerFilter: true,
                 speedLimits: true,
+                ratioLimits: true,
                 freeDiskSpace: true,
                 uploadOptions: {
                     saveLocation: true,
@@ -269,6 +272,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 connections: torrent.peersConnected ?? null,
                 connectionsLimit: torrent.maxConnectedPeers ?? null,
                 shareRatio: torrent.uploadRatio ?? null,
+                ratioLimit: torrent.seedRatioMode > 0 ? (torrent.seedRatioLimit ?? null) : null,
                 additionDate: torrent.addedDate ?? null,
                 completionDate: torrent.doneDate ?? null,
                 createdBy: torrent.creator ?? null,
@@ -483,5 +487,12 @@ export class TransmissionRuntime implements BittorrentRuntime {
         })
 
         return this.doAction('torrent-set', hashes, args).then((response) => this.ensureSuccess(response)).then(() => undefined)
+    }
+
+    setRatioLimit(hashes: string[], options: Record<string, any>): Promise<void> {
+        return this.doAction('torrent-set', hashes, {
+            seedRatioMode: 1,
+            seedRatioLimit: Number(options.ratioLimit),
+        }).then((response) => this.ensureSuccess(response)).then(() => undefined)
     }
 }
