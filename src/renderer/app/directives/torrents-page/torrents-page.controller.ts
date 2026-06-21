@@ -30,15 +30,22 @@ export class TorrentsPageController {
         settingsService: any,
     ) {
         const LIMIT = 25;
+        const SYNC_LATENCY_SAMPLE_SIZE = 5;
+        const MIN_SLOW_LATENCY_MS = 1000;
+        const SLOW_LATENCY_FACTOR = 3;
 
         let selected: any[] = [];
         let lastSelected: any = null;
         let timeout: angular.IPromise<void> | undefined;
         let reconnect: angular.IPromise<void> | undefined;
+        let slowSyncTimer: angular.IPromise<void> | undefined;
+        let slowConnectionTimer: angular.IPromise<void> | undefined;
         let deferredUploads: Array<{ item: PendingTorrentUploadItem; askUploadOptions: boolean }> = [];
 
         let settings = settingsService.getAllSettings();
         let refreshRate = settings.refreshRate || 2000;
+
+        $rootScope.$syncConnection = $rootScope.$syncConnection || { state: "normal", responseTimes: [] };
 
         $scope.settings = settingsService.getAllSettings();
         $scope.connectionLost = false;
@@ -212,6 +219,7 @@ export class TorrentsPageController {
 
         $scope.$on("wipe:torrents", () => {
             $scope.connectionLost = false;
+            setSyncConnectionState("normal");
             clearAll();
             $scope.filters = {
                 status: "all",
@@ -379,9 +387,11 @@ export class TorrentsPageController {
                     .then(() => {
                         startTimer();
                         $scope.connectionLost = false;
+                        setSyncConnectionState("normal");
                     }).catch(() => {
                         $notify.alert("Connection lost", "Trying to reconnect");
                         $scope.connectionLost = true;
+                        setSyncConnectionState("broken");
                         startReconnect();
                     });
             }, refreshRate);
@@ -398,6 +408,7 @@ export class TorrentsPageController {
                         $notify.enableAll();
                         $notify.ok("Reconnected", "The connection has been reestablished");
                         $scope.connectionLost = false;
+                        setSyncConnectionState("normal");
                         startTimer(true);
                     }).catch((err: unknown) => {
                         startReconnect();
@@ -422,6 +433,81 @@ export class TorrentsPageController {
             if (timeout) {
                 $timeout.cancel(timeout);
             }
+            cancelSlowSyncTimer();
+        }
+
+        function cancelSlowSyncRequestTimer() {
+            if (slowSyncTimer) {
+                $timeout.cancel(slowSyncTimer);
+                slowSyncTimer = undefined;
+            }
+        }
+
+        function cancelSlowSyncTimer() {
+            cancelSlowSyncRequestTimer();
+            if (slowConnectionTimer) {
+                $timeout.cancel(slowConnectionTimer);
+                slowConnectionTimer = undefined;
+            }
+        }
+
+        function getSyncConnectionStatus() {
+            $rootScope.$syncConnection = $rootScope.$syncConnection || { state: "normal", responseTimes: [] };
+            return $rootScope.$syncConnection;
+        }
+
+        function setSyncConnectionState(state: "normal" | "slow" | "broken", lastResponseTime?: number, slowThreshold?: number) {
+            const status = getSyncConnectionStatus();
+            status.state = state;
+            if (typeof lastResponseTime === "number") {
+                status.lastResponseTime = lastResponseTime;
+            }
+            if (typeof slowThreshold === "number") {
+                status.slowThreshold = slowThreshold;
+            }
+            $rootScope.$applyAsync();
+        }
+
+        function scheduleSlowConnectionTimer(serverId?: string | number) {
+            if (slowConnectionTimer) {
+                $timeout.cancel(slowConnectionTimer);
+            }
+            const slowThreshold = getSlowSyncThreshold();
+            slowConnectionTimer = $timeout(() => {
+                if (!$scope.connectionLost && serverId === $rootScope.$server?.id) {
+                    setSyncConnectionState("slow", undefined, slowThreshold);
+                }
+            }, refreshRate + slowThreshold);
+        }
+
+        function getSlowSyncThreshold() {
+            const responseTimes = getSyncConnectionStatus().responseTimes;
+            if (!responseTimes.length) {
+                return MIN_SLOW_LATENCY_MS;
+            }
+
+            const sortedResponseTimes = responseTimes.slice().sort((left, right) => left - right);
+            const medianResponseTime = sortedResponseTimes[Math.floor(sortedResponseTimes.length / 2)];
+            return Math.max(MIN_SLOW_LATENCY_MS, medianResponseTime * SLOW_LATENCY_FACTOR);
+        }
+
+        function trackSyncRequestLatency(startedAt: number, serverId?: string | number) {
+            if (serverId !== $rootScope.$server?.id) {
+                return;
+            }
+
+            const responseTime = Math.round(window.performance.now() - startedAt);
+            if (slowConnectionTimer) {
+                $timeout.cancel(slowConnectionTimer);
+                slowConnectionTimer = undefined;
+            }
+            const status = getSyncConnectionStatus();
+            status.responseTimes.push(responseTime);
+            if (status.responseTimes.length > SYNC_LATENCY_SAMPLE_SIZE) {
+                status.responseTimes.splice(0, status.responseTimes.length - SYNC_LATENCY_SAMPLE_SIZE);
+            }
+            setSyncConnectionState("normal", responseTime, getSlowSyncThreshold());
+            scheduleSlowConnectionTimer(serverId);
         }
 
         $scope.filterByStatus = (status: string) => {
@@ -805,7 +891,21 @@ export class TorrentsPageController {
         $scope.update = (fullupdate?: boolean) => {
             const serverId = $rootScope.$server?.id;
             const request = $rootScope.$btclient?.torrents(!!fullupdate);
+            const startedAt = window.performance.now();
+            const slowThreshold = getSlowSyncThreshold();
+            cancelSlowSyncRequestTimer();
+            slowSyncTimer = $timeout(() => {
+                if (!$scope.connectionLost && serverId === $rootScope.$server?.id) {
+                    setSyncConnectionState("slow", undefined, slowThreshold);
+                }
+            }, slowThreshold);
+
             return request.then((torrents: any) => {
+                cancelSlowSyncRequestTimer();
+                trackSyncRequestLatency(startedAt, serverId);
+                if (serverId !== $rootScope.$server?.id) {
+                    return;
+                }
                 if (serverId !== $rootScope.$server?.id) {
                     return;
                 }
@@ -826,6 +926,8 @@ export class TorrentsPageController {
                     $scope.renderDone();
                 }
             }).catch((err: unknown) => {
+                cancelSlowSyncTimer();
+                setSyncConnectionState("broken");
                 $scope.renderDone();
                 return $q.reject(err);
             });

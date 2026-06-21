@@ -6,6 +6,9 @@ import type { AppMeta, LaunchPayload, MenuAction } from "@shared/ipc-contract";
 interface AppShellScope extends IScope {
     servers: any[];
     connectedServerName: () => string;
+    showSyncConnectionIndicator: () => boolean;
+    syncConnectionState: () => string;
+    syncConnectionMessage: () => string;
     showTorrents: boolean;
     showLoading: boolean;
     statusText: string;
@@ -42,6 +45,14 @@ export class AppShellController {
 
         $scope.servers = settingsService.getServers();
         $scope.connectedServerName = () => $rootScope.$server?.getDisplayName() || "";
+        $scope.syncConnectionState = () => $rootScope.$syncConnection?.state || "normal";
+        $scope.showSyncConnectionIndicator = () => $scope.syncConnectionState() !== "normal";
+        $scope.syncConnectionMessage = () => {
+            if ($scope.syncConnectionState() === "broken") {
+                return "Connection lost. Trying to reconnect.";
+            }
+            return "Server response is slower than usual.";
+        };
         $scope.showTorrents = false;
         $scope.showLoading = true;
         $scope.statusText = "Loading";

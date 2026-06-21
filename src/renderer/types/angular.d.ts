@@ -16,8 +16,16 @@ declare namespace angular {
         json(): StoredServerConfig
     }
 
+    interface SyncConnectionStatus {
+        state: "normal" | "slow" | "broken"
+        responseTimes: number[]
+        lastResponseTime?: number
+        slowThreshold?: number
+    }
+
     interface IRootScopeService {
         $btclient?: TorrentClient | null
         $server?: ElectorrentServer | null
+        $syncConnection?: SyncConnectionStatus
     }
 }
