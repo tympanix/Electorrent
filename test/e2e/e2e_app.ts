@@ -108,6 +108,11 @@ export class App {
     await settingsPage.waitForDisplayed({ timeout: this.timeout })
   }
 
+  async welcomePageIsVisible(opts?: { timeout: number }) {
+    const welcomePage = $("#page-welcome")
+    await welcomePage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
+  }
+
   async serverSelectionPageIsVisible(opts?: { timeout: number }) {
     const serverSelectionPage = $("#page-server-selection")
     await serverSelectionPage.waitForDisplayed({ timeout: opts?.timeout ?? this.timeout })
@@ -184,10 +189,10 @@ export class App {
     await waitForModalClose(insecureTlsModal, this.timeout)
   }
 
-  async getNotificationError() {
+  async getNotificationError(opts?: { timeout: number }) {
       const msg = $("#notifications .negative")
       try {
-        await msg.waitForExist({ timeout: 1000 })
+        await msg.waitForExist({ timeout: opts?.timeout ?? 1000 })
         return {
           title: await msg.$(".header").getText(),
           message: await msg.$("p").getText()

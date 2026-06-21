@@ -12,7 +12,9 @@ export interface TestClient {
   host: string
   port: number
   containerPort?: number
+  containerHostPort?: number
   proxyPort?: number
+  authProxyHostPort?: number
   acceptHttpStatus: number
   stopLabel: string
   downloadLabel: string

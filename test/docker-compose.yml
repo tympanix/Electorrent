@@ -36,9 +36,11 @@ services:
     build: ./shared/nginx
     ports:
       - ${NGINX_HOST_PORT:-8443}:443
+      - ${NGINX_AUTH_HOST_PORT:-8081}:${NGINX_AUTH_PORT:-8081}
     environment:
       - PROXY_HOST=${PROXY_HOST}
       - PROXY_PORT=${PROXY_PORT}
+      - NGINX_AUTH_PORT=${NGINX_AUTH_PORT:-8081}
 
   deluge:
     image: linuxserver/deluge:${VERSION:-latest}

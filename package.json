@@ -36,7 +36,7 @@
     "winreg": "^1.2.2"
   },
   "devDependencies": {
-    "@electorrent/xmlrpc": "^1.4.0",
+    "@electorrent/xmlrpc": "^1.5.0",
     "@fontsource/lato": "^5.2.7",
     "@types/angular": "^1.5.8",
     "@types/angular-animate": "^1.5.10",

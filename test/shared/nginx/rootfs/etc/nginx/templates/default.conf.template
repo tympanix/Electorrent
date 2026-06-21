@@ -6,6 +6,22 @@ server {
 }
 
 server {
+  listen ${NGINX_AUTH_PORT} default_server;
+
+  location / {
+    auth_basic "Electorrent test fixture";
+    auth_basic_user_file /etc/nginx/conf.d/rtorrent-basic-auth.htpasswd;
+
+    proxy_http_version 1.1;
+    proxy_set_header   Host               ${PROXY_HOST}:${PROXY_PORT};
+    proxy_set_header   X-Forwarded-Host   $http_host;
+    proxy_set_header   X-Forwarded-For    $remote_addr;
+    proxy_set_header   Referer            '';
+    proxy_pass http://${PROXY_HOST}:${PROXY_PORT};
+  }
+}
+
+server {
   listen 443 ssl default_server;
 
   ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
