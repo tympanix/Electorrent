@@ -1,0 +1,104 @@
+<div class="torrent sidebar">
+    <div class="sidebar-scroll">
+        <div class="torrent-sidebar-header">
+            <button
+                type="button"
+                class="ui icon basic mini button torrent-sidebar-toggle"
+                data-role="torrent-sidebar-toggle"
+                ng-click="ctl.toggleCollapsed()"
+                ng-attr-aria-label="{{ ctl.isCollapsed() ? 'Expand torrent sidebar' : 'Collapse torrent sidebar' }}"
+                title="{{ ctl.isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar' }}"
+            >
+                <i class="angle double {{ ctl.isCollapsed() ? 'right' : 'left' }} icon"></i>
+            </button>
+        </div>
+        <ul class="nav">
+            <li data-state="all" ng-click="ctl.selectStatus('all')" ng-class="ctl.activeOn('all')">
+                <i class="ui large teal asterisk icon"></i>
+                <span class="torrent-sidebar-item-label">All</span>
+                <div class="ui torrent sort label">{{ctl.numInStatus('all')}}</div>
+            </li>
+            <li data-state="downloading" ng-click="ctl.selectStatus('downloading')" ng-class="ctl.activeOn('downloading')">
+                <i class="ui large blue arrow down icon"></i>
+                <span class="torrent-sidebar-item-label">Downloading</span>
+                <div class="ui torrent sort label">{{ctl.numInStatus('downloading')}}</div>
+            </li>
+            <li data-state="finished" ng-click="ctl.selectStatus('finished')" ng-class="ctl.activeOn('finished')">
+                <i class="ui large green checkmark icon"></i>
+                <span class="torrent-sidebar-item-label">Finished</span>
+                <div class="ui torrent sort label">{{ctl.numInStatus('finished')}}</div>
+            </li>
+            <li data-state="seeding" ng-click="ctl.selectStatus('seeding')" ng-class="ctl.activeOn('seeding')">
+                <i class="ui large orange arrow up icon"></i>
+                <span class="torrent-sidebar-item-label">Seeding</span>
+                <div class="ui torrent sort label">{{ctl.numInStatus('seeding')}}</div>
+            </li>
+            <li data-state="stopped" ng-click="ctl.selectStatus('stopped')" ng-class="ctl.activeOn('stopped')">
+                <i class="ui large grey pause icon"></i>
+                <span class="torrent-sidebar-item-label">Stopped</span>
+                <div class="ui torrent sort label">{{ctl.numInStatus('stopped')}}</div>
+            </li>
+            <li data-state="error" ng-click="ctl.selectStatus('error')" ng-class="ctl.activeOn('error')">
+                <i class="ui large red remove icon"></i>
+                <span class="torrent-sidebar-item-label">Failed</span>
+                <div class="ui torrent sort label">{{ctl.numInStatus('error')}}</div>
+            </li>
+        </ul>
+        <div id="torrent-sidebar-labels" ng-if="ctl.features.labels && !ctl.isCollapsed()">
+            <torrent-sidebar-section
+                title="Labels"
+                clear-role="labels-clear"
+                empty-text="No labels..."
+                item-attribute="label"
+                items="ctl.labels"
+                active="ctl.filters.label"
+                on-select="ctl.selectLabel(item)">
+            </torrent-sidebar-section>
+        </div>
+        <div id="torrent-sidebar-trackers" ng-if="ctl.features.trackerFilter && !ctl.isCollapsed()">
+            <torrent-sidebar-section
+                title="Trackers"
+                clear-role="trackers-clear"
+                empty-text="No trackers..."
+                item-attribute="tracker"
+                items="ctl.trackers"
+                active="ctl.filters.tracker"
+                on-select="ctl.selectTracker(item)">
+            </torrent-sidebar-section>
+        </div>
+    </div>
+    <div class="sidebar-collapsed-sections" ng-if="ctl.isCollapsed()">
+        <div class="sidebar-collapsed-section" ng-if="ctl.features.labels">
+            <div class="torrent-sidebar-section-trigger" data-role="torrent-sidebar-labels-toggle" title="Labels">
+                <i class="tags icon"></i>
+            </div>
+            <div id="torrent-sidebar-labels" class="sidebar-flyout">
+                <torrent-sidebar-section
+                    title="Labels"
+                    clear-role="labels-clear"
+                    empty-text="No labels..."
+                    item-attribute="label"
+                    items="ctl.labels"
+                    active="ctl.filters.label"
+                    on-select="ctl.selectLabel(item)">
+                </torrent-sidebar-section>
+            </div>
+        </div>
+        <div class="sidebar-collapsed-section" ng-if="ctl.features.trackerFilter">
+            <div class="torrent-sidebar-section-trigger" data-role="torrent-sidebar-trackers-toggle" title="Trackers">
+                <i class="sitemap icon"></i>
+            </div>
+            <div id="torrent-sidebar-trackers" class="sidebar-flyout">
+                <torrent-sidebar-section
+                    title="Trackers"
+                    clear-role="trackers-clear"
+                    empty-text="No trackers..."
+                    item-attribute="tracker"
+                    items="ctl.trackers"
+                    active="ctl.filters.tracker"
+                    on-select="ctl.selectTracker(item)">
+                </torrent-sidebar-section>
+            </div>
+        </div>
+    </div>
+</div>

@@ -83,7 +83,8 @@ html, body {
     overflow-x: hidden;
     border-right: 1px solid @borderColor;
 }
-.sidebar + div {
+.sidebar + div,
+torrent-sidebar + .main-panel {
     position: relative;
     z-index: 2;
     float: right;
@@ -106,7 +107,8 @@ html, body {
     z-index: 3;
     transition: width 0.2s ease;
 }
-#page-torrents .sidebar + div {
+#page-torrents .sidebar + div,
+#page-torrents torrent-sidebar + .main-panel {
     width: calc(~"100% - var(--torrent-sidebar-width)");
     transition: width 0.2s ease;
 }
