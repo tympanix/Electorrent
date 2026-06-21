@@ -6,3 +6,4 @@
 @pageMiddleground    : #F9FAFB;
 @highlightBackground : #F5F5F5;
 @overlayBackground   : @pageBackground;
+@popupBackground     : rgba(255, 255, 255, 0.5);
