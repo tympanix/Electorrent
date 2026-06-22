@@ -5,16 +5,7 @@ import { addTorrentUrl, getSnapshot, invokeAction, uploadTorrent } from "@render
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   public name = "µTorrent"
   public id = "utorrent"
-  private ratioLimits = new Map<string, number>()
-
-  build = (array: Array<any>): UtorrentTorrent => {
-    const torrent = UtorrentTorrent.fromArray(array)
-    const ratioLimit = this.ratioLimits.get(torrent.hash) ?? this.ratioLimits.get(torrent.hash.toLowerCase())
-    if (ratioLimit !== undefined) {
-      torrent.ratioLimit = ratioLimit
-    }
-    return torrent
-  }
+  build = (array: Array<any>): UtorrentTorrent => UtorrentTorrent.fromApiArray(array)
 
   defaultPath(): string {
     return "/gui";
@@ -103,14 +94,10 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
     return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
   }
 
-  setRatioLimit(torrents: UtorrentTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
-    return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.hash), options).then(() => {
-      torrents.forEach((torrent) => {
-        torrent.ratioLimit = options.ratioLimit;
-        this.ratioLimits.set(torrent.hash, options.ratioLimit);
-        this.ratioLimits.set(torrent.hash.toLowerCase(), options.ratioLimit);
-      });
-    });
+  async setRatioLimit(torrents: UtorrentTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
+    const hashes = torrents.map((torrent) => torrent.hash);
+    await invokeAction("setRatioLimit", hashes, options);
+    await invokeAction("getprops", hashes);
   };
 
   private baseActionHeader: TorrentActionList<UtorrentTorrent> = [
@@ -176,12 +163,6 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       label: "Set Speed Limits",
       click: () => Promise.resolve(),
       icon: "dashboard",
-    },
-    {
-      id: "torrent-set-ratio",
-      label: "Set Ratio",
-      click: () => Promise.resolve(),
-      icon: "percent",
     },
     {
       label: "Remove",

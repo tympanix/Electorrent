@@ -333,7 +333,7 @@ export abstract class Torrent implements TorrentProps {
     })
 
     static COL_RATIO_LIMIT = new Column({
-      name: 'Ratio Target',
+      name: 'Ratio Limit',
       enabled: false,
       template: '{{torrent.ratioLimit | torrentRatio}}',
       attribute: 'ratioLimit'

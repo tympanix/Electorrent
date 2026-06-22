@@ -1,5 +1,90 @@
 import {Torrent} from "@renderer/app/bittorrent/abstracttorrent";
 
+interface UtorrentApiAdditionalData {
+    seed_override?: number
+    seed_ratio?: number
+    [key: string]: any
+}
+
+interface UtorrentApiTorrent {
+    hash: string
+    status: number
+    name: string
+    size: number
+    percent: number
+    downloaded: number
+    uploaded: number
+    ratio: number
+    uploadSpeed: number
+    downloadSpeed: number
+    eta: number
+    label: string
+    peersConnected: number
+    peersInSwarm: number
+    seedsConnected: number
+    seedsInSwarm: number
+    availability: number
+    torrentQueueOrder: number
+    remaining: number
+    downloadUrl: string
+    rssFeedUrl: string
+    statusMessage: string
+    streamId: string
+    dateAdded: number
+    dateCompleted: number
+    appUpdateUrl: string
+    savePath: string
+    additionalData?: UtorrentApiAdditionalData
+}
+
+const apiPropertiesOrder: Array<keyof UtorrentApiTorrent> = [
+    "hash",
+    "status",
+    "name",
+    "size",
+    "percent",
+    "downloaded",
+    "uploaded",
+    "ratio",
+    "uploadSpeed",
+    "downloadSpeed",
+    "eta",
+    "label",
+    "peersConnected",
+    "peersInSwarm",
+    "seedsConnected",
+    "seedsInSwarm",
+    "availability",
+    "torrentQueueOrder",
+    "remaining",
+    "downloadUrl",
+    "rssFeedUrl",
+    "statusMessage",
+    "streamId",
+    "dateAdded",
+    "dateCompleted",
+    "appUpdateUrl",
+    "savePath",
+    "additionalData",
+]
+
+function parseUtorrentApiTorrent(data: any[]): UtorrentApiTorrent {
+    const torrent: any = {}
+    apiPropertiesOrder.forEach((property, index) => {
+        torrent[property] = data[index]
+    })
+    return torrent as UtorrentApiTorrent
+}
+
+function parseRatioLimit(additionalData?: UtorrentApiAdditionalData): number | undefined {
+    if (!additionalData?.seed_override) {
+        return undefined
+    }
+
+    const seedRatio = Number(additionalData.seed_ratio)
+    return Number.isFinite(seedRatio) ? seedRatio / 1000 : undefined
+}
+
 export class UtorrentTorrent extends Torrent {
 
     /* Custom/additional attributes */
@@ -9,9 +94,9 @@ export class UtorrentTorrent extends Torrent {
     streamId: string
     rssFeedUrl: string
     appUpdateUrl: string
-    additionalData: Record<string, any>
+    additionalData: UtorrentApiAdditionalData
 
-    constructor(data: Record<string, any>) {
+    constructor(data: UtorrentApiTorrent) {
 
         super({
             hash: data.hash,
@@ -21,7 +106,7 @@ export class UtorrentTorrent extends Torrent {
             downloaded: data.downloaded,
             uploaded: data.uploaded,
             ratio: (data.ratio / 1000),
-            ratioLimit: data.additionalData?.seed_override ? (data.additionalData.seed_ratio / 1000) : undefined,
+            ratioLimit: parseRatioLimit(data.additionalData),
             uploadSpeed: data.uploadSpeed,
             downloadSpeed: data.downloadSpeed,
             eta: data.eta,
@@ -44,47 +129,12 @@ export class UtorrentTorrent extends Torrent {
         this.streamId = data.streamId;
         this.rssFeedUrl = data.rssFeedUrl;
         this.appUpdateUrl = data.appUpdateUrl;
-        this.additionalData = data.additionalData;
+        this.additionalData = data.additionalData || {};
 
     }
 
-    static apiPropertiesOrder = [
-        "hash",
-        "status",
-        "name",
-        "size",
-        "percent",
-        "downloaded",
-        "uploaded",
-        "ratio",
-        "uploadSpeed",
-        "downloadSpeed",
-        "eta",
-        "label",
-        "peersConnected",
-        "peersInSwarm",
-        "seedsConnected",
-        "seedsInSwarm",
-        "availability",
-        "torrentQueueOrder",
-        "remaining",
-        "downloadUrl",
-        "rssFeedUrl",
-        "statusMessage",
-        "streamId",
-        "dateAdded",
-        "dateCompleted",
-        "appUpdateUrl",
-        "savePath",
-        "additionalData",
-    ]
-
-    static fromArray(data: any[]): UtorrentTorrent {
-        let args = {}
-        for (let i = 0; i < data.length; i++) {
-            args[this.apiPropertiesOrder[i]] = data[i]
-        }
-        return new UtorrentTorrent(args)
+    static fromApiArray(data: any[]): UtorrentTorrent {
+        return new UtorrentTorrent(parseUtorrentApiTorrent(data))
     }
 
     statusesMap = {

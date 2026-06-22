@@ -439,10 +439,11 @@ export class DelugeRuntime implements BittorrentRuntime {
     }
 
     async setRatioLimit(hashes: string[], options: Record<string, any>): Promise<void> {
-        const ratioLimit = Number(options.ratioLimit)
-        await Promise.all(hashes.map(async (hash) => {
-            await defer((done) => this.rpc("core.set_torrent_stop_at_ratio", [hash, true], done))
-            await defer((done) => this.rpc("core.set_torrent_stop_ratio", [hash, ratioLimit], done))
-        }))
+        const torrentOptions = {
+            stop_at_ratio: true,
+            stop_ratio: Number(options.ratioLimit),
+        }
+
+        return defer((done) => this.rpc("core.set_torrent_options", [hashes, torrentOptions], done)).then(() => undefined)
     }
 }

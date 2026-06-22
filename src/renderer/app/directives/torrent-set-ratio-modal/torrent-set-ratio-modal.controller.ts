@@ -79,13 +79,13 @@ export class TorrentSetRatioModalController {
     }
 
     if (this.scope.ratioLimit === null || this.scope.ratioLimit === undefined || String(this.scope.ratioLimit) === "") {
-      this.scope.error = "Enter a ratio target";
+      this.scope.error = "Enter a ratio limit";
       return;
     }
 
     const ratioLimit = Number(this.scope.ratioLimit);
     if (!Number.isFinite(ratioLimit) || ratioLimit < 0) {
-      this.scope.error = "Ratio target must be zero or greater";
+      this.scope.error = "Ratio limit must be zero or greater";
       return;
     }
 
@@ -94,13 +94,13 @@ export class TorrentSetRatioModalController {
       this.scope.error = null;
       const client = this.rootScope.$btclient;
       if (!client || typeof client.setRatioLimit !== "function") {
-        throw new Error("Ratio targets are not available for the current client");
+        throw new Error("Ratio limits are not available for the current client");
       }
       await client.setRatioLimit(this.scope.torrents, { ratioLimit });
       await this.scope.onSaved?.();
       this.close();
     } catch (err: any) {
-      this.scope.error = err?.message || "Failed to set ratio target";
+      this.scope.error = err?.message || "Failed to set ratio limit";
     } finally {
       this.scope.loading = false;
     }

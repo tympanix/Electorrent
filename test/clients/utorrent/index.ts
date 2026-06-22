@@ -6,7 +6,7 @@ const features = {
   magnetLinks: true,
   labels: true,
   speedLimits: true,
-  ratioLimits: true,
+  ratioLimits: false,
   uploadOptions: {
     saveLocation: true,
   },

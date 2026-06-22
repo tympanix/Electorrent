@@ -6,20 +6,20 @@
     <i class="close icon"></i>
     <div class="header">
         <i class="percent icon"></i>
-        Set Ratio Target
+        Set Ratio Limit
     </div>
     <div class="content">
         <form class="ui form" ng-submit="ctl.apply()">
-            <p>Enter a ratio target. The current ratio is shown when all selected torrents share the same target.</p>
+            <p>Enter a ratio limit. The current limit is shown when all selected torrents share the same limit.</p>
             <div class="field">
-                <label for="torrent-set-ratio-value">Ratio target</label>
+                <label for="torrent-set-ratio-value">Ratio limit</label>
                 <input
                     id="torrent-set-ratio-value"
                     data-role="torrent-set-ratio-value"
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="Ratio target"
+                    placeholder="Ratio limit"
                     ng-model="ctl.scope.ratioLimit">
             </div>
             <div class="ui negative message" ng-if="ctl.scope.error">
