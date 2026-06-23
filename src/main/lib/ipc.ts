@@ -14,6 +14,7 @@ import * as updater from './update'
 
 interface RegisterHandlersOptions {
     isDebug: boolean
+    forceTitleBarMenu?: boolean
     getWindow: () => BrowserWindow | null
     consumePendingLaunchPayload: () => Promise<{
         magnets: PendingTorrentUploadLink[]
@@ -24,7 +25,7 @@ interface RegisterHandlersOptions {
     onBittorrentConnected?: () => void | Promise<void>
 }
 
-function getAppMeta(isDebug: boolean) {
+function getAppMeta(isDebug: boolean, requestedForceTitleBarMenu = false) {
     return {
         appName: app.name,
         appVersion: getAppVersion(),
@@ -32,6 +33,7 @@ function getAppMeta(isDebug: boolean) {
         isWindows: is.windows(),
         isLinux: is.linux(),
         isDebug,
+        forceTitleBarMenu: requestedForceTitleBarMenu,
         platform: process.platform,
         versions: {
             node: process.versions.node,
@@ -95,11 +97,11 @@ function runEditCommand(window: BrowserWindow, command: EditCommand) {
     }
 }
 
-export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload, onSettingsSaved, onSystemThemeChanged, onBittorrentConnected }: RegisterHandlersOptions) {
+export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consumePendingLaunchPayload, onSettingsSaved, onSystemThemeChanged, onBittorrentConnected }: RegisterHandlersOptions) {
     menu.configure({ isDebug })
 
     ipcMain.handle(IPC_CHANNELS.app.getMeta, async function() {
-        return getAppMeta(isDebug)
+        return getAppMeta(isDebug, forceTitleBarMenu)
     })
 
     ipcMain.handle(IPC_CHANNELS.app.getDefaultProtocolStatus, async function(_event: IpcMainInvokeEvent, { protocol }) {

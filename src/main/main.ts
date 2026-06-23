@@ -39,6 +39,7 @@ async function bootstrap() {
     parser.usage(`Electorrent ${app.getVersion()}`)
     parser.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
     parser.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
+    parser.boolean('force-title-bar-menu')
 
     const [
         { IPC_CHANNELS },
@@ -75,7 +76,7 @@ async function bootstrap() {
     logger.debug('Starting Electorrent in debug mode')
     logger.verbose('Verbose logging enabled')
 
-    const program = parser.parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean }
+    const program = parser.parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean; forceTitleBarMenu?: boolean }
 
     if (!app.isPackaged) {
         try {
@@ -411,6 +412,7 @@ async function bootstrap() {
 
     ipcHandlers.registerHandlers({
         isDebug: !!program.debug,
+        forceTitleBarMenu: !!program.forceTitleBarMenu,
         getWindow: () => torrentWindow,
         consumePendingLaunchPayload,
         onSettingsSaved: async (newSettings) => {
