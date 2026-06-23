@@ -44,21 +44,36 @@ interface MockTorrentFile {
     is_seed: boolean
 }
 
+interface MockRuntimeStore {
+    torrents: Map<string, MockTorrent>
+    files: Map<string, MockTorrentFile[]>
+    removedHashes: string[]
+}
+
 type MockTorrentInput = Partial<MockTorrent> & {
     hash?: string
     files?: MockTorrentFile[]
 }
 
 export class MockBittorrentRuntime implements BittorrentRuntime {
-    private connected = false
-    private torrents = new Map<string, MockTorrent>()
-    private files = new Map<string, MockTorrentFile[]>()
-    private removedHashes: string[] = []
+    private static stores = new Map<string, MockRuntimeStore>()
 
-    async connect(_server: BittorrentServerConfig): Promise<TorrentClientConnection> {
-        this.torrents.clear()
-        this.files.clear()
-        this.removedHashes = []
+    private connected = false
+    private store?: MockRuntimeStore
+
+    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+        const key = this.getServerKey(server)
+        let store = MockBittorrentRuntime.stores.get(key)
+        if (!store) {
+            store = {
+                torrents: new Map<string, MockTorrent>(),
+                files: new Map<string, MockTorrentFile[]>(),
+                removedHashes: [],
+            }
+            MockBittorrentRuntime.stores.set(key, store)
+        }
+
+        this.store = store
         this.connected = true
 
         return {
@@ -417,8 +432,27 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
     }
 
     private assertConnected() {
-        if (!this.connected) {
+        if (!this.connected || !this.store) {
             throw new Error("Mock bittorrent session is not connected")
         }
+    }
+
+    private get torrents() {
+        this.assertConnected()
+        return this.store!.torrents
+    }
+
+    private get files() {
+        this.assertConnected()
+        return this.store!.files
+    }
+
+    private get removedHashes() {
+        this.assertConnected()
+        return this.store!.removedHashes
+    }
+
+    private getServerKey(server: BittorrentServerConfig) {
+        return server.id || `${server.client}:${server.proto}://${server.ip}:${server.port}${server.path || ""}`
     }
 }
