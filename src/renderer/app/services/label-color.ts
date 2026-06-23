@@ -9,12 +9,16 @@ interface ServerWithLabelColors {
 }
 
 export class LabelColorService {
-    private readonly saturation = 62
-    private readonly value = 82
+    private readonly saturation = 35
+    private readonly value = 58
+    private readonly paletteHueDelta = 5
 
-    getPalette() {
-        return Array.from({ length: 36 }, (_value, index) => {
-            return this.hsvToHex(index * 10, this.saturation, this.value)
+    getPalette(deltaHue = this.paletteHueDelta) {
+        const step = Math.max(1, Math.min(360, Math.round(deltaHue)))
+        const length = Math.ceil(360 / step)
+
+        return Array.from({ length }, (_value, index) => {
+            return this.hsvToHex((index * step) % 360, this.saturation, this.value)
         })
     }
 
