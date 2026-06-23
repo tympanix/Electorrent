@@ -112,7 +112,9 @@ export class ModalDirective implements IDirective {
 
     static clearForm(element: IAugmentedJQuery) {
         let form: any = $(element)
-        form.form('clear');
+        if (!form.find('[ng-model], [data-ng-model], [x-ng-model]').length) {
+            form.form('clear');
+        }
         form.find('.error.message').empty()
     }
 

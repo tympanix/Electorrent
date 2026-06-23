@@ -75,6 +75,7 @@ describe("settings", function () {
 
     const nextName = `Renamed ${Date.now()}`
     await this.app.renameSettingsServer(0, nextName)
+    assert.equal(await this.app.getRenameSettingsServerValue(0), nextName)
 
     await this.app.settingsSave()
     await this.app.torrentsPageIsVisible()
