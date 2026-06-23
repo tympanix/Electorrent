@@ -101,6 +101,13 @@ jobs:
     - name: Build distribution
       run: npm run dist
       if: github.ref != 'refs/heads/master'
+    - name: Upload distribution
+      uses: actions/upload-artifact@v4
+      if: github.event_name == 'pull_request'
+      with:
+        name: electorrent-dist-${{ runner.os }}
+        path: dist/**
+        if-no-files-found: error
     - name: Release artifacts
       if: github.ref == 'refs/heads/master'
       run: npm run release
