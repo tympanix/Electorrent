@@ -1,0 +1,33 @@
+<nav class="title-bar-menu" aria-label="Application menu">
+    <div class="title-bar-menu-root" ng-repeat="menu in titleBarMenus track by menu.label">
+        <button
+            type="button"
+            class="title-bar-menu-trigger"
+            ng-class="{ active: activeTitleBarMenu === $index }"
+            ng-click="toggleTitleBarMenu($index, $event)"
+            ng-mousedown="$event.preventDefault()"
+            ng-mouseenter="openTitleBarMenu($index)"
+            aria-haspopup="true"
+            ng-attr-aria-expanded="{{activeTitleBarMenu === $index}}">
+            {{menu.label}}
+        </button>
+        <div class="title-bar-menu-dropdown" ng-if="activeTitleBarMenu === $index" ng-click="$event.stopPropagation()" role="menu">
+            <div ng-repeat="item in visibleTitleBarMenuItems(menu) track by $index">
+                <div ng-if="item.separator" class="title-bar-menu-divider" role="separator"></div>
+                <button
+                    ng-if="!item.separator"
+                    type="button"
+                    class="title-bar-menu-item"
+                    ng-class="{ disabled: item.enabled === false, checked: item.checked }"
+                    ng-click="runTitleBarMenuItem(item, $event)"
+                    ng-mousedown="$event.preventDefault()"
+                    role="menuitem"
+                    ng-disabled="item.enabled === false">
+                    <span class="title-bar-menu-check"></span>
+                    <span class="title-bar-menu-label">{{item.label}}</span>
+                    <span class="title-bar-menu-accelerator">{{item.accelerator}}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>

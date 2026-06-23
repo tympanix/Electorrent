@@ -126,6 +126,8 @@ import { AppThemeDirective } from "@renderer/app/directives/app-theme/app-theme.
 torrentApp.directive("appTheme", AppThemeDirective.getInstance())
 import { AppShellDirective } from "@renderer/app/directives/app-shell/app-shell.directive"
 torrentApp.directive("appShell", AppShellDirective.getInstance())
+import { TitleBarMenuDirective } from "@renderer/app/directives/title-bar-menu/title-bar-menu.directive"
+torrentApp.directive("titleBarMenu", TitleBarMenuDirective.getInstance())
 import { NotificationsCenterDirective } from "@renderer/app/directives/notifications-center/notifications-center.directive"
 torrentApp.directive("notificationsCenter", NotificationsCenterDirective.getInstance())
 import { SettingsPageDirective } from "@renderer/app/directives/settings-page/settings-page.directive"
