@@ -1,5 +1,5 @@
 import { IScope } from "angular";
-import type { PendingTorrentUploadFile } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
+import { createMenuActionHandler } from "@renderer/app/lib/menu-action-handler";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { EditCommand, MenuAction, WindowCommand } from "@shared/ipc-contract";
 
@@ -45,14 +45,14 @@ export class TitleBarMenuController {
         settingsService: any,
     ) {
         const electorrent = window.electorrent;
-        const PAGE_TORRENTS = "torrents";
         let isDebug = false;
-
-        const getActiveTextInput = () => {
-            return document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement
-                ? document.activeElement
-                : null;
-        };
+        const handleMenuAction = createMenuActionHandler({
+            $rootScope,
+            $scope,
+            $bittorrent,
+            settingsService,
+            currentPage: $scope.currentPage,
+        });
 
         const supportsUploadOptions = () => {
             return Object.values($rootScope.$btclient?.features.uploadOptions || {}).some(Boolean);
@@ -60,77 +60,6 @@ export class TitleBarMenuController {
 
         const hasActiveServer = () => {
             return !!$rootScope.$server?.id;
-        };
-
-        const broadcastTorrentFile = (file: PendingTorrentUploadFile, askUploadOptions: boolean) => {
-            const pendingFile: PendingTorrentUploadFile = {
-                type: "file",
-                data: new Uint8Array(file.data),
-                filename: file.filename,
-                metadata: file.metadata,
-                sourcePath: file.sourcePath,
-            };
-            $rootScope.$broadcast("torrents:add", pendingFile, askUploadOptions);
-        };
-
-        const handleMenuAction = (action: MenuAction) => {
-            switch (action.type) {
-                case "show-settings":
-                    $scope.$emit("show:settings");
-                    break;
-                case "show-servers":
-                    $scope.$emit("show:servers");
-                    break;
-                case "search-torrent":
-                    $rootScope.$broadcast("search:torrent");
-                    break;
-                case "select-all":
-                    {
-                        const activeTextInput = getActiveTextInput();
-                        if (activeTextInput) {
-                            activeTextInput.select();
-                        } else if ($scope.currentPage() === PAGE_TORRENTS) {
-                            $rootScope.$broadcast("select:torrents");
-                        }
-                    }
-                    break;
-                case "remove-selected":
-                    if (document.activeElement?.nodeName !== "INPUT" && $scope.currentPage() === PAGE_TORRENTS) {
-                        $rootScope.$broadcast("remove:torrents");
-                    }
-                    break;
-                case "open-add-torrent":
-                    electorrent.torrents.openFiles(!!action.askUploadOptions).then((files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
-                        files.forEach((item) => broadcastTorrentFile(item, !!item.askUploadOptions));
-                    });
-                    break;
-                case "paste-torrent-url":
-                    $bittorrent.uploadFromClipboard(!!action.askUploadOptions);
-                    break;
-                case "open-external":
-                    electorrent.shell.openExternal(action.url);
-                    break;
-                case "check-for-updates":
-                    electorrent.updates.check(!!action.verbose);
-                    break;
-                case "connect-server":
-                    {
-                        const server = settingsService.getServer(action.serverId);
-                        if (server) {
-                            $scope.$emit("connect:server", server);
-                        }
-                    }
-                    break;
-                case "set-current-default-server":
-                    settingsService.setCurrentServerAsDefault();
-                    break;
-                case "add-server":
-                    $scope.$emit("add:server");
-                    break;
-                default:
-                    break;
-            }
-            $scope.$applyAsync();
         };
 
         const serverAccelerator = (index: number) => {
@@ -319,10 +248,6 @@ export class TitleBarMenuController {
         electorrent.app.getMeta().then((meta) => {
             isDebug = meta.isDebug;
             $scope.$applyAsync();
-        });
-
-        electorrent.menu.onAction((action: MenuAction) => {
-            handleMenuAction(action);
         });
 
         const onDocumentClick = () => {
