@@ -64,7 +64,7 @@ export class AppShellController {
 
         $rootScope.$on("ready", () => {
             Promise.all([settingsService.whenReady(), electorrent.app.getMeta()]).then(([_, meta]: [unknown, AppMeta]) => {
-                $scope.isWindows = meta.isWindows;
+                $scope.isWindows = meta.isWindows || meta.forceTitleBarMenu;
                 const settings = settingsService.getAllSettings();
                 const automaticUpdates = settings?.automaticUpdates;
                 if (!meta.isDebug && automaticUpdates !== false) {

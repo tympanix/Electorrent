@@ -11,6 +11,7 @@ export interface AppMeta {
     isWindows: boolean
     isLinux: boolean
     isDebug: boolean
+    forceTitleBarMenu: boolean
     platform: string
     versions: {
         node: string
