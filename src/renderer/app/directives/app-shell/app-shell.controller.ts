@@ -1,7 +1,8 @@
 import { IScope } from "angular";
 import { PendingTorrentUploadFile, PendingTorrentUploadLink } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
+import { createMenuActionHandler } from "@renderer/app/lib/menu-action-handler";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
-import type { AppMeta, LaunchPayload } from "@shared/ipc-contract";
+import type { AppMeta, LaunchPayload, MenuAction } from "@shared/ipc-contract";
 
 interface AppShellScope extends IScope {
     servers: any[];
@@ -23,12 +24,13 @@ interface AppShellScope extends IScope {
 }
 
 export class AppShellController {
-    static $inject = ["$rootScope", "$scope", "$timeout", "settingsService", "notificationService"];
+    static $inject = ["$rootScope", "$scope", "$timeout", "$bittorrent", "settingsService", "notificationService"];
 
     constructor(
         $rootScope: ElectorrentRootScope,
         $scope: AppShellScope,
         $timeout: angular.ITimeoutService,
+        $bittorrent: any,
         settingsService: any,
         $notify: any,
     ) {
@@ -159,6 +161,18 @@ export class AppShellController {
             drainPendingLaunchPayloads();
             $scope.$applyAsync();
         });
+
+        const handleMenuAction = createMenuActionHandler({
+            $rootScope,
+            $scope,
+            $bittorrent,
+            settingsService,
+            currentPage: () => page,
+        });
+        const unsubscribeMenuActions = electorrent.menu.onAction((action: MenuAction) => {
+            handleMenuAction(action);
+        });
+        $scope.$on("$destroy", unsubscribeMenuActions);
 
         const pageTorrents = (fullupdate?: boolean) => {
             $scope.showTorrents = true;
