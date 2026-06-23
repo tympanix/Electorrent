@@ -52,6 +52,12 @@ export const IPC_CHANNELS = {
     notifications: {
         push: 'notifications:push',
     },
+    edit: {
+        command: 'edit:command',
+    },
+    window: {
+        command: 'window:command',
+    },
     menu: {
         action: 'menu:action',
     },
