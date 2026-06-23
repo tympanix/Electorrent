@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
 import { TransmissionTorrent } from "./torrentt";
 import _ from "underscore"
@@ -116,6 +116,10 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
     }
 
+    setRatioLimit(torrents: TransmissionTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
+      return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.hash), options);
+    }
+
     extraColumns = [Torrent.COL_DOWNLIMIT, Torrent.COL_UPLIMIT];
 
     protected getTorrentDetailsData(torrent: TransmissionTorrent): Promise<BittorrentTorrentDetailsData> {
@@ -143,6 +147,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
           this.createTorrentDetailsField("downloaded", "Downloaded", this.toNumber(info.totalDownloaded) ?? torrent.downloaded, "bytes"),
           this.createTorrentDetailsField("uploaded", "Uploaded", this.toNumber(info.totalUploaded) ?? torrent.uploaded, "bytes"),
           this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
+          this.createTorrentDetailsField("ratio-limit", "Ratio Limit", this.toNumber(info.ratioLimit) ?? torrent.ratioLimit, "ratio"),
           this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
           this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
           this.createTorrentDetailsField("download-limit", "Download Limit", toSpeedLimitBytes(info.downloadLimit), "speedLimit", { allowEmpty: true }),
@@ -261,6 +266,12 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         label: "Set Speed Limits",
         click: () => Promise.resolve(),
         icon: "dashboard",
+      },
+      {
+        id: "torrent-set-ratio",
+        label: "Set Ratio",
+        click: () => Promise.resolve(),
+        icon: "percent",
       },
       {
         label: "Remove",

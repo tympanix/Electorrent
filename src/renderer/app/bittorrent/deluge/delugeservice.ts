@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
 import { DelugeTorrent } from "./torrentd";
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
@@ -80,6 +80,10 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
         return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options)
     }
 
+    setRatioLimit(torrents: DelugeTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
+        return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.hash), options)
+    }
+
     protected getTorrentDetailsData(torrent: DelugeTorrent): Promise<BittorrentTorrentDetailsData> {
         return getTorrentDetails(torrent.hash)
     }
@@ -103,6 +107,7 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
                 this.createTorrentDetailsField("downloaded", "Downloaded", this.toNumber(info.totalDownloaded) ?? torrent.downloaded, "bytes"),
                 this.createTorrentDetailsField("uploaded", "Uploaded", this.toNumber(info.totalUploaded) ?? torrent.uploaded, "bytes"),
                 this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
+                this.createTorrentDetailsField("ratio-limit", "Ratio Limit", this.toNumber(info.ratioLimit) ?? torrent.ratioLimit, "ratio"),
                 this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
                 this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
                 this.createTorrentDetailsField("download-limit", "Download Limit", toSpeedLimitBytes(info.downloadLimit), "speedLimit", { allowEmpty: true }),
@@ -207,6 +212,12 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
             label: "Set Speed Limits",
             click: () => Promise.resolve(),
             icon: "dashboard",
+        },
+        {
+            id: "torrent-set-ratio",
+            label: "Set Ratio",
+            click: () => Promise.resolve(),
+            icon: "percent",
         },
         {
             label: 'Remove',

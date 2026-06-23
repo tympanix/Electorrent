@@ -1,13 +1,11 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { ContextActionList, TorrentActionList, TorrentClient, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { UtorrentTorrent } from "./torrentu";
 import { addTorrentUrl, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
 export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   public name = "µTorrent"
   public id = "utorrent"
-  build(array: Array<any>): UtorrentTorrent {
-    return UtorrentTorrent.fromArray(array)
-  }
+  build = (array: Array<any>): UtorrentTorrent => UtorrentTorrent.fromApiArray(array)
 
   defaultPath(): string {
     return "/gui";
@@ -94,6 +92,12 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
 
   setSpeedLimits(torrents: UtorrentTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
     return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
+  }
+
+  async setRatioLimit(torrents: UtorrentTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
+    const hashes = torrents.map((torrent) => torrent.hash);
+    await invokeAction("setRatioLimit", hashes, options);
+    await invokeAction("getprops", hashes);
   };
 
   private baseActionHeader: TorrentActionList<UtorrentTorrent> = [

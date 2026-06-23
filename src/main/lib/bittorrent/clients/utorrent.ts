@@ -164,6 +164,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 speedLimits: true,
+                ratioLimits: false,
                 uploadOptions: {
                     saveLocation: true,
                 },
@@ -318,5 +319,14 @@ export class UtorrentRuntime implements BittorrentRuntime {
             requests.push(this.setProperty(hashes, 'ulrate', Number(options.uploadSpeedLimit)))
         }
         await Promise.all(requests)
+    }
+
+    async setRatioLimit(hashes: string[], options: Record<string, any>): Promise<void> {
+        const ratioLimit = Math.round(Number(options.ratioLimit) * 1000)
+        await Promise.all([
+            this.setProperty(hashes, 'seed_override', 1),
+            this.setProperty(hashes, 'seed_ratio', ratioLimit),
+        ])
+        this.data.cid = 0
     }
 }

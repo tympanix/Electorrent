@@ -28,6 +28,8 @@ const DELUGE_TORRENT_FIELDS = [
     "ratio",
     "save_path",
     "seeds_peers_ratio",
+    "stop_at_ratio",
+    "stop_ratio",
     "state",
     "time_added",
     "total_done",
@@ -242,6 +244,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 labels: this.supportsLabels,
                 torrentDetails: true,
                 speedLimits: true,
+                ratioLimits: true,
                 freeDiskSpace: true,
                 uploadOptions: {
                     saveLocation: true,
@@ -304,6 +307,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 seedingTime: details.seeding_time ?? null,
                 connectionsLimit: details.max_connections ?? null,
                 shareRatio: details.ratio ?? null,
+                ratioLimit: details.stop_at_ratio ? (details.stop_ratio ?? null) : null,
                 additionDate: details.time_added ?? null,
                 completionDate: details.completed_time ?? null,
                 downloadSpeed: details.download_payload_rate ?? null,
@@ -429,6 +433,15 @@ export class DelugeRuntime implements BittorrentRuntime {
         }
         if (options.uploadSpeedLimit !== undefined) {
             torrentOptions.max_upload_speed = options.uploadSpeedLimit > 0 ? Number(options.uploadSpeedLimit) : -1
+        }
+
+        return defer((done) => this.rpc("core.set_torrent_options", [hashes, torrentOptions], done)).then(() => undefined)
+    }
+
+    async setRatioLimit(hashes: string[], options: Record<string, any>): Promise<void> {
+        const torrentOptions = {
+            stop_at_ratio: true,
+            stop_ratio: Number(options.ratioLimit),
         }
 
         return defer((done) => this.rpc("core.set_torrent_options", [hashes, torrentOptions], done)).then(() => undefined)

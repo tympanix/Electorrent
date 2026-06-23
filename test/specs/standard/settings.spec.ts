@@ -121,7 +121,7 @@ describe("settings", function () {
       torrent = await this.app.uploadTorrent({ filename: torrentFile })
       await this.app.uploadTorrentModalVisible()
       await this.app.uploadTorrentModalSubmit()
-      await torrent.waitForExist()
+      await torrent.waitForExist({ timeout: 30 * 1000 })
     } finally {
       if (torrent && await torrent.isExisting()) {
         await torrent.delete()

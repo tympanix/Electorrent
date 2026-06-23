@@ -194,6 +194,7 @@ export interface TorrentClientFeatures {
     readonly trackerFilter?: boolean
     readonly alternativeSpeedLimits?: boolean
     readonly speedLimits?: boolean
+    readonly ratioLimits?: boolean
     readonly freeDiskSpace?: boolean
     readonly uploadOptions?: Readonly<TorrentUploadOptionsEnable>
 }
@@ -212,6 +213,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly trackerFilter: boolean
     readonly alternativeSpeedLimits: boolean
     readonly speedLimits: boolean
+    readonly ratioLimits: boolean
     readonly freeDiskSpace: boolean
     readonly uploadOptions: Readonly<Required<Record<keyof TorrentUploadOptions, boolean>>>
 }

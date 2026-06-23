@@ -3,7 +3,7 @@ import { ClickOptions } from "webdriverio";
 import { browser, $, $$ } from '@wdio/globals'
 import { waitForModalClose, waitForModalOpen } from "./modal"
 
-export type ColumnName = "decodedName" | "size" | "downloadSpeed" | "uploadSpeed" | "downloadLimit" | "uploadLimit" | "percent" | "label" | "dateAdded" | "dateCompleted" | "peersConnected" | "seedsConnected" | "torrentQueueOrder" | "eta" | "ratio"
+export type ColumnName = "decodedName" | "size" | "downloadSpeed" | "uploadSpeed" | "downloadLimit" | "uploadLimit" | "percent" | "label" | "dateAdded" | "dateCompleted" | "peersConnected" | "seedsConnected" | "torrentQueueOrder" | "eta" | "ratio" | "ratioLimit"
 
 export class Torrent {
   app: App
@@ -155,6 +155,20 @@ export class Torrent {
     return modal;
   }
 
+  async openSetRatioModal() {
+    await this.openContextMenu()
+
+    const contextMenu = $("#contextmenu")
+    const action = contextMenu.$("a=Set Ratio")
+    await action.waitForDisplayed()
+    await action.click()
+    await contextMenu.waitForDisplayed({ reverse: true })
+
+    const modal = $("#torrent-set-ratio-modal");
+    await waitForModalOpen(modal, this.timeout);
+    return modal;
+  }
+
   async openDetailsPanel() {
     await this.clickContextMenu("torrent-details")
 
@@ -235,6 +249,29 @@ export class Torrent {
     await cancel.click();
     await waitForModalClose(modal, this.timeout);
     return { download, upload };
+  }
+
+  async setRatioLimit(ratioLimit: number) {
+    const modal = await this.openSetRatioModal();
+    const input = modal.$("input[data-role='torrent-set-ratio-value']");
+    await input.waitForDisplayed();
+    await input.clearValue();
+    await input.setValue(String(ratioLimit));
+
+    const approve = modal.$("button[data-role='torrent-set-ratio-apply']");
+    await approve.waitForEnabled();
+    await approve.click();
+    await waitForModalClose(modal, this.timeout);
+  }
+
+  async getRatioModalValue() {
+    const modal = await this.openSetRatioModal();
+    const ratio = await modal.$("input[data-role='torrent-set-ratio-value']").getValue();
+    const cancel = modal.$("button.deny");
+    await cancel.waitForClickable();
+    await cancel.click();
+    await waitForModalClose(modal, this.timeout);
+    return ratio;
   }
 
   async stop({ state = "Stopped", timeout = this.timeout } = {}) {
