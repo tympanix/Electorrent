@@ -1,5 +1,5 @@
 import chai from 'chai'
-import { browser } from '@wdio/globals'
+import { eventually } from '../../e2e/eventually'
 import { createTorrentFile } from '../../torrent'
 import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from '../../framework/fixture'
 
@@ -40,10 +40,7 @@ describe('torrent ratio limits', function () {
     const ratioLimit = 1.5
     await torrent.setRatioLimit(ratioLimit)
 
-    await browser.waitUntil(async () => await torrent.getColumn('ratioLimit') === ratioLimit.toFixed(2), {
-      timeout: 10 * 1000,
-      timeoutMsg: `Expected ratio limit column to show ${ratioLimit.toFixed(2)}`,
-    })
+    await eventually(() => torrent.getColumn('ratioLimit')).equals(ratioLimit.toFixed(2))
 
     assert.equal(await torrent.getRatioModalValue(), String(ratioLimit))
   })

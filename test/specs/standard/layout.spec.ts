@@ -1,5 +1,6 @@
 import chai from "chai"
-import { $, browser } from "@wdio/globals"
+import { $ } from "@wdio/globals"
+import { eventually } from "../../e2e/eventually"
 import { configureSpec } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
 
@@ -54,9 +55,7 @@ describe("layout", function () {
     await this.app.settingsSave()
     await this.app.torrentsPageIsVisible()
 
-    await browser.waitUntil(async () => {
-      const className = await $("#torrentTable").getAttribute("class")
-      return (className || "").includes("compact") === !initialState
-    })
+    await eventually(() => $("#torrentTable").getAttribute("class"))
+      .satisfies(`compact state to be ${!initialState}`, (className) => (className || "").includes("compact") === !initialState)
   })
 })

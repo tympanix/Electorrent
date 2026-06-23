@@ -1,5 +1,5 @@
-import { browser } from "@wdio/globals"
 import * as e2e from "../../e2e"
+import { eventually } from "../../e2e/eventually"
 import { createTorrentFile } from "../../torrent"
 import { configureSpec, getTestFixture, requireFeature } from "../../framework/fixture"
 
@@ -21,13 +21,10 @@ describe("tracker filters", function () {
     const torrents: e2e.Torrent[] = []
 
     const waitForSidebarTrackers = async (expectedTrackers: string[]) => {
-      await browser.waitUntil(async () => {
-        const sidebarTrackers = await this.app.getAllSidebarTrackers()
-        return expectedTrackers.every((tracker) => sidebarTrackers.includes(tracker))
-      }, {
-        timeout: 30 * 1000,
-        timeoutMsg: `Expected tracker sidebar to contain: ${expectedTrackers.join(", ")}`,
-      })
+      await eventually(() => this.app.getAllSidebarTrackers())
+        .satisfies(`contain ${expectedTrackers.join(", ")}`, (sidebarTrackers) => {
+          return expectedTrackers.every((tracker) => sidebarTrackers.includes(tracker))
+        }, { timeout: 30 * 1000 })
     }
 
     try {
@@ -57,15 +54,12 @@ describe("tracker filters", function () {
 
       await this.app.filterTracker()
       await torrents[1].delete()
-      await browser.waitUntil(async () => {
-        const sidebarTrackers = await this.app.getAllSidebarTrackers()
-        return !sidebarTrackers.includes(torrentCases[1].tracker)
-          && sidebarTrackers.includes(torrentCases[0].tracker)
-          && sidebarTrackers.includes(torrentCases[2].tracker)
-      }, {
-        timeout: 30 * 1000,
-        timeoutMsg: `Expected ${torrentCases[1].tracker} to be removed from tracker sidebar`,
-      })
+      await eventually(() => this.app.getAllSidebarTrackers())
+        .satisfies(`remove ${torrentCases[1].tracker}`, (sidebarTrackers) => {
+          return !sidebarTrackers.includes(torrentCases[1].tracker)
+            && sidebarTrackers.includes(torrentCases[0].tracker)
+            && sidebarTrackers.includes(torrentCases[2].tracker)
+        }, { timeout: 30 * 1000 })
     } finally {
       await this.app.filterTracker()
       for (const torrent of torrents) {

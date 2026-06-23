@@ -1,5 +1,6 @@
 import chai from "chai"
 import { $, $$, browser } from "@wdio/globals"
+import { eventually } from "../../e2e/eventually"
 import { configureSpec } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
 
@@ -72,13 +73,8 @@ describe("mock torrent table sorting", function () {
   }
 
   async function waitForMockRows(expectedCount = 1) {
-    await browser.waitUntil(async () => {
-      const rows = await $$("#torrentTable tbody tr[data-hash]")
-      return await rows.length >= expectedCount
-    }, {
-      timeout: 10 * 1000,
-      timeoutMsg: `Expected at least ${expectedCount} mock torrent rows to be visible`,
-    })
+    await eventually(async () => (await $$("#torrentTable tbody tr[data-hash]")).length)
+      .satisfies(`be at least ${expectedCount}`, (count) => count >= expectedCount)
   }
 
   async function getColumnHeader(columnName: string) {
@@ -100,12 +96,8 @@ describe("mock torrent table sorting", function () {
     if (!(await header.getAttribute("class")).split(/\s+/).includes(sortClass)) {
       await header.click()
     }
-    await browser.waitUntil(async () => {
-      return (await header.getAttribute("class")).split(/\s+/).includes(sortClass)
-    }, {
-      timeout: 5 * 1000,
-      timeoutMsg: `Expected ${columnName} column to be sorted ${descending ? "descending" : "ascending"}`,
-    })
+    await eventually(() => header.getAttribute("class"))
+      .satisfies(`include ${sortClass}`, (className) => (className || "").split(/\s+/).includes(sortClass), { timeout: 5 * 1000 })
     await waitForMockRows(sortingScenario.length)
   }
 

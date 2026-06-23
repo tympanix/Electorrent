@@ -1,8 +1,9 @@
 import chai from "chai"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import { $, browser } from "@wdio/globals"
+import { $ } from "@wdio/globals"
 import * as e2e from "../../e2e"
+import { eventually } from "../../e2e/eventually"
 import { configureSpec } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
 
@@ -152,9 +153,8 @@ describe("settings", function () {
     await this.app.settingsSave()
     await this.app.torrentsPageIsVisible()
 
-    await browser.waitUntil(async () => {
-      return (await this.app.getAppliedThemeHref()) !== initialThemeHref
-    })
+    await eventually(() => this.app.getAppliedThemeHref())
+      .satisfies(`differ from ${initialThemeHref}`, (href) => href !== initialThemeHref)
 
     await this.app.openSettings()
     await this.app.settingsGotoTab("general")

@@ -1,6 +1,7 @@
 import { App } from "./e2e_app"
 import { ClickOptions } from "webdriverio";
 import { browser, $, $$ } from '@wdio/globals'
+import { eventually } from "./eventually"
 import { waitForModalClose, waitForModalOpen } from "./modal"
 
 export type ColumnName = "decodedName" | "size" | "downloadSpeed" | "uploadSpeed" | "downloadLimit" | "uploadLimit" | "percent" | "label" | "dateAdded" | "dateCompleted" | "peersConnected" | "seedsConnected" | "torrentQueueOrder" | "eta" | "ratio" | "ratioLimit"
@@ -55,20 +56,11 @@ export class Torrent {
   }
 
   async waitForStates(states: string[], { timeout = this.timeout } = {}) {
-    let currentValue = ""
-    try {
-      await browser.waitUntil(async () => {
-        const percent = await this.getColumn("percent")
-        currentValue = percent
-        const value = percent.toLowerCase()
-        return states.some((state) => value.includes(state.toLowerCase()))
-      }, {
-        timeout: timeout,
-        timeoutMsg: `Torrent ${this.hash} did not reach states ${states.join(", ")} within ${timeout}ms`
-      });
-    } catch (err: any) {
-      throw new Error(`${err.message}. Current percent column: ${currentValue || "<empty>"}`)
-    }
+    await eventually(() => this.getColumn("percent")).satisfies(
+      `include one of ${states.join(", ")}`,
+      (percent) => states.some((state) => percent.toLowerCase().includes(state.toLowerCase())),
+      { timeout },
+    )
   }
 
   async waitForDownloading({ timeout = 20 * 1000 } = {}) {
@@ -321,9 +313,7 @@ export class Torrent {
     await submit.click()
     await waitForModalClose(modal, this.timeout)
 
-    await browser.waitUntil(async () => {
-      return await this.getLabel() === labelName
-    });
+    await eventually(() => this.getLabel()).equals(labelName)
   }
 
   async changeLabel(labelName: string) {
@@ -334,9 +324,7 @@ export class Torrent {
     await labelItemElem.click()
     await labelItemElem.waitForDisplayed({ reverse: true })
 
-    await browser.waitUntil(async () => {
-      return await this.getLabel() === labelName
-    });
+    await eventually(() => this.getLabel()).equals(labelName)
   }
 
   async click(options: ClickOptions) {

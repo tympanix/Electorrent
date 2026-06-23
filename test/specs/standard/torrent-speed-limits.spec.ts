@@ -1,4 +1,4 @@
-import { browser } from '@wdio/globals'
+import { eventually } from '../../e2e/eventually'
 import { createTorrentFile } from '../../torrent'
 import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from '../../framework/fixture'
 
@@ -32,16 +32,10 @@ describe('torrent speed limits', function () {
     await torrent.setSpeedLimits({ downloadSpeedLimit })
     await torrent.openDetailsPanel()
 
-    await browser.waitUntil(async () => (await torrent.getDetailsFieldValue('download-limit')) === `${downloadSpeedLimit} KB/s`, {
-      timeout: 10 * 1000,
-      timeoutMsg: `Expected download limit to become ${downloadSpeedLimit} KB/s`,
-    })
+    await eventually(() => torrent.getDetailsFieldValue('download-limit')).equals(`${downloadSpeedLimit} KB/s`)
 
     await torrent.closeDetailsPanel()
-    await browser.waitUntil(async () => (await torrent.getSpeedLimitModalValues()).download === String(downloadSpeedLimit), {
-      timeout: 10 * 1000,
-      timeoutMsg: `Expected speed limit modal to show download limit ${downloadSpeedLimit}`,
-    })
+    await eventually(async () => (await torrent.getSpeedLimitModalValues()).download).equals(String(downloadSpeedLimit))
   })
 
   it('sets upload speed limit from context menu', async function () {
@@ -51,15 +45,9 @@ describe('torrent speed limits', function () {
     await torrent.setSpeedLimits({ uploadSpeedLimit })
     await torrent.openDetailsPanel()
 
-    await browser.waitUntil(async () => (await torrent.getDetailsFieldValue('upload-limit')) === `${uploadSpeedLimit} KB/s`, {
-      timeout: 10 * 1000,
-      timeoutMsg: `Expected upload limit to become ${uploadSpeedLimit} KB/s`,
-    })
+    await eventually(() => torrent.getDetailsFieldValue('upload-limit')).equals(`${uploadSpeedLimit} KB/s`)
 
     await torrent.closeDetailsPanel()
-    await browser.waitUntil(async () => (await torrent.getSpeedLimitModalValues()).upload === String(uploadSpeedLimit), {
-      timeout: 10 * 1000,
-      timeoutMsg: `Expected speed limit modal to show upload limit ${uploadSpeedLimit}`,
-    })
+    await eventually(async () => (await torrent.getSpeedLimitModalValues()).upload).equals(String(uploadSpeedLimit))
   })
 })

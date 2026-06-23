@@ -1,5 +1,5 @@
-import { browser } from "@wdio/globals"
 import type { ChainablePromiseElement } from "webdriverio"
+import { eventually } from "./eventually"
 
 type ModalElement = ChainablePromiseElement
 
@@ -10,28 +10,30 @@ async function hasAnimatingClass(modal: ModalElement): Promise<boolean> {
 
 export async function waitForModalOpen(modal: ModalElement, timeout = 10_000) {
   await modal.waitForDisplayed({ timeout })
-  await browser.waitUntil(async () => {
-    if (!await modal.isDisplayed()) {
-      return false
-    }
-    return !(await hasAnimatingClass(modal))
-  }, {
-    timeout,
-    timeoutMsg: "Modal did not finish opening animation in time",
-  })
+  await eventually(async () => ({
+    displayed: await modal.isDisplayed(),
+    animating: await hasAnimatingClass(modal),
+  })).satisfies(
+    "be displayed and not animating",
+    ({ displayed, animating }) => displayed && !animating,
+    { timeout },
+  )
 }
 
 export async function waitForModalClose(modal: ModalElement, timeout = 10_000) {
-  await browser.waitUntil(async () => {
+  await eventually(async () => {
     if (!await modal.isExisting()) {
-      return true
+      return { existing: false, displayed: false, animating: false }
     }
 
-    const displayed = await modal.isDisplayed()
-    const animating = await hasAnimatingClass(modal)
-    return !displayed && !animating
-  }, {
-    timeout,
-    timeoutMsg: "Modal did not finish closing animation in time",
-  })
+    return {
+      existing: true,
+      displayed: await modal.isDisplayed(),
+      animating: await hasAnimatingClass(modal),
+    }
+  }).satisfies(
+    "not be displayed or animating",
+    ({ existing, displayed, animating }) => !existing || (!displayed && !animating),
+    { timeout },
+  )
 }

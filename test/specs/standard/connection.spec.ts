@@ -1,5 +1,6 @@
 import chai from "chai"
-import { $, browser } from "@wdio/globals"
+import { $ } from "@wdio/globals"
+import { eventually } from "../../e2e/eventually"
 import { configureSpec, getTestFixture } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
 import { HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT } from "../../../src/main/lib/bittorrent/helpers"
@@ -50,9 +51,7 @@ describe("connection", function () {
       await restartApplication(this)
       await this.app.settingsPageIsVisible({ timeout: CONNECT_FAILURE_TIMEOUT + CONNECT_FAILURE_BUFFER })
       await this.app.settingsPageConnectionIsVisible()
-      await browser.waitUntil(async () => {
-        return await $("#page-settings-connection input[name='ip']").getValue() === client.host
-      })
+      await eventually(() => $("#page-settings-connection input[name='ip']").getValue()).equals(client.host)
       assert.equal(await $("#page-settings-connection input[name='ip']").getValue(), client.host)
       assert.equal(await $("#page-settings-connection input[name='port']").getValue(), String(client.port))
       assert.equal(await $("#page-settings-connection input[name='username']").getValue(), client.username)
