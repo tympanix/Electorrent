@@ -1,7 +1,7 @@
 import { clipboard, contextBridge, ipcRenderer, webUtils } from 'electron'
 
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { ColorTheme, PendingTorrentUploadFile, PendingTorrentUploadLink } from '@shared/ipc-contract'
+import type { ColorTheme, EditCommand, PendingTorrentUploadFile, PendingTorrentUploadLink, WindowCommand } from '@shared/ipc-contract'
 
 const INITIAL_THEME_ARGUMENT = '--theme='
 const initialThemeArgument = process.argv.find((argument) => argument.startsWith(INITIAL_THEME_ARGUMENT))
@@ -75,6 +75,12 @@ contextBridge.exposeInMainWorld('electorrent', {
     },
     notifications: {
         onPush: (callback: (notification: unknown) => void) => subscribe(IPC_CHANNELS.notifications.push, callback),
+    },
+    edit: {
+        command: (command: EditCommand) => invoke(IPC_CHANNELS.edit.command, { command }),
+    },
+    window: {
+        command: (command: WindowCommand) => invoke(IPC_CHANNELS.window.command, { command }),
     },
     menu: {
         onAction: (callback: (action: unknown) => void) => subscribe(IPC_CHANNELS.menu.action, callback),

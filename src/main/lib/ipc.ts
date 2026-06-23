@@ -1,8 +1,8 @@
-import { app, dialog, ipcMain, nativeTheme, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell, type IpcMainInvokeEvent } from 'electron'
 import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { AppSettings, PendingTorrentUploadLink } from '@shared/ipc-contract'
+import type { AppSettings, EditCommand, PendingTorrentUploadLink, WindowCommand } from '@shared/ipc-contract'
 import { getAppVersion } from './app-meta'
 import { bittorrentManager } from './bittorrent'
 import * as certificates from './certificates'
@@ -41,6 +41,60 @@ function getAppMeta(isDebug: boolean) {
     }
 }
 
+function getCommandWindow(event: IpcMainInvokeEvent, getWindow: () => BrowserWindow | null) {
+    const eventWindow = BrowserWindow.fromWebContents(event.sender)
+    if (eventWindow && !eventWindow.isDestroyed()) {
+        return eventWindow
+    }
+
+    const window = getWindow()
+    return window && !window.isDestroyed() ? window : null
+}
+
+function runWindowCommand(window: BrowserWindow, command: WindowCommand) {
+    switch (command) {
+        case 'reload':
+            window.reload()
+            break
+        case 'toggle-full-screen':
+            window.setFullScreen(!window.isFullScreen())
+            break
+        case 'toggle-dev-tools':
+            window.webContents.toggleDevTools()
+            break
+        case 'minimize':
+            window.minimize()
+            break
+        case 'close':
+            window.close()
+            break
+        default:
+            break
+    }
+}
+
+function runEditCommand(window: BrowserWindow, command: EditCommand) {
+    switch (command) {
+        case 'undo':
+            window.webContents.undo()
+            break
+        case 'redo':
+            window.webContents.redo()
+            break
+        case 'cut':
+            window.webContents.cut()
+            break
+        case 'copy':
+            window.webContents.copy()
+            break
+        case 'paste':
+            window.webContents.paste()
+            break
+        default:
+            break
+    }
+}
+
 export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPayload, onSettingsSaved, onSystemThemeChanged, onBittorrentConnected }: RegisterHandlersOptions) {
     menu.configure({ isDebug })
 
@@ -66,6 +120,24 @@ export function registerHandlers({ isDebug, getWindow, consumePendingLaunchPaylo
 
     ipcMain.handle(IPC_CHANNELS.app.reportCorruptSettings, async function() {
         settings.showCorruptDialog()
+    })
+
+    ipcMain.handle(IPC_CHANNELS.window.command, async function(event: IpcMainInvokeEvent, { command }) {
+        if (!isDebug && (command === 'reload' || command === 'toggle-dev-tools')) {
+            return
+        }
+
+        const window = getCommandWindow(event, getWindow)
+        if (window) {
+            runWindowCommand(window, command)
+        }
+    })
+
+    ipcMain.handle(IPC_CHANNELS.edit.command, async function(event: IpcMainInvokeEvent, { command }) {
+        const window = getCommandWindow(event, getWindow)
+        if (window) {
+            runEditCommand(window, command)
+        }
     })
 
     ipcMain.handle(IPC_CHANNELS.shell.openExternal, async function(_event: IpcMainInvokeEvent, { url }) {

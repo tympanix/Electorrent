@@ -302,6 +302,20 @@ export type MenuAction =
     | { type: "set-current-default-server" }
     | { type: "add-server" }
 
+export type WindowCommand =
+    | "reload"
+    | "toggle-full-screen"
+    | "toggle-dev-tools"
+    | "minimize"
+    | "close"
+
+export type EditCommand =
+    | "undo"
+    | "redo"
+    | "cut"
+    | "copy"
+    | "paste"
+
 export interface ElectorrentBridge {
     app: {
         initialTheme: ColorTheme
@@ -358,6 +372,12 @@ export interface ElectorrentBridge {
     }
     notifications: {
         onPush(callback: (notification: NotificationPayload) => void): Unsubscribe
+    }
+    edit: {
+        command(command: EditCommand): Promise<void>
+    }
+    window: {
+        command(command: WindowCommand): Promise<void>
     }
     menu: {
         onAction(callback: (action: MenuAction) => void): Unsubscribe

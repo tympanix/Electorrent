@@ -21,6 +21,101 @@ html, body {
     border-bottom: 1px solid @borderColor;
     app-region: drag;
 }
+.title-bar-menu {
+    position: absolute;
+    top: 0;
+    left: 8px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    app-region: no-drag;
+}
+.title-bar-menu-root {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+.title-bar-menu-trigger,
+.title-bar-menu-item {
+    border: 0;
+    font: inherit;
+    color: @textColor;
+    background: transparent;
+    cursor: default;
+    outline: 0;
+    app-region: no-drag;
+}
+.title-bar-menu-trigger {
+    height: 28px;
+    min-width: 42px;
+    padding: 0 12px;
+    border-radius: @defaultBorderRadius;
+    line-height: 28px;
+}
+.title-bar-menu-trigger:hover,
+.title-bar-menu-trigger.active {
+    color: @hoveredTextColor;
+    background-color: @highlightBackground;
+}
+.title-bar-menu-dropdown {
+    position: absolute;
+    top: 34px;
+    left: 0;
+    min-width: 270px;
+    padding: 6px 0;
+    color: @textColor;
+    background-color: @pageForeground;
+    border: 1px solid @borderColor;
+    border-radius: @defaultBorderRadius;
+    box-shadow: @subtleShadow;
+    z-index: 1002;
+    app-region: no-drag;
+}
+.title-bar-menu-item {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    column-gap: 8px;
+    align-items: center;
+    width: 100%;
+    min-height: 30px;
+    padding: 6px 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+.title-bar-menu-item:hover,
+.title-bar-menu-item:focus {
+    color: @hoveredTextColor;
+    background-color: @highlightBackground;
+}
+.title-bar-menu-item.disabled,
+.title-bar-menu-item:disabled {
+    color: @disabledTextColor;
+    background: transparent;
+}
+.title-bar-menu-check {
+    text-align: center;
+}
+.title-bar-menu-item.checked .title-bar-menu-check::before {
+    content: "\2713";
+}
+.title-bar-menu-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.title-bar-menu-accelerator {
+    color: @lightTextColor;
+    font-size: 0.9em;
+}
+.title-bar-menu-item.disabled .title-bar-menu-accelerator,
+.title-bar-menu-item:disabled .title-bar-menu-accelerator {
+    color: @disabledTextColor;
+}
+.title-bar-menu-divider {
+    height: 1px;
+    margin: 6px 0;
+    background-color: @borderColor;
+}
 .title-bar-server-name-anchor {
     position: relative;
     display: flex;
