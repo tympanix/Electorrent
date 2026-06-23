@@ -7,7 +7,9 @@
         </div>
         <div data-role="new-label" class="item" ng-click="openNewLabelModal()"><i class="edit icon"></i> New Label</div>
         <div class="scrolling menu">
-            <div class="item" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
+            <div class="item" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">
+                <span class="label-pill" ng-style="labelColorStyle ? labelColorStyle(label) : {}">{{label}}</span>
+            </div>
             <div></div>
         </div>
     </div>

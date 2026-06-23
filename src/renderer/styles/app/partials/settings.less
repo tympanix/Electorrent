@@ -54,3 +54,37 @@
     font-size: 1.1em;
     margin: 0 !important;
 }
+
+.settings-label-color-list .settings-label-color-item {
+    display: block !important;
+}
+
+.settings-label-color-row {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+}
+
+.settings-label-color-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    max-height: 14rem;
+    overflow-y: auto;
+    padding: .25rem;
+}
+
+.settings-label-color-swatch {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    height: 1.8rem;
+    padding: 0;
+    width: 1.8rem;
+}
+
+.settings-label-color-swatch.selected {
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, .25);
+}

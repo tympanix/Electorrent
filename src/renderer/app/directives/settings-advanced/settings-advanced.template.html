@@ -57,6 +57,41 @@
 
     <div class="ui divider"></div>
 
+    <div data-role="advanced-label-colors-row">
+        <div class="ui small header">Label colors</div>
+        <p>Customize label colors for <strong>{{ ctl.getServerName() }}</strong>. Default colors are generated from each label name.</p>
+        <div style="margin-left: 2rem;">
+            <div class="ui divided list settings-label-color-list" ng-if="ctl.hasServer() && ctl.getLabels().length">
+                <div
+                    class="item settings-label-color-item"
+                    ng-repeat="label in ctl.getLabels() track by label"
+                    data-role="settings-label-color-item"
+                    data-label="{{ label }}">
+                    <div class="settings-label-color-row">
+                        <span class="label-pill" ng-style="ctl.getLabelColorStyle(label)">{{ label }}</span>
+                        <button
+                            type="button"
+                            class="ui tiny button"
+                            data-role="settings-label-color-edit"
+                            ng-click="ctl.openLabelColorModal(label)">
+                            Change color
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ui info message" ng-if="ctl.hasServer() && !ctl.getLabels().length">
+                <p>No labels discovered for this server yet.</p>
+            </div>
+
+            <div class="ui warning message" ng-if="!ctl.hasServer()">
+                <p>Connect to a server to manage label colors.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui divider"></div>
+
     <div data-role="advanced-saved-locations-row">
         <div class="ui small header">Saved locations</div>
         <p>Save reusable upload locations for <strong>{{ ctl.getServerName() }}</strong>. These locations appear in the upload modal for this server.</p>
@@ -102,3 +137,27 @@
 </div>
 
 <saved-location-modal modal-id="settingsSavedLocationModal" ng-ref="ctl.savedLocationModalRef"></saved-location-modal>
+
+<div class="ui small modal" id="settingsLabelColorModal">
+    <div class="header">Choose label color</div>
+    <div class="content" ng-if="labelColorModal">
+        <p>Pick a color for <strong>{{ labelColorModal.label }}</strong>.</p>
+        <div class="settings-label-color-picker" data-role="settings-label-color-picker">
+            <button
+                type="button"
+                class="settings-label-color-swatch"
+                ng-repeat="color in ctl.getPalette() track by color"
+                ng-style="ctl.getColorSwatchStyle(color)"
+                ng-class="{selected: color == labelColorModal.selectedColor}"
+                data-role="settings-label-color-swatch"
+                data-color="{{ color }}"
+                ng-click="ctl.selectLabelColor(color)"
+                title="{{ color }}">
+            </button>
+        </div>
+    </div>
+    <div class="actions">
+        <button type="button" class="ui deny button">Cancel</button>
+        <button type="button" class="ui positive approve button" data-role="settings-label-color-apply" ng-click="ctl.saveLabelColor()">Apply</button>
+    </div>
+</div>

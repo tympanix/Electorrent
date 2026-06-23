@@ -8,7 +8,12 @@ export class TorrentSidebarSectionController {
     clearRole = "";
     emptyText = "";
     itemAttribute = "";
+    labelColorStyle?: (label: string) => Record<string, string>;
     onSelect?: (locals: { item?: string }) => void;
+
+    itemStyle(item: string) {
+        return this.itemAttribute === "label" && this.labelColorStyle ? this.labelColorStyle(item) : {};
+    }
 
     isActive(item: string) {
         return this.active === item;
@@ -32,6 +37,7 @@ export class TorrentSidebarSectionDirective implements IDirective {
         clearRole: "@",
         emptyText: "@",
         itemAttribute: "@",
+        labelColorStyle: "=?",
         onSelect: "&",
     };
     bindToController = true;

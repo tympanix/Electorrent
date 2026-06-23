@@ -736,6 +736,40 @@ export class App {
     await waitForModalClose(savedLocationModal, this.timeout)
   }
 
+  async getSidebarLabelColor(labelName: string) {
+    const label = $(`#torrent-sidebar-labels li[data-label="${labelName}"] .colored-label`)
+    await label.waitForDisplayed()
+    return await label.getCSSProperty("background-color")
+  }
+
+  async setSettingsLabelColor(labelName: string, colorIndex = 5) {
+    const row = $(`#page-settings-advanced [data-role='settings-label-color-item'][data-label="${labelName}"]`)
+    await row.waitForDisplayed()
+
+    const editButton = row.$("[data-role='settings-label-color-edit']")
+    await editButton.waitForClickable()
+    await editButton.click()
+
+    const modal = $("#settingsLabelColorModal")
+    await waitForModalOpen(modal, this.timeout)
+
+    const swatches = await modal.$$(`[data-role='settings-label-color-swatch']`)
+    if (await swatches.length <= colorIndex) {
+      throw new Error(`Expected at least ${colorIndex + 1} label color swatches`)
+    }
+
+    const swatch = swatches[colorIndex]
+    const color = await swatch.getAttribute("data-color")
+    await swatch.waitForClickable()
+    await swatch.click()
+
+    const applyButton = modal.$("[data-role='settings-label-color-apply']")
+    await applyButton.waitForEnabled()
+    await applyButton.click()
+    await waitForModalClose(modal, this.timeout)
+    return color
+  }
+
   async getStoredServerName(serverIndex: number) {
     return await browser.execute((index) => {
       const injector = angular.element(document.body).injector()

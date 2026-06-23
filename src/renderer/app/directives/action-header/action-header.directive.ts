@@ -5,6 +5,7 @@ interface ActionHeaderScope extends IScope {
     actions: any[];
     click: (...args: any[]) => void;
     labels: string[];
+    labelColorStyle?: (label: string) => Record<string, string>;
     bind?: Record<string, never>;
     enabled?: boolean;
     addLabel?: (label: string, create?: boolean) => void;
@@ -16,6 +17,7 @@ export class ActionHeaderDirective implements IDirective {
         actions: "=",
         click: "=",
         labels: "=",
+        labelColorStyle: "=?",
         bind: "=?",
         enabled: "=?",
     };
@@ -80,7 +82,7 @@ export class ActionHeaderDirective implements IDirective {
 
         const appendLabelsDropdown = (list: IAugmentedJQuery, item: any) => {
             const dropdown = angular.element(
-                '<span labels-dropdown labels="labels" action="addLabel" enabled="enabled"></span>',
+                '<span labels-dropdown labels="labels" label-color-style="labelColorStyle" action="addLabel" enabled="enabled"></span>',
             );
 
             dropdown.attr("data-role", "labels");

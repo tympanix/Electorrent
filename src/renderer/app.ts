@@ -85,6 +85,8 @@ import { notificationService } from "@renderer/app/services/notification"
 torrentApp.service("notificationService", notificationService)
 import { CertificateResponseService } from "@renderer/app/services/certificate-response"
 torrentApp.service("certificateResponseService", CertificateResponseService)
+import { LabelColorService } from "@renderer/app/services/label-color"
+torrentApp.service("labelColorService", LabelColorService)
 import { serverService} from "@renderer/app/services/server"
 torrentApp.factory("Server", serverService)
 

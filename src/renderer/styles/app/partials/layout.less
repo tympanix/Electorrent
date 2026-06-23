@@ -383,6 +383,23 @@ torrent-sidebar + .main-panel {
     list-style-type: none;
     cursor: pointer;
 }
+
+.label-pill,
+.colored-label.ui.label {
+    border-radius: 999px !important;
+    border: 1px solid transparent !important;
+    display: inline-block;
+    font-weight: 700;
+}
+
+.label-pill {
+    line-height: 1;
+    padding: .35em .75em;
+}
+
+.colored-label.ui.label.active {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, .9), 0 0 0 4px currentColor;
+}
 .sidebar-collapsed-sections {
     display: flex;
     flex-direction: column;

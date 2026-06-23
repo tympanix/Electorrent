@@ -68,6 +68,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 this.savedLocations = []
                 this.defaultUploadOptionsEnabled = false
                 this.defaultUploadOptions = normalizeDefaultUploadOptions()
+                this.labelColors = {}
             }
             this.isConnected = false
         }
@@ -89,6 +90,20 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             return Object.assign({ startTorrent: true }, options || {})
         }
 
+        function normalizeLabelColors(labelColors?: Record<string, string>) {
+            if (!labelColors || typeof labelColors !== "object") {
+                return {}
+            }
+
+            return Object.entries(labelColors).reduce((colors: Record<string, string>, [label, color]) => {
+                if (label && typeof color === "string" && /^#[0-9a-f]{6}$/i.test(color)) {
+                    colors[label] = color.toUpperCase()
+                }
+
+                return colors
+            }, {})
+        }
+
         Server.prototype.fromJson = function(data) {
             this.name = data.name
             this.id = data.id
@@ -108,6 +123,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             this.savedLocations = normalizeSavedLocations(data.savedLocations)
             this.defaultUploadOptionsEnabled = data.defaultUploadOptionsEnabled === true
             this.defaultUploadOptions = normalizeDefaultUploadOptions(data.defaultUploadOptions)
+            this.labelColors = normalizeLabelColors(data.labelColors)
         };
 
         Server.prototype.json = function() {
@@ -129,6 +145,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 savedLocations: normalizeSavedLocations(this.savedLocations),
                 defaultUploadOptionsEnabled: this.defaultUploadOptionsEnabled === true,
                 defaultUploadOptions: normalizeDefaultUploadOptions(this.defaultUploadOptions),
+                labelColors: normalizeLabelColors(this.labelColors),
             }
         };
 
