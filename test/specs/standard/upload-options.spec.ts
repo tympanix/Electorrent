@@ -5,6 +5,7 @@ import * as e2e from "../../e2e"
 import { createTorrentFile } from "../../torrent"
 import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
+import { eventually } from "../../e2e/eventually"
 
 const fixture = getTestFixture()
 const client = fixture.client
@@ -62,7 +63,7 @@ describe("upload options", function () {
     const torrentMetadata = parseTorrent(fs.readFileSync(this.torrentPath))
 
     await this.app.uploadTorrentModalVisible()
-    await this.app.uploadTorrentModalLabel().should.eventually.equal(torrentMetadata.name)
+    await eventually(() => this.app.uploadTorrentModalLabel()).equals(String(torrentMetadata.name))
     await this.app.uploadTorrentModalSubmit()
     await torrent.waitForExist()
     await torrent.waitForStates([client.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
@@ -79,7 +80,7 @@ describe("upload options", function () {
     torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
     await this.app.uploadTorrentModalSubmit({ label: labelName })
     await torrent.waitForExist()
-    await torrent.getLabel().should.eventually.equal(labelName)
+    await eventually(() => torrent.getLabel()).equals(labelName)
     await torrent.delete()
   })
 
@@ -102,10 +103,7 @@ describe("upload options", function () {
     await torrent.waitForExist({ timeout: 20 * 1000 })
     await torrent.waitForStates([client.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
     await torrent.openDetailsPanel()
-    await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("connections-limit")) === String(peerLimit), {
-      timeout: 10 * 1000,
-      timeoutMsg: `Expected peer limit to become ${peerLimit}`,
-    })
+    await eventually(() => torrent.getDetailsFieldValue("connections-limit")).equals(String(peerLimit))
     await torrent.closeDetailsPanel()
     await torrent.delete()
   })
@@ -124,16 +122,10 @@ describe("upload options", function () {
     await torrent.waitForStates([client.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
     await torrent.openDetailsPanel()
     if (client.features.uploadOptions?.downloadSpeedLimit === true) {
-      await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("download-limit")) === `${downloadSpeedLimit} KB/s`, {
-        timeout: 10 * 1000,
-        timeoutMsg: `Expected download limit to become ${downloadSpeedLimit} KB/s`,
-      })
+      await eventually(() => torrent.getDetailsFieldValue("download-limit")).equals(`${downloadSpeedLimit} KB/s`)
     }
     if (client.features.uploadOptions?.uploadSpeedLimit === true) {
-      await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("upload-limit")) === `${uploadSpeedLimit} KB/s`, {
-        timeout: 10 * 1000,
-        timeoutMsg: `Expected upload limit to become ${uploadSpeedLimit} KB/s`,
-      })
+      await eventually(() => torrent.getDetailsFieldValue("upload-limit")).equals(`${uploadSpeedLimit} KB/s`)
     }
     await torrent.closeDetailsPanel()
     await torrent.delete()
@@ -147,10 +139,7 @@ describe("upload options", function () {
     await torrent.waitForExist({ timeout: 20 * 1000 })
     await torrent.waitForStates([client.downloadLabel, "Seeding"], { timeout: 20 * 1000 })
     await torrent.openDetailsPanel()
-    await browser.waitUntil(async () => (await torrent.getDetailsFieldValue("sequential-download")) === "Yes", {
-      timeout: 10 * 1000,
-      timeoutMsg: "Expected sequential download to be enabled",
-    })
+    await eventually(() => torrent.getDetailsFieldValue("sequential-download")).equals("Yes")
     await torrent.closeDetailsPanel()
     await torrent.delete()
   })
@@ -161,7 +150,7 @@ describe("upload options", function () {
     const torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true });
     await this.app.uploadTorrentModalSubmit({ name: torrentName })
     await torrent.isExisting()
-    await torrent.getColumn("decodedName").should.eventually.equal(torrentName)
+    await eventually(() => torrent.getColumn("decodedName")).equals(torrentName)
     await torrent.delete()
   })
 

@@ -6,6 +6,7 @@ import parseTorrent from "parse-torrent"
 import { browser, $, $$, expect } from '@wdio/globals'
 import type { ClientId } from "../../src/shared/client-metadata"
 import { parseServerAddressInput } from "../../src/shared/server-address"
+import { eventually } from "./eventually"
 import { waitForModalClose, waitForModalOpen } from "./modal"
 import type { ChainablePromiseElement } from "webdriverio"
 
@@ -223,10 +224,7 @@ export class App {
     await toggleInput.scrollIntoView()
     if (await toggleInput.isSelected() !== enabled) {
       await toggleInput.click()
-      await browser.waitUntil(async () => (await toggleInput.isSelected()) === enabled, {
-        timeout: 5_000,
-        timeoutMsg: `Expected ${action} toggle to become ${enabled}`,
-      })
+      await eventually(() => toggleInput.isSelected()).equals(enabled, { timeout: 5_000 })
     }
   }
 
@@ -267,12 +265,7 @@ export class App {
         item?.click()
       }, options.savedLocationPath)
       const selectedText = savedLocationDropdown.$(".text")
-      await browser.waitUntil(async () => {
-        return (await selectedText.getText()).includes(options.savedLocationPath || "")
-      }, {
-        timeout: 5_000,
-        timeoutMsg: `Expected saved location dropdown to select ${options.savedLocationPath}`,
-      })
+      await eventually(() => selectedText.getText()).contains(options.savedLocationPath || "", { timeout: 5_000 })
     }
 
     if (options?.start !== undefined) {
@@ -450,12 +443,7 @@ export class App {
     if (await this.isTorrentSidebarCollapsed() !== collapsed) {
       await toggle.waitForClickable()
       await toggle.click()
-      await browser.waitUntil(async () => {
-      return await this.isTorrentSidebarCollapsed() === collapsed
-      }, {
-      timeout: this.timeout,
-      timeoutMsg: `Expected torrent sidebar collapsed state to become ${collapsed}`,
-      })
+      await eventually(() => this.isTorrentSidebarCollapsed()).equals(collapsed, { timeout: this.timeout })
     }
   }
 
@@ -530,9 +518,7 @@ export class App {
     const modal = await this.openRenameSettingsServer(serverIndex)
     const input = modal.$("input[name='servername']")
     await input.waitForDisplayed()
-    await browser.waitUntil(async () => {
-      return (await input.getValue()).length > 0
-    })
+    await eventually(() => input.getValue()).satisfies("be non-empty", (value) => value.length > 0)
     const value = await input.getValue()
 
     const cancelButton = modal.$("button.deny")
@@ -631,12 +617,8 @@ export class App {
     await dropdown.waitForClickable()
     await dropdown.click()
 
-    await browser.waitUntil(async () => {
-      const options = await dropdown.$$(".menu .item")
-      return await options.length >= minimumOptionCount
-    }, {
-      timeoutMsg: `expected at least ${minimumOptionCount} options in ${settingName} dropdown`,
-    })
+    await eventually(async () => (await dropdown.$$(".menu .item")).length)
+      .satisfies(`be at least ${minimumOptionCount}`, (count) => count >= minimumOptionCount)
 
     const options = await dropdown.$$(".menu .item")
     const values: string[] = []

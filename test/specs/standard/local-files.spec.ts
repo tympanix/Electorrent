@@ -1,8 +1,8 @@
 import fs from "node:fs"
 import path from "node:path"
 import parseTorrent from "parse-torrent"
-import { browser } from "@wdio/globals"
 import * as e2e from "../../e2e"
+import { eventually } from "../../e2e/eventually"
 import { createTorrentFile } from "../../torrent"
 import { configureSpec, createUniqueLabel, getTestFixture } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
@@ -83,10 +83,7 @@ describe("local files", function () {
         sourcePath: torrentPath,
       })
       await torrent.waitForExist({ timeout: 30 * 1000 })
-      await browser.waitUntil(async () => !fs.existsSync(torrentPath), {
-        timeout: 10 * 1000,
-        timeoutMsg: `expected torrent file ${torrentPath} to be removed after upload`,
-      })
+      await eventually(async () => fs.existsSync(torrentPath)).equals(false)
     } finally {
       if (torrent && await torrent.isExisting()) {
         await torrent.delete()

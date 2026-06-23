@@ -2,8 +2,8 @@ import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import parseTorrent from "parse-torrent"
-import { browser } from "@wdio/globals"
 import * as e2e from "../../e2e"
+import { eventually } from "../../e2e/eventually"
 import { configureSpec, formatBytes, requireFeature } from "../../framework/fixture"
 
 const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
@@ -33,12 +33,7 @@ describe("torrent details", function () {
     const panel = await torrent.openDetailsPanel()
     const infoTab = panel.$("[data-role='torrent-details-info']")
 
-    await browser.waitUntil(async () => {
-      return (await infoTab.getText()).includes(torrentMetadata.infoHash)
-    }, {
-      timeout: 30_000,
-      timeoutMsg: "Torrent details info tab did not load expected metadata",
-    })
+    await eventually(() => infoTab.getText()).contains(torrentMetadata.infoHash, { timeout: 30_000 })
 
     const infoText = await infoTab.getText()
     infoText.should.contain(torrentMetadata.name || "")
@@ -57,12 +52,7 @@ describe("torrent details", function () {
     const filesTab = panel.$("[data-role='torrent-details-files']")
     const expectedFile = torrentMetadata.files?.[0]
 
-    await browser.waitUntil(async () => {
-      return (await filesTab.getText()).includes(expectedFile?.path || "")
-    }, {
-      timeout: 30_000,
-      timeoutMsg: "Torrent details files tab did not load expected file rows",
-    })
+    await eventually(() => filesTab.getText()).contains(expectedFile?.path || "", { timeout: 30_000 })
 
     const filesText = await filesTab.getText()
     filesText.should.contain(expectedFile?.path || "")
@@ -83,13 +73,8 @@ describe("torrent details", function () {
     const filesTable = panel.$("[data-role='torrent-details-files-table']")
     await filesTable.waitForDisplayed({ timeout: 30_000 })
 
-    await browser.waitUntil(async () => {
-      const headers = await filesTable.$$("thead th")
-      return await headers.length > 1
-    }, {
-      timeout: 30_000,
-      timeoutMsg: "Torrent details files table did not render enough columns to resize",
-    })
+    await eventually(async () => (await filesTable.$$("thead th")).length)
+      .satisfies("be greater than 1", (count) => count > 1, { timeout: 30_000 })
 
     const headers = await filesTable.$$("thead th")
     const firstHeader = headers[0]
@@ -99,13 +84,8 @@ describe("torrent details", function () {
     const initialWidth = (await firstHeader.getSize()).width
     await handle.dragAndDrop({ x: 40, y: 0 })
 
-    await browser.waitUntil(async () => {
-      const nextWidth = (await firstHeader.getSize()).width
-      return Math.abs(nextWidth - initialWidth) >= 10
-    }, {
-      timeout: 10_000,
-      timeoutMsg: "Torrent details files table column width did not change after dragging the resize handle",
-    })
+    await eventually(async () => (await firstHeader.getSize()).width)
+      .satisfies(`change by at least 10 from ${initialWidth}`, (nextWidth) => Math.abs(nextWidth - initialWidth) >= 10)
 
     await torrent.closeDetailsPanel()
   })

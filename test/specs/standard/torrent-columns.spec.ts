@@ -1,8 +1,8 @@
 import chai from "chai"
 import fs from "node:fs"
 import parseTorrent from "parse-torrent"
-import { browser } from "@wdio/globals"
 import * as e2e from "../../e2e"
+import { eventually } from "../../e2e/eventually"
 import { createTorrentFile } from "../../torrent"
 import { configureSpec, createUniqueLabel, formatBytes, getTestFixture } from "../../framework/fixture"
 
@@ -89,23 +89,15 @@ describe("torrent columns", function () {
   })
 
   it("shows a sensible Peers column value", async function () {
-    await browser.waitUntil(async () => {
-      return totalPeers((await torrent.getColumn("peersConnected")).trim()) > 0
-    }, {
-      timeout: 20 * 1000,
-      timeoutMsg: "Peers column did not show a positive total peer count",
-    })
+    await eventually(() => torrent.getColumn("peersConnected"))
+      .satisfies("show a positive total peer count", (value) => totalPeers(value.trim()) > 0, { timeout: 20 * 1000 })
 
     assert.match((await torrent.getColumn("peersConnected")).trim(), /^\d+ of \d+$/)
   })
 
   it("shows a sensible Seeds column value", async function () {
-    await browser.waitUntil(async () => {
-      return totalPeers((await torrent.getColumn("seedsConnected")).trim()) > 0
-    }, {
-      timeout: 20 * 1000,
-      timeoutMsg: "Seeds column did not show a positive total seed count",
-    })
+    await eventually(() => torrent.getColumn("seedsConnected"))
+      .satisfies("show a positive total seed count", (value) => totalPeers(value.trim()) > 0, { timeout: 20 * 1000 })
 
     assert.match((await torrent.getColumn("seedsConnected")).trim(), /^\d+ of \d+$/)
   })
@@ -119,12 +111,7 @@ describe("torrent columns", function () {
   })
 
   it("shows a sensible Ratio column value", async function () {
-    await browser.waitUntil(async () => {
-      return /^-?\d+\.\d{2}$/.test((await torrent.getColumn("ratio")).trim())
-    }, {
-      timeout: 20 * 1000,
-      timeoutMsg: "Ratio column did not show a decimal value",
-    })
+    await eventually(() => torrent.getColumn("ratio")).matches(/^-?\d+\.\d{2}$/, { timeout: 20 * 1000 })
 
     assert.match((await torrent.getColumn("ratio")).trim(), /^-?\d+\.\d{2}$/)
   })
@@ -145,29 +132,16 @@ describe("torrent columns", function () {
   })
 
   it("shows a sensible Date Added column value", async function () {
-    await browser.waitUntil(async () => {
-      return dateIsSensible((await torrent.getColumn("dateAdded")).trim())
-    }, {
-      timeout: 20 * 1000,
-      timeoutMsg: "Date Added column did not show a non-empty sensible date",
-    })
+    await eventually(() => torrent.getColumn("dateAdded"))
+      .satisfies("show a non-empty sensible date", (value) => dateIsSensible(value.trim()), { timeout: 20 * 1000 })
   })
 
   it("shows 100.0% progress when a torrent finishes", async function () {
-    await browser.waitUntil(async () => {
-      return (await torrent.getColumn("percent")).includes("100.0%")
-    }, {
-      timeout: 20 * 1000,
-      timeoutMsg: "Progress column did not show 100.0% for the finished torrent",
-    })
+    await eventually(() => torrent.getColumn("percent")).contains("100.0%", { timeout: 20 * 1000 })
   })
 
   it("shows Date Completed when a torrent finishes", async function () {
-    await browser.waitUntil(async () => {
-      return dateIsSensible((await torrent.getColumn("dateCompleted")).trim())
-    }, {
-      timeout: 20 * 1000,
-      timeoutMsg: "Date Completed column did not show a completion date for the finished torrent",
-    })
+    await eventually(() => torrent.getColumn("dateCompleted"))
+      .satisfies("show a completion date", (value) => dateIsSensible(value.trim()), { timeout: 20 * 1000 })
   })
 })

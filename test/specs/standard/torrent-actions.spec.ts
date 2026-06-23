@@ -4,6 +4,7 @@ import path from "node:path"
 import parseTorrent from "parse-torrent"
 import { $ } from "@wdio/globals"
 import * as e2e from "../../e2e"
+import { eventually } from "../../e2e/eventually"
 import { waitForModalClose } from "../../e2e/modal"
 import { createTorrentFile } from "../../torrent"
 import { configureSpec, createUniqueLabel, getTestFixture } from "../../framework/fixture"
@@ -60,7 +61,7 @@ describe("torrent actions", function () {
 
   it("delete action shows a confirmation modal", async function () {
     const modal = await torrent.openDeleteConfirmation()
-    await modal.$(".content").getText().should.eventually.contain("Are you sure")
+    await eventually(() => modal.$(".content").getText()).contains("Are you sure")
 
     const cancelButton = modal.$("button.deny")
     await cancelButton.waitForDisplayed()

@@ -1,5 +1,6 @@
 import chai from "chai"
 import { $, browser } from "@wdio/globals"
+import { eventually } from "../../e2e/eventually"
 import { configureSpec, enabledFeaturePaths, getTestFixture } from "../../framework/fixture"
 import { CLIENT_METADATA } from "../../../src/shared/client-metadata"
 
@@ -36,10 +37,7 @@ describe("application", function () {
       return this.skip()
     }
 
-    await browser.waitUntil(async () => {
-      const footerText = await this.app.getTorrentsFooterText()
-      return footerText.includes("Free:")
-    })
+    await eventually(() => this.app.getTorrentsFooterText()).contains("Free:")
   })
 
   it("toggles alternative rate limits from the status bar", async function () {
@@ -56,12 +54,12 @@ describe("application", function () {
     try {
       await button.waitForClickable()
       await button.click()
-      await browser.waitUntil(async () => await isActive() !== initial)
+      await eventually(isActive).equals(!initial)
     } finally {
       if (await isActive() !== initial) {
         await button.waitForClickable()
         await button.click()
-        await browser.waitUntil(async () => await isActive() === initial)
+        await eventually(isActive).equals(initial)
       }
     }
   })
