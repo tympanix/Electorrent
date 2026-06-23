@@ -1,8 +1,13 @@
 import { app, Menu, type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
 
-import { CLIENT_METADATA } from '@shared/client-metadata'
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { AppSettings, StoredServerConfig } from '@shared/ipc-contract'
+import type { AppSettings, MenuAction, StoredServerConfig, WindowCommand } from '@shared/ipc-contract'
+import {
+    buildMenuModel,
+    type MenuCommand,
+    type MenuModelItem,
+    type MenuModelMenu,
+} from '@shared/menu-model'
 import * as settings from './settings'
 
 type MenuSessionState = {
@@ -37,282 +42,104 @@ export function setWindow(window: BrowserWindow) {
     buildMenu()
 }
 
-function sendAction(action: unknown) {
+function sendAction(action: MenuAction) {
     if (!mainWindow || mainWindow.isDestroyed()) return
     mainWindow.webContents.send(IPC_CHANNELS.menu.action, action)
 }
 
-function serverAccelerator(index: number) {
-    if (index > 0 && index <= 10) {
-        return `CmdOrCtrl+${index % 10}`
+function runWindowCommand(window: BrowserWindow, command: WindowCommand) {
+    switch (command) {
+        case 'reload':
+            window.reload()
+            break
+        case 'toggle-full-screen':
+            window.setFullScreen(!window.isFullScreen())
+            break
+        case 'toggle-dev-tools':
+            window.webContents.toggleDevTools()
+            break
+        case 'minimize':
+            window.minimize()
+            break
+        case 'close':
+            window.close()
+            break
+        default:
+            break
+    }
+}
+
+function applyMenuCommand(options: MenuItemConstructorOptions, command: MenuCommand) {
+    switch (command.type) {
+        case 'menu-action':
+            options.click = () => sendAction(command.action)
+            break
+        case 'edit-command':
+            options.role = command.command as MenuItemConstructorOptions['role']
+            break
+        case 'window-command':
+            if (command.command === 'minimize' || command.command === 'close') {
+                options.role = command.command as MenuItemConstructorOptions['role']
+            } else {
+                options.click = (_item, focusedWindow) => {
+                    if (focusedWindow) {
+                        runWindowCommand(focusedWindow as BrowserWindow, command.command)
+                    }
+                }
+            }
+            break
+        case 'app-command':
+            if (command.command === 'quit') {
+                options.role = 'quit'
+            }
+            break
+        default:
+            break
+    }
+}
+
+function toElectronMenuItem(item: MenuModelItem): MenuItemConstructorOptions {
+    if (item.separator) {
+        return { type: 'separator' }
     }
 
-    return undefined
+    const options: MenuItemConstructorOptions = {}
+
+    if (item.id) options.id = item.id
+    if (item.label) options.label = item.label
+    if (item.accelerator) options.accelerator = item.accelerator
+    if (item.type) options.type = item.type
+    if (typeof item.checked === 'boolean') options.checked = item.checked
+    if (typeof item.enabled === 'boolean') options.enabled = item.enabled
+    if (typeof item.visible === 'boolean') options.visible = item.visible
+    if (item.role) options.role = item.role as MenuItemConstructorOptions['role']
+    if (item.submenu) options.submenu = item.submenu.map(toElectronMenuItem)
+    if (item.command) applyMenuCommand(options, item.command)
+
+    return options
 }
 
-function getServerLabel(server: StoredServerConfig) {
-    const clientName = CLIENT_METADATA[server.client]?.name || server.client || 'Server'
-    const address = server.ip || 'unknown host'
-    return server.name || `${clientName} @ ${address}`
-}
-
-function hasActiveServer() {
-    return !!menuState.activeServerId
-}
-
-function advancedUploadEnabled() {
-    return !!menuState.activeClientId && !!CLIENT_METADATA[menuState.activeClientId]?.showAdvancedUploadMenu
-}
-
-function serverMenuItems(): MenuItemConstructorOptions[] {
-    const submenu: MenuItemConstructorOptions[] = [
-        {
-            label: 'Add new server...',
-            accelerator: 'CmdOrCtrl+N',
-            click: () => sendAction({ type: 'add-server' }),
-        },
-        {
-            label: 'Set current as default',
-            enabled: hasActiveServer(),
-            click: () => sendAction({ type: 'set-current-default-server' }),
-        },
-        { type: 'separator' },
-    ]
-
-    if (!hasActiveServer()) {
-        submenu.push({
-            label: 'Disabled...',
-            enabled: false,
-        })
-        return submenu
-    }
-
-    menuSettings.servers.forEach((server, index) => {
-        submenu.push({
-            label: getServerLabel(server),
-            accelerator: serverAccelerator(index + 1),
-            type: 'radio',
-            checked: server.id === menuState.activeServerId,
-            click: () => sendAction({ type: 'connect-server', serverId: server.id }),
-        })
+function toElectronMenu(menu: MenuModelMenu): MenuItemConstructorOptions {
+    return toElectronMenuItem({
+        id: menu.id,
+        label: menu.label,
+        role: menu.role,
+        submenu: menu.items,
     })
-
-    return submenu
-}
-
-function fileMenuItems(): MenuItemConstructorOptions[] {
-    return [
-        {
-            label: 'Add Torrent',
-            accelerator: 'CmdOrCtrl+O',
-            click: () => sendAction({ type: 'open-add-torrent', askUploadOptions: false }),
-        },
-        {
-            label: 'Add Torrent (Advanced)',
-            accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+O' : 'CmdOrCtrl+Shift+O',
-            visible: advancedUploadEnabled(),
-            enabled: advancedUploadEnabled(),
-            click: () => sendAction({ type: 'open-add-torrent', askUploadOptions: true }),
-        },
-        {
-            label: 'Paste Torrent URL',
-            accelerator: 'CmdOrCtrl+I',
-            click: () => sendAction({ type: 'paste-torrent-url', askUploadOptions: false }),
-        },
-        {
-            label: 'Paste Torrent URL (Advanced)',
-            accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+I' : 'CmdOrCtrl+Shift+I',
-            visible: advancedUploadEnabled(),
-            enabled: advancedUploadEnabled(),
-            click: () => sendAction({ type: 'paste-torrent-url', askUploadOptions: true }),
-        },
-    ]
-}
-
-function editMenuItems(): MenuItemConstructorOptions[] {
-    return [
-        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
-        { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', role: 'redo' },
-        { type: 'separator' },
-        {
-            label: 'Find',
-            accelerator: 'CmdOrCtrl+F',
-            click: () => sendAction({ type: 'search-torrent' }),
-        },
-        { label: 'Cut', accelerator: 'CmdOrCtrl+X', role: 'cut' },
-        { label: 'Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' },
-        { label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste' },
-        {
-            label: 'Remove',
-            accelerator: 'Delete',
-            click: () => sendAction({ type: 'remove-selected' }),
-        },
-        {
-            label: 'Select All',
-            accelerator: 'CmdOrCtrl+A',
-            click: () => sendAction({ type: 'select-all' }),
-        },
-    ]
-}
-
-function viewMenuItems(): MenuItemConstructorOptions[] {
-    return [
-        {
-            label: 'Reload',
-            visible: !!menuState.isDebug,
-            accelerator: 'CmdOrCtrl+R',
-            click(_item, focusedWindow) {
-                if (focusedWindow) (focusedWindow as BrowserWindow).reload()
-            },
-        },
-        {
-            label: 'Toggle Full Screen',
-            accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
-            click(_item, focusedWindow) {
-                if (focusedWindow) {
-                    const browserWindow = focusedWindow as BrowserWindow
-                    browserWindow.setFullScreen(!browserWindow.isFullScreen())
-                }
-            },
-        },
-        {
-            label: 'Toggle Developer Tools',
-            visible: !!menuState.isDebug,
-            accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-            click(_item, focusedWindow) {
-                if (focusedWindow) {
-                    (focusedWindow as BrowserWindow).webContents.toggleDevTools()
-                }
-            },
-        },
-    ]
-}
-
-function helpMenuItems(): MenuItemConstructorOptions[] {
-    return [
-        {
-            label: 'Learn More',
-            click: () => sendAction({ type: 'open-external', url: 'https://github.com/tympanix/Electorrent' }),
-        },
-        {
-            label: 'Check For Updates',
-            click: () => sendAction({ type: 'check-for-updates', verbose: true }),
-        },
-    ]
-}
-
-function buildDarwinTemplate(): MenuItemConstructorOptions[] {
-    const name = app.name
-
-    return [
-        {
-            label: name,
-            submenu: [
-                { label: `About ${name}`, role: 'about' },
-                { type: 'separator' },
-                {
-                    label: 'Preferences',
-                    accelerator: 'Command+,',
-                    click: () => sendAction({ type: 'show-settings' }),
-                },
-                { label: 'Services', role: 'services', submenu: [] },
-                { type: 'separator' },
-                { label: `Hide ${name}`, accelerator: 'Command+H', role: 'hide' },
-                { label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideOthers' },
-                { label: 'Show All', role: 'unhide' },
-                { type: 'separator' },
-                { label: 'Quit', accelerator: 'Command+Q', role: 'quit' },
-            ],
-        },
-        {
-            label: 'File',
-            id: 'file',
-            submenu: fileMenuItems(),
-        },
-        {
-            label: 'Edit',
-            submenu: editMenuItems(),
-        },
-        {
-            label: 'View',
-            submenu: viewMenuItems(),
-        },
-        {
-            label: 'Servers',
-            id: 'servers',
-            submenu: serverMenuItems(),
-        },
-        {
-            label: 'Window',
-            role: 'window',
-            submenu: [
-                { label: 'Close', accelerator: 'CmdOrCtrl+W', role: 'close' },
-                { label: 'Minimize', accelerator: 'CmdOrCtrl+M', role: 'minimize' },
-                { label: 'Zoom', role: 'zoom' },
-                { type: 'separator' },
-                { label: 'Bring All to Front', role: 'front' },
-            ],
-        },
-        {
-            label: 'Help',
-            role: 'help',
-            submenu: helpMenuItems(),
-        },
-    ]
-}
-
-function buildDefaultTemplate(): MenuItemConstructorOptions[] {
-    return [
-        {
-            label: 'File',
-            id: 'file',
-            submenu: [
-                ...fileMenuItems(),
-                { type: 'separator' },
-                {
-                    label: 'Settings',
-                    accelerator: 'Ctrl+,',
-                    click: () => sendAction({ type: 'show-settings' }),
-                },
-                { type: 'separator' },
-                { label: 'Exit', role: 'quit' },
-            ],
-        },
-        {
-            label: 'Edit',
-            submenu: editMenuItems(),
-        },
-        {
-            label: 'View',
-            submenu: viewMenuItems(),
-        },
-        {
-            label: 'Servers',
-            id: 'servers',
-            submenu: serverMenuItems(),
-        },
-        {
-            label: 'Window',
-            role: 'window',
-            submenu: [
-                { label: 'Minimize', accelerator: 'CmdOrCtrl+M', role: 'minimize' },
-                { label: 'Close', accelerator: 'CmdOrCtrl+W', role: 'close' },
-            ],
-        },
-        {
-            label: 'Help',
-            role: 'help',
-            submenu: helpMenuItems(),
-        },
-    ]
 }
 
 function buildMenu() {
-    const template = process.platform === 'darwin'
-        ? buildDarwinTemplate()
-        : buildDefaultTemplate()
+    const model = buildMenuModel({
+        layout: process.platform === 'darwin' ? 'darwin' : 'standard',
+        acceleratorStyle: 'electron',
+        appName: app.name,
+        isDebug: menuState.isDebug,
+        activeServerId: menuState.activeServerId,
+        activeClientId: menuState.activeClientId,
+        servers: menuSettings.servers as StoredServerConfig[],
+    })
 
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+    Menu.setApplicationMenu(Menu.buildFromTemplate(model.menus.map(toElectronMenu)))
 }
 
 export function configure(state: Pick<MenuSessionState, 'isDebug'>) {
