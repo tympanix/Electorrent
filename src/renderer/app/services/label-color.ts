@@ -9,8 +9,8 @@ interface ServerWithLabelColors {
 }
 
 export class LabelColorService {
-    private readonly saturation = 35
-    private readonly value = 58
+    private readonly saturation = 45
+    private readonly value = 68
     private readonly paletteHueDelta = 5
 
     getPalette(deltaHue = this.paletteHueDelta) {
@@ -40,7 +40,7 @@ export class LabelColorService {
 
         return {
             backgroundColor,
-            borderColor: backgroundColor,
+            borderColor: this.vibrantBorderColor(backgroundColor),
             color: this.contrastColor(backgroundColor),
         }
     }
@@ -98,6 +98,15 @@ export class LabelColorService {
         }).join("")}`.toUpperCase()
     }
 
+    private vibrantBorderColor(hex: string) {
+        const hsv = this.hexToHsv(hex)
+        if (!hsv) {
+            return hex
+        }
+
+        return this.hsvToHex(hsv.h, Math.min(100, hsv.s + 25), Math.min(90, hsv.v + 18))
+    }
+
     private relativeLuminance(rgb: { r: number; g: number; b: number }) {
         const [r, g, b] = [rgb.r, rgb.g, rgb.b].map((channel) => {
             const normalized = channel / 255
@@ -107,6 +116,37 @@ export class LabelColorService {
         })
 
         return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
+    }
+
+    private hexToHsv(hex: string) {
+        const rgb = this.hexToRgb(hex)
+        if (!rgb) {
+            return undefined
+        }
+
+        const r = rgb.r / 255
+        const g = rgb.g / 255
+        const b = rgb.b / 255
+        const max = Math.max(r, g, b)
+        const min = Math.min(r, g, b)
+        const delta = max - min
+        let hue = 0
+
+        if (delta !== 0) {
+            if (max === r) {
+                hue = 60 * (((g - b) / delta) % 6)
+            } else if (max === g) {
+                hue = 60 * (((b - r) / delta) + 2)
+            } else {
+                hue = 60 * (((r - g) / delta) + 4)
+            }
+        }
+
+        return {
+            h: (hue + 360) % 360,
+            s: max === 0 ? 0 : (delta / max) * 100,
+            v: max * 100,
+        }
     }
 
     private hexToRgb(hex: string) {
