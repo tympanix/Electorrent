@@ -66,7 +66,7 @@ export class QBittorrentTorrent extends Torrent {
             uploadLimit: data.up_limit,
             downloadLimit: data.dl_limit,
             eta: data.eta,
-            label: data.category || data.label,
+            label: data.category !== undefined ? data.category : data.label,
             peersConnected: data.num_leechs,
             peersInSwarm: data.num_incomplete,
             seedsConnected: data.num_seeds,

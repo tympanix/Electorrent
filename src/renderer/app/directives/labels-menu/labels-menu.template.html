@@ -5,9 +5,11 @@
             <i class="search icon"></i>
             <input type="text" placeholder="Search labels...">
         </div>
+        <div data-role="remove-label" class="item" ng-click="action('')"><i class="remove icon"></i> Remove Label</div>
         <div data-role="new-label" class="item" ng-click="openNewLabelModal()"><i class="edit icon"></i> New Label</div>
+        <div class="divider"></div>
         <div class="scrolling menu">
-            <div class="item" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
+            <div class="item" data-role="label-option" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
             <div></div>
         </div>
     </div>

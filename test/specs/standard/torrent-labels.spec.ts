@@ -49,4 +49,10 @@ describe("torrent labels", function () {
     await torrent.changeLabel(firstLabel)
     await torrent.checkInFilterLabel(firstLabel)
   })
+
+  it("removes the label", async function () {
+    await torrent.removeLabel()
+    const label = await torrent.getLabel()
+    label.trim().should.equal("")
+  })
 })

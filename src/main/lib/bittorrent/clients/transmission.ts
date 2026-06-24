@@ -474,7 +474,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
 
     label(hashes: string[], label: string): Promise<void> {
         return this.doAction('torrent-set', hashes, {
-            labels: [label],
+            labels: label ? [label] : [],
         }).then((response) => this.ensureSuccess(response)).then(() => undefined)
     }
 
