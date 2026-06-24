@@ -327,6 +327,17 @@ export class Torrent {
     await eventually(() => this.getLabel()).equals(labelName)
   }
 
+  async removeLabel() {
+    const labelsElem = await this.openLabelsDropdown()
+
+    const removeLabelElem = labelsElem.$("div[data-role=remove-label]")
+    await removeLabelElem.waitForDisplayed()
+    await removeLabelElem.click()
+    await removeLabelElem.waitForDisplayed({ reverse: true })
+
+    await eventually(async () => (await this.getLabel()).trim()).equals("")
+  }
+
   async click(options: ClickOptions) {
     const elem = $(this.query)
     await elem.click(options)

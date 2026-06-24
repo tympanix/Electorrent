@@ -290,7 +290,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
                 token: this.data.token,
                 hash: hashes,
                 s: 'label',
-                v: label,
+                v: label === '' ? ' ' : label,
                 action: 'setprops',
                 t: Date.now(),
             },
