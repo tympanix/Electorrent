@@ -1,9 +1,12 @@
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import * as e2e from "../../e2e"
-import { configureSpec, createUniqueLabel, requireFeature } from "../../framework/fixture"
+import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from "../../framework/fixture"
+import { createTorrentFile } from "../../torrent"
 
 const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
+const tracker = getTestFixture().tracker
+const noLabelFilter = "__electorrent_no_label__"
 
 describe("torrent labels", function () {
   configureSpec()
@@ -13,17 +16,24 @@ describe("torrent labels", function () {
   const secondLabel = createUniqueLabel("someotherlabel")
   let initialLabelCount = 0
   let torrent: e2e.Torrent
+  let unlabeledTorrent: e2e.Torrent
 
   before(async function () {
     const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+    const unlabeledFilename = await createTorrentFile(tracker, { torrentName: createUniqueLabel("unlabeled") })
     torrent = await this.app.uploadTorrent({ filename })
+    unlabeledTorrent = await this.app.uploadTorrent({ filename: unlabeledFilename })
     await torrent.waitForExist()
+    await unlabeledTorrent.waitForExist()
     initialLabelCount = (await this.app.getAllSidebarLabels()).length
   })
 
   after(async function () {
     if (torrent && await torrent.isExisting()) {
       await torrent.delete()
+    }
+    if (unlabeledTorrent && await unlabeledTorrent.isExisting()) {
+      await unlabeledTorrent.delete()
     }
   })
 
@@ -43,6 +53,13 @@ describe("torrent labels", function () {
     labels.should.include(firstLabel)
     labels.should.include(secondLabel)
     labels.should.have.length(initialLabelCount + 2)
+  })
+
+  it("filters torrents without a label", async function () {
+    await this.app.filterLabel(noLabelFilter)
+    await unlabeledTorrent.waitForExist()
+    await torrent.waitForGone()
+    await this.app.filterLabel()
   })
 
   it("changes back to a previous label", async function () {

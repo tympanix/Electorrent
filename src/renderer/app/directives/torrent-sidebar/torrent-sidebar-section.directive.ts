@@ -8,10 +8,24 @@ export class TorrentSidebarSectionController {
     clearRole = "";
     emptyText = "";
     itemAttribute = "";
+    specialItemValue?: string;
+    specialItemText?: string;
     onSelect?: (locals: { item?: string }) => void;
 
     isActive(item: string) {
         return this.active === item;
+    }
+
+    itemText(item: string) {
+        return item === this.specialItemValue && this.specialItemText ? this.specialItemText : item;
+    }
+
+    hasSpecialItem() {
+        return !!this.specialItemValue;
+    }
+
+    displayEmpty() {
+        return this.items.length === 0 && !this.hasSpecialItem();
     }
 
     select(item: string) {
@@ -32,6 +46,8 @@ export class TorrentSidebarSectionDirective implements IDirective {
         clearRole: "@",
         emptyText: "@",
         itemAttribute: "@",
+        specialItemValue: "@",
+        specialItemText: "@",
         onSelect: "&",
     };
     bindToController = true;
