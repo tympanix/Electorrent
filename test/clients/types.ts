@@ -15,6 +15,8 @@ export interface TestClient {
   containerHostPort?: number
   proxyPort?: number
   authProxyHostPort?: number
+  digestAuthProxyHostPort?: number
+  additionalComposeServices?: string[]
   acceptHttpStatus: number
   stopLabel: string
   downloadLabel: string
