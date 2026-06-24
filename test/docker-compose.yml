@@ -42,6 +42,15 @@ services:
       - PROXY_PORT=${PROXY_PORT}
       - NGINX_AUTH_PORT=${NGINX_AUTH_PORT:-8081}
 
+  apache:
+    build: ./shared/apache
+    ports:
+      - ${APACHE_AUTH_HOST_PORT:-8082}:${APACHE_AUTH_PORT:-8082}
+    environment:
+      - PROXY_HOST=${PROXY_HOST}
+      - PROXY_PORT=${PROXY_PORT}
+      - APACHE_AUTH_PORT=${APACHE_AUTH_PORT:-8082}
+
   deluge:
     image: linuxserver/deluge:${VERSION:-latest}
     environment:

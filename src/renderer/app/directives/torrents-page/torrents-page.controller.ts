@@ -2,6 +2,7 @@ import Fuse from "fuse.js";
 import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { PendingTorrentUploadItem, PendingTorrentUploadList } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import { matchesLabelFilter } from "@renderer/app/directives/torrent-sidebar/torrent-label-filter";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
 interface TorrentControllerScope extends angular.IScope {
@@ -779,7 +780,7 @@ export class TorrentsPageController {
             }
 
             if (filterLabel) {
-                filters.push((torrent) => torrent.label === filterLabel);
+                filters.push((torrent) => matchesLabelFilter(torrent.label, filterLabel));
             }
 
             if (filterTracker) {

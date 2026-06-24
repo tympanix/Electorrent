@@ -26,6 +26,12 @@ export default {
     containerHostPort: 48080,
     proxyPort: 80,
     authProxyHostPort: 48081,
+    digestAuthProxyHostPort: 48082,
+    additionalComposeServices: ["apache"],
+    specs: [
+      "test/specs/standard/**/*.spec.ts",
+      "test/specs/rtorrent/**/*.spec.ts",
+    ],
     username: "admin",
     password: "admin",
     saveLocation: "/downloads/custom/save/location",

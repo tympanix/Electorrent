@@ -31,7 +31,7 @@ export default class ElectorrentTestService {
         const { composeOptions } = this.getClientEnvironment(client)
 
         await compose.upMany(
-          ["tracker", "peer", this.getClientServiceName(client), "nginx"],
+          ["tracker", "peer", this.getClientServiceName(client), "nginx", ...(client.additionalComposeServices ?? [])],
           composeOptions,
         )
         await waitForHttp({
@@ -89,6 +89,8 @@ export default class ElectorrentTestService {
       NGINX_HOST_PORT: String(proxyPort),
       NGINX_AUTH_HOST_PORT: String(authProxyPort),
       NGINX_AUTH_PORT: "8081",
+      APACHE_AUTH_HOST_PORT: String(client.digestAuthProxyHostPort ?? 56000 + clientIndex),
+      APACHE_AUTH_PORT: "8082",
       PROXY_HOST: this.getClientServiceName(client),
       PROXY_PORT: String(client.proxyPort ?? client.containerPort ?? client.port),
       RPC_PORT: String(52000 + clientIndex),

@@ -1,0 +1,37 @@
+ServerRoot "/usr/local/apache2"
+ServerName localhost
+Listen ${APACHE_AUTH_PORT}
+
+LoadModule mpm_event_module modules/mod_mpm_event.so
+LoadModule auth_digest_module modules/mod_auth_digest.so
+LoadModule authn_core_module modules/mod_authn_core.so
+LoadModule authn_file_module modules/mod_authn_file.so
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule authz_user_module modules/mod_authz_user.so
+LoadModule log_config_module modules/mod_log_config.so
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule unixd_module modules/mod_unixd.so
+
+User daemon
+Group daemon
+PidFile logs/httpd.pid
+ErrorLog /proc/self/fd/2
+TransferLog /proc/self/fd/1
+LogLevel warn
+
+<VirtualHost *:${APACHE_AUTH_PORT}>
+  ProxyPreserveHost On
+
+  <Location />
+    AuthType Digest
+    AuthName "Electorrent test fixture"
+    AuthDigestDomain /
+    AuthDigestProvider file
+    AuthUserFile /usr/local/apache2/conf.d/rtorrent-digest-auth.htdigest
+    Require valid-user
+
+    ProxyPass http://${PROXY_HOST}:${PROXY_PORT}/
+    ProxyPassReverse http://${PROXY_HOST}:${PROXY_PORT}/
+  </Location>
+</VirtualHost>
