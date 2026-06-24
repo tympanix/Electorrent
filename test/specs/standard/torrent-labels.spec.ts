@@ -1,9 +1,11 @@
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import * as e2e from "../../e2e"
-import { configureSpec, createUniqueLabel, requireFeature } from "../../framework/fixture"
+import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from "../../framework/fixture"
+import { createTorrentFile } from "../../torrent"
 
 const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
+const tracker = getTestFixture().tracker
 const noLabelFilter = "__electorrent_no_label__"
 
 describe("torrent labels", function () {
@@ -18,7 +20,7 @@ describe("torrent labels", function () {
 
   before(async function () {
     const filename = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
-    const unlabeledFilename = path.join(testDir, "shared/opentracker/data/shared/test-torrent-n86j8t6d.torrent")
+    const unlabeledFilename = await createTorrentFile(tracker, { torrentName: createUniqueLabel("unlabeled") })
     torrent = await this.app.uploadTorrent({ filename })
     unlabeledTorrent = await this.app.uploadTorrent({ filename: unlabeledFilename })
     await torrent.waitForExist()
