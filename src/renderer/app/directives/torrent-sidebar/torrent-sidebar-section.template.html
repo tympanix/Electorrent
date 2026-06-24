@@ -3,10 +3,15 @@
     <a data-role="{{ctl.clearRole}}" class="ui gray basic mini clear button" ng-click="ctl.clear()">Clear</a>
 </div>
 <ul class="filter label">
-    <span ng-if="ctl.items.length == 0" class="meta text">{{ctl.emptyText}}</span>
+    <span ng-if="ctl.displayEmpty()" class="meta text">{{ctl.emptyText}}</span>
+    <li ng-if="ctl.hasSpecialItem()" ng-attr-data-label="{{ctl.itemAttribute == 'label' ? ctl.specialItemValue : undefined}}" ng-attr-data-tracker="{{ctl.itemAttribute == 'tracker' ? ctl.specialItemValue : undefined}}">
+        <div class="ui fluid torrent tag label" ng-click="ctl.select(ctl.specialItemValue)" ng-class="{blue: ctl.isActive(ctl.specialItemValue)}">
+            {{ctl.itemText(ctl.specialItemValue)}}
+        </div>
+    </li>
     <li ng-attr-data-label="{{ctl.itemAttribute == 'label' ? item : undefined}}" ng-attr-data-tracker="{{ctl.itemAttribute == 'tracker' ? item : undefined}}" ng-repeat="item in ctl.items track by item">
         <div class="ui fluid torrent tag label" ng-click="ctl.select(item)" ng-class="{blue: ctl.isActive(item)}">
-            {{item}}
+            {{ctl.itemText(item)}}
         </div>
     </li>
 </ul>

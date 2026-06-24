@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { matchesLabelFilter, NO_LABEL_FILTER } from "./torrent-label-filter";
 import html from "./torrent-sidebar.template.html";
 
 interface TorrentSidebarFilters {
@@ -37,6 +38,7 @@ export class TorrentSidebarController {
     filters: TorrentSidebarFilters = {};
     labels: string[] = [];
     trackers: string[] = [];
+    noLabelFilter = NO_LABEL_FILTER;
     onStatus?: (locals: { status: string }) => void;
     onLabel?: (locals: { label?: string }) => void;
     onTracker?: (locals: { tracker?: string }) => void;
@@ -91,7 +93,7 @@ export class TorrentSidebarController {
         ];
 
         if (filterLabel) {
-            filters.push((torrent) => torrent.label === filterLabel);
+            filters.push((torrent) => matchesLabelFilter(torrent.label, filterLabel));
         }
 
         if (filterTracker) {
