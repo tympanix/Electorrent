@@ -3,6 +3,7 @@ import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { PendingTorrentUploadItem, PendingTorrentUploadList } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
+import type { LabelColorService } from "@renderer/app/services/label-color";
 
 interface TorrentControllerScope extends angular.IScope {
     pendingTorrentFiles: PendingTorrentUploadList;
@@ -18,7 +19,7 @@ interface TorrentControllerScope extends angular.IScope {
 }
 
 export class TorrentsPageController {
-    static $inject = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "settingsService"];
+    static $inject = ["$rootScope", "$scope", "$timeout", "$filter", "$q", "$bittorrent", "notificationService", "settingsService", "labelColorService"];
 
     constructor(
         $rootScope: ElectorrentRootScope,
@@ -29,6 +30,7 @@ export class TorrentsPageController {
         $bittorrent: any,
         $notify: any,
         settingsService: any,
+        labelColorService: LabelColorService,
     ) {
         const LIMIT = 25;
         const SYNC_LATENCY_SAMPLE_SIZE = 5;
@@ -64,6 +66,8 @@ export class TorrentsPageController {
         $scope.labelsDrowdown = null;
         $scope.torrentLimit = LIMIT;
         $scope.labels = [];
+        ($rootScope as any).$labels = $scope.labels;
+        $scope.labelColorStyle = (label: string) => labelColorService.style($rootScope.$server, label);
         $scope.trackers = [];
         $scope.guiBusy = true;
         $scope.pendingTorrentFiles = [];
@@ -957,6 +961,10 @@ export class TorrentsPageController {
                 torrents.labels.forEach((label: string) => {
                     if (!$scope.labels.includes(label)) {
                         $scope.labels.push(label);
+                    }
+
+                    if ($rootScope.$server && !$rootScope.$server.labelColors?.[label]) {
+                        labelColorService.setColor($rootScope.$server, label, labelColorService.colorFromLabel(label));
                     }
                 });
             }

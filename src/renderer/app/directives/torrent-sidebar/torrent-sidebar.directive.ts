@@ -36,6 +36,7 @@ export class TorrentSidebarController {
     torrents: Record<string, TorrentLike> = {};
     filters: TorrentSidebarFilters = {};
     labels: string[] = [];
+    labelColorStyle?: (label: string) => Record<string, string>;
     trackers: string[] = [];
     onStatus?: (locals: { status: string }) => void;
     onLabel?: (locals: { label?: string }) => void;
@@ -130,6 +131,7 @@ export class TorrentSidebarDirective implements IDirective {
         torrents: "=",
         filters: "=",
         labels: "=",
+        labelColorStyle: "=?",
         trackers: "=",
         onStatus: "&",
         onLabel: "&",

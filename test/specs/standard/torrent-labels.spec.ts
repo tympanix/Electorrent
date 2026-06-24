@@ -1,8 +1,10 @@
+import chai from "chai"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import * as e2e from "../../e2e"
 import { configureSpec, createUniqueLabel, requireFeature } from "../../framework/fixture"
 
+const assert: Chai.AssertStatic = chai.assert
 const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 
 describe("torrent labels", function () {
@@ -43,6 +45,20 @@ describe("torrent labels", function () {
     labels.should.include(firstLabel)
     labels.should.include(secondLabel)
     labels.should.have.length(initialLabelCount + 2)
+  })
+
+  it("changes a label color", async function () {
+    await torrent.changeLabel(firstLabel)
+    const originalColor = await this.app.getSidebarLabelColor(firstLabel)
+
+    await this.app.openSettings()
+    await this.app.settingsGotoTab("advanced")
+    await this.app.setSettingsLabelColor(firstLabel, 12)
+    await this.app.settingsSave()
+    await this.app.torrentsPageIsVisible()
+
+    const updatedColor = await this.app.getSidebarLabelColor(firstLabel)
+    assert.notEqual(updatedColor.value, originalColor.value)
   })
 
   it("changes back to a previous label", async function () {

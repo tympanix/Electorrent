@@ -9,6 +9,7 @@ export class LabelsDropdownDirective implements IDirective {
         enabled: "=?",
         action: "=",
         labels: "=",
+        labelColorStyle: "=?",
     };
     controller = LabelsDropdownController;
 

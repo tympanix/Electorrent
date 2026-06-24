@@ -159,6 +159,7 @@ export interface StoredServerConfig {
     savedLocations?: SavedLocationConfig[]
     defaultUploadOptionsEnabled?: boolean
     defaultUploadOptions?: TorrentUploadOptions
+    labelColors?: Record<string, string>
 }
 
 export interface SavedLocationConfig {

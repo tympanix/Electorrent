@@ -5,7 +5,7 @@
 <ul class="filter label">
     <span ng-if="ctl.items.length == 0" class="meta text">{{ctl.emptyText}}</span>
     <li ng-attr-data-label="{{ctl.itemAttribute == 'label' ? item : undefined}}" ng-attr-data-tracker="{{ctl.itemAttribute == 'tracker' ? item : undefined}}" ng-repeat="item in ctl.items track by item">
-        <div class="ui fluid torrent tag label" ng-click="ctl.select(item)" ng-class="{blue: ctl.isActive(item)}">
+        <div class="ui fluid torrent tag label colored-label" ng-click="ctl.select(item)" ng-class="{active: ctl.isActive(item)}" ng-style="ctl.itemStyle(item)">
             {{item}}
         </div>
     </li>
