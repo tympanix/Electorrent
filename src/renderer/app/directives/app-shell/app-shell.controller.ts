@@ -19,7 +19,7 @@ interface AppShellScope extends IScope {
     showServers: () => boolean;
     currentPage: () => string | null;
     showTitleBarMenu: () => boolean;
-    isWindows: boolean;
+    hasBrowserTitleBarMenu: boolean;
     [key: string]: any;
 }
 
@@ -60,13 +60,13 @@ export class AppShellController {
         $scope.showTorrents = false;
         $scope.showLoading = true;
         $scope.statusText = "Loading";
-        $scope.isWindows = false;
+        $scope.hasBrowserTitleBarMenu = false;
         $scope.currentPage = () => page;
-        $scope.showTitleBarMenu = () => $scope.isWindows;
+        $scope.showTitleBarMenu = () => $scope.hasBrowserTitleBarMenu;
 
         $rootScope.$on("ready", () => {
             Promise.all([settingsService.whenReady(), electorrent.app.getMeta()]).then(([_, meta]: [unknown, AppMeta]) => {
-                $scope.isWindows = meta.isWindows || meta.forceTitleBarMenu;
+                $scope.hasBrowserTitleBarMenu = meta.isWindows || meta.isLinux || meta.forceTitleBarMenu;
                 const settings = settingsService.getAllSettings();
                 const automaticUpdates = settings?.automaticUpdates;
                 if (!meta.isDebug && automaticUpdates !== false) {

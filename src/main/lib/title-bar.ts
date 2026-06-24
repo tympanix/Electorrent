@@ -28,6 +28,7 @@ export function getTitleBarWindowOptions(theme?: ThemePreference): BrowserWindow
     }
 
     if (process.platform !== 'darwin') {
+        options.autoHideMenuBar = true
         options.titleBarOverlay = {
             color: colors.background,
             symbolColor: colors.foreground,
