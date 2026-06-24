@@ -52,6 +52,12 @@ describe("tracker filters", function () {
         }
       }
 
+      await this.app.filterTracker(torrentCases[0].tracker)
+      await this.app.filterTracker(torrentCases[0].tracker)
+      for (const torrent of torrents) {
+        await torrent.waitForExist()
+      }
+
       await this.app.filterTracker()
       await torrents[1].delete()
       await eventually(() => this.app.getAllSidebarTrackers())

@@ -15,7 +15,7 @@ export class TorrentSidebarSectionController {
     }
 
     select(item: string) {
-        this.onSelect?.({ item });
+        this.onSelect?.({ item: this.isActive(item) ? undefined : item });
     }
 
     clear() {
