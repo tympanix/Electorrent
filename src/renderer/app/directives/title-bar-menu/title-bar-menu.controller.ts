@@ -1,5 +1,6 @@
 import { IScope } from "angular";
 import { createMenuActionHandler } from "@renderer/app/lib/menu-action-handler";
+import { CLIENT_METADATA } from "@shared/client-metadata";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { EditCommand, MenuAction, WindowCommand } from "@shared/ipc-contract";
 
@@ -54,12 +55,21 @@ export class TitleBarMenuController {
             currentPage: $scope.currentPage,
         });
 
+        const activeServer = () => {
+            return ($rootScope as any).$activeServer || $rootScope.$server;
+        };
+
         const supportsUploadOptions = () => {
-            return Object.values($rootScope.$btclient?.features.uploadOptions || {}).some(Boolean);
+            const clientId = activeServer()?.client;
+            return !!clientId && !!CLIENT_METADATA[clientId]?.showAdvancedUploadMenu;
         };
 
         const hasActiveServer = () => {
-            return !!$rootScope.$server?.id;
+            return !!activeServer()?.id;
+        };
+
+        const hasConnectedServer = () => {
+            return hasActiveServer() && !!$rootScope.$server?.isConnected && !!$rootScope.$btclient;
         };
 
         const serverAccelerator = (index: number) => {
@@ -78,23 +88,27 @@ export class TitleBarMenuController {
             {
                 label: "Add Torrent",
                 accelerator: "Ctrl+O",
+                enabled: hasConnectedServer(),
                 action: { type: "open-add-torrent", askUploadOptions: false },
             },
             {
                 label: "Add Torrent (Advanced)",
                 accelerator: "Ctrl+Shift+O",
                 visible: supportsUploadOptions,
+                enabled: hasConnectedServer(),
                 action: { type: "open-add-torrent", askUploadOptions: true },
             },
             {
                 label: "Paste Torrent URL",
                 accelerator: "Ctrl+I",
+                enabled: hasConnectedServer(),
                 action: { type: "paste-torrent-url", askUploadOptions: false },
             },
             {
                 label: "Paste Torrent URL (Advanced)",
                 accelerator: "Ctrl+Shift+I",
                 visible: supportsUploadOptions,
+                enabled: hasConnectedServer(),
                 action: { type: "paste-torrent-url", askUploadOptions: true },
             },
             { label: "", separator: true },
@@ -163,7 +177,7 @@ export class TitleBarMenuController {
                 items.push({
                     label: getServerLabel(server),
                     accelerator: serverAccelerator(index + 1),
-                    checked: server.id === $rootScope.$server?.id,
+                    checked: server.id === activeServer()?.id,
                     action: { type: "connect-server", serverId: server.id },
                 });
             });
