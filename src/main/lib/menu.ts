@@ -79,9 +79,9 @@ function serverMenuItems(): MenuItemConstructorOptions[] {
         { type: 'separator' },
     ]
 
-    if (!hasActiveServer()) {
+    if (!menuSettings.servers.length) {
         submenu.push({
-            label: 'Disabled...',
+            label: 'No servers',
             enabled: false,
         })
         return submenu

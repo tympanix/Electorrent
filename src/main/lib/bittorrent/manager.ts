@@ -66,6 +66,12 @@ class BittorrentManager {
 
             const runtime = createRuntime(server.client)
             const connection = await runtime.connect(server)
+            if (this.pendingConnections.get(senderId) !== pendingConnect) {
+                if (typeof runtime.disconnect === "function") {
+                    await runtime.disconnect()
+                }
+                throw new Error("Stale bittorrent connection")
+            }
             this.sessions.set(senderId, runtime)
             return connection
         })()
