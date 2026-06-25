@@ -210,8 +210,9 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
+        menu.setActiveServer(server, false)
         const connection = await bittorrentManager.connect(event.sender, server)
-        menu.setActiveServer(server)
+        menu.setActiveServer(server, true)
         await onBittorrentConnected?.()
         return connection
     })

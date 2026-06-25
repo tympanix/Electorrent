@@ -9,6 +9,7 @@ type MenuSessionState = {
     isDebug: boolean
     activeServerId: string | null
     activeClientId: string | null
+    isConnected: boolean
 }
 
 let mainWindow: BrowserWindow | null = null
@@ -16,6 +17,7 @@ let menuState: MenuSessionState = {
     isDebug: false,
     activeServerId: null,
     activeClientId: null,
+    isConnected: false,
 }
 const defaultMenuSettings: AppSettings = settings.getDefaultSettings()
 let menuSettings: AppSettings = defaultMenuSettings
@@ -60,8 +62,16 @@ function hasActiveServer() {
     return !!menuState.activeServerId
 }
 
-function advancedUploadEnabled() {
+function hasConnectedServer() {
+    return hasActiveServer() && menuState.isConnected
+}
+
+function advancedUploadVisible() {
     return !!menuState.activeClientId && !!CLIENT_METADATA[menuState.activeClientId]?.showAdvancedUploadMenu
+}
+
+function advancedUploadEnabled() {
+    return hasConnectedServer() && advancedUploadVisible()
 }
 
 function serverMenuItems(): MenuItemConstructorOptions[] {
@@ -105,24 +115,26 @@ function fileMenuItems(): MenuItemConstructorOptions[] {
         {
             label: 'Add Torrent',
             accelerator: 'CmdOrCtrl+O',
+            enabled: hasConnectedServer(),
             click: () => sendAction({ type: 'open-add-torrent', askUploadOptions: false }),
         },
         {
             label: 'Add Torrent (Advanced)',
             accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+O' : 'CmdOrCtrl+Shift+O',
-            visible: advancedUploadEnabled(),
+            visible: advancedUploadVisible(),
             enabled: advancedUploadEnabled(),
             click: () => sendAction({ type: 'open-add-torrent', askUploadOptions: true }),
         },
         {
             label: 'Paste Torrent URL',
             accelerator: 'CmdOrCtrl+I',
+            enabled: hasConnectedServer(),
             click: () => sendAction({ type: 'paste-torrent-url', askUploadOptions: false }),
         },
         {
             label: 'Paste Torrent URL (Advanced)',
             accelerator: process.platform === 'darwin' ? 'CmdOrCtrl+Alt+I' : 'CmdOrCtrl+Shift+I',
-            visible: advancedUploadEnabled(),
+            visible: advancedUploadVisible(),
             enabled: advancedUploadEnabled(),
             click: () => sendAction({ type: 'paste-torrent-url', askUploadOptions: true }),
         },
@@ -320,10 +332,11 @@ export function configure(state: Pick<MenuSessionState, 'isDebug'>) {
     refresh()
 }
 
-export function setActiveServer(server?: { id?: string | null; client?: string | null } | null) {
+export function setActiveServer(server?: { id?: string | null; client?: string | null } | null, isConnected = !!server) {
     menuState = Object.assign({}, menuState, {
         activeServerId: server?.id || null,
         activeClientId: server?.client || null,
+        isConnected: !!server && isConnected,
     })
     buildMenu()
 }

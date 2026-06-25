@@ -212,6 +212,7 @@ export class AppShellController {
             pageLoading();
             $scope.$broadcast("stop:torrents");
             $scope.$broadcast("wipe:torrents");
+            ($rootScope as any).$activeServer = server;
             $rootScope.$btclient = null;
             $rootScope.$server = null;
             const serverName = typeof server?.getDisplayName === "function"
@@ -248,6 +249,7 @@ export class AppShellController {
 
         $scope.$on("add:server", () => {
             $scope.$broadcast("stop:torrents");
+            ($rootScope as any).$activeServer = null;
             $rootScope.$btclient = null;
             pageWelcome();
             $scope.$apply();
