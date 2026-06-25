@@ -44,6 +44,7 @@ export class AppShellController {
 
         let loadingTimer: angular.IPromise<void> | undefined;
         let page: string | null = null;
+        let activeConnectionId = 0;
         let pendingMagnets: Array<PendingTorrentUploadLink & { askUploadOptions?: boolean }> = [];
         let pendingTorrentFiles: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }> = [];
 
@@ -205,6 +206,9 @@ export class AppShellController {
         };
 
         const connectToServer = (server: any) => {
+            const connectionId = ++activeConnectionId;
+            const isCurrentConnection = () => connectionId === activeConnectionId;
+
             pageLoading();
             $scope.$broadcast("stop:torrents");
             $scope.$broadcast("wipe:torrents");
@@ -216,17 +220,27 @@ export class AppShellController {
             $scope.statusText = "Connecting to " + serverName;
 
             server.connect().then(() => {
+                if (!isCurrentConnection()) {
+                    return;
+                }
+
                 $scope.statusText = "Loading Torrents";
                 settingsService.updateServer(server);
                 pageTorrents(true);
                 return electorrent.launch.getPending().then((payload: LaunchPayload) => {
+                    if (!isCurrentConnection()) {
+                        return;
+                    }
+
                     queueMagnetLinks(payload.magnets || []);
                     queueTorrentFiles(payload.torrentFiles || []);
                     drainPendingLaunchPayloads();
                 });
             }).catch((err: unknown) => {
                 console.error(err);
-                pageSettings("connection", server.id);
+                if (isCurrentConnection()) {
+                    pageSettings("connection", server.id);
+                }
             }).then(() => {
                 $scope.$apply();
             });

@@ -153,12 +153,13 @@ export class TitleBarMenuController {
                 { label: "", separator: true },
             ];
 
-            if (!hasActiveServer()) {
-                items.push({ label: "Disabled...", enabled: false });
+            const servers = settingsService.getServers();
+            if (!servers.length) {
+                items.push({ label: "No servers", enabled: false });
                 return items;
             }
 
-            settingsService.getServers().forEach((server: any, index: number) => {
+            servers.forEach((server: any, index: number) => {
                 items.push({
                     label: getServerLabel(server),
                     accelerator: serverAccelerator(index + 1),

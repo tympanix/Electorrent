@@ -47,6 +47,10 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             return err?.name === "AggregateError" || message.includes("aggregateerror")
         }
 
+        function isStaleConnectionError(err: any) {
+            return String(err?.message || err).toLowerCase().includes("stale bittorrent connection")
+        }
+
         /**
          * Constructor, with class name
          */
@@ -209,7 +213,9 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                         return self.connect()
                     })
                 }
-                $notify.alertAuth(err)
+                if (!isStaleConnectionError(err)) {
+                    $notify.alertAuth(err)
+                }
                 return $q.reject(err, this)
             }).then(function() {
                 self.isConnected = true
