@@ -4,6 +4,7 @@ import { defineClient } from "../define"
 
 const baseFeatures = {
   labels: true,
+  uploadFileSelection: true,
   torrentDetails: true,
   speedLimits: true,
   ratioLimits: true,

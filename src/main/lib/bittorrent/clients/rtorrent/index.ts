@@ -1,7 +1,8 @@
 import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
+import parseTorrent from "parse-torrent"
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
@@ -50,6 +51,28 @@ export class RtorrentRuntime implements BittorrentRuntime {
             return shouldStart ? "load.start" : "load.normal"
         }
         return shouldStart ? "load.raw_start" : "load.raw"
+    }
+
+    private getUploadFileSelection(options?: Record<string, any>): BittorrentFileSelection[] {
+        return Array.isArray(options?.fileSelection) ? options.fileSelection : []
+    }
+
+    private async setUploadFileSelection(hash: string, files: BittorrentFileSelection[]) {
+        const unwantedFiles = files.filter((file) => !file.wanted)
+        if (unwantedFiles.length === 0) {
+            return
+        }
+
+        await this.call("system.multicall", [[
+            ...unwantedFiles.map((file): RtorrentMethodCall => ({
+                methodName: "f.priority.set",
+                params: [`${hash}:f${file.index}`, 0],
+            })),
+            {
+                methodName: "d.update_priorities",
+                params: [hash],
+            },
+        ]])
     }
 
     private async getMulticall(method: string, params: any[], commands: Record<string, string>): Promise<Record<string, any>[]> {
@@ -132,6 +155,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
             features: {
                 magnetLinks: true,
                 labels: true,
+                uploadFileSelection: true,
                 torrentDetails: true,
                 trackerFilter: true,
                 speedLimits: true,
@@ -320,6 +344,22 @@ export class RtorrentRuntime implements BittorrentRuntime {
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
+        const fileSelection = this.getUploadFileSelection(options)
+        if (fileSelection.length > 0) {
+            const hash = parseTorrent(uri).infoHash
+            const method = "load.normal"
+            if (options?.saveLocation) {
+                await this.loadTorrentWithSaveLocation(method, uri, options.saveLocation)
+            } else {
+                await this.call(method, ["", uri])
+            }
+            await this.setUploadFileSelection(hash, fileSelection)
+            if (options?.startTorrent !== false) {
+                await this.start([hash])
+            }
+            return
+        }
+
         const method = this.getLoadMethod("url", options)
         if (options?.saveLocation) {
             await this.loadTorrentWithSaveLocation(method, uri, options.saveLocation)
@@ -330,6 +370,22 @@ export class RtorrentRuntime implements BittorrentRuntime {
     }
 
     async uploadTorrent(buffer: Uint8Array, _filename: string, options?: Record<string, any>): Promise<void> {
+        const fileSelection = this.getUploadFileSelection(options)
+        if (fileSelection.length > 0) {
+            const hash = parseTorrent(Buffer.from(buffer)).infoHash
+            const method = "load.raw"
+            if (options?.saveLocation) {
+                await this.loadTorrentWithSaveLocation(method, buffer, options.saveLocation)
+            } else {
+                await this.call(method, ["", Buffer.from(buffer)])
+            }
+            await this.setUploadFileSelection(hash, fileSelection)
+            if (options?.startTorrent !== false) {
+                await this.start([hash])
+            }
+            return
+        }
+
         const method = this.getLoadMethod("file", options)
         if (options?.saveLocation) {
             await this.loadTorrentWithSaveLocation(method, buffer, options.saveLocation)

@@ -7,6 +7,44 @@ html, body {
     flex: 1 1 0;
     min-width: 0;
 }
+.upload-files-scroll {
+    max-height: 50vh;
+    overflow: auto;
+}
+.upload-torrent-heading {
+    display: flex;
+    gap: 1em;
+    align-items: baseline;
+}
+.upload-torrent-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.upload-torrent-size {
+    flex-shrink: 0;
+    margin-left: auto;
+    color: @lightTextColor;
+    font-weight: normal;
+}
+.upload-file-meta {
+    display: flex;
+    gap: 0.75em;
+    align-items: center;
+}
+.upload-file-size {
+    color: @lightTextColor;
+}
+.upload-file-row .content {
+    min-width: 0;
+}
+.upload-file-row label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 .title-bar {
     position: absolute;
     top: 0;
@@ -638,7 +676,7 @@ torrent-sidebar + .main-panel {
             gap: 1rem;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             padding: 0.75rem 1rem;
-            overflow-y: auto;
+            overflow-y: hidden;
         }
 
         .torrent-details-section {
@@ -670,13 +708,35 @@ torrent-sidebar + .main-panel {
         }
 
         .torrent-details-files-content {
+            flex: 1 1 auto;
+            min-height: 0;
             overflow-x: auto;
             overflow-y: auto;
+        }
+
+        .torrent-details-files {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .torrent-details-files.table,
         .torrent-details-files-content .torrent.table {
             margin: 0;
+        }
+
+        .torrent-details-files-content .torrent.table td,
+        .torrent-details-files-header-label,
+        .torrent-details-file-cell,
+        .torrent-details-file-cell > span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .torrent-details-files-header-label,
+        .torrent-details-file-cell > span {
+            display: block;
         }
 
         .torrent-details-file-progress {
