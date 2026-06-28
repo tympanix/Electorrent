@@ -1,12 +1,26 @@
+import { ITimeoutService } from "angular";
 import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import { SavedLocationModalController } from "@renderer/app/directives/saved-location-modal/saved-location-modal.controller";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import { AddTorrentModalScope } from "./add-torrent-modal.directive";
+import type { BittorrentFileSelection, TorrentMetadataFile } from "@shared/ipc-contract";
+
+interface UploadFileTreeNode {
+    id: string
+    name: string
+    path: string
+    size: number
+    level: number
+    fileIndex?: number
+    children: UploadFileTreeNode[]
+    selected: boolean
+    partial: boolean
+}
 
 export class AddTorrentModalController {
 
-    static $inject = ["$scope", "$rootScope"]
+    static $inject = ["$scope", "$rootScope", "$timeout"]
 
     static defaultTorrentUploadOptions: TorrentUploadOptions = {
         startTorrent: true,
@@ -18,10 +32,13 @@ export class AddTorrentModalController {
     savedLocationModalRef: SavedLocationModalController
     uploadOptions: TorrentUploadOptions
     isLoading: boolean
+    activeTab = "general"
+    fileTree: UploadFileTreeNode[] = []
+    visibleFileTree: UploadFileTreeNode[] = []
     private preserveUploadsOnHide: boolean
     private restoreUploadOptionsOnShow: boolean
 
-    constructor(scope: AddTorrentModalScope, rootScope: ElectorrentRootScope) {
+    constructor(scope: AddTorrentModalScope, rootScope: ElectorrentRootScope, private readonly $timeout: ITimeoutService) {
         this.scope = scope
         this.rootScope = rootScope
         this.isLoading = false
@@ -32,6 +49,7 @@ export class AddTorrentModalController {
             return this.scope.torrents && this.scope.torrents.length
         }, (newVal, oldVal) => {
             if (newVal > 0) {
+                this.refreshUploadFiles()
                 this.modalref.showModal()
             } else if (oldVal > 0 && newVal === 0) {
                 this.modalref.hideModal()
@@ -55,6 +73,8 @@ export class AddTorrentModalController {
             AddTorrentModalController.defaultTorrentUploadOptions,
             configuredOptions || {},
         )
+        this.activeTab = "general"
+        this.refreshUploadFiles()
     }
 
     onHidden() {
@@ -62,6 +82,8 @@ export class AddTorrentModalController {
             return
         }
         this.scope.torrents = []
+        this.fileTree = []
+        this.visibleFileTree = []
     }
 
     supportsSavedLocations() {
@@ -83,6 +105,30 @@ export class AddTorrentModalController {
         return torrent.metadata?.name || (torrent.type === "file" ? torrent.filename : torrent.uri)
     }
 
+    getCurrentTorrentUploadSize() {
+        const torrent = this.getCurrentTorrentUpload()
+        const metadata = torrent?.metadata
+        return metadata?.length || metadata?.files.reduce((size, file) => size + (file.length || 0), 0) || 0
+    }
+
+    hasFilesTab() {
+        return !!this.rootScope.$btclient?.features.uploadFileSelection && this.visibleFileTree.length > 0
+    }
+
+    switchTab(tab: "general" | "files") {
+        if (tab === "files" && !this.hasFilesTab()) {
+            return
+        }
+        this.activeTab = tab
+        this.updateIndeterminateCheckboxes()
+    }
+
+    toggleFileNode(node: UploadFileTreeNode) {
+        this.setNodeSelection(node, node.partial ? true : !node.selected)
+        this.syncFileSelectionOptions()
+        this.updateIndeterminateCheckboxes()
+    }
+
     getPendingUploadCountLabel() {
         const torrentCount = this.scope.torrents?.length || 0
         return `${torrentCount} ${torrentCount === 1 ? "torrent" : "torrents"} remaining`
@@ -92,6 +138,8 @@ export class AddTorrentModalController {
         this.scope.torrents.shift()
         if (this.scope.torrents.length === 0) {
             this.modalref.hideModal()
+        } else {
+            this.onShow()
         }
     }
 
@@ -107,6 +155,8 @@ export class AddTorrentModalController {
             this.scope.torrents.shift()
             if (this.scope.torrents.length === 0) {
                 this.modalref.hideModal()
+            } else {
+                this.onShow()
             }
         } finally {
             this.isLoading = false
@@ -149,6 +199,135 @@ export class AddTorrentModalController {
         } else {
             await this.rootScope.$btclient.uploadTorrent(torrent, filename, options, sourcePath)
         }
+    }
+
+    private refreshUploadFiles() {
+        const torrent = this.getCurrentTorrentUpload()
+        const files = torrent?.metadata?.files || []
+        if (!this.rootScope.$btclient?.features.uploadFileSelection || files.length === 0) {
+            delete this.uploadOptions.fileSelection
+            this.fileTree = []
+            this.visibleFileTree = []
+            this.activeTab = "general"
+            return
+        }
+
+        this.fileTree = this.buildFileTree(files)
+        this.visibleFileTree = this.flattenFileTree(this.fileTree)
+        this.syncFileSelectionOptions()
+        this.updateIndeterminateCheckboxes()
+    }
+
+    private buildFileTree(files: TorrentMetadataFile[]) {
+        const roots: UploadFileTreeNode[] = []
+        const folders = new Map<string, UploadFileTreeNode>()
+
+        files.forEach((file, index) => {
+            const normalizedPath = file.path || file.name || `file-${index + 1}`
+            const parts = normalizedPath.split(/[\\/]+/).filter(Boolean)
+            let siblings = roots
+            let folderPath = ""
+
+            parts.forEach((part, partIndex) => {
+                const isFile = partIndex === parts.length - 1
+                folderPath = folderPath ? `${folderPath}/${part}` : part
+                if (isFile) {
+                    siblings.push({
+                        id: `file-${index}`,
+                        name: part,
+                        path: normalizedPath,
+                        size: file.length || 0,
+                        level: partIndex,
+                        fileIndex: index,
+                        children: [],
+                        selected: true,
+                        partial: false,
+                    })
+                    return
+                }
+
+                let folder = folders.get(folderPath)
+                if (!folder) {
+                    folder = {
+                        id: `folder-${encodeURIComponent(folderPath)}`,
+                        name: part,
+                        path: folderPath,
+                        size: 0,
+                        level: partIndex,
+                        children: [],
+                        selected: true,
+                        partial: false,
+                    }
+                    folders.set(folderPath, folder)
+                    siblings.push(folder)
+                }
+                siblings = folder.children
+            })
+        })
+
+        this.refreshFolderState(roots)
+        return roots
+    }
+
+    private flattenFileTree(nodes: UploadFileTreeNode[]): UploadFileTreeNode[] {
+        return nodes.flatMap((node) => [node, ...this.flattenFileTree(node.children)])
+    }
+
+    private setNodeSelection(node: UploadFileTreeNode, selected: boolean) {
+        node.selected = selected
+        node.partial = false
+        node.children.forEach((child) => this.setNodeSelection(child, selected))
+        this.refreshFolderState(this.fileTree)
+    }
+
+    private refreshFolderState(nodes: UploadFileTreeNode[]) {
+        nodes.forEach((node) => {
+            if (node.children.length === 0) {
+                return
+            }
+
+            this.refreshFolderState(node.children)
+            node.size = node.children.reduce((size, child) => size + child.size, 0)
+            const selectedCount = node.children.filter((child) => child.selected && !child.partial).length
+            const partialCount = node.children.filter((child) => child.partial).length
+            node.selected = selectedCount === node.children.length && partialCount === 0
+            node.partial = (selectedCount > 0 || partialCount > 0) && !node.selected
+        })
+    }
+
+    private syncFileSelectionOptions() {
+        if (!this.hasFilesTab()) {
+            delete this.uploadOptions.fileSelection
+            return
+        }
+
+        const fileSelection = this.visibleFileTree
+            .filter((node) => node.fileIndex !== undefined)
+            .map((node): BittorrentFileSelection => ({
+                index: node.fileIndex!,
+                path: node.path,
+                name: node.name,
+                size: node.size,
+                wanted: node.selected,
+            }))
+
+        if (fileSelection.every((file) => file.wanted)) {
+            delete this.uploadOptions.fileSelection
+            return
+        }
+
+        this.uploadOptions.fileSelection = fileSelection
+    }
+
+    private updateIndeterminateCheckboxes() {
+        this.$timeout(() => {
+            this.visibleFileTree.forEach((node) => {
+                const element = document.getElementById(`upload-file-cb-${node.id}`) as HTMLInputElement | null
+                if (element) {
+                    element.indeterminate = node.partial
+                }
+            })
+        })
     }
 
 }

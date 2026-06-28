@@ -1,7 +1,7 @@
 import request from "request"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
 import {
     defer,
     HTTP_LOGIN_TIMEOUT,
@@ -82,6 +82,16 @@ export class DelugeRuntime implements BittorrentRuntime {
             return {}
         }
 
+        const fileSelection = Array.isArray(options.fileSelection)
+            ? options.fileSelection as BittorrentFileSelection[]
+            : []
+        const filePriorities = fileSelection.length > 0
+            ? fileSelection.reduce<number[]>((priorities, file) => {
+                priorities[file.index] = file.wanted ? 1 : 0
+                return priorities
+            }, [])
+            : undefined
+
         return Object.fromEntries(
             Object.entries({
                 download_location: options.saveLocation || undefined,
@@ -91,6 +101,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 max_upload_speed: options.uploadSpeedLimit,
                 prioritize_first_last_pieces: options.firstAndLastPiecePrio,
                 label: options.category,
+                file_priorities: filePriorities,
             }).filter(([, value]) => value !== undefined && value !== null),
         )
     }
@@ -245,6 +256,7 @@ export class DelugeRuntime implements BittorrentRuntime {
             features: {
                 magnetLinks: Array.isArray(methods) && methods.includes("core.add_torrent_magnet"),
                 labels: this.supportsLabels,
+                uploadFileSelection: true,
                 torrentDetails: true,
                 speedLimits: true,
                 ratioLimits: true,
