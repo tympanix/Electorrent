@@ -63,6 +63,8 @@ html, body {
     top: 34px;
     left: 0;
     min-width: 270px;
+    width: max-content;
+    max-width: min(560px, calc(100vw - 16px));
     padding: 6px 0;
     color: @textColor;
     background-color: @pageForeground;
@@ -73,10 +75,10 @@ html, body {
     app-region: no-drag;
 }
 .title-bar-menu-item {
-    display: grid;
-    grid-template-columns: 18px minmax(0, 1fr) auto;
-    column-gap: 8px;
+    display: flex;
     align-items: center;
+    column-gap: 8px;
+    box-sizing: border-box;
     width: 100%;
     min-height: 30px;
     padding: 6px 12px;
@@ -94,16 +96,21 @@ html, body {
     background: transparent;
 }
 .title-bar-menu-check {
+    flex: 0 0 18px;
     text-align: center;
 }
 .title-bar-menu-item.checked .title-bar-menu-check::before {
     content: "\2713";
 }
 .title-bar-menu-label {
+    flex: 0 1 auto;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .title-bar-menu-accelerator {
+    flex: 0 0 auto;
+    margin-left: auto;
     color: @lightTextColor;
     font-size: 0.9em;
 }
