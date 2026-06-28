@@ -141,6 +141,10 @@ export interface LaunchPayload {
     torrentFiles: PendingTorrentUploadFile[]
 }
 
+export type LabelColorHue = number
+
+export type LabelColorOverrides = Partial<Record<string, LabelColorHue>>
+
 export interface StoredServerConfig {
     name?: string
     id: string
@@ -159,6 +163,7 @@ export interface StoredServerConfig {
     savedLocations?: SavedLocationConfig[]
     defaultUploadOptionsEnabled?: boolean
     defaultUploadOptions?: TorrentUploadOptions
+    labelColors?: LabelColorOverrides
 }
 
 export interface SavedLocationConfig {

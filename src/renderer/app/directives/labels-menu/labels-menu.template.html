@@ -9,7 +9,11 @@
         <div data-role="new-label" class="item" ng-click="openNewLabelModal()"><i class="edit icon"></i> New Label</div>
         <div class="divider"></div>
         <div class="scrolling menu">
-            <div class="item" data-role="label-option" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
+            <div class="item label-dropdown-option" data-role="label-option" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">
+                <span class="label-dropdown-chip" label-chip="label">
+                    <span class="label-chip-text">{{label}}</span>
+                </span>
+            </div>
             <div></div>
         </div>
     </div>

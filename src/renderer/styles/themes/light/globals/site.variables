@@ -7,3 +7,11 @@
 @highlightBackground : #F5F5F5;
 @overlayBackground   : @pageBackground;
 @popupBackground     : rgba(255, 255, 255, 0.5);
+@labelChipBackgroundLightness : 94%;
+@labelChipBackgroundChroma    : 0.025;
+@labelChipBorderLightness     : 78%;
+@labelChipBorderChroma        : 0.060;
+@labelChipTextLightness       : 38%;
+@labelChipTextChroma          : 0.100;
+@labelChipDotLightness        : 58%;
+@labelChipDotChroma           : 0.120;

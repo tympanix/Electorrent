@@ -452,6 +452,65 @@ torrent-sidebar + .main-panel {
 .sidebar-flyout .filter.label {
     padding-right: 24px;
 }
+.ui.circular.label.label-chip {
+    align-items: center;
+    background: oklch(@labelChipBackgroundLightness @labelChipBackgroundChroma var(--label-hue, 225));
+    border: 1px solid oklch(@labelChipBorderLightness @labelChipBorderChroma var(--label-hue, 225));
+    color: @textColor;
+    display: inline-flex;
+    gap: 0.45em;
+    line-height: 1.15;
+    max-width: 100%;
+    padding-left: .75em !important;
+    padding-right: .75em !important;
+}
+.label-chip-active-dot {
+    background: @textColor;
+    border-radius: 999px;
+    display: inline-block;
+    flex: 0 0 auto;
+    height: 0.55em;
+    margin-left: auto;
+    width: 0.55em;
+}
+.label-chip-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.torrent-sidebar-label-chip {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    font-size: 1rem;
+    font-weight: 400;
+    min-height: 0;
+    padding: 0.35em 0.55em;
+    width: 100%;
+}
+.torrent-sidebar-label-chip:hover,
+.torrent-sidebar-label-chip.is-active {
+    // box-shadow: inset 0 0 0 1px oklch(@labelChipDotLightness @labelChipDotChroma var(--label-hue, 225));
+    border: 2px solid oklch(@labelChipDotLightness @labelChipDotChroma var(--label-hue, 225));
+}
+.ui.circular.label.torrent-sidebar-label-chip--empty {
+    background: @highlightBackground;
+    border: 1px solid @borderColor;
+    color: @textColor;
+    line-height: 1.15;
+    justify-content: flex-start;
+}
+.torrent-sidebar-label-chip--empty .label-chip-active-dot {
+    background: @textColor;
+}
+.torrent-table-label-chip,
+.label-dropdown-chip {
+    padding: 0.35em 0.65em;
+}
+.label-dropdown-option.item {
+    display: flex !important;
+}
 .torrent.tag {
     background-color: @highlightBackground;
 }

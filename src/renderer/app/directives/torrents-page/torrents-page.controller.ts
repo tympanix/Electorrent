@@ -405,6 +405,10 @@ export class TorrentsPageController {
             $scope.torrents = {};
             $scope.arrayTorrents = [];
             setLabels([]);
+            if ($rootScope.$server?.id) {
+                $rootScope.currentLabelsByServer = $rootScope.currentLabelsByServer || {};
+                $rootScope.currentLabelsByServer[$rootScope.$server.id] = $scope.labels;
+            }
             $scope.trackers = [];
         }
 
@@ -965,6 +969,11 @@ export class TorrentsPageController {
                         $scope.labels.push(label);
                     }
                 });
+            }
+
+            if ($rootScope.$server?.id) {
+                $rootScope.currentLabelsByServer = $rootScope.currentLabelsByServer || {};
+                $rootScope.currentLabelsByServer[$rootScope.$server.id] = $scope.labels;
             }
         }
 

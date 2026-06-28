@@ -5,12 +5,29 @@
 <ul class="filter label">
     <span ng-if="ctl.displayEmpty()" class="meta text">{{ctl.emptyText}}</span>
     <li ng-if="ctl.hasSpecialItem()" ng-attr-data-label="{{ctl.itemAttribute == 'label' ? ctl.specialItemValue : undefined}}" ng-attr-data-tracker="{{ctl.itemAttribute == 'tracker' ? ctl.specialItemValue : undefined}}">
-        <div class="ui fluid torrent tag label" ng-click="ctl.select(ctl.specialItemValue)" ng-class="{blue: ctl.isActive(ctl.specialItemValue)}">
+        <div
+            class="ui circular label label-chip torrent-sidebar-label-chip torrent-sidebar-label-chip--empty"
+            ng-if="ctl.itemAttribute == 'label'"
+            ng-click="ctl.select(ctl.specialItemValue)"
+            ng-class="{'is-active': ctl.isActive(ctl.specialItemValue)}">
+            <span class="label-chip-text">{{ctl.itemText(ctl.specialItemValue)}}</span>
+            <span class="label-chip-active-dot" ng-if="ctl.isActive(ctl.specialItemValue)"></span>
+        </div>
+        <div class="ui fluid torrent tag label" ng-if="ctl.itemAttribute != 'label'" ng-click="ctl.select(ctl.specialItemValue)" ng-class="{blue: ctl.isActive(ctl.specialItemValue)}">
             {{ctl.itemText(ctl.specialItemValue)}}
         </div>
     </li>
     <li ng-attr-data-label="{{ctl.itemAttribute == 'label' ? item : undefined}}" ng-attr-data-tracker="{{ctl.itemAttribute == 'tracker' ? item : undefined}}" ng-repeat="item in ctl.items track by item">
-        <div class="ui fluid torrent tag label" ng-click="ctl.select(item)" ng-class="{blue: ctl.isActive(item)}">
+        <div
+            class="torrent-sidebar-label-chip"
+            ng-if="ctl.itemAttribute == 'label'"
+            label-chip="item"
+            ng-click="ctl.select(item)"
+            ng-class="{'is-active': ctl.isActive(item)}">
+            <span class="label-chip-text">{{ctl.itemText(item)}}</span>
+            <span class="label-chip-active-dot" ng-if="ctl.isActive(item)"></span>
+        </div>
+        <div class="ui fluid torrent tag label" ng-if="ctl.itemAttribute != 'label'" ng-click="ctl.select(item)" ng-class="{blue: ctl.isActive(item)}">
             {{ctl.itemText(item)}}
         </div>
     </li>

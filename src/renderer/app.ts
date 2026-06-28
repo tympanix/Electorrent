@@ -85,6 +85,8 @@ import { notificationService } from "@renderer/app/services/notification"
 torrentApp.service("notificationService", notificationService)
 import { CertificateResponseService } from "@renderer/app/services/certificate-response"
 torrentApp.service("certificateResponseService", CertificateResponseService)
+import { labelColorService } from "@renderer/app/services/label-colors"
+torrentApp.service("labelColorService", labelColorService)
 import { serverService} from "@renderer/app/services/server"
 torrentApp.factory("Server", serverService)
 
@@ -168,6 +170,8 @@ import { LabelsDropdownDirective } from "@renderer/app/directives/labels-dropdow
 torrentApp.directive("labelsDropdown", LabelsDropdownDirective.getInstance())
 import { LabelsMenuDirective } from "@renderer/app/directives/labels-menu/labels-menu.directive"
 torrentApp.directive("labelsMenu", LabelsMenuDirective.getInstance())
+import { LabelChipDirective } from "@renderer/app/directives/label-chip/label-chip.directive"
+torrentApp.directive("labelChip", LabelChipDirective.getInstance())
 import { NewLabelModalDirective } from "@renderer/app/directives/new-label-modal/new-label-modal.directive"
 torrentApp.directive("newLabelModal", NewLabelModalDirective.getInstance())
 import { DragAndDropDirective } from "@renderer/app/directives/drag-and-drop/drag-and-drop.directive"
@@ -216,3 +220,5 @@ import { TorrentSetRatioModalDirective } from "@renderer/app/directives/torrent-
 torrentApp.directive('torrentSetRatioModal', TorrentSetRatioModalDirective.getInstance())
 import { SavedLocationModalDirective } from "@renderer/app/directives/saved-location-modal/saved-location-modal.directive";
 torrentApp.directive('savedLocationModal', SavedLocationModalDirective.getInstance())
+import { LabelColorModalDirective } from "@renderer/app/directives/label-color-modal/label-color-modal.directive";
+torrentApp.directive('labelColorModal', LabelColorModalDirective.getInstance())
