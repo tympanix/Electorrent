@@ -370,7 +370,9 @@ export class App {
 
   async uploadTorrentModalLabel() {
     const modal = await this.uploadTorrentModalVisible()
-    return modal.$(".content .sub.header").getText()
+    const label = modal.$(".upload-torrent-name")
+    await label.waitForDisplayed()
+    return label.getText()
   }
 
   async waitForLabelInDropdown(labelName) {
