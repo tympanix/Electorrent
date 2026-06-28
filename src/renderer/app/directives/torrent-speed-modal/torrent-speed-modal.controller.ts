@@ -51,7 +51,8 @@ export class TorrentSpeedModalController {
       return null;
     }
 
-    return Math.floor(Number(firstLimit) / 1024);
+    const numericLimit = Number(firstLimit);
+    return Number.isFinite(numericLimit) && numericLimit > 0 ? Math.floor(numericLimit / 1024) : null;
   }
 
   open(torrents: any[]) {

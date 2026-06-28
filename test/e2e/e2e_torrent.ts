@@ -193,9 +193,13 @@ export class Torrent {
     const panel = $("[data-role='torrent-details-panel']")
     await panel.waitForDisplayed({ timeout: this.timeout })
 
-    const field = panel.$(`[data-role='torrent-details-field'][data-field-id='${fieldId}'] .value`)
+    const field = $(`[data-role='torrent-details-field'][data-field-id='${fieldId}'] .value`)
     await field.waitForDisplayed({ timeout: this.timeout })
-    return await field.getText()
+    const text = await field.getText()
+    if (text) {
+      return text
+    }
+    return (await field.getHTML()).replace(/<[^>]*>/g, "").trim()
   }
 
   async setLocation(location: string) {
@@ -216,20 +220,38 @@ export class Torrent {
     if (downloadSpeedLimit !== undefined) {
       const input = modal.$("input[data-role='torrent-speed-limit-download']");
       await input.waitForDisplayed();
+      await input.click();
       await input.clearValue();
       await input.setValue(String(downloadSpeedLimit));
+      await eventually(() => input.getValue()).equals(String(downloadSpeedLimit));
     }
     if (uploadSpeedLimit !== undefined) {
       const input = modal.$("input[data-role='torrent-speed-limit-upload']");
       await input.waitForDisplayed();
+      await input.click();
       await input.clearValue();
       await input.setValue(String(uploadSpeedLimit));
+      await eventually(() => input.getValue()).equals(String(uploadSpeedLimit));
     }
 
     const approve = modal.$("button[data-role='torrent-speed-limit-apply']");
     await approve.waitForEnabled();
     await approve.click();
     await waitForModalClose(modal, this.timeout);
+
+    await eventually(() => this.getSpeedLimitModalValues()).satisfies(
+      "reflect the requested speed limits",
+      (values) => {
+        if (downloadSpeedLimit !== undefined && values.download !== String(downloadSpeedLimit)) {
+          return false
+        }
+        if (uploadSpeedLimit !== undefined && values.upload !== String(uploadSpeedLimit)) {
+          return false
+        }
+        return true
+      },
+      { timeout: 20 * 1000 },
+    )
   }
 
   async getSpeedLimitModalValues() {
