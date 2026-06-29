@@ -93,14 +93,22 @@
                 rz-col="column.id"
                 sort="column.id"
               >
-                {{ column.label }}
+                <span class="torrent-details-files-header-label">{{ column.label }}</span>
               </th>
             </tr>
           </thead>
           <tbody>
             <tr ng-repeat="file in ctl.scope.sortedFiles track by file.index" data-file-index="{{ file.index }}">
               <td ng-repeat="column in ctl.scope.panel.files.columns track by column.id" data-col="{{ column.id }}">
-                <div ng-switch="column.format">
+                <div ng-if="column.id === 'wanted'" class="torrent-details-file-cell">
+                  <i
+                    ng-if="file.wanted"
+                    class="tiny check icon"
+                    data-role="torrent-details-file-wanted-check"
+                    aria-label="Wanted"
+                  ></i>
+                </div>
+                <div ng-if="column.id !== 'wanted'" ng-switch="column.format" class="torrent-details-file-cell">
                   <div ng-switch-when="progress" class="torrent-details-file-progress">
                     <div class="ui tiny indicating progress">
                       <div class="bar" ng-style="{ width: ctl.fileProgressPercent(file) + '%' }"></div>

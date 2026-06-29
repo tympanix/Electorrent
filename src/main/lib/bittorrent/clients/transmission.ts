@@ -198,6 +198,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
             features: {
                 magnetLinks: true,
                 labels: true,
+                uploadFileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
                 trackerFilter: true,
@@ -338,6 +339,9 @@ export class TransmissionRuntime implements BittorrentRuntime {
             'download-dir': uploadOptions.saveLocation || undefined,
             labels: uploadOptions.category ? [uploadOptions.category] : undefined,
             paused: uploadOptions.startTorrent === undefined ? undefined : !uploadOptions.startTorrent,
+            'files-unwanted': Array.isArray(uploadOptions.fileSelection)
+                ? uploadOptions.fileSelection.filter((file: any) => !file.wanted).map((file: any) => file.index)
+                : undefined,
         })
     }
 

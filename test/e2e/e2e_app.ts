@@ -244,6 +244,7 @@ export class App {
     firstAndLastPiecePrio?: boolean
     downloadSpeedLimit?: number
     uploadSpeedLimit?: number
+    disabledFileIndexes?: number[]
   }) {
     const modal = await this.uploadTorrentModalVisible()
     await browser.pause(200)
@@ -301,6 +302,19 @@ export class App {
       await labelItemElem.click()
     }
 
+    for (const fileIndex of options?.disabledFileIndexes || []) {
+      const filesTab = modal.$("a=Files")
+      await filesTab.waitForDisplayed()
+      await filesTab.click()
+      const fileCheckbox = modal.$(`#upload-file-cb-file-${fileIndex}`)
+      await fileCheckbox.waitForExist({ timeout: 10_000 })
+      await fileCheckbox.scrollIntoView()
+      if (await fileCheckbox.isSelected()) {
+        await fileCheckbox.click()
+        await eventually(() => fileCheckbox.isSelected()).equals(false, { timeout: 5_000 })
+      }
+    }
+
     await browser.pause(250)
     const submitBtn = modal.$("button[type=submit]")
     await submitBtn.click()
@@ -356,7 +370,9 @@ export class App {
 
   async uploadTorrentModalLabel() {
     const modal = await this.uploadTorrentModalVisible()
-    return modal.$(".content .sub.header").getText()
+    const label = modal.$(".upload-torrent-name")
+    await label.waitForDisplayed()
+    return label.getText()
   }
 
   async waitForLabelInDropdown(labelName) {

@@ -1,5 +1,6 @@
 import { URL } from "node:url"
 import request from "request"
+import parseTorrent from "parse-torrent"
 
 import type {
     BittorrentFileSelection,
@@ -88,6 +89,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 fileSelection: true,
+                uploadFileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
                 trackerFilter: true,
@@ -259,10 +261,16 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    private getHttpUploadOptions(options?: Record<string, any>) {
+    private getUploadFileSelection(options?: Record<string, any>): BittorrentFileSelection[] {
+        return Array.isArray(options?.fileSelection) ? options.fileSelection : []
+    }
+
+    private getHttpUploadOptions(options?: Record<string, any>, includeFilePriorities = true) {
         if (!options) {
             return undefined
         }
+
+        const filePriorities = includeFilePriorities ? this.getUploadFilePriorities(options.fileSelection) : undefined
 
         return Object.fromEntries(
             Object.entries({
@@ -276,10 +284,35 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 dlLimit: options.downloadSpeedLimit === undefined ? undefined : Number(options.downloadSpeedLimit) * 1024,
                 sequentialDownload: options.sequentialDownload,
                 firstLastPiecePrio: options.firstAndLastPiecePrio,
+                filePriorities,
             })
                 .filter(([, value]) => value !== undefined && value !== null)
                 .map(([key, value]) => [key, value.toString()]),
         )
+    }
+
+    private getUploadFilePriorities(fileSelection: unknown) {
+        if (!Array.isArray(fileSelection) || fileSelection.length === 0) {
+            return undefined
+        }
+        if (!fileSelection.some((file) => file?.wanted === false)) {
+            return undefined
+        }
+
+        const files = (fileSelection as BittorrentFileSelection[])
+            .map((file) => ({ ...file, index: Number(file.index) }))
+            .filter((file) => Number.isInteger(file.index) && file.index >= 0)
+        const maxIndex = files.reduce((max, file) => Math.max(max, file.index), -1)
+        if (maxIndex < 0) {
+            return undefined
+        }
+
+        const priorities = new Array(maxIndex + 1).fill(QBITTORRENT_PRIORITY_NORMAL)
+        files.forEach((file) => {
+            priorities[file.index] = file.wanted === false ? QBITTORRENT_PRIORITY_SKIP : QBITTORRENT_PRIORITY_NORMAL
+        })
+
+        return priorities.join(",")
     }
 
     addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
@@ -287,9 +320,25 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         return defer((done) => api.addTorrentURL(uri, this.getHttpUploadOptions(options), done))
     }
 
-    uploadTorrent(buffer: Uint8Array, filename: string, options?: Record<string, any>): Promise<void> {
+    async uploadTorrent(buffer: Uint8Array, filename: string, options?: Record<string, any>): Promise<void> {
         const api = this.getApi()
-        return defer((done) => api.addTorrentFileContent(Buffer.from(buffer), filename, this.getHttpUploadOptions(options), done))
+        const fileSelection = this.getUploadFileSelection(options)
+        if (fileSelection.length > 0) {
+            const hash = parseTorrent(Buffer.from(buffer)).infoHash
+            await defer((done) => api.addTorrentFileContent(
+                Buffer.from(buffer),
+                filename,
+                this.getHttpUploadOptions({ ...options, startTorrent: false }, false),
+                done,
+            ))
+            await this.setTorrentFileSelection(hash, fileSelection)
+            if (options?.startTorrent !== false) {
+                await this.resume([hash])
+            }
+            return
+        }
+
+        return defer((done) => api.addTorrentFileContent(Buffer.from(buffer), filename, this.getHttpUploadOptions(options, false), done))
     }
 
     resume(hashes: string[]): Promise<void> {

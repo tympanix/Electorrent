@@ -7,18 +7,40 @@
         </div>
     </div>
     <div class="content">
-        <h4 class="ui header">
-            <div class="content">
-                Add a New Torrent
-                <div class="sub header">{{ ctl.getCurrentTorrentUploadLabel() }}</div>
-            </div>
+        <h4 class="ui header upload-torrent-heading">
+            <span class="upload-torrent-name">{{ ctl.getCurrentTorrentUploadLabel() }}</span>
+            <span class="upload-torrent-size">{{ ctl.getCurrentTorrentUploadSize() | bytes }}</span>
         </h4>
-        <torrent-upload-form
-            loading="ctl.isLoading"
-            options="ctl.uploadOptions"
-            labels="labels"
-            can-add-saved-location="!!ctl.rootScope.$server"
-            on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+        <div class="ui secondary pointing menu" ng-if="ctl.hasFilesTab()">
+            <a class="item" ng-class="{active: ctl.activeTab === 'general'}" ng-click="ctl.switchTab('general')">General</a>
+            <a class="item" ng-class="{active: ctl.activeTab === 'files'}" ng-click="ctl.switchTab('files')">Files</a>
+        </div>
+        <div ng-show="ctl.activeTab === 'general' || !ctl.hasFilesTab()">
+            <torrent-upload-form
+                loading="ctl.isLoading"
+                options="ctl.uploadOptions"
+                labels="labels"
+                can-add-saved-location="!!ctl.rootScope.$server"
+                on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+        </div>
+        <div ng-if="ctl.hasFilesTab()" ng-show="ctl.activeTab === 'files'">
+            <div class="ui relaxed divided list upload-files-list upload-files-scroll">
+                <div class="item upload-file-row" ng-repeat="node in ctl.visibleFileTree track by node.id" ng-style="{'padding-left': (node.level * 1.5) + 'rem'}" data-upload-file-path="{{ node.path }}">
+                    <div class="right floated content upload-file-meta">
+                        <span class="upload-file-size">{{ node.size | bytes }}</span>
+                    </div>
+                    <div class="content">
+                        <div class="ui checkbox">
+                            <input id="upload-file-cb-{{ node.id }}" type="checkbox" ng-checked="node.selected" ng-click="ctl.toggleFileNode(node)">
+                            <label for="upload-file-cb-{{ node.id }}">
+                                <i class="icon" ng-class="node.children.length ? 'folder' : 'file outline'"></i>
+                                {{ node.name }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="actions">
         <button class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">

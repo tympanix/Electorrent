@@ -177,6 +177,7 @@ export interface TorrentUploadOptions {
     firstAndLastPiecePrio?: boolean
     downloadSpeedLimit?: number
     uploadSpeedLimit?: number
+    fileSelection?: BittorrentFileSelection[]
 }
 
 export interface TorrentSpeedLimitOptions {
@@ -190,6 +191,7 @@ export interface TorrentClientFeatures {
     readonly magnetLinks?: boolean
     readonly labels?: boolean
     readonly fileSelection?: boolean
+    readonly uploadFileSelection?: boolean
     readonly setLocation?: boolean
     readonly torrentDetails?: boolean
     readonly trackerFilter?: boolean
@@ -209,6 +211,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly magnetLinks: boolean
     readonly labels: boolean
     readonly fileSelection: boolean
+    readonly uploadFileSelection: boolean
     readonly setLocation: boolean
     readonly torrentDetails: boolean
     readonly trackerFilter: boolean

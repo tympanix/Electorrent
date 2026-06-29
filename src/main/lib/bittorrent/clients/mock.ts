@@ -5,6 +5,7 @@ import type {
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
+import parseTorrent from "parse-torrent"
 
 const PRIORITY_SKIP = 0
 const PRIORITY_NORMAL = 1
@@ -82,6 +83,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 fileSelection: true,
+                uploadFileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
                 ratioLimits: true,
@@ -123,12 +125,28 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {
         this.assertConnected()
-        await this.addTorrent(options?.renameTorrent || uri.replace(/^magnet:\?xt=urn:btih:/, "Mock Magnet "))
+        try {
+            const parsed = parseTorrent(uri)
+            await this.addTorrent(options?.renameTorrent || parsed.name || uri.replace(/^magnet:\?xt=urn:btih:/, "Mock Magnet "), {
+                hash: parsed.infoHash,
+                files: this.createFilesFromUploadSelection(options?.fileSelection),
+            })
+        } catch {
+            await this.addTorrent(options?.renameTorrent || uri.replace(/^magnet:\?xt=urn:btih:/, "Mock Magnet "), {
+                files: this.createFilesFromUploadSelection(options?.fileSelection),
+            })
+        }
     }
 
-    async uploadTorrent(_buffer: Uint8Array, filename: string, options?: Record<string, any>): Promise<void> {
+    async uploadTorrent(buffer: Uint8Array, filename: string, options?: Record<string, any>): Promise<void> {
         this.assertConnected()
-        await this.addTorrent(options?.renameTorrent || filename.replace(/\.torrent$/i, ""))
+        const parsed = parseTorrent(Buffer.from(buffer))
+        const parsedFiles = "files" in parsed && Array.isArray(parsed.files) ? parsed.files : undefined
+        await this.addTorrent(options?.renameTorrent || parsed.name || filename.replace(/\.torrent$/i, ""), {
+            hash: parsed.infoHash,
+            files: this.createFilesFromUploadSelection(options?.fileSelection)
+                || this.createFilesFromTorrentMetadata(parsedFiles),
+        })
     }
 
     async addMockedTorrent(_hashes: string[], input: MockTorrentInput = {}): Promise<string> {
@@ -370,6 +388,38 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         ]
     }
 
+    private createFilesFromUploadSelection(files: unknown): MockTorrentFile[] | undefined {
+        if (!Array.isArray(files) || files.length === 0) {
+            return undefined
+        }
+
+        return files.map((file: BittorrentFileSelection, index: number) => ({
+            index: file.index ?? index,
+            name: file.path || file.name || `file-${index + 1}`,
+            size: file.size || 0,
+            progress: 0,
+            availability: 1,
+            priority: file.wanted ? PRIORITY_NORMAL : PRIORITY_SKIP,
+            is_seed: false,
+        }))
+    }
+
+    private createFilesFromTorrentMetadata(files: any[] | undefined): MockTorrentFile[] | undefined {
+        if (!Array.isArray(files) || files.length === 0) {
+            return undefined
+        }
+
+        return files.map((file, index) => ({
+            index,
+            name: file.path || file.name || `file-${index + 1}`,
+            size: typeof file.length === "number" ? file.length : 0,
+            progress: 0,
+            availability: 1,
+            priority: PRIORITY_NORMAL,
+            is_seed: false,
+        }))
+    }
+
     private getCategories() {
         return Object.fromEntries(
             Array.from(new Set(Array.from(this.torrents.values()).map((torrent) => torrent.category)))
@@ -378,8 +428,9 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         )
     }
 
-    private async addTorrent(name: string) {
+    private async addTorrent(name: string, input: MockTorrentInput = {}) {
         await this.addMockedTorrent([], {
+            ...input,
             added_on: Math.floor(Date.now() / 1000),
             category: "mock-label-new",
             dl_speed: 512 * 1024,
