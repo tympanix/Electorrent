@@ -36,8 +36,8 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
         return angular.copy($rootScope.$server)
     }
 
-    this.uploadFromClipboard = function(askUploadOptions: boolean) {
-        var magnet = electorrent.clipboard.readText();
+    this.uploadFromClipboard = async function(askUploadOptions: boolean) {
+        var magnet = await electorrent.clipboard.readText();
 
         var protocol = ['magnet', 'http'];
 

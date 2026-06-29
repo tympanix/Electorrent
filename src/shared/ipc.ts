@@ -61,4 +61,7 @@ export const IPC_CHANNELS = {
     menu: {
         action: 'menu:action',
     },
+    clipboard: {
+        readText: 'clipboard:read-text',
+    },
 } as const
