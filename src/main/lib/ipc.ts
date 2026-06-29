@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, clipboard, dialog, ipcMain, nativeTheme, shell, type IpcMainInvokeEvent } from 'electron'
 import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
@@ -140,6 +140,10 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         if (window) {
             runEditCommand(window, command)
         }
+    })
+
+    ipcMain.handle(IPC_CHANNELS.clipboard.readText, async function() {
+        return clipboard.readText()
     })
 
     ipcMain.handle(IPC_CHANNELS.shell.openExternal, async function(_event: IpcMainInvokeEvent, { url }) {

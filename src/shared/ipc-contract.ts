@@ -384,6 +384,6 @@ export interface ElectorrentBridge {
         onAction(callback: (action: MenuAction) => void): Unsubscribe
     }
     clipboard: {
-        readText(): string
+        readText(): Promise<string>
     }
 }

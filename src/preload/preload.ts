@@ -1,4 +1,4 @@
-import { clipboard, contextBridge, ipcRenderer, webUtils } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 
 import { IPC_CHANNELS } from '@shared/ipc'
 import type { ColorTheme, EditCommand, PendingTorrentUploadFile, PendingTorrentUploadLink, WindowCommand } from '@shared/ipc-contract'
@@ -86,6 +86,6 @@ contextBridge.exposeInMainWorld('electorrent', {
         onAction: (callback: (action: unknown) => void) => subscribe(IPC_CHANNELS.menu.action, callback),
     },
     clipboard: {
-        readText: () => clipboard.readText(),
+        readText: () => invoke(IPC_CHANNELS.clipboard.readText),
     },
 })
