@@ -30,7 +30,6 @@ export const rtorrentFields = {
         up_rate: "d.up.rate",
         up_total: "d.up.total",
         message: "d.message",
-        bitfield: "d.bitfield",
         chunk_size: "d.chunk_size",
         chunk_completed: "d.completed_chunks",
         createdAt: "d.creation_date",

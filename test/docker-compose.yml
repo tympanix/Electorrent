@@ -80,6 +80,27 @@ services:
       - /downloads
       - /config
 
+  rtorrent-crazymax:
+    image: crazymax/rtorrent-rutorrent:5.3.1-0.16.13
+    ports:
+      - ${CLIENT_HOST_PORT:-8080}:8080
+      - ${RPC_PORT:-8000}:8000
+      - ${PEER_PORT:-50000}:50000
+      - ${PEER_UDP_PORT:-6881}:6881/udp
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - RT_INC_PORT=50000
+      - RT_DHT_PORT=6881
+      - WAN_IP_CMD=hostname -i
+    volumes:
+      - ./clients/rtorrent-crazymax/.rtorrent.rc:/data/rtorrent/.rtorrent.rc
+      - rtorrent-crazymax-data:/data
+    tmpfs:
+      - /downloads
+      - /passwd
+
   transmission:
     image: linuxserver/transmission:${VERSION:-latest}
     environment:
@@ -98,3 +119,6 @@ services:
       - ${CLIENT_HOST_PORT:-8080}:8080
     tmpfs:
       - /data:uid=1001,gid=1001
+
+volumes:
+  rtorrent-crazymax-data:

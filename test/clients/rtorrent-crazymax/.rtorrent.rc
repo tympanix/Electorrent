@@ -1,0 +1,13 @@
+# Match the test peer's shared payload directory so generated local torrents can hash complete.
+directory.default.set = /downloads
+
+# Keep local tracker tests on Docker IPv4 addresses only.
+network.block.ipv6.set = true
+
+# Debug local tracker peer discovery and outbound peer handshakes.
+log.add_output = "tracker_dump", "log"
+log.add_output = "tracker_requests", "log"
+log.add_output = "tracker_events", "log"
+log.add_output = "peer_list_events", "log"
+log.add_output = "peer_list_address", "log"
+log.add_output = "connection_hanshake", "log"
