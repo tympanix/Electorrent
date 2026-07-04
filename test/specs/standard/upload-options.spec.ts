@@ -58,6 +58,40 @@ describe("upload options", function () {
     }
   })
 
+  it("torrent uploaded with default label option", async function () {
+    if (client.features.uploadOptions?.category !== true) return this.skip()
+
+    const labelName = createUniqueLabel("defaultlabel")
+    let torrent: e2e.Torrent | undefined
+
+    try {
+      torrent = await this.app.uploadTorrent({ filename: this.torrentPath })
+      await torrent.newLabel(labelName)
+      await torrent.delete()
+
+      await this.app.openSettings()
+      await this.app.settingsGotoTab("advanced")
+      await this.app.setDefaultUploadOptions({ enabled: true, label: labelName })
+      await this.app.settingsSave()
+      await this.app.torrentsPageIsVisible()
+
+      torrent = await this.app.uploadTorrent({ filename: this.torrentPath, askUploadOptions: true })
+      await this.app.uploadTorrentModalSubmit()
+      await torrent.waitForExist()
+      await eventually(() => torrent.getLabel()).equals(labelName)
+    } finally {
+      if (torrent && await torrent.isExisting()) {
+        await torrent.delete()
+      }
+
+      await this.app.openSettings()
+      await this.app.settingsGotoTab("advanced")
+      await this.app.setDefaultUploadOptions({ enabled: false })
+      await this.app.settingsSave()
+      await this.app.torrentsPageIsVisible()
+    }
+  })
+
   it("magnet link opens upload options", async function () {
     const torrent = await this.app.uploadMagnetLink({ filename: this.torrentPath, askUploadOptions: true });
     const torrentMetadata = parseTorrent(fs.readFileSync(this.torrentPath))

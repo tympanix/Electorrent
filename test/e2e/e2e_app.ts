@@ -673,7 +673,7 @@ export class App {
     }
   }
 
-  async setDefaultUploadOptions({ enabled, start }: { enabled: boolean, start?: boolean }) {
+  async setDefaultUploadOptions({ enabled, start, label }: { enabled: boolean, start?: boolean, label?: string }) {
     const toggle = $("#page-settings-advanced [data-role='settings-default-upload-options-toggle'] input")
     await toggle.waitForExist()
     if (await toggle.isSelected() !== enabled) {
@@ -684,6 +684,23 @@ export class App {
       const form = $("#page-settings-advanced [data-role='settings-default-upload-options-form']")
       await form.waitForDisplayed()
       await this.setUploadToggle(form, "start-torrent", start)
+    }
+
+    if (enabled && label !== undefined) {
+      const form = $("#page-settings-advanced [data-role='settings-default-upload-options-form']")
+      await form.waitForDisplayed()
+
+      const labelDropdown = form.$("#upload-options-label")
+      await labelDropdown.waitForDisplayed()
+      await labelDropdown.waitForClickable()
+      await labelDropdown.click()
+
+      const labelItem = labelDropdown.$(`div[data-label='${label}']`)
+      await labelItem.waitForDisplayed()
+      await labelItem.click()
+
+      const selectedText = labelDropdown.$(".text")
+      await eventually(() => selectedText.getText()).equals(label, { timeout: 5_000 })
     }
   }
 

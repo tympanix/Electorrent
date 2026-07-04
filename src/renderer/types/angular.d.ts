@@ -27,5 +27,6 @@ declare namespace angular {
         $btclient?: TorrentClient | null
         $server?: ElectorrentServer | null
         $syncConnection?: SyncConnectionStatus
+        labels?: string[]
     }
 }
