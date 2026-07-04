@@ -37,3 +37,11 @@ npm run smoketest
 * Avoid conditional logic based on client ID - deduce feature support from `TorrentClient`
 * The `BittorrentRuntime` MUST return all `n` torrents from `getSnapshot` in `O(1)` HTTP calls
 * Use the Conventional Commits specification for commit messages and pull-requests
+
+# Behaviour triggers
+Keywords at the start of a user prompt followed by colon (`:`) may trigger certain behaviour. Keywords are only applicable for the current prompt.
+* `quickedit`: Only implement/write code without performing validation (build, lint, test, etc.)
+* `question`|`q`: Respond to the user. May search, read and investigate codebase - no edits or mutation of source code
+
+**Examples:**
+> Q: What file is responsible for authentication?

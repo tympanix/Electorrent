@@ -25,6 +25,7 @@ jobs:
           - qbittorrent:5
           - qbittorrent:latest
           - rtorrent
+          - rtorrent:latest
           - transmission
           - deluge:1
           - deluge:2

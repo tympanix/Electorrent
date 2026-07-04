@@ -155,7 +155,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 torrent.down_total = torrent.completed
             }
 
-            torrent.ratio = torrent.up_total / torrent.down_total
+            torrent.ratio = torrent.down_total > 0 ? torrent.up_total / torrent.down_total : 0
         }
 
         const trackerCalls = torrents.map((torrent) => ({
