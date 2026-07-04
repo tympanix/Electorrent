@@ -15,6 +15,14 @@ const client = fixture.client
 const backend = fixture.backend
 const tracker = fixture.tracker
 
+function shellQuote(value: string) {
+  return `'${value.replace(/'/g, "'\\''")}'`
+}
+
+function findDownloadedContentCommand(downloadRoot: string, contentName: string) {
+  return `find ${shellQuote(downloadRoot)} -maxdepth 5 -type f -name ${shellQuote(contentName)} -print -quit`
+}
+
 describe("torrent actions", function () {
   configureSpec()
 
@@ -80,6 +88,45 @@ describe("torrent actions", function () {
     await torrent.resume({ waitForState: false })
     await torrent.waitForDownloading({ timeout: 20 * 1000 })
     await torrent.checkInState(["all", "downloading"])
+  })
+
+  it("remove and delete removes downloaded content from disk", async function () {
+    this.timeout(300 * 1000)
+    if (!backend || !client.downloadRoot) {
+      return this.skip()
+    }
+
+    const torrentName = createUniqueLabel("delete-files")
+    const torrentPath = await createTorrentFile(tracker, { fileSize: 1, torrentName })
+    const torrentInfo = parseTorrent(fs.readFileSync(torrentPath))
+    const contentName = String(torrentInfo.name || torrentName)
+    const findContentCommand = findDownloadedContentCommand(client.downloadRoot, contentName)
+    const contentExistsCommand = `${findContentCommand} | grep -q .`
+    const contentMissingCommand = `[ -z "$(${findContentCommand})" ]`
+    const torrentToDelete = await this.app.uploadTorrent({ filename: torrentPath })
+
+    try {
+      await torrentToDelete.waitForExist({ timeout: 20 * 1000 })
+      await torrentToDelete.waitForStates(["Seeding", "Finished"], { timeout: 120 * 1000 })
+      await backend.waitForExec(["sh", "-lc", contentExistsCommand], 20 * 1000)
+      await $("#page-torrents li[data-state=all]").click()
+      await torrentToDelete.waitForExist()
+
+      const modal = await torrentToDelete.openDeleteConfirmation()
+      const approveButton = modal.$("button.approve")
+      await approveButton.waitForDisplayed()
+      await approveButton.waitForClickable()
+      await approveButton.click()
+      await waitForModalClose(modal)
+      await torrentToDelete.waitForGone()
+
+      await backend.waitForExec(["sh", "-lc", contentMissingCommand], 60 * 1000)
+    } finally {
+      if (await torrentToDelete.isExisting()) {
+        await $("#page-torrents li[data-state=all]").click()
+        await torrentToDelete.delete()
+      }
+    }
   })
 
   it("moves downloaded content via Set Location", async function () {

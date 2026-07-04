@@ -18,9 +18,10 @@ export interface TestClient {
   acceptHttpStatus: number
   stopLabel: string
   downloadLabel: string
+  downloadRoot?: string
   saveLocation?: string
   specs?: string[]
 }
 
-export type TestClientInput = Omit<TestClient, "host" | "acceptHttpStatus" | "stopLabel" | "downloadLabel">
-  & Partial<Pick<TestClient, "host" | "acceptHttpStatus" | "stopLabel" | "downloadLabel">>
+export type TestClientInput = Omit<TestClient, "host" | "acceptHttpStatus" | "stopLabel" | "downloadLabel" | "downloadRoot">
+  & Partial<Pick<TestClient, "host" | "acceptHttpStatus" | "stopLabel" | "downloadLabel" | "downloadRoot">>

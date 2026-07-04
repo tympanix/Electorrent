@@ -24,6 +24,7 @@ export default {
     username: "admin",
     password: "",
     acceptHttpStatus: 400,
+    downloadRoot: "/data",
     saveLocation: "/utorrent/custom/save/location",
   }),
 } satisfies Record<string, TestClient>
