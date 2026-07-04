@@ -64,7 +64,7 @@ export class TorrentsPageController {
         $scope.showDragAndDrop = false;
         $scope.labelsDrowdown = null;
         $scope.torrentLimit = LIMIT;
-        $scope.labels = [];
+        setLabels([]);
         $scope.trackers = [];
         $scope.guiBusy = true;
         $scope.pendingTorrentFiles = [];
@@ -404,8 +404,13 @@ export class TorrentsPageController {
         function clearAll() {
             $scope.torrents = {};
             $scope.arrayTorrents = [];
-            $scope.labels = [];
+            setLabels([]);
             $scope.trackers = [];
+        }
+
+        function setLabels(labels: string[]) {
+            $rootScope.labels = labels;
+            $scope.labels = labels;
         }
 
         function resetAll() {
