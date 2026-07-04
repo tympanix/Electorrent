@@ -28,6 +28,7 @@ export default {
     authProxyHostPort: 48081,
     username: "admin",
     password: "admin",
+    downloadRoot: "/downloads",
     saveLocation: "/downloads/custom/save/location",
   }),
   "rtorrent:latest": defineClient({
@@ -43,6 +44,7 @@ export default {
     authProxyHostPort: 48083,
     username: "admin",
     password: "admin",
+    downloadRoot: "/downloads",
     saveLocation: "/downloads/custom/save/location",
   }),
 } satisfies Record<string, TestClient>

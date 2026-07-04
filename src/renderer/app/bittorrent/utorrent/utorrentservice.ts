@@ -168,7 +168,6 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       label: "Remove",
       click: this.remove,
       icon: "remove",
-      role: "delete",
     },
     {
       label: "Remove And",
@@ -184,6 +183,7 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
         {
           label: "Delete All",
           click: this.removedatatorrent,
+          role: "delete",
         },
       ],
     },
