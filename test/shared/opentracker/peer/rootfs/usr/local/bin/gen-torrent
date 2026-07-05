@@ -34,7 +34,7 @@ P2P_PORT=$((1024 + RANDOM % 64512))
 # Seed the torrent file (and contents)
 ARIA2_ARGS=(
     --allow-overwrite=true
-    --check-integrity=true
+    --bt-seed-unverified=true
     --dir="$(dirname "$TEST_FILE")"
     --enable-dht=false
     --enable-peer-exchange=false
