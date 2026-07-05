@@ -5,12 +5,13 @@ set -e
 # Parse CLI options for upload speed, download speed, file size, torrent file name, and tracker URL
 while [[ "$#" -gt 0 ]]; do
     case $1 in
+        --foreground) FOREGROUND="1" ;;
         --upload-speed) UP_SPEED="$2"; shift ;;
         --download-speed) DL_SPEED="$2"; shift ;;
         --file-size) FILE_SIZE="$2"; shift ;;
         --torrent-name) TORRENT_NAME="$2"; shift ;;
         --tracker-url) TRACKER_URL="$2"; shift ;;
-        *) echo >&2 "Usage: $0 --upload-speed <up-speed> --download-speed <dl-speed> --file-size <file-size> --torrent-name <torrent-name> --tracker-url <tracker-url>" >&2; exit 1 ;;
+        *) echo >&2 "Usage: $0 [--foreground] --upload-speed <up-speed> --download-speed <dl-speed> --file-size <file-size> --torrent-name <torrent-name> --tracker-url <tracker-url>" >&2; exit 1 ;;
     esac
     shift
 done
@@ -25,13 +26,26 @@ TEST_FILE="/srv/test-file-${RANDOM_SUFFIX}.bin"
 dd if=/dev/urandom of="$TEST_FILE" bs=1k count="$FILE_SIZE" 2>/dev/null
 # Set the torrent file name, defaulting to a random name if not provided
 TORRENT_FILE="/shared/${TORRENT_NAME}.torrent"
-# Create a torrent file and save it in the shared folder with specified upload and download speeds
+# Create a torrent file and save it in the shared folder.
 rm -f "$TORRENT_FILE"
-ctorrent -t -s $TORRENT_FILE -u "$TRACKER_URL" $TEST_FILE >/dev/null 2>&1
+mktorrent -a "$TRACKER_URL" -o "$TORRENT_FILE" "$TEST_FILE" >/dev/null
 # Generate a random unprivileged port (1024-65535)
 P2P_PORT=$((1024 + RANDOM % 64512))
 # Seed the torrent file (and contents)
-[ -n "$UP_SPEED" ] && CTORRENT_ARGS+=" -U$UP_SPEED"
-[ -n "$DL_SPEED" ] && CTORRENT_ARGS+=" -D$DL_SPEED"
-ctorrent $CTORRENT_ARGS -P "$HOSTNAME" -p "$P2P_PORT" -s "$TEST_FILE" "$TORRENT_FILE" >/dev/null 2>&1 &
+ARIA2_ARGS=(
+    --allow-overwrite=true
+    --check-integrity=true
+    --dir="$(dirname "$TEST_FILE")"
+    --enable-dht=false
+    --enable-peer-exchange=false
+    --listen-port="$P2P_PORT"
+    --max-concurrent-downloads=1
+    --seed-ratio=0.0
+)
+[ -n "$UP_SPEED" ] && ARIA2_ARGS+=(--max-overall-upload-limit="${UP_SPEED}K")
+[ -n "$DL_SPEED" ] && ARIA2_ARGS+=(--max-overall-download-limit="${DL_SPEED}K")
+if [ -n "$FOREGROUND" ]; then
+    exec aria2c "${ARIA2_ARGS[@]}" "$TORRENT_FILE"
+fi
+aria2c "${ARIA2_ARGS[@]}" "$TORRENT_FILE" >/dev/null 2>&1 &
 exit 0
