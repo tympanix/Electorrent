@@ -6,7 +6,7 @@ x-peer: &peer
     - ./shared/opentracker/data/shared:/shared
   tmpfs:
     - /srv
-  entrypoint: ["/start"]
+  entrypoint: ["/usr/local/bin/gen-torrent"]
 
 services:
   # Opentracker (http://erdgeist.org/arts/software/opentracker/)
@@ -30,7 +30,7 @@ services:
   peer:
     <<: *peer
     hostname: peer
-    command: ["--torrent-name", "slow", "--upload-speed", "1", "--download-speed", "1", "--file-size", "100000"]
+    command: ["--foreground", "--torrent-name", "slow", "--upload-speed", "1", "--download-speed", "1", "--file-size", "100000"]
 
   nginx:
     build: ./shared/nginx

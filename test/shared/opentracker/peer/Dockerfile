@@ -1,8 +1,6 @@
-FROM debian:trixie-slim
+FROM alpine:latest
 
-RUN apt-get update \
-    && apt-get install ctorrent \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache aria2 bash coreutils mktorrent
 COPY ./rootfs /
-RUN chmod +x /start /usr/local/bin/*
-ENTRYPOINT ["/start"]
+RUN chmod +x /usr/local/bin/*
+ENTRYPOINT ["/usr/local/bin/gen-torrent"]
