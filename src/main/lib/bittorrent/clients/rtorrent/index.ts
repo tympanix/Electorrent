@@ -11,6 +11,12 @@ type RtorrentMethodCall = {
     params: any[]
 }
 
+type RtorrentDeleteMetadata = {
+    basePath: string
+    isMultiFile: boolean
+    filePaths: string[]
+}
+
 type RtorrentMulticallCommand = string | [string, ...any[]]
 
 export class RtorrentRuntime implements BittorrentRuntime {
@@ -61,6 +67,125 @@ export class RtorrentRuntime implements BittorrentRuntime {
 
     private unwrapMulticallResult<T = any>(result: any): T {
         return (Array.isArray(result) ? result[0] : result) as T
+    }
+
+    private unwrapScalarMulticallResult(result: any): any {
+        let value = result
+
+        while (Array.isArray(value) && value.length === 1) {
+            value = value[0]
+        }
+
+        return value
+    }
+
+    private assertMulticallSuccess(results: any[], context: string): void {
+        const fault = results.find((result) => result && typeof result === "object" && "faultCode" in result)
+
+        if (fault) {
+            throw new Error(`${context}: ${fault.faultString || fault.faultCode}`)
+        }
+    }
+
+    private parentDirectory(remotePath: string): string | null {
+        const trimmed = remotePath.replace(/\/+$/g, "")
+        const separatorIndex = trimmed.lastIndexOf("/")
+
+        if (separatorIndex <= 0) {
+            return null
+        }
+
+        return trimmed.slice(0, separatorIndex)
+    }
+
+    private isPathInsideDirectory(remotePath: string, directory: string): boolean {
+        const normalizedDirectory = directory.replace(/\/+$/g, "")
+
+        return Boolean(normalizedDirectory) && remotePath.startsWith(`${normalizedDirectory}/`)
+    }
+
+    private getDeleteDirectories(basePath: string, filePaths: string[]): string[] {
+        const directories = new Set<string>()
+        const normalizedBasePath = basePath.replace(/\/+$/g, "")
+
+        for (const filePath of filePaths) {
+            let directory = this.parentDirectory(filePath)
+
+            while (directory && this.isPathInsideDirectory(directory, normalizedBasePath)) {
+                directories.add(directory)
+                directory = this.parentDirectory(directory)
+            }
+        }
+
+        return [...directories].sort((a, b) => b.length - a.length)
+    }
+
+    private parseFrozenPaths(rows: any): string[] {
+        let unwrappedRows = rows
+
+        while (Array.isArray(unwrappedRows) && unwrappedRows.length === 1 && Array.isArray(unwrappedRows[0]) && Array.isArray(unwrappedRows[0][0])) {
+            unwrappedRows = unwrappedRows[0]
+        }
+
+        const fileRows = Array.isArray(unwrappedRows) ? unwrappedRows : []
+
+        return fileRows
+            .map((row) => this.unwrapMulticallResult(row))
+            .filter((filePath): filePath is string => typeof filePath === "string" && filePath.length > 0)
+    }
+
+    private async getDeleteMetadata(hash: string): Promise<RtorrentDeleteMetadata> {
+        const metadataCalls: RtorrentMethodCall[] = [
+            { methodName: "d.base_path", params: [hash] },
+            { methodName: "d.is_multi_file", params: [hash] },
+            { methodName: "f.multicall", params: [hash, "", "f.frozen_path="] },
+        ]
+        const result = await this.call<any[]>("system.multicall", [metadataCalls])
+        this.assertMulticallSuccess(result, `Failed to read rTorrent delete metadata for ${hash}`)
+        const basePath = this.unwrapScalarMulticallResult(result[0])
+        const isMultiFile = Number(this.unwrapScalarMulticallResult(result[1])) > 0
+        const filePaths = this.parseFrozenPaths(result[2])
+
+        if (typeof basePath !== "string" || !basePath || filePaths.length === 0) {
+            throw new Error(`rTorrent did not return delete metadata for ${hash}`)
+        }
+
+        return {
+            basePath,
+            isMultiFile,
+            filePaths,
+        }
+    }
+
+    private async deleteAndEraseOne(hash: string): Promise<void> {
+        const metadata = await this.getDeleteMetadata(hash)
+
+        const eraseResult = await this.call<any[]>("system.multicall", [[
+            { methodName: "d.delete_tied", params: [hash] },
+            { methodName: "d.erase", params: [hash] },
+        ]])
+        this.assertMulticallSuccess(eraseResult, `Failed to erase rTorrent torrent ${hash}`)
+
+        const fsCalls: RtorrentMethodCall[] = metadata.filePaths.map((filePath) => ({
+            methodName: "execute.throw",
+            params: ["", "rm", "-f", "--", filePath],
+        }))
+
+        if (metadata.isMultiFile) {
+            const directories = this.getDeleteDirectories(metadata.basePath, metadata.filePaths)
+
+            fsCalls.push(...directories.map((directory) => ({
+                methodName: "execute",
+                params: ["", "rmdir", "--", directory],
+            })))
+            fsCalls.push({
+                methodName: "execute",
+                params: ["", "rmdir", "--", metadata.basePath],
+            })
+        }
+
+        const fsResult = await this.call<any[]>("system.multicall", [fsCalls])
+        this.assertMulticallSuccess(fsResult, `Failed to delete rTorrent payload data for ${hash}`)
     }
 
     private async getTorrentFields(hash: string, commands: Record<string, RtorrentMulticallCommand>): Promise<Record<string, any>> {
@@ -357,8 +482,10 @@ export class RtorrentRuntime implements BittorrentRuntime {
         return this.setTorrentHashes(hashes, ["d.erase"], [])
     }
 
-    deleteAndErase(hashes: string[]): Promise<void> {
-        return this.setTorrentHashes(hashes, ["d.custom5.set", "d.delete_tied", "d.erase"], ["1"])
+    async deleteAndErase(hashes: string[]): Promise<void> {
+        for (const hash of hashes) {
+            await this.deleteAndEraseOne(hash)
+        }
     }
 
     recheck(hashes: string[]): Promise<void> {
