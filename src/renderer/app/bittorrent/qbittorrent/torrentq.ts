@@ -136,7 +136,9 @@ export class QBittorrentTorrent extends Torrent {
     }
 
     manualStatusText() {
-        if (this.isStatusChecking()) {
+        if (this.getStatus('moving')) {
+            return 'Moving';
+        } else if (this.isStatusChecking()) {
             return 'Checking';
         } else {
             return super.manualStatusText();
