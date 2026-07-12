@@ -72,28 +72,31 @@ function downloadUpdate(url: string) {
     mainWindow?.webContents.downloadURL(url)
 }
 
-function filePostfix() {
-    const date = new Date()
-    const day = date.getDate()
-    const month = date.getMonth() + 1
-    const hour = date.getHours()
-    const minute = date.getMinutes()
-    const seconds = date.getSeconds()
+function notifyUpdateDownloaded(filePath: string) {
+    downloadedUpdate = filePath
 
-    return `${month}.${day}-${hour}.${minute}.${seconds}`
-}
-
-function getUniqueFilename(filename: string) {
-    const extension = path.extname(filename)
-    const file = path.basename(filename, extension)
-    const postfix = filePostfix()
-    return `${file} (${postfix})${extension}`
+    sendUpdateStatus({
+        type: 'downloaded',
+        data: {
+            releaseNotes: update.notes,
+            releaseName: update.name,
+            releaseDate: update.pub_date,
+            updateUrl: update.url,
+            manual: true,
+        },
+    })
 }
 
 function manualDownloader() {
     mainWindow?.webContents.session.on('will-download', (_event, item) => {
         const totalBytes = item.getTotalBytes()
-        const filePath = path.join(app.getPath('downloads'), getUniqueFilename(item.getFilename()))
+        const filePath = path.join(app.getPath('downloads'), item.getFilename())
+
+        if (totalBytes > 0 && fs.existsSync(filePath) && fs.statSync(filePath).size === totalBytes) {
+            item.cancel()
+            notifyUpdateDownloaded(filePath)
+            return
+        }
 
         item.setSavePath(filePath)
 
@@ -112,18 +115,7 @@ function manualDownloader() {
             }
 
             if (state === 'completed') {
-                downloadedUpdate = item.getSavePath()
-
-                sendUpdateStatus({
-                    type: 'downloaded',
-                    data: {
-                        releaseNotes: update.notes,
-                        releaseName: update.name,
-                        releaseDate: update.pub_date,
-                        updateUrl: update.url,
-                        manual: true,
-                    },
-                })
+                notifyUpdateDownloaded(item.getSavePath())
             }
         })
     })
