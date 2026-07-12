@@ -85,7 +85,7 @@ export class AddTorrentModalController {
 
     getPendingUploadCountLabel() {
         const torrentCount = this.scope.torrents?.length || 0
-        return `${torrentCount} ${torrentCount === 1 ? "upload" : "uploads"} remaining`
+        return `${torrentCount} ${torrentCount === 1 ? "torrent" : "torrents"} remaining`
     }
 
     discardCurrentTorrent() {

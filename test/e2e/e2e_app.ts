@@ -359,6 +359,11 @@ export class App {
     return modal.$(".content .sub.header").getText()
   }
 
+  async uploadTorrentModalPendingCountLabel() {
+    const modal = await this.uploadTorrentModalVisible()
+    return modal.$(".header .ui.label").getText()
+  }
+
   async waitForLabelInDropdown(labelName) {
     const labels = "#torrent-action-header div[data-role=labels]";
     const labelBtn = `div[data-label='${labelName}']`;
