@@ -27,6 +27,8 @@ Pick a test strategy from context:
 npm run test -- --client "<client>" --spec "<spec>"
 ```
 
+> NOTE: A single test case within a spec may be targeted with `--mochaOpts.grep "<grep>"`
+
 ### Smoketest
 ```shell
 npm run smoketest
