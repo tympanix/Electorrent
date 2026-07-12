@@ -238,6 +238,7 @@ export class App {
     label?: string
     start?: boolean
     name?: string
+    waitForClose?: boolean
     savedLocationPath?: string
     peerLimit?: number
     sequentialDownload?: boolean
@@ -304,7 +305,9 @@ export class App {
     await browser.pause(250)
     const submitBtn = modal.$("button[type=submit]")
     await submitBtn.click()
-    await waitForModalClose(modal, this.timeout)
+    if (options?.waitForClose !== false) {
+      await waitForModalClose(modal, this.timeout)
+    }
   }
 
   async uploadTorrent({ filename, askUploadOptions, sourcePath }: { filename: string, askUploadOptions?: boolean, sourcePath?: string }) {

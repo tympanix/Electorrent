@@ -69,7 +69,7 @@ describe("upload queue", function () {
         const remaining = torrentItems.length - index
         await eventually(() => this.app.uploadTorrentModalLabel()).equals(torrentItems[index].name, { timeout: 10 * 1000 })
         await eventually(() => this.app.uploadTorrentModalPendingCountLabel()).contains(`${remaining} ${remaining === 1 ? "torrent" : "torrents"} remaining`, { timeout: 10 * 1000 })
-        await this.app.uploadTorrentModalSubmit()
+        await this.app.uploadTorrentModalSubmit({ waitForClose: remaining === 1 })
       }
 
       for (const torrent of uploadedTorrents) {
@@ -82,6 +82,8 @@ describe("upload queue", function () {
         }
       }
 
+      await restartApplication(this)
+      await this.app.torrentsPageIsVisible()
       await this.app.openSettings()
       await this.app.settingsGotoTab("advanced")
       await this.app.clearSettingsWatchDirectory()
