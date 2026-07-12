@@ -5,6 +5,8 @@ productName: Electorrent
 appId: com.github.tympanix.electorrent
 mac:
   category: public.app-category.utilities
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.inherit.plist
   target:
     - target: dmg
       arch:
