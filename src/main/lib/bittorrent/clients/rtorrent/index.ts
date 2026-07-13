@@ -170,26 +170,20 @@ export class RtorrentRuntime implements BittorrentRuntime {
             return
         }
 
-        const fsCalls: RtorrentMethodCall[] = metadata.filePaths.map((filePath) => ({
+        const fileDeleteCalls: RtorrentMethodCall[] = metadata.filePaths.map((filePath) => ({
             methodName: "execute.throw",
             params: ["", "rm", "-f", "--", filePath],
         }))
+        const fileDeleteResult = await this.call<any[]>("system.multicall", [fileDeleteCalls])
+        this.assertMulticallSuccess(fileDeleteResult, `Failed to delete rTorrent payload data for ${hash}`)
 
         if (metadata.isMultiFile) {
             const directories = this.getDeleteDirectories(metadata.basePath, metadata.filePaths)
 
-            fsCalls.push(...directories.map((directory) => ({
-                methodName: "execute",
-                params: ["", "rmdir", "--", directory],
-            })))
-            fsCalls.push({
-                methodName: "execute",
-                params: ["", "rmdir", "--", metadata.basePath],
-            })
+            for (const directory of [...directories, metadata.basePath]) {
+                await this.call("execute.throw", ["", "rmdir", "--", directory])
+            }
         }
-
-        const fsResult = await this.call<any[]>("system.multicall", [fsCalls])
-        this.assertMulticallSuccess(fsResult, `Failed to delete rTorrent payload data for ${hash}`)
     }
 
     private async getTorrentFields(hash: string, commands: Record<string, RtorrentMulticallCommand>): Promise<Record<string, any>> {

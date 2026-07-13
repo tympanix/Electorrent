@@ -23,6 +23,10 @@ function findDownloadedContentCommand(downloadRoot: string, contentName: string)
   return `find ${shellQuote(downloadRoot)} -maxdepth 5 -type f -name ${shellQuote(contentName)} -print -quit`
 }
 
+function findDownloadedDirectoryCommand(downloadRoot: string, contentName: string) {
+  return `find ${shellQuote(downloadRoot)} -maxdepth 5 -type d -name ${shellQuote(contentName)} -print -quit`
+}
+
 describe("torrent actions", function () {
   configureSpec()
 
@@ -102,6 +106,50 @@ describe("torrent actions", function () {
     const contentName = String(torrentInfo.name || torrentName)
     const findContentCommand = findDownloadedContentCommand(client.downloadRoot, contentName)
     const contentExistsCommand = `${findContentCommand} | grep -q .`
+    const contentMissingCommand = `[ -z "$(${findContentCommand})" ]`
+    const torrentToDelete = await this.app.uploadTorrent({ filename: torrentPath })
+
+    try {
+      await torrentToDelete.waitForExist({ timeout: 20 * 1000 })
+      await torrentToDelete.waitForStates(["Seeding", "Finished"], { timeout: 120 * 1000 })
+      await backend.waitForExec(["sh", "-lc", contentExistsCommand], 20 * 1000)
+      await $("#page-torrents li[data-state=all]").click()
+      await torrentToDelete.waitForExist()
+
+      const modal = await torrentToDelete.openDeleteConfirmation()
+      const approveButton = modal.$("button.approve")
+      await approveButton.waitForDisplayed()
+      await approveButton.waitForClickable()
+      await approveButton.click()
+      await waitForModalClose(modal)
+      await torrentToDelete.waitForGone()
+
+      await backend.waitForExec(["sh", "-lc", contentMissingCommand], 60 * 1000)
+    } finally {
+      if (await torrentToDelete.isExisting()) {
+        await $("#page-torrents li[data-state=all]").click()
+        await torrentToDelete.delete()
+      }
+    }
+  })
+
+  it("remove and delete removes multi-file content from disk", async function () {
+    this.timeout(300 * 1000)
+    if (!backend || !client.downloadRoot) {
+      return this.skip()
+    }
+
+    const torrentName = createUniqueLabel("delete-multi-file")
+    const torrentPath = await createTorrentFile(tracker, {
+      torrentName,
+      files: {
+        "first.bin": 1,
+        "nested/second.bin": 1,
+        "nested/deeper/third.bin": 1,
+      },
+    })
+    const findContentCommand = findDownloadedDirectoryCommand(client.downloadRoot, torrentName)
+    const contentExistsCommand = `content_path=$(${findContentCommand}); [ -n "$content_path" ] && [ -f "$content_path/first.bin" ] && [ -f "$content_path/nested/deeper/third.bin" ]`
     const contentMissingCommand = `[ -z "$(${findContentCommand})" ]`
     const torrentToDelete = await this.app.uploadTorrent({ filename: torrentPath })
 

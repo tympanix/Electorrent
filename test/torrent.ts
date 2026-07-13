@@ -13,6 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export async function createTorrentFile(tracker: DockerComposeService, options: {
     torrentName?: string;
     fileSize?: number;
+    files?: Record<string, number>;
     downloadSpeed?: number;
     uploadSpeed?: number;
     trackerUrl?: string;
@@ -23,8 +24,14 @@ export async function createTorrentFile(tracker: DockerComposeService, options: 
     const cmd = [
         "gen-torrent",
         "--torrent-name", torrentName,
-        "--file-size", fileSize.toString(),
     ]
+    if (options.files) {
+        for (const [filePath, size] of Object.entries(options.files)) {
+            cmd.push("--file", filePath, size.toString());
+        }
+    } else {
+        cmd.push("--file-size", fileSize.toString());
+    }
     if (options.downloadSpeed) {
         cmd.push("--download-speed", options.downloadSpeed.toString());
     }
