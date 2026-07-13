@@ -32,5 +32,6 @@ export default {
     host: "localhost",
     port: 1,
     specs: ["test/specs/mock/**/*.spec.ts"],
+    appArgs: ["-d", "--force-title-bar-menu", "--update-url=http://127.0.0.1:43871/update"],
   }),
 }

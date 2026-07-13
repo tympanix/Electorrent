@@ -20,6 +20,7 @@ export interface TestClient {
   downloadLabel: string
   saveLocation?: string
   specs?: string[]
+  appArgs?: string[]
 }
 
 export type TestClientInput = Omit<TestClient, "host" | "acceptHttpStatus" | "stopLabel" | "downloadLabel">
