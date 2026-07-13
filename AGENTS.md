@@ -15,10 +15,10 @@ npm run lint
 ```
 
 ## Test
-Pick a test strategy from context:
-* If user requested particular tests -> run user requested tests
-* If changes scoped to particular feature -> run targeted tests
-* Otherwise -> run smoketest
+Pick one of the following test strategies from context:
+* If user requested particular tests -> run requested targeted test
+* Search for relevant test spec -> run relevant targeted tests
+* Otherwise, if no relevant tests found -> run smoketest
 
 ### Targeted test
 * <client>: affected bittorrent client or `qbittorrent:latest` by default
