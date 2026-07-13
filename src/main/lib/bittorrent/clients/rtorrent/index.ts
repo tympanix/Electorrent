@@ -1,3 +1,4 @@
+import path from "node:path"
 import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
 
@@ -14,7 +15,6 @@ type RtorrentMethodCall = {
 type RtorrentDeleteMetadata = {
     basePath: string
     isMultiFile: boolean
-    filePaths: string[]
 }
 
 type RtorrentMulticallCommand = string | [string, ...any[]]
@@ -87,40 +87,23 @@ export class RtorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    private parseFrozenPaths(rows: any): string[] {
-        let unwrappedRows = rows
-
-        while (Array.isArray(unwrappedRows) && unwrappedRows.length === 1 && Array.isArray(unwrappedRows[0]) && Array.isArray(unwrappedRows[0][0])) {
-            unwrappedRows = unwrappedRows[0]
-        }
-
-        const fileRows = Array.isArray(unwrappedRows) ? unwrappedRows : []
-
-        return fileRows
-            .map((row) => this.unwrapMulticallResult(row))
-            .filter((filePath): filePath is string => typeof filePath === "string" && filePath.length > 0)
-    }
-
-    private async getDeleteMetadata(hash: string): Promise<RtorrentDeleteMetadata | null> {
+    private async getDeleteMetadata(hash: string): Promise<RtorrentDeleteMetadata> {
         const metadataCalls: RtorrentMethodCall[] = [
             { methodName: "d.base_path", params: [hash] },
             { methodName: "d.is_multi_file", params: [hash] },
-            { methodName: "f.multicall", params: [hash, "", "f.frozen_path="] },
         ]
         const result = await this.call<any[]>("system.multicall", [metadataCalls])
         this.assertMulticallSuccess(result, `Failed to read rTorrent delete metadata for ${hash}`)
         const basePath = this.unwrapScalarMulticallResult(result[0])
         const isMultiFile = Number(this.unwrapScalarMulticallResult(result[1])) > 0
-        const filePaths = this.parseFrozenPaths(result[2])
 
-        if (typeof basePath !== "string" || !basePath || filePaths.length === 0) {
-            return null
+        if (typeof basePath !== "string" || !basePath || !path.posix.isAbsolute(basePath)) {
+            throw new Error(`Invalid rTorrent base path for ${hash}`)
         }
 
         return {
             basePath,
             isMultiFile,
-            filePaths,
         }
     }
 
@@ -133,20 +116,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         ]])
         this.assertMulticallSuccess(eraseResult, `Failed to erase rTorrent torrent ${hash}`)
 
-        if (!metadata) {
-            return
-        }
-
-        const fileDeleteCalls: RtorrentMethodCall[] = metadata.filePaths.map((filePath) => ({
-            methodName: "execute.throw",
-            params: ["", "rm", "-f", "--", filePath],
-        }))
-        const fileDeleteResult = await this.call<any[]>("system.multicall", [fileDeleteCalls])
-        this.assertMulticallSuccess(fileDeleteResult, `Failed to delete rTorrent payload data for ${hash}`)
-
-        if (metadata.isMultiFile) {
-            await this.call("execute.throw", ["", "find", metadata.basePath, "-depth", "-type", "d", "-exec", "rmdir", "{}", ";"])
-        }
+        await this.call("execute.throw", ["", "rm", metadata.isMultiFile ? "-rf" : "-f", "--", metadata.basePath])
     }
 
     private async getTorrentFields(hash: string, commands: Record<string, RtorrentMulticallCommand>): Promise<Record<string, any>> {
