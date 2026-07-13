@@ -1,9 +1,9 @@
 import { app } from 'electron'
 import path from 'path'
 import winston from 'winston'
-import yargs from 'yargs'
 
-const program = yargs(process.argv.slice(1)).parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean }
+import { commandLineOptions } from './command-line'
+
 const loglevel = getLogLevel()
 const logfile = path.join(app.getPath('userData'), 'logfile.log')
 
@@ -15,9 +15,9 @@ const logger = new winston.Logger({
 })
 
 function getLogLevel() {
-    if (program.debug) {
+    if (commandLineOptions.debug) {
         return 'debug'
-    } else if (program.verbose) {
+    } else if (commandLineOptions.verbose) {
         return 'verbose'
     }
 

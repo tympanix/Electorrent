@@ -5,9 +5,9 @@ import Q from 'q'
 import electronRegedit from 'electron-regedit'
 
 import type { SystemStartupOption } from '@shared/ipc-contract'
+import { commandLineOptions, STARTED_AT_LOGIN_ARGUMENT, type SquirrelCommand } from './command-line'
 
 const { ProgId, Regedit } = electronRegedit as any
-const STARTED_AT_LOGIN_ARG = '--started-at-login'
 
 new ProgId({
     description: 'Torrent File',
@@ -41,12 +41,11 @@ function removeShortcut() {
     return executeSquirrelCommand(['--removeShortcut', target])
 }
 
-function checkSquirrel() {
+function checkSquirrel(squirrelCommand?: SquirrelCommand) {
     if (process.platform !== 'win32') {
         return false
     }
 
-    const squirrelCommand = process.argv[1]
     switch (squirrelCommand) {
         case '--squirrel-install':
         case '--squirrel-updated':
@@ -69,7 +68,7 @@ function checkSquirrel() {
     }
 }
 
-const shouldQuitFromStartup = checkSquirrel()
+const shouldQuitFromStartup = checkSquirrel(commandLineOptions.squirrelCommand)
 
 export function configureSystemStartup(option: SystemStartupOption) {
     if (!app.isPackaged || !['darwin', 'win32'].includes(process.platform)) {
@@ -86,7 +85,7 @@ export function configureSystemStartup(option: SystemStartupOption) {
         app.setLoginItemSettings({
             openAtLogin,
             path: stubLauncher,
-            args: openAtLogin ? [STARTED_AT_LOGIN_ARG] : [],
+            args: openAtLogin ? [STARTED_AT_LOGIN_ARGUMENT] : [],
         })
         return
     }
@@ -94,13 +93,13 @@ export function configureSystemStartup(option: SystemStartupOption) {
     app.setLoginItemSettings({ openAtLogin })
 }
 
-export function shouldStartInBackground(option: SystemStartupOption) {
+export function shouldStartInBackground(option: SystemStartupOption, startedAtLogin: boolean) {
     if (option !== 'background') {
         return false
     }
 
     if (process.platform === 'win32') {
-        return process.argv.includes(STARTED_AT_LOGIN_ARG)
+        return startedAtLogin
     }
 
     return process.platform === 'darwin' && app.getLoginItemSettings().wasOpenedAtLogin

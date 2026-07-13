@@ -1,7 +1,7 @@
 import fs, { type FSWatcher } from 'fs'
 import path from 'path'
 
-import { app, Notification, type BrowserWindow } from 'electron'
+import { Notification, type BrowserWindow } from 'electron'
 
 import { bittorrentManager } from '@main/lib/bittorrent'
 import { IPC_CHANNELS } from '@shared/ipc'
@@ -12,6 +12,7 @@ import { serializeTorrentFile } from './torrents'
 interface TorrentFileWatcherOptions {
     getSettings: () => Pick<AppSettings, 'watchDirectory' | 'alwaysPromptUploadOptions'>
     getWindow: () => BrowserWindow | null
+    isHeadless: boolean
     isRendererLoaded: () => boolean
     showOrCreateTorrentWindow: () => void
     showTorrentWindow: () => void
@@ -151,7 +152,7 @@ export class TorrentFileWatcher {
     }
 
     private showNativeNotification(title: string, body: string) {
-        if (app.commandLine.hasSwitch('headless') || !Notification.isSupported()) {
+        if (this.options.isHeadless || !Notification.isSupported()) {
             return
         }
 
