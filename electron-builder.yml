@@ -5,8 +5,6 @@ productName: Electorrent
 appId: com.github.tympanix.electorrent
 mac:
   category: public.app-category.utilities
-  extendInfo:
-    NSLocalNetworkUsageDescription: Electorrent connects to torrent clients running on devices on your local network.
   target:
     - target: dmg
       arch:
