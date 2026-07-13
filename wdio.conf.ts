@@ -40,7 +40,7 @@ function electronCapability(client: (typeof selectedClients)[number]): Webdriver
         'electorrent:client': client,
         'wdio:electronServiceOptions': {
             appEntryPoint: 'app/main.js',
-            appArgs: [],
+            appArgs: client.appArgs ?? [],
         },
         'goog:chromeOptions': {
             args: [

@@ -40,6 +40,7 @@ async function bootstrap() {
     parser.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
     parser.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
     parser.boolean('force-title-bar-menu')
+    parser.string('update-url')
 
     const [
         { IPC_CHANNELS },
@@ -76,7 +77,7 @@ async function bootstrap() {
     logger.debug('Starting Electorrent in debug mode')
     logger.verbose('Verbose logging enabled')
 
-    const program = parser.parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean; forceTitleBarMenu?: boolean }
+    const program = parser.parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean; forceTitleBarMenu?: boolean; updateUrl?: string }
 
     if (!app.isPackaged) {
         try {
@@ -479,7 +480,7 @@ async function bootstrap() {
         createTorrentWindow(startedInBackground)
         syncTray()
         torrentFileWatcher.start()
-        updater.initialise(torrentWindow)
+        updater.initialise(torrentWindow, program.updateUrl)
 
         session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
             const { requestHeaders } = details

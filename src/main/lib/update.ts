@@ -37,8 +37,9 @@ export function checkForUpdates(notifyVerbose: boolean) {
     }
 }
 
-export function initialise(initWindow: BrowserWindow) {
+export function initialise(initWindow: BrowserWindow, customUpdateUrl?: string) {
     mainWindow = initWindow
+    updateUrl = customUpdateUrl || updateUrl
     squirrelUpdater()
     manualDownloader()
 }

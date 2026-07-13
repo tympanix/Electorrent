@@ -198,7 +198,7 @@ export class TitleBarMenuController {
             },
         ];
 
-        const helpMenuItems = (): TitleBarMenuItem[] => [
+        const helpMenuItems: TitleBarMenuItem[] = [
             {
                 label: "Learn More",
                 action: { type: "open-external", url: "https://github.com/tympanix/Electorrent" },
@@ -233,7 +233,7 @@ export class TitleBarMenuController {
             { label: "View", items: viewMenuItems },
             { label: "Servers", items: serverMenuItems },
             { label: "Window", items: windowMenuItems },
-            { label: "Help", items: helpMenuItems },
+            { label: "Help", items: () => helpMenuItems },
         ];
         $scope.visibleTitleBarMenuItems = (menu: TitleBarMenu) => {
             return menu.items().filter((item) => item.visible ? item.visible() : true);
