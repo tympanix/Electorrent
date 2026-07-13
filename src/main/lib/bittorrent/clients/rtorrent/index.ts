@@ -87,39 +87,6 @@ export class RtorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    private parentDirectory(remotePath: string): string | null {
-        const trimmed = remotePath.replace(/\/+$/g, "")
-        const separatorIndex = trimmed.lastIndexOf("/")
-
-        if (separatorIndex <= 0) {
-            return null
-        }
-
-        return trimmed.slice(0, separatorIndex)
-    }
-
-    private isPathInsideDirectory(remotePath: string, directory: string): boolean {
-        const normalizedDirectory = directory.replace(/\/+$/g, "")
-
-        return Boolean(normalizedDirectory) && remotePath.startsWith(`${normalizedDirectory}/`)
-    }
-
-    private getDeleteDirectories(basePath: string, filePaths: string[]): string[] {
-        const directories = new Set<string>()
-        const normalizedBasePath = basePath.replace(/\/+$/g, "")
-
-        for (const filePath of filePaths) {
-            let directory = this.parentDirectory(filePath)
-
-            while (directory && this.isPathInsideDirectory(directory, normalizedBasePath)) {
-                directories.add(directory)
-                directory = this.parentDirectory(directory)
-            }
-        }
-
-        return [...directories].sort((a, b) => b.length - a.length)
-    }
-
     private parseFrozenPaths(rows: any): string[] {
         let unwrappedRows = rows
 
@@ -178,11 +145,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         this.assertMulticallSuccess(fileDeleteResult, `Failed to delete rTorrent payload data for ${hash}`)
 
         if (metadata.isMultiFile) {
-            const directories = this.getDeleteDirectories(metadata.basePath, metadata.filePaths)
-
-            for (const directory of [...directories, metadata.basePath]) {
-                await this.call("execute.throw", ["", "rmdir", "--", directory])
-            }
+            await this.call("execute.throw", ["", "find", metadata.basePath, "-depth", "-type", "d", "-exec", "rmdir", "{}", ";"])
         }
     }
 
