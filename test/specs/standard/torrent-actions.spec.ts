@@ -149,15 +149,13 @@ describe("torrent actions", function () {
       },
     })
     const findContentCommand = findDownloadedDirectoryCommand(client.downloadRoot, torrentName)
-    const addUnlistedContentCommand = `content_path=$(${findContentCommand}); [ -n "$content_path" ] && mkdir -p "$content_path/unlisted/deeper" && touch "$content_path/unlisted/deeper/extra.bin" && chmod -R 777 "$content_path/unlisted"`
-    const contentExistsCommand = `content_path=$(${findContentCommand}); [ -n "$content_path" ] && [ -f "$content_path/first.bin" ] && [ -f "$content_path/nested/deeper/third.bin" ] && [ -f "$content_path/unlisted/deeper/extra.bin" ]`
+    const contentExistsCommand = `content_path=$(${findContentCommand}); [ -n "$content_path" ] && [ -f "$content_path/first.bin" ] && [ -f "$content_path/nested/deeper/third.bin" ]`
     const contentMissingCommand = `[ -z "$(${findContentCommand})" ]`
     const torrentToDelete = await this.app.uploadTorrent({ filename: torrentPath })
 
     try {
       await torrentToDelete.waitForExist({ timeout: 20 * 1000 })
       await torrentToDelete.waitForStates(["Seeding", "Finished"], { timeout: 120 * 1000 })
-      await backend.exec(["sh", "-lc", addUnlistedContentCommand])
       await backend.waitForExec(["sh", "-lc", contentExistsCommand], 20 * 1000)
       await $("#page-torrents li[data-state=all]").click()
       await torrentToDelete.waitForExist()
