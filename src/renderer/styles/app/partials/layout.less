@@ -509,10 +509,16 @@ torrent-sidebar + .main-panel {
     padding: 0.35em 0.65em;
 }
 .torrent-table-label-chip {
-    line-height: 1;
+    line-height: 1 !important;
 }
-.label-dropdown-option.item {
+.ui.dropdown .menu > .label-dropdown-option.item {
     display: flex !important;
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+
+    &:first-child {
+        margin-top: .5rem;
+    }
 }
 .torrent.tag {
     background-color: @highlightBackground;
