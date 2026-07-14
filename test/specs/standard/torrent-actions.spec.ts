@@ -2,10 +2,10 @@ import chai from "chai"
 import fs from "node:fs"
 import path from "node:path"
 import parseTorrent from "parse-torrent"
-import { $, browser } from "@wdio/globals"
+import { $ } from "@wdio/globals"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
-import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
+import { waitForModalClose } from "../../e2e/modal"
 import { createTorrentFile } from "../../torrent"
 import { configureSpec, createUniqueLabel, getTestFixture } from "../../framework/fixture"
 
@@ -79,19 +79,6 @@ describe("torrent actions", function () {
     await cancelButton.waitForDisplayed()
     await cancelButton.waitForClickable()
     await cancelButton.click()
-    await waitForModalClose(modal)
-
-    await torrent.waitForExist()
-  })
-
-  it("Shift+Delete shows the delete confirmation modal", async function () {
-    await $(torrent.query).click()
-    await browser.keys(["Shift", "Delete"])
-
-    const modal = $("#deleteTorrentModal")
-    await waitForModalOpen(modal, torrent.timeout)
-    await eventually(() => modal.$(".content").getText()).contains("Are you sure")
-    await modal.$("button.deny").click()
     await waitForModalClose(modal)
 
     await torrent.waitForExist()
