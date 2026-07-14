@@ -9,7 +9,7 @@
         Set Speed Limits
     </div>
     <div class="content">
-        <form class="ui form" ng-submit="ctl.apply()">
+        <form id="torrent-speed-limit-form" class="ui form" ng-submit="ctl.apply()">
             <p>Enter limits in KB/s. Leave a field blank to keep the existing limit. Use 0 for unlimited.</p>
             <div class="field">
                 <label for="torrent-speed-limit-download">Download limit (KB/s)</label>
@@ -41,12 +41,12 @@
             Cancel
         </button>
         <button
-            type="button"
+            type="submit"
+            form="torrent-speed-limit-form"
             class="ui green right labeled icon button"
             data-role="torrent-speed-limit-apply"
             ng-class="{ disabled: ctl.scope.loading }"
-            ng-disabled="ctl.scope.loading"
-            ng-click="ctl.apply()">
+            ng-disabled="ctl.scope.loading">
             Apply
             <i class="checkmark icon"></i>
         </button>

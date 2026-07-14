@@ -7,7 +7,7 @@
         Rename Server
     </div>
     <div class="content">
-        <form class="ui form" ng-submit="applyAndClose()">
+        <form id="rename-server-form" class="ui form" ng-submit="applyAndClose()">
             <div class="field">
                 <div class="ui fluid left icon action input">
                     <i class="user icon"></i>
@@ -24,8 +24,9 @@
             Cancel
         </button>
         <button
-            type="button"
-            class="ui green right labeled icon approve button"
+            type="submit"
+            form="rename-server-form"
+            class="ui green right labeled icon button"
             ng-class="{ disabled: !data.name }"
             ng-disabled="!data.name">
             Rename

@@ -7,24 +7,26 @@
         </div>
     </div>
     <div class="content">
-        <h4 class="ui header">
-            <div class="content">
-                Add a New Torrent
-                <div class="sub header">{{ ctl.getCurrentTorrentUploadLabel() }}</div>
-            </div>
-        </h4>
-        <torrent-upload-form
-            loading="ctl.isLoading"
-            options="ctl.uploadOptions"
-            labels="labels"
-            can-add-saved-location="!!ctl.rootScope.$server"
-            on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+        <form id="upload-torrent-form" ng-submit="ctl.uploadCurrentTorrent()">
+            <h4 class="ui header">
+                <div class="content">
+                    Add a New Torrent
+                    <div class="sub header">{{ ctl.getCurrentTorrentUploadLabel() }}</div>
+                </div>
+            </h4>
+            <torrent-upload-form
+                loading="ctl.isLoading"
+                options="ctl.uploadOptions"
+                labels="labels"
+                can-add-saved-location="!!ctl.rootScope.$server"
+                on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+        </form>
     </div>
     <div class="actions">
-        <button class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
+        <button type="button" class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
             Cancel
         </button>
-        <button type="submit" class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.uploadCurrentTorrent()">
+        <button type="submit" form="upload-torrent-form" class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}">
             Add Torrent
             <i class="plus icon"></i>
         </button>

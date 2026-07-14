@@ -8,7 +8,7 @@
         Set Location
     </div>
     <div class="content">
-        <form class="ui form" ng-submit="ctl.apply()">
+        <form id="set-location-form" class="ui form" ng-submit="ctl.apply()">
             <p>Choose a new location for {{ ctl.getTargetLabel() }}.</p>
             <div class="field">
                 <label for="set-location-input">Location</label>
@@ -32,12 +32,12 @@
             Cancel
         </button>
         <button
-            type="button"
+            type="submit"
+            form="set-location-form"
             class="ui green right labeled icon button"
             data-role="set-location-apply"
             ng-class="{ disabled: ctl.scope.loading || !ctl.scope.location }"
-            ng-disabled="ctl.scope.loading || !ctl.scope.location"
-            ng-click="ctl.apply()">
+            ng-disabled="ctl.scope.loading || !ctl.scope.location">
             Set Location
             <i class="folder open icon"></i>
         </button>

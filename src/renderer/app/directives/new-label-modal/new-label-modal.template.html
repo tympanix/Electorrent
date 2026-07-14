@@ -7,7 +7,7 @@
         New Label
     </div>
     <div class="content">
-        <form class="ui form" ng-submit="applyAndClose()">
+        <form id="new-label-form" class="ui form" ng-submit="applyAndClose()">
             <div class="field">
                 <div class="ui fluid left icon input">
                     <i class="tag icon"></i>
@@ -21,8 +21,9 @@
             Cancel
         </button>
         <button
-            type="button"
-            class="ui green right labeled icon approve button"
+            type="submit"
+            form="new-label-form"
+            class="ui green right labeled icon button"
             ng-class="{ disabled: !data.label }"
             ng-disabled="!data.label">
             Apply Label

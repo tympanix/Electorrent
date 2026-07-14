@@ -545,7 +545,7 @@ export class App {
     await input.clearValue()
     await input.setValue(nextName)
 
-    const approveButton = modal.$("button.approve")
+    const approveButton = modal.$("button[type='submit']")
     await approveButton.waitForEnabled()
     await approveButton.click()
     await waitForModalClose(modal, this.timeout)

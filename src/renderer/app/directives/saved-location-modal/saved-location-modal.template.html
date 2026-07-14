@@ -8,7 +8,7 @@
         {{ ctl.title }}
     </div>
     <div class="content">
-        <form class="ui form" ng-submit="ctl.addSavedLocation()">
+        <form id="{{ ctl.modalId }}-form" class="ui form" ng-submit="ctl.addSavedLocation()">
             <div class="field">
                 <label for="{{ ctl.modalId }}-path">Path</label>
                 <div class="ui left icon input">
@@ -52,10 +52,10 @@
             Cancel
         </button>
         <button
-            type="button"
+            type="submit"
+            form="{{ ctl.modalId }}-form"
             class="ui green right labeled icon button"
             data-role="saved-location-save"
-            ng-click="ctl.addSavedLocation()"
             ng-disabled="!ctl.path || !ctl.selectedIcon">
             {{ ctl.submitLabel }}
             <i class="checkmark icon"></i>
