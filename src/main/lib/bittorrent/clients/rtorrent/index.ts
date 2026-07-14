@@ -87,7 +87,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    private async getDeleteMetadata(hash: string): Promise<RtorrentDeleteMetadata> {
+    private async getDeleteMetadata(hash: string): Promise<RtorrentDeleteMetadata | null> {
         const metadataCalls: RtorrentMethodCall[] = [
             { methodName: "d.base_path", params: [hash] },
             { methodName: "d.is_multi_file", params: [hash] },
@@ -98,7 +98,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         const isMultiFile = Number(this.unwrapScalarMulticallResult(result[1])) > 0
 
         if (typeof basePath !== "string" || !basePath || !path.posix.isAbsolute(basePath)) {
-            throw new Error(`Invalid rTorrent base path for ${hash}`)
+            return null
         }
 
         return {
@@ -115,6 +115,10 @@ export class RtorrentRuntime implements BittorrentRuntime {
             { methodName: "d.erase", params: [hash] },
         ]])
         this.assertMulticallSuccess(eraseResult, `Failed to erase rTorrent torrent ${hash}`)
+
+        if (!metadata) {
+            return
+        }
 
         await this.call("execute.throw", ["", "rm", metadata.isMultiFile ? "-rf" : "-f", "--", metadata.basePath])
     }
