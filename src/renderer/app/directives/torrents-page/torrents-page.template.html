@@ -73,6 +73,9 @@
             <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="0.5">
                 <table
                     id="torrentTable"
+                    tabindex="0"
+                    aria-label="Torrents"
+                    ng-keydown="navigateSelection($event)"
                     ng-class="{ 'compact': settings.ui.displayCompact, 'is-sticky': settings.ui.fixedHeader }"
                     rz-table
                     rz-busy="guiBusy"

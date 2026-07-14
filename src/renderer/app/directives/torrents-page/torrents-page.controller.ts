@@ -622,6 +622,35 @@ export class TorrentsPageController {
             } else {
                 singleSelect(torrent);
             }
+
+            (event.currentTarget as HTMLElement).closest("table")?.focus({ preventScroll: true });
+        };
+
+        $scope.navigateSelection = (event: KeyboardEvent) => {
+            if ((event.key !== "ArrowUp" && event.key !== "ArrowDown") || $scope.arrayTorrents.length === 0) {
+                return;
+            }
+
+            event.preventDefault();
+            const direction = event.key === "ArrowUp" ? -1 : 1;
+            const selectedIndexes = $scope.arrayTorrents.reduce((indexes: number[], torrent: any, index: number) => {
+                if (torrent.selected) {
+                    indexes.push(index);
+                }
+                return indexes;
+            }, []);
+            const currentIndex = selectedIndexes.length === 0
+                ? (direction < 0 ? $scope.arrayTorrents.length : -1)
+                : (direction < 0 ? Math.min(...selectedIndexes) : Math.max(...selectedIndexes));
+            const targetIndex = Math.max(0, Math.min(currentIndex + direction, $scope.arrayTorrents.length - 1));
+            const target = $scope.arrayTorrents[targetIndex];
+
+            singleSelect(target);
+            $scope.torrentLimit = Math.max($scope.torrentLimit, targetIndex + 1);
+            $timeout(() => {
+                document.querySelector<HTMLElement>(`#torrentTable tbody tr[data-hash="${target.hash.toLowerCase()}"]`)
+                    ?.scrollIntoView({ block: "nearest" });
+            });
         };
 
         function getSelectedHashes() {
