@@ -1,15 +1,14 @@
-<form modal
+<modal
     size="small"
     id="{{ ctl.modalId }}"
     on-hidden="ctl.onHidden()"
-    ng-submit="ctl.addSavedLocation()"
     ng-ref="ctl.modalref">
     <i class="close icon"></i>
     <div class="header">
         {{ ctl.title }}
     </div>
     <div class="content">
-        <div class="ui form">
+        <form id="{{ ctl.modalId }}-form" class="ui form" ng-submit="ctl.addSavedLocation()">
             <div class="field">
                 <label for="{{ ctl.modalId }}-path">Path</label>
                 <div class="ui left icon input">
@@ -46,7 +45,7 @@
             <div class="ui negative message" ng-if="ctl.error">
                 <p>{{ ctl.error }}</p>
             </div>
-        </div>
+        </form>
     </div>
     <div class="actions">
         <button type="button" class="ui black button" ng-click="ctl.close()">
@@ -54,6 +53,7 @@
         </button>
         <button
             type="submit"
+            form="{{ ctl.modalId }}-form"
             class="ui green right labeled icon button"
             data-role="saved-location-save"
             ng-disabled="!ctl.path || !ctl.selectedIcon">
@@ -61,4 +61,4 @@
             <i class="checkmark icon"></i>
         </button>
     </div>
-</form>
+</modal>

@@ -1,4 +1,4 @@
-<form modal size="small" id="uploadTorrentModal" on-show="ctl.onShow()" on-hidden="ctl.onHidden()" ng-submit="ctl.uploadCurrentTorrent()" ng-ref="ctl.modalref">
+<modal size="small" id="uploadTorrentModal" on-show="ctl.onShow()" on-hidden="ctl.onHidden()" ng-ref="ctl.modalref">
     <i class="close icon"></i>
     <div class="header">
         Add Torrent
@@ -7,27 +7,29 @@
         </div>
     </div>
     <div class="content">
-        <h4 class="ui header">
-            <div class="content">
-                Add a New Torrent
-                <div class="sub header">{{ ctl.getCurrentTorrentUploadLabel() }}</div>
-            </div>
-        </h4>
-        <torrent-upload-form
-            loading="ctl.isLoading"
-            options="ctl.uploadOptions"
-            labels="labels"
-            can-add-saved-location="!!ctl.rootScope.$server"
-            on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+        <form id="upload-torrent-form" ng-submit="ctl.uploadCurrentTorrent()">
+            <h4 class="ui header">
+                <div class="content">
+                    Add a New Torrent
+                    <div class="sub header">{{ ctl.getCurrentTorrentUploadLabel() }}</div>
+                </div>
+            </h4>
+            <torrent-upload-form
+                loading="ctl.isLoading"
+                options="ctl.uploadOptions"
+                labels="labels"
+                can-add-saved-location="!!ctl.rootScope.$server"
+                on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+        </form>
     </div>
     <div class="actions">
         <button type="button" class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
             Cancel
         </button>
-        <button type="submit" class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}">
+        <button type="submit" form="upload-torrent-form" class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}">
             Add Torrent
             <i class="plus icon"></i>
         </button>
     </div>
-</form>
+</modal>
 <saved-location-modal modal-id="uploadSavedLocationModal" ng-ref="ctl.savedLocationModalRef"></saved-location-modal>

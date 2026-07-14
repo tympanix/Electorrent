@@ -1,14 +1,13 @@
-<form modal
+<modal
     size="small"
     approve="approve()"
-    ng-submit="applyAndClose()"
     id="renameModal">
     <i class="close icon"></i>
     <div class="header">
         Rename Server
     </div>
     <div class="content">
-        <div class="ui form">
+        <form id="rename-server-form" class="ui form" ng-submit="applyAndClose()">
             <div class="field">
                 <div class="ui fluid left icon action input">
                     <i class="user icon"></i>
@@ -18,7 +17,7 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
     <div class="actions">
         <button type="button" class="ui black deny button">
@@ -26,6 +25,7 @@
         </button>
         <button
             type="submit"
+            form="rename-server-form"
             class="ui green right labeled icon button"
             ng-class="{ disabled: !data.name }"
             ng-disabled="!data.name">
@@ -33,4 +33,4 @@
             <i class="tag icon"></i>
         </button>
     </div>
-</form>
+</modal>
