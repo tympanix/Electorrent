@@ -161,7 +161,7 @@ function editMenuItems(): MenuItemConstructorOptions[] {
         },
         {
             label: 'Remove and Delete',
-            accelerator: 'Shift+Delete',
+            accelerator: 'CmdOrCtrl+Delete',
             click: () => sendAction({ type: 'remove-and-delete-selected' }),
         },
         {

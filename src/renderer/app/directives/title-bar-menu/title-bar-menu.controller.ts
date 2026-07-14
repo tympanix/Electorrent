@@ -133,7 +133,7 @@ export class TitleBarMenuController {
             { label: "Copy", accelerator: "Ctrl+C", action: { type: "edit-command", command: "copy" } },
             { label: "Paste", accelerator: "Ctrl+V", action: { type: "edit-command", command: "paste" } },
             { label: "Remove", accelerator: "Delete", action: { type: "remove-selected" } },
-            { label: "Remove and Delete", accelerator: "Shift+Delete", action: { type: "remove-and-delete-selected" } },
+            { label: "Remove and Delete", accelerator: "Ctrl+Delete", action: { type: "remove-and-delete-selected" } },
             { label: "Select All", accelerator: "Ctrl+A", action: { type: "select-all" } },
         ];
 

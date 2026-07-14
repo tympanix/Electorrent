@@ -41,7 +41,7 @@ async function sendRemoveAndDeleteShortcut() {
     if (!menuItem || !menuItem.visible || !menuItem.enabled) {
       throw new Error("Remove and Delete menu item is unavailable")
     }
-    if (menuItem.accelerator !== "Shift+Delete") {
+    if (menuItem.accelerator !== "CmdOrCtrl+Delete") {
       throw new Error(`Unexpected Remove and Delete accelerator: ${menuItem.accelerator}`)
     }
 
@@ -106,7 +106,7 @@ describe("torrent actions", function () {
     await torrent.waitForExist()
   })
 
-  it("Shift+Delete shows the delete confirmation modal", async function () {
+  it("CmdOrCtrl+Delete shows the delete confirmation modal", async function () {
     await $(torrent.query).click()
     await sendRemoveAndDeleteShortcut()
 
