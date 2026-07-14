@@ -42,13 +42,8 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 || message.includes("certificate")
         }
 
-        function isAggregateConnectionError(err: any) {
-            const message = String(err?.message || err).toLowerCase()
-            return err?.name === "AggregateError" || message.includes("aggregateerror")
-        }
-
         function isStaleConnectionError(err: any) {
-            return String(err?.message || err).toLowerCase().includes("stale bittorrent connection")
+            return err?.kind === "cancelled" || String(err?.message || err).toLowerCase().includes("stale bittorrent connection")
         }
 
         /**
@@ -208,7 +203,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
 
             return service.connect(this).catch(function(err) {
                 self.isConnected = false
-                if (self.isHTTPS() && (isTlsCertificateError(err) || isAggregateConnectionError(err))) {
+                if (self.isHTTPS() && (err?.kind === "tls" || isTlsCertificateError(err))) {
                     return self.askForCertificate().then(function() {
                         return self.connect()
                     })
