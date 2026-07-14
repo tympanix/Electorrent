@@ -31,6 +31,7 @@ export default {
     username: "admin",
     password: "deluge",
     stopLabel: "Paused",
+    downloadRoot: "/downloads",
   }),
   "deluge:2": defineClient({
     key: "deluge:2",
@@ -46,5 +47,6 @@ export default {
     username: "admin",
     password: "deluge",
     stopLabel: "Paused",
+    downloadRoot: "/downloads",
   }),
 } satisfies Record<string, TestClient>

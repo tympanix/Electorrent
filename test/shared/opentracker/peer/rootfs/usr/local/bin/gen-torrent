@@ -2,16 +2,20 @@
 
 set -e
 
-# Parse CLI options for upload speed, download speed, file size, torrent file name, and tracker URL
+FILE_PATHS=()
+FILE_SIZES=()
+
+# Parse CLI options for upload speed, download speed, file contents, torrent file name, and tracker URL
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --foreground) FOREGROUND="1" ;;
         --upload-speed) UP_SPEED="$2"; shift ;;
         --download-speed) DL_SPEED="$2"; shift ;;
         --file-size) FILE_SIZE="$2"; shift ;;
+        --file) FILE_PATHS+=("$2"); FILE_SIZES+=("$3"); shift 2 ;;
         --torrent-name) TORRENT_NAME="$2"; shift ;;
         --tracker-url) TRACKER_URL="$2"; shift ;;
-        *) echo >&2 "Usage: $0 [--foreground] --upload-speed <up-speed> --download-speed <dl-speed> --file-size <file-size> --torrent-name <torrent-name> --tracker-url <tracker-url>" >&2; exit 1 ;;
+        *) echo >&2 "Usage: $0 [--foreground] [--upload-speed <up-speed>] [--download-speed <dl-speed>] [--file-size <file-size> | --file <path> <size> ...] --torrent-name <torrent-name> [--tracker-url <tracker-url>]"; exit 1 ;;
     esac
     shift
 done
@@ -19,23 +23,41 @@ done
 # Set default values if not provided
 FILE_SIZE="${FILE_SIZE:-1}"
 TRACKER_URL="${TRACKER_URL:-http://tracker:6969/announce}"
-# Generate a random suffix for unique file names
-RANDOM_SUFFIX=$(date +%s%N | sha256sum | head -c 8)
-# Create a random test file with the specified file size and unique name
-TEST_FILE="/srv/test-file-${RANDOM_SUFFIX}.bin"
-dd if=/dev/urandom of="$TEST_FILE" bs=1k count="$FILE_SIZE" 2>/dev/null
+if [ "${#FILE_PATHS[@]}" -gt 0 ]; then
+    CONTENT_PATH="/srv/$TORRENT_NAME"
+    rm -rf "$CONTENT_PATH"
+    mkdir -p "$CONTENT_PATH"
+
+    for i in "${!FILE_PATHS[@]}"; do
+        FILE_PATH="${FILE_PATHS[$i]}"
+        FILE_SIZE="${FILE_SIZES[$i]}"
+        if [[ "$FILE_PATH" = /* || "$FILE_PATH" = ".." || "$FILE_PATH" = ../* || "$FILE_PATH" = */../* || "$FILE_PATH" = */.. ]]; then
+            echo >&2 "File path must remain inside the torrent directory: $FILE_PATH"
+            exit 1
+        fi
+        mkdir -p "$CONTENT_PATH/$(dirname "$FILE_PATH")"
+        dd if=/dev/urandom of="$CONTENT_PATH/$FILE_PATH" bs=1k count="$FILE_SIZE" 2>/dev/null
+    done
+    SEED_DIR="/srv"
+else
+    # Create a random test file with the specified file size and unique name.
+    RANDOM_SUFFIX=$(date +%s%N | sha256sum | head -c 8)
+    CONTENT_PATH="/srv/test-file-${RANDOM_SUFFIX}.bin"
+    dd if=/dev/urandom of="$CONTENT_PATH" bs=1k count="$FILE_SIZE" 2>/dev/null
+    SEED_DIR="$(dirname "$CONTENT_PATH")"
+fi
 # Set the torrent file name, defaulting to a random name if not provided
 TORRENT_FILE="/shared/${TORRENT_NAME}.torrent"
 # Create a torrent file and save it in the shared folder.
 rm -f "$TORRENT_FILE"
-mktorrent -a "$TRACKER_URL" -o "$TORRENT_FILE" "$TEST_FILE" >/dev/null
+mktorrent -a "$TRACKER_URL" -o "$TORRENT_FILE" "$CONTENT_PATH" >/dev/null
 # Generate a random unprivileged port (1024-65535)
 P2P_PORT=$((1024 + RANDOM % 64512))
 # Seed the torrent file (and contents)
 ARIA2_ARGS=(
     --allow-overwrite=true
     --bt-seed-unverified=true
-    --dir="$(dirname "$TEST_FILE")"
+    --dir="$SEED_DIR"
     --enable-dht=false
     --enable-peer-exchange=false
     --listen-port="$P2P_PORT"

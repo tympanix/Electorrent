@@ -34,5 +34,6 @@ export default {
     username: "username",
     password: "password",
     acceptHttpStatus: 401,
+    downloadRoot: "/downloads",
   }),
 } satisfies Record<string, TestClient>

@@ -37,6 +37,7 @@ export default {
     containerPort: 8080,
     username: "admin",
     password: "adminadmin",
+    downloadRoot: "/downloads",
   }),
   "qbittorrent:5": defineClient({
     key: "qbittorrent:5",
@@ -48,6 +49,7 @@ export default {
     containerPort: 8080,
     username: "admin",
     password: "adminadmin",
+    downloadRoot: "/downloads",
   }),
   "qbittorrent:latest": defineClient({
     key: "qbittorrent:latest",
@@ -59,5 +61,6 @@ export default {
     containerPort: 8080,
     username: "admin",
     password: "adminadmin",
+    downloadRoot: "/downloads",
   }),
 } satisfies Record<string, TestClient>
