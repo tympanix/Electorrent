@@ -2,10 +2,10 @@ import chai from "chai"
 import fs from "node:fs"
 import path from "node:path"
 import parseTorrent from "parse-torrent"
-import { $ } from "@wdio/globals"
+import { $, browser } from "@wdio/globals"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
-import { waitForModalClose } from "../../e2e/modal"
+import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
 import { createTorrentFile } from "../../torrent"
 import { configureSpec, createUniqueLabel, getTestFixture } from "../../framework/fixture"
 
@@ -25,6 +25,28 @@ function findDownloadedContentCommand(downloadRoot: string, contentName: string)
 
 function findDownloadedDirectoryCommand(downloadRoot: string, contentName: string) {
   return `find ${shellQuote(downloadRoot)} -maxdepth 5 -type d -name ${shellQuote(contentName)} -print -quit`
+}
+
+async function sendRemoveAndDeleteShortcut() {
+  await browser.electron.execute((electron) => {
+    const win = electron.BrowserWindow.getFocusedWindow()
+      || electron.BrowserWindow.getAllWindows().find((window) => !window.isDestroyed())
+
+    if (!win) throw new Error("No Electron window found")
+
+    const menu = electron.Menu.getApplicationMenu()
+    const editMenu = menu?.items.find((item) => item.id === "edit" || item.label === "Edit")
+    const menuItem = editMenu?.submenu?.items.find((item) => item.label === "Remove and Delete")
+
+    if (!menuItem || !menuItem.visible || !menuItem.enabled) {
+      throw new Error("Remove and Delete menu item is unavailable")
+    }
+    if (menuItem.accelerator !== "Shift+Delete") {
+      throw new Error(`Unexpected Remove and Delete accelerator: ${menuItem.accelerator}`)
+    }
+
+    menuItem.click({}, win, win.webContents)
+  })
 }
 
 describe("torrent actions", function () {
@@ -79,6 +101,19 @@ describe("torrent actions", function () {
     await cancelButton.waitForDisplayed()
     await cancelButton.waitForClickable()
     await cancelButton.click()
+    await waitForModalClose(modal)
+
+    await torrent.waitForExist()
+  })
+
+  it("Shift+Delete shows the delete confirmation modal", async function () {
+    await $(torrent.query).click()
+    await sendRemoveAndDeleteShortcut()
+
+    const modal = $("#deleteTorrentModal")
+    await waitForModalOpen(modal, torrent.timeout)
+    await eventually(() => modal.$(".content").getText()).contains("Are you sure")
+    await modal.$("button.deny").click()
     await waitForModalClose(modal)
 
     await torrent.waitForExist()
