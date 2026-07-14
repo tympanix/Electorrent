@@ -211,6 +211,21 @@ describe("mock torrent table sorting", function () {
     await expectSelectedHashes([hashes[1]])
   })
 
+  it("extends the torrent selection with shift and arrow keys", async function () {
+    const rows = await $$("#torrentTable tbody tr[data-hash]")
+    const hashes = await rows.map((row) => row.getAttribute("data-hash"))
+
+    await rows[2].click()
+    await browser.keys([Key.Shift, Key.ArrowDown])
+    await expectSelectedHashes(hashes.slice(2, 4))
+
+    await browser.keys([Key.Shift, Key.ArrowDown])
+    await expectSelectedHashes(hashes.slice(2, 5))
+
+    await browser.keys([Key.Shift, Key.ArrowUp])
+    await expectSelectedHashes(hashes.slice(1, 5))
+  })
+
   it("collapses multiple selections from the directional edge", async function () {
     const rows = await $$("#torrentTable tbody tr[data-hash]")
     const hashes = await rows.map((row) => row.getAttribute("data-hash"))

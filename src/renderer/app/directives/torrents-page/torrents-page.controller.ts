@@ -645,7 +645,16 @@ export class TorrentsPageController {
             const targetIndex = Math.max(0, Math.min(currentIndex + direction, $scope.arrayTorrents.length - 1));
             const target = $scope.arrayTorrents[targetIndex];
 
-            singleSelect(target);
+            if (event.shiftKey && selectedIndexes.length > 0) {
+                if (!target.selected) {
+                    target.selected = true;
+                    selected.push(target);
+                    lastSelected = target;
+                    syncDetailsPanel();
+                }
+            } else {
+                singleSelect(target);
+            }
             $scope.torrentLimit = Math.max($scope.torrentLimit, targetIndex + 1);
             $timeout(() => {
                 document.querySelector<HTMLElement>(`#torrentTable tbody tr[data-hash="${target.hash.toLowerCase()}"]`)
