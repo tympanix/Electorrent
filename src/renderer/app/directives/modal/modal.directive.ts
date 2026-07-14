@@ -70,7 +70,7 @@ export class ModalDirective implements IDirective {
         });
 
         scope.applyAndClose = function() {
-            if (!attr.approve || this.invokeExpression(scope, attr.approve)) {
+            if (!attr.approve || this.invokeExpression(scope, attr.approve) !== false) {
                 modal.modal('hide')
             }
         }.bind(this)
