@@ -50,8 +50,6 @@ export class SettingsAdvancedController {
             }
         });
 
-        Object.keys(this.getLabelColors()).forEach((label) => labels.add(label));
-
         return Array.from(labels).sort((left, right) => left.localeCompare(right));
     }
 
