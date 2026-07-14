@@ -1,5 +1,5 @@
 import chai from "chai"
-import { $$, browser } from "@wdio/globals"
+import { $, $$, browser } from "@wdio/globals"
 import { eventually } from "../../e2e/eventually"
 import { configureSpec } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
@@ -27,6 +27,27 @@ describe("mock multiple servers", function () {
     await saveMockServers()
     await restartApplication(this)
     await this.app.serverSelectionPageIsVisible()
+  })
+
+  it("adds a launch magnet only to the first server", async function () {
+    const launchTorrentName = "Mock Magnet 0000000000000000000000000000000000000356"
+    const launchMagnet = "magnet:?xt=urn:btih:0000000000000000000000000000000000000356"
+
+    await browser.electron.execute((electron, uri) => {
+      electron.app.emit("open-url", {} as Electron.Event, uri)
+    }, launchMagnet)
+
+    await this.app.connectServerSelection(0)
+    await this.app.torrentsPageIsVisible()
+    await expectOnlyTorrent(launchTorrentName)
+
+    await openServerSelection()
+    await this.app.connectServerSelection(1)
+    await this.app.torrentsPageIsVisible()
+    await eventually(getTorrentNames).satisfies(
+      "not include the launch magnet on the second server",
+      (names) => !names.includes(launchTorrentName),
+    )
   })
 
   it("shows each server's torrent after changing servers", async function () {
@@ -88,6 +109,15 @@ async function invokeMockAction(action: string, ...args: any[]) {
   await browser.execute(async (request) => {
     await (window as any).electorrent.bittorrent.invokeAction(request)
   }, { action, args })
+}
+
+async function openServerSelection() {
+  await browser.execute(() => {
+    const rootScope = angular.element(document.documentElement).injector().get("$rootScope")
+    rootScope.$broadcast("show:servers")
+    rootScope.$applyAsync()
+  })
+  await $("#page-server-selection").waitForDisplayed()
 }
 
 async function addMockedTorrent(torrent: MockTorrent) {

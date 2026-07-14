@@ -402,6 +402,12 @@ async function bootstrap() {
     }
 
     async function consumePendingLaunchPayload() {
+        for (let index = process.argv.length - 1; index >= 0; index -= 1) {
+            if (isMagnetLink(process.argv[index]) || isTorrentFilePath(process.argv[index])) {
+                process.argv.splice(index, 1)
+            }
+        }
+
         return {
             magnets: pendingLaunchPayload.magnets.splice(0),
             torrentFiles: [
