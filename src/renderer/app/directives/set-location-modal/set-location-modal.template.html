@@ -1,14 +1,15 @@
-<modal
+<form modal
     size="tiny"
     id="setLocationModal"
     on-hidden="ctl.onHidden()"
+    ng-submit="ctl.apply()"
     ng-ref="ctl.modalref">
     <i class="close icon"></i>
     <div class="header">
         Set Location
     </div>
     <div class="content">
-        <form class="ui form" ng-submit="ctl.apply()">
+        <div class="ui form">
             <p>Choose a new location for {{ ctl.getTargetLabel() }}.</p>
             <div class="field">
                 <label for="set-location-input">Location</label>
@@ -25,21 +26,20 @@
             <div class="ui negative message" ng-if="ctl.scope.error">
                 <p>{{ ctl.scope.error }}</p>
             </div>
-        </form>
+        </div>
     </div>
     <div class="actions">
         <button type="button" class="ui black button" ng-class="{ disabled: ctl.scope.loading }" ng-click="ctl.close()">
             Cancel
         </button>
         <button
-            type="button"
+            type="submit"
             class="ui green right labeled icon button"
             data-role="set-location-apply"
             ng-class="{ disabled: ctl.scope.loading || !ctl.scope.location }"
-            ng-disabled="ctl.scope.loading || !ctl.scope.location"
-            ng-click="ctl.apply()">
+            ng-disabled="ctl.scope.loading || !ctl.scope.location">
             Set Location
             <i class="folder open icon"></i>
         </button>
     </div>
-</modal>
+</form>

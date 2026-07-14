@@ -1,7 +1,8 @@
-<modal
+<form modal
     id="setSpeedLimitModal"
     size="tiny"
     on-hidden="ctl.onHidden()"
+    ng-submit="ctl.apply()"
     ng-ref="ctl.modalref">
     <i class="close icon"></i>
     <div class="header">
@@ -9,7 +10,7 @@
         Set Speed Limits
     </div>
     <div class="content">
-        <form class="ui form" ng-submit="ctl.apply()">
+        <div class="ui form">
             <p>Enter limits in KB/s. Leave a field blank to keep the existing limit. Use 0 for unlimited.</p>
             <div class="field">
                 <label for="torrent-speed-limit-download">Download limit (KB/s)</label>
@@ -34,21 +35,20 @@
             <div class="ui negative message" ng-if="ctl.scope.error">
                 <p>{{ ctl.scope.error }}</p>
             </div>
-        </form>
+        </div>
     </div>
     <div class="actions">
         <button type="button" class="ui black deny button" ng-class="{ disabled: ctl.scope.loading }" ng-click="ctl.close()">
             Cancel
         </button>
         <button
-            type="button"
+            type="submit"
             class="ui green right labeled icon button"
             data-role="torrent-speed-limit-apply"
             ng-class="{ disabled: ctl.scope.loading }"
-            ng-disabled="ctl.scope.loading"
-            ng-click="ctl.apply()">
+            ng-disabled="ctl.scope.loading">
             Apply
             <i class="checkmark icon"></i>
         </button>
     </div>
-</modal>
+</form>

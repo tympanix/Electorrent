@@ -1,7 +1,8 @@
-<modal
+<form modal
     id="torrent-set-ratio-modal"
     size="tiny"
     on-hidden="ctl.onHidden()"
+    ng-submit="ctl.apply()"
     ng-ref="ctl.modalref">
     <i class="close icon"></i>
     <div class="header">
@@ -9,7 +10,7 @@
         Set Ratio Limit
     </div>
     <div class="content">
-        <form class="ui form" ng-submit="ctl.apply()">
+        <div class="ui form">
             <p>Enter a ratio limit. The current limit is shown when all selected torrents share the same limit.</p>
             <div class="field">
                 <label for="torrent-set-ratio-value">Ratio limit</label>
@@ -25,21 +26,20 @@
             <div class="ui negative message" ng-if="ctl.scope.error">
                 <p>{{ ctl.scope.error }}</p>
             </div>
-        </form>
+        </div>
     </div>
     <div class="actions">
         <button type="button" class="ui black deny button" ng-class="{ disabled: ctl.scope.loading }" ng-click="ctl.close()">
             Cancel
         </button>
         <button
-            type="button"
+            type="submit"
             class="ui green right labeled icon button"
             data-role="torrent-set-ratio-apply"
             ng-class="{ disabled: ctl.scope.loading }"
-            ng-disabled="ctl.scope.loading"
-            ng-click="ctl.apply()">
+            ng-disabled="ctl.scope.loading">
             Apply
             <i class="checkmark icon"></i>
         </button>
     </div>
-</modal>
+</form>
