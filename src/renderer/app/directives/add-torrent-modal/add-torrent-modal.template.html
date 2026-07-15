@@ -8,18 +8,27 @@
     </div>
     <div class="content">
         <form id="upload-torrent-form" ng-submit="ctl.uploadCurrentTorrent()">
-            <h4 class="ui header">
-                <div class="content">
-                    Add a New Torrent
-                    <div class="sub header">{{ ctl.getCurrentTorrentUploadLabel() }}</div>
-                </div>
+            <h4 class="ui header upload-torrent-heading">
+                <span class="upload-torrent-name">{{ ctl.getCurrentTorrentUploadLabel() }}</span>
+                <span class="upload-torrent-size">{{ ctl.getCurrentTorrentUploadSize() | bytes }}</span>
             </h4>
-            <torrent-upload-form
-                loading="ctl.isLoading"
-                options="ctl.uploadOptions"
-                labels="labels"
-                can-add-saved-location="!!ctl.rootScope.$server"
-                on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+            <div class="ui secondary pointing menu" ng-if="ctl.hasFilesTab()">
+                <a class="item" ng-class="{active: ctl.activeTab === 'general'}" ng-click="ctl.switchTab('general')">General</a>
+                <a class="item" ng-class="{active: ctl.activeTab === 'files'}" ng-click="ctl.switchTab('files')">Files</a>
+            </div>
+            <div ng-show="ctl.activeTab === 'general' || !ctl.hasFilesTab()">
+                <torrent-upload-form
+                    loading="ctl.isLoading"
+                    options="ctl.uploadOptions"
+                    labels="labels"
+                    can-add-saved-location="!!ctl.rootScope.$server"
+                    on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+            </div>
+            <torrent-upload-file-selection
+                ng-if="ctl.hasFilesTab()"
+                ng-show="ctl.activeTab === 'files'"
+                files="ctl.getCurrentTorrentUploadFiles()"
+                on-selection-change="ctl.updateFileSelection(selection)"></torrent-upload-file-selection>
         </form>
     </div>
     <div class="actions">

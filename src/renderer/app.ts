@@ -200,6 +200,8 @@ import { AddTorrentModalDirective } from "@renderer/app/directives/add-torrent-m
 torrentApp.directive('addTorrentModal', AddTorrentModalDirective.getInstance())
 import { TorrentUploadFormDirective } from "@renderer/app/directives/torrent-upload-form/torrent-upload-form.directive";
 torrentApp.directive('torrentUploadForm', TorrentUploadFormDirective.getInstance())
+import { TorrentUploadFileSelectionDirective } from "@renderer/app/directives/torrent-upload-file-selection/torrent-upload-file-selection.directive";
+torrentApp.directive('torrentUploadFileSelection', TorrentUploadFileSelectionDirective.getInstance())
 import { TorrentFilesTreeDirective } from "@renderer/app/directives/torrent-files-tree/torrent-files-tree.directive";
 torrentApp.directive('torrentFilesTree', TorrentFilesTreeDirective.getInstance())
 import { indeterminateValueDirective } from "@renderer/app/directives/torrent-files-tree/indeterminate-value.directive";

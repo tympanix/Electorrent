@@ -48,12 +48,14 @@ const DEFAULT_UPLOAD_OPTIONS: ResolvedTorrentClientFeatures["uploadOptions"] = O
     firstAndLastPiecePrio: false,
     downloadSpeedLimit: false,
     uploadSpeedLimit: false,
+    fileSelection: false,
 })
 
 const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     magnetLinks: false,
     labels: false,
     fileSelection: false,
+    uploadFileSelection: false,
     setLocation: false,
     torrentDetails: false,
     trackerFilter: false,
@@ -373,6 +375,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             { id: "name", label: "Name", format: "text", sortType: "alphabetical" },
             { id: "size", label: "Size", format: "bytes", sortType: "numeric" },
             { id: "progress", label: "Progress", format: "progress", sortType: "numeric" },
+            { id: "wanted", label: "Wanted", format: "text", sortType: "alphabetical" },
             { id: "availability", label: "Availability", format: "percent", sortType: "numeric" },
             { id: "priority", label: "Priority", format: "number", sortType: "numeric" },
             { id: "path", label: "Path", format: "text", sortType: "alphabetical" },

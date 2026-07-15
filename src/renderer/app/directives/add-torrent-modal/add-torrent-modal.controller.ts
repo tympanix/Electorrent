@@ -3,6 +3,7 @@ import { ModalController } from "@renderer/app/directives/modal/modal.controller
 import { SavedLocationModalController } from "@renderer/app/directives/saved-location-modal/saved-location-modal.controller";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import { AddTorrentModalScope } from "./add-torrent-modal.directive";
+import type { BittorrentFileSelection } from "@shared/ipc-contract";
 
 export class AddTorrentModalController {
 
@@ -18,6 +19,7 @@ export class AddTorrentModalController {
     savedLocationModalRef: SavedLocationModalController
     uploadOptions: TorrentUploadOptions
     isLoading: boolean
+    activeTab: "general" | "files" = "general"
     private preserveUploadsOnHide: boolean
     private restoreUploadOptionsOnShow: boolean
 
@@ -55,6 +57,7 @@ export class AddTorrentModalController {
             AddTorrentModalController.defaultTorrentUploadOptions,
             configuredOptions || {},
         )
+        this.activeTab = "general"
     }
 
     onHidden() {
@@ -83,6 +86,36 @@ export class AddTorrentModalController {
         return torrent.metadata?.name || (torrent.type === "file" ? torrent.filename : torrent.uri)
     }
 
+    getCurrentTorrentUploadSize() {
+        const torrent = this.getCurrentTorrentUpload()
+        const metadata = torrent?.metadata
+        return metadata?.length || metadata?.files.reduce((size, file) => size + (file.length || 0), 0) || 0
+    }
+
+    getCurrentTorrentUploadFiles() {
+        return this.getCurrentTorrentUpload()?.metadata?.files
+    }
+
+    hasFilesTab() {
+        return !!this.rootScope.$btclient?.features.uploadFileSelection
+            && !!this.getCurrentTorrentUploadFiles()?.length
+    }
+
+    switchTab(tab: "general" | "files") {
+        if (tab === "files" && !this.hasFilesTab()) {
+            return
+        }
+        this.activeTab = tab
+    }
+
+    updateFileSelection(selection?: BittorrentFileSelection[]) {
+        if (selection) {
+            this.uploadOptions.fileSelection = selection
+        } else {
+            delete this.uploadOptions.fileSelection
+        }
+    }
+
     getPendingUploadCountLabel() {
         const torrentCount = this.scope.torrents?.length || 0
         return `${torrentCount} ${torrentCount === 1 ? "torrent" : "torrents"} remaining`
@@ -92,6 +125,8 @@ export class AddTorrentModalController {
         this.scope.torrents.shift()
         if (this.scope.torrents.length === 0) {
             this.modalref.hideModal()
+        } else {
+            this.onShow()
         }
     }
 
@@ -107,6 +142,8 @@ export class AddTorrentModalController {
             this.scope.torrents.shift()
             if (this.scope.torrents.length === 0) {
                 this.modalref.hideModal()
+            } else {
+                this.onShow()
             }
         } finally {
             this.isLoading = false

@@ -1,0 +1,16 @@
+<div class="ui relaxed divided list upload-files-list upload-files-scroll">
+    <div class="item upload-file-row" ng-repeat="node in ctl.visibleFileTree track by node.id" ng-style="{'padding-left': (node.level * 1.5) + 'rem'}" data-upload-file-path="{{ node.path }}">
+        <div class="right floated content upload-file-meta">
+            <span class="upload-file-size">{{ node.size | bytes }}</span>
+        </div>
+        <div class="content">
+            <div class="ui checkbox">
+                <input id="upload-file-cb-{{ node.id }}" type="checkbox" ng-checked="node.selected" indeterminate-value="node.partial" ng-click="ctl.toggleFileNode(node)">
+                <label for="upload-file-cb-{{ node.id }}">
+                    <i class="icon" ng-class="node.children.length ? 'folder' : 'file outline'"></i>
+                    {{ node.name }}
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
