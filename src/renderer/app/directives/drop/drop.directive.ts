@@ -127,7 +127,7 @@ export class DropdownElementDirective implements IDirective {
         };
 
         const onKeyDown = (event: KeyboardEvent) => {
-            if (event.code === "Space" && event.target === element[0]) {
+            if (event.code === "Space") {
                 event.preventDefault();
                 toggle();
                 return;
@@ -180,9 +180,9 @@ export class DropdownElementDirective implements IDirective {
         element.on("focus", onFocus);
         element.on("mousedown", onMouseDown);
         element.on("blur", onBlur);
+        element[0].addEventListener("keydown", onKeyDown);
         document.body.addEventListener("click", onBodyClick);
         window.addEventListener("keyup", onKeyUp);
-        window.addEventListener("keydown", onKeyDown);
         window.addEventListener("mouseup", onMouseUp);
 
         scope.$on("$destroy", () => {
@@ -190,9 +190,9 @@ export class DropdownElementDirective implements IDirective {
             element.off("focus", onFocus);
             element.off("mousedown", onMouseDown);
             element.off("blur", onBlur);
+            element[0].removeEventListener("keydown", onKeyDown);
             document.body.removeEventListener("click", onBodyClick);
             window.removeEventListener("keyup", onKeyUp);
-            window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("mouseup", onMouseUp);
         });
     }
