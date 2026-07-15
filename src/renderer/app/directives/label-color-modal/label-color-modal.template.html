@@ -18,9 +18,7 @@
                 ng-repeat="hue in ctl.hues track by hue"
                 ng-class="{'is-selected': ctl.isSelected(hue)}"
                 ng-attr-style="--label-hue: {{ hue }}"
-                ng-click="ctl.selectHue(hue)">
-                <span class="label-color-picker-dot"></span>
-            </button>
+                ng-click="ctl.selectHue(hue)"></button>
         </div>
     </div>
     <div class="actions">
