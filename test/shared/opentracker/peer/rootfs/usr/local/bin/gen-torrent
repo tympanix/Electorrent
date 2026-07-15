@@ -50,7 +50,7 @@ fi
 TORRENT_FILE="/shared/${TORRENT_NAME}.torrent"
 # Create a torrent file and save it in the shared folder.
 rm -f "$TORRENT_FILE"
-mktorrent -a "$TRACKER_URL" -o "$TORRENT_FILE" "$CONTENT_PATH" >/dev/null
+mktorrent -p -a "$TRACKER_URL" -o "$TORRENT_FILE" "$CONTENT_PATH" >/dev/null
 # Generate a random unprivileged port (1024-65535)
 P2P_PORT=$((1024 + RANDOM % 64512))
 # Seed the torrent file (and contents)
