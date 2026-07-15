@@ -1,11 +1,10 @@
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import { $ } from "@wdio/globals"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
-import { configureSpec, requireFeature } from "../../framework/fixture"
+import { configureSpec, createUniqueLabel, getTestFixture, requireFeature } from "../../framework/fixture"
+import { createTorrentFile } from "../../torrent"
 
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
+const tracker = getTestFixture().tracker
 
 describe("upload file selection", function () {
   configureSpec()
@@ -23,7 +22,17 @@ describe("upload file selection", function () {
   it("adds a torrent with one file disabled from advanced upload options", async function () {
     this.timeout(60 * 1000)
 
-    const torrentPath = path.join(testDir, "shared/multifile.torrent")
+    const torrentPath = await createTorrentFile(tracker, {
+      torrentName: createUniqueLabel("upload-file-selection"),
+      files: {
+        "documents/notes.txt": 1,
+        "documents/report.pdf": 2,
+        "media/audio/theme.mp3": 3,
+        "media/images/cover.jpg": 4,
+        "media/images/thumbnail.png": 5,
+        "README.md": 1,
+      },
+    })
 
     torrent = await this.app.uploadTorrent({ filename: torrentPath, askUploadOptions: true })
     await this.app.uploadTorrentModalSubmit({ disabledFileIndexes: [0] })
