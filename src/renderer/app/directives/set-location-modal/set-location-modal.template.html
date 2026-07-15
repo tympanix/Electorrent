@@ -28,8 +28,8 @@
                         <span>{{ savedLocation.path }}</span>
                     </dropdown-group>
                 </dropdown>
-                <div class="ui mini message" data-role="set-location-empty" ng-if="!ctl.savedLocations.length">
-                    No saved locations are available for this server.
+                <div class="ui small info message" data-role="set-location-empty" ng-if="!ctl.savedLocations.length">
+                    No saved locations are available for this server. Add saved locations in Settings &rarr; Advanced.
                 </div>
             </div>
             <div class="ui negative message" ng-if="ctl.scope.error">
