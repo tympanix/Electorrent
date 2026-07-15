@@ -1,20 +1,6 @@
 declare namespace angular {
     type TorrentClient = import("@renderer/app/bittorrent/torrentclient").TorrentClient
-    type StoredServerConfig = import("@shared/ipc-contract").StoredServerConfig
-    type ColumnProps = import("@renderer/app/services/column").ColumnProps
-
-    interface ElectorrentServer extends Omit<StoredServerConfig, "columns"> {
-        columns: ColumnProps[]
-        isConnected: boolean
-        connect(): IPromise<void>
-        getName(): string
-        getIcon(): string
-        getNameAtAddress(): string
-        getDisplayName(): string
-        setPath(): void
-        url(): string
-        json(): StoredServerConfig
-    }
+    type ElectorrentServer = import("@renderer/app/services/server").Server
 
     interface SyncConnectionStatus {
         state: "normal" | "slow" | "broken"

@@ -1,6 +1,8 @@
 import { IScope } from "angular";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import type { SettingsService } from "@renderer/app/services/settings";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
+import type { SavedLocationConfig } from "@shared/ipc-contract";
 
 export interface SetLocationModalScope extends IScope {
   torrents: any[];
@@ -10,16 +12,18 @@ export interface SetLocationModalScope extends IScope {
 }
 
 export class SetLocationModalController {
-  static $inject = ["$scope", "$rootScope"];
+  static $inject = ["$scope", "$rootScope", "settingsService"];
 
   scope: SetLocationModalScope;
   rootScope: ElectorrentRootScope;
   modalref: ModalController;
+  savedLocations: SavedLocationConfig[] = [];
   private unsubscribeOpen?: () => void;
 
   constructor(
     scope: SetLocationModalScope,
     rootScope: ElectorrentRootScope,
+    private readonly settingsService: SettingsService,
   ) {
     this.scope = scope;
     this.rootScope = rootScope;
@@ -54,8 +58,12 @@ export class SetLocationModalController {
   }
 
   open(torrents: any[]) {
+    const serverId = this.rootScope.$server?.id;
+    const server = serverId ? this.settingsService.getServer(serverId) : undefined;
+    this.savedLocations = Array.isArray(server?.savedLocations) ? server.savedLocations : [];
     this.scope.torrents = torrents.slice();
-    this.scope.location = this.getSharedLocation(torrents);
+    const sharedLocation = this.getSharedLocation(torrents);
+    this.scope.location = this.savedLocations.some(({ path }) => path === sharedLocation) ? sharedLocation : "";
     this.scope.error = null;
     this.scope.loading = false;
 

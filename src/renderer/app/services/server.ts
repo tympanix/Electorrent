@@ -1,8 +1,34 @@
 import _ from "underscore"
+import type { IPromise } from "angular"
 import { Torrent } from "@renderer/app/bittorrent"
+import type { ColumnProps } from "@renderer/app/services/column"
 import { parseServerAddressInput, sanitizeServerAddress } from "@shared/server-address"
 import type { CertificateResponseService } from "@renderer/app/services/certificate-response"
 import type { SavedLocationConfig, StoredServerConfig, TorrentUploadOptions } from "@shared/ipc-contract"
+
+export interface Server extends Omit<StoredServerConfig, "columns"> {
+    columns: ColumnProps[]
+    certificateData?: Uint8Array
+    isConnected: boolean
+    connect(): IPromise<void>
+    getName(): string
+    getIcon(): string
+    getNameAtAddress(): string
+    getDisplayName(): string
+    updateLastUsed(): void
+    cleanPath(): string
+    setPath(): void
+    url(): string
+    isHTTPS(): boolean
+    askForCertificate(): IPromise<void>
+    getCertificate(): Uint8Array | undefined
+    equals(other: Server): boolean
+    parseColumns(columns?: string[]): ColumnProps[]
+    defaultColumns(): ColumnProps[]
+    addCustomColumns(columns: ColumnProps[]): ColumnProps[]
+    bootstrap(): void
+    json(): StoredServerConfig
+}
 
 export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclients', 'certificateResponseService',
     function($q, $notify, $bittorrent, $btclients, certificateResponseService: CertificateResponseService) {

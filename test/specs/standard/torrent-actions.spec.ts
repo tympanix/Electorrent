@@ -232,6 +232,12 @@ describe("torrent actions", function () {
     await backend.exec(["chmod", "777", targetDirectory])
     await backend.exec(["test", "-d", targetDirectory])
 
+    await this.app.openSettings()
+    await this.app.settingsGotoTab("advanced")
+    await this.app.addSettingsSavedLocation({ path: targetDirectory, icon: "folder open" })
+    await this.app.settingsSave()
+    await this.app.torrentsPageIsVisible()
+
     const fastTorrent = await this.app.uploadTorrent({ filename: torrentPath })
 
     try {

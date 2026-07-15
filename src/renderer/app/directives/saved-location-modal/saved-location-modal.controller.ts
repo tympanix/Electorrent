@@ -1,5 +1,6 @@
 import { IRootScopeService, IScope } from "angular";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import type { SettingsService } from "@renderer/app/services/settings";
 import type { SavedLocationConfig } from "@shared/ipc-contract";
 import { SAVED_LOCATION_ICONS } from "./saved-location-icons";
 
@@ -41,7 +42,7 @@ export class SavedLocationModalController {
     constructor(
         private readonly scope: SavedLocationModalScope,
         private readonly rootScope: IRootScopeService,
-        private readonly settingsService: { getAllSettingsCopy: () => unknown, saveAllSettings: () => Promise<void> },
+        private readonly settingsService: SettingsService,
     ) {
         this.modalId = scope.modalId || "savedLocationModal";
     }
