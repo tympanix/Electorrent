@@ -45,3 +45,14 @@ export async function createTorrentFile(tracker: DockerComposeService, options: 
     const torrentPath = path.join(__dirname, `shared/opentracker/data/shared/${torrentName}.torrent`)
     return torrentPath;
 }
+
+/** Create the large, bandwidth-limited torrent used by slower integration tests. */
+export function createSlowTorrentFile(tracker: DockerComposeService): Promise<string> {
+    const randomString = Math.random().toString(36).substring(2, 10);
+    return createTorrentFile(tracker, {
+        torrentName: `slow-${randomString}`,
+        fileSize: 100000,
+        downloadSpeed: 1,
+        uploadSpeed: 1,
+    });
+}
