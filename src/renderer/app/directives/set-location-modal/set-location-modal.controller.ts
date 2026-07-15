@@ -1,5 +1,6 @@
 import { IScope } from "angular";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import type { SettingsService } from "@renderer/app/services/settings";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { SavedLocationConfig } from "@shared/ipc-contract";
 
@@ -22,7 +23,7 @@ export class SetLocationModalController {
   constructor(
     scope: SetLocationModalScope,
     rootScope: ElectorrentRootScope,
-    private readonly settingsService: { getServer: (id: string) => { savedLocations?: SavedLocationConfig[] } | undefined },
+    private readonly settingsService: SettingsService,
   ) {
     this.scope = scope;
     this.rootScope = rootScope;

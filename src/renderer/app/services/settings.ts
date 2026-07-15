@@ -1,5 +1,28 @@
 import { IRootScopeService } from "angular";
 import type { AppSettings, StoredServerConfig } from "@shared/ipc-contract";
+import type { Server } from "@renderer/app/services/server";
+
+export interface SettingsService {
+    whenReady(): Promise<AppSettings<Server>>
+    initSettings(): Promise<AppSettings<Server>>
+    appendServer(server: Server): void
+    getAllSettings(): AppSettings<Server>
+    getAllSettingsCopy(): AppSettings<Server>
+    setCurrentServerAsDefault(): void
+    setDefault(server: Server, skipSave?: boolean): void
+    saveAllSettings(newSettings?: Partial<AppSettings<Server>>): Promise<void>
+    trustCertificate(certificate: { fingerprint: string }): Promise<void>
+    enableInsecureTls(serverId: string): Promise<void>
+    disableInsecureTls(server: Server): Promise<void>
+    saveServer(server: Server): Promise<void>
+    saveServer(ip: string, port: number, user: string, password: string, client: string): Promise<void>
+    removeServer(server: Server): void
+    updateServer(server: Partial<Server> & Pick<Server, "id">): Promise<void>
+    getServer(id: string): Server | undefined
+    getServers(): Server[]
+    getDefaultServer(): Server | undefined
+    getRecentServer(): Server | undefined
+}
 
 export let settingsService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
     const electorrent = window.electorrent
