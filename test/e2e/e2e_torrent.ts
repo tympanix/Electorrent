@@ -200,10 +200,15 @@ export class Torrent {
 
   async setLocation(location: string) {
     const modal = await this.openSetLocationModal();
-    const input = modal.$("input[name='location']");
-    await input.waitForDisplayed();
-    await input.clearValue();
-    await input.setValue(location);
+    const dropdown = modal.$("#set-location-dropdown");
+    await dropdown.waitForDisplayed();
+    await dropdown.waitForClickable();
+    await dropdown.click();
+
+    const locationItem = dropdown.$(`[data-path="${location}"]`);
+    await locationItem.waitForDisplayed();
+    await locationItem.waitForClickable();
+    await locationItem.click();
 
     const approve = modal.$("button[data-role='set-location-apply']");
     await approve.waitForEnabled();

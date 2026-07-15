@@ -11,15 +11,25 @@
         <form id="set-location-form" class="ui form" ng-submit="ctl.apply()">
             <p>Choose a new location for {{ ctl.getTargetLabel() }}.</p>
             <div class="field">
-                <label for="set-location-input">Location</label>
-                <div class="ui fluid left icon input">
-                    <i class="folder open icon"></i>
-                    <input
-                        id="set-location-input"
-                        type="text"
-                        name="location"
-                        ng-model="ctl.scope.location"
-                        placeholder="/downloads/new/location">
+                <label for="set-location-dropdown">Location</label>
+                <dropdown
+                    title="Select saved location"
+                    id="set-location-dropdown"
+                    class="fluid"
+                    open-on-focus="false"
+                    ng-model="ctl.scope.location"
+                    ng-disabled="!ctl.savedLocations.length">
+                    <dropdown-group
+                        ng-repeat="savedLocation in ctl.savedLocations track by savedLocation.path"
+                        title="savedLocation.path"
+                        value="savedLocation.path"
+                        data-path="{{ savedLocation.path }}">
+                        <i class="{{ savedLocation.icon }} icon"></i>
+                        <span>{{ savedLocation.path }}</span>
+                    </dropdown-group>
+                </dropdown>
+                <div class="ui mini message" data-role="set-location-empty" ng-if="!ctl.savedLocations.length">
+                    No saved locations are available for this server.
                 </div>
             </div>
             <div class="ui negative message" ng-if="ctl.scope.error">
