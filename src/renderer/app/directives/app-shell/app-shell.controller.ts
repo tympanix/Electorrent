@@ -45,6 +45,8 @@ export class AppShellController {
         let loadingTimer: angular.IPromise<void> | undefined;
         let page: string | null = null;
         let activeConnectionId = 0;
+        let initialLaunchPayloadDelivered = false;
+        let initialLaunchPayloadPromise: Promise<LaunchPayload> | null = null;
         let pendingMagnets: Array<PendingTorrentUploadLink & { askUploadOptions?: boolean }> = [];
         let pendingTorrentFiles: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }> = [];
 
@@ -228,11 +230,16 @@ export class AppShellController {
                 $scope.statusText = "Loading Torrents";
                 settingsService.updateServer(server);
                 pageTorrents(true);
-                return electorrent.launch.getPending().then((payload: LaunchPayload) => {
-                    if (!isCurrentConnection()) {
+                if (initialLaunchPayloadDelivered) {
+                    return;
+                }
+                initialLaunchPayloadPromise ||= electorrent.launch.getPending();
+                return initialLaunchPayloadPromise.then((payload: LaunchPayload) => {
+                    if (!isCurrentConnection() || initialLaunchPayloadDelivered) {
                         return;
                     }
 
+                    initialLaunchPayloadDelivered = true;
                     queueMagnetLinks(payload.magnets || []);
                     queueTorrentFiles(payload.torrentFiles || []);
                     drainPendingLaunchPayloads();

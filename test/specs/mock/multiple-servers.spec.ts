@@ -1,5 +1,5 @@
 import chai from "chai"
-import { $$, browser } from "@wdio/globals"
+import { $, $$, browser } from "@wdio/globals"
 import { eventually } from "../../e2e/eventually"
 import { configureSpec } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
@@ -40,6 +40,36 @@ describe("mock multiple servers", function () {
       await connectServer.call(this, index)
       await expectOnlyTorrent(mockServers[index].torrentName)
     }
+  })
+
+  it("uploads launch magnets once across consecutive app invocations", async function () {
+    const firstMagnet = "magnet:?xt=urn:btih:0000000000000000000000000000000000000356"
+    const secondMagnet = "magnet:?xt=urn:btih:0000000000000000000000000000000000000357"
+    const firstTorrentName = "Mock Magnet 0000000000000000000000000000000000000356"
+    const secondTorrentName = "Mock Magnet 0000000000000000000000000000000000000357"
+
+    await emitSecondInstanceDuringRendererReload(firstMagnet)
+    await this.app.serverSelectionPageIsVisible()
+    await this.app.connectServerSelection(0)
+    await this.app.torrentsPageIsVisible()
+    await eventually(getTorrentNames).satisfies(
+      "include the first launch magnet",
+      (names) => names.includes(firstTorrentName),
+    )
+
+    await emitSecondInstance(secondMagnet)
+    await eventually(getTorrentNames).satisfies(
+      "include both launch magnets",
+      (names) => names.includes(firstTorrentName) && names.includes(secondTorrentName),
+    )
+
+    await openServerSelection()
+    await this.app.connectServerSelection(1)
+    await this.app.torrentsPageIsVisible()
+    await eventually(getTorrentNames).satisfies(
+      "not replay launch magnets on the second server",
+      (names) => !names.includes(firstTorrentName) && !names.includes(secondTorrentName),
+    )
   })
 })
 
@@ -88,6 +118,32 @@ async function invokeMockAction(action: string, ...args: any[]) {
   await browser.execute(async (request) => {
     await (window as any).electorrent.bittorrent.invokeAction(request)
   }, { action, args })
+}
+
+async function emitSecondInstance(magnet: string) {
+  await browser.electron.execute((electron, uri) => {
+    electron.app.emit("second-instance", {} as Electron.Event, [electron.app.getPath("exe"), uri], process.cwd())
+  }, magnet)
+}
+
+async function emitSecondInstanceDuringRendererReload(magnet: string) {
+  await browser.electron.execute(async (electron, uri) => {
+    const window = electron.BrowserWindow.getAllWindows()[0]
+    await new Promise<void>((resolve) => {
+      window.webContents.once("did-start-loading", () => {
+        electron.app.emit("second-instance", {} as Electron.Event, [electron.app.getPath("exe"), uri], process.cwd())
+        resolve()
+      })
+      window.webContents.reload()
+    })
+  }, magnet)
+}
+
+async function openServerSelection() {
+  await browser.electron.execute((electron) => {
+    electron.BrowserWindow.getAllWindows()[0]?.webContents.send("menu:action", { type: "show-servers" })
+  })
+  await $("#page-server-selection").waitForDisplayed()
 }
 
 async function addMockedTorrent(torrent: MockTorrent) {
