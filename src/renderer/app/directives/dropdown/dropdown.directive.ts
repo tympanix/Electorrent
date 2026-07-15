@@ -41,6 +41,10 @@ export class SemanticDropdownDirective implements IDirective {
             action: "hide",
         });
 
+        if ("dropdownNoBlur" in attr) {
+            dropdown.off("blur.dropdown");
+        }
+
         if ("ref" in attr) {
             scope.ref = {
                 clear: doAction("clear"),
