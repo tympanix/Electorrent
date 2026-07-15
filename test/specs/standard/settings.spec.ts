@@ -1,14 +1,13 @@
 import chai from "chai"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import { $ } from "@wdio/globals"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
-import { configureSpec } from "../../framework/fixture"
+import { configureSpec, getTestFixture } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
+import { createSlowTorrentFile } from "../../torrent"
 
 const assert: Chai.AssertStatic = chai.assert
-const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
+const tracker = getTestFixture().tracker
 describe("settings", function () {
   configureSpec()
 
@@ -108,7 +107,7 @@ describe("settings", function () {
   })
 
   it("can enable always ask for upload options", async function () {
-    const torrentFile = path.join(testDir, "shared/opentracker/data/shared/slow.torrent")
+    const torrentFile = await createSlowTorrentFile(tracker)
     let torrent: e2e.Torrent | undefined
 
     await this.app.settingsGotoTab("general")
