@@ -4,7 +4,8 @@ import { Torrent } from "@renderer/app/bittorrent"
 import type { ColumnProps } from "@renderer/app/services/column"
 import { parseServerAddressInput, sanitizeServerAddress } from "@shared/server-address"
 import type { CertificateResponseService } from "@renderer/app/services/certificate-response"
-import type { SavedLocationConfig, StoredServerConfig, TorrentUploadOptions } from "@shared/ipc-contract"
+import type { LabelColorHue, LabelColorOverrides, SavedLocationConfig, StoredServerConfig, TorrentUploadOptions } from "@shared/ipc-contract"
+import { normalizeLabelColorHue } from "@renderer/app/services/label-colors"
 
 export interface Server extends Omit<StoredServerConfig, "columns"> {
     columns: ColumnProps[]
@@ -91,6 +92,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 this.lastused = -1
                 this.columns = this.defaultColumns()
                 this.savedLocations = []
+                this.labelColors = {}
                 this.defaultUploadOptionsEnabled = false
                 this.defaultUploadOptions = normalizeDefaultUploadOptions()
             }
@@ -114,6 +116,20 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             return Object.assign({ startTorrent: true }, options || {})
         }
 
+        function normalizeLabelColors(labelColors?: LabelColorOverrides) {
+            if (!labelColors || typeof labelColors !== "object") {
+                return {}
+            }
+
+            return Object.keys(labelColors).reduce((normalized: Record<string, LabelColorHue>, label) => {
+                const hue = normalizeLabelColorHue(labelColors[label])
+                if (label && hue !== undefined) {
+                    normalized[label] = hue
+                }
+                return normalized
+            }, {})
+        }
+
         Server.prototype.fromJson = function(data) {
             this.name = data.name
             this.id = data.id
@@ -133,6 +149,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             this.savedLocations = normalizeSavedLocations(data.savedLocations)
             this.defaultUploadOptionsEnabled = data.defaultUploadOptionsEnabled === true
             this.defaultUploadOptions = normalizeDefaultUploadOptions(data.defaultUploadOptions)
+            this.labelColors = normalizeLabelColors(data.labelColors)
         };
 
         Server.prototype.json = function() {
@@ -154,6 +171,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 savedLocations: normalizeSavedLocations(this.savedLocations),
                 defaultUploadOptionsEnabled: this.defaultUploadOptionsEnabled === true,
                 defaultUploadOptions: normalizeDefaultUploadOptions(this.defaultUploadOptions),
+                labelColors: normalizeLabelColors(this.labelColors),
             }
         };
 

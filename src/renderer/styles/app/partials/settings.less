@@ -54,3 +54,77 @@
     font-size: 1.1em;
     margin: 0 !important;
 }
+
+.settings-label-color-list .settings-label-color-item {
+    display: block !important;
+}
+
+.settings-label-color-row {
+    align-items: center;
+    display: flex;
+    gap: .75rem;
+    width: 100%;
+}
+
+.settings-label-color-chip {
+    flex: 0 1 auto;
+    min-width: 0;
+    padding: 0.45em 0.75em;
+}
+
+.settings-label-color-row > button:first-of-type {
+    margin-left: auto;
+}
+
+.settings-label-color-hue {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    justify-content: center;
+    width: 2rem;
+}
+
+.label-color-preview-dot,
+.label-color-picker-dot {
+    background: oklch(@labelChipDotLightness @labelChipDotChroma var(--label-hue, 225));
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.label-color-preview-dot {
+    height: 0.9rem;
+    width: 0.9rem;
+}
+
+.label-color-picker-grid {
+    display: grid;
+    gap: .45rem;
+    grid-template-columns: repeat(auto-fill, minmax(2.4rem, 1fr));
+}
+
+.label-color-picker-option {
+    align-items: center;
+    background: transparent;
+    border: 1px solid @borderColor;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    height: 2.4rem;
+    justify-content: center;
+    padding: 0;
+}
+
+.label-color-picker-option:hover,
+.label-color-picker-option.is-selected {
+    background: @highlightBackground;
+    border-color: @selectedBorderColor;
+}
+
+.label-color-picker-option.is-selected {
+    box-shadow: 0 0 0 2px oklch(@labelChipDotLightness @labelChipDotChroma var(--label-hue, 225));
+}
+
+.label-color-picker-dot {
+    height: 1.05rem;
+    width: 1.05rem;
+}

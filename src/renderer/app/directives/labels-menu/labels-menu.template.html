@@ -1,17 +1,22 @@
-<div data-role="labels" dropdown class="ui icon top left pointing dropdown button" ng-class="{disabled: enabled}">
+<div data-role="labels" dropdown dropdown-no-blur class="ui icon top left pointing dropdown button" ng-class="{disabled: enabled}">
     <i class="tag icon"></i>
     <div class="menu">
-        <div class="ui icon search input">
+        <div class="ui icon input">
             <i class="search icon"></i>
-            <input type="text" placeholder="Search labels...">
+            <input type="text" placeholder="Search labels..." ng-model="labelSearch">
         </div>
         <div data-role="remove-label" class="item" ng-click="action('')"><i class="remove icon"></i> Remove Label</div>
         <div data-role="new-label" class="item" ng-click="openNewLabelModal()"><i class="edit icon"></i> New Label</div>
         <div class="divider"></div>
         <div class="scrolling menu">
-            <div class="item" data-role="label-option" data-label="{{label}}" ng-repeat="label in labels" ng-click="action(label)">{{label}}</div>
+            <div class="item label-dropdown-option" data-role="label-option" data-label="{{label}}" ng-repeat="label in labels | filter:labelSearch" ng-click="action(label)">
+                <span class="label-dropdown-chip" label-chip="label">
+                    <span class="label-chip-text">{{label}}</span>
+                </span>
+            </div>
             <div></div>
         </div>
+        <div class="message" ng-if="labelSearch && (labels | filter:labelSearch).length === 0">No results found</div>
     </div>
 </div>
 

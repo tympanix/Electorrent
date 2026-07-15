@@ -57,6 +57,14 @@
 @negativeTextColor: #fff;
 @negativeBackgroundColor: #ee5f5b;
 @negativeBorderColor: darken(spin(@negativeBackgroundColor, -10), 3%);
+@labelChipBackgroundLightness : 32%;
+@labelChipBackgroundChroma    : 0.035;
+@labelChipBorderLightness     : 50%;
+@labelChipBorderChroma        : 0.070;
+@labelChipTextLightness       : 78%;
+@labelChipTextChroma          : 0.080;
+@labelChipDotLightness        : 68%;
+@labelChipDotChroma           : 0.110;
 
 
 @darkTextColor               : rgba(255, 255, 255, 0.85);

@@ -57,6 +57,55 @@
 
     <div class="ui divider"></div>
 
+    <div data-role="advanced-label-colors-row">
+        <div class="ui small header">Label colors</div>
+        <p>Override theme-aware label hues for <strong>{{ ctl.getServerName() }}</strong>. The saved value is the hue, while lightness and chroma stay theme-controlled.</p>
+        <div style="margin-left: 2rem;">
+            <div class="ui divided list settings-label-color-list" ng-if="ctl.hasServer() && ctl.getLabels().length">
+                <div
+                    class="item settings-label-color-item"
+                    ng-repeat="label in ctl.getLabels() track by label"
+                    data-role="settings-label-color-item"
+                    data-label="{{ label }}">
+                    <div class="settings-label-color-row">
+                        <span class="settings-label-color-chip" label-chip="label" label-color-overrides="server.labelColors">
+                            <span class="label-chip-text">{{ label }}</span>
+                        </span>
+                        <span class="settings-label-color-hue" title="Hue {{ ctl.getLabelHue(label) }}" ng-attr-style="--label-hue: {{ ctl.getLabelHue(label) }}">
+                            <span class="label-color-preview-dot"></span>
+                        </span>
+                        <button
+                            type="button"
+                            class="ui tiny button"
+                            data-role="settings-label-color-change"
+                            ng-click="ctl.openLabelColorModal(label)">
+                            Change
+                        </button>
+                        <button
+                            type="button"
+                            class="ui tiny icon button"
+                            title="Use deterministic color"
+                            data-role="settings-label-color-reset"
+                            ng-click="ctl.resetLabelColor(label)"
+                            ng-disabled="!ctl.hasCustomLabelColor(label)">
+                            <i class="undo icon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ui info message" ng-if="ctl.hasServer() && !ctl.getLabels().length">
+                <p>No labels found for this server yet. Labels will appear here after they are reported by the connected client.</p>
+            </div>
+
+            <div class="ui warning message" ng-if="!ctl.hasServer()">
+                <p>Connect to a server to manage label colors.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui divider"></div>
+
     <div data-role="advanced-saved-locations-row">
         <div class="ui small header">Saved locations</div>
         <p>Save reusable upload locations. These locations appear in the upload modal for this server.</p>
@@ -102,3 +151,4 @@
 </div>
 
 <saved-location-modal modal-id="settingsSavedLocationModal" ng-ref="ctl.savedLocationModalRef"></saved-location-modal>
+<label-color-modal modal-id="settingsLabelColorModal" ng-ref="ctl.labelColorModalRef"></label-color-modal>

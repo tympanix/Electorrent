@@ -1,0 +1,36 @@
+<modal
+    size="small"
+    id="{{ ctl.modalId }}"
+    on-hidden="ctl.onHidden()"
+    ng-ref="ctl.modalref">
+    <i class="close icon"></i>
+    <div class="header">
+        Label color
+    </div>
+    <div class="content">
+        <p>Choose a theme-aware hue for <strong>{{ ctl.label }}</strong>.</p>
+        <div class="label-color-picker-grid">
+            <button
+                type="button"
+                class="label-color-picker-option"
+                data-role="label-color-option"
+                data-hue="{{ hue }}"
+                title="Hue {{ hue }}"
+                ng-repeat="hue in ctl.hues track by hue"
+                ng-class="{'is-selected': ctl.isSelected(hue)}"
+                ng-attr-style="--label-hue: {{ hue }}"
+                ng-click="ctl.selectHue(hue)">
+                <span class="label-color-picker-dot"></span>
+            </button>
+        </div>
+    </div>
+    <div class="actions">
+        <button type="button" class="ui black button" ng-click="ctl.close()">
+            Cancel
+        </button>
+        <button type="button" class="ui green right labeled icon button" data-role="label-color-save" ng-click="ctl.save()">
+            Save color
+            <i class="checkmark icon"></i>
+        </button>
+    </div>
+</modal>
