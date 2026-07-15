@@ -381,26 +381,6 @@ async function bootstrap() {
         pendingLaunchPayload.torrentFilePaths.push(...getTorrentFilePaths(args))
     }
 
-    async function sendMagnetLinks(args: string[]) {
-        const magnetLinks = getMagnetLinks(args).map((uri) => torrents.serializeMagnetLink(uri))
-        if (magnetLinks.length === 0 || !torrentWindow || torrentWindow.isDestroyed()) return
-        torrentWindow.webContents.send(IPC_CHANNELS.launch.magnets, magnetLinks)
-    }
-
-    async function sendTorrentFiles(args: string[]) {
-        logger.info('Main searching for files in', args)
-        const torrentFiles = getTorrentFilePaths(args)
-        if (torrentFiles.length === 0 || !torrentWindow || torrentWindow.isDestroyed()) return
-        logger.info('Main sending torrent files', torrentFiles)
-        const files = await torrents.readFiles(torrentFiles, false)
-        if (files.length === 0) return
-        if (!rendererLoaded) {
-            pendingLaunchPayload.torrentFilePaths.push(...torrentFiles)
-            return
-        }
-        torrentWindow.webContents.send(IPC_CHANNELS.launch.torrentFiles, files)
-    }
-
     async function consumePendingLaunchPayload() {
         return {
             magnets: pendingLaunchPayload.magnets.splice(0),
@@ -409,6 +389,23 @@ async function bootstrap() {
                 ...torrentFileWatcher.consumePendingPromptedTorrentFiles(),
             ],
         }
+    }
+
+    async function flushPendingLaunchPayload() {
+        if (!rendererLoaded || !torrentWindow || torrentWindow.isDestroyed()) return
+
+        const payload = await consumePendingLaunchPayload()
+        if (payload.magnets.length > 0) {
+            torrentWindow.webContents.send(IPC_CHANNELS.launch.magnets, payload.magnets)
+        }
+        if (payload.torrentFiles.length > 0) {
+            torrentWindow.webContents.send(IPC_CHANNELS.launch.torrentFiles, payload.torrentFiles)
+        }
+    }
+
+    function queueAndFlushPendingLaunchArgs(args: string[]) {
+        queuePendingLaunchArgs(args)
+        void flushPendingLaunchPayload()
     }
 
     ipcHandlers.registerHandlers({
@@ -439,35 +436,19 @@ async function bootstrap() {
         app.quit()
     } else {
         app.on('second-instance', function(_event: ElectronEvent, args: string[]) {
-            if (torrentWindow) {
-                sendMagnetLinks(args)
-                sendTorrentFiles(args)
-                showTorrentWindow()
-            } else {
-                queuePendingLaunchArgs(args)
-                showOrCreateTorrentWindow()
-            }
+            queueAndFlushPendingLaunchArgs(args)
+            showOrCreateTorrentWindow()
         })
     }
 
     app.on('open-url', function(_event: ElectronEvent, url: string) {
-        if (torrentWindow) {
-            sendMagnetLinks([url])
-            showTorrentWindow()
-        } else {
-            queuePendingLaunchArgs([url])
-            showOrCreateTorrentWindow()
-        }
+        queueAndFlushPendingLaunchArgs([url])
+        showOrCreateTorrentWindow()
     })
 
     app.on('open-file', function(_event: ElectronEvent, filePath: string) {
-        if (torrentWindow) {
-            sendTorrentFiles([filePath])
-            showTorrentWindow()
-        } else {
-            queuePendingLaunchArgs([filePath])
-            showOrCreateTorrentWindow()
-        }
+        queueAndFlushPendingLaunchArgs([filePath])
+        showOrCreateTorrentWindow()
     })
 
     app.on('ready', function() {
