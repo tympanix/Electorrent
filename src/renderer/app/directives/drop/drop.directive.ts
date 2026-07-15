@@ -126,18 +126,12 @@ export class DropdownElementDirective implements IDirective {
             }
         };
 
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (event.code === "Space") {
-                event.preventDefault();
-                toggle();
+        const onKeyDown = (event: JQuery.KeyDownEvent) => {
+            if (!scope.is_open && event.code !== "Space") {
                 return;
             }
 
-            if (!scope.is_open) {
-                return;
-            }
-
-            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
+            if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
                 event.preventDefault();
             }
 
@@ -147,6 +141,9 @@ export class DropdownElementDirective implements IDirective {
                 break;
             case "ArrowDown":
                 controller.next();
+                break;
+            case "Space":
+                toggle();
                 break;
             default:
                 break;
@@ -180,7 +177,7 @@ export class DropdownElementDirective implements IDirective {
         element.on("focus", onFocus);
         element.on("mousedown", onMouseDown);
         element.on("blur", onBlur);
-        element[0].addEventListener("keydown", onKeyDown);
+        element.on("keydown", onKeyDown);
         document.body.addEventListener("click", onBodyClick);
         window.addEventListener("keyup", onKeyUp);
         window.addEventListener("mouseup", onMouseUp);
@@ -190,7 +187,7 @@ export class DropdownElementDirective implements IDirective {
             element.off("focus", onFocus);
             element.off("mousedown", onMouseDown);
             element.off("blur", onBlur);
-            element[0].removeEventListener("keydown", onKeyDown);
+            element.off("keydown", onKeyDown);
             document.body.removeEventListener("click", onBodyClick);
             window.removeEventListener("keyup", onKeyUp);
             window.removeEventListener("mouseup", onMouseUp);
