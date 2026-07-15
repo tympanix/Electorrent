@@ -26,7 +26,7 @@
         <button type="button" class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
             Cancel
         </button>
-        <button type="submit" form="upload-torrent-form" class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}">
+        <button type="submit" form="upload-torrent-form" class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}" ng-disabled="ctl.isLoading">
             Add Torrent
             <i class="plus icon"></i>
         </button>

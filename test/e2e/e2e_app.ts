@@ -304,6 +304,17 @@ export class App {
 
     await browser.pause(250)
     const submitBtn = modal.$("button[type=submit]")
+    await eventually(async () => {
+      const className = (await submitBtn.getAttribute("class")) || ""
+      return {
+        displayed: await submitBtn.isDisplayed(),
+        clickable: await submitBtn.isClickable(),
+        cssDisabled: className.split(/\s+/).includes("disabled"),
+      }
+    }).satisfies(
+      "be displayed, clickable, and not CSS-disabled",
+      ({ displayed, clickable, cssDisabled }) => displayed && clickable && !cssDisabled,
+    )
     await submitBtn.click()
     if (options?.waitForClose !== false) {
       await waitForModalClose(modal, this.timeout)
