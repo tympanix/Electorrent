@@ -127,11 +127,17 @@ export class DropdownElementDirective implements IDirective {
         };
 
         const onKeyDown = (event: KeyboardEvent) => {
+            if (event.code === "Space" && event.target === element[0]) {
+                event.preventDefault();
+                toggle();
+                return;
+            }
+
             if (!scope.is_open) {
                 return;
             }
 
-            if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
                 event.preventDefault();
             }
 
@@ -141,9 +147,6 @@ export class DropdownElementDirective implements IDirective {
                 break;
             case "ArrowDown":
                 controller.next();
-                break;
-            case "Space":
-                toggle();
                 break;
             default:
                 break;
