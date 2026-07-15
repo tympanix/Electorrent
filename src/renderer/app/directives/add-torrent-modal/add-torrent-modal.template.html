@@ -24,24 +24,11 @@
                     can-add-saved-location="!!ctl.rootScope.$server"
                     on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
             </div>
-            <div ng-if="ctl.hasFilesTab()" ng-show="ctl.activeTab === 'files'">
-                <div class="ui relaxed divided list upload-files-list upload-files-scroll">
-                    <div class="item upload-file-row" ng-repeat="node in ctl.visibleFileTree track by node.id" ng-style="{'padding-left': (node.level * 1.5) + 'rem'}" data-upload-file-path="{{ node.path }}">
-                        <div class="right floated content upload-file-meta">
-                            <span class="upload-file-size">{{ node.size | bytes }}</span>
-                        </div>
-                        <div class="content">
-                            <div class="ui checkbox">
-                                <input id="upload-file-cb-{{ node.id }}" type="checkbox" ng-checked="node.selected" ng-click="ctl.toggleFileNode(node)">
-                                <label for="upload-file-cb-{{ node.id }}">
-                                    <i class="icon" ng-class="node.children.length ? 'folder' : 'file outline'"></i>
-                                    {{ node.name }}
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <torrent-upload-file-selection
+                ng-if="ctl.hasFilesTab()"
+                ng-show="ctl.activeTab === 'files'"
+                files="ctl.getCurrentTorrentUploadFiles()"
+                on-selection-change="ctl.updateFileSelection(selection)"></torrent-upload-file-selection>
         </form>
     </div>
     <div class="actions">
