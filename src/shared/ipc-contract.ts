@@ -295,6 +295,7 @@ export type MenuAction =
     | { type: "search-torrent" }
     | { type: "select-all" }
     | { type: "remove-selected" }
+    | { type: "remove-and-delete-selected" }
     | { type: "open-add-torrent"; askUploadOptions?: boolean }
     | { type: "paste-torrent-url"; askUploadOptions?: boolean }
     | { type: "open-external"; url: string }

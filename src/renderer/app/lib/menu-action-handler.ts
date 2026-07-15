@@ -65,6 +65,11 @@ export function createMenuActionHandler({
                     $rootScope.$broadcast("remove:torrents");
                 }
                 break;
+            case "remove-and-delete-selected":
+                if (document.activeElement?.nodeName !== "INPUT" && currentPage() === PAGE_TORRENTS) {
+                    $rootScope.$broadcast("remove-and-delete:torrents");
+                }
+                break;
             case "open-add-torrent":
                 electorrent.torrents.openFiles(!!action.askUploadOptions).then((files: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }>) => {
                     files.forEach((item) => broadcastTorrentFile(item, !!item.askUploadOptions));

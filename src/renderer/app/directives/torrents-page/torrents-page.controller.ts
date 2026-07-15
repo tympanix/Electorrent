@@ -256,6 +256,13 @@ export class TorrentsPageController {
             remove();
         });
 
+        $scope.$on("remove-and-delete:torrents", () => {
+            const deleteAction = findContextActionByRole($rootScope.$btclient?.contextMenu || [], "delete");
+            if (deleteAction && selected.length > 0) {
+                openDeleteConfirmation(deleteAction.click, deleteAction.label);
+            }
+        });
+
         $scope.$on("torrentLocation:updated", () => {
             syncAfterTorrentMutation();
         });
@@ -290,6 +297,21 @@ export class TorrentsPageController {
                 torrents: selected.slice(),
             };
             $scope.deleteModalref?.showModal();
+        }
+
+        function findContextActionByRole(items: any[], role: string): any | null {
+            for (const item of items) {
+                if (item.role === role) {
+                    return item;
+                }
+
+                const nestedAction = findContextActionByRole(item.menu || [], role);
+                if (nestedAction) {
+                    return nestedAction;
+                }
+            }
+
+            return null;
         }
 
         function getDeleteConfirmationTarget(torrents: any[]) {

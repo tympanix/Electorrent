@@ -160,6 +160,11 @@ function editMenuItems(): MenuItemConstructorOptions[] {
             click: () => sendAction({ type: 'remove-selected' }),
         },
         {
+            label: 'Remove and Delete',
+            accelerator: 'CmdOrCtrl+Delete',
+            click: () => sendAction({ type: 'remove-and-delete-selected' }),
+        },
+        {
             label: 'Select All',
             accelerator: 'CmdOrCtrl+A',
             click: () => sendAction({ type: 'select-all' }),
