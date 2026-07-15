@@ -23,6 +23,7 @@ describe("connection authentication", function () {
       throw new Error("Expected a connection problem notification")
     }
     assert.equal(error.title, "Connection problem")
+    assert.equal(error.message, "Incorrect username or password.")
     await this.app.welcomePageIsVisible()
   })
 })

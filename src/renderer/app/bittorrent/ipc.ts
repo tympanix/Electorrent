@@ -25,8 +25,13 @@ export function serializeServer(server: any): BittorrentServerConfig {
     }
 }
 
-export function connect(server: any): Promise<TorrentClientConnection> {
-    return bridge().connect(serializeServer(server))
+export async function connect(server: any): Promise<TorrentClientConnection> {
+    const result = await bridge().connect(serializeServer(server))
+    if (result.ok === false) {
+        throw Object.assign(new Error(result.error.message), result.error)
+    }
+
+    return result.connection
 }
 
 export function disconnect() {

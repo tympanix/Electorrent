@@ -205,6 +205,27 @@ export interface TorrentClientConnection {
     readonly features: TorrentClientFeatures
 }
 
+export type BittorrentConnectionErrorKind =
+    | "authentication"
+    | "timeout"
+    | "unreachable"
+    | "address"
+    | "tls"
+    | "server"
+    | "response"
+    | "cancelled"
+    | "unknown"
+
+export interface BittorrentConnectionError {
+    readonly kind: BittorrentConnectionErrorKind
+    readonly message: string
+    readonly code?: string
+}
+
+export type BittorrentConnectResult =
+    | { readonly ok: true; readonly connection: TorrentClientConnection }
+    | { readonly ok: false; readonly error: BittorrentConnectionError }
+
 export interface ResolvedTorrentClientFeatures {
     readonly magnetLinks: boolean
     readonly labels: boolean
@@ -350,7 +371,7 @@ export interface ElectorrentBridge {
         getPathForFile(file: unknown): string
     }
     bittorrent: {
-        connect(server: BittorrentServerConfig): Promise<TorrentClientConnection>
+        connect(server: BittorrentServerConfig): Promise<BittorrentConnectResult>
         disconnect(): Promise<void>
         getSnapshot(request?: BittorrentSnapshotRequest): Promise<any>
         addTorrentUrl(request: BittorrentAddTorrentUrlRequest): Promise<void>

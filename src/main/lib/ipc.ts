@@ -5,6 +5,7 @@ import { IPC_CHANNELS } from '@shared/ipc'
 import type { AppSettings, EditCommand, PendingTorrentUploadLink, WindowCommand } from '@shared/ipc-contract'
 import { getAppVersion } from './app-meta'
 import { bittorrentManager } from './bittorrent'
+import { normalizeConnectionError } from './bittorrent/connection-error'
 import * as certificates from './certificates'
 import * as menu from './menu'
 import * as settings from './settings'
@@ -215,10 +216,14 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
         menu.setActiveServer(server, false)
-        const connection = await bittorrentManager.connect(event.sender, server)
-        menu.setActiveServer(server, true)
-        await onBittorrentConnected?.()
-        return connection
+        try {
+            const connection = await bittorrentManager.connect(event.sender, server)
+            menu.setActiveServer(server, true)
+            await onBittorrentConnected?.()
+            return { ok: true, connection }
+        } catch (error) {
+            return { ok: false, error: normalizeConnectionError(error) }
+        }
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.disconnect, async function(event: IpcMainInvokeEvent) {

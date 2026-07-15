@@ -210,7 +210,10 @@ export class DelugeRuntime implements BittorrentRuntime {
             jar: request.jar(),
         }
 
-        await defer((done) => this.rpc("auth.login", [server.password], done, HTTP_LOGIN_TIMEOUT))
+        const authenticated = await defer<boolean>((done) => this.rpc("auth.login", [server.password], done, HTTP_LOGIN_TIMEOUT))
+        if (!authenticated) {
+            throw new Error("Invalid credentials")
+        }
 
         const hosts = await this.getHosts()
         const hostId = hosts[0]?.[0]

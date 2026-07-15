@@ -66,15 +66,17 @@ export let notificationService = ["$rootScope", function ($rootScope) {
         if (typeof err === 'string') {
             this.alert('Connection problem', err)
         } else if (typeof err !== 'object') {
-            this.alert("Connection problem", "The connection could not be established")
+            this.alert("Connection problem", "Could not connect to client.")
+        } else if (typeof err.message === 'string' && err.kind) {
+            this.alert("Connection problem", err.message)
         } else if (err.status === -1) {
-            this.alert("Connection problem", "The connection to the server timed out!")
+            this.alert("Connection problem", "Connection timed out.")
         } else if (err.status === 401) {
-            this.alert("Connection problem", "You entered an incorrent username/password")
+            this.alert("Connection problem", "Incorrect username or password.")
         } else if (err.code && ERR_CODES.hasOwnProperty(err.code)) {
             this.alert(ERR_CODES[err.code].title, ERR_CODES[err.code].msg)
         } else {
-            this.alert("Connection problem", "The connection could not be established")
+            this.alert("Connection problem", "Could not connect to client.")
         }
     }
 
