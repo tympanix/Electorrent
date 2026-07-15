@@ -1,6 +1,6 @@
 import type { LabelColorHue, LabelColorOverrides } from "@shared/ipc-contract";
 
-export const LABEL_COLOR_HUE_STEP = 20;
+export const LABEL_COLOR_HUE_STEP = 10;
 export const LABEL_COLOR_HUES: LabelColorHue[] = Array.from(
     { length: 360 / LABEL_COLOR_HUE_STEP },
     (_unused, index) => index * LABEL_COLOR_HUE_STEP,

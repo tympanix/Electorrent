@@ -71,9 +71,6 @@
                         <span class="settings-label-color-chip" label-chip="label" label-color-overrides="server.labelColors">
                             <span class="label-chip-text">{{ label }}</span>
                         </span>
-                        <span class="settings-label-color-hue" title="Hue {{ ctl.getLabelHue(label) }}" ng-attr-style="--label-hue: {{ ctl.getLabelHue(label) }}">
-                            <span class="label-color-preview-dot"></span>
-                        </span>
                         <button
                             type="button"
                             class="ui tiny button"
@@ -90,6 +87,9 @@
                             ng-disabled="!ctl.hasCustomLabelColor(label)">
                             <i class="undo icon"></i>
                         </button>
+                        <span class="settings-label-color-hue" title="Hue {{ ctl.getLabelHue(label) }}" ng-attr-style="--label-hue: {{ ctl.getLabelHue(label) }}">
+                            <span class="label-color-preview-dot"></span>
+                        </span>
                     </div>
                 </div>
             </div>
