@@ -275,9 +275,16 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         })
     }
 
-    async getTorrentFiles(hash: string): Promise<MockTorrentFile[]> {
+    async getTorrentFiles(hash: string): Promise<BittorrentFileSelection[]> {
         this.assertConnected()
-        return this.files.get(hash) || []
+        return (this.files.get(hash) || []).map((file) => ({
+            index: file.index,
+            path: file.name,
+            name: file.name.split(/[/\\]/).pop() || "",
+            size: file.size,
+            wanted: file.priority !== PRIORITY_SKIP,
+            priority: file.priority,
+        }))
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {

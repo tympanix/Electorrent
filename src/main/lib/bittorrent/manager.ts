@@ -137,7 +137,7 @@ class BittorrentManager {
 
     async invokeAction(sender: WebContents, request: BittorrentInvokeActionRequest) {
         const runtime = await this.getSession(sender)
-        const action = runtime[request.action]
+        const action = (runtime as unknown as Record<string, unknown>)[request.action]
         if (typeof action !== "function") {
             throw new Error(`Unsupported bittorrent action: ${request.action}`)
         }

@@ -50,7 +50,7 @@ export function uploadTorrent(data: Uint8Array, filename: string, options?: Torr
     return bridge().uploadTorrent({ data, filename, options, sourcePath })
 }
 
-export function invokeAction(action: string, hashes: string[] = [], ...args: any[]) {
+export function invokeAction(action: string, hashes: string[] = [], ...args: unknown[]) {
     return bridge().invokeAction({ action, hashes, args })
 }
 

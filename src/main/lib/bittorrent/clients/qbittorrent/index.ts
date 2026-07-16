@@ -6,6 +6,7 @@ import type {
     BittorrentFileSelection,
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
+    BittorrentTorrentDetailsFile,
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT, serverOriginUrl, serverUrl, urlPath } from "@main/lib/bittorrent/helpers"
@@ -16,6 +17,62 @@ import type { QBittorrentBaseApi } from "./base-api"
 
 const QBITTORRENT_PRIORITY_SKIP = 0
 const QBITTORRENT_PRIORITY_NORMAL = 1
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null
+}
+
+function normalizeTorrentFiles(body: unknown): BittorrentFileSelection[] {
+    if (!Array.isArray(body)) {
+        throw new Error("Invalid torrent files response")
+    }
+
+    return body.map((value, index) => {
+        if (!isRecord(value)) {
+            throw new Error("Invalid torrent file response")
+        }
+
+        const path = typeof value.name === "string" ? value.name : ""
+        const size = typeof value.size === "number" ? value.size : Number.parseInt(String(value.size), 10) || 0
+        const priority = typeof value.priority === "number" ? value.priority : QBITTORRENT_PRIORITY_NORMAL
+
+        return {
+            index: typeof value.index === "number" ? value.index : index,
+            path,
+            name: path.split(/[/\\]/).pop() || "",
+            size,
+            wanted: priority !== QBITTORRENT_PRIORITY_SKIP,
+            priority,
+        }
+    })
+}
+
+function normalizeTorrentDetailsFiles(body: unknown): BittorrentTorrentDetailsFile[] {
+    if (!Array.isArray(body)) {
+        throw new Error("Invalid torrent files response")
+    }
+
+    return body.map((value, index) => {
+        if (!isRecord(value)) {
+            throw new Error("Invalid torrent file response")
+        }
+
+        const path = typeof value.name === "string" ? value.name : ""
+        const priority = typeof value.priority === "number" ? value.priority : QBITTORRENT_PRIORITY_NORMAL
+
+        return {
+            index: typeof value.index === "number" ? value.index : index,
+            path,
+            name: path.split(/[/\\]/).pop() || "",
+            size: typeof value.size === "number" ? value.size : Number.parseInt(String(value.size), 10) || 0,
+            progress: typeof value.progress === "number" ? value.progress : Number(value.progress) || 0,
+            availability: typeof value.availability === "number" ? value.availability : Number(value.availability) || 0,
+            priority,
+            wanted: priority !== QBITTORRENT_PRIORITY_SKIP,
+            isSeed: Boolean(value.is_seed),
+        }
+    })
+}
 
 export class QBittorrentRuntime implements BittorrentRuntime {
     private url(server: BittorrentServerConfig, endpoint?: string) {
@@ -475,12 +532,8 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                     resolve(body || {})
                 })
             }),
-            this.getTorrentFiles(hash),
+            this.fetchTorrentFiles(hash),
         ])
-
-        if (!Array.isArray(files)) {
-            throw new Error("Invalid torrent files response")
-        }
 
         return {
             info: {
@@ -522,27 +575,14 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 uploadSpeed: properties.up_speed ?? null,
                 isPrivate: properties.is_private ?? properties.isPrivate ?? null,
             },
-            files: files.map((file: any, idx: number) => {
-                const priority = file.priority != null ? Number(file.priority) : undefined
-                return {
-                    index: file.index != null ? Number(file.index) : idx,
-                    path: file.name || "",
-                    name: (file.name || "").split(/[/\\]/).pop() || "",
-                    size: typeof file.size === "number" ? file.size : (parseInt(String(file.size), 10) || 0),
-                    progress: typeof file.progress === "number" ? file.progress : Number(file.progress) || 0,
-                    availability: typeof file.availability === "number" ? file.availability : Number(file.availability) || 0,
-                    priority,
-                    wanted: priority !== QBITTORRENT_PRIORITY_SKIP,
-                    isSeed: Boolean(file.is_seed),
-                }
-            }),
+            files: normalizeTorrentDetailsFiles(files),
         }
     }
 
-    getTorrentFiles(hash: string): Promise<any> {
+    private fetchTorrentFiles(hash: string): Promise<unknown> {
         const api = this.getApi()
         return new Promise((resolve, reject) => {
-            api.getJson("torrents/files", { qs: { hash } }, (err: any, _res: any, body: any) => {
+            api.getJson("torrents/files", { qs: { hash } }, (err: unknown, _res: unknown, body: unknown) => {
                 if (err) {
                     reject(err)
                     return
@@ -551,6 +591,10 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 resolve(body)
             })
         })
+    }
+
+    async getTorrentFiles(hash: string): Promise<BittorrentFileSelection[]> {
+        return normalizeTorrentFiles(await this.fetchTorrentFiles(hash))
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {
