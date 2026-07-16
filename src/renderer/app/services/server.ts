@@ -1,4 +1,5 @@
 import _ from "underscore"
+import type { IPromise, IQService } from "angular"
 import { Torrent } from "@renderer/app/bittorrent"
 import type { TorrentClient } from "@renderer/app/bittorrent/torrentclient"
 import type { ColumnProps } from "@renderer/app/services/column"
@@ -20,6 +21,7 @@ type BittorrentService = {
 type BittorrentClientMetadata = Record<string, { name: string, icon: string }>
 
 type ServerDependencies = {
+    $q: IQService
     $notify: NotificationService
     $bittorrent: BittorrentService
     $btclients: BittorrentClientMetadata
@@ -218,38 +220,38 @@ export class Server implements Omit<StoredServerConfig, "columns"> {
         this.path = client?.defaultPath ? client.defaultPath() : "/"
     }
 
-    connect(): Promise<void> {
-        const { $notify, $bittorrent } = Server.dependencies
+    connect(): IPromise<void> {
+        const { $q, $notify, $bittorrent } = Server.dependencies
         Object.assign(this, sanitizeServerAddress(this))
 
         if (!this.client) {
             $notify.alert("Opps!", "Please select a client to connect to!")
-            return Promise.reject()
+            return $q.reject()
         }
 
-        return $bittorrent.getClient(this.client).connect(this).catch((err: any) => {
+        return $q.when($bittorrent.getClient(this.client).connect(this) as any).catch((err: any) => {
             this.isConnected = false
             if (this.isHTTPS() && (err?.kind === "tls" || isTlsCertificateError(err))) {
                 return this.askForCertificate().then(() => this.connect())
             }
             if (!isStaleConnectionError(err)) $notify.alertAuth(err)
-            return Promise.reject(err)
+            return $q.reject(err)
         }).then(() => {
             this.isConnected = true
             $bittorrent.setServer(this)
-            return Promise.resolve()
+            return $q.resolve()
         })
     }
 
-    askForCertificate(): Promise<void> {
-        const { certificateResponseService } = Server.dependencies
+    askForCertificate(): IPromise<void> {
+        const { $q, certificateResponseService } = Server.dependencies
         const response = certificateResponseService.wait(this.id)
 
         window.electorrent.certificates.fetch({ server: this.json() }).catch((err: unknown) => {
             certificateResponseService.reject(this.id, err)
         })
 
-        return Promise.resolve(response).then((result) => {
+        return $q.when(response as any).then((result) => {
             if ("tlsSecurity" in result) {
                 this.tlsSecurity = "insecure"
                 this.certificate = undefined
@@ -259,7 +261,7 @@ export class Server implements Omit<StoredServerConfig, "columns"> {
 
             this.tlsSecurity = "default"
             this.certificate = result.fingerprint
-            return window.electorrent.certificates.load(result.fingerprint).then((certificateData) => {
+            return $q.when(window.electorrent.certificates.load(result.fingerprint) as any).then((certificateData) => {
                 this.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
             })
         })
@@ -334,8 +336,9 @@ function s4(): string {
     return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
 }
 
-export const serverService = ["notificationService", "$bittorrent", "$btclients", "certificateResponseService",
-    ($notify: NotificationService, $bittorrent: BittorrentService, $btclients: BittorrentClientMetadata, certificateResponseService: CertificateResponseService) => Server.configure({
+export const serverService = ["$q", "notificationService", "$bittorrent", "$btclients", "certificateResponseService",
+    ($q: IQService, $notify: NotificationService, $bittorrent: BittorrentService, $btclients: BittorrentClientMetadata, certificateResponseService: CertificateResponseService) => Server.configure({
+        $q,
         $notify,
         $bittorrent,
         $btclients,
