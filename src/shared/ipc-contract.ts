@@ -411,6 +411,8 @@ export interface ElectorrentBridge {
         command(command: WindowCommand): Promise<void>
     }
     menu: {
+        getModel(): Promise<import("./title-menu").TitleMenuItem[]>
+        onChanged(callback: (menu: import("./title-menu").TitleMenuItem[]) => void): Unsubscribe
         onAction(callback: (action: MenuAction) => void): Unsubscribe
     }
     clipboard: {

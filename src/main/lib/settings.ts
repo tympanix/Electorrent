@@ -6,6 +6,7 @@ import type { AppSettings } from '@shared/ipc-contract'
 import * as electorrent from './electorrent'
 
 let data: any = null
+const changeListeners = new Set<() => void>()
 
 type MainAppSettings = AppSettings & {
     debugMode?: boolean
@@ -172,6 +173,7 @@ function mergeWithDefaults<T>(defaults: T, value: any): T {
 export function put(key: string, value: any, callback?: (err?: Error | null) => void) {
     load()
     data[key] = value
+    notifyChanged()
     if (callback !== undefined) {
         save(callback)
     }
@@ -193,6 +195,7 @@ export function write() {
 export function saveAll(settings: any, callback?: (err?: Error | null) => void) {
     load()
     data = mergeWithDefaults(defaultSettings, settings)
+    notifyChanged()
     if (callback !== undefined) {
         save(callback)
     }
@@ -205,4 +208,13 @@ export function get(key: string) {
         value = copy(data[key])
     }
     return value
+}
+
+export function subscribe(listener: () => void) {
+    changeListeners.add(listener)
+    return () => changeListeners.delete(listener)
+}
+
+function notifyChanged() {
+    changeListeners.forEach((listener) => listener())
 }

@@ -166,8 +166,11 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
             })
         })
 
-        menu.refresh()
         await onSettingsSaved?.(newSettings)
+    })
+
+    ipcMain.handle(IPC_CHANNELS.menu.getModel, async function() {
+        return menu.getModel()
     })
 
     ipcMain.handle(IPC_CHANNELS.settings.listThemes, async function() {
@@ -215,10 +218,8 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
-        menu.setActiveServer(server, false)
         try {
             const connection = await bittorrentManager.connect(event.sender, server)
-            menu.setActiveServer(server, true)
             await onBittorrentConnected?.()
             return { ok: true, connection }
         } catch (error) {
@@ -228,7 +229,6 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.disconnect, async function(event: IpcMainInvokeEvent) {
         await bittorrentManager.disconnect(event.sender)
-        menu.setActiveServer(null)
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.getSnapshot, async function(event: IpcMainInvokeEvent, { fullUpdate } = {}) {
