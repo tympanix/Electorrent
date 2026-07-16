@@ -79,8 +79,8 @@ import { httpFormService } from "@renderer/app/services/httpFormService"
 torrentApp.factory("httpFormService", httpFormService)
 import { bittorrentService } from "@renderer/app/services/bittorrent"
 torrentApp.service("$bittorrent", bittorrentService)
-import { settingsService } from "@renderer/app/services/settings"
-torrentApp.service("settingsService", settingsService)
+import { SettingsService } from "@renderer/app/services/settings"
+torrentApp.service("settingsService", SettingsService)
 import { notificationService } from "@renderer/app/services/notification"
 torrentApp.service("notificationService", notificationService)
 import { CertificateResponseService } from "@renderer/app/services/certificate-response"

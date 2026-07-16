@@ -1,199 +1,130 @@
-import { IRootScopeService } from "angular";
-import type { AppSettings, StoredServerConfig } from "@shared/ipc-contract";
-import type { Server } from "@renderer/app/services/server";
+import type { IRootScopeService } from "angular"
+import type { AppSettings, StoredServerConfig } from "@shared/ipc-contract"
+import { Server } from "@renderer/app/services/server"
 
-export interface SettingsService {
-    whenReady(): Promise<AppSettings<Server>>
-    initSettings(): Promise<AppSettings<Server>>
-    appendServer(server: Server): void
-    getAllSettings(): AppSettings<Server>
-    getAllSettingsCopy(): AppSettings<Server>
-    setCurrentServerAsDefault(): void
-    setDefault(server: Server, skipSave?: boolean): void
-    saveAllSettings(newSettings?: Partial<AppSettings<Server>>): Promise<void>
-    trustCertificate(certificate: { fingerprint: string }): Promise<void>
-    enableInsecureTls(serverId: string): Promise<void>
-    disableInsecureTls(server: Server): Promise<void>
-    saveServer(server: Server): Promise<void>
-    saveServer(ip: string, port: number, user: string, password: string, client: string): Promise<void>
-    removeServer(server: Server): void
-    updateServer(server: Partial<Server> & Pick<Server, "id">): Promise<void>
-    getServer(id: string): Server | undefined
-    getServers(): Server[]
-    getDefaultServer(): Server | undefined
-    getRecentServer(): Server | undefined
+type NotificationService = {
+    alert(title: string, message: string): void
+    warning(title: string, message: string): void
+    ok(title: string, message: string): void
 }
 
-export let settingsService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
-    const electorrent = window.electorrent
+type BittorrentService = {
+    setServer(server: Server): void
+}
 
-    var settings: AppSettings<any> = {
-        startup: 'default',
-        systemStartup: 'disabled',
+type ServerConstructor = typeof Server
+
+export class SettingsService {
+    static $inject = ["$rootScope", "$bittorrent", "notificationService", "Server"]
+
+    private readonly settings: AppSettings<Server> = {
+        startup: "default",
+        systemStartup: "disabled",
         refreshRate: 2000,
         automaticUpdates: true,
         closeToTray: true,
         debugMode: false,
         autoRemoveTorrents: false,
         alwaysPromptUploadOptions: false,
-        watchDirectory: '',
+        watchDirectory: "",
         ui: {
-            resizeMode: '',
+            resizeMode: "",
             notifications: true,
-            displaySize: 'normal',
+            displaySize: "normal",
             displayCompact: false,
             cleanNames: true,
             fixedHeader: false,
-            theme: 'system',
+            theme: "system",
             sidebarCollapsed: false,
         },
         servers: [],
-        certificates: []
-    };
+        certificates: [],
+    }
 
-    function loadServerCertificate(server: any) {
-        if (server?.tlsSecurity === "insecure") {
-            server.certificate = undefined
-            server.certificateData = undefined
-            return Promise.resolve()
-        }
+    private readonly readyPromise: Promise<AppSettings<Server>>
 
-        if (!server?.certificate) {
-            server.certificateData = undefined
-            return Promise.resolve()
-        }
+    constructor(
+        private readonly $rootScope: IRootScopeService,
+        private readonly $bittorrent: BittorrentService,
+        private readonly $notify: NotificationService,
+        private readonly ServerClass: ServerConstructor,
+    ) {
+        this.readyPromise = window.electorrent.settings.getAll().then((settings: AppSettings<StoredServerConfig>) => {
+            this.mergeSettings(settings)
+            return this.loadServerCertificates(this.settings.servers).then(() => this.settings)
+        })
 
-        return electorrent.certificates.load(server.certificate).then((certificateData) => {
-            server.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
+        this.$rootScope.$on("certificate-installed", (_event: unknown, serverId: string, fingerprint: string) => {
+            const server = this.getServer(serverId)
+            if (!server) return
+
+            server.tlsSecurity = "default"
+            server.certificate = fingerprint
+            this.loadServerCertificate(server)
+                .then(() => this.saveAllSettings())
+                .catch((err: unknown) => this.$notify.alert("Certificate cache error", String(err)))
         })
     }
 
-    function loadServerCertificates(servers: any[]) {
-        return Promise.all(servers.map((server) => loadServerCertificate(server))).then(() => undefined)
+    whenReady(): Promise<AppSettings<Server>> {
+        return this.readyPromise
     }
 
-    function hydrateServer(server: any) {
-        return typeof server?.connect === "function" ? server : new Server(server)
+    initSettings(): Promise<AppSettings<Server>> {
+        return this.readyPromise
     }
 
-    function replaceServers(servers: any[]) {
-        settings.servers.splice(0, settings.servers.length, ...servers.map((server) => hydrateServer(server)))
+    appendServer(server: Server): void {
+        this.settings.servers.push(server)
     }
 
-    function mergeSettings(newSettings: Partial<AppSettings<any>>) {
-        const { servers, ui, ...rest } = newSettings
-        Object.assign(settings, rest)
-        settings.ui = Object.assign({}, settings.ui, ui || {})
-        if (Array.isArray(servers)) {
-            replaceServers(servers)
-        }
+    getAllSettings(): AppSettings<Server> {
+        return this.settings
     }
 
-    const readyPromise = electorrent.settings.getAll().then((org: AppSettings<StoredServerConfig>) => {
-        mergeSettings(org)
-        return loadServerCertificates(settings.servers).then(() => settings)
-    });
+    getAllSettingsCopy(): AppSettings<Server> {
+        return angular.copy(this.settings)
+    }
 
-    $rootScope.$on("certificate-installed", (_event: unknown, serverId: string, fingerprint: string) => {
-        const server = this.getServer(serverId)
-        if (!server) {
+    setCurrentServerAsDefault(): void {
+        if (!this.$rootScope.$server) {
+            this.$notify.warning("Can't set default server", "You need to chose a server to set it as default")
             return
         }
-
-        server.tlsSecurity = "default"
-        server.certificate = fingerprint
-        loadServerCertificate(server).then(() => {
-            return this.saveAllSettings()
-        }).catch((err: unknown) => {
-            $notify.alert("Certificate cache error", String(err))
-        })
-    })
-
-    this.whenReady = function() {
-        return readyPromise;
+        this.setDefault(this.$rootScope.$server)
     }
 
-    this.initSettings = function() {
-        return readyPromise;
-    }
-
-    function isDefault(server) {
-        return server.default === true
-    }
-
-    this.appendServer = function(server) {
-        settings.servers.push(server)
-    }
-
-    this.getAllSettings = function() {
-        return settings;
-    }
-
-    this.getAllSettingsCopy = function() {
-      return angular.copy(settings)
-    }
-
-    this.setCurrentServerAsDefault = function() {
-        if (!$rootScope.$server) {
-            $notify.warning('Can\'t set default server', 'You need to chose a server to set it as default')
-        }
-        this.setDefault($rootScope.$server)
-    }
-
-    this.setDefault = function(server, skipsave) {
-        let found = this.getServer(server.id)
+    setDefault(server: Server, skipSave?: boolean): void {
+        const found = this.getServer(server.id)
         if (!found) return
-        settings.servers.forEach(function(value) {
+        this.settings.servers.forEach((value) => {
             value.default = false
         })
         found.default = true
-        if (!skipsave) {
+        if (!skipSave) {
             this.saveAllSettings().then(() => {
-                $notify.ok('Default server saved', 'You default server is now ' + server.getNameAtAddress())
-            }).catch(function() {
-                $notify.alert('I/O Error', 'Could not save default server. Local configuration file could not be written to?!')
+                this.$notify.ok("Default server saved", "You default server is now " + server.getNameAtAddress())
+            }).catch(() => {
+                this.$notify.alert("I/O Error", "Could not save default server. Local configuration file could not be written to?!")
             })
         }
     }
 
-    function settingsToJson() {
-        let copy: any = {}
-        angular.copy(settings, copy)
-        copy.servers = copy.servers.map((server) => {
-            return server.json()
-        })
-        return copy
+    saveAllSettings(newSettings?: Partial<AppSettings<Server>>): Promise<void> {
+        if (newSettings) this.mergeSettings(newSettings)
+        return this.loadServerCertificates(this.settings.servers)
+            .then(() => window.electorrent.settings.saveAll(this.settingsToJson()))
+            .then(() => this.updateServerReference())
     }
 
-
-    this.saveAllSettings = function(newSettings) {
-        if (newSettings) {
-            mergeSettings(newSettings)
-        }
-        return loadServerCertificates(settings.servers).then(() => electorrent.settings.saveAll(settingsToJson())).then(function() {
-            updateServerReference()
-        });
-    }
-
-    function updateServerReference() {
-      if (!$rootScope.$server) return
-      let server = settings.servers.find(function(s) {
-          return s.id === $rootScope.$server.id
-      })
-      if (!server) return
-      $bittorrent.setServer(server)
-    }
-
-    this.trustCertificate = function(cert) {
-        settings.certificates.push(cert.fingerprint)
+    trustCertificate(certificate: { fingerprint: string }): Promise<void> {
+        this.settings.certificates.push(certificate.fingerprint)
         return this.saveAllSettings()
     }
 
-    this.enableInsecureTls = function(serverId: string) {
+    enableInsecureTls(serverId: string): Promise<void> {
         const server = this.getServer(serverId)
-        if (!server) {
-            return $q.reject(`Server with id ${serverId} not found`)
-        }
+        if (!server) return Promise.reject(`Server with id ${serverId} not found`)
 
         server.tlsSecurity = "insecure"
         server.certificate = undefined
@@ -201,56 +132,97 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
         return this.saveAllSettings()
     }
 
-    this.disableInsecureTls = function(server) {
+    disableInsecureTls(server: Server): Promise<void> {
         server.tlsSecurity = "default"
         return this.saveAllSettings()
     }
 
-    this.saveServer = function(ip, port, user, password, client) {
-        if(arguments.length === 1) {
-            this.appendServer(arguments[0]);
-        } else {
-            this.appendServer(new Server(ip, port, user, password, client))
-        }
+    saveServer(server: Server): Promise<void>
+    saveServer(ip: string, port: number, user: string, password: string, client: string): Promise<void>
+    saveServer(serverOrIp: Server | string, port?: number, user?: string, password?: string, client?: string): Promise<void> {
+        const server = typeof serverOrIp === "string"
+            ? new this.ServerClass(serverOrIp, port, user, password, client)
+            : serverOrIp
+        this.appendServer(server)
         return this.saveAllSettings()
     }
 
-    this.removeServer = function(server) {
-        settings.servers = settings.servers.filter((s) => {
-            return s.id !== server.id
-        })
+    removeServer(server: Server): void {
+        this.settings.servers.splice(0, this.settings.servers.length, ...this.settings.servers.filter((candidate) => candidate.id !== server.id))
     }
 
-    this.updateServer = function(update) {
-        let server = this.getServer(update.id);
-        if(!server) return $q.reject('Server with id ' + update.id + ' not found')
+    updateServer(update: Partial<Server> & Pick<Server, "id">): Promise<void> {
+        const server = this.getServer(update.id)
+        if (!server) return Promise.reject("Server with id " + update.id + " not found")
         angular.merge(server, update)
         return this.saveAllSettings()
     }
 
-    this.getServer = function(id) {
-        return settings.servers.find((server) => server.id === id)
+    getServer(id: string): Server | undefined {
+        return this.settings.servers.find((server) => server.id === id)
     }
 
-    this.getServers = function() {
-        return settings.servers
+    getServers(): Server[] {
+        return this.settings.servers
     }
 
-    this.getDefaultServer = function() {
-        if (settings.servers.length === 1) {
-            return settings.servers[0]
+    getDefaultServer(): Server | undefined {
+        if (this.settings.servers.length === 1) return this.settings.servers[0]
+        return this.settings.servers.find((server) => server.default === true)
+    }
+
+    getRecentServer(): Server | undefined {
+        return this.settings.servers.reduce<Server | undefined>((mostRecent, server) => {
+            if (!mostRecent || (server.lastused || -1) > (mostRecent.lastused || -1)) return server
+            return mostRecent
+        }, undefined)
+    }
+
+    private loadServerCertificate(server: Server): Promise<void> {
+        if (server.tlsSecurity === "insecure") {
+            server.certificate = undefined
+            server.certificateData = undefined
+            return Promise.resolve()
         }
-        return settings.servers.find(isDefault)
-    }
-
-    this.getRecentServer = function() {
-        let maxServer = settings.servers[0]
-        settings.servers.forEach(function(server){
-            if (server.lastused > maxServer.lastused){
-                maxServer = server
-            }
+        if (!server.certificate) {
+            server.certificateData = undefined
+            return Promise.resolve()
+        }
+        return window.electorrent.certificates.load(server.certificate).then((certificateData) => {
+            server.certificateData = certificateData ? new Uint8Array(certificateData) : undefined
         })
-        return maxServer
     }
 
-}];
+    private loadServerCertificates(servers: Server[]): Promise<void> {
+        return Promise.all(servers.map((server) => this.loadServerCertificate(server))).then(() => undefined)
+    }
+
+    private hydrateServer(server: Server | StoredServerConfig): Server {
+        return typeof (server as Server)?.connect === "function" ? server as Server : new this.ServerClass(server as StoredServerConfig)
+    }
+
+    private replaceServers(servers: Array<Server | StoredServerConfig>): void {
+        this.settings.servers.splice(0, this.settings.servers.length, ...servers.map((server) => this.hydrateServer(server)))
+    }
+
+    private mergeSettings(newSettings: Partial<AppSettings<Server | StoredServerConfig>>): void {
+        const { servers, ui, ...rest } = newSettings
+        Object.assign(this.settings, rest)
+        this.settings.ui = Object.assign({}, this.settings.ui, ui || {})
+        if (Array.isArray(servers)) this.replaceServers(servers)
+    }
+
+    private settingsToJson(): AppSettings<StoredServerConfig> {
+        const copy = angular.copy(this.settings) as AppSettings<Server>
+        return {
+            ...copy,
+            servers: this.settings.servers.map((server) => server.json()),
+        }
+    }
+
+    private updateServerReference(): void {
+        if (!this.$rootScope.$server) return
+        const server = this.settings.servers.find((candidate) => candidate.id === this.$rootScope.$server.id)
+        if (server) this.$bittorrent.setServer(server)
+    }
+}
