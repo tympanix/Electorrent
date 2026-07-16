@@ -186,10 +186,6 @@ export function getDefaultSettings() {
     return copy(defaultSettings)
 }
 
-export function settingsReference() {
-    return data
-}
-
 export function write() {
     saveSync()
 }
@@ -209,35 +205,4 @@ export function get(key: string) {
         value = copy(data[key])
     }
     return value
-}
-
-export function getServer(id: string) {
-    load()
-    return data.servers.find((s: { id: string }) => s.id === id)
-}
-
-export function saveServer(server: { id: string }, callback: (err?: Error | null) => void) {
-    load()
-    let ok = false
-    data.servers = data.servers.map((s: { id: string }) => {
-        if (s.id === server.id) {
-            ok = true
-            return Object.assign(s, server)
-        }
-        return s
-    })
-
-    if (!ok) {
-        return callback(new Error('Could not save server. Server not found'))
-    }
-
-    save(callback)
-}
-
-export function unset(key: string, callback: (err?: Error | null) => void) {
-    load()
-    if (key in data) {
-        delete data[key]
-        save(callback)
-    }
 }
