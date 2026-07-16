@@ -58,11 +58,21 @@ describe("torrent details", function () {
 
     const filesTab = panel.$("[data-role='torrent-details-files']")
     const expectedFile = torrentMetadata.files?.[0]
+    const expectedPath = expectedFile?.path || ""
+    const torrentRoot = `${torrentMetadata.name || ""}/`
+    const expectedRelativePath = expectedPath.startsWith(torrentRoot)
+      ? expectedPath.slice(torrentRoot.length)
+      : expectedPath
+    const expectedPaths = new Set([expectedPath, expectedRelativePath].filter(Boolean))
 
-    await eventually(() => filesTab.getText()).contains(expectedFile?.path || "", { timeout: 30_000 })
+    await eventually(() => filesTab.getText()).satisfies(
+      `contain a client-normalized path for ${expectedPath}`,
+      (text) => Array.from(expectedPaths).some((path) => text.includes(path)),
+      { timeout: 30_000 },
+    )
 
     const filesText = await filesTab.getText()
-    filesText.should.contain(expectedFile?.path || "")
+    Array.from(expectedPaths).some((path) => filesText.includes(path)).should.equal(true)
     filesText.should.contain(formatBytes(expectedFile?.length || 0))
 
     const progressBar = filesTab.$(".torrent-details-file-progress .bar")
