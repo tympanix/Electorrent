@@ -826,6 +826,55 @@ torrent-sidebar + .main-panel {
                 margin: 0;
             }
         }
+
+        .torrent-details-files-error {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            margin: 0;
+        }
+
+        .torrent-details-file-checkbox {
+            min-height: 17px;
+            min-width: 17px;
+        }
+
+        .torrent-details-file-name {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            cursor: default;
+
+            > span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .torrent-details-folder-row .torrent-details-file-name {
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .torrent-details-folder-toggle.ui.button {
+            flex: 0 0 18px;
+            width: 18px;
+            min-height: 18px;
+            margin: 0 2px 0 0;
+            padding: 0;
+            border: 0;
+            box-shadow: none;
+
+            .icon {
+                width: auto;
+                margin: 0;
+            }
+        }
+
+        .torrent-details-file-icon {
+            flex: 0 0 18px;
+            margin: 0 2px 0 0;
+        }
     }
 
     .status-bar {

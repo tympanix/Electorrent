@@ -3,7 +3,7 @@ import parseTorrent from "parse-torrent"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
 import { configureSpec, formatBytes, getTestFixture, requireFeature } from "../../framework/fixture"
-import { createSlowTorrentFile } from "../../torrent"
+import { createTorrentFile } from "../../torrent"
 
 const tracker = getTestFixture().tracker
 describe("torrent details", function () {
@@ -14,7 +14,15 @@ describe("torrent details", function () {
   let torrentMetadata: parseTorrent.Instance
 
   before(async function () {
-    const filename = await createSlowTorrentFile(tracker)
+    const filename = await createTorrentFile(tracker, {
+      files: {
+        "documents/readme.txt": 100_000,
+        "documents/guides/setup.txt": 100_000,
+        "media/preview.jpg": 100_000,
+      },
+      downloadSpeed: 1,
+      uploadSpeed: 1,
+    })
     torrentMetadata = parseTorrent(fs.readFileSync(filename)) as parseTorrent.Instance
     torrent = await this.app.uploadTorrent({ filename })
     await torrent.waitForExist()
@@ -59,6 +67,18 @@ describe("torrent details", function () {
 
     const progressBar = filesTab.$(".torrent-details-file-progress .bar")
     await progressBar.waitForExist({ timeout: 10_000 })
+
+    const firstHeaderCheckbox = filesTab.$("thead th:first-child input[type='checkbox']")
+    await firstHeaderCheckbox.waitForExist({ timeout: 10_000 })
+
+    const folderRow = filesTab.$("tbody tr.torrent-details-folder-row")
+    await folderRow.waitForDisplayed({ timeout: 10_000 })
+    const visibleRowsBeforeCollapse = await filesTab.$$("tbody tr")
+    const rowCountBeforeCollapse = await visibleRowsBeforeCollapse.length
+
+    await folderRow.$(".torrent-details-folder-toggle").click()
+    await eventually(async () => (await filesTab.$$("tbody tr")).length)
+      .satisfies("decrease after collapsing a folder", (count) => count < rowCountBeforeCollapse)
 
     await torrent.closeDetailsPanel()
   })

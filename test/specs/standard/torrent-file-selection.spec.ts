@@ -1,6 +1,7 @@
 import chai from "chai"
 import { $ } from "@wdio/globals"
 import * as e2e from "../../e2e"
+import { eventually } from "../../e2e/eventually"
 import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
 import { configureSpec, getTestFixture, requireFeature } from "../../framework/fixture"
 import { createSlowTorrentFile } from "../../torrent"
@@ -23,6 +24,30 @@ describe("torrent file selection", function () {
     if (torrent && await torrent.isExisting()) {
       await torrent.delete()
     }
+  })
+
+  it("persists file wanted state via torrent details", async function () {
+    this.timeout(60 * 1000)
+
+    const panel = await torrent.openDetailsPanel()
+    await torrent.openDetailsTab("files")
+
+    const firstFileCheckbox = panel.$("[data-role='torrent-details-file-checkbox']")
+    await firstFileCheckbox.waitForEnabled({ timeout: 30_000 })
+
+    const initialSelected = await firstFileCheckbox.isSelected()
+    await firstFileCheckbox.click()
+    await eventually(() => firstFileCheckbox.isSelected()).equals(!initialSelected)
+
+    await torrent.closeDetailsPanel()
+    const reopenedPanel = await torrent.openDetailsPanel()
+    await torrent.openDetailsTab("files")
+
+    const checkboxAfter = reopenedPanel.$("[data-role='torrent-details-file-checkbox']")
+    await checkboxAfter.waitForEnabled({ timeout: 30_000 })
+    await eventually(() => checkboxAfter.isSelected()).equals(!initialSelected)
+
+    await torrent.closeDetailsPanel()
   })
 
   it("persists file wanted state via Files modal", async function () {

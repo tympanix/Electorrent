@@ -69,6 +69,9 @@
       ng-if="!ctl.showStateMessage() && ctl.isActiveTab('files')"
     >
       <div class="torrent-details-files-content">
+        <div class="ui tiny negative message torrent-details-files-error" ng-if="ctl.scope.selectionError">
+          {{ ctl.scope.selectionError }}
+        </div>
         <table
           id="torrentDetailsFilesTable"
           data-role="torrent-details-files-table"
@@ -93,29 +96,73 @@
                 rz-col="column.id"
                 sort="column.id"
               >
-                <span class="torrent-details-files-header-label">{{ column.label }}</span>
+                <div ng-if="column.id === 'wanted'" class="ui checkbox torrent-details-file-checkbox">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all files"
+                    data-role="torrent-details-files-select-all"
+                    ng-checked="ctl.allFilesWanted()"
+                    indeterminate-value="ctl.allFilesSelectionIndeterminate()"
+                    ng-disabled="!ctl.canSelectFiles() || ctl.scope.selectionUpdating"
+                    ng-click="ctl.toggleAllFiles($event)"
+                  />
+                  <label></label>
+                </div>
+                <span ng-if="column.id !== 'wanted'" class="torrent-details-files-header-label">{{ column.label }}</span>
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr ng-repeat="file in ctl.scope.sortedFiles track by file.index" data-file-index="{{ file.index }}">
+            <tr
+              ng-repeat="row in ctl.scope.sortedFiles track by row.key"
+              ng-class="{ 'torrent-details-folder-row': row.isDirectory }"
+              data-file-index="{{ row.file.index }}"
+              data-file-path="{{ row.data.path }}"
+            >
               <td ng-repeat="column in ctl.scope.panel.files.columns track by column.id" data-col="{{ column.id }}">
                 <div ng-if="column.id === 'wanted'" class="torrent-details-file-cell">
-                  <i
-                    ng-if="file.wanted"
-                    class="tiny check icon"
-                    data-role="torrent-details-file-wanted-check"
-                    aria-label="Wanted"
-                  ></i>
+                  <div class="ui checkbox torrent-details-file-checkbox">
+                    <input
+                      type="checkbox"
+                      aria-label="{{ row.isDirectory ? 'Select folder ' : 'Select file ' }}{{ row.data.name }}"
+                      data-role="torrent-details-file-checkbox"
+                      ng-checked="ctl.rowWanted(row)"
+                      indeterminate-value="ctl.rowSelectionIndeterminate(row)"
+                      ng-disabled="!ctl.canSelectFiles() || ctl.scope.selectionUpdating"
+                      ng-click="ctl.toggleRowSelection(row, $event)"
+                    />
+                    <label></label>
+                  </div>
                 </div>
                 <div ng-if="column.id !== 'wanted'" ng-switch="column.format" class="torrent-details-file-cell">
                   <div ng-switch-when="progress" class="torrent-details-file-progress">
                     <div class="ui tiny indicating progress">
-                      <div class="bar" ng-style="{ width: ctl.fileProgressPercent(file) + '%' }"></div>
+                      <div class="bar" ng-style="{ width: ctl.fileProgressPercent(row.data) + '%' }"></div>
                     </div>
-                    <span>{{ ctl.fileProgressPercent(file) | number:1 }}%</span>
+                    <span>{{ ctl.fileProgressPercent(row.data) | number:1 }}%</span>
                   </div>
-                  <span ng-switch-default>{{ ctl.formatFileCell(column, file) }}</span>
+                  <div
+                    ng-switch-default
+                    ng-if="column.id === 'name'"
+                    class="torrent-details-file-name"
+                    ng-style="{ 'padding-left': (row.depth * 18) + 'px' }"
+                    title="{{ row.data.path }}"
+                    ng-click="row.isDirectory && ctl.toggleFolder(row, $event)"
+                  >
+                    <button
+                      ng-if="row.isDirectory"
+                      type="button"
+                      class="ui icon basic button torrent-details-folder-toggle"
+                      aria-label="{{ ctl.isFolderExpanded(row) ? 'Collapse' : 'Expand' }} {{ row.data.name }}"
+                      aria-expanded="{{ ctl.isFolderExpanded(row) }}"
+                      ng-click="ctl.toggleFolder(row, $event)"
+                    >
+                      <i class="icon" ng-class="ctl.isFolderExpanded(row) ? 'caret down' : 'caret right'"></i>
+                    </button>
+                    <i ng-if="!row.isDirectory" class="file outline icon torrent-details-file-icon"></i>
+                    <span>{{ row.data.name }}</span>
+                  </div>
+                  <span ng-switch-default ng-if="column.id !== 'name'">{{ ctl.formatFileCell(column, row.data) }}</span>
                 </div>
               </td>
             </tr>
