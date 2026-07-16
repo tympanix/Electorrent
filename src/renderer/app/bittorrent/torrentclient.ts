@@ -165,6 +165,7 @@ export interface TorrentDetailsFileColumn {
     label: string
     format?: "text" | "bytes" | "progress" | "percent" | "number"
     sortType?: "alphabetical" | "numeric"
+    sortable?: boolean
 }
 
 export interface TorrentDetailsFileItem extends BittorrentTorrentDetailsFile {
@@ -374,7 +375,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
 
     protected getTorrentDetailsFilesColumns(_torrent: T, _details: BittorrentTorrentDetailsData): TorrentDetailsFileColumn[] {
         return [
-            { id: "wanted", label: "", format: "text", sortType: "alphabetical" },
+            { id: "wanted", label: "", format: "text", sortType: "alphabetical", sortable: false },
             { id: "name", label: "Name", format: "text", sortType: "alphabetical" },
             { id: "size", label: "Size", format: "bytes", sortType: "numeric" },
             { id: "progress", label: "Progress", format: "progress", sortType: "numeric" },

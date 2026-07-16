@@ -835,8 +835,33 @@ torrent-sidebar + .main-panel {
         }
 
         .torrent-details-file-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             min-height: 17px;
             min-width: 17px;
+        }
+
+        .torrent-details-files-content .torrent.table th.torrent-details-file-selection-column,
+        .torrent-details-files-content .torrent.table td[data-col="wanted"] {
+            width: 38px !important;
+            min-width: 25px;
+            max-width: 38px;
+            padding-right: 0;
+            padding-left: 0;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .torrent-details-file-selection-column .rz-handle {
+            display: none;
+        }
+
+        td[data-col="wanted"] .torrent-details-file-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 17px;
         }
 
         .torrent-details-file-name {

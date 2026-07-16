@@ -95,6 +95,8 @@
                 ng-repeat="column in ctl.scope.panel.files.columns track by column.id"
                 rz-col="column.id"
                 sort="column.id"
+                sort-disabled="column.sortable === false"
+                ng-class="{ 'torrent-details-file-selection-column': column.id === 'wanted' }"
               >
                 <div ng-if="column.id === 'wanted'" class="ui checkbox torrent-details-file-checkbox">
                   <input

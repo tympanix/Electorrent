@@ -106,14 +106,23 @@ describe("torrent details", function () {
       .satisfies("be greater than 1", (count) => count > 1, { timeout: 30_000 })
 
     const headers = await filesTable.$$("thead th")
-    const firstHeader = headers[0]
-    const handle = firstHeader.$(".rz-handle")
+    const selectionHeader = headers[0]
+    const selectionWidth = (await selectionHeader.getSize()).width
+    selectionWidth.should.be.at.most(40)
+    const selectionHandleDisplayed = await selectionHeader.$(".rz-handle").isDisplayed()
+    const selectionSortIconExists = await selectionHeader.$(".sorting.icon").isExisting()
+    selectionHandleDisplayed.should.equal(false)
+    selectionSortIconExists.should.equal(false)
+
+    const firstResizableHeader = headers[1]
+    const controlledHeader = headers[2]
+    const handle = firstResizableHeader.$(".rz-handle")
     await handle.waitForDisplayed({ timeout: 10_000 })
 
-    const initialWidth = (await firstHeader.getSize()).width
+    const initialWidth = (await controlledHeader.getSize()).width
     await handle.dragAndDrop({ x: 40, y: 0 })
 
-    await eventually(async () => (await firstHeader.getSize()).width)
+    await eventually(async () => (await controlledHeader.getSize()).width)
       .satisfies(`change by at least 10 from ${initialWidth}`, (nextWidth) => Math.abs(nextWidth - initialWidth) >= 10)
 
     await torrent.closeDetailsPanel()

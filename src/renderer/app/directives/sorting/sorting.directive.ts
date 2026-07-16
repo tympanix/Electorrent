@@ -58,6 +58,12 @@ export class SortDirective implements IDirective {
         const column = $(element);
         scope.sort = scope.$eval(attr.sort || "");
 
+        if (attr.sortDisabled && scope.$eval(attr.sortDisabled)) {
+            scope.update = () => undefined;
+            column.addClass("sorting-disabled");
+            return;
+        }
+
         const setSortingArrow = (sortDesc?: boolean) => {
             if (controller.last) {
                 controller.last.removeClass("sortdown sortup");
