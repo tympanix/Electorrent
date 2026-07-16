@@ -32,8 +32,6 @@ export interface QBittorrentUploadOptions {
   firstLastPiecePrio?: boolean
 }
 
-const QBITTORRENT_PRIORITY_SKIP = 0;
-
 export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     public name = "qBittorrent"
     public id = "qbittorrent"
@@ -169,19 +167,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     }
 
     async getTorrentFiles(torrent: QBittorrentTorrent): Promise<TorrentFile[]> {
-      const body = await getTorrentFiles(torrent.hash);
-      if (!Array.isArray(body)) {
-        throw new Error("Invalid response");
-      }
-
-      return body.map((file: any, idx: number) => ({
-        index: file.index != null ? file.index : idx,
-        path: file.name || "",
-        name: (file.name || "").split(/[/\\]/).pop() || "",
-        size: typeof file.size === "number" ? file.size : (parseInt(String(file.size), 10) || 0),
-        wanted: (file.priority != null ? file.priority : 1) !== QBITTORRENT_PRIORITY_SKIP,
-        priority: file.priority,
-      }));
+      return getTorrentFiles(torrent.hash);
     }
 
     setTorrentFileSelection(torrent: QBittorrentTorrent, files: TorrentFile[]): Promise<void> {

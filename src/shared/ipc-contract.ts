@@ -79,20 +79,20 @@ export interface BittorrentSnapshotRequest {
 
 export interface BittorrentAddTorrentUrlRequest {
     uri: string
-    options?: Record<string, any>
+    options?: TorrentUploadOptions
 }
 
 export interface BittorrentUploadTorrentRequest {
     data: Uint8Array
     filename: string
-    options?: Record<string, any>
+    options?: TorrentUploadOptions
     sourcePath?: string
 }
 
 export interface BittorrentInvokeActionRequest {
     action: string
     hashes?: string[]
-    args?: any[]
+    args?: unknown[]
 }
 
 export interface BittorrentGetTorrentFilesRequest {
@@ -376,7 +376,7 @@ export interface ElectorrentBridge {
     torrents: {
         openFiles(askUploadOptions: boolean): Promise<PendingTorrentUploadFile[]>
         parse(request: ParseTorrentRequest): Promise<TorrentMetadata>
-        getPathForFile(file: unknown): string
+        getPathForFile(file: File): string
     }
     bittorrent: {
         connect(server: BittorrentServerConfig): Promise<BittorrentConnectResult>
@@ -386,7 +386,7 @@ export interface ElectorrentBridge {
         uploadTorrent(request: BittorrentUploadTorrentRequest): Promise<void>
         invokeAction(request: BittorrentInvokeActionRequest): Promise<void>
         getTorrentDetails(request: BittorrentGetTorrentDetailsRequest): Promise<BittorrentTorrentDetailsData>
-        getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<any>
+        getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<BittorrentFileSelection[]>
         setTorrentFileSelection(request: BittorrentSetTorrentFileSelectionRequest): Promise<void>
     }
     updates: {

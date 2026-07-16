@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
 
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { ColorTheme, EditCommand, PendingTorrentUploadFile, PendingTorrentUploadLink, WindowCommand } from '@shared/ipc-contract'
+import type { ColorTheme, ElectorrentBridge, PendingTorrentUploadFile, PendingTorrentUploadLink } from '@shared/ipc-contract'
 
 const INITIAL_THEME_ARGUMENT = '--theme='
 const initialThemeArgument = process.argv.find((argument) => argument.startsWith(INITIAL_THEME_ARGUMENT))
@@ -9,7 +9,7 @@ const initialThemeValue = initialThemeArgument?.slice(INITIAL_THEME_ARGUMENT.len
 const initialTheme: ColorTheme = initialThemeValue === 'dark' ? 'dark' : 'light'
 const nodeEnvironment = process.env["NODE" + "_ENV"]
 
-function invoke<T = unknown>(channel: string, payload?: any): Promise<T> {
+function invoke<T = unknown>(channel: string, payload?: unknown): Promise<T> {
     return ipcRenderer.invoke(channel, payload)
 }
 
@@ -19,7 +19,7 @@ function subscribe<T = unknown>(channel: string, callback: (payload: T) => void)
     return () => ipcRenderer.removeListener(channel, listener)
 }
 
-contextBridge.exposeInMainWorld('electorrent', {
+const electorrentBridge: ElectorrentBridge = {
     app: {
         initialTheme,
         isTestEnvironment: nodeEnvironment === 'test',
@@ -34,7 +34,7 @@ contextBridge.exposeInMainWorld('electorrent', {
     },
     settings: {
         getAll: () => invoke(IPC_CHANNELS.settings.getAll),
-        saveAll: (settings: unknown) => invoke(IPC_CHANNELS.settings.saveAll, { settings }),
+        saveAll: (settings) => invoke(IPC_CHANNELS.settings.saveAll, { settings }),
         listThemes: () => invoke(IPC_CHANNELS.settings.listThemes),
         getSystemTheme: () => invoke(IPC_CHANNELS.settings.getSystemTheme),
         onSystemThemeChanged: (callback: (theme: ColorTheme) => void) => subscribe(IPC_CHANNELS.settings.systemThemeChanged, callback),
@@ -47,45 +47,47 @@ contextBridge.exposeInMainWorld('electorrent', {
     },
     torrents: {
         openFiles: (askUploadOptions: boolean) => invoke(IPC_CHANNELS.torrents.openFiles, { askUploadOptions }),
-        parse: (request: unknown) => invoke(IPC_CHANNELS.torrents.parse, request),
-        getPathForFile: (file: any) => webUtils.getPathForFile(file),
+        parse: (request) => invoke(IPC_CHANNELS.torrents.parse, request),
+        getPathForFile: (file) => webUtils.getPathForFile(file),
     },
     bittorrent: {
-        connect: (server: unknown) => invoke(IPC_CHANNELS.bittorrent.connect, { server }),
+        connect: (server) => invoke(IPC_CHANNELS.bittorrent.connect, { server }),
         disconnect: () => invoke(IPC_CHANNELS.bittorrent.disconnect),
-        getSnapshot: (request?: unknown) => invoke(IPC_CHANNELS.bittorrent.getSnapshot, request || {}),
-        addTorrentUrl: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.addTorrentUrl, request),
-        uploadTorrent: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.uploadTorrent, request),
-        invokeAction: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.invokeAction, request),
-        getTorrentDetails: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.getTorrentDetails, request),
-        getTorrentFiles: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.getTorrentFiles, request),
-        setTorrentFileSelection: (request: unknown) => invoke(IPC_CHANNELS.bittorrent.setTorrentFileSelection, request),
+        getSnapshot: (request) => invoke(IPC_CHANNELS.bittorrent.getSnapshot, request || {}),
+        addTorrentUrl: (request) => invoke(IPC_CHANNELS.bittorrent.addTorrentUrl, request),
+        uploadTorrent: (request) => invoke(IPC_CHANNELS.bittorrent.uploadTorrent, request),
+        invokeAction: (request) => invoke(IPC_CHANNELS.bittorrent.invokeAction, request),
+        getTorrentDetails: (request) => invoke(IPC_CHANNELS.bittorrent.getTorrentDetails, request),
+        getTorrentFiles: (request) => invoke(IPC_CHANNELS.bittorrent.getTorrentFiles, request),
+        setTorrentFileSelection: (request) => invoke(IPC_CHANNELS.bittorrent.setTorrentFileSelection, request),
     },
     updates: {
         check: (verbose?: boolean) => invoke(IPC_CHANNELS.updates.check, { verbose }),
         installDownloaded: () => invoke(IPC_CHANNELS.updates.installDownloaded),
         installAuto: () => invoke(IPC_CHANNELS.updates.installAuto),
-        onStatus: (callback: (event: unknown) => void) => subscribe(IPC_CHANNELS.updates.status, callback),
+        onStatus: (callback) => subscribe(IPC_CHANNELS.updates.status, callback),
     },
     certificates: {
-        fetch: (request: unknown) => invoke(IPC_CHANNELS.certificates.fetch, request),
-        install: (request: unknown) => invoke(IPC_CHANNELS.certificates.install, request),
+        fetch: (request) => invoke(IPC_CHANNELS.certificates.fetch, request),
+        install: (request) => invoke(IPC_CHANNELS.certificates.install, request),
         load: (fingerprint: string) => invoke(IPC_CHANNELS.certificates.load, { fingerprint }),
-        onChallenge: (callback: (prompt: unknown) => void) => subscribe(IPC_CHANNELS.certificates.challenge, callback),
+        onChallenge: (callback) => subscribe(IPC_CHANNELS.certificates.challenge, callback),
     },
     notifications: {
-        onPush: (callback: (notification: unknown) => void) => subscribe(IPC_CHANNELS.notifications.push, callback),
+        onPush: (callback) => subscribe(IPC_CHANNELS.notifications.push, callback),
     },
     edit: {
-        command: (command: EditCommand) => invoke(IPC_CHANNELS.edit.command, { command }),
+        command: (command) => invoke(IPC_CHANNELS.edit.command, { command }),
     },
     window: {
-        command: (command: WindowCommand) => invoke(IPC_CHANNELS.window.command, { command }),
+        command: (command) => invoke(IPC_CHANNELS.window.command, { command }),
     },
     menu: {
-        onAction: (callback: (action: unknown) => void) => subscribe(IPC_CHANNELS.menu.action, callback),
+        onAction: (callback) => subscribe(IPC_CHANNELS.menu.action, callback),
     },
     clipboard: {
         readText: () => invoke(IPC_CHANNELS.clipboard.readText),
     },
-})
+}
+
+contextBridge.exposeInMainWorld('electorrent', electorrentBridge)
