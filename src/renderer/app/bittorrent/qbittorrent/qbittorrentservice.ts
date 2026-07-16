@@ -311,24 +311,29 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         icon: "checkmark",
       },
       {
-        label: "Move Up Queue",
-        click: this.increasePrio,
-        icon: "arrow up",
-      },
-      {
-        label: "Move Queue Down",
-        click: this.decreasePrio,
-        icon: "arrow down",
-      },
-      {
-        label: "Queue Top",
-        click: this.topPrio,
-        icon: "chevron circle up",
-      },
-      {
-        label: "Queue Bottom",
-        click: this.bottomPrio,
-        icon: "chevron circle down",
+        label: "Queue",
+        menu: [
+          {
+            label: "Move Up Queue",
+            click: this.increasePrio,
+            icon: "arrow up",
+          },
+          {
+            label: "Move Queue Down",
+            click: this.decreasePrio,
+            icon: "arrow down",
+          },
+          {
+            label: "Queue Top",
+            click: this.topPrio,
+            icon: "chevron circle up",
+          },
+          {
+            label: "Queue Bottom",
+            click: this.bottomPrio,
+            icon: "chevron circle down",
+          },
+        ],
       },
       {
         label: "Sequential Download",
