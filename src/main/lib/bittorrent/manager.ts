@@ -15,9 +15,23 @@ import * as settings from "../settings"
 import { createRuntime } from "./registry"
 import type { BittorrentRuntime } from "./types"
 
+export interface BittorrentSessionState {
+    activeServerId: string | null
+    activeClientId: string | null
+    isConnected: boolean
+}
+
+const EMPTY_SESSION_STATE: BittorrentSessionState = {
+    activeServerId: null,
+    activeClientId: null,
+    isConnected: false,
+}
+
 class BittorrentManager {
     private sessions = new Map<number, BittorrentRuntime>()
     private pendingConnections = new Map<number, Promise<TorrentClientConnection>>()
+    private sessionStates = new Map<number, BittorrentSessionState>()
+    private sessionListeners = new Set<() => void>()
 
     private async getSession(sender: WebContents) {
         const senderId = sender.id
@@ -55,6 +69,11 @@ class BittorrentManager {
 
     async connect(sender: WebContents, server: BittorrentServerConfig) {
         const senderId = sender.id
+        this.setSessionState(senderId, {
+            activeServerId: server.id || null,
+            activeClientId: server.client || null,
+            isConnected: false,
+        })
         const pendingConnect = (async () => {
             const existing = this.sessions.get(senderId)
             if (existing) {
@@ -73,6 +92,11 @@ class BittorrentManager {
                 throw new Error("Stale bittorrent connection")
             }
             this.sessions.set(senderId, runtime)
+            this.setSessionState(senderId, {
+                activeServerId: server.id || null,
+                activeClientId: server.client || null,
+                isConnected: true,
+            })
             return connection
         })()
 
@@ -95,12 +119,14 @@ class BittorrentManager {
 
         const existing = this.sessions.get(senderId)
         if (!existing) {
+            this.setSessionState(senderId, EMPTY_SESSION_STATE)
             return
         }
         if (typeof existing.disconnect === "function") {
             await existing.disconnect()
         }
         this.sessions.delete(senderId)
+        this.setSessionState(senderId, EMPTY_SESSION_STATE)
     }
 
     async getSnapshot(sender: WebContents, fullUpdate?: boolean) {
@@ -181,6 +207,25 @@ class BittorrentManager {
         }
 
         return this.sessions.has(sender.id)
+    }
+
+    getSessionState(sender: Pick<WebContents, "id"> | null | undefined): BittorrentSessionState {
+        if (!sender) return EMPTY_SESSION_STATE
+        return this.sessionStates.get(sender.id) || EMPTY_SESSION_STATE
+    }
+
+    subscribe(listener: () => void) {
+        this.sessionListeners.add(listener)
+        return () => this.sessionListeners.delete(listener)
+    }
+
+    private setSessionState(senderId: number, state: BittorrentSessionState) {
+        if (state.activeServerId) {
+            this.sessionStates.set(senderId, state)
+        } else {
+            this.sessionStates.delete(senderId)
+        }
+        this.sessionListeners.forEach((listener) => listener())
     }
 }
 

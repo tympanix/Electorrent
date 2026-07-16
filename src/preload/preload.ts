@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron'
 
 import { IPC_CHANNELS } from '@shared/ipc'
 import type { ColorTheme, ElectorrentBridge, PendingTorrentUploadFile, PendingTorrentUploadLink } from '@shared/ipc-contract'
+import type { TitleMenuItem } from '@shared/title-menu'
 
 const INITIAL_THEME_ARGUMENT = '--theme='
 const initialThemeArgument = process.argv.find((argument) => argument.startsWith(INITIAL_THEME_ARGUMENT))
@@ -83,6 +84,8 @@ const electorrentBridge: ElectorrentBridge = {
         command: (command) => invoke(IPC_CHANNELS.window.command, { command }),
     },
     menu: {
+        getModel: () => invoke<TitleMenuItem[]>(IPC_CHANNELS.menu.getModel),
+        onChanged: (callback: (menu: TitleMenuItem[]) => void) => subscribe(IPC_CHANNELS.menu.changed, callback),
         onAction: (callback) => subscribe(IPC_CHANNELS.menu.action, callback),
     },
     clipboard: {

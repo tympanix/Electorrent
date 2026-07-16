@@ -13,9 +13,9 @@
         </button>
         <div class="title-bar-menu-dropdown" ng-if="activeTitleBarMenu === $index" ng-click="$event.stopPropagation()" role="menu">
             <div ng-repeat="item in visibleTitleBarMenuItems(menu) track by $index">
-                <div ng-if="item.separator" class="title-bar-menu-divider" role="separator"></div>
+                <div ng-if="item.type === 'separator'" class="title-bar-menu-divider" role="separator"></div>
                 <button
-                    ng-if="!item.separator"
+                    ng-if="item.type !== 'separator'"
                     type="button"
                     class="title-bar-menu-item"
                     ng-class="{ disabled: item.enabled === false, checked: item.checked }"
