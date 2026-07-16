@@ -498,6 +498,7 @@ export class TorrentDetailsPanelController {
 
     try {
       await client.setTorrentFileSelection(this.scope.torrent, files);
+      this.scheduleDetailsFilesUpdate(this.scope.torrent);
     } catch (err) {
       previous.forEach((entry) => { entry.file.wanted = entry.wanted; });
       this.scope.selectionError = err && err.message ? err.message : "Failed to update file selection";
@@ -506,6 +507,14 @@ export class TorrentDetailsPanelController {
       this.scope.selectionUpdating = false;
       this.scope.$evalAsync();
     }
+  }
+
+  private scheduleDetailsFilesUpdate(torrent: any) {
+    this.scope.$evalAsync(() => {
+      if (this.scope.isOpen && this.scope.torrent === torrent) {
+        void this.loadDetails(torrent);
+      }
+    });
   }
 
   private syncResizeBindings() {

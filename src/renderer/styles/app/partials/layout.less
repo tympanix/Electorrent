@@ -838,8 +838,21 @@ torrent-sidebar + .main-panel {
             display: flex;
             align-items: center;
             justify-content: center;
+            flex: 0 0 17px;
+            width: 17px;
+            height: 17px;
             min-height: 17px;
             min-width: 17px;
+
+            > input,
+            > label {
+                width: 17px;
+                height: 17px;
+            }
+
+            > label {
+                padding: 0;
+            }
         }
 
         .torrent-details-files-content .torrent.table th.torrent-details-file-selection-column,

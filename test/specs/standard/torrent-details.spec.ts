@@ -114,8 +114,21 @@ describe("torrent details", function () {
     selectionHandleDisplayed.should.equal(false)
     selectionSortIconExists.should.equal(false)
 
+    const selectionCell = filesTable.$("tbody td[data-col='wanted']")
+    const selectionCheckbox = selectionCell.$(".torrent-details-file-checkbox")
+    const cellLocation = await selectionCell.getLocation()
+    const cellSize = await selectionCell.getSize()
+    const checkboxLocation = await selectionCheckbox.getLocation()
+    const checkboxSize = await selectionCheckbox.getSize()
+    checkboxLocation.x.should.be.at.least(cellLocation.x)
+    checkboxLocation.y.should.be.at.least(cellLocation.y)
+    const checkboxRight = checkboxLocation.x + checkboxSize.width
+    const checkboxBottom = checkboxLocation.y + checkboxSize.height
+    checkboxRight.should.be.at.most(cellLocation.x + cellSize.width)
+    checkboxBottom.should.be.at.most(cellLocation.y + cellSize.height)
+
     const firstResizableHeader = headers[1]
-    const controlledHeader = headers[2]
+    const controlledHeader = firstResizableHeader
     const handle = firstResizableHeader.$(".rz-handle")
     await handle.waitForDisplayed({ timeout: 10_000 })
 
