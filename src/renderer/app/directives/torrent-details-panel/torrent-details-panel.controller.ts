@@ -51,7 +51,7 @@ export class TorrentDetailsPanelController {
     this.scope.torrent = null;
     this.scope.activeTab = "info";
     this.scope.sortedFiles = [];
-    this.scope.resizeMode = "FixedResizer";
+    this.scope.resizeMode = "OverflowResizer";
     this.scope.resizeProfile = this.getResizeProfile();
     this.scope.panel = {
       info: { sections: [] },
@@ -61,7 +61,7 @@ export class TorrentDetailsPanelController {
     this.scope.$watch(
       () => this.scope.settings?.ui?.resizeMode,
       (resizeMode?: string) => {
-        this.scope.resizeMode = resizeMode || "FixedResizer";
+        this.scope.resizeMode = resizeMode || "OverflowResizer";
       },
     );
 
@@ -305,7 +305,7 @@ export class TorrentDetailsPanelController {
   }
 
   private syncResizeBindings() {
-    this.scope.resizeMode = this.scope.settings?.ui?.resizeMode || "FixedResizer";
+    this.scope.resizeMode = this.scope.settings?.ui?.resizeMode || "OverflowResizer";
     this.scope.resizeProfile = this.getResizeProfile();
   }
 

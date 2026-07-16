@@ -27,7 +27,7 @@ const defaultSettings: MainAppSettings = {
     alwaysPromptUploadOptions: false,
     watchDirectory: '',
     ui: {
-        resizeMode: 'FixedResizer',
+        resizeMode: 'OverflowResizer',
         notifications: true,
         displaySize: 'normal',
         displayCompact: false,
