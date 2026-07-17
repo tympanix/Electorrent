@@ -7,7 +7,7 @@ import type {
     TorrentSpeedLimitOptions,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
-import { connect } from "./ipc"
+import { connect, getTorrentFiles as getTorrentFilesData } from "./ipc"
 
 export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
@@ -182,6 +182,9 @@ export interface TorrentDetailsPanelData {
     }
 }
 
+export type TorrentDetailsInfoData = TorrentDetailsPanelData["info"]
+export type TorrentDetailsFilesData = TorrentDetailsPanelData["files"]
+
 export abstract class TorrentClient<T extends Torrent = Torrent> {
     private resolvedFeatures = DEFAULT_FEATURES
     private clientVersion = ""
@@ -276,18 +279,14 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
     /**
      * Get the list of files for a torrent.
      *
-     * Default implementation always throws:
-     * - when {@link features.fileSelection} is false: Error("File selection not supported for this client")
-     * - when {@link features.fileSelection} is true but the client did not override this method:
-     *   Error("File selection not implemented for this client")
-     *
-     * Concrete clients that support file selection must override this method.
+     * The shared implementation uses the torrent-files IPC for both the details panel and
+     * file-selection UI. Clients advertise at least one of those features when files are available.
      */
-    async getTorrentFiles(torrent: T): Promise<TorrentFile[]> {
-        if (!this.features.fileSelection) {
-            throw new Error("File selection not supported for this client")
+    async getTorrentFiles(torrent: T): Promise<TorrentDetailsFileItem[]> {
+        if (!this.features.fileSelection && !this.features.torrentDetails) {
+            throw new Error("Torrent files not supported for this client")
         }
-        return Promise.reject(new Error("File selection not implemented for this client"))
+        return getTorrentFilesData(torrent.hash)
     }
 
     /**
@@ -343,7 +342,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         return Promise.reject(new Error("Ratio limits not implemented for this client"))
     }
 
-    async getTorrentDetails(torrent: T): Promise<TorrentDetailsPanelData> {
+    async getTorrentDetails(torrent: T): Promise<TorrentDetailsInfoData> {
         if (!this.features.torrentDetails) {
             throw new Error("Torrent details not supported for this client")
         }
@@ -351,13 +350,19 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         const details = await this.getTorrentDetailsData(torrent)
 
         return {
-            info: {
-                sections: this.getTorrentDetailsInfoSections(torrent, details),
-            },
-            files: {
-                columns: this.getTorrentDetailsFilesColumns(torrent, details),
-                items: details.files.map((file) => this.mapTorrentDetailsFile(torrent, details, file)),
-            },
+            sections: this.getTorrentDetailsInfoSections(torrent, details),
+        }
+    }
+
+    async getTorrentDetailsFiles(torrent: T): Promise<TorrentDetailsFilesData> {
+        if (!this.features.torrentDetails) {
+            throw new Error("Torrent details not supported for this client")
+        }
+
+        const files = await this.getTorrentFiles(torrent)
+        return {
+            columns: this.getTorrentDetailsFilesColumns(torrent),
+            items: files.map((file) => this.mapTorrentDetailsFile(torrent, file)),
         }
     }
 
@@ -373,7 +378,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         return []
     }
 
-    protected getTorrentDetailsFilesColumns(_torrent: T, _details: BittorrentTorrentDetailsData): TorrentDetailsFileColumn[] {
+    protected getTorrentDetailsFilesColumns(_torrent: T): TorrentDetailsFileColumn[] {
         return [
             { id: "wanted", label: "", format: "text", sortType: "alphabetical", sortable: false },
             { id: "name", label: "Name", format: "text", sortType: "alphabetical" },
@@ -387,7 +392,6 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
 
     protected mapTorrentDetailsFile(
         _torrent: T,
-        _details: BittorrentTorrentDetailsData,
         file: BittorrentTorrentDetailsFile,
     ): TorrentDetailsFileItem {
         return { ...file, wanted: file.wanted !== false }

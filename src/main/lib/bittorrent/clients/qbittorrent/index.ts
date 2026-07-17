@@ -22,31 +22,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null
 }
 
-function normalizeTorrentFiles(body: unknown): BittorrentFileSelection[] {
-    if (!Array.isArray(body)) {
-        throw new Error("Invalid torrent files response")
-    }
-
-    return body.map((value, index) => {
-        if (!isRecord(value)) {
-            throw new Error("Invalid torrent file response")
-        }
-
-        const path = typeof value.name === "string" ? value.name : ""
-        const size = typeof value.size === "number" ? value.size : Number.parseInt(String(value.size), 10) || 0
-        const priority = typeof value.priority === "number" ? value.priority : QBITTORRENT_PRIORITY_NORMAL
-
-        return {
-            index: typeof value.index === "number" ? value.index : index,
-            path,
-            name: path.split(/[/\\]/).pop() || "",
-            size,
-            wanted: priority !== QBITTORRENT_PRIORITY_SKIP,
-            priority,
-        }
-    })
-}
-
 function normalizeTorrentDetailsFiles(body: unknown): BittorrentTorrentDetailsFile[] {
     if (!Array.isArray(body)) {
         throw new Error("Invalid torrent files response")
@@ -521,19 +496,16 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
         const api = this.getApi()
-        const [properties, files] = await Promise.all([
-            new Promise<Record<string, any>>((resolve, reject) => {
-                api.getJson("torrents/properties", { qs: { hash } }, (err: any, _res: any, body: any) => {
-                    if (err) {
-                        reject(err)
-                        return
-                    }
+        const properties = await new Promise<Record<string, any>>((resolve, reject) => {
+            api.getJson("torrents/properties", { qs: { hash } }, (err: any, _res: any, body: any) => {
+                if (err) {
+                    reject(err)
+                    return
+                }
 
-                    resolve(body || {})
-                })
-            }),
-            this.fetchTorrentFiles(hash),
-        ])
+                resolve(body || {})
+            })
+        })
 
         return {
             info: {
@@ -575,7 +547,6 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 uploadSpeed: properties.up_speed ?? null,
                 isPrivate: properties.is_private ?? properties.isPrivate ?? null,
             },
-            files: normalizeTorrentDetailsFiles(files),
         }
     }
 
@@ -593,8 +564,8 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         })
     }
 
-    async getTorrentFiles(hash: string): Promise<BittorrentFileSelection[]> {
-        return normalizeTorrentFiles(await this.fetchTorrentFiles(hash))
+    async getTorrentFiles(hash: string): Promise<BittorrentTorrentDetailsFile[]> {
+        return normalizeTorrentDetailsFiles(await this.fetchTorrentFiles(hash))
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {
