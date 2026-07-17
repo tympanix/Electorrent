@@ -1,5 +1,6 @@
 import { IRootScopeService } from "angular";
 import type { AppSettings, StoredServerConfig } from "@shared/ipc-contract";
+import { createDefaultSettings } from "@shared/settings-defaults";
 import type { Server } from "@renderer/app/services/server";
 
 export interface SettingsService {
@@ -27,29 +28,7 @@ export interface SettingsService {
 export let settingsService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
     const electorrent = window.electorrent
 
-    var settings: AppSettings<any> = {
-        startup: 'default',
-        systemStartup: 'disabled',
-        refreshRate: 2000,
-        automaticUpdates: true,
-        closeToTray: true,
-        debugMode: false,
-        autoRemoveTorrents: false,
-        alwaysPromptUploadOptions: false,
-        watchDirectory: '',
-        ui: {
-            resizeMode: '',
-            notifications: true,
-            displaySize: 'normal',
-            displayCompact: false,
-            cleanNames: true,
-            fixedHeader: false,
-            theme: 'system',
-            sidebarCollapsed: false,
-        },
-        servers: [],
-        certificates: []
-    };
+    var settings: AppSettings<any> = createDefaultSettings();
 
     function loadServerCertificate(server: any) {
         if (server?.tlsSecurity === "insecure") {
