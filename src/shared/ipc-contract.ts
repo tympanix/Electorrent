@@ -1,3 +1,7 @@
+import type { BittorrentInvokeActionRequest } from "./bittorrent-actions"
+
+export type { BittorrentInvokeActionRequest, TorrentRatioLimitOptions, TorrentSpeedLimitOptions } from "./bittorrent-actions"
+
 export type Unsubscribe = () => void
 
 export type ColorTheme = "light" | "dark"
@@ -89,12 +93,6 @@ export interface BittorrentUploadTorrentRequest {
     sourcePath?: string
 }
 
-export interface BittorrentInvokeActionRequest {
-    action: string
-    hashes?: string[]
-    args?: unknown[]
-}
-
 export interface BittorrentGetTorrentFilesRequest {
     hash: string
 }
@@ -183,11 +181,6 @@ export interface TorrentUploadOptions {
     downloadSpeedLimit?: number
     uploadSpeedLimit?: number
     fileSelection?: BittorrentFileSelection[]
-}
-
-export interface TorrentSpeedLimitOptions {
-    downloadSpeedLimit?: number
-    uploadSpeedLimit?: number
 }
 
 export type TorrentUploadOptionsEnable = Partial<Record<keyof TorrentUploadOptions, boolean>>

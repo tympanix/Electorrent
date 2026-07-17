@@ -4,6 +4,7 @@ import { Key } from "webdriverio"
 import { eventually } from "../../e2e/eventually"
 import { configureSpec } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
+import type { BittorrentActionArguments } from "@shared/bittorrent-actions"
 
 const assert: Chai.AssertStatic = chai.assert
 
@@ -57,7 +58,10 @@ describe("mock torrent table sorting", function () {
     }
   }
 
-  async function invokeMockAction(action: string, ...args: any[]) {
+  async function invokeMockAction<Action extends "addMockedTorrent" | "clearMockedTorrents">(
+    action: Action,
+    ...args: BittorrentActionArguments[Action]
+  ) {
     await browser.execute(async (request) => {
       await (window as any).electorrent.bittorrent.invokeAction(request)
     }, { action, args })

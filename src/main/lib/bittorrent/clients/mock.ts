@@ -5,6 +5,7 @@ import type {
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
+import type { MockTorrentFileInput, MockTorrentInput } from "@shared/bittorrent-actions"
 import parseTorrent from "parse-torrent"
 
 const PRIORITY_SKIP = 0
@@ -35,25 +36,12 @@ interface MockTorrent {
     up_speed: number
 }
 
-interface MockTorrentFile {
-    index: number
-    name: string
-    size: number
-    progress: number
-    availability: number
-    priority: number
-    is_seed: boolean
-}
+type MockTorrentFile = MockTorrentFileInput
 
 interface MockRuntimeStore {
     torrents: Map<string, MockTorrent>
     files: Map<string, MockTorrentFile[]>
     removedHashes: string[]
-}
-
-type MockTorrentInput = Partial<MockTorrent> & {
-    hash?: string
-    files?: MockTorrentFile[]
 }
 
 export class MockBittorrentRuntime implements BittorrentRuntime {

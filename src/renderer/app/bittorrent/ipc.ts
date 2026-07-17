@@ -6,6 +6,11 @@ import type {
     TorrentClientConnection,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
+import type {
+    BittorrentActionArguments,
+    BittorrentActionName,
+    BittorrentInvokeActionRequest,
+} from "@shared/bittorrent-actions"
 
 declare const window: Window & { electorrent: ElectorrentBridge }
 
@@ -50,8 +55,12 @@ export function uploadTorrent(data: Uint8Array, filename: string, options?: Torr
     return bridge().uploadTorrent({ data, filename, options, sourcePath })
 }
 
-export function invokeAction(action: string, hashes: string[] = [], ...args: unknown[]) {
-    return bridge().invokeAction({ action, hashes, args })
+export function invokeAction<Action extends BittorrentActionName>(
+    action: Action,
+    hashes: string[] = [],
+    ...args: BittorrentActionArguments[Action]
+) {
+    return bridge().invokeAction({ action, hashes, args } as BittorrentInvokeActionRequest)
 }
 
 export function getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {

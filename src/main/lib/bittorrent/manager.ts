@@ -3,17 +3,28 @@ import path from "path"
 import type { WebContents } from "electron"
 import type {
     BittorrentAddTorrentUrlRequest,
-    BittorrentInvokeActionRequest,
     BittorrentServerConfig,
     BittorrentSetTorrentFileSelectionRequest,
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
     BittorrentUploadTorrentRequest,
 } from "@shared/ipc-contract"
+import {
+    isBittorrentActionName,
+    type BittorrentActionName,
+    type BittorrentInvokeActionRequest,
+} from "@shared/bittorrent-actions"
 import logger from "../logger"
 import * as settings from "../settings"
 import { createRuntime } from "./registry"
-import type { BittorrentRuntime } from "./types"
+import type { BittorrentRuntime, BittorrentRuntimeAction } from "./types"
+
+function getRuntimeAction<Action extends BittorrentActionName>(
+    runtime: BittorrentRuntime,
+    action: Action,
+): BittorrentRuntimeAction<Action> | undefined {
+    return runtime[action] as BittorrentRuntimeAction<Action> | undefined
+}
 
 export interface BittorrentSessionState {
     activeServerId: string | null
@@ -161,13 +172,28 @@ class BittorrentManager {
         }
     }
 
-    async invokeAction(sender: WebContents, request: BittorrentInvokeActionRequest) {
-        const runtime = await this.getSession(sender)
-        const action = (runtime as unknown as Record<string, unknown>)[request.action]
-        if (typeof action !== "function") {
-            throw new Error(`Unsupported bittorrent action: ${request.action}`)
+    async invokeAction(sender: WebContents, request: BittorrentInvokeActionRequest | null | undefined) {
+        if (!request || typeof request !== "object") {
+            throw new Error("Invalid bittorrent action request")
         }
-        return action.call(runtime, request.hashes || [], ...(request.args || []))
+
+        const { action, hashes, args } = request
+        if (!isBittorrentActionName(action)) {
+            throw new Error(`Unsupported bittorrent action: ${action}`)
+        }
+        if (hashes !== undefined && !Array.isArray(hashes)) {
+            throw new Error("Invalid bittorrent action hashes")
+        }
+        if (args !== undefined && !Array.isArray(args)) {
+            throw new Error("Invalid bittorrent action arguments")
+        }
+
+        const runtime = await this.getSession(sender)
+        const runtimeAction = getRuntimeAction(runtime, action)
+        if (typeof runtimeAction !== "function") {
+            throw new Error(`Unsupported bittorrent action: ${action}`)
+        }
+        return runtimeAction.call(runtime, hashes || [], ...(args || []))
     }
 
     async getTorrentDetails(sender: WebContents, hash: string): Promise<BittorrentTorrentDetailsData> {

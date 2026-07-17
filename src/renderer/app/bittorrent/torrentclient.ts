@@ -4,16 +4,13 @@ import type {
     BittorrentTorrentDetailsFile,
     ResolvedTorrentClientFeatures,
     TorrentClientFeatures,
+    TorrentRatioLimitOptions,
     TorrentSpeedLimitOptions,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
 import { connect } from "./ipc"
 
-export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
-
-export interface TorrentRatioLimitOptions {
-    ratioLimit: number
-}
+export type { TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
 export type TorrentActionRole = "resume" | "stop" | "delete"
 
