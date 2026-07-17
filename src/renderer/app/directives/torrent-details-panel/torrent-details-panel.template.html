@@ -30,7 +30,7 @@
   </div>
 
   <div class="torrent-details-panel-body">
-    <div ng-if="ctl.scope.loading && !ctl.scope.panel.info.sections.length && !ctl.scope.panel.files.items.length" class="torrent-details-state torrent-details-panel-loader">
+    <div ng-if="ctl.scope.loading && !ctl.hasActiveTabData()" class="torrent-details-state torrent-details-panel-loader">
       <div class="ui active inline loader"></div>
     </div>
 

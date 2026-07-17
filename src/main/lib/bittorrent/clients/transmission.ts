@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import https from 'https'
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, TorrentClientConnection } from '@shared/ipc-contract'
 import {
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
@@ -87,6 +87,15 @@ const TRANSMISSION_FIELDS = [
     'webseeds',
     'webseedsSendingToUs',
 ]
+
+const TRANSMISSION_TORRENT_DETAILS_FIELDS = TRANSMISSION_FIELDS.filter((field) => ![
+    'files',
+    'fileStats',
+    'priorities',
+    'wanted',
+].includes(field))
+
+const TRANSMISSION_TORRENT_FILES_FIELDS = ['files', 'fileStats', 'priorities', 'wanted']
 
 export class TransmissionRuntime implements BittorrentRuntime {
     private server!: BittorrentServerConfig
@@ -242,7 +251,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         const response = await this.getHttpClient().post(this.url(), {
             arguments: {
                 ids: [hash],
-                fields: TRANSMISSION_FIELDS,
+                fields: TRANSMISSION_TORRENT_DETAILS_FIELDS,
             },
             method: 'torrent-get',
         })
@@ -251,11 +260,6 @@ export class TransmissionRuntime implements BittorrentRuntime {
         if (!torrent) {
             throw new Error('Transmission did not return torrent details')
         }
-
-        const files = Array.isArray(torrent.files) ? torrent.files : []
-        const fileStats = Array.isArray(torrent.fileStats) ? torrent.fileStats : []
-        const wanted = Array.isArray(torrent.wanted) ? torrent.wanted : []
-        const priorities = Array.isArray(torrent.priorities) ? torrent.priorities : []
 
         return {
             info: {
@@ -289,7 +293,28 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 queuePosition: torrent.queuePosition ?? null,
                 sequentialDownload: torrent.sequentialDownload ?? torrent.sequential_download ?? null,
             },
-            files: files.map((file: any, index: number) => {
+        }
+    }
+
+    async getTorrentFiles(hash: string): Promise<BittorrentTorrentDetailsFile[]> {
+        const response = await this.getHttpClient().post(this.url(), {
+            arguments: {
+                ids: [hash],
+                fields: TRANSMISSION_TORRENT_FILES_FIELDS,
+            },
+            method: 'torrent-get',
+        })
+        const torrent = response?.data?.arguments?.torrents?.[0]
+        if (!torrent) {
+            throw new Error('Transmission did not return torrent files')
+        }
+
+        const files = Array.isArray(torrent.files) ? torrent.files : []
+        const fileStats = Array.isArray(torrent.fileStats) ? torrent.fileStats : []
+        const wanted = Array.isArray(torrent.wanted) ? torrent.wanted : []
+        const priorities = Array.isArray(torrent.priorities) ? torrent.priorities : []
+
+        return files.map((file: any, index: number) => {
                 const stats = fileStats[index] || {}
                 const size = typeof file.length === 'number' ? file.length : (parseInt(String(file.length), 10) || 0)
                 const completed = typeof stats.bytesCompleted === 'number'
@@ -308,8 +333,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                     priority,
                     wanted: Boolean(stats.wanted ?? wanted[index] ?? true),
                 }
-            }),
-        }
+            })
     }
 
     private removeEmpty(obj: Record<string, any>) {

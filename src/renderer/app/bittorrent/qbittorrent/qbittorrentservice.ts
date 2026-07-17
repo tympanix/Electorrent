@@ -11,7 +11,7 @@ import {
 } from "@renderer/app/bittorrent/torrentclient";
 import { TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 import { QBittorrentTorrent } from "./torrentq";
-import { addTorrentUrl, getSnapshot, getTorrentDetails, getTorrentFiles, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 import { applyFreeDiskSpace } from "@renderer/app/bittorrent/free-disk-space";
 
@@ -164,10 +164,6 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
 
     deleteTorrents(torrents: QBittorrentTorrent[]): Promise<void> {
       return this.delete(torrents)
-    }
-
-    async getTorrentFiles(torrent: QBittorrentTorrent): Promise<TorrentFile[]> {
-      return getTorrentFiles(torrent.hash);
     }
 
     setTorrentFileSelection(torrent: QBittorrentTorrent, files: TorrentFile[]): Promise<void> {

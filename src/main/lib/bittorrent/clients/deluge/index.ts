@@ -1,7 +1,7 @@
 import request from "request"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, TorrentClientConnection } from "@shared/ipc-contract"
 import {
     defer,
     HTTP_LOGIN_TIMEOUT,
@@ -43,9 +43,6 @@ const DELUGE_TORRENT_FIELDS = [
 
 const DELUGE_TORRENT_DETAIL_FIELDS = [
     ...DELUGE_TORRENT_FIELDS,
-    "files",
-    "file_progress",
-    "file_priorities",
     "message",
     "active_time",
     "seeding_time",
@@ -59,6 +56,8 @@ const DELUGE_TORRENT_DETAIL_FIELDS = [
     "seed_rank",
     "time_since_transfer",
 ]
+
+const DELUGE_TORRENT_FILES_FIELDS = ["files", "file_progress", "file_priorities"]
 
 export class DelugeRuntime implements BittorrentRuntime {
     private url(server: BittorrentServerConfig, endpoint?: string) {
@@ -305,10 +304,6 @@ export class DelugeRuntime implements BittorrentRuntime {
 
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
         const details = await defer<Record<string, any>>((done) => this.rpc("web.get_torrent_status", [hash, DELUGE_TORRENT_DETAIL_FIELDS], done))
-        const files = Array.isArray(details.files) ? details.files : []
-        const fileProgress = Array.isArray(details.file_progress) ? details.file_progress : []
-        const filePriorities = Array.isArray(details.file_priorities) ? details.file_priorities : []
-
         return {
             info: {
                 hash,
@@ -343,7 +338,16 @@ export class DelugeRuntime implements BittorrentRuntime {
                 message: details.message ?? null,
                 timeSinceTransfer: details.time_since_transfer ?? null,
             },
-            files: files.map((file: any, index: number) => {
+        }
+    }
+
+    async getTorrentFiles(hash: string): Promise<BittorrentTorrentDetailsFile[]> {
+        const details = await defer<Record<string, any>>((done) => this.rpc("web.get_torrent_status", [hash, DELUGE_TORRENT_FILES_FIELDS], done))
+        const files = Array.isArray(details.files) ? details.files : []
+        const fileProgress = Array.isArray(details.file_progress) ? details.file_progress : []
+        const filePriorities = Array.isArray(details.file_priorities) ? details.file_priorities : []
+
+        return files.map((file: any, index: number) => {
                 const priority = filePriorities[index] != null ? Number(filePriorities[index]) : undefined
                 const progressValue = typeof fileProgress[index] === "number"
                     ? fileProgress[index]
@@ -358,8 +362,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                     priority,
                     wanted: priority !== 0,
                 }
-            }),
-        }
+            })
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

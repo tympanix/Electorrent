@@ -8,6 +8,7 @@ import type {
     BittorrentSetTorrentFileSelectionRequest,
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
+    BittorrentTorrentDetailsFile,
     BittorrentUploadTorrentRequest,
 } from "@shared/ipc-contract"
 import logger from "../logger"
@@ -178,10 +179,10 @@ class BittorrentManager {
         return runtime.getTorrentDetails(hash)
     }
 
-    async getTorrentFiles(sender: WebContents, hash: string) {
+    async getTorrentFiles(sender: WebContents, hash: string): Promise<BittorrentTorrentDetailsFile[]> {
         const runtime = await this.getSession(sender)
         if (typeof runtime.getTorrentFiles !== "function") {
-            throw new Error("Torrent file selection not supported for this client")
+            throw new Error("Torrent files not supported for this client")
         }
         return runtime.getTorrentFiles(hash)
     }

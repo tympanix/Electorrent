@@ -3,7 +3,7 @@ import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, TorrentClientConnection } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
@@ -322,24 +322,12 @@ export class RtorrentRuntime implements BittorrentRuntime {
             "additionDate",
             "loadDate",
         ] as const
-        const fileCommands = {
-            path: "f.path",
-            size: "f.size_bytes",
-            completedChunks: "f.completed_chunks",
-            totalChunks: "f.size_chunks",
-            priority: "f.priority",
-        }
-
-        const [detailFields, files] = await Promise.all([
-            this.getTorrentFields(hash, detailCommands),
-            this.getMulticall("f.multicall", [hash, ""], fileCommands),
-        ])
+        const detailFields = await this.getTorrentFields(hash, detailCommands)
 
         numericDetailFields.forEach((field) => {
             const numeric = Number(detailFields[field])
             detailFields[field] = Number.isFinite(numeric) ? numeric : null
         })
-        files.forEach((file) => stringsToNumbers(file))
 
         const savePath = typeof detailFields.savePath === "string" ? detailFields.savePath : null
         const name = typeof detailFields.name === "string" ? detailFields.name : null
@@ -384,7 +372,20 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 chunksComplete: chunksComplete ?? null,
                 message: message ?? null,
             },
-            files: files.map((file: Record<string, any>, index: number) => {
+        }
+    }
+
+    async getTorrentFiles(hash: string): Promise<BittorrentTorrentDetailsFile[]> {
+        const files = await this.getMulticall("f.multicall", [hash, ""], {
+            path: "f.path",
+            size: "f.size_bytes",
+            completedChunks: "f.completed_chunks",
+            totalChunks: "f.size_chunks",
+            priority: "f.priority",
+        })
+        files.forEach((file) => stringsToNumbers(file))
+
+        return files.map((file: Record<string, any>, index: number) => {
                 const size = typeof file.size === "number" ? file.size : 0
                 const totalChunks = typeof file.totalChunks === "number" ? file.totalChunks : 0
                 const completedChunks = typeof file.completedChunks === "number" ? file.completedChunks : 0
@@ -399,8 +400,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
                     priority,
                     wanted: priority !== 0,
                 }
-            }),
-        }
+            })
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

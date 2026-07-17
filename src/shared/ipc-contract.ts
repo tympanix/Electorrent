@@ -113,13 +113,12 @@ export interface BittorrentTorrentDetailsFile {
     progress: number
     availability?: number
     priority?: number
-    wanted?: boolean
+    wanted: boolean
     isSeed?: boolean
 }
 
 export interface BittorrentTorrentDetailsData {
     info: Record<string, BittorrentTorrentDetailsPrimitive>
-    files: BittorrentTorrentDetailsFile[]
 }
 
 export interface BittorrentFileSelection {
@@ -386,7 +385,7 @@ export interface ElectorrentBridge {
         uploadTorrent(request: BittorrentUploadTorrentRequest): Promise<void>
         invokeAction(request: BittorrentInvokeActionRequest): Promise<void>
         getTorrentDetails(request: BittorrentGetTorrentDetailsRequest): Promise<BittorrentTorrentDetailsData>
-        getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<BittorrentFileSelection[]>
+        getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<BittorrentTorrentDetailsFile[]>
         setTorrentFileSelection(request: BittorrentSetTorrentFileSelectionRequest): Promise<void>
     }
     updates: {

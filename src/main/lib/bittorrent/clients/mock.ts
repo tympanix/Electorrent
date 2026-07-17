@@ -2,6 +2,7 @@ import type {
     BittorrentFileSelection,
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
+    BittorrentTorrentDetailsFile,
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
@@ -275,15 +276,18 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         })
     }
 
-    async getTorrentFiles(hash: string): Promise<BittorrentFileSelection[]> {
+    async getTorrentFiles(hash: string): Promise<BittorrentTorrentDetailsFile[]> {
         this.assertConnected()
         return (this.files.get(hash) || []).map((file) => ({
             index: file.index,
             path: file.name,
             name: file.name.split(/[/\\]/).pop() || "",
             size: file.size,
+            progress: file.progress,
+            availability: file.availability,
             wanted: file.priority !== PRIORITY_SKIP,
             priority: file.priority,
+            isSeed: file.is_seed,
         }))
     }
 
@@ -354,17 +358,6 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 uploadSpeed: torrent.up_speed,
                 isPrivate: false,
             },
-            files: (this.files.get(hash) || []).map((file) => ({
-                index: file.index,
-                path: file.name,
-                name: file.name.split(/[/\\]/).pop() || file.name,
-                size: file.size,
-                progress: file.progress,
-                availability: file.availability,
-                priority: file.priority,
-                wanted: file.priority !== PRIORITY_SKIP,
-                isSeed: file.is_seed,
-            })),
         }
     }
 
