@@ -3,41 +3,11 @@ import fs from 'fs'
 import path from 'path'
 
 import type { AppSettings } from '@shared/ipc-contract'
+import { createDefaultSettings, normalizeSettings } from '@shared/settings-defaults'
 import * as electorrent from './electorrent'
 
 let data: any = null
 const changeListeners = new Set<() => void>()
-
-type MainAppSettings = AppSettings & {
-    debugMode?: boolean
-    autoRemoveTorrents?: boolean
-    alwaysPromptUploadOptions?: boolean
-    watchDirectory?: string
-}
-
-const defaultSettings: MainAppSettings = {
-    startup: 'default',
-    systemStartup: 'disabled',
-    refreshRate: 2000,
-    servers: [],
-    certificates: [],
-    automaticUpdates: true,
-    closeToTray: true,
-    debugMode: false,
-    autoRemoveTorrents: false,
-    alwaysPromptUploadOptions: false,
-    watchDirectory: '',
-    ui: {
-        resizeMode: 'OverflowResizer',
-        notifications: true,
-        displaySize: 'normal',
-        displayCompact: false,
-        cleanNames: true,
-        fixedHeader: false,
-        theme: 'system',
-        sidebarCollapsed: false,
-    },
-}
 
 const CONF_PATH = path.join(app.getPath('userData'), 'config.json')
 
@@ -80,19 +50,19 @@ function load() {
     }
 
     if (!fs.existsSync(CONF_PATH)) {
-        data = copy(defaultSettings)
+        data = createDefaultSettings()
         return
     }
 
     const file = fs.readFileSync(CONF_PATH, 'utf-8')
 
     if (!file) {
-        data = copy(defaultSettings)
+        data = createDefaultSettings()
         return
     }
 
     try {
-        data = mergeWithDefaults(defaultSettings, JSON.parse(file))
+        data = normalizeSettings(JSON.parse(file))
     } catch (_e) {
         if (app.isReady()) {
             showCorruptDialog()
@@ -144,32 +114,6 @@ function copyArray(_obj: any[]) {
     return copiedArray
 }
 
-function mergeWithDefaults<T>(defaults: T, value: any): T {
-    if (value === undefined) {
-        return copy(defaults)
-    }
-
-    if (defaults === null || typeof defaults !== 'object') {
-        return copy(value)
-    }
-
-    if (Array.isArray(defaults)) {
-        return (Array.isArray(value) ? copy(value) : copy(defaults)) as T
-    }
-
-    const mergedValue = value && typeof value === 'object' && !Array.isArray(value)
-        ? copyObject(value)
-        : {}
-
-    for (const key in defaults as Record<string, any>) {
-        if (Object.prototype.hasOwnProperty.call(defaults, key)) {
-            mergedValue[key] = mergeWithDefaults((defaults as Record<string, any>)[key], mergedValue[key])
-        }
-    }
-
-    return mergedValue as T
-}
-
 export function put(key: string, value: any, callback?: (err?: Error | null) => void) {
     load()
     data[key] = value
@@ -179,13 +123,13 @@ export function put(key: string, value: any, callback?: (err?: Error | null) => 
     }
 }
 
-export function getAllSettings(): MainAppSettings {
+export function getAllSettings(): AppSettings {
     load()
-    return copy(data)
+    return normalizeSettings(data)
 }
 
-export function getDefaultSettings() {
-    return copy(defaultSettings)
+export function getDefaultSettings(): AppSettings {
+    return createDefaultSettings()
 }
 
 export function write() {
@@ -194,7 +138,7 @@ export function write() {
 
 export function saveAll(settings: any, callback?: (err?: Error | null) => void) {
     load()
-    data = mergeWithDefaults(defaultSettings, settings)
+    data = normalizeSettings(settings)
     notifyChanged()
     if (callback !== undefined) {
         save(callback)
