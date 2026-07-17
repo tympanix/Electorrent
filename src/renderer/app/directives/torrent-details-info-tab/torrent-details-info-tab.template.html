@@ -1,0 +1,17 @@
+<div class="torrent-details-info" data-role="torrent-details-info">
+  <div class="torrent-details-section" ng-repeat="section in ctl.scope.sections track by section.id">
+    <div class="ui tiny header">{{ section.title }}</div>
+    <table class="ui very basic compact table">
+      <tbody>
+        <tr
+          ng-repeat="field in section.fields track by field.id"
+          data-role="torrent-details-field"
+          data-field-id="{{ field.id }}"
+        >
+          <td class="label">{{ field.label }}</td>
+          <td class="value" ng-class="{ multiline: field.multiline }">{{ ctl.formatFieldValue(field) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
