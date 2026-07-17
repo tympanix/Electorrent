@@ -1,6 +1,6 @@
 import type { BrowserWindow, BrowserWindowConstructorOptions, Rectangle } from 'electron'
 
-interface StoredWindowState extends Rectangle {
+export interface StoredWindowState extends Rectangle {
     fullscreen?: boolean
 }
 
