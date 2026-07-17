@@ -12,7 +12,7 @@ import {
     DelugeClient,
     MockBittorrentClient
 } from "@renderer/app/bittorrent"
-import { CLIENT_METADATA } from "@shared/client-metadata"
+import { CLIENT_METADATA, type ClientId } from "@shared/client-metadata"
 
 const torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
 
@@ -22,45 +22,34 @@ torrentApp.config(['$animateProvider', function($animateProvider) {
     }
 ]);
 
-const btclients: Record<string, { name: string; service: unknown; icon: string }> = {
-    'utorrent': {
-        name: CLIENT_METADATA.utorrent.name,
-        service: new UtorrentClient(),
-        icon: CLIENT_METADATA.utorrent.icon
-    },
-    'qbittorrent': {
-        name: CLIENT_METADATA.qbittorrent.name,
-        service: new QBittorrentClient(),
-        icon: CLIENT_METADATA.qbittorrent.icon
-    },
-    'transmission': {
-        name: CLIENT_METADATA.transmission.name,
-        service: new TransmissionClient(),
-        icon: CLIENT_METADATA.transmission.icon
-    },
-    'rtorrent': {
-        name: CLIENT_METADATA.rtorrent.name,
-        service: new RtorrentClient(),
-        icon: CLIENT_METADATA.rtorrent.icon
-    },
-    'synology': {
-        name: CLIENT_METADATA.synology.name,
-        service: new SynologyClient(),
-        icon: CLIENT_METADATA.synology.icon
-    },
-    'deluge': {
-        name: CLIENT_METADATA.deluge.name,
-        service: new DelugeClient(),
-        icon: CLIENT_METADATA.deluge.icon,
-    }
-};
+interface ClientRegistration {
+    name: string
+    service: unknown
+    icon: string
+}
 
-if (window.electorrent.app.isTestEnvironment) {
-    btclients.mock = {
-        name: CLIENT_METADATA.mock.name,
-        service: new MockBittorrentClient(),
-        icon: CLIENT_METADATA.mock.icon,
-    };
+const clientFactories = {
+    utorrent: () => new UtorrentClient(),
+    qbittorrent: () => new QBittorrentClient(),
+    transmission: () => new TransmissionClient(),
+    rtorrent: () => new RtorrentClient(),
+    synology: () => new SynologyClient(),
+    deluge: () => new DelugeClient(),
+    mock: () => new MockBittorrentClient(),
+} satisfies Record<ClientId, () => unknown>
+
+const btclients: Record<string, ClientRegistration> = {}
+
+for (const clientId of Object.keys(clientFactories) as ClientId[]) {
+    if (clientId === "mock" && !window.electorrent.app.isTestEnvironment) {
+        continue
+    }
+
+    btclients[clientId] = {
+        name: CLIENT_METADATA[clientId].name,
+        service: clientFactories[clientId](),
+        icon: CLIENT_METADATA[clientId].icon,
+    }
 }
 
 // Register torrent clients
