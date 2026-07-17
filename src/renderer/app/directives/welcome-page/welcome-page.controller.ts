@@ -35,7 +35,7 @@ export class WelcomePageController {
 
 
         function saveServer(ip: string, port: number, username: string, password: string, client: string) {
-            const server = new Server(ip, port, username, password, client);
+            const server = new Server({ ip, port, user: username, password, client });
 
             $bittorrent.setServer(server);
 

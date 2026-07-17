@@ -1,12 +1,7 @@
 import type { IRootScopeService } from "angular"
 import type { AppSettings, StoredServerConfig } from "@shared/ipc-contract"
 import { Server } from "@renderer/app/services/server"
-
-type NotificationService = {
-    alert(title: string, message: string): void
-    warning(title: string, message: string): void
-    ok(title: string, message: string): void
-}
+import type { NotificationService } from "@renderer/app/services/notification"
 
 type BittorrentService = {
     setServer(server: Server): void
@@ -137,12 +132,7 @@ export class SettingsService {
         return this.saveAllSettings()
     }
 
-    saveServer(server: Server): Promise<void>
-    saveServer(ip: string, port: number, user: string, password: string, client: string): Promise<void>
-    saveServer(serverOrIp: Server | string, port?: number, user?: string, password?: string, client?: string): Promise<void> {
-        const server = typeof serverOrIp === "string"
-            ? new this.ServerClass(serverOrIp, port, user, password, client)
-            : serverOrIp
+    saveServer(server: Server): Promise<void> {
         this.appendServer(server)
         return this.saveAllSettings()
     }

@@ -5,13 +5,9 @@ import type { TorrentClient } from "@renderer/app/bittorrent/torrentclient"
 import type { ColumnProps } from "@renderer/app/services/column"
 import { parseServerAddressInput, sanitizeServerAddress } from "@shared/server-address"
 import type { CertificateResponseService } from "@renderer/app/services/certificate-response"
+import type { NotificationService } from "@renderer/app/services/notification"
 import type { LabelColorHue, LabelColorOverrides, SavedLocationConfig, StoredServerConfig, TorrentUploadOptions } from "@shared/ipc-contract"
 import { normalizeLabelColorHue } from "@renderer/app/services/label-colors"
-
-type NotificationService = {
-    alert(title: string, message: string): void
-    alertAuth(error: unknown): void
-}
 
 type BittorrentService = {
     getClient(name: string): TorrentClient
@@ -101,30 +97,19 @@ export class Server implements Omit<StoredServerConfig, "columns"> {
         return Server
     }
 
-    constructor(data: StoredServerConfig)
-    constructor(ip: string, port: number, user: string, password: string, client: string)
-    constructor(ip?: string, proto?: string, port?: number, user?: string, password?: string, client?: string, path?: string)
-    constructor(ipOrData?: string | StoredServerConfig, protoOrPort?: string | number, portOrUser?: number | string, userOrPassword?: string, passwordOrClient?: string, client?: string, path?: string) {
+    constructor(config: Partial<StoredServerConfig> = {}) {
         this.certificateData = undefined
-        if (typeof ipOrData === "object") {
-            this.fromJson(ipOrData)
+        if (config.id) {
+            this.fromJson(config as StoredServerConfig)
         } else {
             this.id = generateGUID()
-            this.ip = ipOrData || ""
-            if (typeof protoOrPort === "number") {
-                this.proto = "http"
-                this.port = protoOrPort
-                this.user = String(portOrUser || "")
-                this.password = userOrPassword || ""
-                this.client = passwordOrClient
-            } else {
-                this.proto = protoOrPort
-                this.port = portOrUser as number
-                this.user = userOrPassword || ""
-                this.password = passwordOrClient || ""
-                this.client = client
-            }
-            this.path = path
+            this.ip = config.ip || ""
+            this.proto = config.proto || "http"
+            this.port = config.port
+            this.user = config.user || ""
+            this.password = config.password || ""
+            this.client = config.client
+            this.path = config.path
             this.lastused = -1
             this.columns = this.defaultColumns()
             this.savedLocations = []

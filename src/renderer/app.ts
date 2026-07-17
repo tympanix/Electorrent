@@ -81,8 +81,8 @@ import { bittorrentService } from "@renderer/app/services/bittorrent"
 torrentApp.service("$bittorrent", bittorrentService)
 import { SettingsService } from "@renderer/app/services/settings"
 torrentApp.service("settingsService", SettingsService)
-import { notificationService } from "@renderer/app/services/notification"
-torrentApp.service("notificationService", notificationService)
+import { NotificationService } from "@renderer/app/services/notification"
+torrentApp.service("notificationService", NotificationService)
 import { CertificateResponseService } from "@renderer/app/services/certificate-response"
 torrentApp.service("certificateResponseService", CertificateResponseService)
 import { labelColorService } from "@renderer/app/services/label-colors"
