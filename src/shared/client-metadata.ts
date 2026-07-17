@@ -43,3 +43,7 @@ export const CLIENT_METADATA = {
 } as const satisfies Record<string, ClientMetadata>
 
 export type ClientId = keyof typeof CLIENT_METADATA
+
+export function isClientId(value: string): value is ClientId {
+    return Object.prototype.hasOwnProperty.call(CLIENT_METADATA, value)
+}
