@@ -42,6 +42,22 @@ export class TorrentDetailsInfoTabController {
     }
   }
 
+  fieldTitle(field: TorrentDetailsInfoField) {
+    return field.multiline || field.format === "path" ? this.formatFieldValue(field) : "";
+  }
+
+  sectionIcon(sectionId: string) {
+    const icons: Record<string, string> = {
+      overview: "info circle",
+      transfer: "exchange",
+      swarm: "users",
+      content: "file alternate outline",
+      dates: "calendar alternate outline",
+    };
+
+    return icons[sectionId] || "list alternate outline";
+  }
+
   private formatPercent(value: unknown) {
     const numeric = typeof value === "number" ? value : Number(value);
     if (!Number.isFinite(numeric) || numeric < 0) {
