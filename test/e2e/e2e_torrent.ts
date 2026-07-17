@@ -380,13 +380,15 @@ export class Torrent {
     const contextMeny = $("#contextmenu")
     for (let attempt = 0; attempt < 3; attempt++) {
       await elem.click(options)
-      if (await contextMeny.isDisplayed()) {
+      try {
+        await contextMeny.waitForDisplayed({ timeout: attempt === 2 ? this.timeout : 1000 })
         return
+      } catch (error) {
+        if (attempt === 2) {
+          throw error
+        }
       }
-      await browser.pause(100)
     }
-
-    await contextMeny.waitForDisplayed()
   }
 
   async clickContextMenu(roleName: string) {
