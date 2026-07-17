@@ -79,10 +79,10 @@ import { httpFormService } from "@renderer/app/services/httpFormService"
 torrentApp.factory("httpFormService", httpFormService)
 import { bittorrentService } from "@renderer/app/services/bittorrent"
 torrentApp.service("$bittorrent", bittorrentService)
-import { settingsService } from "@renderer/app/services/settings"
-torrentApp.service("settingsService", settingsService)
-import { notificationService } from "@renderer/app/services/notification"
-torrentApp.service("notificationService", notificationService)
+import { SettingsService } from "@renderer/app/services/settings"
+torrentApp.service("settingsService", SettingsService)
+import { NotificationService } from "@renderer/app/services/notification"
+torrentApp.service("notificationService", NotificationService)
 import { CertificateResponseService } from "@renderer/app/services/certificate-response"
 torrentApp.service("certificateResponseService", CertificateResponseService)
 import { labelColorService } from "@renderer/app/services/label-colors"
