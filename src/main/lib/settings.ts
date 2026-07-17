@@ -5,8 +5,13 @@ import path from 'path'
 import type { AppSettings } from '@shared/ipc-contract'
 import { createDefaultSettings, normalizeSettings } from '@shared/settings-defaults'
 import * as electorrent from './electorrent'
+import type { StoredWindowState } from './window-state'
 
-let data: any = null
+export interface PersistedSettings extends AppSettings {
+    windowsize?: StoredWindowState
+}
+
+let data: PersistedSettings | null = null
 const changeListeners = new Set<() => void>()
 
 const CONF_PATH = path.join(app.getPath('userData'), 'config.json')
@@ -44,26 +49,27 @@ export function showCorruptDialog() {
     }
 }
 
-function load() {
+function load(): PersistedSettings {
     if (data !== null) {
-        return
+        return data
     }
 
     if (!fs.existsSync(CONF_PATH)) {
         data = createDefaultSettings()
-        return
+        return data
     }
 
     const file = fs.readFileSync(CONF_PATH, 'utf-8')
 
     if (!file) {
         data = createDefaultSettings()
-        return
+        return data
     }
 
     try {
         data = normalizeSettings(JSON.parse(file))
     } catch (_e) {
+        data = createDefaultSettings()
         if (app.isReady()) {
             showCorruptDialog()
         } else {
@@ -72,6 +78,8 @@ function load() {
             })
         }
     }
+
+    return data
 }
 
 function save(callback: (err?: Error | null) => void) {
@@ -82,12 +90,12 @@ function saveSync() {
     fs.writeFileSync(CONF_PATH, JSON.stringify(data, null, 4))
 }
 
-function copy(object: any): any {
+function copy<T>(object: T): T {
     if (object === null) {
         return object
     } else if (typeof object === 'object') {
         if (Array.isArray(object)) {
-            return copyArray(object)
+            return copyArray(object) as T
         }
 
         return copyObject(object)
@@ -96,27 +104,27 @@ function copy(object: any): any {
     return object
 }
 
-function copyObject(_obj: Record<string, any>) {
-    const copyObj: Record<string, any> = {}
+function copyObject<T extends object>(_obj: T): T {
+    const copyObj: Record<string, unknown> = {}
     for (const key in _obj) {
         if (Object.prototype.hasOwnProperty.call(_obj, key)) {
             copyObj[key] = copy(_obj[key])
         }
     }
-    return copyObj
+    return copyObj as T
 }
 
-function copyArray(_obj: any[]) {
-    const copiedArray: any[] = []
-    for (let i = 0; i < _obj.length; i++) {
-        copiedArray[i] = copy(_obj[i])
+function copyArray<T>(array: T[]): T[] {
+    const copiedArray: T[] = []
+    for (let i = 0; i < array.length; i++) {
+        copiedArray[i] = copy(array[i])
     }
     return copiedArray
 }
 
-export function put(key: string, value: any, callback?: (err?: Error | null) => void) {
-    load()
-    data[key] = value
+export function put<K extends keyof PersistedSettings>(key: K, value: PersistedSettings[K], callback?: (err?: Error | null) => void) {
+    const settings = load()
+    settings[key] = copy(value)
     notifyChanged()
     if (callback !== undefined) {
         save(callback)
@@ -124,8 +132,7 @@ export function put(key: string, value: any, callback?: (err?: Error | null) => 
 }
 
 export function getAllSettings(): AppSettings {
-    load()
-    return normalizeSettings(data)
+    return normalizeSettings(load())
 }
 
 export function getDefaultSettings(): AppSettings {
@@ -136,8 +143,7 @@ export function write() {
     saveSync()
 }
 
-export function saveAll(settings: any, callback?: (err?: Error | null) => void) {
-    load()
+export function saveAll(settings: AppSettings, callback?: (err?: Error | null) => void) {
     data = normalizeSettings(settings)
     notifyChanged()
     if (callback !== undefined) {
@@ -145,13 +151,12 @@ export function saveAll(settings: any, callback?: (err?: Error | null) => void) 
     }
 }
 
-export function get(key: string) {
-    load()
-    let value: any = null
-    if (data && key in data) {
-        value = copy(data[key])
+export function get<K extends keyof PersistedSettings>(key: K): PersistedSettings[K] | null {
+    const settings = load()
+    if (key in settings) {
+        return copy(settings[key])
     }
-    return value
+    return null
 }
 
 export function subscribe(listener: () => void) {
