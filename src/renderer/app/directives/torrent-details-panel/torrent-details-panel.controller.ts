@@ -16,9 +16,29 @@ export interface TorrentDetailsPanelScope extends IScope {
   torrent: any;
   panel: TorrentDetailsPanelData;
   activeTab: "info" | "files";
-  sortedFiles: TorrentDetailsFileItem[];
+  sortedFiles: TorrentDetailsFileRow[];
+  selectionUpdating: boolean;
+  selectionError: string | null;
   resizeMode: string;
   resizeProfile: string;
+}
+
+interface TorrentDetailsFileRow {
+  key: string;
+  depth: number;
+  isDirectory: boolean;
+  file?: TorrentDetailsFileItem;
+  filesInSubtree: TorrentDetailsFileItem[];
+  data: TorrentDetailsFileItem;
+}
+
+interface TorrentDetailsFileNode {
+  name: string;
+  path: string;
+  children: Map<string, TorrentDetailsFileNode>;
+  file?: TorrentDetailsFileItem;
+  filesInSubtree: TorrentDetailsFileItem[];
+  data: TorrentDetailsFileItem;
 }
 
 export class TorrentDetailsPanelController {
@@ -37,6 +57,7 @@ export class TorrentDetailsPanelController {
   private panelHeight = this.defaultPanelHeight;
   private loadRequestId = 0;
   private stopResizeListeners?: () => void;
+  private readonly collapsedFolders = new Set<string>();
 
   constructor(
     public scope: TorrentDetailsPanelScope,
@@ -51,6 +72,8 @@ export class TorrentDetailsPanelController {
     this.scope.torrent = null;
     this.scope.activeTab = "info";
     this.scope.sortedFiles = [];
+    this.scope.selectionUpdating = false;
+    this.scope.selectionError = null;
     this.scope.resizeMode = "OverflowResizer";
     this.scope.resizeProfile = this.getResizeProfile();
     this.scope.panel = {
@@ -180,6 +203,58 @@ export class TorrentDetailsPanelController {
     this.sortFiles();
   };
 
+  canSelectFiles() {
+    return !!this.rootScope.$btclient?.features.fileSelection;
+  }
+
+  isFolderExpanded(row: TorrentDetailsFileRow) {
+    return row.isDirectory && !this.collapsedFolders.has(row.data.path);
+  }
+
+  toggleFolder(row: TorrentDetailsFileRow, event?: Event) {
+    event?.stopPropagation();
+    if (!row.isDirectory) {
+      return;
+    }
+
+    if (this.collapsedFolders.has(row.data.path)) {
+      this.collapsedFolders.delete(row.data.path);
+    } else {
+      this.collapsedFolders.add(row.data.path);
+    }
+    this.sortFiles();
+  }
+
+  rowWanted(row: TorrentDetailsFileRow) {
+    return row.filesInSubtree.length > 0 && row.filesInSubtree.every((file) => file.wanted !== false);
+  }
+
+  rowSelectionIndeterminate(row: TorrentDetailsFileRow) {
+    const wanted = row.filesInSubtree.filter((file) => file.wanted !== false).length;
+    return wanted > 0 && wanted < row.filesInSubtree.length;
+  }
+
+  allFilesWanted() {
+    const files = this.scope.panel.files.items;
+    return files.length > 0 && files.every((file) => file.wanted !== false);
+  }
+
+  allFilesSelectionIndeterminate() {
+    const files = this.scope.panel.files.items;
+    const wanted = files.filter((file) => file.wanted !== false).length;
+    return wanted > 0 && wanted < files.length;
+  }
+
+  toggleAllFiles(event: Event) {
+    event.stopPropagation();
+    return this.updateFileSelection(this.scope.panel.files.items, !this.allFilesWanted());
+  }
+
+  toggleRowSelection(row: TorrentDetailsFileRow, event: Event) {
+    event.stopPropagation();
+    return this.updateFileSelection(row.filesInSubtree, !this.rowWanted(row));
+  }
+
   formatFieldValue(field: TorrentDetailsInfoField) {
     switch (field.format) {
       case "bytes":
@@ -263,6 +338,10 @@ export class TorrentDetailsPanelController {
       }
 
       this.scope.panel = panel || this.scope.panel;
+      this.scope.panel.files.items.forEach((file) => {
+        file.wanted = file.wanted !== false;
+      });
+      this.scope.selectionError = null;
       this.loadSortingSettings();
       this.sortFiles();
     } catch (err) {
@@ -281,27 +360,161 @@ export class TorrentDetailsPanelController {
 
   private sortFiles() {
     const columns = this.scope.panel?.files?.columns || [];
-    const items = [...(this.scope.panel?.files?.items || [])];
     const column = columns.find((entry) => entry.id === this.fileSortKey) || columns[0];
     const sortKey = column?.id || "name";
     const sortType = column?.sortType || (sortKey === "name" || sortKey === "path" ? "alphabetical" : "numeric");
+    const root = this.buildFileTree(this.scope.panel?.files?.items || []);
+    const rows: TorrentDetailsFileRow[] = [];
 
-    items.sort((left, right) => {
-      const leftValue = left[sortKey];
-      const rightValue = right[sortKey];
-
-      if (sortType === "alphabetical") {
-        return String(leftValue || "").toLowerCase().localeCompare(String(rightValue || "").toLowerCase());
+    const compareNodes = (left: TorrentDetailsFileNode, right: TorrentDetailsFileNode) => {
+      const leftIsDirectory = left.children.size > 0 && !left.file;
+      const rightIsDirectory = right.children.size > 0 && !right.file;
+      if (leftIsDirectory !== rightIsDirectory) {
+        return leftIsDirectory ? -1 : 1;
       }
 
-      return Number(leftValue || 0) - Number(rightValue || 0);
+      const leftValue = left.data[sortKey];
+      const rightValue = right.data[sortKey];
+      const compared = sortType === "alphabetical"
+        ? String(leftValue ?? "").toLowerCase().localeCompare(String(rightValue ?? "").toLowerCase())
+        : Number(leftValue ?? 0) - Number(rightValue ?? 0);
+      const ordered = this.fileSortDescending ? -compared : compared;
+      return ordered || left.name.localeCompare(right.name);
+    };
+
+    const visit = (node: TorrentDetailsFileNode, depth: number, visible: boolean) => {
+      const isDirectory = node.children.size > 0 && !node.file;
+      if (visible) {
+        rows.push({
+          key: isDirectory ? `folder:${node.path}` : `file:${node.file?.index}`,
+          depth,
+          isDirectory,
+          file: node.file,
+          filesInSubtree: node.filesInSubtree,
+          data: node.data,
+        });
+      }
+
+      const childrenVisible = visible && (!isDirectory || !this.collapsedFolders.has(node.path));
+      Array.from(node.children.values()).sort(compareNodes).forEach((child) => visit(child, depth + 1, childrenVisible));
+    };
+
+    Array.from(root.children.values()).sort(compareNodes).forEach((node) => visit(node, 0, true));
+    this.scope.sortedFiles = rows;
+  }
+
+  private buildFileTree(files: TorrentDetailsFileItem[]) {
+    const emptyData = (name = "", path = ""): TorrentDetailsFileItem => ({
+      index: -1,
+      name,
+      path,
+      size: 0,
+      progress: 0,
+      wanted: false,
+    });
+    const root: TorrentDetailsFileNode = {
+      name: "",
+      path: "",
+      children: new Map(),
+      filesInSubtree: [],
+      data: emptyData(),
+    };
+
+    files.forEach((file) => {
+      const normalizedPath = (file.path || file.name || "").replace(/\\/g, "/");
+      const parts = normalizedPath.split("/").filter(Boolean);
+      if (!parts.length) {
+        return;
+      }
+
+      let node = root;
+      let currentPath = "";
+      parts.forEach((part, index) => {
+        currentPath = currentPath ? `${currentPath}/${part}` : part;
+        let child = node.children.get(part);
+        if (!child) {
+          child = {
+            name: part,
+            path: currentPath,
+            children: new Map(),
+            filesInSubtree: [],
+            data: emptyData(part, currentPath),
+          };
+          node.children.set(part, child);
+        }
+        if (index === parts.length - 1) {
+          child.file = file;
+          child.data = file;
+        }
+        node = child;
+      });
     });
 
-    if (this.fileSortDescending) {
-      items.reverse();
+    const aggregate = (node: TorrentDetailsFileNode): TorrentDetailsFileItem[] => {
+      if (node.file) {
+        node.filesInSubtree = [node.file];
+        return node.filesInSubtree;
+      }
+
+      node.filesInSubtree = Array.from(node.children.values()).flatMap(aggregate);
+      const totalSize = node.filesInSubtree.reduce((sum, file) => sum + (Number(file.size) || 0), 0);
+      const weightedValue = (key: "progress" | "availability") => {
+        const values = node.filesInSubtree.filter((file) => Number.isFinite(Number(file[key])));
+        if (!values.length) {
+          return undefined;
+        }
+        if (totalSize > 0) {
+          return values.reduce((sum, file) => sum + Number(file[key]) * (Number(file.size) || 0), 0) / totalSize;
+        }
+        return values.reduce((sum, file) => sum + Number(file[key]), 0) / values.length;
+      };
+      const priorities = new Set(node.filesInSubtree.map((file) => file.priority).filter((value) => value != null));
+      node.data = {
+        ...node.data,
+        size: totalSize,
+        progress: weightedValue("progress") || 0,
+        availability: weightedValue("availability"),
+        wanted: node.filesInSubtree.every((file) => file.wanted !== false),
+        priority: priorities.size === 1 ? priorities.values().next().value : undefined,
+      };
+      return node.filesInSubtree;
+    };
+
+    aggregate(root);
+    return root;
+  }
+
+  private async updateFileSelection(files: TorrentDetailsFileItem[], wanted: boolean) {
+    const client = this.rootScope.$btclient;
+    if (!this.canSelectFiles() || !client || !this.scope.torrent || this.scope.selectionUpdating || !files.length) {
+      return;
     }
 
-    this.scope.sortedFiles = items;
+    const previous = files.map((file) => ({ file, wanted: file.wanted }));
+    files.forEach((file) => { file.wanted = wanted; });
+    this.scope.selectionUpdating = true;
+    this.scope.selectionError = null;
+    this.sortFiles();
+
+    try {
+      await client.setTorrentFileSelection(this.scope.torrent, files);
+      this.scheduleDetailsFilesUpdate(this.scope.torrent);
+    } catch (err) {
+      previous.forEach((entry) => { entry.file.wanted = entry.wanted; });
+      this.scope.selectionError = err && err.message ? err.message : "Failed to update file selection";
+      this.sortFiles();
+    } finally {
+      this.scope.selectionUpdating = false;
+      this.scope.$evalAsync();
+    }
+  }
+
+  private scheduleDetailsFilesUpdate(torrent: any) {
+    this.scope.$evalAsync(() => {
+      if (this.scope.isOpen && this.scope.torrent === torrent) {
+        void this.loadDetails(torrent);
+      }
+    });
   }
 
   private syncResizeBindings() {
@@ -328,11 +541,14 @@ export class TorrentDetailsPanelController {
   private resetPanelState() {
     this.scope.loading = false;
     this.scope.error = null;
+    this.scope.selectionError = null;
+    this.scope.selectionUpdating = false;
     this.scope.torrent = null;
     this.scope.panel = {
       info: { sections: [] },
       files: { columns: [], items: [] },
     };
     this.scope.sortedFiles = [];
+    this.collapsedFolders.clear();
   }
 }

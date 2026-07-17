@@ -43,13 +43,15 @@ describe("upload file selection", function () {
 
     const firstFileWanted = $("[data-role='torrent-details-files-table'] tbody tr[data-file-index='0'] td[data-col='wanted']")
     await firstFileWanted.waitForDisplayed({ timeout: 30 * 1000 })
-    await eventually(() => firstFileWanted.getText()).equals("", { timeout: 30 * 1000 })
-    const firstFileWantedIconExists = await firstFileWanted.$("[data-role='torrent-details-file-wanted-check']").isExisting()
-    firstFileWantedIconExists.should.equal(false)
+    const firstFileWantedCheckbox = firstFileWanted.$("[data-role='torrent-details-file-checkbox']")
+    await firstFileWantedCheckbox.waitForExist({ timeout: 30 * 1000 })
+    await eventually(() => firstFileWantedCheckbox.isSelected()).equals(false, { timeout: 30 * 1000 })
 
     const secondFileWanted = $("[data-role='torrent-details-files-table'] tbody tr[data-file-index='1'] td[data-col='wanted']")
     await secondFileWanted.waitForDisplayed({ timeout: 30 * 1000 })
-    await secondFileWanted.$("[data-role='torrent-details-file-wanted-check']").waitForDisplayed({ timeout: 30 * 1000 })
+    const secondFileWantedCheckbox = secondFileWanted.$("[data-role='torrent-details-file-checkbox']")
+    await secondFileWantedCheckbox.waitForExist({ timeout: 30 * 1000 })
+    await eventually(() => secondFileWantedCheckbox.isSelected()).equals(true, { timeout: 30 * 1000 })
 
     await torrent.closeDetailsPanel()
   })
