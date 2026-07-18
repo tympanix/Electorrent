@@ -14,6 +14,8 @@ export interface Server extends Omit<StoredServerConfig, "columns"> {
     connect(): IPromise<void>
     getName(): string
     getIcon(): string
+    isClientKnown(): boolean
+    getClientWarning(): string
     getNameAtAddress(): string
     getDisplayName(): string
     updateLastUsed(): void
@@ -176,11 +178,19 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         };
 
         Server.prototype.getName = function() {
-            return $btclients[this.client].name
+            return $btclients[this.client]?.name || `Unknown client (${this.client || "missing client ID"})`
         };
 
         Server.prototype.getIcon = function() {
-            return $btclients[this.client].icon
+            return $btclients[this.client]?.icon || "exclamation triangle red"
+        };
+
+        Server.prototype.isClientKnown = function() {
+            return !!this.client && !!$btclients[this.client]
+        };
+
+        Server.prototype.getClientWarning = function() {
+            return `The configured client "${this.client || "(missing)"}" is unknown or invalid.`
         };
 
         Server.prototype.getNameAtAddress = function() {
@@ -242,9 +252,12 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             let self = this
             Object.assign(this, sanitizeServerAddress(this))
 
-            if(!this.client) {
-                $notify.alert("Opps!", "Please select a client to connect to!")
-                return $q.reject()
+            if (!this.isClientKnown()) {
+                const message = this.client
+                    ? this.getClientWarning()
+                    : "Please select a client to connect to!"
+                $notify.alert("Invalid client", message)
+                return $q.reject(new Error(message))
             }
 
             let service = $bittorrent.getClient(this.client);
@@ -346,7 +359,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         }
 
         Server.prototype.addCustomColumns = function (columns) {
-            if (this.client) {
+            if (this.isClientKnown()) {
                 let client = $bittorrent.getClient(this.client)
                 columns = _.union(columns, client.extraColumns)
             }

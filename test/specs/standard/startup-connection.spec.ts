@@ -1,5 +1,5 @@
 import chai from "chai"
-import { $ } from "@wdio/globals"
+import { $, browser } from "@wdio/globals"
 import { configureSpec } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
 
@@ -47,5 +47,43 @@ describe("startup connection", function () {
 
     await this.app.connectServerSelection(0)
     await this.app.torrentsPageIsVisible()
+  })
+
+  it("server with an unavailable client", async function () {
+    const unavailableClientId = "unavailable-client"
+    const originalSettings = await browser.execute(async () => {
+      return await (window as any).electorrent.settings.getAll()
+    })
+    const serverId = originalSettings.servers[0].id
+
+    try {
+      await browser.execute(async ({ clientId, id }) => {
+        const settings = await (window as any).electorrent.settings.getAll()
+        settings.startup = "default"
+        settings.servers.forEach((server: any) => {
+          server.default = server.id === id
+        })
+        settings.servers.find((server: any) => server.id === id).client = clientId
+        await (window as any).electorrent.settings.saveAll(settings)
+      }, { clientId: unavailableClientId, id: serverId })
+
+      await restartApplication(this)
+      await this.app.serverSelectionPageIsVisible()
+
+      const persistedClientId = await browser.execute(async (id) => {
+        const settings = await (window as any).electorrent.settings.getAll()
+        return settings.servers.find((server: any) => server.id === id)?.client
+      }, serverId)
+      assert.equal(persistedClientId, unavailableClientId)
+
+      const warning = $("#page-server-selection i.icon.exclamation")
+      await warning.waitForDisplayed()
+      assert.include(await warning.getAttribute("title"), unavailableClientId)
+    } finally {
+      await browser.execute(async (settings) => {
+        await (window as any).electorrent.settings.saveAll(settings)
+      }, originalSettings)
+      await restartApplication(this)
+    }
   })
 })

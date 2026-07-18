@@ -20,7 +20,13 @@
                     <label></label>
                 </div>
             </td>
-            <td>{{server.getName()}}</td>
+            <td>
+                <span class="invalid-client-indicator" ng-if="!server.isClientKnown()">
+                    <i class="red exclamation triangle icon" title="{{server.getClientWarning()}}"></i>
+                    <span class="ui popup">{{server.getClientWarning()}}</span>
+                </span>
+                {{server.getName()}}
+            </td>
             <td>{{server.ip}}</td>
             <td class="collapsing">
                 <div ng-switch="server.proto">

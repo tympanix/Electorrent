@@ -76,7 +76,7 @@ class BittorrentManager {
         return sourceBasename === filename && sourceBasename.toLowerCase().endsWith(".torrent")
     }
 
-    async connect(sender: WebContents, server: BittorrentServerConfig) {
+    async connect(sender: WebContents, server: BittorrentServerConfig): Promise<TorrentClientConnection | null> {
         const senderId = sender.id
         this.setSessionState(senderId, {
             activeServerId: server.id || null,
@@ -95,6 +95,11 @@ class BittorrentManager {
             }
 
             const runtime = createRuntime(server.client)
+            if (!runtime) {
+                this.setSessionState(senderId, EMPTY_SESSION_STATE)
+                return null
+            }
+
             const connection = await runtime.connect(server)
             if (this.pendingConnections.get(senderId) !== pendingConnect) {
                 if (typeof runtime.disconnect === "function") {

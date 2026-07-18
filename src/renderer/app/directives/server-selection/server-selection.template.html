@@ -11,7 +11,8 @@
                 <div class="card" ng-repeat="server in servers">
                     <div class="content">
                         <div class="header">
-                            <i class="torrent icon" ng-class="server.getIcon()"></i>
+                            <i class="red exclamation triangle icon" ng-if="!server.isClientKnown()" title="{{server.getClientWarning()}}"></i>
+                            <i class="torrent icon" ng-if="server.isClientKnown()" ng-class="server.getIcon()"></i>
                             {{server.getName()}}
                         </div>
                         <div class="meta">
