@@ -20,9 +20,9 @@ const runtimeFactories = {
     synology: () => new SynologyRuntime(),
 } satisfies Record<ClientId, () => BittorrentRuntime>
 
-export function createRuntime(clientId: string): BittorrentRuntime {
+export function createRuntime(clientId: string): BittorrentRuntime | undefined {
     if (!isClientId(clientId)) {
-        throw new Error(`Unsupported bittorrent client: ${clientId}`)
+        return undefined
     }
 
     return runtimeFactories[clientId]()

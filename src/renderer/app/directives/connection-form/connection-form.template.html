@@ -46,6 +46,9 @@
                 <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}}
             </dropdown-group>
         </dropdown>
+        <div class="ui pointing red basic label" ng-if="server.client && !btclients[server.client]">
+            Invalid client: {{server.client}}
+        </div>
     </div>
 
     <div class="fields">

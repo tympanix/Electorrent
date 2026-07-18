@@ -84,7 +84,11 @@ export class AppShellController {
                 if (settings.startup === "default") {
                     const server = settingsService.getDefaultServer();
                     if (server) {
-                        connectToServer(server);
+                        if (server.isClientKnown()) {
+                            connectToServer(server);
+                        } else {
+                            pageServers();
+                        }
                     } else {
                         pageServers();
                         $notify.ok("No default server", "Please choose a server to connect to");
@@ -92,7 +96,11 @@ export class AppShellController {
                 } else if (settings.startup === "latest") {
                     const server = settingsService.getRecentServer();
                     if (server) {
-                        connectToServer(server);
+                        if (server.isClientKnown()) {
+                            connectToServer(server);
+                        } else {
+                            pageServers();
+                        }
                     } else {
                         pageServers();
                         $notify.ok("No recent servers", "Please choose a server to connect to");

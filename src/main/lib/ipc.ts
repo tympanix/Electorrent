@@ -224,6 +224,15 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
     ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
         try {
             const connection = await bittorrentManager.connect(event.sender, server)
+            if (!connection) {
+                return {
+                    ok: false,
+                    error: {
+                        kind: "unknown",
+                        message: "Could not connect to client.",
+                    },
+                }
+            }
             await onBittorrentConnected?.()
             return { ok: true, connection }
         } catch (error) {
