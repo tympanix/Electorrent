@@ -139,6 +139,7 @@ const rendererConfig = {
               },
             },
           },
+          'import-glob-loader',
         ],
       },
       {

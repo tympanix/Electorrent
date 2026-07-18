@@ -1,0 +1,20 @@
+notifications-center {
+    .notifications.container {
+        top: 15px;
+        right: 15px;
+        width: 375px;
+        position: absolute;
+    }
+
+    .notification {
+        margin: 5px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+
+        &.ng-enter { -webkit-animation: notification-show 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.27499); }
+        &.ng-leave { -webkit-animation: notification-hide .10s cubic-bezier(.34, .07, 1, .2), notification-shrink .24s .12s cubic-bezier(0.5, 0, 0, 1); -webkit-animation-fill-mode: forwards; }
+    }
+}
+
+@-webkit-keyframes notification-show { 0% { opacity: 0; transform: perspective(350px) translate(0, -30px) rotateX(90deg); } 100% { opacity: 1; transform: perspective(350px) translate(0, 0) rotateX(0deg); } }
+@-webkit-keyframes notification-hide { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.5); } }
+@-webkit-keyframes notification-shrink { 0% { opacity: 0; max-height: 70px; } 100% { opacity: 0; max-height: 0; } }

@@ -1,0 +1,47 @@
+torrent-upload-file-selection {
+    .upload-files-scroll {
+        max-height: 50vh;
+        overflow: auto;
+    }
+
+    .upload-torrent-heading {
+        display: flex;
+        gap: 1em;
+        align-items: baseline;
+    }
+
+    .upload-torrent-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .upload-torrent-size {
+        flex-shrink: 0;
+        margin-left: auto;
+        color: @lightTextColor;
+        font-weight: normal;
+    }
+
+    .upload-file-meta {
+        display: flex;
+        gap: 0.75em;
+        align-items: center;
+    }
+
+    .upload-file-size {
+        color: @lightTextColor;
+    }
+
+    .upload-file-row .content {
+        min-width: 0;
+    }
+
+    .upload-file-row label {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

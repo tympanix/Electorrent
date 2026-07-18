@@ -1,0 +1,91 @@
+title-bar-menu {
+    position: absolute;
+    top: 0;
+    left: 8px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    app-region: no-drag;
+
+    .title-bar-menu-root {
+        position: relative;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .title-bar-menu-trigger,
+    .title-bar-menu-item {
+        border: 0;
+        font: inherit;
+        color: @textColor;
+        background: transparent;
+        cursor: default;
+        outline: 0;
+        app-region: no-drag;
+    }
+
+    .title-bar-menu-trigger {
+        height: 28px;
+        min-width: 42px;
+        padding: 0 12px;
+        border-radius: @defaultBorderRadius;
+        line-height: 28px;
+
+        &:hover,
+        &.active {
+            color: @hoveredTextColor;
+            background-color: @highlightBackground;
+        }
+    }
+
+    .title-bar-menu-dropdown {
+        position: absolute;
+        top: 34px;
+        left: 0;
+        min-width: 270px;
+        width: max-content;
+        max-width: min(560px, calc(100vw - 16px));
+        padding: 6px 0;
+        color: @textColor;
+        background-color: @pageForeground;
+        border: 1px solid @borderColor;
+        border-radius: @defaultBorderRadius;
+        box-shadow: @subtleShadow;
+        z-index: 1002;
+        app-region: no-drag;
+    }
+
+    .title-bar-menu-item {
+        display: flex;
+        align-items: center;
+        column-gap: 8px;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 30px;
+        padding: 6px 12px;
+        text-align: left;
+        white-space: nowrap;
+
+        &:hover,
+        &:focus {
+            color: @hoveredTextColor;
+            background-color: @highlightBackground;
+        }
+
+        &.disabled,
+        &:disabled {
+            color: @disabledTextColor;
+            background: transparent;
+        }
+
+        &.checked .title-bar-menu-check::before { content: "\\2713"; }
+        &.disabled .title-bar-menu-accelerator,
+        &:disabled .title-bar-menu-accelerator { color: @disabledTextColor; }
+    }
+
+    .title-bar-menu-check { flex: 0 0 18px; text-align: center; }
+    .title-bar-menu-label { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .title-bar-menu-accelerator { flex: 0 0 auto; margin-left: auto; color: @lightTextColor; font-size: 0.9em; }
+    .title-bar-menu-divider { height: 1px; margin: 6px 0; background-color: @borderColor; }
+}
