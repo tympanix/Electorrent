@@ -34,6 +34,14 @@ npm run test -- --client "<client>" --spec "<spec>"
 npm run smoketest
 ```
 
+## PR checks
+When instructed to wait for, monitor or validate PR, always wait for PR checks to fully complete in a single command:
+```shell
+gh pr checks --watch
+```
+
+Do not actively poll or send progress updates. Resume only when checks are terminal or a check fails
+
 # Coding Guidelines
 * Avoid using `browser.execute` in browser testing - prefer organic user interaction
 * Avoid conditional logic based on client ID - deduce feature support from `TorrentClient`
