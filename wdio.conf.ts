@@ -5,6 +5,7 @@ import ElectorrentTestService from './test/framework/service'
 import ElectorrentSpecReporter from './test/framework/spec-reporter'
 
 process.env.NODE_ENV = 'test'
+process.env.ELECTORRENT_TEST_HTTP_REQUEST_TIMEOUT = '5000'
 delete process.env.ELECTRON_RUN_AS_NODE
 
 const standardSpecs = [

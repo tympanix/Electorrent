@@ -4,7 +4,7 @@ import { sanitizeServerAddress } from "@shared/server-address"
 import type { CallbackFunc } from "./types"
 
 export const HTTP_LOGIN_TIMEOUT = 10_000
-export const HTTP_REQUEST_TIMEOUT = 30_000
+export const HTTP_REQUEST_TIMEOUT = Number.parseInt(process.env.ELECTORRENT_TEST_HTTP_REQUEST_TIMEOUT || "30_000", 10)
 
 export function defer<T>(fn: (f: CallbackFunc<T>) => void): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -49,4 +49,3 @@ export function appendUrlPath(baseUrl: string, endpoint?: string) {
 
     return url.pathname === "/" ? url.origin : url.toString()
 }
-
