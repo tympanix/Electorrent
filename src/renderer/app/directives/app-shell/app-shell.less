@@ -1,0 +1,133 @@
+app-shell {
+    display: block;
+    height: 100%;
+
+    .main.wrapper {
+        position: relative;
+        top: 0;
+        height: 100vh;
+        background-color: @pageBackground;
+    }
+
+    .title-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 38px;
+        background-color: @pageBackground;
+        border-bottom: 1px solid @borderColor;
+        app-region: drag;
+    }
+
+    .title-bar-server-name-anchor {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        max-width: 50%;
+        min-width: 0;
+    }
+
+    .title-bar-server-name {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .title-bar-sync-connection-indicator {
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        margin-left: 8px;
+        cursor: default;
+        transform: translateY(-50%);
+        pointer-events: auto;
+        app-region: no-drag;
+
+        &.is-slow { color: #fbbd08; }
+        &.is-broken { color: #db2828; }
+
+        > .ui.popup {
+            position: absolute;
+            top: calc(100% + 0.75rem);
+            right: auto;
+            bottom: auto;
+            left: 50%;
+            z-index: 1001;
+            display: none;
+            min-width: 180px;
+            text-align: center;
+            white-space: normal;
+            transform: translateX(-50%);
+        }
+
+        &:hover > .ui.popup {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+
+    .app-content {
+        position: absolute;
+        top: 38px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow: hidden;
+
+        > div,
+        torrents-page,
+        settings-page,
+        welcome-page,
+        server-selection {
+            display: block;
+            height: 100%;
+        }
+
+        .wrapper { height: 100%; }
+    }
+
+    .overlay {
+        position: absolute;
+        z-index: 500;
+        width: 100%;
+        height: 100%;
+        background-color: @overlayBackground;
+    }
+
+    .transparent.overlay { background-color: rgba(0, 0, 0, 0.75); }
+
+    .overlay.ng-hide-add,
+    .overlay.ng-hide-remove,
+    .overlay.ng-hide-add-active,
+    .overlay.ng-hide-remove-active {
+        -webkit-transition: 0.10s cubic-bezier(.24, .78, .35, .99) all;
+    }
+
+    .overlay.ng-hide-add {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .overlay.ng-hide-add.ng-hide-add-active {
+        opacity: 0;
+        transform: scale(1.1);
+    }
+
+    .overlay.ng-hide-remove {
+        opacity: 0;
+        transform: scale(1.1);
+    }
+
+    .overlay.ng-hide-remove.ng-hide-remove-active {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

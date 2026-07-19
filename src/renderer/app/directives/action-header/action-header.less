@@ -1,0 +1,33 @@
+[action-header] {
+    display: flex;
+    align-items: center;
+}
+
+.main-panel .action.header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    padding: 0 7px;
+    color: @textColor;
+    line-height: 50px;
+    white-space: nowrap;
+    background-color: @pageForeground;
+    border-bottom: 1px solid @borderColor;
+
+    > div { display: flex; align-items: center; }
+    .actions.left { flex: 1 1 auto; min-width: 0; }
+    .actions.right {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: 0;
+        margin-left: 8px;
+        gap: 8px;
+
+        div.search { flex: 0 1 250px; min-width: 160px; }
+        .input { float: none; width: 100%; min-width: 0; max-width: none; margin: 0; }
+    }
+}

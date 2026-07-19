@@ -1,0 +1,26 @@
+[label-chip],
+[label-color] {
+    &.ui.circular.label.label-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .45em;
+        max-width: 100%;
+        padding-right: .75em !important;
+        padding-left: .75em !important;
+        color: @textColor;
+        line-height: 1.15;
+        background: oklch(@labelChipBackgroundLightness @labelChipBackgroundChroma var(--label-hue, 225));
+        border: 1px solid oklch(@labelChipBorderLightness @labelChipBorderChroma var(--label-hue, 225));
+    }
+
+    .label-chip-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .label-chip-active-dot {
+        flex: 0 0 auto;
+        display: inline-block;
+        width: .55em;
+        height: .55em;
+        margin-left: auto;
+        background: @textColor;
+        border-radius: 999px;
+    }
+}

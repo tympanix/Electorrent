@@ -1,0 +1,46 @@
+torrent-sidebar-section {
+    .section {
+        padding: 12px 24px;
+        font-weight: 700;
+        font-style: normal;
+        border-top: 1px solid @borderColor;
+        border-bottom: 1px solid @borderColor;
+    }
+
+    .filter.label {
+        margin: 0;
+        padding: 1em;
+
+        li {
+            margin: 5px;
+            list-style-type: none;
+            cursor: pointer;
+        }
+    }
+
+    .clear.button { float: right; margin: -4px; border-radius: 100px !important; }
+    .torrent.tag { background-color: @highlightBackground; }
+    .torrent.tag .detail { float: right; }
+
+    .torrent-sidebar-label-chip {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        min-height: 0;
+        padding: .35em .55em;
+        font-size: 1rem;
+        font-weight: 400;
+        cursor: pointer;
+
+        &:hover,
+        &.is-active { border: 2px solid oklch(@labelChipDotLightness @labelChipDotChroma var(--label-hue, 225)); }
+    }
+
+    .ui.circular.label.torrent-sidebar-label-chip--empty {
+        justify-content: flex-start;
+        color: @textColor;
+        line-height: 1.15;
+        background: @highlightBackground;
+        border: 1px solid @borderColor;
+    }
+}

@@ -1,0 +1,27 @@
+torrent-details-peers-tab {
+    .torrent-details-peers,
+    .torrent-details-peers-content {
+        flex: 1 1 auto;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .torrent-details-peers {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .torrent-details-peers-content {
+        overflow: auto;
+
+        > .ui.torrent.table {
+            margin: 0;
+
+            th,
+            td { white-space: nowrap; }
+
+            .flag { margin-right: .45rem; }
+        }
+    }
+}
