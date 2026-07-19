@@ -35,8 +35,8 @@ async function sendRemoveAndDeleteShortcut() {
     if (!win) throw new Error("No Electron window found")
 
     const menu = electron.Menu.getApplicationMenu()
-    const editMenu = menu?.items.find((item) => item.id === "edit" || item.label === "Edit")
-    const menuItem = editMenu?.submenu?.items.find((item) => item.label === "Remove and Delete")
+    const actionsMenu = menu?.items.find((item) => item.id === "actions" || item.label === "Actions")
+    const menuItem = actionsMenu?.submenu?.items.find((item) => item.label === "Remove And Delete")
 
     if (!menuItem || !menuItem.visible || !menuItem.enabled) {
       throw new Error("Remove and Delete menu item is unavailable")
