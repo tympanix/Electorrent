@@ -2,12 +2,13 @@ import { Torrent, TorrentFile } from "./abstracttorrent"
 import type {
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
+    BittorrentTorrentPeer,
     ResolvedTorrentClientFeatures,
     TorrentClientFeatures,
     TorrentSpeedLimitOptions,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
-import { connect, getTorrentFiles as getTorrentFilesData } from "./ipc"
+import { connect, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData } from "./ipc"
 
 export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
@@ -58,6 +59,7 @@ const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     uploadFileSelection: false,
     setLocation: false,
     torrentDetails: false,
+    torrentPeers: false,
     trackerFilter: false,
     alternativeSpeedLimits: false,
     speedLimits: false,
@@ -180,10 +182,14 @@ export interface TorrentDetailsPanelData {
         columns: TorrentDetailsFileColumn[]
         items: TorrentDetailsFileItem[]
     }
+    peers: {
+        items: BittorrentTorrentPeer[]
+    }
 }
 
 export type TorrentDetailsInfoData = TorrentDetailsPanelData["info"]
 export type TorrentDetailsFilesData = TorrentDetailsPanelData["files"]
+export type TorrentDetailsPeersData = TorrentDetailsPanelData["peers"]
 
 export abstract class TorrentClient<T extends Torrent = Torrent> {
     private resolvedFeatures = DEFAULT_FEATURES
@@ -364,6 +370,14 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             columns: this.getTorrentDetailsFilesColumns(torrent),
             items: files.map((file) => this.mapTorrentDetailsFile(torrent, file)),
         }
+    }
+
+    async getTorrentDetailsPeers(torrent: T): Promise<TorrentDetailsPeersData> {
+        if (!this.features.torrentPeers) {
+            throw new Error("Torrent peers not supported for this client")
+        }
+
+        return { items: await getTorrentPeersData(torrent.hash) }
     }
 
     protected async getTorrentDetailsData(_torrent: T): Promise<BittorrentTorrentDetailsData> {

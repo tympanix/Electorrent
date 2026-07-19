@@ -3,7 +3,7 @@ import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
@@ -217,6 +217,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 labels: true,
                 uploadFileSelection: true,
                 torrentDetails: true,
+                torrentPeers: true,
                 trackerFilter: true,
                 speedLimits: true,
                 uploadOptions: {
@@ -401,6 +402,31 @@ export class RtorrentRuntime implements BittorrentRuntime {
                     wanted: priority !== 0,
                 }
             })
+    }
+
+    async getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {
+        const peers = await this.getMulticall("p.multicall", [hash, ""], {
+            ip: "p.address",
+            port: "p.port",
+            client: "p.client_version",
+            progress: "p.completed_percent",
+            downloadSpeed: "p.down_rate",
+            uploadSpeed: "p.up_rate",
+            downloaded: "p.down_total",
+            uploaded: "p.up_total",
+            flags: "p.flags",
+        })
+        return peers.map((peer) => ({
+            ip: typeof peer.ip === "string" ? peer.ip : "",
+            port: Number(peer.port) || undefined,
+            client: typeof peer.client === "string" ? peer.client : "",
+            progress: Math.max(0, Math.min(1, (Number(peer.progress) || 0) / 100)),
+            downloadSpeed: Number(peer.downloadSpeed) || 0,
+            uploadSpeed: Number(peer.uploadSpeed) || 0,
+            downloaded: Number(peer.downloaded) || 0,
+            uploaded: Number(peer.uploaded) || 0,
+            flags: typeof peer.flags === "string" ? peer.flags : undefined,
+        }))
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

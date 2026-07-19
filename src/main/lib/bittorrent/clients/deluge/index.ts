@@ -1,7 +1,7 @@
 import request from "request"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
 import {
     defer,
     HTTP_LOGIN_TIMEOUT,
@@ -257,6 +257,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 labels: this.supportsLabels,
                 uploadFileSelection: true,
                 torrentDetails: true,
+                torrentPeers: true,
                 speedLimits: true,
                 ratioLimits: true,
                 freeDiskSpace: true,
@@ -363,6 +364,19 @@ export class DelugeRuntime implements BittorrentRuntime {
                     wanted: priority !== 0,
                 }
             })
+    }
+
+    async getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {
+        const details = await defer<Record<string, any>>((done) => this.rpc("web.get_torrent_status", [hash, ["peers"]], done))
+        return (Array.isArray(details.peers) ? details.peers : []).map((peer: any) => ({
+            ip: typeof peer.ip === "string" ? peer.ip : "",
+            port: Number(peer.port) || undefined,
+            client: typeof peer.client === "string" ? peer.client : "",
+            progress: Number(peer.progress) || (peer.seed ? 1 : 0),
+            downloadSpeed: Number(peer.down_speed) || 0,
+            uploadSpeed: Number(peer.up_speed) || 0,
+            country: typeof peer.country === "string" ? peer.country : undefined,
+        }))
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

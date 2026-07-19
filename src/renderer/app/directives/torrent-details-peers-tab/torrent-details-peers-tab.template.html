@@ -1,0 +1,42 @@
+<div class="torrent-details-peers" data-role="torrent-details-peers">
+  <div class="torrent-details-peers-content">
+    <table class="ui compact single line unstackable torrent table" data-role="torrent-details-peers-table">
+      <thead>
+        <tr>
+          <th>Country</th>
+          <th>IP</th>
+          <th>Port</th>
+          <th>Client</th>
+          <th>Progress</th>
+          <th>Down Speed</th>
+          <th>Up Speed</th>
+          <th>Downloaded</th>
+          <th>Uploaded</th>
+          <th>Connection</th>
+          <th>Flags</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="peer in ctl.scope.peers.items track by (peer.ip + ':' + peer.port + ':' + $index)">
+          <td data-col="country">
+            <i ng-if="peer.countryCode" ng-class="ctl.countryFlagClass(peer)" title="{{ peer.country }}"></i>
+            <span>{{ peer.country || peer.countryCode || '' }}</span>
+          </td>
+          <td data-col="ip">{{ peer.ip }}</td>
+          <td data-col="port">{{ peer.port || '' }}</td>
+          <td data-col="client">{{ peer.client }}</td>
+          <td data-col="progress">{{ ctl.progressPercent(peer) | number:1 }}%</td>
+          <td data-col="downloadSpeed">{{ peer.downloadSpeed | speed }}</td>
+          <td data-col="uploadSpeed">{{ peer.uploadSpeed | speed }}</td>
+          <td data-col="downloaded">{{ peer.downloaded == null ? '' : (peer.downloaded | bytes) }}</td>
+          <td data-col="uploaded">{{ peer.uploaded == null ? '' : (peer.uploaded | bytes) }}</td>
+          <td data-col="connection">{{ peer.connection || '' }}</td>
+          <td data-col="flags">{{ peer.flags || '' }}</td>
+        </tr>
+        <tr ng-if="!ctl.scope.peers.items.length">
+          <td colspan="11">No peers connected.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

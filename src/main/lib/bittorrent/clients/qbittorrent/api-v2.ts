@@ -52,6 +52,12 @@ export class QBittorrentApiV2 extends QBittorrentBaseApi {
         })
     }
 
+    getTorrentPeers(hash: string, cb: (err?: any, body?: any) => void) {
+        this.getJson("sync/torrentPeers", { qs: { hash } }, (err, res, body) => {
+            this.handleError(cb, TORRENT_ERRORS)(err, res, body)
+        })
+    }
+
     addTorrentFileContent(content: Buffer | Uint8Array, filename: string, options: Record<string, any> | undefined, cb: (err?: any, body?: any) => void) {
         const formData = {
             torrents: {

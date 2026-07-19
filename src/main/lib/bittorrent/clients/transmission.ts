@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import https from 'https'
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, TorrentClientConnection } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentPeer, TorrentClientConnection } from '@shared/ipc-contract'
 import {
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
@@ -210,6 +210,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 uploadFileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
+                torrentPeers: true,
                 trackerFilter: true,
                 speedLimits: true,
                 ratioLimits: true,
@@ -334,6 +335,28 @@ export class TransmissionRuntime implements BittorrentRuntime {
                     wanted: Boolean(stats.wanted ?? wanted[index] ?? true),
                 }
             })
+    }
+
+    async getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {
+        const response = await this.getHttpClient().post(this.url(), {
+            arguments: { ids: [hash], fields: ['peers'] },
+            method: 'torrent-get',
+        })
+        const torrent = response?.data?.arguments?.torrents?.[0]
+        if (!torrent) {
+            throw new Error('Transmission did not return torrent peers')
+        }
+
+        return (Array.isArray(torrent.peers) ? torrent.peers : []).map((peer: any) => ({
+            ip: typeof peer.address === 'string' ? peer.address : '',
+            port: Number(peer.port) || undefined,
+            client: typeof peer.clientName === 'string' ? peer.clientName : '',
+            progress: Number(peer.progress) || 0,
+            downloadSpeed: Number(peer.rateToClient) || 0,
+            uploadSpeed: Number(peer.rateToPeer) || 0,
+            connection: peer.isIncoming ? 'Incoming' : 'Outgoing',
+            flags: typeof peer.flagStr === 'string' ? peer.flagStr : undefined,
+        }))
     }
 
     private removeEmpty(obj: Record<string, any>) {
