@@ -18,17 +18,22 @@ import logger from "../logger"
 import * as settings from "../settings"
 import { createRuntime } from "./registry"
 import type { BittorrentRuntime } from "./types"
+import { withTorrentActionAccelerators } from "@shared/torrent-actions"
 
 export interface BittorrentSessionState {
     activeServerId: string | null
     activeClientId: string | null
     isConnected: boolean
+    selectedTorrentCount: number
+    actions: ReturnType<typeof withTorrentActionAccelerators>
 }
 
 const EMPTY_SESSION_STATE: BittorrentSessionState = {
     activeServerId: null,
     activeClientId: null,
     isConnected: false,
+    selectedTorrentCount: 0,
+    actions: [],
 }
 
 class BittorrentManager {
@@ -77,6 +82,8 @@ class BittorrentManager {
             activeServerId: server.id || null,
             activeClientId: server.client || null,
             isConnected: false,
+            selectedTorrentCount: 0,
+            actions: [],
         })
         const pendingConnect = (async () => {
             const existing = this.sessions.get(senderId)
@@ -100,6 +107,8 @@ class BittorrentManager {
                 activeServerId: server.id || null,
                 activeClientId: server.client || null,
                 isConnected: true,
+                selectedTorrentCount: 0,
+                actions: withTorrentActionAccelerators(runtime.actions),
             })
             return connection
         })()
@@ -172,6 +181,21 @@ class BittorrentManager {
             throw new Error(`Unsupported bittorrent action: ${request.action}`)
         }
         return action.call(runtime, request.hashes || [], ...(request.args || []))
+    }
+
+    async getActions(sender: WebContents) {
+        const runtime = await this.getSession(sender)
+        return withTorrentActionAccelerators(runtime.actions)
+    }
+
+    setSelectedTorrents(sender: WebContents, hashes: unknown) {
+        const state = this.getSessionState(sender)
+        if (!state.isConnected) return
+        const selectedTorrentCount = Array.isArray(hashes)
+            ? new Set(hashes.filter((hash): hash is string => typeof hash === "string")).size
+            : 0
+        if (selectedTorrentCount === state.selectedTorrentCount) return
+        this.setSessionState(sender.id, { ...state, selectedTorrentCount })
     }
 
     async getTorrentDetails(sender: WebContents, hash: string): Promise<BittorrentTorrentDetailsData> {

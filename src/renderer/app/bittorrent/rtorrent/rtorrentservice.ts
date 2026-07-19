@@ -1,6 +1,6 @@
 import { Column } from "@renderer/app/services/column";
 import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { RtorrentTorrent } from "./torrentr";
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
@@ -169,57 +169,4 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
         ? this.baseActionHeader
         : this.baseActionHeader.filter((action) => action.type !== "labels")
     }
-
-    contextMenu: ContextActionList<RtorrentTorrent> = [
-      {
-        id: "torrent-details",
-        role: "torrent-details",
-        label: "Details",
-        click: () => Promise.resolve(),
-        icon: "info circle",
-      },
-      {
-        label: "Recheck",
-        click: this.recheck,
-        icon: "checkmark",
-      },
-      {
-        label: "Priority",
-        menu: [
-          {
-            label: "High",
-            click: this.priorityHigh,
-          },
-          {
-            label: "Normal",
-            click: this.priorityNormal,
-          },
-          {
-            label: "Low",
-            click: this.priorityLow,
-          },
-          {
-            label: "Don't Download",
-            click: this.priorityOff,
-          },
-        ],
-      },
-      {
-        id: "torrent-set-speed-limits",
-        label: "Set Speed Limits",
-        click: () => Promise.resolve(),
-        icon: "dashboard",
-      },
-      {
-        label: "Remove",
-        click: this.remove,
-        icon: "remove",
-      },
-      {
-        label: "Remove and Delete",
-        click: this.deleteAndErase,
-        icon: "trash",
-        role: "delete",
-      },
-    ];
 }

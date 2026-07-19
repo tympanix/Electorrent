@@ -15,7 +15,7 @@
             <div ng-repeat="item in visibleTitleBarMenuItems(menu) track by $index">
                 <div ng-if="item.type === 'separator'" class="title-bar-menu-divider" role="separator"></div>
                 <button
-                    ng-if="item.type !== 'separator'"
+                    ng-if="item.type !== 'separator' && !item.submenu"
                     type="button"
                     class="title-bar-menu-item"
                     ng-class="{ disabled: item.enabled === false, checked: item.checked }"
@@ -27,6 +27,22 @@
                     <span class="title-bar-menu-label">{{item.label}}</span>
                     <span class="title-bar-menu-accelerator">{{item.accelerator}}</span>
                 </button>
+                <div ng-if="item.submenu" class="title-bar-menu-submenu">
+                    <div class="title-bar-menu-submenu-label">{{item.label}}</div>
+                    <button
+                        ng-repeat="child in item.submenu track by $index"
+                        type="button"
+                        class="title-bar-menu-item title-bar-menu-submenu-item"
+                        ng-class="{ disabled: child.enabled === false }"
+                        ng-click="runTitleBarMenuItem(child, $event)"
+                        ng-mousedown="$event.preventDefault()"
+                        role="menuitem"
+                        ng-disabled="child.enabled === false">
+                        <span class="title-bar-menu-check"></span>
+                        <span class="title-bar-menu-label">{{child.label}}</span>
+                        <span class="title-bar-menu-accelerator">{{child.accelerator}}</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -98,6 +98,9 @@ export function createMenuActionHandler({
             case "add-server":
                 $scope.$emit("add:server");
                 break;
+            case "torrent-action":
+                $rootScope.$broadcast("torrent-action", action.action);
+                break;
             default:
                 break;
         }

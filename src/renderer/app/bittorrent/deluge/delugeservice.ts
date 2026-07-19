@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
 import { DelugeTorrent } from "./torrentd";
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
@@ -173,63 +173,4 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
             ? this.baseActionHeader
             : this.baseActionHeader.filter((action) => action.type !== "labels")
     }
-
-    contextMenu: ContextActionList<DelugeTorrent> = [
-        {
-            id: "torrent-details",
-            role: "torrent-details",
-            label: "Details",
-            click: () => Promise.resolve(),
-            icon: "info circle"
-        },
-        {
-            label: 'Verify',
-            click: this.verify,
-            icon: 'checkmark'
-        },
-        {
-            label: 'Move Queue Up',
-            click: this.queueUp,
-            icon: 'arrow up'
-        },
-        {
-            label: 'Move Queue Down',
-            click: this.queueDown,
-            icon: 'arrow down'
-        },
-        {
-            label: 'Queue Top',
-            click: this.queueTop,
-            icon: 'chevron circle up'
-        },
-        {
-            label: 'Queue Bottom',
-            click: this.queueBottom,
-            icon: 'chevron circle down'
-        },
-        {
-            id: "torrent-set-speed-limits",
-            label: "Set Speed Limits",
-            click: () => Promise.resolve(),
-            icon: "dashboard",
-        },
-        {
-            id: "torrent-set-ratio",
-            label: "Set Ratio",
-            click: () => Promise.resolve(),
-            icon: "percent",
-        },
-        {
-            label: 'Remove',
-            click: this.remove,
-            icon: 'remove'
-        },
-        {
-            label: 'Remove and delete',
-            click: this.removeAndDelete,
-            icon: 'trash',
-            role: 'delete'
-        },
-    ];
-
 }

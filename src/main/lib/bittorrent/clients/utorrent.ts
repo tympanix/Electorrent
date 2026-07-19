@@ -12,8 +12,22 @@ import {
     serverUrl,
 } from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
+import type { TorrentActionItem } from '@shared/torrent-actions'
 
 export class UtorrentRuntime implements BittorrentRuntime {
+    readonly actions: TorrentActionItem[] = [
+        { label: "Recheck", action: "recheck", icon: "checkmark" },
+        { label: "Force Start", action: "forcestart", icon: "flag" },
+        { label: "Move Up Queue", action: "queueup", icon: "arrow up" },
+        { label: "Move Queue Down", action: "queuedown", icon: "arrow down" },
+        { id: "torrent-set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
+        { label: "Remove", action: "remove", icon: "remove" },
+        { label: "Remove And", menu: [
+            { label: "Delete Torrent", action: "removetorrent" },
+            { label: "Delete Data", action: "removedata" },
+            { label: "Delete All", action: "removedatatorrent", role: "delete" },
+        ] },
+    ]
     private server!: BittorrentServerConfig
     private http!: AxiosInstance
     private data = {

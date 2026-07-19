@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
 import { TransmissionTorrent } from "./torrentt";
 import _ from "underscore"
@@ -221,73 +221,4 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
         ? this.baseActionHeader
         : this.baseActionHeader.filter((action) => action.type !== "labels")
     }
-
-    contextMenu: ContextActionList<TransmissionTorrent> = [
-      {
-        id: "torrent-details",
-        role: "torrent-details",
-        label: "Details",
-        click: () => Promise.resolve(),
-        icon: "info circle",
-      },
-      {
-        label: "Start",
-        click: this.start,
-        icon: "play",
-      },
-      {
-        label: "Pause",
-        click: this.stop,
-        icon: "pause",
-      },
-      {
-        label: "Verify",
-        click: this.verify,
-        icon: "checkmark",
-      },
-      {
-        label: "Move Up Queue",
-        click: this.queueUp,
-        icon: "arrow up",
-      },
-      {
-        label: "Move Queue Down",
-        click: this.queueDown,
-        icon: "arrow down",
-      },
-      {
-        id: "torrent-set-location",
-        label: "Set Location",
-        click: () => Promise.resolve(),
-        icon: "folder open",
-      },
-      {
-        id: "torrent-set-speed-limits",
-        label: "Set Speed Limits",
-        click: () => Promise.resolve(),
-        icon: "dashboard",
-      },
-      {
-        id: "torrent-set-ratio",
-        label: "Set Ratio",
-        click: () => Promise.resolve(),
-        icon: "percent",
-      },
-      {
-        label: "Remove",
-        menu: [
-          {
-            label: "Torrent",
-            icon: "remove",
-            click: this.remove,
-          },
-          {
-            label: "Torrent and Local Data",
-            icon: "remove",
-            click: this.removeAndLocal,
-            role: "delete",
-          },
-        ],
-      },
-    ];
 }

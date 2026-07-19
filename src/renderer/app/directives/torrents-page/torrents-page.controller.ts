@@ -4,6 +4,7 @@ import { PendingTorrentUploadItem, PendingTorrentUploadList } from "@renderer/ap
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import { matchesLabelFilter } from "@renderer/app/directives/torrent-sidebar/torrent-label-filter";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
+import type { TorrentActionItem } from "@shared/torrent-actions";
 
 interface TorrentControllerScope extends angular.IScope {
     pendingTorrentFiles: PendingTorrentUploadList;
@@ -263,6 +264,16 @@ export class TorrentsPageController {
             }
         });
 
+        $scope.$on("torrent-action", (_event: unknown, item: TorrentActionItem) => {
+            if (selected.length === 0) {
+                return;
+            }
+            const bound = $rootScope.$btclient?.bindContextAction(item);
+            if (bound && "click" in bound) {
+                $scope.doContextAction(bound.click, bound.label, bound);
+            }
+        });
+
         $scope.$on("torrentLocation:updated", () => {
             syncAfterTorrentMutation();
         });
@@ -281,6 +292,7 @@ export class TorrentsPageController {
 
         function syncDetailsPanel() {
             $rootScope.$emit("torrentDetails:sync", getCurrentSelectedTorrent());
+            void window.electorrent.bittorrent.setSelectedTorrents(selected.map((torrent) => torrent.hash));
         }
 
         function syncAfterTorrentMutation() {

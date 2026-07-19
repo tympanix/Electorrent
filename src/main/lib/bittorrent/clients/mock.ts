@@ -8,6 +8,7 @@ import type {
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
+import type { TorrentActionItem } from "@shared/torrent-actions"
 import parseTorrent from "parse-torrent"
 
 const PRIORITY_SKIP = 0
@@ -62,6 +63,23 @@ type MockTorrentInput = Partial<MockTorrent> & {
 }
 
 export class MockBittorrentRuntime implements BittorrentRuntime {
+    readonly actions: TorrentActionItem[] = [
+        { id: "torrent-details", role: "torrent-details", label: "Details", icon: "info circle" },
+        { id: "torrent-files", label: "Files", icon: "file" },
+        { label: "Recheck", action: "recheck", icon: "checkmark" },
+        { label: "Queue", menu: [
+            { label: "Move Up Queue", action: "increasePrio", icon: "arrow up" },
+            { label: "Move Queue Down", action: "decreasePrio", icon: "arrow down" },
+            { label: "Queue Top", action: "topPrio", icon: "chevron circle up" },
+            { label: "Queue Bottom", action: "bottomPrio", icon: "chevron circle down" },
+        ] },
+        { label: "Sequential Download", action: "toggleSequentialDownload", checkProperty: "sequentialDownload" },
+        { id: "torrent-set-location", label: "Set Location", icon: "folder open" },
+        { id: "torrent-set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
+        { id: "torrent-set-ratio", label: "Set Ratio", icon: "percent" },
+        { label: "Remove", action: "delete", icon: "remove" },
+        { label: "Remove And Delete", action: "deleteAndRemove", icon: "trash", role: "delete" },
+    ]
     private static stores = new Map<string, MockRuntimeStore>()
 
     private connected = false
