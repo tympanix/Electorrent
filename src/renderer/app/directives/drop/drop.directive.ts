@@ -1,4 +1,5 @@
 import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { DropDownController } from "./drop.controller";
 import html from "./drop.template.html";
 import dropdownGroupHtml from "./dropdown-group.template.html";
@@ -243,3 +244,6 @@ export class DropdownGroupDirective implements IDirective {
         });
     }
 }
+
+torrentApp.directive("dropdown", DropdownElementDirective.getInstance())
+torrentApp.directive("dropdownGroup", DropdownGroupDirective.getInstance())

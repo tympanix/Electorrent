@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import html from "./settings-about.template.html";
 
 export class SettingsAboutDirective implements IDirective {
@@ -10,3 +11,5 @@ export class SettingsAboutDirective implements IDirective {
         return () => new SettingsAboutDirective();
     }
 }
+
+torrentApp.directive("settingsAbout", SettingsAboutDirective.getInstance())

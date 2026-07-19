@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { SavedLocationModalController } from "./saved-location-modal.controller";
 import html from "./saved-location-modal.template.html";
 
@@ -15,3 +16,5 @@ export class SavedLocationModalDirective implements IDirective {
         return () => new SavedLocationModalDirective();
     }
 }
+
+torrentApp.directive("savedLocationModal", SavedLocationModalDirective.getInstance())

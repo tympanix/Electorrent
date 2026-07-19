@@ -1,4 +1,5 @@
 import { IAugmentedJQuery, IAttributes, IDirective, IDirectiveFactory, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import type { LabelColorHue, LabelColorOverrides } from "@shared/ipc-contract";
 
 interface LabelChipAttributes extends IAttributes {
@@ -43,3 +44,5 @@ export class LabelChipDirective implements IDirective {
         scope.$watch(getOverrides, render, true);
     }
 }
+
+torrentApp.directive("labelChip", LabelChipDirective.getInstance())

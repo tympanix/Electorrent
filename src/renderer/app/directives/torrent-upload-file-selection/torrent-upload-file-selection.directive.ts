@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import type { BittorrentFileSelection, TorrentMetadataFile } from "@shared/ipc-contract";
 import { TorrentUploadFileSelectionController } from "./torrent-upload-file-selection.controller";
 import html from "./torrent-upload-file-selection.template.html";
@@ -22,3 +23,5 @@ export class TorrentUploadFileSelectionDirective implements IDirective {
         return () => new TorrentUploadFileSelectionDirective()
     }
 }
+
+torrentApp.directive("torrentUploadFileSelection", TorrentUploadFileSelectionDirective.getInstance())

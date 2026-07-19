@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { TorrentSpeedModalController } from "./torrent-speed-modal.controller";
 import html from "./torrent-speed-modal.template.html";
 
@@ -16,3 +17,5 @@ export class TorrentSpeedModalDirective implements IDirective {
     return () => new TorrentSpeedModalDirective();
   }
 }
+
+torrentApp.directive("torrentSpeedModal", TorrentSpeedModalDirective.getInstance())

@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { NotificationsCenterController } from "./notifications-center.controller";
 import html from "./notifications-center.template.html";
 
@@ -12,3 +13,5 @@ export class NotificationsCenterDirective implements IDirective {
         return () => new NotificationsCenterDirective();
     }
 }
+
+torrentApp.directive("notificationsCenter", NotificationsCenterDirective.getInstance())

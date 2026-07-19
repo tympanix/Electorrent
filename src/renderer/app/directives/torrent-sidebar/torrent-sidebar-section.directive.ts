@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import html from "./torrent-sidebar-section.template.html";
 
 export class TorrentSidebarSectionController {
@@ -59,3 +60,5 @@ export class TorrentSidebarSectionDirective implements IDirective {
         return () => new TorrentSidebarSectionDirective();
     }
 }
+
+torrentApp.directive("torrentSidebarSection", TorrentSidebarSectionDirective.getInstance())

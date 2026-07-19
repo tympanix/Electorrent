@@ -1,4 +1,5 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { TorrentBodyController } from "./torrent-table.controller";
 
 interface TorrentRowScope extends IScope {
@@ -51,3 +52,6 @@ export class TorrentRowDirective implements IDirective {
         controller.subscribe(scope);
     }
 }
+
+torrentApp.directive("torrentBody", TorrentBodyDirective.getInstance())
+torrentApp.directive("torrentRow", TorrentRowDirective.getInstance())

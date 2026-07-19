@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import html from "./certificate-modal.template.html";
 
 export class CertificateModalDirective implements IDirective {
@@ -16,3 +17,5 @@ export class CertificateModalDirective implements IDirective {
         return () => new CertificateModalDirective();
     }
 }
+
+torrentApp.directive("certificateModal", CertificateModalDirective.getInstance())

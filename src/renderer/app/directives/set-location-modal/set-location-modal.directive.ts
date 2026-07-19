@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { SetLocationModalController } from "./set-location-modal.controller";
 import html from "./set-location-modal.template.html";
 
@@ -13,3 +14,5 @@ export class SetLocationModalDirective implements IDirective {
     return () => new SetLocationModalDirective();
   }
 }
+
+torrentApp.directive("setLocationModal", SetLocationModalDirective.getInstance())

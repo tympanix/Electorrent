@@ -1,4 +1,5 @@
 import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { DropdownController } from "./dropdown.controller";
 
 interface DropdownScope extends IScope {
@@ -83,3 +84,6 @@ export class DropItemDirective implements IDirective {
         }
     }
 }
+
+torrentApp.directive("dropdown", SemanticDropdownDirective.getInstance())
+torrentApp.directive("dropItem", DropItemDirective.getInstance())

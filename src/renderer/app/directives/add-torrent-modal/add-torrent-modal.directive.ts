@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { Torrent } from "@renderer/app/bittorrent";
 import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import type { TorrentMetadata } from "@shared/ipc-contract";
@@ -47,3 +48,5 @@ export class AddTorrentModalDirective implements IDirective {
         return () => new AddTorrentModalDirective()
     }
 }
+
+torrentApp.directive("addTorrentModal", AddTorrentModalDirective.getInstance())

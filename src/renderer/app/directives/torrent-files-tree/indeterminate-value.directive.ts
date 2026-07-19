@@ -1,3 +1,5 @@
+import { torrentApp } from "@renderer/app/app.module"
+
 /**
  * Sets checkbox element's indeterminate property from scope expression.
  * Use as: <input type="checkbox" indeterminate-value="row._folderIndeterminate" ... />
@@ -16,3 +18,5 @@ export function indeterminateValueDirective(): ng.IDirective {
     },
   };
 }
+
+torrentApp.directive("indeterminateValue", indeterminateValueDirective)

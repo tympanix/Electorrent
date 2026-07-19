@@ -1,4 +1,5 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IFilterService, IScope, ITimeoutService, IPromise } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { TimeController } from "./time.controller";
 
 interface TimeScope extends IScope {
@@ -83,3 +84,5 @@ export class TimeDirective implements IDirective {
         });
     }
 }
+
+torrentApp.directive("time", TimeDirective.getInstance())

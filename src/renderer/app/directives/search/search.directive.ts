@@ -1,4 +1,5 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IRootScopeService, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { SearchController } from "./search.controller";
 
 export class SearchDirective implements IDirective {
@@ -29,3 +30,5 @@ export class SearchDirective implements IDirective {
         scope.$on("$destroy", unsubscribe);
     }
 }
+
+torrentApp.directive("search", SearchDirective.getInstance())

@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { ToggleController } from "./checkbox.controller";
 import html from "./checkbox.template.html";
 
@@ -22,3 +23,5 @@ export class ToggleDirective implements IDirective {
         return () => new ToggleDirective();
     }
 }
+
+torrentApp.directive("toggle", ToggleDirective.getInstance())

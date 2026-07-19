@@ -1,4 +1,5 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IRootScopeService, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { DragAndDropController } from "./drag-and-drop.controller";
 import type { PendingTorrentUploadFile } from "@shared/ipc-contract";
 
@@ -126,3 +127,5 @@ export class DragAndDropDirective implements IDirective {
         });
     }
 }
+
+torrentApp.directive("dragAndDrop", DragAndDropDirective.getInstance())

@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import html from "./settings-connection.template.html";
 
 export class SettingsConnectionDirective implements IDirective {
@@ -10,3 +11,5 @@ export class SettingsConnectionDirective implements IDirective {
         return () => new SettingsConnectionDirective();
     }
 }
+
+torrentApp.directive("settingsConnection", SettingsConnectionDirective.getInstance())

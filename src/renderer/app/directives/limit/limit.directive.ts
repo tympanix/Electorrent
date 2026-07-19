@@ -1,4 +1,5 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { LimitBindController } from "./limit.controller";
 
 export class LimitBindDirective implements IDirective {
@@ -52,3 +53,6 @@ export class LimitSourceDirective implements IDirective {
         });
     }
 }
+
+torrentApp.directive("limitBind", LimitBindDirective.getInstance())
+torrentApp.directive("limitSource", LimitSourceDirective.getInstance())

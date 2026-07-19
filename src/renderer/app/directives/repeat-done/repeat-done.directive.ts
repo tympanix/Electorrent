@@ -1,4 +1,5 @@
 import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope, ITimeoutService } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { RepeatDoneController } from "./repeat-done.controller";
 
 export class RepeatDoneDirective implements IDirective {
@@ -24,3 +25,5 @@ export class RepeatDoneDirective implements IDirective {
         }
     }
 }
+
+torrentApp.directive("repeatDone", RepeatDoneDirective.getInstance())

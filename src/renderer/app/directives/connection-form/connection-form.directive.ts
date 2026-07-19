@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { parseServerAddressInput, sanitizeServerAddress } from "@shared/server-address";
 import html from "./connection-form.template.html";
 
@@ -84,3 +85,5 @@ export class ConnectionFormDirective implements IDirective {
         scope.$watch("server.ip", syncHostFields);
     }
 }
+
+torrentApp.directive("connectionForm", ConnectionFormDirective.getInstance())

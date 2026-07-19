@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { TorrentSetRatioModalController } from "./torrent-set-ratio-modal.controller";
 import html from "./torrent-set-ratio-modal.template.html";
 
@@ -16,3 +17,5 @@ export class TorrentSetRatioModalDirective implements IDirective {
     return () => new TorrentSetRatioModalDirective();
   }
 }
+
+torrentApp.directive("torrentSetRatioModal", TorrentSetRatioModalDirective.getInstance())
