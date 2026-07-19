@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import html from "./insecure-tls-modal.template.html";
 
 export class InsecureTlsModalDirective implements IDirective {
@@ -15,3 +16,5 @@ export class InsecureTlsModalDirective implements IDirective {
         return () => new InsecureTlsModalDirective();
     }
 }
+
+torrentApp.directive("insecureTlsModal", InsecureTlsModalDirective.getInstance())

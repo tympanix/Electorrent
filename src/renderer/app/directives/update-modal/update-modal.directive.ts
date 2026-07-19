@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import html from "./update-modal.template.html";
 
 export class UpdateModalDirective implements IDirective {
@@ -14,3 +15,5 @@ export class UpdateModalDirective implements IDirective {
         return () => new UpdateModalDirective();
     }
 }
+
+torrentApp.directive("updateModal", UpdateModalDirective.getInstance())

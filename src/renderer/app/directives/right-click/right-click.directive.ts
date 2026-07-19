@@ -1,4 +1,5 @@
 import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IParseService, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { RightClickController } from "./right-click.controller";
 
 export class RightClickDirective implements IDirective {
@@ -22,3 +23,5 @@ export class RightClickDirective implements IDirective {
         });
     }
 }
+
+torrentApp.directive("ngRightClick", RightClickDirective.getInstance())

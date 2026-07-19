@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { TorrentFilesModalController } from "./torrent-files-modal.controller";
 import html from "./torrent-files-modal.template.html";
 
@@ -19,3 +20,5 @@ export class TorrentFilesModalDirective implements IDirective {
     return () => new TorrentFilesModalDirective();
   }
 }
+
+torrentApp.directive("torrentFilesModal", TorrentFilesModalDirective.getInstance())

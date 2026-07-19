@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory, IRootScopeService, ITimeoutService, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { ReadyBroadcastController } from "./ready-broadcast.controller";
 
 export class ReadyBroadcastDirective implements IDirective {
@@ -23,3 +24,5 @@ export class ReadyBroadcastDirective implements IDirective {
         });
     }
 }
+
+torrentApp.directive("readyBroadcast", ReadyBroadcastDirective.getInstance())

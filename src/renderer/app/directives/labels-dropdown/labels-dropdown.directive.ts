@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { LabelsDropdownController } from "./labels-dropdown.controller";
 import html from "./labels-dropdown.template.html";
 
@@ -16,3 +17,5 @@ export class LabelsDropdownDirective implements IDirective {
         return () => new LabelsDropdownDirective();
     }
 }
+
+torrentApp.directive("labelsDropdown", LabelsDropdownDirective.getInstance())

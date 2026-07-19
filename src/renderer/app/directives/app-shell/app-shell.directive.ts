@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { AppShellController } from "./app-shell.controller";
 import html from "./app-shell.template.html";
 
@@ -12,3 +13,5 @@ export class AppShellDirective implements IDirective {
         return () => new AppShellDirective();
     }
 }
+
+torrentApp.directive("appShell", AppShellDirective.getInstance())

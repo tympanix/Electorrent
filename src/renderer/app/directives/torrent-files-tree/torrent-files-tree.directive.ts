@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { TorrentFilesTreeController } from "./torrent-files-tree.controller";
 import html from "./torrent-files-tree.template.html";
 
@@ -15,3 +16,5 @@ export class TorrentFilesTreeDirective implements IDirective {
     return () => new TorrentFilesTreeDirective();
   }
 }
+
+torrentApp.directive("torrentFilesTree", TorrentFilesTreeDirective.getInstance())

@@ -1,4 +1,5 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IDocumentService, IRootScopeService, IScope, IWindowService } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { ContextMenuController } from "./context-menu.controller";
 
 interface ContextMenuItem {
@@ -255,3 +256,5 @@ export class ContextMenuDirective implements IDirective {
         });
     }
 }
+
+torrentApp.directive("contextMenu", ContextMenuDirective.getInstance())

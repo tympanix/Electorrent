@@ -1,4 +1,5 @@
 import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IParseService, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { ModalController } from "./modal.controller";
 
 interface ModalAttributes extends IAttributes {
@@ -119,3 +120,5 @@ export class ModalDirective implements IDirective {
     }
 
 }
+
+torrentApp.directive("modal", ModalDirective.getInstance())

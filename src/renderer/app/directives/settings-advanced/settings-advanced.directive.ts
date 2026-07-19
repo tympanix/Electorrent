@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import html from "./settings-advanced.template.html";
 import { SettingsAdvancedController } from "./settings-advanced.controller";
 
@@ -13,3 +14,5 @@ export class SettingsAdvancedDirective implements IDirective {
         return () => new SettingsAdvancedDirective();
     }
 }
+
+torrentApp.directive("settingsAdvanced", SettingsAdvancedDirective.getInstance())

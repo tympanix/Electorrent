@@ -1,4 +1,5 @@
 import { IAttributes, IAugmentedJQuery, ICompileService, IDirective, IDirectiveFactory, IRootScopeService, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { ActionHeaderController } from "./action-header.controller";
 
 interface ActionHeaderScope extends IScope {
@@ -168,3 +169,5 @@ export class ActionHeaderDirective implements IDirective {
         );
     }
 }
+
+torrentApp.directive("actionHeader", ActionHeaderDirective.getInstance())

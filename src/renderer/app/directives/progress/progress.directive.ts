@@ -1,4 +1,5 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IScope, ITimeoutService } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { ProgressController } from "./progress.controller";
 import html from "./progress.template.html";
 
@@ -53,3 +54,5 @@ export class ProgressDirective implements IDirective {
         updateProgress();
     }
 }
+
+torrentApp.directive("progress", ProgressDirective.getInstance())

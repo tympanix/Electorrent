@@ -1,3 +1,4 @@
+import { torrentApp } from "@renderer/app/app.module"
 import {
     IAttributes,
     IAugmentedJQuery,
@@ -69,3 +70,5 @@ export class TorrentUploadFormDirective extends Directive {
     }
 
 }
+
+torrentApp.directive("torrentUploadForm", TorrentUploadFormDirective.getInstance())

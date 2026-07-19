@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { matchesLabelFilter, NO_LABEL_FILTER } from "./torrent-label-filter";
 import html from "./torrent-sidebar.template.html";
 
@@ -146,3 +147,5 @@ export class TorrentSidebarDirective implements IDirective {
         return () => new TorrentSidebarDirective();
     }
 }
+
+torrentApp.directive("torrentSidebar", TorrentSidebarDirective.getInstance())

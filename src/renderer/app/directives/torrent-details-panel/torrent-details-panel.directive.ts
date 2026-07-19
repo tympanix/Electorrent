@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { TorrentDetailsPanelController } from "./torrent-details-panel.controller";
 import html from "./torrent-details-panel.template.html";
 
@@ -15,3 +16,5 @@ export class TorrentDetailsPanelDirective implements IDirective {
     return () => new TorrentDetailsPanelDirective();
   }
 }
+
+torrentApp.directive("torrentDetailsPanel", TorrentDetailsPanelDirective.getInstance())

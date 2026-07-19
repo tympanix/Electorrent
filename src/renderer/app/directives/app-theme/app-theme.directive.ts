@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { AppThemeController } from "./app-theme.controller";
 
 export class AppThemeDirective implements IDirective {
@@ -10,3 +11,5 @@ export class AppThemeDirective implements IDirective {
         return () => new AppThemeDirective();
     }
 }
+
+torrentApp.directive("appTheme", AppThemeDirective.getInstance())

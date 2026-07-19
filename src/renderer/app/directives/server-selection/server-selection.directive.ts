@@ -1,4 +1,5 @@
 import { IDirective, IDirectiveFactory } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import html from "./server-selection.template.html";
 
 export class ServerSelectionDirective implements IDirective {
@@ -13,3 +14,5 @@ export class ServerSelectionDirective implements IDirective {
         return () => new ServerSelectionDirective();
     }
 }
+
+torrentApp.directive("serverSelection", ServerSelectionDirective.getInstance())

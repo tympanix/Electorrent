@@ -1,4 +1,5 @@
 import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
+import { torrentApp } from "@renderer/app/app.module"
 import { SortingController } from "./sorting.controller";
 
 interface SortScope extends IScope {
@@ -124,3 +125,6 @@ export class SortDirective implements IDirective {
         scope.update();
     }
 }
+
+torrentApp.directive("sorting", SortingDirective.getInstance())
+torrentApp.directive("sort", SortDirective.getInstance())
