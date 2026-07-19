@@ -99,6 +99,10 @@ export interface BittorrentGetTorrentFilesRequest {
     hash: string
 }
 
+export interface BittorrentGetTorrentPeersRequest {
+    hash: string
+}
+
 export type BittorrentTorrentDetailsPrimitive = string | number | boolean | null
 
 export interface BittorrentGetTorrentDetailsRequest {
@@ -119,6 +123,21 @@ export interface BittorrentTorrentDetailsFile {
 
 export interface BittorrentTorrentDetailsData {
     info: Record<string, BittorrentTorrentDetailsPrimitive>
+}
+
+export interface BittorrentTorrentPeer {
+    ip: string
+    port?: number
+    client: string
+    progress: number
+    downloadSpeed: number
+    uploadSpeed: number
+    downloaded?: number
+    uploaded?: number
+    connection?: string
+    flags?: string
+    country?: string
+    countryCode?: string
 }
 
 export interface BittorrentFileSelection {
@@ -198,6 +217,7 @@ export interface TorrentClientFeatures {
     readonly uploadFileSelection?: boolean
     readonly setLocation?: boolean
     readonly torrentDetails?: boolean
+    readonly torrentPeers?: boolean
     readonly trackerFilter?: boolean
     readonly alternativeSpeedLimits?: boolean
     readonly speedLimits?: boolean
@@ -239,6 +259,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly uploadFileSelection: boolean
     readonly setLocation: boolean
     readonly torrentDetails: boolean
+    readonly torrentPeers: boolean
     readonly trackerFilter: boolean
     readonly alternativeSpeedLimits: boolean
     readonly speedLimits: boolean
@@ -386,6 +407,7 @@ export interface ElectorrentBridge {
         invokeAction(request: BittorrentInvokeActionRequest): Promise<void>
         getTorrentDetails(request: BittorrentGetTorrentDetailsRequest): Promise<BittorrentTorrentDetailsData>
         getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<BittorrentTorrentDetailsFile[]>
+        getTorrentPeers(request: BittorrentGetTorrentPeersRequest): Promise<BittorrentTorrentPeer[]>
         setTorrentFileSelection(request: BittorrentSetTorrentFileSelectionRequest): Promise<void>
     }
     updates: {

@@ -3,6 +3,7 @@ import type {
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
+    BittorrentTorrentPeer,
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
@@ -87,6 +88,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 uploadFileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
+                torrentPeers: true,
                 ratioLimits: true,
                 freeDiskSpace: true,
                 uploadOptions: {
@@ -289,6 +291,26 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             priority: file.priority,
             isSeed: file.is_seed,
         }))
+    }
+
+    async getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {
+        this.assertConnected()
+        if (!this.torrents.has(hash)) {
+            throw new Error("Mock torrent not found")
+        }
+
+        return [{
+            ip: "8.8.8.8",
+            port: 6881,
+            client: "Mock Peer 1.0",
+            progress: 0.75,
+            downloadSpeed: 128 * 1024,
+            uploadSpeed: 32 * 1024,
+            downloaded: 750 * 1024 * 1024,
+            uploaded: 250 * 1024 * 1024,
+            connection: "Outgoing",
+            flags: "Interested, encrypted",
+        }]
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {

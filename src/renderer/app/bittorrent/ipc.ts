@@ -2,6 +2,7 @@ import type {
     BittorrentTorrentDetailsData,
     ElectorrentBridge,
     BittorrentFileSelection,
+    BittorrentTorrentPeer,
     BittorrentServerConfig,
     TorrentClientConnection,
     TorrentUploadOptions,
@@ -60,6 +61,10 @@ export function getTorrentDetails(hash: string): Promise<BittorrentTorrentDetail
 
 export function getTorrentFiles(hash: string) {
     return bridge().getTorrentFiles({ hash })
+}
+
+export function getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {
+    return bridge().getTorrentPeers({ hash })
 }
 
 export function setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]) {

@@ -143,6 +143,7 @@ export abstract class QBittorrentBaseApi {
     abstract syncMaindata(cb: (err?: any, body?: any) => void): void
 
     abstract getTorrentTrackers(hash: string, cb: (err?: any, body?: any) => void): void
+    abstract getTorrentPeers(hash: string, cb: (err?: any, body?: any) => void): void
 
     abstract addTorrentFileContent(content: Buffer | Uint8Array, filename: string, options: Record<string, any> | undefined, cb: (err?: any, body?: any) => void): void
 

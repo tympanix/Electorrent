@@ -2,6 +2,8 @@ import { IDocumentService, IScope, IWindowService } from "angular";
 import { TorrentDetailsFileItem, TorrentDetailsPanelData } from "@renderer/app/bittorrent/torrentclient";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
+type TorrentDetailsTab = "info" | "files" | "peers";
+
 export interface TorrentDetailsPanelScope extends IScope {
   settings: any;
   isOpen: boolean;
@@ -9,7 +11,7 @@ export interface TorrentDetailsPanelScope extends IScope {
   error: string | null;
   torrent: any;
   panel: TorrentDetailsPanelData;
-  activeTab: "info" | "files";
+  activeTab: TorrentDetailsTab;
   resizeMode: string;
   resizeProfile: string;
 }
@@ -20,10 +22,10 @@ export class TorrentDetailsPanelController {
   private readonly defaultPanelHeight = 320;
   private readonly minPanelHeight = 220;
   private panelHeight = this.defaultPanelHeight;
-  private loadRequestIds = { info: 0, files: 0 };
-  private loadedTabs = { info: false, files: false };
-  private loadingTabs = { info: false, files: false };
-  private tabErrors: Record<"info" | "files", string | null> = { info: null, files: null };
+  private loadRequestIds: Record<TorrentDetailsTab, number> = { info: 0, files: 0, peers: 0 };
+  private loadedTabs: Record<TorrentDetailsTab, boolean> = { info: false, files: false, peers: false };
+  private loadingTabs: Record<TorrentDetailsTab, boolean> = { info: false, files: false, peers: false };
+  private tabErrors: Record<TorrentDetailsTab, string | null> = { info: null, files: null, peers: null };
   private stopResizeListeners?: () => void;
 
   constructor(
@@ -42,6 +44,7 @@ export class TorrentDetailsPanelController {
     this.scope.panel = {
       info: { sections: [] },
       files: { columns: [], items: [] },
+      peers: { items: [] },
     };
 
     this.scope.$watch(
@@ -99,7 +102,7 @@ export class TorrentDetailsPanelController {
     this.resetPanelState();
   }
 
-  showTab(tab: "info" | "files") {
+  showTab(tab: TorrentDetailsTab) {
     this.scope.activeTab = tab;
     this.syncActiveTabState();
     if (this.scope.torrent && !this.loadedTabs[tab]) {
@@ -107,7 +110,7 @@ export class TorrentDetailsPanelController {
     }
   }
 
-  isActiveTab(tab: "info" | "files") {
+  isActiveTab(tab: TorrentDetailsTab) {
     return this.scope.activeTab === tab;
   }
 
@@ -116,9 +119,12 @@ export class TorrentDetailsPanelController {
   }
 
   hasActiveTabData() {
-    return this.scope.activeTab === "info"
-      ? this.scope.panel.info.sections.length > 0
-      : this.scope.panel.files.items.length > 0;
+    if (this.scope.activeTab === "info") {
+      return this.scope.panel.info.sections.length > 0;
+    }
+    return this.scope.activeTab === "files"
+      ? this.scope.panel.files.items.length > 0
+      : this.scope.panel.peers.items.length > 0;
   }
 
   stateMessageIcon() {
@@ -137,6 +143,10 @@ export class TorrentDetailsPanelController {
 
   canSelectFiles() {
     return !!this.rootScope.$btclient?.features.fileSelection;
+  }
+
+  canShowPeers() {
+    return !!this.rootScope.$btclient?.features.torrentPeers;
   }
 
   updateFileSelection = async (files: TorrentDetailsFileItem[], wanted: boolean) => {
@@ -186,7 +196,7 @@ export class TorrentDetailsPanelController {
     return `torrent-details-files.${serverId}`;
   }
 
-  private async loadTab(tab: "info" | "files", torrent: any, force = false) {
+  private async loadTab(tab: TorrentDetailsTab, torrent: any, force = false) {
     if (!force && this.loadedTabs[tab]) {
       return;
     }
@@ -200,7 +210,9 @@ export class TorrentDetailsPanelController {
       const client = this.rootScope.$btclient;
       const data = tab === "info"
         ? await client?.getTorrentDetails(torrent)
-        : await client?.getTorrentDetailsFiles(torrent);
+        : tab === "files"
+          ? await client?.getTorrentDetailsFiles(torrent)
+          : await client?.getTorrentDetailsPeers(torrent);
       if (requestId !== this.loadRequestIds[tab] || this.scope.torrent !== torrent) {
         return;
       }
@@ -208,8 +220,10 @@ export class TorrentDetailsPanelController {
       if (data) {
         if (tab === "info") {
           this.scope.panel.info = data as TorrentDetailsPanelData["info"];
-        } else {
+        } else if (tab === "files") {
           this.scope.panel.files = data as TorrentDetailsPanelData["files"];
+        } else {
+          this.scope.panel.peers = data as TorrentDetailsPanelData["peers"];
         }
       }
       this.loadedTabs[tab] = true;
@@ -261,15 +275,17 @@ export class TorrentDetailsPanelController {
   private resetPanelState() {
     this.loadRequestIds.info += 1;
     this.loadRequestIds.files += 1;
-    this.loadedTabs = { info: false, files: false };
-    this.loadingTabs = { info: false, files: false };
-    this.tabErrors = { info: null, files: null };
+    this.loadRequestIds.peers += 1;
+    this.loadedTabs = { info: false, files: false, peers: false };
+    this.loadingTabs = { info: false, files: false, peers: false };
+    this.tabErrors = { info: null, files: null, peers: null };
     this.scope.loading = false;
     this.scope.error = null;
     this.scope.torrent = null;
     this.scope.panel = {
       info: { sections: [] },
       files: { columns: [], items: [] },
+      peers: { items: [] },
     };
   }
 }

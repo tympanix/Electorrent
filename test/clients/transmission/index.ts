@@ -8,6 +8,7 @@ const features = {
   uploadFileSelection: true,
   setLocation: true,
   torrentDetails: true,
+  torrentPeers: true,
   trackerFilter: true,
   speedLimits: true,
   ratioLimits: true,

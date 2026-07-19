@@ -35,6 +35,7 @@ export const IPC_CHANNELS = {
         invokeAction: 'bittorrent:invoke-action',
         getTorrentDetails: 'bittorrent:get-torrent-details',
         getTorrentFiles: 'bittorrent:get-torrent-files',
+        getTorrentPeers: 'bittorrent:get-torrent-peers',
         setTorrentFileSelection: 'bittorrent:set-torrent-file-selection',
     },
     updates: {

@@ -4,6 +4,7 @@ import type {
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
+    BittorrentTorrentPeer,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
 
@@ -17,6 +18,7 @@ export interface BittorrentRuntime {
     setLocation?(hashes: string[], location: string): Promise<void>
     getTorrentDetails?(hash: string): Promise<BittorrentTorrentDetailsData>
     getTorrentFiles?(hash: string): Promise<BittorrentTorrentDetailsFile[]>
+    getTorrentPeers?(hash: string): Promise<BittorrentTorrentPeer[]>
     setTorrentFileSelection?(hash: string, files: BittorrentFileSelection[]): Promise<void>
     disconnect?(): Promise<void>
 }

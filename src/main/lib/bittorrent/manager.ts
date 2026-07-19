@@ -1,6 +1,7 @@
 import fs from "fs"
 import path from "path"
 import type { WebContents } from "electron"
+import { lookup as lookupCountry } from "geoip-country"
 import type {
     BittorrentAddTorrentUrlRequest,
     BittorrentInvokeActionRequest,
@@ -9,6 +10,7 @@ import type {
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
+    BittorrentTorrentPeer,
     BittorrentUploadTorrentRequest,
 } from "@shared/ipc-contract"
 import logger from "../logger"
@@ -185,6 +187,23 @@ class BittorrentManager {
             throw new Error("Torrent files not supported for this client")
         }
         return runtime.getTorrentFiles(hash)
+    }
+
+    async getTorrentPeers(sender: WebContents, hash: string): Promise<BittorrentTorrentPeer[]> {
+        const runtime = await this.getSession(sender)
+        if (typeof runtime.getTorrentPeers !== "function") {
+            throw new Error("Torrent peers not supported for this client")
+        }
+
+        const peers = await runtime.getTorrentPeers(hash)
+        return peers.map((peer) => {
+            if (peer.countryCode && peer.country) {
+                return peer
+            }
+
+            const geo = lookupCountry(peer.ip)
+            return geo ? { ...peer, countryCode: geo.country, country: geo.name } : peer
+        })
     }
 
     async setTorrentFileSelection(sender: WebContents, request: BittorrentSetTorrentFileSelectionRequest) {

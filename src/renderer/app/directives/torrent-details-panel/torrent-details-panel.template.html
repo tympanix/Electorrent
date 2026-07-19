@@ -17,6 +17,15 @@
     >
       Files
     </a>
+    <a
+      class="item"
+      data-role="torrent-details-tab-peers"
+      ng-if="ctl.canShowPeers()"
+      ng-class="{ active: ctl.isActiveTab('peers') }"
+      ng-click="ctl.showTab('peers')"
+    >
+      Peers
+    </a>
     <div class="right menu">
       <a
         class="item"
@@ -54,5 +63,10 @@
       can-select-files="ctl.canSelectFiles()"
       update-selection="ctl.updateFileSelection(files, wanted)"
     ></torrent-details-files-tab>
+
+    <torrent-details-peers-tab
+      ng-if="!ctl.showStateMessage() && ctl.isActiveTab('peers')"
+      peers="ctl.scope.panel.peers"
+    ></torrent-details-peers-tab>
   </div>
 </div>

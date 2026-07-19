@@ -60,6 +60,7 @@ const electorrentBridge: ElectorrentBridge = {
         invokeAction: (request) => invoke(IPC_CHANNELS.bittorrent.invokeAction, request),
         getTorrentDetails: (request) => invoke(IPC_CHANNELS.bittorrent.getTorrentDetails, request),
         getTorrentFiles: (request) => invoke(IPC_CHANNELS.bittorrent.getTorrentFiles, request),
+        getTorrentPeers: (request) => invoke(IPC_CHANNELS.bittorrent.getTorrentPeers, request),
         setTorrentFileSelection: (request) => invoke(IPC_CHANNELS.bittorrent.setTorrentFileSelection, request),
     },
     updates: {

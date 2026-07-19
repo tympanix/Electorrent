@@ -255,6 +255,10 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         return bittorrentManager.getTorrentFiles(event.sender, hash)
     })
 
+    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentPeers, async function(event: IpcMainInvokeEvent, { hash }) {
+        return bittorrentManager.getTorrentPeers(event.sender, hash)
+    })
+
     ipcMain.handle(IPC_CHANNELS.bittorrent.setTorrentFileSelection, async function(event: IpcMainInvokeEvent, request) {
         return bittorrentManager.setTorrentFileSelection(event.sender, request)
     })

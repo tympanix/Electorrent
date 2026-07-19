@@ -12,6 +12,8 @@ const __dirname = path.dirname(__filename)
 const defaultInclude = path.resolve(__dirname, 'src')
 const outDir = path.resolve(__dirname, 'app')
 const semanticUiLessDir = path.resolve(__dirname, 'node_modules/semantic-ui-less')
+const geoIpCountryDir = path.resolve(__dirname, 'node_modules/geoip-country')
+const countriesListDir = path.resolve(__dirname, 'node_modules/countries-list')
 const semanticThemeConfigPath = path.resolve(__dirname, 'src/renderer/styles/semantic/theme.config')
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -79,6 +81,14 @@ const commonPlugins = [
         from: path.resolve(__dirname, 'src/renderer/assets/img'),
         to: path.resolve(outDir, 'img'),
         noErrorOnMissing: true,
+      },
+      {
+        from: geoIpCountryDir,
+        to: path.resolve(outDir, 'node_modules/geoip-country'),
+      },
+      {
+        from: countriesListDir,
+        to: path.resolve(outDir, 'node_modules/countries-list'),
       },
     ],
   }),
@@ -210,6 +220,9 @@ function makeNodeConfig({ name, entry, target, tsConfig }) {
     target,
     mode: isProduction ? 'production' : 'development',
     externals: [
+      {
+        'geoip-country': 'commonjs geoip-country',
+      },
       nodeExternals({
         modulesDir: 'app/node_modules',
       }),

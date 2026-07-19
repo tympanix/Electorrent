@@ -31,6 +31,7 @@
   "author": "tympanix",
   "dependencies": {
     "electron-regedit": "^2.0.0",
+    "geoip-country": "^5.0.202607180103",
     "less": "^4.4.1",
     "q": "^1.5.1",
     "winreg": "^1.2.2"

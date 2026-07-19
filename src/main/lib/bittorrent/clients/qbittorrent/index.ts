@@ -7,6 +7,7 @@ import type {
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
+    BittorrentTorrentPeer,
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT, serverOriginUrl, serverUrl, urlPath } from "@main/lib/bittorrent/helpers"
@@ -45,6 +46,35 @@ function normalizeTorrentDetailsFiles(body: unknown): BittorrentTorrentDetailsFi
             priority,
             wanted: priority !== QBITTORRENT_PRIORITY_SKIP,
             isSeed: Boolean(value.is_seed),
+        }
+    })
+}
+
+function normalizeTorrentPeers(body: unknown): BittorrentTorrentPeer[] {
+    if (!isRecord(body)) {
+        throw new Error("Invalid torrent peers response")
+    }
+
+    return Object.values(body).map((value) => {
+        if (!isRecord(value)) {
+            throw new Error("Invalid torrent peer response")
+        }
+
+        return {
+            ip: typeof value.ip === "string" ? value.ip : "",
+            port: typeof value.port === "number" ? value.port : Number(value.port) || undefined,
+            client: typeof value.client === "string" ? value.client : "",
+            progress: typeof value.progress === "number" ? value.progress : Number(value.progress) || 0,
+            downloadSpeed: typeof value.dl_speed === "number" ? value.dl_speed : Number(value.dl_speed) || 0,
+            uploadSpeed: typeof value.up_speed === "number" ? value.up_speed : Number(value.up_speed) || 0,
+            downloaded: typeof value.downloaded === "number" ? value.downloaded : Number(value.downloaded) || 0,
+            uploaded: typeof value.uploaded === "number" ? value.uploaded : Number(value.uploaded) || 0,
+            connection: typeof value.connection === "string" ? value.connection : undefined,
+            flags: typeof value.flags_desc === "string" ? value.flags_desc : (typeof value.flags === "string" ? value.flags : undefined),
+            country: typeof value.country === "string" ? value.country : undefined,
+            countryCode: typeof value.country_code === "string" && /^[a-z]{2}$/i.test(value.country_code)
+                ? value.country_code.toUpperCase()
+                : undefined,
         }
     })
 }
@@ -124,6 +154,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 uploadFileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
+                torrentPeers: true,
                 trackerFilter: true,
                 alternativeSpeedLimits: true,
                 speedLimits: true,
@@ -566,6 +597,20 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
     async getTorrentFiles(hash: string): Promise<BittorrentTorrentDetailsFile[]> {
         return normalizeTorrentDetailsFiles(await this.fetchTorrentFiles(hash))
+    }
+
+    async getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {
+        const api = this.getApi()
+        const peers = await new Promise<unknown>((resolve, reject) => {
+            api.getTorrentPeers(hash, (err: unknown, body: unknown) => {
+                if (err) {
+                    reject(err)
+                    return
+                }
+                resolve(isRecord(body) && isRecord(body.peers) ? body.peers : body)
+            })
+        })
+        return normalizeTorrentPeers(peers)
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {
