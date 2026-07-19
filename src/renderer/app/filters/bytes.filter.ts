@@ -6,10 +6,18 @@ export class BytesFilter {
     }
 
     public transform: IFilterNumber = (value, fractionSize = 1): string => {
+        if (value === null || value === undefined) {
+            return "";
+        }
+
         const bytes = Number(value);
         const decimals = Number(fractionSize);
 
-        if (!bytes) {
+        if (!Number.isFinite(bytes) || bytes < 0) {
+            return "";
+        }
+
+        if (bytes === 0) {
             return "0 B";
         }
 
