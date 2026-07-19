@@ -8,6 +8,7 @@ import type {
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
     BittorrentTorrentPeer,
+    BittorrentTorrentDetailsTracker,
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT, serverOriginUrl, serverUrl, urlPath } from "@main/lib/bittorrent/helpers"
@@ -76,6 +77,41 @@ function normalizeTorrentPeers(body: unknown): BittorrentTorrentPeer[] {
                 ? value.country_code.toUpperCase()
                 : undefined,
         }
+    })
+}
+
+function normalizeTorrentTrackers(body: unknown): BittorrentTorrentDetailsTracker[] {
+    if (!Array.isArray(body)) {
+        throw new Error("Invalid torrent trackers response")
+    }
+
+    const statuses: Record<number, string> = {
+        0: "Disabled",
+        1: "Not contacted",
+        2: "Working",
+        3: "Updating",
+        4: "Not working",
+    }
+    const optionalNumber = (value: unknown) => {
+        const numeric = typeof value === "number" ? value : Number(value)
+        return Number.isFinite(numeric) && numeric >= 0 ? numeric : undefined
+    }
+
+    return body.flatMap((value) => {
+        if (!isRecord(value) || typeof value.url !== "string") {
+            return []
+        }
+        const statusCode = optionalNumber(value.status)
+        return [{
+            url: value.url,
+            status: statusCode == null ? undefined : (statuses[statusCode] || String(statusCode)),
+            tier: optionalNumber(value.tier),
+            peers: optionalNumber(value.num_peers),
+            seeds: optionalNumber(value.num_seeds),
+            leeches: optionalNumber(value.num_leeches),
+            downloaded: optionalNumber(value.num_downloaded),
+            message: typeof value.msg === "string" ? value.msg : undefined,
+        }]
     })
 }
 
@@ -611,6 +647,19 @@ export class QBittorrentRuntime implements BittorrentRuntime {
             })
         })
         return normalizeTorrentPeers(peers)
+    }
+
+    async getTorrentTrackers(hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
+        const body = await new Promise<unknown>((resolve, reject) => {
+            this.getApi().getTorrentTrackers(hash, (err: unknown, response: unknown) => {
+                if (err) {
+                    reject(err)
+                    return
+                }
+                resolve(response)
+            })
+        })
+        return normalizeTorrentTrackers(body)
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {

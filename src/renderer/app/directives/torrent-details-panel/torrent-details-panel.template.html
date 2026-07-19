@@ -26,6 +26,14 @@
     >
       Peers
     </a>
+    <a
+      class="item"
+      data-role="torrent-details-tab-trackers"
+      ng-class="{ active: ctl.isActiveTab('trackers') }"
+      ng-click="ctl.showTab('trackers')"
+    >
+      Trackers
+    </a>
     <div class="right menu">
       <a
         class="item"
@@ -68,5 +76,9 @@
       ng-if="!ctl.showStateMessage() && ctl.isActiveTab('peers')"
       peers="ctl.scope.panel.peers"
     ></torrent-details-peers-tab>
+    <torrent-details-trackers-tab
+      ng-if="!ctl.showStateMessage() && ctl.isActiveTab('trackers')"
+      trackers="ctl.scope.panel.trackers.items"
+    ></torrent-details-trackers-tab>
   </div>
 </div>

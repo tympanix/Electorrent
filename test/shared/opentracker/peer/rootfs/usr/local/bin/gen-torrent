@@ -4,6 +4,7 @@ set -e
 
 FILE_PATHS=()
 FILE_SIZES=()
+TRACKER_URLS=()
 
 # Parse CLI options for upload speed, download speed, file contents, torrent file name, and tracker URL
 while [[ "$#" -gt 0 ]]; do
@@ -14,7 +15,7 @@ while [[ "$#" -gt 0 ]]; do
         --file-size) FILE_SIZE="$2"; shift ;;
         --file) FILE_PATHS+=("$2"); FILE_SIZES+=("$3"); shift 2 ;;
         --torrent-name) TORRENT_NAME="$2"; shift ;;
-        --tracker-url) TRACKER_URL="$2"; shift ;;
+        --tracker-url) TRACKER_URLS+=("$2"); shift ;;
         *) echo >&2 "Usage: $0 [--foreground] [--upload-speed <up-speed>] [--download-speed <dl-speed>] [--file-size <file-size> | --file <path> <size> ...] --torrent-name <torrent-name> [--tracker-url <tracker-url>]"; exit 1 ;;
     esac
     shift
@@ -22,7 +23,10 @@ done
 
 # Set default values if not provided
 FILE_SIZE="${FILE_SIZE:-1}"
-TRACKER_URL="${TRACKER_URL:-http://tracker:6969/announce}"
+if [ "${#TRACKER_URLS[@]}" -eq 0 ]; then
+    TRACKER_URLS=("http://tracker:6969/announce")
+fi
+TRACKER_URL=$(IFS=,; echo "${TRACKER_URLS[*]}")
 if [ "${#FILE_PATHS[@]}" -gt 0 ]; then
     CONTENT_PATH="/srv/$TORRENT_NAME"
     rm -rf "$CONTENT_PATH"

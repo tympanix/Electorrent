@@ -716,6 +716,7 @@ torrent-sidebar + .main-panel {
         torrent-details-info-tab,
         torrent-details-files-tab,
         torrent-details-peers-tab {
+        torrent-details-trackers-tab {
             display: flex;
             flex: 1 1 auto;
             min-height: 0;
@@ -753,6 +754,7 @@ torrent-sidebar + .main-panel {
         .torrent-details-files-content,
         .torrent-details-peers,
         .torrent-details-peers-content {
+        .torrent-details-trackers {
             flex: 1 1 auto;
             height: 100%;
             min-height: 0;
@@ -879,6 +881,26 @@ torrent-sidebar + .main-panel {
             min-height: 0;
             overflow-x: auto;
             overflow-y: auto;
+        }
+
+        .torrent-details-trackers {
+            overflow: auto;
+
+            .table {
+                margin: 0;
+            }
+
+            th,
+            td {
+                white-space: nowrap;
+            }
+
+            .torrent-details-tracker-url {
+                min-width: 260px;
+                max-width: 520px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         }
 
         .torrent-details-files {

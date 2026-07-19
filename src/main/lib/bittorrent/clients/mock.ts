@@ -4,6 +4,7 @@ import type {
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
     BittorrentTorrentPeer,
+    BittorrentTorrentDetailsTracker,
     TorrentClientConnection,
 } from "@shared/ipc-contract"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
@@ -50,12 +51,14 @@ interface MockTorrentFile {
 interface MockRuntimeStore {
     torrents: Map<string, MockTorrent>
     files: Map<string, MockTorrentFile[]>
+    trackers: Map<string, BittorrentTorrentDetailsTracker[]>
     removedHashes: string[]
 }
 
 type MockTorrentInput = Partial<MockTorrent> & {
     hash?: string
     files?: MockTorrentFile[]
+    trackers?: BittorrentTorrentDetailsTracker[]
 }
 
 export class MockBittorrentRuntime implements BittorrentRuntime {
@@ -71,6 +74,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             store = {
                 torrents: new Map<string, MockTorrent>(),
                 files: new Map<string, MockTorrentFile[]>(),
+                trackers: new Map<string, BittorrentTorrentDetailsTracker[]>(),
                 removedHashes: [],
             }
             MockBittorrentRuntime.stores.set(key, store)
@@ -133,6 +137,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             await this.addTorrent(options?.renameTorrent || parsed.name || uri.replace(/^magnet:\?xt=urn:btih:/, "Mock Magnet "), {
                 hash: parsed.infoHash,
                 files: this.createFilesFromUploadSelection(options?.fileSelection),
+                trackers: this.createTrackersFromTorrentMetadata(parsed),
             })
         } catch {
             await this.addTorrent(options?.renameTorrent || uri.replace(/^magnet:\?xt=urn:btih:/, "Mock Magnet "), {
@@ -149,6 +154,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             hash: parsed.infoHash,
             files: this.createFilesFromUploadSelection(options?.fileSelection)
                 || this.createFilesFromTorrentMetadata(parsedFiles),
+            trackers: this.createTrackersFromTorrentMetadata(parsed),
         })
     }
 
@@ -187,6 +193,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             up_speed: input.up_speed ?? (index * 256),
         })
         this.files.set(hash, input.files || this.createFiles(name, size, progress))
+        this.trackers.set(hash, input.trackers || [])
         return hash
     }
 
@@ -195,6 +202,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         this.removedHashes.push(...this.torrents.keys())
         this.torrents.clear()
         this.files.clear()
+        this.trackers.clear()
     }
 
     async resume(hashes: string[]): Promise<void> {
@@ -249,6 +257,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         hashes.forEach((hash) => {
             if (this.torrents.delete(hash)) {
                 this.files.delete(hash)
+                this.trackers.delete(hash)
                 this.removedHashes.push(hash)
             }
         })
@@ -311,6 +320,11 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             connection: "Outgoing",
             flags: "Interested, encrypted",
         }]
+    }
+
+    async getTorrentTrackers(hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
+        this.assertConnected()
+        return (this.trackers.get(hash) || []).map((tracker) => ({ ...tracker }))
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {
@@ -442,6 +456,16 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         }))
     }
 
+    private createTrackersFromTorrentMetadata(metadata: unknown): BittorrentTorrentDetailsTracker[] {
+        const announce = (metadata as { announce?: unknown })?.announce
+        const urls = Array.isArray(announce) ? announce : (typeof announce === "string" ? [announce] : [])
+        return urls.filter((url): url is string => typeof url === "string").map((url, tier) => ({
+            url,
+            tier,
+            status: "Working",
+        }))
+    }
+
     private getCategories() {
         return Object.fromEntries(
             Array.from(new Set(Array.from(this.torrents.values()).map((torrent) => torrent.category)))
@@ -518,6 +542,11 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
     private get files() {
         this.assertConnected()
         return this.store!.files
+    }
+
+    private get trackers() {
+        this.assertConnected()
+        return this.store!.trackers
     }
 
     private get removedHashes() {

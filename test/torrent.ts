@@ -17,6 +17,7 @@ export async function createTorrentFile(tracker: DockerComposeService, options: 
     downloadSpeed?: number;
     uploadSpeed?: number;
     trackerUrl?: string;
+    trackerUrls?: string[];
 }): Promise<string> {
     const randomString = Math.random().toString(36).substring(2, 10);
     const torrentName = options.torrentName || `test-torrent-${randomString}`;
@@ -40,6 +41,9 @@ export async function createTorrentFile(tracker: DockerComposeService, options: 
     }
     if (options.trackerUrl) {
         cmd.push("--tracker-url", options.trackerUrl);
+    }
+    for (const trackerUrl of options.trackerUrls || []) {
+        cmd.push("--tracker-url", trackerUrl);
     }
     await tracker.exec(cmd);
     const torrentPath = path.join(__dirname, `shared/opentracker/data/shared/${torrentName}.torrent`)
