@@ -71,7 +71,7 @@
     "angular-resource": "^1.8.2",
     "angular-table-resize": "^3.0.0",
     "angular-ui-sortable": "^0.19.0",
-    "axios": "^1.16.0",
+    "axios": "^1.18.1",
     "base64-js": "^1.2.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
