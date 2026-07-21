@@ -23,16 +23,16 @@ type RtorrentMulticallCommand = string | [string, ...any[]]
 
 export class RtorrentRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
-        { id: "torrent-details", role: "torrent-details", label: "Details", icon: "info circle" },
-        { label: "Recheck", action: "recheck", icon: "checkmark" },
+        { role: "details", label: "Details", icon: "info circle" },
+        { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },
         { label: "Priority", menu: [
             { label: "High", action: "priorityHigh" },
             { label: "Normal", action: "priorityNormal" },
             { label: "Low", action: "priorityLow" },
             { label: "Don't Download", action: "priorityOff" },
         ] },
-        { id: "torrent-set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
-        { label: "Remove", action: "remove", icon: "remove" },
+        { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
+        { role: "remove", label: "Remove", action: "remove", icon: "remove" },
         { label: "Remove and Delete", action: "deleteAndErase", icon: "trash", role: "delete" },
     ]
     private client: any

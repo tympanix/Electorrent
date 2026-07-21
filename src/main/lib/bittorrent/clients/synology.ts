@@ -50,8 +50,8 @@ const ERR_TASK: Record<number, string> = {
 
 export class SynologyRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
-        { id: "torrent-set-location", label: "Set Location", icon: "folder open" },
-        { label: "Remove Torrent", action: "remove", icon: "remove" },
+        { role: "set-location", label: "Set Location", icon: "folder open" },
+        { role: "remove", label: "Remove Torrent", action: "remove", icon: "remove" },
     ]
     private server!: BittorrentServerConfig
     private http!: AxiosInstance

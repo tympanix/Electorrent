@@ -40,6 +40,16 @@ describe("mock Actions menu", function () {
 
     await eventually(async () => (await getActionsMenu()).disabled).equals(false)
   })
+
+  it("renders platform-localized shortcuts in the title menu", async function () {
+    const actionsMenu = $("//button[contains(@class, 'title-bar-menu-trigger') and normalize-space(.)='Actions']")
+    await actionsMenu.waitForClickable()
+    await actionsMenu.click()
+
+    const detailsShortcut = $("//button[contains(@class, 'title-bar-menu-item')][.//span[normalize-space(.)='Details']]//span[contains(@class, 'title-bar-menu-accelerator')]")
+    await detailsShortcut.waitForDisplayed()
+    assert.notInclude(await detailsShortcut.getText(), "CmdOrCtrl")
+  })
 })
 
 async function getActionsMenu() {

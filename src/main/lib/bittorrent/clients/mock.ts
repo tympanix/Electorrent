@@ -64,9 +64,9 @@ type MockTorrentInput = Partial<MockTorrent> & {
 
 export class MockBittorrentRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
-        { id: "torrent-details", role: "torrent-details", label: "Details", icon: "info circle" },
-        { id: "torrent-files", label: "Files", icon: "file" },
-        { label: "Recheck", action: "recheck", icon: "checkmark" },
+        { role: "details", label: "Details", icon: "info circle" },
+        { role: "files", label: "Files", icon: "file" },
+        { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },
         { label: "Queue", menu: [
             { label: "Move Up Queue", action: "increasePrio", icon: "arrow up" },
             { label: "Move Queue Down", action: "decreasePrio", icon: "arrow down" },
@@ -74,10 +74,10 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             { label: "Queue Bottom", action: "bottomPrio", icon: "chevron circle down" },
         ] },
         { label: "Sequential Download", action: "toggleSequentialDownload", checkProperty: "sequentialDownload" },
-        { id: "torrent-set-location", label: "Set Location", icon: "folder open" },
-        { id: "torrent-set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
-        { id: "torrent-set-ratio", label: "Set Ratio", icon: "percent" },
-        { label: "Remove", action: "delete", icon: "remove" },
+        { role: "set-location", label: "Set Location", icon: "folder open" },
+        { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
+        { role: "set-ratio", label: "Set Ratio", icon: "percent" },
+        { role: "remove", label: "Remove", action: "delete", icon: "remove" },
         { label: "Remove And Delete", action: "deleteAndRemove", icon: "trash", role: "delete" },
     ]
     private static stores = new Map<string, MockRuntimeStore>()

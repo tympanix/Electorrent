@@ -25,7 +25,7 @@
                     ng-disabled="item.enabled === false">
                     <span class="title-bar-menu-check"></span>
                     <span class="title-bar-menu-label">{{item.label}}</span>
-                    <span class="title-bar-menu-accelerator">{{item.accelerator}}</span>
+                    <span class="title-bar-menu-accelerator">{{formatTitleMenuAccelerator(item.accelerator)}}</span>
                 </button>
                 <div ng-if="item.submenu" class="title-bar-menu-submenu">
                     <div class="title-bar-menu-submenu-label">{{item.label}}</div>
@@ -40,7 +40,7 @@
                         ng-disabled="child.enabled === false">
                         <span class="title-bar-menu-check"></span>
                         <span class="title-bar-menu-label">{{child.label}}</span>
-                        <span class="title-bar-menu-accelerator">{{child.accelerator}}</span>
+                        <span class="title-bar-menu-accelerator">{{formatTitleMenuAccelerator(child.accelerator)}}</span>
                     </button>
                 </div>
             </div>

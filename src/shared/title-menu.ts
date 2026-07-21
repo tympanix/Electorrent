@@ -67,7 +67,6 @@ const separator = (): TitleMenuItem => ({ type: "separator" })
 
 function toTitleTorrentAction(item: TorrentActionItem, hasSelection: boolean): TitleMenuItem {
     return {
-        id: item.id,
         label: item.label,
         accelerator: item.accelerator,
         enabled: hasSelection,

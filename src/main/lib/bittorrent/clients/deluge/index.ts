@@ -62,15 +62,15 @@ const DELUGE_TORRENT_FILES_FIELDS = ["files", "file_progress", "file_priorities"
 
 export class DelugeRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
-        { id: "torrent-details", role: "torrent-details", label: "Details", icon: "info circle" },
-        { label: "Verify", action: "verify", icon: "checkmark" },
+        { role: "details", label: "Details", icon: "info circle" },
+        { role: "verify", label: "Verify", action: "verify", icon: "checkmark" },
         { label: "Move Queue Up", action: "queueUp", icon: "arrow up" },
         { label: "Move Queue Down", action: "queueDown", icon: "arrow down" },
         { label: "Queue Top", action: "queueTop", icon: "chevron circle up" },
         { label: "Queue Bottom", action: "queueBottom", icon: "chevron circle down" },
-        { id: "torrent-set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
-        { id: "torrent-set-ratio", label: "Set Ratio", icon: "percent" },
-        { label: "Remove", action: "remove", icon: "remove" },
+        { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
+        { role: "set-ratio", label: "Set Ratio", icon: "percent" },
+        { role: "remove", label: "Remove", action: "remove", icon: "remove" },
         { label: "Remove and delete", action: "removeAndDelete", icon: "trash", role: "delete" },
     ]
     private url(server: BittorrentServerConfig, endpoint?: string) {

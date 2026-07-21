@@ -10,7 +10,7 @@ import type {
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
 import { connect, getActions, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData, getTorrentTrackers as getTorrentTrackersData, invokeAction } from "./ipc"
-import type { TorrentActionItem } from "@shared/torrent-actions"
+import type { TorrentActionItem, TorrentActionRole } from "@shared/torrent-actions"
 
 export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
@@ -18,7 +18,7 @@ export interface TorrentRatioLimitOptions {
     ratioLimit: number
 }
 
-export type TorrentActionRole = "resume" | "stop" | "delete"
+export type TorrentActionButtonRole = "resume" | "stop" | "delete"
 
 export interface TorrentUpdates {
     labels?: string[],
@@ -87,7 +87,7 @@ export interface TorrentActionButton<T extends Torrent> {
     color: string,
     click?(torrents: T[]): Promise<void>,
     icon: string
-    role?: TorrentActionRole
+    role?: TorrentActionButtonRole
 }
 
 export interface TorrentActionDropdown<T extends Torrent> {
@@ -117,10 +117,8 @@ export interface ContextActionButton<T extends Torrent> {
     label: string
     click(torrents: T[]): Promise<void>
     icon?: string
-    role?: string
+    role?: TorrentActionRole
     check?(torrent: T): boolean
-    /** Optional id for controller to handle specially (e.g. 'torrent-files' to open file selection modal). */
-    id?: string
 }
 
 export interface ContextActionMenu<T extends Torrent> {

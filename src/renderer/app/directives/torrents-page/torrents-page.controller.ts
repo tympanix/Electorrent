@@ -205,7 +205,10 @@ export class TorrentsPageController {
         $scope.$on("wipe:torrents", () => {
             $scope.connectionLost = false;
             setSyncConnectionState("normal");
+            deselectAll();
+            lastSelected = null;
             clearAll();
+            syncDetailsPanel();
             $scope.filters = {
                 status: "all",
             };
@@ -278,6 +281,10 @@ export class TorrentsPageController {
             syncAfterTorrentMutation();
         });
 
+        $scope.$on("$destroy", () => {
+            void window.electorrent.bittorrent.setSelectedTorrents([]);
+        });
+
         function clearDeleteConfirmation() {
             $scope.deleteConfirmation = {
                 action: null,
@@ -292,6 +299,10 @@ export class TorrentsPageController {
 
         function syncDetailsPanel() {
             $rootScope.$emit("torrentDetails:sync", getCurrentSelectedTorrent());
+            syncSelectedTorrents();
+        }
+
+        function syncSelectedTorrents() {
             void window.electorrent.bittorrent.setSelectedTorrents(selected.map((torrent) => torrent.hash));
         }
 
@@ -733,32 +744,32 @@ export class TorrentsPageController {
         };
 
         $scope.doContextAction = (action: any, label: string, item: any) => {
-            if (item && item.id === "torrent-details") {
+            if (item?.role === "details") {
                 const currentTorrent = getCurrentSelectedTorrent();
                 if (currentTorrent) {
                     $rootScope.$emit("torrentDetails:open", currentTorrent);
                 }
                 return $q.resolve();
             }
-            if (item && item.id === "torrent-files") {
+            if (item?.role === "files") {
                 if (selected.length >= 1) {
                     $rootScope.$emit("torrentFiles:open", selected[0]);
                 }
                 return $q.resolve();
             }
-            if (item && item.id === "torrent-set-location") {
+            if (item?.role === "set-location") {
                 if (selected.length >= 1) {
                     $rootScope.$emit("torrentLocation:open", selected.slice());
                 }
                 return $q.resolve();
             }
-            if (item && item.id === "torrent-set-speed-limits") {
+            if (item?.role === "set-speed-limits") {
                 if (selected.length >= 1) {
                     $scope.speedLimitModalRef?.open(selected.slice());
                 }
                 return $q.resolve();
             }
-            if (item && item.id === "torrent-set-ratio") {
+            if (item?.role === "set-ratio") {
                 if (selected.length >= 1) {
                     $scope.setRatioModalRef?.open(selected.slice());
                 }
