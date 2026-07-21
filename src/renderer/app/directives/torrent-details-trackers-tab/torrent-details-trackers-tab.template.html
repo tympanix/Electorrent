@@ -1,0 +1,35 @@
+<div class="torrent-details-trackers" data-role="torrent-details-trackers">
+  <table class="ui compact single line unstackable table" data-role="torrent-details-trackers-table">
+    <thead>
+      <tr>
+        <th>URL</th>
+        <th>Status</th>
+        <th>Tier</th>
+        <th>Peers</th>
+        <th>Seeds</th>
+        <th>Leeches</th>
+        <th>Downloaded</th>
+        <th>Last announce</th>
+        <th>Next announce</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="tracker in trackers track by $index" data-tracker-url="{{ tracker.url }}">
+        <td class="torrent-details-tracker-url" title="{{ tracker.url }}">{{ tracker.url }}</td>
+        <td>{{ tracker.status }}</td>
+        <td>{{ tracker.tier }}</td>
+        <td>{{ tracker.peers }}</td>
+        <td>{{ tracker.seeds }}</td>
+        <td>{{ tracker.leeches }}</td>
+        <td>{{ tracker.downloaded }}</td>
+        <td>{{ tracker.lastAnnounce ? (tracker.lastAnnounce | epoch) : '' }}</td>
+        <td>{{ tracker.nextAnnounce ? (tracker.nextAnnounce | epoch) : '' }}</td>
+        <td title="{{ tracker.message }}">{{ tracker.message }}</td>
+      </tr>
+      <tr ng-if="!trackers.length">
+        <td colspan="10">No trackers available.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -11,6 +11,7 @@ import type {
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
     BittorrentTorrentPeer,
+    BittorrentTorrentDetailsTracker,
     BittorrentUploadTorrentRequest,
 } from "@shared/ipc-contract"
 import logger from "../logger"
@@ -204,6 +205,14 @@ class BittorrentManager {
             const geo = lookupCountry(peer.ip)
             return geo ? { ...peer, countryCode: geo.country, country: geo.name } : peer
         })
+    }
+
+    async getTorrentTrackers(sender: WebContents, hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
+        const runtime = await this.getSession(sender)
+        if (typeof runtime.getTorrentTrackers !== "function") {
+            throw new Error("Torrent trackers not supported for this client")
+        }
+        return runtime.getTorrentTrackers(hash)
     }
 
     async setTorrentFileSelection(sender: WebContents, request: BittorrentSetTorrentFileSelectionRequest) {

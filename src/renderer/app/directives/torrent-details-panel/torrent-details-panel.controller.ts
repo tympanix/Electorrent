@@ -2,7 +2,7 @@ import { IDocumentService, IScope, IWindowService } from "angular";
 import { TorrentDetailsFileItem, TorrentDetailsPanelData } from "@renderer/app/bittorrent/torrentclient";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
-type TorrentDetailsTab = "info" | "files" | "peers";
+type TorrentDetailsTab = "info" | "files" | "peers" | "trackers";
 
 export interface TorrentDetailsPanelScope extends IScope {
   settings: any;
@@ -22,10 +22,10 @@ export class TorrentDetailsPanelController {
   private readonly defaultPanelHeight = 320;
   private readonly minPanelHeight = 220;
   private panelHeight = this.defaultPanelHeight;
-  private loadRequestIds: Record<TorrentDetailsTab, number> = { info: 0, files: 0, peers: 0 };
-  private loadedTabs: Record<TorrentDetailsTab, boolean> = { info: false, files: false, peers: false };
-  private loadingTabs: Record<TorrentDetailsTab, boolean> = { info: false, files: false, peers: false };
-  private tabErrors: Record<TorrentDetailsTab, string | null> = { info: null, files: null, peers: null };
+  private loadRequestIds: Record<TorrentDetailsTab, number> = { info: 0, files: 0, peers: 0, trackers: 0 };
+  private loadedTabs: Record<TorrentDetailsTab, boolean> = { info: false, files: false, peers: false, trackers: false };
+  private loadingTabs: Record<TorrentDetailsTab, boolean> = { info: false, files: false, peers: false, trackers: false };
+  private tabErrors: Record<TorrentDetailsTab, string | null> = { info: null, files: null, peers: null, trackers: null };
   private stopResizeListeners?: () => void;
 
   constructor(
@@ -45,6 +45,7 @@ export class TorrentDetailsPanelController {
       info: { sections: [] },
       files: { columns: [], items: [] },
       peers: { items: [] },
+      trackers: { items: [] },
     };
 
     this.scope.$watch(
@@ -124,7 +125,9 @@ export class TorrentDetailsPanelController {
     }
     return this.scope.activeTab === "files"
       ? this.scope.panel.files.items.length > 0
-      : this.scope.panel.peers.items.length > 0;
+      : this.scope.activeTab === "peers"
+        ? this.scope.panel.peers.items.length > 0
+        : this.scope.panel.trackers.items.length > 0;
   }
 
   stateMessageIcon() {
@@ -212,7 +215,9 @@ export class TorrentDetailsPanelController {
         ? await client?.getTorrentDetails(torrent)
         : tab === "files"
           ? await client?.getTorrentDetailsFiles(torrent)
-          : await client?.getTorrentDetailsPeers(torrent);
+          : tab === "peers"
+            ? await client?.getTorrentDetailsPeers(torrent)
+            : await client?.getTorrentDetailsTrackers(torrent);
       if (requestId !== this.loadRequestIds[tab] || this.scope.torrent !== torrent) {
         return;
       }
@@ -222,8 +227,10 @@ export class TorrentDetailsPanelController {
           this.scope.panel.info = data as TorrentDetailsPanelData["info"];
         } else if (tab === "files") {
           this.scope.panel.files = data as TorrentDetailsPanelData["files"];
-        } else {
+        } else if (tab === "peers") {
           this.scope.panel.peers = data as TorrentDetailsPanelData["peers"];
+        } else {
+          this.scope.panel.trackers = data as TorrentDetailsPanelData["trackers"];
         }
       }
       this.loadedTabs[tab] = true;
@@ -276,9 +283,10 @@ export class TorrentDetailsPanelController {
     this.loadRequestIds.info += 1;
     this.loadRequestIds.files += 1;
     this.loadRequestIds.peers += 1;
-    this.loadedTabs = { info: false, files: false, peers: false };
-    this.loadingTabs = { info: false, files: false, peers: false };
-    this.tabErrors = { info: null, files: null, peers: null };
+    this.loadRequestIds.trackers += 1;
+    this.loadedTabs = { info: false, files: false, peers: false, trackers: false };
+    this.loadingTabs = { info: false, files: false, peers: false, trackers: false };
+    this.tabErrors = { info: null, files: null, peers: null, trackers: null };
     this.scope.loading = false;
     this.scope.error = null;
     this.scope.torrent = null;
@@ -286,6 +294,7 @@ export class TorrentDetailsPanelController {
       info: { sections: [] },
       files: { columns: [], items: [] },
       peers: { items: [] },
+      trackers: { items: [] },
     };
   }
 }

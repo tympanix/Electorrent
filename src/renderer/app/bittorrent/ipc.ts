@@ -67,6 +67,10 @@ export function getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> 
     return bridge().getTorrentPeers({ hash })
 }
 
+export function getTorrentTrackers(hash: string) {
+    return bridge().getTorrentTrackers({ hash })
+}
+
 export function setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]) {
     return bridge().setTorrentFileSelection({ hash, files })
 }

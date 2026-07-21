@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import https from 'https'
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentPeer, TorrentClientConnection } from '@shared/ipc-contract'
+import type { BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from '@shared/ipc-contract'
 import {
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
@@ -357,6 +357,33 @@ export class TransmissionRuntime implements BittorrentRuntime {
             connection: peer.isIncoming ? 'Incoming' : 'Outgoing',
             flags: typeof peer.flagStr === 'string' ? peer.flagStr : undefined,
         }))
+    }
+
+    async getTorrentTrackers(hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
+        const response = await this.getHttpClient().post(this.url(), {
+            arguments: {
+                ids: [hash],
+                fields: ['trackerStats'],
+            },
+            method: 'torrent-get',
+        })
+        const torrent = response?.data?.arguments?.torrents?.[0]
+        if (!torrent) {
+            throw new Error('Transmission did not return torrent trackers')
+        }
+
+        const optionalNumber = (value: unknown) => typeof value === 'number' && value >= 0 ? value : undefined
+        return (Array.isArray(torrent.trackerStats) ? torrent.trackerStats : []).map((tracker: any) => ({
+            url: tracker.announce || tracker.host || '',
+            status: tracker.lastAnnounceResult || tracker.lastScrapeResult || undefined,
+            tier: optionalNumber(tracker.tier),
+            peers: optionalNumber(tracker.lastAnnouncePeerCount),
+            seeds: optionalNumber(tracker.seederCount),
+            leeches: optionalNumber(tracker.leecherCount),
+            downloaded: optionalNumber(tracker.downloadCount),
+            lastAnnounce: optionalNumber(tracker.lastAnnounceTime),
+            nextAnnounce: optionalNumber(tracker.nextAnnounceTime),
+        })).filter((tracker: BittorrentTorrentDetailsTracker) => tracker.url)
     }
 
     private removeEmpty(obj: Record<string, any>) {

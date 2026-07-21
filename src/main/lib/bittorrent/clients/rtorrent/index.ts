@@ -3,7 +3,7 @@ import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
@@ -427,6 +427,25 @@ export class RtorrentRuntime implements BittorrentRuntime {
             uploaded: Number(peer.uploaded) || 0,
             flags: typeof peer.flags === "string" ? peer.flags : undefined,
         }))
+    }
+
+    async getTorrentTrackers(hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
+        const trackers = await this.getMulticall("t.multicall", [hash, ""], rtorrentFields.trackers)
+        return trackers.flatMap((tracker) => {
+            if (typeof tracker.url !== "string") {
+                return []
+            }
+            stringsToNumbers(tracker)
+            return [{
+                url: tracker.url,
+                status: Number(tracker.enabled) === 0 ? "Disabled" : (Number(tracker.open) !== 0 ? "Working" : undefined),
+                tier: typeof tracker.group === "number" ? tracker.group : undefined,
+                seeds: typeof tracker.scrape_complete === "number" && tracker.scrape_complete >= 0 ? tracker.scrape_complete : undefined,
+                leeches: typeof tracker.scrape_incomplete === "number" && tracker.scrape_incomplete >= 0 ? tracker.scrape_incomplete : undefined,
+                downloaded: typeof tracker.scrape_downloaded === "number" && tracker.scrape_downloaded >= 0 ? tracker.scrape_downloaded : undefined,
+                lastAnnounce: typeof tracker.scrape_time_last === "number" && tracker.scrape_time_last > 0 ? tracker.scrape_time_last : undefined,
+            }]
+        })
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

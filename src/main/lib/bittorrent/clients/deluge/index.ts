@@ -1,7 +1,7 @@
 import request from "request"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
 import {
     defer,
     HTTP_LOGIN_TIMEOUT,
@@ -377,6 +377,21 @@ export class DelugeRuntime implements BittorrentRuntime {
             uploadSpeed: Number(peer.up_speed) || 0,
             country: typeof peer.country === "string" ? peer.country : undefined,
         }))
+    }
+
+    async getTorrentTrackers(hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
+        const details = await defer<Record<string, any>>((done) => this.rpc("web.get_torrent_status", [hash, ["trackers", "tracker_status"]], done))
+        const status = typeof details.tracker_status === "string" ? details.tracker_status : undefined
+        return (Array.isArray(details.trackers) ? details.trackers : []).flatMap((tracker: any) => {
+            if (typeof tracker?.url !== "string") {
+                return []
+            }
+            return [{
+                url: tracker.url,
+                tier: typeof tracker.tier === "number" ? tracker.tier : Number(tracker.tier) || undefined,
+                status,
+            }]
+        })
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

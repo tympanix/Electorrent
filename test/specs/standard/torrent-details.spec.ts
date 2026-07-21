@@ -6,6 +6,11 @@ import { configureSpec, formatBytes, getTestFixture, requireFeature } from "../.
 import { createTorrentFile } from "../../torrent"
 
 const tracker = getTestFixture().tracker
+const trackerUrls = [
+  "http://tracker-one.test:6969/announce",
+  "http://tracker-two.test:6969/announce",
+  "http://tracker-three.test:6969/announce",
+]
 describe("torrent details", function () {
   configureSpec()
   requireFeature(({ features }) => features.torrentDetails === true)
@@ -22,6 +27,7 @@ describe("torrent details", function () {
       },
       downloadSpeed: 1,
       uploadSpeed: 1,
+      trackerUrls,
     })
     torrentMetadata = parseTorrent(fs.readFileSync(filename)) as parseTorrent.Instance
     torrent = await this.app.uploadTorrent({ filename })
@@ -89,6 +95,26 @@ describe("torrent details", function () {
     await folderRow.$(".torrent-details-folder-toggle").click()
     await eventually(async () => (await filesTab.$$("tbody tr")).length)
       .satisfies("decrease after collapsing a folder", (count) => count < rowCountBeforeCollapse)
+
+    await torrent.closeDetailsPanel()
+  })
+
+  it("shows every torrent tracker in the trackers tab", async function () {
+    this.timeout(60 * 1000)
+
+    const panel = await torrent.openDetailsPanel()
+    await torrent.openDetailsTab("trackers")
+
+    const trackersTab = panel.$("[data-role='torrent-details-trackers']")
+    await eventually(() => trackersTab.getText()).satisfies(
+      "contain every configured tracker",
+      (text) => trackerUrls.every((url) => text.includes(url)),
+      { timeout: 30_000 },
+    )
+
+    const trackerRows = await trackersTab.$$("tbody tr[data-tracker-url]")
+    const displayedUrls = await trackerRows.map((row) => row.getAttribute("data-tracker-url"))
+    trackerUrls.forEach((url) => displayedUrls.should.contain(url))
 
     await torrent.closeDetailsPanel()
   })

@@ -169,7 +169,7 @@ export class Torrent {
     return panel
   }
 
-  async openDetailsTab(tab: "info" | "files" | "peers") {
+  async openDetailsTab(tab: "info" | "files" | "peers" | "trackers") {
     const panel = $("[data-role='torrent-details-panel']")
     await panel.waitForDisplayed({ timeout: this.timeout })
 

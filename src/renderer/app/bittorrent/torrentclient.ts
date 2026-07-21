@@ -3,12 +3,13 @@ import type {
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
     BittorrentTorrentPeer,
+    BittorrentTorrentDetailsTracker,
     ResolvedTorrentClientFeatures,
     TorrentClientFeatures,
     TorrentSpeedLimitOptions,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
-import { connect, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData } from "./ipc"
+import { connect, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData, getTorrentTrackers as getTorrentTrackersData } from "./ipc"
 
 export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
@@ -185,11 +186,15 @@ export interface TorrentDetailsPanelData {
     peers: {
         items: BittorrentTorrentPeer[]
     }
+    trackers: {
+        items: BittorrentTorrentDetailsTracker[]
+    }
 }
 
 export type TorrentDetailsInfoData = TorrentDetailsPanelData["info"]
 export type TorrentDetailsFilesData = TorrentDetailsPanelData["files"]
 export type TorrentDetailsPeersData = TorrentDetailsPanelData["peers"]
+export type TorrentDetailsTrackersData = TorrentDetailsPanelData["trackers"]
 
 export abstract class TorrentClient<T extends Torrent = Torrent> {
     private resolvedFeatures = DEFAULT_FEATURES
@@ -378,6 +383,16 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         }
 
         return { items: await getTorrentPeersData(torrent.hash) }
+    }
+
+    async getTorrentDetailsTrackers(torrent: T): Promise<TorrentDetailsTrackersData> {
+        if (!this.features.torrentDetails) {
+            throw new Error("Torrent details not supported for this client")
+        }
+
+        return {
+            items: await getTorrentTrackersData(torrent.hash),
+        }
     }
 
     protected async getTorrentDetailsData(_torrent: T): Promise<BittorrentTorrentDetailsData> {

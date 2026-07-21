@@ -103,6 +103,10 @@ export interface BittorrentGetTorrentPeersRequest {
     hash: string
 }
 
+export interface BittorrentGetTorrentTrackersRequest {
+    hash: string
+}
+
 export type BittorrentTorrentDetailsPrimitive = string | number | boolean | null
 
 export interface BittorrentGetTorrentDetailsRequest {
@@ -119,6 +123,19 @@ export interface BittorrentTorrentDetailsFile {
     priority?: number
     wanted: boolean
     isSeed?: boolean
+}
+
+export interface BittorrentTorrentDetailsTracker {
+    url: string
+    status?: string
+    tier?: number
+    peers?: number
+    seeds?: number
+    leeches?: number
+    downloaded?: number
+    message?: string
+    lastAnnounce?: number
+    nextAnnounce?: number
 }
 
 export interface BittorrentTorrentDetailsData {
@@ -408,6 +425,7 @@ export interface ElectorrentBridge {
         getTorrentDetails(request: BittorrentGetTorrentDetailsRequest): Promise<BittorrentTorrentDetailsData>
         getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<BittorrentTorrentDetailsFile[]>
         getTorrentPeers(request: BittorrentGetTorrentPeersRequest): Promise<BittorrentTorrentPeer[]>
+        getTorrentTrackers(request: BittorrentGetTorrentTrackersRequest): Promise<BittorrentTorrentDetailsTracker[]>
         setTorrentFileSelection(request: BittorrentSetTorrentFileSelectionRequest): Promise<void>
     }
     updates: {
