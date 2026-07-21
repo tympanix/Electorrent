@@ -1,5 +1,6 @@
 import { CLIENT_METADATA } from "./client-metadata"
 import type { AppSettings, EditCommand, MenuAction, StoredServerConfig, Unsubscribe, WindowCommand } from "./ipc-contract"
+import type { TorrentActionItem } from "./torrent-actions"
 
 export type TitleMenuPlatform = "darwin" | "linux" | "win32"
 
@@ -50,6 +51,8 @@ export interface TitleMenuState {
         activeServerId: string | null
         activeClientId: string | null
         isConnected: boolean
+        selectedTorrentCount: number
+        actions: TorrentActionItem[]
     }
 }
 
@@ -61,6 +64,16 @@ export interface TitleMenuSources {
 }
 
 const separator = (): TitleMenuItem => ({ type: "separator" })
+
+function toTitleTorrentAction(item: TorrentActionItem, hasSelection: boolean): TitleMenuItem {
+    return {
+        label: item.label,
+        accelerator: item.accelerator,
+        enabled: hasSelection,
+        action: item.menu ? undefined : { type: "torrent-action", action: item },
+        submenu: item.menu?.map((child) => toTitleTorrentAction(child, hasSelection)),
+    }
+}
 
 function serverAccelerator(index: number, platform: TitleMenuPlatform) {
     if (index <= 0 || index > 10) return undefined
@@ -77,6 +90,7 @@ export function deriveTitleMenu(state: TitleMenuState): TitleMenuItem[] {
     const isDarwin = platform === "darwin"
     const hasActiveServer = !!session.activeServerId
     const hasConnectedServer = hasActiveServer && session.isConnected
+    const hasSelection = hasConnectedServer && session.selectedTorrentCount > 0
     const advancedUploadVisible = !!session.activeClientId
         && !!CLIENT_METADATA[session.activeClientId as keyof typeof CLIENT_METADATA]?.showAdvancedUploadMenu
 
@@ -117,10 +131,12 @@ export function deriveTitleMenu(state: TitleMenuState): TitleMenuItem[] {
         { label: "Cut", accelerator: "CmdOrCtrl+X", nativeRole: "cut", action: { type: "edit-command", command: "cut" } },
         { label: "Copy", accelerator: "CmdOrCtrl+C", nativeRole: "copy", action: { type: "edit-command", command: "copy" } },
         { label: "Paste", accelerator: "CmdOrCtrl+V", nativeRole: "paste", action: { type: "edit-command", command: "paste" } },
-        { label: "Remove", accelerator: "Delete", action: { type: "remove-selected" } },
-        { label: "Remove and Delete", accelerator: "CmdOrCtrl+Delete", action: { type: "remove-and-delete-selected" } },
         { label: "Select All", accelerator: "CmdOrCtrl+A", action: { type: "select-all" } },
     ]
+
+    const actionItems = session.actions.length > 0
+        ? session.actions.map((item) => toTitleTorrentAction(item, hasSelection))
+        : [{ label: "No actions available", enabled: false }]
 
     const viewItems: TitleMenuItem[] = [
         {
@@ -193,6 +209,7 @@ export function deriveTitleMenu(state: TitleMenuState): TitleMenuItem[] {
             },
             { id: "file", label: "File", submenu: fileItems },
             { id: "edit", label: "Edit", submenu: editItems },
+            { id: "actions", label: "Actions", submenu: actionItems },
             { id: "view", label: "View", submenu: viewItems },
             { id: "servers", label: "Servers", submenu: serverItems },
             {
@@ -224,6 +241,7 @@ export function deriveTitleMenu(state: TitleMenuState): TitleMenuItem[] {
             ],
         },
         { id: "edit", label: "Edit", submenu: editItems },
+        { id: "actions", label: "Actions", submenu: actionItems },
         { id: "view", label: "View", submenu: viewItems },
         { id: "servers", label: "Servers", submenu: serverItems },
         {

@@ -13,6 +13,7 @@ import type {
 } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, HTTP_REQUEST_TIMEOUT, serverOriginUrl, serverUrl, urlPath } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
+import type { TorrentActionItem } from "@shared/torrent-actions"
 import { QBittorrentApiV1 } from "./api-v1"
 import { QBittorrentApiV2 } from "./api-v2"
 import type { QBittorrentBaseApi } from "./base-api"
@@ -116,6 +117,23 @@ function normalizeTorrentTrackers(body: unknown): BittorrentTorrentDetailsTracke
 }
 
 export class QBittorrentRuntime implements BittorrentRuntime {
+    readonly actions: TorrentActionItem[] = [
+        { role: "details", label: "Details", icon: "info circle" },
+        { role: "files", label: "Files", icon: "file" },
+        { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },
+        { label: "Queue", menu: [
+            { label: "Move Up Queue", action: "increasePrio", icon: "arrow up" },
+            { label: "Move Queue Down", action: "decreasePrio", icon: "arrow down" },
+            { label: "Queue Top", action: "topPrio", icon: "chevron circle up" },
+            { label: "Queue Bottom", action: "bottomPrio", icon: "chevron circle down" },
+        ] },
+        { label: "Sequential Download", action: "toggleSequentialDownload", checkProperty: "sequentialDownload" },
+        { role: "set-location", label: "Set Location", icon: "folder open" },
+        { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
+        { role: "set-ratio", label: "Set Ratio", icon: "percent" },
+        { role: "remove", label: "Remove", action: "delete", icon: "remove" },
+        { label: "Remove And Delete", action: "deleteAndRemove", icon: "trash", role: "delete" },
+    ]
     private url(server: BittorrentServerConfig, endpoint?: string) {
         return serverUrl(server, endpoint)
     }

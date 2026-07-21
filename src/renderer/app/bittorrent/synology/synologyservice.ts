@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { TorrentActionList, TorrentClient, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { SynologyTorrent } from "./synologytorrent";
 import { addTorrentUrl, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
@@ -74,18 +74,4 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
         }
 
     ]
-
-    contextMenu: ContextActionList<SynologyTorrent> = [
-        {
-            id: "torrent-set-location",
-            label: "Set Location",
-            click: () => Promise.resolve(),
-            icon: "folder open",
-        },
-        {
-            label: 'Remove Torrent',
-            click: this.remove,
-            icon: 'remove'
-        }
-    ];
 }

@@ -1,3 +1,5 @@
+import type { TorrentActionItem } from "./torrent-actions"
+
 export type Unsubscribe = () => void
 
 export type ColorTheme = "light" | "dark"
@@ -369,6 +371,7 @@ export type MenuAction =
     | { type: "connect-server"; serverId: string }
     | { type: "set-current-default-server" }
     | { type: "add-server" }
+    | { type: "torrent-action"; action: TorrentActionItem }
 
 export type WindowCommand =
     | "reload"
@@ -422,6 +425,8 @@ export interface ElectorrentBridge {
         addTorrentUrl(request: BittorrentAddTorrentUrlRequest): Promise<void>
         uploadTorrent(request: BittorrentUploadTorrentRequest): Promise<void>
         invokeAction(request: BittorrentInvokeActionRequest): Promise<void>
+        getActions(): Promise<TorrentActionItem[]>
+        setSelectedTorrents(hashes: string[]): Promise<void>
         getTorrentDetails(request: BittorrentGetTorrentDetailsRequest): Promise<BittorrentTorrentDetailsData>
         getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<BittorrentTorrentDetailsFile[]>
         getTorrentPeers(request: BittorrentGetTorrentPeersRequest): Promise<BittorrentTorrentPeer[]>

@@ -3,7 +3,6 @@ import {
   TorrentActionList,
   TorrentClient,
   TorrentUpdates,
-  ContextActionList,
   TorrentUploadOptions,
   TorrentSpeedLimitOptions,
   TorrentRatioLimitOptions,
@@ -272,86 +271,4 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
         ? this.baseActionHeader
         : this.baseActionHeader.filter((action) => action.type !== "labels")
     }
-
-    contextMenu: ContextActionList<QBittorrentTorrent> = [
-      {
-        id: "torrent-details",
-        role: "torrent-details",
-        label: "Details",
-        click: () => Promise.resolve(),
-        icon: "info circle",
-      },
-      {
-        id: 'torrent-files',
-        label: "Files",
-        click: () => Promise.resolve(),
-        icon: "file",
-      },
-      {
-        label: "Recheck",
-        click: this.recheck,
-        icon: "checkmark",
-      },
-      {
-        label: "Queue",
-        menu: [
-          {
-            label: "Move Up Queue",
-            click: this.increasePrio,
-            icon: "arrow up",
-          },
-          {
-            label: "Move Queue Down",
-            click: this.decreasePrio,
-            icon: "arrow down",
-          },
-          {
-            label: "Queue Top",
-            click: this.topPrio,
-            icon: "chevron circle up",
-          },
-          {
-            label: "Queue Bottom",
-            click: this.bottomPrio,
-            icon: "chevron circle down",
-          },
-        ],
-      },
-      {
-        label: "Sequential Download",
-        click: this.toggleSequentialDownload,
-        check: function (torrent: QBittorrentTorrent) {
-          return torrent.sequentialDownload;
-        },
-      },
-      {
-        id: "torrent-set-location",
-        label: "Set Location",
-        click: () => Promise.resolve(),
-        icon: "folder open",
-      },
-      {
-        id: "torrent-set-speed-limits",
-        label: "Set Speed Limits",
-        click: () => Promise.resolve(),
-        icon: "dashboard",
-      },
-      {
-        id: "torrent-set-ratio",
-        label: "Set Ratio",
-        click: () => Promise.resolve(),
-        icon: "percent",
-      },
-      {
-        label: "Remove",
-        click: this.delete,
-        icon: "remove",
-      },
-      {
-        label: "Remove And Delete",
-        click: this.deleteAndRemove,
-        icon: "trash",
-        role: "delete",
-      },
-    ];
 }

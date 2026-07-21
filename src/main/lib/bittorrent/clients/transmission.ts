@@ -9,6 +9,7 @@ import {
     serverUrl,
 } from '@main/lib/bittorrent/helpers'
 import type { BittorrentRuntime } from '@main/lib/bittorrent/types'
+import type { TorrentActionItem } from '@shared/torrent-actions'
 
 const SESSION_ID_HEADER = 'X-Transmission-Session-Id'
 
@@ -98,6 +99,21 @@ const TRANSMISSION_TORRENT_DETAILS_FIELDS = TRANSMISSION_FIELDS.filter((field) =
 const TRANSMISSION_TORRENT_FILES_FIELDS = ['files', 'fileStats', 'priorities', 'wanted']
 
 export class TransmissionRuntime implements BittorrentRuntime {
+    readonly actions: TorrentActionItem[] = [
+        { role: "details", label: "Details", icon: "info circle" },
+        { label: "Start", action: "start", icon: "play" },
+        { label: "Pause", action: "stop", icon: "pause" },
+        { role: "verify", label: "Verify", action: "verify", icon: "checkmark" },
+        { label: "Move Up Queue", action: "queueUp", icon: "arrow up" },
+        { label: "Move Queue Down", action: "queueDown", icon: "arrow down" },
+        { role: "set-location", label: "Set Location", icon: "folder open" },
+        { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
+        { role: "set-ratio", label: "Set Ratio", icon: "percent" },
+        { label: "Remove", menu: [
+            { role: "remove", label: "Torrent", action: "remove", icon: "remove" },
+            { label: "Torrent and Local Data", action: "removeAndLocal", icon: "remove", role: "delete" },
+        ] },
+    ]
     private server!: BittorrentServerConfig
     private session?: string
 

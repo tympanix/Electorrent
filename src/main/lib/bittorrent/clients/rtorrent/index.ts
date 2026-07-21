@@ -6,6 +6,7 @@ import parseTorrent from "parse-torrent"
 import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
+import type { TorrentActionItem } from "@shared/torrent-actions"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
 
 type RtorrentMethodCall = {
@@ -21,6 +22,19 @@ type RtorrentDeleteMetadata = {
 type RtorrentMulticallCommand = string | [string, ...any[]]
 
 export class RtorrentRuntime implements BittorrentRuntime {
+    readonly actions: TorrentActionItem[] = [
+        { role: "details", label: "Details", icon: "info circle" },
+        { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },
+        { label: "Priority", menu: [
+            { label: "High", action: "priorityHigh" },
+            { label: "Normal", action: "priorityNormal" },
+            { label: "Low", action: "priorityLow" },
+            { label: "Don't Download", action: "priorityOff" },
+        ] },
+        { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
+        { role: "remove", label: "Remove", action: "remove", icon: "remove" },
+        { label: "Remove and Delete", action: "deleteAndErase", icon: "trash", role: "delete" },
+    ]
     private client: any
 
     private url(server: BittorrentServerConfig) {

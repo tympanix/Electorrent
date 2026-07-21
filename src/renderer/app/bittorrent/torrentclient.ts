@@ -9,7 +9,8 @@ import type {
     TorrentSpeedLimitOptions,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
-import { connect, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData, getTorrentTrackers as getTorrentTrackersData } from "./ipc"
+import { connect, getActions, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData, getTorrentTrackers as getTorrentTrackersData, invokeAction } from "./ipc"
+import type { TorrentActionItem, TorrentActionRole } from "@shared/torrent-actions"
 
 export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
 
@@ -17,7 +18,7 @@ export interface TorrentRatioLimitOptions {
     ratioLimit: number
 }
 
-export type TorrentActionRole = "resume" | "stop" | "delete"
+export type TorrentActionButtonRole = "resume" | "stop" | "delete"
 
 export interface TorrentUpdates {
     labels?: string[],
@@ -86,7 +87,7 @@ export interface TorrentActionButton<T extends Torrent> {
     color: string,
     click?(torrents: T[]): Promise<void>,
     icon: string
-    role?: TorrentActionRole
+    role?: TorrentActionButtonRole
 }
 
 export interface TorrentActionDropdown<T extends Torrent> {
@@ -116,10 +117,8 @@ export interface ContextActionButton<T extends Torrent> {
     label: string
     click(torrents: T[]): Promise<void>
     icon?: string
-    role?: string
+    role?: TorrentActionRole
     check?(torrent: T): boolean
-    /** Optional id for controller to handle specially (e.g. 'torrent-files' to open file selection modal). */
-    id?: string
 }
 
 export interface ContextActionMenu<T extends Torrent> {
@@ -233,6 +232,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         const connection = await connect(server)
         this.resolvedFeatures = resolveFeatures(connection.features)
         this.clientVersion = connection.version
+        this.contextMenu = (await getActions()).map((action) => this.bindContextAction(action))
     }
 
     /**
@@ -525,5 +525,24 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      *      check [function]:   Displays a checkbox instead of an icon. The function is a predicate which
      *                          has to hold for all selected torrents, for the checkbox to be checked.
      */
-    public abstract contextMenu: ContextActionList<T>
+    public contextMenu: ContextActionList<T> = []
+
+    public bindContextAction(item: TorrentActionItem): ContextActionElem<T> {
+        if (item.menu) {
+            return {
+                label: item.label,
+                menu: item.menu.map((child) => this.bindContextAction(child) as ContextActionButton<T>),
+            }
+        }
+
+        return {
+            ...item,
+            click: (torrents: T[]) => item.action
+                ? invokeAction(item.action, torrents.map((torrent) => torrent.hash))
+                : Promise.resolve(),
+            check: item.checkProperty
+                ? (torrent: T) => !!(torrent as unknown as Record<string, unknown>)[item.checkProperty!]
+                : undefined,
+        }
+    }
 };

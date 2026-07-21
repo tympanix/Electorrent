@@ -1,4 +1,4 @@
-import { ContextActionList, TorrentActionList, TorrentClient, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
+import { TorrentActionList, TorrentClient, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { UtorrentTorrent } from "./torrentu";
 import { addTorrentUrl, getSnapshot, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 
@@ -136,56 +136,4 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
       ? this.baseActionHeader
       : this.baseActionHeader.filter((action) => action.type !== "labels")
   }
-
-  contextMenu: ContextActionList<UtorrentTorrent> = [
-    {
-      label: "Recheck",
-      click: this.recheck,
-      icon: "checkmark",
-    },
-    {
-      label: "Force Start",
-      click: this.forcestart,
-      icon: "flag",
-    },
-    {
-      label: "Move Up Queue",
-      click: this.queueup,
-      icon: "arrow up",
-    },
-    {
-      label: "Move Queue Down",
-      click: this.queuedown,
-      icon: "arrow down",
-    },
-    {
-      id: "torrent-set-speed-limits",
-      label: "Set Speed Limits",
-      click: () => Promise.resolve(),
-      icon: "dashboard",
-    },
-    {
-      label: "Remove",
-      click: this.remove,
-      icon: "remove",
-    },
-    {
-      label: "Remove And",
-      menu: [
-        {
-          label: "Delete Torrent",
-          click: this.removetorrent,
-        },
-        {
-          label: "Delete Data",
-          click: this.removedata,
-        },
-        {
-          label: "Delete All",
-          click: this.removedatatorrent,
-          role: "delete",
-        },
-      ],
-    },
-  ];
 }

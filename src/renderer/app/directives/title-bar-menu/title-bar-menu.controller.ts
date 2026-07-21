@@ -8,6 +8,7 @@ interface TitleBarMenuScope extends IScope {
     activeTitleBarMenu: number | null
     titleBarMenus: TitleMenuItem[]
     visibleTitleBarMenuItems: (menu: TitleMenuItem) => TitleMenuItem[]
+    formatTitleMenuAccelerator: (accelerator?: string) => string | undefined
     toggleTitleBarMenu: (index: number, $event: Event) => void
     openTitleBarMenu: (index: number) => void
     closeTitleBarMenu: () => void
@@ -24,6 +25,7 @@ export class TitleBarMenuController {
         settingsService: any,
     ) {
         const electorrent = window.electorrent
+        let isMacOS = false
         const handleMenuAction = createMenuActionHandler({
             $rootScope,
             $scope,
@@ -54,6 +56,32 @@ export class TitleBarMenuController {
         $scope.visibleTitleBarMenuItems = (menu: TitleMenuItem) => {
             return (menu.submenu || []).filter((item) => item.visible !== false)
         }
+        $scope.formatTitleMenuAccelerator = (accelerator?: string) => {
+            if (!accelerator) {
+                return accelerator
+            }
+
+            if (!isMacOS) {
+                return accelerator
+                    .replace("CmdOrCtrl", "Ctrl")
+                    .replace("Command", "Ctrl")
+                    .replace("Cmd", "Ctrl")
+            }
+
+            const macModifiers: Record<string, string> = {
+                CmdOrCtrl: "⌘",
+                Command: "⌘",
+                Cmd: "⌘",
+                Ctrl: "⌃",
+                Control: "⌃",
+                Alt: "⌥",
+                Option: "⌥",
+                Shift: "⇧",
+                Delete: "⌫",
+                Backspace: "⌫",
+            }
+            return accelerator.split("+").map((key) => macModifiers[key] || key).join("")
+        }
         $scope.toggleTitleBarMenu = (index: number, $event: Event) => {
             $event.stopPropagation()
             $scope.activeTitleBarMenu = $scope.activeTitleBarMenu === index ? null : index
@@ -80,6 +108,10 @@ export class TitleBarMenuController {
         }
         const unsubscribeMenu = electorrent.menu.onChanged(updateMenu)
         electorrent.menu.getModel().then(updateMenu)
+        electorrent.app.getMeta().then((meta) => {
+            isMacOS = meta.isMacOS
+            $scope.$applyAsync()
+        })
 
         const onDocumentClick = () => {
             $scope.closeTitleBarMenu()

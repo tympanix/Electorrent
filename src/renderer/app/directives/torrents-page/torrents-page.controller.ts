@@ -4,6 +4,7 @@ import { PendingTorrentUploadItem, PendingTorrentUploadList } from "@renderer/ap
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import { matchesLabelFilter } from "@renderer/app/directives/torrent-sidebar/torrent-label-filter";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
+import type { TorrentActionItem } from "@shared/torrent-actions";
 
 interface TorrentControllerScope extends angular.IScope {
     pendingTorrentFiles: PendingTorrentUploadList;
@@ -204,7 +205,10 @@ export class TorrentsPageController {
         $scope.$on("wipe:torrents", () => {
             $scope.connectionLost = false;
             setSyncConnectionState("normal");
+            deselectAll();
+            lastSelected = null;
             clearAll();
+            syncDetailsPanel();
             $scope.filters = {
                 status: "all",
             };
@@ -263,8 +267,22 @@ export class TorrentsPageController {
             }
         });
 
+        $scope.$on("torrent-action", (_event: unknown, item: TorrentActionItem) => {
+            if (selected.length === 0) {
+                return;
+            }
+            const bound = $rootScope.$btclient?.bindContextAction(item);
+            if (bound && "click" in bound) {
+                $scope.doContextAction(bound.click, bound.label, bound);
+            }
+        });
+
         $scope.$on("torrentLocation:updated", () => {
             syncAfterTorrentMutation();
+        });
+
+        $scope.$on("$destroy", () => {
+            void window.electorrent.bittorrent.setSelectedTorrents([]);
         });
 
         function clearDeleteConfirmation() {
@@ -281,6 +299,11 @@ export class TorrentsPageController {
 
         function syncDetailsPanel() {
             $rootScope.$emit("torrentDetails:sync", getCurrentSelectedTorrent());
+            syncSelectedTorrents();
+        }
+
+        function syncSelectedTorrents() {
+            void window.electorrent.bittorrent.setSelectedTorrents(selected.map((torrent) => torrent.hash));
         }
 
         function syncAfterTorrentMutation() {
@@ -721,32 +744,32 @@ export class TorrentsPageController {
         };
 
         $scope.doContextAction = (action: any, label: string, item: any) => {
-            if (item && item.id === "torrent-details") {
+            if (item?.role === "details") {
                 const currentTorrent = getCurrentSelectedTorrent();
                 if (currentTorrent) {
                     $rootScope.$emit("torrentDetails:open", currentTorrent);
                 }
                 return $q.resolve();
             }
-            if (item && item.id === "torrent-files") {
+            if (item?.role === "files") {
                 if (selected.length >= 1) {
                     $rootScope.$emit("torrentFiles:open", selected[0]);
                 }
                 return $q.resolve();
             }
-            if (item && item.id === "torrent-set-location") {
+            if (item?.role === "set-location") {
                 if (selected.length >= 1) {
                     $rootScope.$emit("torrentLocation:open", selected.slice());
                 }
                 return $q.resolve();
             }
-            if (item && item.id === "torrent-set-speed-limits") {
+            if (item?.role === "set-speed-limits") {
                 if (selected.length >= 1) {
                     $scope.speedLimitModalRef?.open(selected.slice());
                 }
                 return $q.resolve();
             }
-            if (item && item.id === "torrent-set-ratio") {
+            if (item?.role === "set-ratio") {
                 if (selected.length >= 1) {
                     $scope.setRatioModalRef?.open(selected.slice());
                 }

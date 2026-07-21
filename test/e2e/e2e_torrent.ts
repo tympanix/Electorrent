@@ -162,7 +162,7 @@ export class Torrent {
   }
 
   async openDetailsPanel() {
-    await this.clickContextMenu("torrent-details")
+    await this.clickContextMenu("details")
 
     const panel = $("[data-role='torrent-details-panel']")
     await panel.waitForDisplayed({ timeout: this.timeout })

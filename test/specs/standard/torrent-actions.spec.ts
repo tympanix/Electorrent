@@ -35,14 +35,18 @@ async function sendRemoveAndDeleteShortcut() {
     if (!win) throw new Error("No Electron window found")
 
     const menu = electron.Menu.getApplicationMenu()
-    const editMenu = menu?.items.find((item) => item.id === "edit" || item.label === "Edit")
-    const menuItem = editMenu?.submenu?.items.find((item) => item.label === "Remove and Delete")
+    const actionsMenu = menu?.items.find((item) => item.id === "actions" || item.label === "Actions")
+    const findShortcut = (items: Electron.MenuItem[]): Electron.MenuItem | undefined => {
+      for (const item of items) {
+        if (item.accelerator === "CmdOrCtrl+Delete") return item
+        const submenuItem = item.submenu && findShortcut(item.submenu.items)
+        if (submenuItem) return submenuItem
+      }
+    }
+    const menuItem = actionsMenu?.submenu && findShortcut(actionsMenu.submenu.items)
 
     if (!menuItem || !menuItem.visible || !menuItem.enabled) {
-      throw new Error("Remove and Delete menu item is unavailable")
-    }
-    if (menuItem.accelerator !== "CmdOrCtrl+Delete") {
-      throw new Error(`Unexpected Remove and Delete accelerator: ${menuItem.accelerator}`)
+      throw new Error("CmdOrCtrl+Delete action is unavailable")
     }
 
     menuItem.click({}, win, win.webContents)
