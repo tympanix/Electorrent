@@ -319,6 +319,15 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
             uploaded: 250 * 1024 * 1024,
             connection: "Outgoing",
             flags: "Interested, encrypted",
+        }, {
+            ip: "192.168.1.2",
+            port: 51413,
+            client: "Local Peer",
+            progress: 0.5,
+            downloadSpeed: 0,
+            uploadSpeed: 0,
+            connection: "Incoming",
+            flags: "Local",
         }]
     }
 

@@ -5,7 +5,11 @@ import html from "./torrent-details-peers-tab.template.html"
 export class TorrentDetailsPeersTabDirective implements IDirective {
   template = html
   restrict = "E"
-  scope = { peers: "=" }
+  scope = {
+    peers: "<",
+    resizeMode: "<",
+    resizeProfile: "<",
+  }
   controller = TorrentDetailsPeersTabController
   controllerAs = "ctl"
 

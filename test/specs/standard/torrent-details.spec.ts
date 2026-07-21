@@ -154,6 +154,20 @@ describe("torrent details", function () {
     const displayedUrls = await trackerRows.map((row) => row.getAttribute("data-tracker-url"))
     trackerUrls.forEach((url) => displayedUrls.should.contain(url))
 
+    const trackersTable = trackersTab.$("[data-role='torrent-details-trackers-table']")
+    const urlHeader = trackersTable.$("thead th:first-child")
+    await urlHeader.click()
+    const sortedRows = await trackersTable.$$("tbody tr[data-tracker-url]")
+    const sortedUrls = await sortedRows.map((row) => row.getAttribute("data-tracker-url"))
+    sortedUrls.should.deep.equal([...displayedUrls].sort().reverse())
+
+    const handle = urlHeader.$(".rz-handle")
+    await handle.waitForDisplayed({ timeout: 10_000 })
+    const initialWidth = (await urlHeader.getSize()).width
+    await handle.dragAndDrop({ x: 40, y: 0 })
+    await eventually(async () => (await urlHeader.getSize()).width)
+      .satisfies(`change by at least 10 from ${initialWidth}`, (nextWidth) => Math.abs(nextWidth - initialWidth) >= 10)
+
     await torrent.closeDetailsPanel()
   })
 

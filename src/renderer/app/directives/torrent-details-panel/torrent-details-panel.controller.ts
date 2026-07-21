@@ -13,7 +13,7 @@ export interface TorrentDetailsPanelScope extends IScope {
   panel: TorrentDetailsPanelData;
   activeTab: TorrentDetailsTab;
   resizeMode: string;
-  resizeProfile: string;
+  resizeProfiles: Record<TorrentDetailsTab, string>;
 }
 
 export class TorrentDetailsPanelController {
@@ -40,7 +40,7 @@ export class TorrentDetailsPanelController {
     this.scope.torrent = null;
     this.scope.activeTab = "info";
     this.scope.resizeMode = "OverflowResizer";
-    this.scope.resizeProfile = this.getResizeProfile();
+    this.scope.resizeProfiles = this.getResizeProfiles();
     this.scope.panel = {
       info: { sections: [] },
       files: { columns: [], items: [] },
@@ -119,6 +119,10 @@ export class TorrentDetailsPanelController {
     return !this.scope.loading && (!!this.scope.error || !this.scope.torrent);
   }
 
+  showLoader() {
+    return this.scope.loading && !this.loadedTabs[this.scope.activeTab] && !this.hasActiveTabData();
+  }
+
   hasActiveTabData() {
     if (this.scope.activeTab === "info") {
       return this.scope.panel.info.sections.length > 0;
@@ -194,15 +198,21 @@ export class TorrentDetailsPanelController {
     this.stopResizeListeners = onMouseUp;
   }
 
-  private getResizeProfile() {
+  private getResizeProfiles() {
     const serverId = this.rootScope.$server?.id || this.rootScope.$btclient?.id || "default";
-    return `torrent-details-files.${serverId}`;
+    return {
+      info: `torrent-details-info.${serverId}`,
+      files: `torrent-details-files.${serverId}`,
+      peers: `torrent-details-peers.${serverId}`,
+      trackers: `torrent-details-trackers.${serverId}`,
+    };
   }
 
   private async loadTab(tab: TorrentDetailsTab, torrent: any, force = false) {
     if (!force && this.loadedTabs[tab]) {
       return;
     }
+    const wasLoaded = this.loadedTabs[tab];
     const requestId = ++this.loadRequestIds[tab];
     this.syncResizeBindings();
     this.loadingTabs[tab] = true;
@@ -239,7 +249,9 @@ export class TorrentDetailsPanelController {
         return;
       }
 
-      this.tabErrors[tab] = err && err.message ? err.message : `Failed to load torrent ${tab}`;
+      if (!wasLoaded) {
+        this.tabErrors[tab] = err && err.message ? err.message : `Failed to load torrent ${tab}`;
+      }
     } finally {
       if (requestId === this.loadRequestIds[tab] && this.scope.torrent === torrent) {
         this.loadingTabs[tab] = false;
@@ -259,7 +271,7 @@ export class TorrentDetailsPanelController {
 
   private syncResizeBindings() {
     this.scope.resizeMode = this.scope.settings?.ui?.resizeMode || "OverflowResizer";
-    this.scope.resizeProfile = this.getResizeProfile();
+    this.scope.resizeProfiles = this.getResizeProfiles();
   }
 
   private clearSelection() {
@@ -267,10 +279,12 @@ export class TorrentDetailsPanelController {
   }
 
   private prepareTorrent(torrent: any) {
-    if (this.scope.torrent !== torrent) {
+    const currentHash = this.scope.torrent?.hash;
+    const nextHash = torrent?.hash;
+    if (!currentHash || !nextHash || currentHash !== nextHash) {
       this.resetPanelState();
-      this.scope.torrent = torrent;
     }
+    this.scope.torrent = torrent;
   }
 
   private syncActiveTabState() {

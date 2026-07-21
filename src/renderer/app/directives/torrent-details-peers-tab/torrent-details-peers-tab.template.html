@@ -1,26 +1,27 @@
 <div class="torrent-details-peers" data-role="torrent-details-peers">
-  <div class="torrent-details-peers-content">
-    <table class="ui compact single line unstackable torrent table" data-role="torrent-details-peers-table">
+  <div class="torrent-details-peers-content torrent-details-table-content">
+    <table
+      id="torrentDetailsPeersTable"
+      class="ui compact single line unstackable fixed torrent resize table torrent-details-table"
+      data-role="torrent-details-peers-table"
+      rz-table
+      rz-profile="ctl.scope.resizeProfile"
+      rz-mode="ctl.scope.resizeMode"
+      rz-container=".torrent-details-peers-content"
+      columns="ctl.scope.columns"
+    >
       <thead>
-        <tr>
-          <th>Country</th>
-          <th>IP</th>
-          <th>Port</th>
-          <th>Client</th>
-          <th>Progress</th>
-          <th>Down Speed</th>
-          <th>Up Speed</th>
-          <th>Downloaded</th>
-          <th>Uploaded</th>
-          <th>Connection</th>
-          <th>Flags</th>
+        <tr sorting="ctl.changeSorting" mode="ctl.scope.resizeProfile" default-sort-key="ip" default-sort-order="false" sort-key-prefix="torrent-details-peers.sort-key" sort-order-prefix="torrent-details-peers.sort-desc">
+          <th ng-repeat="column in ctl.scope.columns track by column.id" rz-col="column.id" sort="column.id">
+            <span class="torrent-details-table-header-label">{{ column.label }}</span>
+          </th>
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="peer in ctl.scope.peers.items track by (peer.ip + ':' + peer.port + ':' + $index)">
+        <tr ng-repeat="peer in ctl.scope.sortedPeers track by (peer.ip + ':' + peer.port + ':' + $index)" data-peer-ip="{{ peer.ip }}">
           <td data-col="country">
-            <i ng-if="peer.countryCode" ng-class="ctl.countryFlagClass(peer)" title="{{ peer.country }}"></i>
-            <span>{{ peer.country || peer.countryCode || '' }}</span>
+            <span class="torrent-details-country-flag" title="{{ ctl.countryName(peer) }}" aria-hidden="true">{{ ctl.countryFlag(peer) }}</span>
+            <span>{{ ctl.countryName(peer) }}</span>
           </td>
           <td data-col="ip">{{ peer.ip }}</td>
           <td data-col="port">{{ peer.port || '' }}</td>
@@ -33,7 +34,7 @@
           <td data-col="connection">{{ peer.connection || '' }}</td>
           <td data-col="flags">{{ peer.flags || '' }}</td>
         </tr>
-        <tr ng-if="!ctl.scope.peers.items.length">
+        <tr ng-if="!ctl.scope.sortedPeers.length">
           <td colspan="11">No peers connected.</td>
         </tr>
       </tbody>
