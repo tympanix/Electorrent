@@ -1,0 +1,123 @@
+torrents-page {
+    display: block;
+    height: 100%;
+
+    #page-torrents {
+        --torrent-sidebar-width: 260px;
+        --torrent-sidebar-collapsed-width: 72px;
+        position: relative;
+        top: 0;
+        height: 100%;
+
+        &.is-sidebar-collapsed { --torrent-sidebar-width: var(--torrent-sidebar-collapsed-width); }
+    }
+
+    torrent-sidebar + .main-panel {
+        position: relative;
+        z-index: 2;
+        float: right;
+        width: calc(~"100% - var(--torrent-sidebar-width)");
+        min-height: 100%;
+        overflow: hidden;
+        transition: width .2s ease;
+    }
+
+    .main-panel {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-height: 100%;
+
+        .main-content {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: overlay;
+        }
+    }
+
+    #torrentTable:focus { outline: none; }
+
+    .status-bar {
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: flex-end;
+        padding: .25rem 1rem;
+        border-top: 1px solid @borderColor;
+
+        > * { margin-right: 1rem; margin-left: 1rem; }
+
+        .client-version {
+            margin-right: auto;
+            margin-left: 0;
+            color: @unselectedTextColor;
+            font-size: .8rem;
+        }
+
+        .alternative-speed-limits-control {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+
+            &:hover .alternative-speed-limits-popup {
+                display: block;
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+
+        .alternative-speed-limits-popup {
+            position: absolute;
+            top: auto;
+            right: auto;
+            bottom: calc(100% + .75rem);
+            left: 50%;
+            z-index: 1000;
+            display: none;
+            white-space: nowrap;
+            transform: translateX(-50%);
+        }
+    }
+
+    .popup {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 400;
+        background-color: @popupBackground;
+        transform-origin: center center;
+
+        .content h2 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -25px !important;
+            margin-left: -125px !important;
+            animation: dragdrop 1s ease-in-out infinite;
+        }
+
+        &.ng-enter { animation: dragdrop-in .12s ease-out; }
+        &.ng-leave { animation: dragdrop-out .24s cubic-bezier(.175, .885, .32, 1.27499); }
+    }
+
+    @media (max-width: 900px) {
+        #page-torrents { --torrent-sidebar-collapsed-width: 64px; }
+    }
+}
+
+@keyframes dragdrop {
+    0%, 100% { transform: rotateZ(6deg); }
+    50% { transform: rotateZ(-6deg); }
+}
+
+@keyframes dragdrop-in {
+    from { opacity: 0; transform: scale(1.2); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes dragdrop-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(1.2); }
+}

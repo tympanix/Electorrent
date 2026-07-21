@@ -1,0 +1,178 @@
+torrent-sidebar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    display: block;
+    width: var(--torrent-sidebar-width);
+    height: 100%;
+    max-height: 100%;
+    background-color: @pageForeground;
+    border-right: 1px solid @borderColor;
+    transition: width .2s ease;
+
+    .torrent.sidebar {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        background-color: @pageForeground;
+    }
+
+    .sidebar-scroll {
+        flex: 1 1 auto;
+        height: 100%;
+        min-height: 0;
+        overflow-x: visible;
+        overflow-y: auto;
+    }
+
+    .torrent-sidebar-header {
+        display: flex;
+        justify-content: flex-end;
+        padding: 12px 14px 0;
+    }
+
+    .torrent-sidebar-toggle {
+        min-width: 0;
+        min-height: 0;
+        margin: 0;
+        padding: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+
+        &:hover,
+        &:focus { background: transparent !important; }
+    }
+
+    .nav {
+        margin: 0;
+        padding: 1em;
+        transition: padding .2s ease;
+
+        li {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: .2em 0;
+            padding: 10px;
+            font-size: 15px;
+            list-style-type: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: margin .2s ease, padding .2s ease;
+
+            &.active,
+            &:hover { background: @highlightBackground !important; }
+
+            > .icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 1.25em;
+                min-width: 1.25em;
+                margin: 0;
+            }
+        }
+    }
+
+    .torrent-sidebar-item-label {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        opacity: 1;
+        transition: opacity .15s ease, width .15s ease;
+    }
+
+    .torrent.sort.label {
+        float: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 1.75em;
+        margin-left: auto;
+        line-height: 1;
+        border-radius: 25px;
+        transition: transform .2s ease;
+    }
+
+    .sidebar-collapsed-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 8px 16px;
+        background-color: @pageForeground;
+        border-top: 1px solid @borderColor;
+    }
+
+    .sidebar-collapsed-section {
+        position: relative;
+        display: flex;
+        justify-content: center;
+
+        &::after {
+            position: absolute;
+            top: -12px;
+            bottom: -12px;
+            left: 100%;
+            width: 12px;
+            content: '';
+        }
+
+        &:hover {
+            .torrent-sidebar-section-trigger { background-color: @highlightBackground; }
+            .sidebar-flyout { opacity: 1; transform: translateX(0); pointer-events: auto; }
+        }
+    }
+
+    .torrent-sidebar-section-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+    }
+
+    .sidebar-flyout {
+        position: absolute;
+        bottom: 0;
+        left: calc(~"100% + 12px");
+        width: 300px;
+        max-width: calc(~"100vw - 108px");
+        max-height: calc(~"100vh - 32px");
+        overflow-y: auto;
+        background-color: @pageForeground;
+        border: 1px solid @borderColor;
+        border-radius: 8px;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, .18);
+        opacity: 0;
+        transform: translateX(-10px);
+        pointer-events: none;
+        transition: opacity .18s ease, transform .18s ease;
+
+        .section { background-color: @pageForeground; }
+        .filter.label { padding-right: 24px; }
+    }
+}
+
+#page-torrents.is-sidebar-collapsed torrent-sidebar {
+    .torrent-sidebar-header { justify-content: center; padding-right: 0; padding-left: 0; }
+    .nav { padding-right: 8px; padding-left: 8px; }
+    .nav li { flex-direction: column; justify-content: center; gap: .2em; margin: .2em; padding: 4px; }
+    .torrent-sidebar-item-label { flex: 0 0 0; width: 0; opacity: 0; }
+    .torrent.sort.label { min-width: 1.75em; margin-left: 0; padding: .35em .5em; font-size: .7rem; }
+}
+
+@media (max-width: 900px) {
+    torrent-sidebar {
+        .sidebar-flyout { left: calc(~"100% + 1.5em"); max-width: calc(~"100vw - 92px"); }
+        .sidebar-collapsed-section::after { width: 1.5em; }
+    }
+}

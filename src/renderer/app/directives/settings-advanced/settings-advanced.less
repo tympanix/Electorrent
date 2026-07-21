@@ -1,0 +1,14 @@
+settings-advanced {
+    .settings-saved-location-item,
+    .settings-label-color-item { display: block !important; }
+
+    .settings-saved-location-row,
+    .settings-label-color-row { display: flex; align-items: center; gap: .75rem; width: 100%; }
+
+    .settings-saved-location-row > .content { flex: 1 1 auto; min-width: 0; }
+    .settings-saved-location-row .header { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .settings-label-color-chip { flex: 0 1 auto; min-width: 0; padding: .45em .75em; }
+    .settings-label-color-row > button:first-of-type { margin-left: auto; }
+    .settings-label-color-hue { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 2rem; }
+    .label-color-preview-dot { display: inline-block; width: .9rem; height: .9rem; background: oklch(@labelChipDotLightness @labelChipDotChroma var(--label-hue, 225)); border-radius: 999px; }
+}

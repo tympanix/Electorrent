@@ -1,0 +1,17 @@
+label-color-modal {
+    .label-color-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, 1.8rem); justify-content: center; gap: .6rem; }
+    .label-color-picker-option {
+        width: 1.8rem;
+        height: 1.8rem;
+        padding: 0;
+        background: oklch(@labelChipDotLightness @labelChipDotChroma var(--label-hue, 225));
+        border: 0;
+        border-radius: 999px;
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible,
+        &.is-selected { box-shadow: 0 0 0 2px @pageBackground, 0 0 0 4px @selectedBorderColor; }
+        &.is-selected { outline: 2px solid transparent; }
+    }
+}

@@ -1,0 +1,94 @@
+title-bar-menu {
+    position: absolute;
+    top: 0;
+    left: 8px;
+    height: 100%;
+    app-region: no-drag;
+
+    .title-bar-menu {
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .title-bar-menu-root {
+        position: relative;
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+
+    .title-bar-menu-trigger,
+    .title-bar-menu-item {
+        color: @textColor;
+        font: inherit;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        cursor: default;
+        app-region: no-drag;
+    }
+
+    .title-bar-menu-trigger {
+        min-width: 42px;
+        height: 28px;
+        padding: 0 12px;
+        line-height: 28px;
+        border-radius: @defaultBorderRadius;
+
+        &:hover,
+        &.active {
+            color: @hoveredTextColor;
+            background-color: @highlightBackground;
+        }
+    }
+
+    .title-bar-menu-dropdown {
+        position: absolute;
+        top: 34px;
+        left: 0;
+        z-index: 1002;
+        width: max-content;
+        min-width: 270px;
+        max-width: min(560px, calc(100vw - 16px));
+        padding: 6px 0;
+        color: @textColor;
+        background-color: @pageForeground;
+        border: 1px solid @borderColor;
+        border-radius: @defaultBorderRadius;
+        box-shadow: @subtleShadow;
+        app-region: no-drag;
+    }
+
+    .title-bar-menu-item {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 30px;
+        padding: 6px 12px;
+        column-gap: 8px;
+        text-align: left;
+        white-space: nowrap;
+
+        &:hover,
+        &:focus {
+            color: @hoveredTextColor;
+            background-color: @highlightBackground;
+        }
+
+        &.disabled,
+        &:disabled {
+            color: @disabledTextColor;
+            background: transparent;
+        }
+    }
+
+    .title-bar-menu-check { flex: 0 0 18px; text-align: center; }
+    .title-bar-menu-item.checked .title-bar-menu-check::before { content: "\2713"; }
+    .title-bar-menu-label { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .title-bar-menu-accelerator { flex: 0 0 auto; margin-left: auto; color: @lightTextColor; font-size: .9em; }
+    .title-bar-menu-item.disabled .title-bar-menu-accelerator,
+    .title-bar-menu-item:disabled .title-bar-menu-accelerator { color: @disabledTextColor; }
+    .title-bar-menu-divider { height: 1px; margin: 6px 0; background-color: @borderColor; }
+}

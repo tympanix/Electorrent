@@ -1,0 +1,76 @@
+torrent-details-info-tab {
+    .torrent-details-info {
+        flex: 1 1 auto;
+        display: grid;
+        align-content: start;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-auto-rows: max-content;
+        gap: .75rem;
+        height: 100%;
+        min-height: 0;
+        padding: 1rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        background: fade(@pageMiddleground, 45%);
+    }
+
+    .torrent-details-section {
+        min-width: 0;
+        background: @pageForeground;
+        border: 1px solid @borderColor;
+        border-radius: 4px;
+        box-shadow: 0 1px 2px fade(#000, 5%);
+    }
+
+    .torrent-details-section-header {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        min-height: 2.5rem;
+        padding: .6rem .85rem;
+        background: fade(@pageMiddleground, 55%);
+        border-bottom: 1px solid fade(@borderColor, 75%);
+
+        .icon { width: 1.15rem; margin: 0; color: @primaryColor; text-align: center; }
+        h3 { margin: 0; color: @textColor; font-size: .85rem; font-weight: 700; line-height: 1.2; letter-spacing: .035em; text-transform: uppercase; }
+    }
+
+    .torrent-details-field-list { margin: 0; }
+
+    .torrent-details-field {
+        display: grid;
+        grid-template-columns: minmax(110px, 38%) minmax(0, 1fr);
+        gap: .75rem;
+        padding: .55rem .85rem;
+        border-bottom: 1px solid fade(@borderColor, 42%);
+
+        &:last-child { border-bottom: 0; }
+        &:hover { background: fade(@pageMiddleground, 32%); }
+    }
+
+    dt { min-width: 0; color: fade(@textColor, 62%); font-size: .82rem; font-weight: 600; line-height: 1.45; }
+    dd {
+        min-width: 0;
+        margin: 0;
+        color: @textColor;
+        font-size: .9rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+        text-align: right;
+        &.multiline { white-space: pre-wrap; }
+    }
+
+    .torrent-details-field-value-path,
+    .torrent-details-field-value-text.multiline { font-family: monospace; font-size: .82rem; font-weight: 400; text-align: left; }
+
+    @media (max-width: 720px) {
+        .torrent-details-info { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    @media (max-width: 460px) {
+        .torrent-details-field { grid-template-columns: minmax(0, 1fr); gap: .2rem; }
+        .torrent-details-field dd { text-align: left; }
+    }
+}

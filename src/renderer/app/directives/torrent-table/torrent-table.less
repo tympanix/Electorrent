@@ -1,0 +1,31 @@
+torrent-table,
+torrents-page {
+    .torrent.table {
+        margin: 0;
+        border: none;
+        border-radius: 0;
+
+        thead th.sortup,
+        thead th.sortdown { padding-right: 25px !important; }
+        thead th.sortdown i::before { content: "\f078"; }
+        thead th.sortup i::before { content: "\f077"; }
+        tbody tr { cursor: default; -webkit-user-select: none !important; }
+    }
+
+    .torrent-table-label-chip { padding: .35em .65em; line-height: 1 !important; }
+
+    .ui.torrent.table {
+        tfoot { position: absolute; bottom: 0; }
+        &.is-sticky th { position: sticky; top: 0; z-index: 1; }
+
+        tr td { padding: .45em .3em; &:first-child { padding-left: .75em; } }
+        tr th { padding: .75em .3em; &:first-child { padding-left: .75em; } }
+
+        &.compact {
+            tr td { padding: .25em .3em; &:first-child { padding-left: .75em; } }
+            tr th { padding: .5em .3em; &:first-child { padding-left: .75em; } }
+        }
+    }
+
+    .ui.table thead th { cursor: default !important; }
+}

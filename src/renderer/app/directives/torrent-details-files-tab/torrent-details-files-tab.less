@@ -1,0 +1,76 @@
+torrent-details-files-tab {
+    .torrent-details-files,
+    .torrent-details-files-content { flex: 1 1 auto; height: 100%; min-height: 0; }
+    .torrent-details-files { display: flex; flex-direction: column; overflow: hidden; }
+    .torrent-details-files-content { overflow: auto; }
+
+    .torrent-details-files-header-label,
+    .torrent-details-file-cell,
+    .torrent-details-file-cell > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .torrent-details-files-header-label,
+    .torrent-details-file-cell > span { display: block; }
+    .torrent-details-file-progress { display: flex; align-items: center; gap: .5rem; }
+    .torrent-details-file-progress > .ui.tiny.indicating.progress { flex: 1 1 auto; margin: 0; }
+    .ui.tiny.negative.message.torrent-details-files-error { position: sticky; top: 0; z-index: 2; margin: 0; }
+
+    .ui.checkbox.torrent-details-file-checkbox {
+        flex: 0 0 17px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 17px;
+        min-width: 17px;
+        height: 17px;
+        min-height: 17px;
+        > input, > label { width: 17px; height: 17px; }
+        > label { padding: 0; }
+    }
+
+    .torrent-details-files-content > .ui.torrent.table {
+        margin: 0;
+
+        > thead > tr > th.torrent-details-file-selection-column,
+        > tbody > tr > td[data-col='wanted'] {
+            width: 38px !important;
+            min-width: 25px;
+            max-width: 38px;
+            padding-right: 0;
+            padding-left: 0;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        > thead > tr > th .sorting.icon {
+            top: 50%;
+            margin: 0;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        > tbody > tr > td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
+
+    .torrent-details-file-selection-column {
+        .torrent-details-file-checkbox { margin-right: auto; margin-left: auto; }
+        .rz-handle { display: none; }
+    }
+
+    td[data-col='wanted'] .torrent-details-file-cell { display: flex; align-items: center; justify-content: center; min-height: 17px; }
+    .torrent-details-file-name { display: flex; align-items: center; min-width: 0; cursor: default; }
+    .torrent-details-file-name > span { overflow: hidden; text-overflow: ellipsis; }
+    .torrent-details-folder-row .torrent-details-file-name { font-weight: 600; cursor: pointer; }
+
+    .torrent-details-folder-toggle.ui.button {
+        flex: 0 0 18px;
+        width: 18px;
+        min-height: 18px;
+        margin: 0 2px 0 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        .icon { width: auto; margin: 0; }
+    }
+
+    .torrent-details-file-icon { flex: 0 0 18px; margin: 0 2px 0 0; }
+}

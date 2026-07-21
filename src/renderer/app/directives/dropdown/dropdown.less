@@ -1,0 +1,12 @@
+dropdown,
+[dropdown] {
+    .menu.visible-add-active {
+        animation: dropdown-show .16s cubic-bezier(.175, .885, .32, 1.27499);
+        transform-origin: center top;
+    }
+}
+
+@keyframes dropdown-show {
+    from { opacity: 0; transform: perspective(650px) translate(0, -30px); }
+    to { opacity: 1; transform: perspective(650px) translate(0, 0); }
+}
