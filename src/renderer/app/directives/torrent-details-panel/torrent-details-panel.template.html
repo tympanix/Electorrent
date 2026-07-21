@@ -51,7 +51,7 @@
   </div>
 
   <div class="torrent-details-panel-body">
-    <div ng-if="ctl.scope.loading && !ctl.hasActiveTabData()" class="torrent-details-state torrent-details-panel-loader">
+    <div ng-if="ctl.showLoader()" class="torrent-details-state torrent-details-panel-loader">
       <div class="ui active inline loader"></div>
     </div>
 
@@ -71,7 +71,7 @@
       ng-if="!ctl.showStateMessage() && ctl.isActiveTab('files')"
       files="ctl.scope.panel.files"
       resize-mode="ctl.scope.resizeMode"
-      resize-profile="ctl.scope.resizeProfile"
+      resize-profile="ctl.scope.resizeProfiles.files"
       can-select-files="ctl.canSelectFiles()"
       update-selection="ctl.updateFileSelection(files, wanted)"
     ></torrent-details-files-tab>
@@ -79,10 +79,14 @@
     <torrent-details-peers-tab
       ng-if="!ctl.showStateMessage() && ctl.isActiveTab('peers')"
       peers="ctl.scope.panel.peers"
+      resize-mode="ctl.scope.resizeMode"
+      resize-profile="ctl.scope.resizeProfiles.peers"
     ></torrent-details-peers-tab>
     <torrent-details-trackers-tab
       ng-if="!ctl.showStateMessage() && ctl.isActiveTab('trackers')"
       trackers="ctl.scope.panel.trackers.items"
+      resize-mode="ctl.scope.resizeMode"
+      resize-profile="ctl.scope.resizeProfiles.trackers"
     ></torrent-details-trackers-tab>
   </div>
 </div>

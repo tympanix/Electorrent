@@ -1,21 +1,24 @@
 <div class="torrent-details-trackers" data-role="torrent-details-trackers">
-  <table class="ui compact single line unstackable table" data-role="torrent-details-trackers-table">
+  <div class="torrent-details-trackers-content torrent-details-table-content">
+  <table
+    id="torrentDetailsTrackersTable"
+    class="ui compact single line unstackable fixed torrent resize table torrent-details-table"
+    data-role="torrent-details-trackers-table"
+    rz-table
+    rz-profile="ctl.scope.resizeProfile"
+    rz-mode="ctl.scope.resizeMode"
+    rz-container=".torrent-details-trackers-content"
+    columns="ctl.scope.columns"
+  >
     <thead>
-      <tr>
-        <th>URL</th>
-        <th>Status</th>
-        <th>Tier</th>
-        <th>Peers</th>
-        <th>Seeds</th>
-        <th>Leeches</th>
-        <th>Downloaded</th>
-        <th>Last announce</th>
-        <th>Next announce</th>
-        <th>Message</th>
+      <tr sorting="ctl.changeSorting" mode="ctl.scope.resizeProfile" default-sort-key="url" default-sort-order="false" sort-key-prefix="torrent-details-trackers.sort-key" sort-order-prefix="torrent-details-trackers.sort-desc">
+        <th ng-repeat="column in ctl.scope.columns track by column.id" rz-col="column.id" sort="column.id">
+          <span class="torrent-details-table-header-label">{{ column.label }}</span>
+        </th>
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="tracker in trackers track by $index" data-tracker-url="{{ tracker.url }}">
+      <tr ng-repeat="tracker in ctl.scope.sortedTrackers track by $index" data-tracker-url="{{ tracker.url }}">
         <td class="torrent-details-tracker-url" title="{{ tracker.url }}">{{ tracker.url }}</td>
         <td>{{ tracker.status }}</td>
         <td>{{ tracker.tier }}</td>
@@ -27,9 +30,10 @@
         <td>{{ tracker.nextAnnounce ? (tracker.nextAnnounce | epoch) : '' }}</td>
         <td title="{{ tracker.message }}">{{ tracker.message }}</td>
       </tr>
-      <tr ng-if="!trackers.length">
+      <tr ng-if="!ctl.scope.sortedTrackers.length">
         <td colspan="10">No trackers available.</td>
       </tr>
     </tbody>
   </table>
+  </div>
 </div>
