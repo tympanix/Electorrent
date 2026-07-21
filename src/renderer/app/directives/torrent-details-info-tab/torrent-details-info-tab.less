@@ -17,9 +17,7 @@ torrent-details-info-tab {
     .torrent-details-section {
         min-width: 0;
         background: @pageForeground;
-        border: 1px solid @borderColor;
-        border-radius: 4px;
-        box-shadow: 0 1px 2px fade(#000, 5%);
+        box-shadow: inset -1px -1px @borderColor;
     }
 
     .torrent-details-section-header {
@@ -31,11 +29,28 @@ torrent-details-info-tab {
         background: fade(@pageMiddleground, 55%);
         border-bottom: 1px solid fade(@borderColor, 75%);
 
-        .icon { width: 1.15rem; margin: 0; color: @primaryColor; text-align: center; }
-        h3 { margin: 0; color: @textColor; font-size: .85rem; font-weight: 700; line-height: 1.2; letter-spacing: .035em; text-transform: uppercase; }
+        .icon {
+            width: 1.15rem;
+            margin: 0;
+            line-height: 1.2;
+            color: @primaryColor;
+            text-align: center;
+        }
+
+        h3 {
+            margin: 0;
+            color: @textColor;
+            font-size: .85rem;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: .035em;
+            text-transform: uppercase;
+        }
     }
 
-    .torrent-details-field-list { margin: 0; }
+    .torrent-details-field-list {
+        margin: 0;
+    }
 
     .torrent-details-field {
         display: grid;
@@ -44,11 +59,23 @@ torrent-details-info-tab {
         padding: .55rem .85rem;
         border-bottom: 1px solid fade(@borderColor, 42%);
 
-        &:last-child { border-bottom: 0; }
-        &:hover { background: fade(@pageMiddleground, 32%); }
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        &:hover {
+            background: fade(@pageMiddleground, 32%);
+        }
     }
 
-    dt { min-width: 0; color: fade(@textColor, 62%); font-size: .82rem; font-weight: 600; line-height: 1.45; }
+    dt {
+        min-width: 0;
+        color: fade(@textColor, 62%);
+        font-size: .82rem;
+        font-weight: 600;
+        line-height: 1.45;
+    }
+
     dd {
         min-width: 0;
         margin: 0;
@@ -59,7 +86,10 @@ torrent-details-info-tab {
         line-height: 1.35;
         overflow-wrap: anywhere;
         text-align: right;
-        &.multiline { white-space: pre-wrap; }
+
+        &.multiline {
+            white-space: pre-wrap;
+        }
     }
 
     .torrent-details-field-copy {
@@ -80,14 +110,27 @@ torrent-details-info-tab {
     }
 
     .torrent-details-field-value-path,
-    .torrent-details-field-value-text.multiline { font-family: monospace; font-size: .82rem; font-weight: 400; text-align: left; }
+    .torrent-details-field-value-text.multiline {
+        font-family: monospace;
+        font-size: .82rem;
+        font-weight: 400;
+        text-align: left;
+    }
 
     @media (max-width: 720px) {
-        .torrent-details-info { grid-template-columns: minmax(0, 1fr); }
+        .torrent-details-info {
+            grid-template-columns: minmax(0, 1fr);
+        }
     }
 
     @media (max-width: 460px) {
-        .torrent-details-field { grid-template-columns: minmax(0, 1fr); gap: .2rem; }
-        .torrent-details-field dd { text-align: left; }
+        .torrent-details-field {
+            grid-template-columns: minmax(0, 1fr);
+            gap: .2rem;
+        }
+
+        .torrent-details-field dd {
+            text-align: left;
+        }
     }
 }
