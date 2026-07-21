@@ -414,7 +414,6 @@ export class RtorrentRuntime implements BittorrentRuntime {
             uploadSpeed: "p.up_rate",
             downloaded: "p.down_total",
             uploaded: "p.up_total",
-            flags: "p.flags",
         })
         return peers.map((peer) => ({
             ip: typeof peer.ip === "string" ? peer.ip : "",
@@ -425,7 +424,6 @@ export class RtorrentRuntime implements BittorrentRuntime {
             uploadSpeed: Number(peer.uploadSpeed) || 0,
             downloaded: Number(peer.downloaded) || 0,
             uploaded: Number(peer.uploaded) || 0,
-            flags: typeof peer.flags === "string" ? peer.flags : undefined,
         }))
     }
 

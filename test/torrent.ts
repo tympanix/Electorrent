@@ -16,6 +16,7 @@ export async function createTorrentFile(tracker: DockerComposeService, options: 
     files?: Record<string, number>;
     downloadSpeed?: number;
     uploadSpeed?: number;
+    seedDelay?: number;
     trackerUrl?: string;
     trackerUrls?: string[];
 }): Promise<string> {
@@ -38,6 +39,9 @@ export async function createTorrentFile(tracker: DockerComposeService, options: 
     }
     if (options.uploadSpeed) {
         cmd.push("--upload-speed", options.uploadSpeed.toString());
+    }
+    if (options.seedDelay) {
+        cmd.push("--seed-delay", options.seedDelay.toString());
     }
     if (options.trackerUrl) {
         cmd.push("--tracker-url", options.trackerUrl);
