@@ -40,6 +40,44 @@ describe("torrent details", function () {
     }
   })
 
+  it("shows the connected torrent peer in the peers tab", async function () {
+    this.timeout(60 * 1000)
+
+    if (getTestFixture().client.features.torrentPeers !== true) {
+      this.skip()
+    }
+
+    const filename = await createTorrentFile(tracker, {
+      fileSize: 100_000,
+      downloadSpeed: 1,
+      uploadSpeed: 1,
+      seedDelay: 15,
+    })
+    const peerTorrent = await this.app.uploadTorrent({ filename })
+    await peerTorrent.waitForExist()
+
+    let detailsPanelOpen = false
+    try {
+      const panel = await peerTorrent.openDetailsPanel()
+      detailsPanelOpen = true
+      await peerTorrent.openDetailsTab("peers")
+
+      const peersTab = panel.$("[data-role='torrent-details-peers']")
+      await eventually(async () => (await peersTab.$$("tbody td[data-col='ip']")).length).satisfies(
+        "contain a connected peer row",
+        (peerCount) => peerCount > 0,
+        { timeout: 30_000 },
+      )
+    } finally {
+      if (detailsPanelOpen) {
+        await peerTorrent.closeDetailsPanel()
+      }
+      if (await peerTorrent.isExisting()) {
+        await peerTorrent.delete()
+      }
+    }
+  })
+
   it("shows expected torrent information in the info tab", async function () {
     this.timeout(60 * 1000)
 

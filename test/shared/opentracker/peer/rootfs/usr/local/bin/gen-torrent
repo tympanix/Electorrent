@@ -12,11 +12,12 @@ while [[ "$#" -gt 0 ]]; do
         --foreground) FOREGROUND="1" ;;
         --upload-speed) UP_SPEED="$2"; shift ;;
         --download-speed) DL_SPEED="$2"; shift ;;
+        --seed-delay) SEED_DELAY="$2"; shift ;;
         --file-size) FILE_SIZE="$2"; shift ;;
         --file) FILE_PATHS+=("$2"); FILE_SIZES+=("$3"); shift 2 ;;
         --torrent-name) TORRENT_NAME="$2"; shift ;;
         --tracker-url) TRACKER_URLS+=("$2"); shift ;;
-        *) echo >&2 "Usage: $0 [--foreground] [--upload-speed <up-speed>] [--download-speed <dl-speed>] [--file-size <file-size> | --file <path> <size> ...] --torrent-name <torrent-name> [--tracker-url <tracker-url>]"; exit 1 ;;
+        *) echo >&2 "Usage: $0 [--foreground] [--upload-speed <up-speed>] [--download-speed <dl-speed>] [--seed-delay <seconds>] [--file-size <file-size> | --file <path> <size> ...] --torrent-name <torrent-name> [--tracker-url <tracker-url>]"; exit 1 ;;
     esac
     shift
 done
@@ -73,5 +74,8 @@ ARIA2_ARGS=(
 if [ -n "$FOREGROUND" ]; then
     exec aria2c "${ARIA2_ARGS[@]}" "$TORRENT_FILE"
 fi
-aria2c "${ARIA2_ARGS[@]}" "$TORRENT_FILE" >/dev/null 2>&1 &
+(
+    [ -n "$SEED_DELAY" ] && sleep "$SEED_DELAY"
+    exec aria2c "${ARIA2_ARGS[@]}" "$TORRENT_FILE"
+) >/dev/null 2>&1 &
 exit 0
