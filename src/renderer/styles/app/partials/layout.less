@@ -689,10 +689,10 @@ torrent-sidebar + .main-panel {
             margin: 0;
             border-bottom: 1px solid @borderColor;
             flex: 0 0 auto;
+            min-height: 2rem;
 
             a.item {
-
-                padding: 0.20rem 1rem;
+                padding: 0.15rem 0.75rem;
 
                 &.active {
                     border-top: none;
@@ -701,6 +701,14 @@ torrent-sidebar + .main-panel {
                         border-left: none;
                     }
                 }
+            }
+
+            > a.item > .icon {
+                margin-right: 0.4rem;
+            }
+
+            .right.menu .icon {
+                margin: 0;
             }
         }
 
