@@ -91,6 +91,11 @@ describe("torrent details", function () {
     infoText.should.contain(torrentMetadata.infoHash)
     infoText.should.contain(formatBytes(torrentMetadata.length || 0))
 
+    const hashValue = infoTab.$("[data-field-id='hash'] .torrent-details-field-copy")
+    await hashValue.click()
+    const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText())
+    clipboardText.should.equal(torrentMetadata.infoHash)
+
     await torrent.closeDetailsPanel()
   })
 

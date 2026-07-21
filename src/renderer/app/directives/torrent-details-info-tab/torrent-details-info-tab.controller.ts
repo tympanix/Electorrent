@@ -46,6 +46,10 @@ export class TorrentDetailsInfoTabController {
     return field.multiline || field.format === "path" ? this.formatFieldValue(field) : "";
   }
 
+  copyFieldValue(field: TorrentDetailsInfoField) {
+    return window.electorrent.clipboard.writeText(this.formatFieldValue(field));
+  }
+
   sectionIcon(sectionId: string) {
     const icons: Record<string, string> = {
       overview: "info circle",
