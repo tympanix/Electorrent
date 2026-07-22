@@ -50,6 +50,34 @@ describe("mock Actions menu", function () {
     await detailsShortcut.waitForDisplayed()
     assert.notInclude(await detailsShortcut.getText(), "CmdOrCtrl")
   })
+
+  it("opens submenu items in a flyout to the right", async function () {
+    await browser.keys("Escape")
+
+    const row = $("#torrentTable tbody tr[data-hash]")
+    await row.waitForClickable()
+    await row.click()
+
+    const actionsMenu = $("//button[contains(@class, 'title-bar-menu-trigger') and normalize-space(.)='Actions']")
+    await actionsMenu.waitForClickable()
+    await actionsMenu.click()
+
+    const queueTrigger = $("//button[contains(@class, 'title-bar-menu-submenu-trigger')][.//span[normalize-space(.)='Queue']]")
+    await queueTrigger.waitForEnabled()
+    assert.isTrue(await queueTrigger.$(".title-bar-menu-submenu-arrow").isExisting())
+
+    const queueFlyout = queueTrigger.$("..").$(".title-bar-menu-flyout")
+    assert.isFalse(await queueFlyout.isDisplayed())
+
+    await queueTrigger.moveTo()
+    await queueFlyout.waitForDisplayed()
+    assert.equal(await queueFlyout.$(".title-bar-menu-label").getText(), "Move Up Queue")
+
+    const triggerX = await queueTrigger.getLocation("x")
+    const triggerWidth = await queueTrigger.getSize("width")
+    const flyoutX = await queueFlyout.getLocation("x")
+    assert.isAtLeast(flyoutX, triggerX + triggerWidth - 2)
+  })
 })
 
 async function getActionsMenu() {
