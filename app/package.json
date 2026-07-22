@@ -33,6 +33,7 @@
     "electron-regedit": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "form-data": "^4.0.5",
+    "geoip-country": "^5.0.202607180103",
     "qs": "^6.10.1",
     "request": "^2.74.0",
     "semver": "^5.3.0",
