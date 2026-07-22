@@ -7,6 +7,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "app": "electron app/main.js",
+    "app:debug": "NODE_ENV=test npm run app -- --force-title-bar-menu",
     "build": "npm run build:webpack",
     "build:webpack": "webpack --config webpack.config.js",
     "build:watch": "webpack --config webpack.config.js --watch",
