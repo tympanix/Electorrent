@@ -54,7 +54,13 @@ async function getVisibleHashes() {
 async function setSearch(searchInput: ReturnType<typeof $>, value: string) {
   await searchInput.click()
   await browser.keys([Key.Ctrl, "a"])
-  await browser.keys(value || Key.Backspace)
+  await browser.keys(Key.Backspace)
+  await eventually(() => searchInput.getValue()).equals("")
+  await expectVisibleHashes(torrents.map(({ hash }) => hash))
+
+  if (value) {
+    await searchInput.addValue(value)
+  }
   await eventually(() => searchInput.getValue()).equals(value)
 }
 
@@ -66,10 +72,10 @@ async function expectSearchResults(searchInput: ReturnType<typeof $>, search: st
       await setSearch(searchInput, search)
     }
     return (await getVisibleHashes()).sort().join(",")
-  }).equals(sortedExpected)
+  }).equals(sortedExpected, { interval: 500 })
 }
 
 async function expectVisibleHashes(expected: string[]) {
   await eventually(async () => (await getVisibleHashes()).sort().join(","))
-    .equals([...expected].sort().join(","))
+    .equals([...expected].sort().join(","), { interval: 500 })
 }
