@@ -43,10 +43,9 @@ title-bar-menu {
         }
     }
 
-    .title-bar-menu-dropdown {
+    .title-bar-menu-dropdown,
+    .title-bar-menu-flyout {
         position: absolute;
-        top: 34px;
-        left: 0;
         z-index: 1002;
         width: max-content;
         min-width: 270px;
@@ -58,6 +57,26 @@ title-bar-menu {
         border-radius: @defaultBorderRadius;
         box-shadow: @subtleShadow;
         app-region: no-drag;
+    }
+
+    .title-bar-menu-dropdown {
+        top: 34px;
+        left: 0;
+    }
+
+    .title-bar-menu-submenu {
+        position: relative;
+    }
+
+    .title-bar-menu-flyout {
+        top: -7px;
+        left: calc(100% - 1px);
+        display: none;
+    }
+
+    .title-bar-menu-submenu:not(.disabled):hover > .title-bar-menu-flyout,
+    .title-bar-menu-submenu:not(.disabled):focus-within > .title-bar-menu-flyout {
+        display: block;
     }
 
     .title-bar-menu-item {
@@ -88,6 +107,15 @@ title-bar-menu {
     .title-bar-menu-item.checked .title-bar-menu-check::before { content: "\2713"; }
     .title-bar-menu-label { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
     .title-bar-menu-accelerator { flex: 0 0 auto; margin-left: auto; color: @lightTextColor; font-size: .9em; }
+    .title-bar-menu-submenu-arrow {
+        flex: 0 0 7px;
+        width: 7px;
+        height: 7px;
+        margin-left: 4px;
+        border-top: 1.5px solid currentColor;
+        border-right: 1.5px solid currentColor;
+        transform: rotate(45deg);
+    }
     .title-bar-menu-item.disabled .title-bar-menu-accelerator,
     .title-bar-menu-item:disabled .title-bar-menu-accelerator { color: @disabledTextColor; }
     .title-bar-menu-divider { height: 1px; margin: 6px 0; background-color: @borderColor; }
