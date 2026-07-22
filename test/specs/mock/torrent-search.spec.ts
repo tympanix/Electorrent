@@ -53,9 +53,11 @@ async function getVisibleHashes() {
 
 async function setSearch(searchInput: ReturnType<typeof $>, value: string) {
   await searchInput.click()
-  const selectAllKey = process.platform === "darwin" ? Key.Command : Key.Control
-  await browser.keys([selectAllKey, "a"])
-  await browser.keys(value || Key.Backspace)
+  await searchInput.clearValue()
+  if (value) {
+    await searchInput.addValue(value)
+  }
+  await browser.keys(Key.Tab)
   await eventually(() => searchInput.getValue()).equals(value)
 }
 
