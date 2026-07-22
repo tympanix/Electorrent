@@ -69,5 +69,6 @@ export const IPC_CHANNELS = {
     },
     clipboard: {
         readText: 'clipboard:read-text',
+        writeText: 'clipboard:write-text',
     },
 } as const

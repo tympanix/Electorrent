@@ -94,6 +94,7 @@ const electorrentBridge: ElectorrentBridge = {
     },
     clipboard: {
         readText: () => invoke(IPC_CHANNELS.clipboard.readText),
+        writeText: (text: string) => invoke(IPC_CHANNELS.clipboard.writeText, { text }),
     },
 }
 

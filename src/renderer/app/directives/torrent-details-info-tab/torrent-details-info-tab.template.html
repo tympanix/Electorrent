@@ -20,8 +20,15 @@
         <dd
           class="value torrent-details-field-value torrent-details-field-value-{{ field.format || 'text' }}"
           ng-class="{ multiline: field.multiline }"
-          title="{{ ctl.fieldTitle(field) }}"
-        >{{ ctl.formatFieldValue(field) }}</dd>
+        >
+          <button
+            type="button"
+            class="torrent-details-field-copy"
+            ng-click="ctl.copyFieldValue(field)"
+            title="{{ ctl.fieldTitle(field) || 'Copy value' }}"
+            aria-label="Copy {{ field.label }} value"
+          >{{ ctl.formatFieldValue(field) }}</button>
+        </dd>
       </div>
     </dl>
   </section>
