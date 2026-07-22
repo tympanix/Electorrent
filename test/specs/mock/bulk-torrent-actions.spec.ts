@@ -1,0 +1,98 @@
+import chai from "chai"
+import { $, $$, browser } from "@wdio/globals"
+import { Key } from "webdriverio"
+import { eventually } from "../../e2e/eventually"
+import { configureSpec } from "../../framework/fixture"
+
+const assert: Chai.AssertStatic = chai.assert
+
+const torrents = [
+  { hash: "11".padStart(40, "0"), name: "Selected torrent one", state: "downloading" },
+  { hash: "22".padStart(40, "0"), name: "Selected torrent two", state: "downloading" },
+  { hash: "33".padStart(40, "0"), name: "Unselected torrent", state: "downloading" },
+]
+
+describe("mock bulk torrent actions", function () {
+  configureSpec({ clearTorrents: false })
+
+  before(async function () {
+    await invokeMockAction("clearMockedTorrents")
+    for (const torrent of torrents) {
+      await invokeMockAction("addMockedTorrent", torrent)
+    }
+    await eventually(async () => (await $$("#torrentTable tbody tr[data-hash]")).length)
+      .equals(torrents.length)
+  })
+
+  it("applies a stop and resume action to every selected torrent", async function () {
+    const firstSelected = await $(`#torrentTable tbody tr[data-hash='${torrents[0].hash}']`)
+    const secondSelected = await $(`#torrentTable tbody tr[data-hash='${torrents[1].hash}']`)
+    await firstSelected.waitForClickable()
+    await firstSelected.click()
+    await shiftClick(secondSelected)
+
+    await eventually(getSelectedHashes).satisfies(
+      "include both selected torrents",
+      (hashes) => hashes.length === 2
+        && hashes.includes(torrents[0].hash)
+        && hashes.includes(torrents[1].hash),
+    )
+
+    const stopButton = $("#torrent-action-header a[data-role='stop']")
+    await stopButton.waitForClickable()
+    await stopButton.click()
+
+    await expectTorrentState(torrents[0].hash, "Stopped")
+    await expectTorrentState(torrents[1].hash, "Stopped")
+    assert.include(await getTorrentState(torrents[2].hash), "Downloading")
+
+    const resumeButton = $("#torrent-action-header a[data-role='resume']")
+    await resumeButton.waitForClickable()
+    await resumeButton.click()
+
+    await expectTorrentState(torrents[0].hash, "Downloading")
+    await expectTorrentState(torrents[1].hash, "Downloading")
+    assert.include(await getTorrentState(torrents[2].hash), "Downloading")
+  })
+})
+
+async function invokeMockAction(action: string, ...args: any[]) {
+  await browser.execute(async (request) => {
+    await (window as any).electorrent.bittorrent.invokeAction(request)
+  }, { action, args })
+}
+
+async function shiftClick(row: Awaited<ReturnType<typeof $>>) {
+  await browser.actions([
+    browser.action("key")
+      .down(Key.Shift)
+      .pause(0)
+      .pause(0)
+      .pause(0)
+      .up(Key.Shift),
+    browser.action("pointer")
+      .pause(0)
+      .move({ origin: row, duration: 0 })
+      .down({ button: 0 })
+      .up({ button: 0 })
+      .pause(0),
+  ])
+}
+
+async function getSelectedHashes() {
+  const rows = await $$("#torrentTable tbody tr.active[data-hash]")
+  const hashes: string[] = []
+  for (const row of rows) {
+    hashes.push(await row.getAttribute("data-hash"))
+  }
+  return hashes
+}
+
+async function getTorrentState(hash: string) {
+  return $(`#torrentTable tbody tr[data-hash='${hash}'] td[data-col='percent']`).getText()
+}
+
+async function expectTorrentState(hash: string, expected: string) {
+  await eventually(() => getTorrentState(hash))
+    .satisfies(`include ${expected}`, (state) => state.includes(expected))
+}

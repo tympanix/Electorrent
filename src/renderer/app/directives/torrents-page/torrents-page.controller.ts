@@ -97,6 +97,7 @@ export class TorrentsPageController {
             minMatchCharLength: 1,
             keys: [
                 "decodedName",
+                "hash",
             ],
         };
 
