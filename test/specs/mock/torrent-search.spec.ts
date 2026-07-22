@@ -52,11 +52,13 @@ async function getVisibleHashes() {
 }
 
 async function setSearch(searchInput: ReturnType<typeof $>, value: string) {
-  await searchInput.clearValue()
+  await searchInput.click()
+  await browser.keys([Key.Ctrl, "a"])
   if (value) {
-    await searchInput.addValue(value)
+    await browser.keys(value)
+  } else {
+    await browser.keys(Key.Backspace)
   }
-  await browser.keys(Key.Tab)
   await eventually(() => searchInput.getValue()).equals(value)
 }
 
