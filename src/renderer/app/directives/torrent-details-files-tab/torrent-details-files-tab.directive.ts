@@ -6,11 +6,8 @@ export class TorrentDetailsFilesTabDirective implements IDirective {
   template = html;
   restrict = "E";
   scope = {
-    files: "<",
-    resizeMode: "<",
-    resizeProfile: "<",
-    canSelectFiles: "<",
-    updateSelection: "&",
+    torrent: "<",
+    refresh: "<",
   };
   controller = TorrentDetailsFilesTabController;
   controllerAs = "ctl";

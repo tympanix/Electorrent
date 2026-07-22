@@ -6,7 +6,8 @@ export class TorrentDetailsInfoTabDirective implements IDirective {
   template = html;
   restrict = "E";
   scope = {
-    sections: "<",
+    torrent: "<",
+    refresh: "<",
   };
   controller = TorrentDetailsInfoTabController;
   controllerAs = "ctl";

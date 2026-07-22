@@ -5,9 +5,7 @@ import html from "./torrent-details-panel.template.html";
 export class TorrentDetailsPanelDirective implements IDirective {
   template = html;
   restrict = "E";
-  scope = {
-    settings: "=",
-  };
+  scope = {};
   controller = TorrentDetailsPanelController;
   controllerAs = "ctl";
 

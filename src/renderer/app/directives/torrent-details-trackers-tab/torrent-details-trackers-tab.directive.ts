@@ -6,9 +6,8 @@ export class TorrentDetailsTrackersTabDirective implements IDirective {
   template = html;
   restrict = "E";
   scope = {
-    trackers: "<",
-    resizeMode: "<",
-    resizeProfile: "<",
+    torrent: "<",
+    refresh: "<",
   };
   controller = TorrentDetailsTrackersTabController;
   controllerAs = "ctl";

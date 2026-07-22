@@ -1,17 +1,37 @@
 import { IFilterService, IScope } from "angular";
 import { TorrentDetailsInfoField, TorrentDetailsInfoSection } from "@renderer/app/bittorrent/torrentclient";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
 export interface TorrentDetailsInfoTabScope extends IScope {
+  torrent: any;
+  refresh: number;
   sections: TorrentDetailsInfoSection[];
+  loading: boolean;
+  loaded: boolean;
+  error: string | null;
 }
 
 export class TorrentDetailsInfoTabController {
-  static $inject = ["$scope", "$filter"];
+  static $inject = ["$scope", "$rootScope", "$filter"];
+
+  private requestId = 0;
+  private torrentHash?: string;
 
   constructor(
     public scope: TorrentDetailsInfoTabScope,
+    private rootScope: ElectorrentRootScope,
     private $filter: IFilterService,
-  ) {}
+  ) {
+    this.scope.sections = [];
+    this.scope.loading = false;
+    this.scope.loaded = false;
+    this.scope.error = null;
+    this.scope.$watchGroup(
+      [() => this.scope.torrent, () => this.scope.refresh],
+      () => { void this.load(); },
+    );
+    this.scope.$on("$destroy", () => { this.requestId += 1; });
+  }
 
   formatFieldValue(field: TorrentDetailsInfoField) {
     switch (field.format) {
@@ -60,6 +80,45 @@ export class TorrentDetailsInfoTabController {
     };
 
     return icons[sectionId] || "list alternate outline";
+  }
+
+  private async load() {
+    const torrent = this.scope.torrent;
+    if (!torrent) {
+      return;
+    }
+
+    if (this.torrentHash !== torrent.hash) {
+      this.torrentHash = torrent.hash;
+      this.scope.sections = [];
+      this.scope.loaded = false;
+    }
+
+    const requestId = ++this.requestId;
+    this.scope.loading = true;
+    this.scope.error = null;
+
+    try {
+      const client = this.rootScope.$btclient;
+      if (!client) {
+        throw new Error("No torrent client is connected");
+      }
+      const data = await client.getTorrentDetails(torrent);
+      if (requestId !== this.requestId || this.scope.torrent !== torrent) {
+        return;
+      }
+      this.scope.sections = data?.sections || [];
+      this.scope.loaded = true;
+    } catch (err) {
+      if (requestId === this.requestId && this.scope.torrent === torrent && !this.scope.loaded) {
+        this.scope.error = err && err.message ? err.message : "Failed to load torrent info";
+      }
+    } finally {
+      if (requestId === this.requestId && this.scope.torrent === torrent) {
+        this.scope.loading = false;
+        this.scope.$evalAsync();
+      }
+    }
   }
 
   private formatPercent(value: unknown) {
