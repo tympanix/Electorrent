@@ -97,7 +97,6 @@ export class TorrentsPageController {
             minMatchCharLength: 1,
             keys: [
                 "decodedName",
-                "hash",
             ],
         };
 
@@ -891,7 +890,11 @@ export class TorrentsPageController {
             if ($scope.filters.search) {
                 const value = search || $scope.filters.search;
                 fuse.setCollection(torrents);
-                return fuse.search(value);
+                const matchingHashes = torrents.filter((torrent) => {
+                    return typeof torrent.hash === "string"
+                        && torrent.hash.toLowerCase().includes(value.toLowerCase());
+                });
+                return Array.from(new Set([...fuse.search(value), ...matchingHashes]));
             }
             return torrents;
         }
