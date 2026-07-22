@@ -1,5 +1,6 @@
 import chai from "chai"
 import { $, $$, browser } from "@wdio/globals"
+import { Key } from "webdriverio"
 import { eventually } from "../../e2e/eventually"
 import { configureSpec } from "../../framework/fixture"
 
@@ -51,7 +52,10 @@ async function getVisibleHashes() {
 }
 
 async function setSearch(searchInput: ReturnType<typeof $>, value: string) {
-  await searchInput.setValue(value)
+  await searchInput.click()
+  const selectAllKey = process.platform === "darwin" ? Key.Command : Key.Control
+  await browser.keys([selectAllKey, "a"])
+  await browser.keys(value || Key.Backspace)
   await eventually(() => searchInput.getValue()).equals(value)
 }
 
