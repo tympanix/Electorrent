@@ -25,9 +25,10 @@ torrent-details-panel {
         flex: 0 0 auto;
         margin: 0;
         min-height: 2rem;
+        max-height: 2.5rem;
         border-bottom: 1px solid @borderColor;
 
-        > a.item {
+        > .item {
             padding: .15rem .75rem;
 
             &.active {
@@ -36,8 +37,8 @@ torrent-details-panel {
             }
         }
 
-        > a.item > .icon { margin-right: .4rem; }
-        .right.menu .icon { margin: 0; }
+        > .item > .icon { margin-right: .4rem; }
+        > .right.menu > .item > .icon { margin: 0; }
     }
 
     .torrent-details-panel-body {
