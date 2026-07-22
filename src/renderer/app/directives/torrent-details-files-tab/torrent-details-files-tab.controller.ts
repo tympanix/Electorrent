@@ -5,6 +5,8 @@ import {
   TorrentDetailsPanelData,
 } from "@renderer/app/bittorrent/torrentclient";
 import { loadSortingState, SortingOptions } from "@renderer/app/directives/sorting/sorting.controller";
+import type { SettingsService } from "@renderer/app/services/settings";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
 type TorrentDetailsFiles = TorrentDetailsPanelData["files"];
 
@@ -26,24 +28,22 @@ interface TorrentDetailsFileNode {
   data: TorrentDetailsFileItem;
 }
 
-interface UpdateSelectionLocals {
-  files: TorrentDetailsFileItem[];
-  wanted: boolean;
-}
-
 export interface TorrentDetailsFilesTabScope extends IScope {
+  torrent: any;
+  refresh: number;
   files: TorrentDetailsFiles;
   resizeMode: string;
   resizeProfile: string;
-  canSelectFiles: boolean;
-  updateSelection: (locals: UpdateSelectionLocals) => Promise<void>;
   sortedFiles: TorrentDetailsFileRow[];
+  loading: boolean;
+  loaded: boolean;
+  error: string | null;
   selectionUpdating: boolean;
   selectionError: string | null;
 }
 
 export class TorrentDetailsFilesTabController {
-  static $inject = ["$scope", "$filter", "$window"];
+  static $inject = ["$scope", "$rootScope", "$filter", "$window", "settingsService"];
 
   private readonly sortingOptions: SortingOptions = {
     defaultSortKey: "name",
@@ -54,15 +54,24 @@ export class TorrentDetailsFilesTabController {
   private fileSortKey = "name";
   private fileSortDescending = false;
   private readonly collapsedFolders = new Set<string>();
+  private requestId = 0;
+  private torrentHash?: string;
 
   constructor(
     public scope: TorrentDetailsFilesTabScope,
+    private rootScope: ElectorrentRootScope,
     private $filter: IFilterService,
     private $window: IWindowService,
+    private settingsService: SettingsService,
   ) {
+    this.scope.files = { columns: [], items: [] };
     this.scope.sortedFiles = [];
+    this.scope.loading = false;
+    this.scope.loaded = false;
+    this.scope.error = null;
     this.scope.selectionUpdating = false;
     this.scope.selectionError = null;
+    this.configureResize();
     this.scope.$watch(
       () => this.scope.files,
       (files) => {
@@ -74,6 +83,22 @@ export class TorrentDetailsFilesTabController {
         this.sortFiles();
       },
     );
+    this.scope.$watchGroup(
+      [() => this.scope.torrent, () => this.scope.refresh],
+      () => { void this.load(); },
+    );
+    this.scope.$watchGroup(
+      [
+        () => this.settingsService.getAllSettings().ui.resizeMode,
+        () => this.rootScope.$server?.id || this.rootScope.$btclient?.id,
+      ],
+      () => this.configureResize(),
+    );
+    this.scope.$on("$destroy", () => { this.requestId += 1; });
+  }
+
+  canSelectFiles() {
+    return !!this.rootScope.$btclient?.features.fileSelection;
   }
 
   changeSorting = (columnId: string, descending: boolean) => {
@@ -282,7 +307,9 @@ export class TorrentDetailsFilesTabController {
   }
 
   private async updateFileSelection(files: TorrentDetailsFileItem[], wanted: boolean) {
-    if (!this.scope.canSelectFiles || this.scope.selectionUpdating || !files.length) {
+    const client = this.rootScope.$btclient;
+    const torrent = this.scope.torrent;
+    if (!this.canSelectFiles() || !client || !torrent || this.scope.selectionUpdating || !files.length) {
       return;
     }
 
@@ -293,7 +320,10 @@ export class TorrentDetailsFilesTabController {
     this.sortFiles();
 
     try {
-      await this.scope.updateSelection({ files, wanted });
+      await client.setTorrentFileSelection(torrent, files.map((file) => ({ ...file, wanted })));
+      if (this.scope.torrent === torrent) {
+        await this.load();
+      }
     } catch (err) {
       previous.forEach((entry) => { entry.file.wanted = entry.wanted; });
       this.scope.selectionError = err && err.message ? err.message : "Failed to update file selection";
@@ -302,6 +332,52 @@ export class TorrentDetailsFilesTabController {
       this.scope.selectionUpdating = false;
       this.scope.$evalAsync();
     }
+  }
+
+  private async load() {
+    const torrent = this.scope.torrent;
+    if (!torrent) {
+      return;
+    }
+
+    if (this.torrentHash !== torrent.hash) {
+      this.torrentHash = torrent.hash;
+      this.scope.files = { columns: [], items: [] };
+      this.scope.loaded = false;
+      this.collapsedFolders.clear();
+    }
+
+    const requestId = ++this.requestId;
+    this.scope.loading = true;
+    this.scope.error = null;
+
+    try {
+      const client = this.rootScope.$btclient;
+      if (!client) {
+        throw new Error("No torrent client is connected");
+      }
+      const data = await client.getTorrentDetailsFiles(torrent);
+      if (requestId !== this.requestId || this.scope.torrent !== torrent) {
+        return;
+      }
+      this.scope.files = data || { columns: [], items: [] };
+      this.scope.loaded = true;
+    } catch (err) {
+      if (requestId === this.requestId && this.scope.torrent === torrent && !this.scope.loaded) {
+        this.scope.error = err && err.message ? err.message : "Failed to load torrent files";
+      }
+    } finally {
+      if (requestId === this.requestId && this.scope.torrent === torrent) {
+        this.scope.loading = false;
+        this.scope.$evalAsync();
+      }
+    }
+  }
+
+  private configureResize() {
+    const serverId = this.rootScope.$server?.id || this.rootScope.$btclient?.id || "default";
+    this.scope.resizeMode = this.settingsService.getAllSettings().ui.resizeMode || "OverflowResizer";
+    this.scope.resizeProfile = `torrent-details-files.${serverId}`;
   }
 
   private loadSortingSettings() {

@@ -1,5 +1,14 @@
 <div class="torrent-details-trackers" data-role="torrent-details-trackers">
-  <div class="torrent-details-trackers-content torrent-details-table-content">
+  <div ng-if="ctl.scope.loading && !ctl.scope.loaded" class="torrent-details-state torrent-details-panel-loader">
+    <div class="ui active inline loader"></div>
+  </div>
+  <div ng-if="ctl.scope.error" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
+    <div class="torrent-details-state-content">
+      <i class="big warning circle icon"></i>
+      <p>{{ ctl.scope.error }}</p>
+    </div>
+  </div>
+  <div class="torrent-details-trackers-content torrent-details-table-content" ng-if="!ctl.scope.error && (!ctl.scope.loading || ctl.scope.loaded)">
   <table
     id="torrentDetailsTrackersTable"
     class="ui compact single line unstackable fixed torrent resize table torrent-details-table"

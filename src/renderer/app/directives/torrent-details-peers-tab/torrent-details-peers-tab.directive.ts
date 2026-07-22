@@ -6,9 +6,8 @@ export class TorrentDetailsPeersTabDirective implements IDirective {
   template = html
   restrict = "E"
   scope = {
-    peers: "<",
-    resizeMode: "<",
-    resizeProfile: "<",
+    torrent: "<",
+    refresh: "<",
   }
   controller = TorrentDetailsPeersTabController
   controllerAs = "ctl"

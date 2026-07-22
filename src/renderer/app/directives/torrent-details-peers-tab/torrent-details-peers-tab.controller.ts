@@ -1,12 +1,19 @@
 import { IScope } from "angular"
+import type { SettingsService } from "@renderer/app/services/settings"
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope"
 import type { BittorrentTorrentPeer } from "@shared/ipc-contract"
 
 export interface TorrentDetailsPeersTabScope extends IScope {
+  torrent: any
+  refresh: number
   peers: { items: BittorrentTorrentPeer[] }
   resizeMode: string
   resizeProfile: string
   columns: TorrentDetailsPeerColumn[]
   sortedPeers: BittorrentTorrentPeer[]
+  loading: boolean
+  loaded: boolean
+  error: string | null
 }
 
 interface TorrentDetailsPeerColumn {
@@ -16,9 +23,16 @@ interface TorrentDetailsPeerColumn {
 }
 
 export class TorrentDetailsPeersTabController {
-  static $inject = ["$scope"]
+  static $inject = ["$scope", "$rootScope", "settingsService"]
 
-  constructor(public scope: TorrentDetailsPeersTabScope) {
+  private requestId = 0
+  private torrentHash?: string
+
+  constructor(
+    public scope: TorrentDetailsPeersTabScope,
+    private rootScope: ElectorrentRootScope,
+    private settingsService: SettingsService,
+  ) {
     this.scope.columns = [
       { id: "country", label: "Country", sortType: "alphabetical" },
       { id: "ip", label: "IP", sortType: "alphabetical" },
@@ -32,8 +46,25 @@ export class TorrentDetailsPeersTabController {
       { id: "connection", label: "Connection", sortType: "alphabetical" },
       { id: "flags", label: "Flags", sortType: "alphabetical" },
     ]
+    this.scope.peers = { items: [] }
     this.scope.sortedPeers = []
+    this.scope.loading = false
+    this.scope.loaded = false
+    this.scope.error = null
+    this.configureResize()
     this.scope.$watch(() => this.scope.peers, () => this.sortPeers())
+    this.scope.$watchGroup(
+      [() => this.scope.torrent, () => this.scope.refresh],
+      () => { void this.load() },
+    )
+    this.scope.$watchGroup(
+      [
+        () => this.settingsService.getAllSettings().ui.resizeMode,
+        () => this.rootScope.$server?.id || this.rootScope.$btclient?.id,
+      ],
+      () => this.configureResize(),
+    )
+    this.scope.$on("$destroy", () => { this.requestId += 1 })
   }
 
   private sortKey: TorrentDetailsPeerColumn["id"] = "ip"
@@ -59,6 +90,51 @@ export class TorrentDetailsPeersTabController {
 
   progressPercent(peer: BittorrentTorrentPeer) {
     return Math.max(0, Math.min(100, (Number(peer.progress) || 0) * 100))
+  }
+
+  private async load() {
+    const torrent = this.scope.torrent
+    if (!torrent) {
+      return
+    }
+
+    if (this.torrentHash !== torrent.hash) {
+      this.torrentHash = torrent.hash
+      this.scope.peers = { items: [] }
+      this.scope.loaded = false
+    }
+
+    const requestId = ++this.requestId
+    this.scope.loading = true
+    this.scope.error = null
+
+    try {
+      const client = this.rootScope.$btclient
+      if (!client) {
+        throw new Error("No torrent client is connected")
+      }
+      const data = await client.getTorrentDetailsPeers(torrent)
+      if (requestId !== this.requestId || this.scope.torrent !== torrent) {
+        return
+      }
+      this.scope.peers = data || { items: [] }
+      this.scope.loaded = true
+    } catch (err) {
+      if (requestId === this.requestId && this.scope.torrent === torrent && !this.scope.loaded) {
+        this.scope.error = err && err.message ? err.message : "Failed to load torrent peers"
+      }
+    } finally {
+      if (requestId === this.requestId && this.scope.torrent === torrent) {
+        this.scope.loading = false
+        this.scope.$evalAsync()
+      }
+    }
+  }
+
+  private configureResize() {
+    const serverId = this.rootScope.$server?.id || this.rootScope.$btclient?.id || "default"
+    this.scope.resizeMode = this.settingsService.getAllSettings().ui.resizeMode || "OverflowResizer"
+    this.scope.resizeProfile = `torrent-details-peers.${serverId}`
   }
 
   private sortPeers() {
