@@ -62,8 +62,10 @@ jobs:
       run: npm install
     - name: Build web application
       run: npm run build
+    - name: Package application
+      run: npm run pack
     - name: Run tests
-      run: xvfb-run -a -- npm test -- --client "${{ matrix.client }}"
+      run: xvfb-run -a -- npm test -- --dist --client "${{ matrix.client }}"
 
   build:
     strategy:
