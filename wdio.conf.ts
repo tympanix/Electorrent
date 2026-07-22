@@ -10,6 +10,7 @@ delete process.env.ELECTRON_RUN_AS_NODE
 const standardSpecs = [
     'test/specs/standard/**/*.spec.ts',
 ]
+const useDistribution = process.argv.includes('--dist')
 
 function requestedClients() {
     return process.argv.flatMap((argument, index, arguments_) => {
@@ -39,7 +40,7 @@ function electronCapability(client: (typeof selectedClients)[number]): Webdriver
         'wdio:specs': client.specs ?? standardSpecs,
         'electorrent:client': client,
         'wdio:electronServiceOptions': {
-            appEntryPoint: 'app/main.js',
+            ...useDistribution ? {} : { appEntryPoint: 'app/main.js' },
             appArgs: client.appArgs ?? [],
         },
         'goog:chromeOptions': {

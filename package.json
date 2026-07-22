@@ -11,7 +11,7 @@
     "build:webpack": "webpack --config webpack.config.js",
     "build:watch": "webpack --config webpack.config.js --watch",
     "postinstall": "electron-builder install-app-deps",
-    "pack": "build --dir",
+    "pack": "electron-builder --dir",
     "predist": "npm run build",
     "dist": "electron-builder --publish never",
     "prerelease": "npm run build",
