@@ -1,43 +1,3 @@
-<script type="text/ng-template" id="title-bar-menu-items.html">
-    <div ng-repeat="item in visibleTitleBarMenuItems(currentMenu) track by $index">
-        <div ng-if="item.type === 'separator'" class="title-bar-menu-divider" role="separator"></div>
-        <button
-            ng-if="item.type !== 'separator' && !item.submenu"
-            type="button"
-            class="title-bar-menu-item"
-            ng-class="{ disabled: item.enabled === false, checked: item.checked }"
-            ng-click="runTitleBarMenuItem(item, $event)"
-            ng-mousedown="$event.preventDefault()"
-            role="menuitem"
-            ng-disabled="item.enabled === false">
-            <span class="title-bar-menu-check"></span>
-            <span class="title-bar-menu-label">{{item.label}}</span>
-            <span class="title-bar-menu-accelerator">{{formatTitleMenuAccelerator(item.accelerator)}}</span>
-        </button>
-        <div
-            ng-if="item.type !== 'separator' && item.submenu"
-            class="title-bar-menu-submenu"
-            ng-class="{ disabled: item.enabled === false }">
-            <button
-                type="button"
-                class="title-bar-menu-item title-bar-menu-submenu-trigger"
-                ng-class="{ disabled: item.enabled === false, checked: item.checked }"
-                ng-mousedown="$event.preventDefault()"
-                role="menuitem"
-                aria-haspopup="true"
-                ng-disabled="item.enabled === false">
-                <span class="title-bar-menu-check"></span>
-                <span class="title-bar-menu-label">{{item.label}}</span>
-                <span class="title-bar-menu-accelerator">{{formatTitleMenuAccelerator(item.accelerator)}}</span>
-                <span class="title-bar-menu-submenu-arrow" aria-hidden="true"></span>
-            </button>
-            <div class="title-bar-menu-flyout" role="menu">
-                <div ng-init="currentMenu = item" ng-include="'title-bar-menu-items.html'"></div>
-            </div>
-        </div>
-    </div>
-</script>
-
 <nav class="title-bar-menu" aria-label="Application menu">
     <div class="title-bar-menu-root" ng-repeat="menu in titleBarMenus track by menu.label">
         <button
@@ -52,7 +12,58 @@
             {{menu.label}}
         </button>
         <div class="title-bar-menu-dropdown" ng-if="activeTitleBarMenu === $index" ng-click="$event.stopPropagation()" role="menu">
-            <div ng-init="currentMenu = menu" ng-include="'title-bar-menu-items.html'"></div>
+            <div ng-repeat="item in visibleTitleBarMenuItems(menu) track by $index">
+                <div ng-if="item.type === 'separator'" class="title-bar-menu-divider" role="separator"></div>
+                <button
+                    ng-if="item.type !== 'separator' && !item.submenu"
+                    type="button"
+                    class="title-bar-menu-item"
+                    ng-class="{ disabled: item.enabled === false, checked: item.checked }"
+                    ng-click="runTitleBarMenuItem(item, $event)"
+                    ng-mousedown="$event.preventDefault()"
+                    role="menuitem"
+                    ng-disabled="item.enabled === false">
+                    <span class="title-bar-menu-check"></span>
+                    <span class="title-bar-menu-label">{{item.label}}</span>
+                    <span class="title-bar-menu-accelerator">{{formatTitleMenuAccelerator(item.accelerator)}}</span>
+                </button>
+                <div
+                    ng-if="item.type !== 'separator' && item.submenu"
+                    class="title-bar-menu-submenu"
+                    ng-class="{ disabled: item.enabled === false }">
+                    <button
+                        type="button"
+                        class="title-bar-menu-item title-bar-menu-submenu-trigger"
+                        ng-class="{ disabled: item.enabled === false, checked: item.checked }"
+                        ng-mousedown="$event.preventDefault()"
+                        role="menuitem"
+                        aria-haspopup="true"
+                        ng-disabled="item.enabled === false">
+                        <span class="title-bar-menu-check"></span>
+                        <span class="title-bar-menu-label">{{item.label}}</span>
+                        <span class="title-bar-menu-accelerator">{{formatTitleMenuAccelerator(item.accelerator)}}</span>
+                        <span class="title-bar-menu-submenu-arrow" aria-hidden="true"></span>
+                    </button>
+                    <div class="title-bar-menu-flyout" role="menu">
+                        <div ng-repeat="child in visibleTitleBarMenuItems(item) track by $index">
+                            <div ng-if="child.type === 'separator'" class="title-bar-menu-divider" role="separator"></div>
+                            <button
+                                ng-if="child.type !== 'separator'"
+                                type="button"
+                                class="title-bar-menu-item"
+                                ng-class="{ disabled: child.enabled === false, checked: child.checked }"
+                                ng-click="runTitleBarMenuItem(child, $event)"
+                                ng-mousedown="$event.preventDefault()"
+                                role="menuitem"
+                                ng-disabled="child.enabled === false">
+                                <span class="title-bar-menu-check"></span>
+                                <span class="title-bar-menu-label">{{child.label}}</span>
+                                <span class="title-bar-menu-accelerator">{{formatTitleMenuAccelerator(child.accelerator)}}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
