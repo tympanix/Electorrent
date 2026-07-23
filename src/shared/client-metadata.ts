@@ -2,9 +2,16 @@ export interface ClientMetadata {
     name: string
     icon: string
     showAdvancedUploadMenu: boolean
+    defaultPort?: number
 }
 
 export const CLIENT_METADATA = {
+    aria2: {
+        name: 'aria2',
+        icon: 'aria2',
+        showAdvancedUploadMenu: true,
+        defaultPort: 6800,
+    },
     utorrent: {
         name: 'µTorrent',
         icon: 'utorrent',

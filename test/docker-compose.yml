@@ -41,6 +41,15 @@ services:
       - PROXY_PORT=${PROXY_PORT}
       - NGINX_AUTH_PORT=${NGINX_AUTH_PORT:-8081}
 
+  aria2:
+    image: opengg/aria2:${VERSION:-edge}
+    ports:
+      - ${CLIENT_HOST_PORT:-6800}:6800
+    volumes:
+      - ./clients/aria2/aria2.conf:/config/aria2.conf
+    tmpfs:
+      - /downloads:mode=1777
+
   deluge:
     image: linuxserver/deluge:${VERSION:-latest}
     environment:

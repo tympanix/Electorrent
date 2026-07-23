@@ -232,6 +232,10 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
             } else {
                 this.path = "/"
             }
+            const defaultPort = $btclients[this.client]?.defaultPort
+            if (defaultPort) {
+                this.port = defaultPort
+            }
         };
 
         Server.prototype.connect = function() {

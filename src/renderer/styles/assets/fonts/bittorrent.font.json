@@ -13,6 +13,7 @@
   "normalize": true,
   "fontHeight": 1024,
   "codepoints": {
+    "aria2": 59911,
     "deluge": 59905,
     "downloadstation": 59906,
     "qbittorrent": 59907,

@@ -2,6 +2,7 @@ export { Torrent } from "./abstracttorrent"
 export { TorrentClient } from "./torrentclient"
 
 // Client API implementations for bittorrent providers
+export { Aria2Client, Aria2Torrent } from "./aria2"
 export { DelugeClient, DelugeTorrent } from "./deluge"
 export { MockBittorrentClient } from "./mock"
 export { QBittorrentClient, QBittorrentTorrent } from "./qbittorrent"

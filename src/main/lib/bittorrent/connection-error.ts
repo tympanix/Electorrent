@@ -80,7 +80,7 @@ export function normalizeConnectionError(error: unknown): BittorrentConnectionEr
         return connectionError("tls", details)
     }
     if ([...details.statuses].some((status) => status === 401 || status === 403)
-        || /\b(401|403)\b|invalid (login|credentials)|failed to authenticate|incorrect password|no such account|account disabled|permission denied/.test(message)) {
+        || /\b(401|403)\b|unauthorized|invalid (login|credentials)|failed to authenticate|incorrect password|no such account|account disabled|permission denied/.test(message)) {
         return connectionError("authentication", details)
     }
     if ([...details.codes].some((code) => TIMEOUT_CODES.has(code)) || /timed? ?out|timeout/.test(message)) {

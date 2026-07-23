@@ -1,4 +1,5 @@
 import { DelugeRuntime } from "@main/lib/bittorrent/clients/deluge"
+import { Aria2Runtime } from "@main/lib/bittorrent/clients/aria2"
 import { QBittorrentRuntime } from "@main/lib/bittorrent/clients/qbittorrent"
 import { RtorrentRuntime } from "@main/lib/bittorrent/clients/rtorrent"
 import { MockBittorrentRuntime } from "@main/lib/bittorrent/clients/mock"
@@ -9,6 +10,7 @@ import { isClientId, type ClientId } from "@shared/client-metadata"
 import type { BittorrentRuntime } from "./types"
 
 const runtimeFactories = {
+    aria2: () => new Aria2Runtime(),
     qbittorrent: () => new QBittorrentRuntime(),
     rtorrent: () => new RtorrentRuntime(),
     deluge: () => new DelugeRuntime(),

@@ -7,6 +7,8 @@ import { App, Torrent } from "../e2e"
 import { DockerComposeService } from "../shared/compose"
 import { setupMochaHooks, waitUntil } from "../testutil"
 import type { TestClient } from "../clients"
+import type { ElectorrentBridge } from "../../src/shared/ipc-contract"
+import { createDefaultSettings } from "../../src/shared/settings-defaults"
 
 export interface TestFixture {
   client: TestClient
@@ -41,9 +43,13 @@ export function configureSpec(options: { login?: boolean, clearTorrents?: boolea
     const userDataPath = await waitUntil(async () => {
         return await browser.electron.execute((electron) => electron.app.getPath("userData"))
     }, 10 * 1000)
-    fs.rmSync(path.join(userDataPath, "config.json"), { force: true })
+    await browser.execute((settings) => {
+      const rendererWindow = window as unknown as Window & { electorrent: ElectorrentBridge }
+      return rendererWindow.electorrent.settings.saveAll(settings)
+    }, createDefaultSettings())
     fs.rmSync(path.join(userDataPath, "certs"), { recursive: true, force: true })
     await browser.execute(() => window.localStorage.clear())
+    await browser.refresh()
 
     current.app = new App()
     this.app = current.app
