@@ -1,4 +1,5 @@
 @backgroundColor: @gray-dark;
+@basicBackground: none @pageForeground;
 @labelActiveBackgroundColor: @gray-light;
 @ribbonShadowColor: @gray-dark;
 
