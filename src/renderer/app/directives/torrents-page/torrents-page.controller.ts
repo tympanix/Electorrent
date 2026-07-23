@@ -45,6 +45,10 @@ export class TorrentsPageController {
         let slowSyncTimer: angular.IPromise<void> | undefined;
         let slowConnectionTimer: angular.IPromise<void> | undefined;
         let deferredUploads: Array<{ item: PendingTorrentUploadItem; askUploadOptions: boolean }> = [];
+        let uploadProcessing = Promise.resolve();
+        let torrentUpdate: Promise<void> | undefined;
+        let torrentUpdatePending = false;
+        let torrentUpdateFull = false;
 
         let settings = settingsService.getAllSettings();
         let refreshRate = settings.refreshRate || 2000;
@@ -185,6 +189,11 @@ export class TorrentsPageController {
             $scope.$applyAsync();
         };
 
+        const queueUploadItem = (item: PendingTorrentUploadItem, askUploadOptions: boolean) => {
+            const nextUpload = uploadProcessing.then(() => processUploadItem(item, askUploadOptions));
+            uploadProcessing = nextUpload.catch(() => undefined);
+        };
+
         const flushDeferredUploads = () => {
             if (!isServerReady() || deferredUploads.length === 0) {
                 return;
@@ -192,7 +201,7 @@ export class TorrentsPageController {
             const uploads = deferredUploads;
             deferredUploads = [];
             uploads.forEach(({ item, askUploadOptions }) => {
-                processUploadItem(item, askUploadOptions);
+                queueUploadItem(item, askUploadOptions);
             });
         };
 
@@ -219,7 +228,7 @@ export class TorrentsPageController {
             if (!isServerReady()) {
                 deferredUploads.push({ item, askUploadOptions: !!askUploadOptions });
             } else {
-                processUploadItem(item, !!askUploadOptions);
+                queueUploadItem(item, !!askUploadOptions);
             }
             $scope.$apply();
         });
@@ -954,7 +963,7 @@ export class TorrentsPageController {
             }
         }
 
-        $scope.update = (fullupdate?: boolean) => {
+        const performUpdate = (fullupdate?: boolean) => {
             const serverId = $rootScope.$server?.id;
             const request = $rootScope.$btclient?.torrents(!!fullupdate);
             const startedAt = window.performance.now();
@@ -994,6 +1003,24 @@ export class TorrentsPageController {
                 $scope.renderDone();
                 return $q.reject(err);
             });
+        };
+
+        $scope.update = (fullupdate?: boolean) => {
+            torrentUpdatePending = true;
+            torrentUpdateFull ||= !!fullupdate;
+            if (!torrentUpdate) {
+                torrentUpdate = (async () => {
+                    while (torrentUpdatePending) {
+                        const nextFullUpdate = torrentUpdateFull;
+                        torrentUpdatePending = false;
+                        torrentUpdateFull = false;
+                        await performUpdate(nextFullUpdate);
+                    }
+                })().finally(() => {
+                    torrentUpdate = undefined;
+                });
+            }
+            return torrentUpdate;
         };
 
         function checkNotification(oldTorrent: any, updatedTorrent: any) {

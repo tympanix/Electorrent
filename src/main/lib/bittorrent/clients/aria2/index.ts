@@ -21,7 +21,6 @@ const TORRENT_FIELDS = [
 ]
 
 const MAX_RESULTS = 2_147_483_647
-const REMOVABLE_STATUSES = new Set(["active", "waiting", "paused"])
 const CHANGEABLE_STATUSES = new Set(["active", "waiting", "paused"])
 const STOPPED_STATUSES = new Set(["complete", "error", "removed"])
 
@@ -566,9 +565,9 @@ export class Aria2Runtime implements BittorrentRuntime {
     }
 
     async remove(hashes: string[]): Promise<void> {
+        await this.getSnapshot()
         const gids = this.resolveGids(hashes)
-        const activeGids = gids.filter((gid) => REMOVABLE_STATUSES.has(this.statusByGid.get(gid) || ""))
-        await this.ignoreMissing(this.client().multicall(activeGids.map((gid) => ({ method: "aria2.remove", params: [gid] }))))
+        await Promise.all(gids.map((gid) => this.ignoreUnavailable(this.client().call("aria2.remove", [gid]))))
         await this.removeDownloadResults(gids)
         hashes.forEach((hash) => this.selectedFilesByHash.delete(hash.toLowerCase()))
     }
@@ -691,11 +690,11 @@ export class Aria2Runtime implements BittorrentRuntime {
             && /^(?:GID [0-9a-f]+ is not found|No such download for GID#[0-9a-f]+)$/i.test(error.message)
     }
 
-    private async ignoreMissing(operation: Promise<unknown>): Promise<void> {
+    private async ignoreUnavailable(operation: Promise<unknown>): Promise<void> {
         try {
             await operation
         } catch (error) {
-            if (!(error instanceof Aria2RpcError) || error.code !== 1) throw error
+            if (!(error instanceof Aria2RpcError) || ![1, 3].includes(error.code)) throw error
         }
     }
 
