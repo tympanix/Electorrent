@@ -14,7 +14,7 @@ describe("layout", function () {
     await this.app.setTorrentSidebarCollapsed(true)
 
     assert.isTrue(await this.app.isTorrentSidebarCollapsed())
-    await $("[data-role='torrent-sidebar-labels-toggle']").waitForDisplayed()
+    await $("torrent-sidebar .nav li[data-state='all']").waitForDisplayed()
 
     await restartApplication(this)
     await this.app.torrentsPageIsVisible()

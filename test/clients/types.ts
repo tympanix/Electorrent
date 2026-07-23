@@ -16,6 +16,7 @@ export interface TestClient {
   proxyPort?: number
   authProxyHostPort?: number
   acceptHttpStatus: number
+  acceptHttpPath?: string
   stopLabel: string
   downloadLabel: string
   downloadRoot?: string

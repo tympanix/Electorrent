@@ -98,7 +98,7 @@ export class TorrentSpeedModalController {
       this.scope.loading = true;
       this.scope.error = null;
       const client = this.rootScope.$btclient;
-      if (!client || typeof client.setSpeedLimits !== "function") {
+      if (!client?.features.speedLimits || typeof client.setSpeedLimits !== "function") {
         throw new Error("Speed limits are not available for the current client");
       }
       await client.setSpeedLimits(this.scope.torrents, options);

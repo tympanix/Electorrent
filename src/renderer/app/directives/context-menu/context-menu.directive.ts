@@ -170,6 +170,20 @@ export class ContextMenuDirective implements IDirective {
                     return;
                 }
 
+                if (
+                    item.role === "set-speed-limits"
+                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.speedLimits)
+                ) {
+                    return;
+                }
+
+                if (
+                    item.role === "set-ratio"
+                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.ratioLimits)
+                ) {
+                    return;
+                }
+
                 appendMenuItem(list, item);
             });
 

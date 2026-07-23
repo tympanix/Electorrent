@@ -158,9 +158,7 @@ export class DropdownElementDirective implements IDirective {
 
         scope.$watch("model", (value) => {
             controller.update_title(value);
-            if (scope.change) {
-                scope.change();
-            }
+            controller.notifyChange();
         });
         scope.$watch("disabled", () => {
             if (scope.disabled && scope.is_open) {

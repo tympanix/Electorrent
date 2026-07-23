@@ -35,6 +35,11 @@ export class TorrentFilesTreeController {
       () => scope.files,
       (files: TorrentFile[]) => {
         scope.rows = buildTorrentFileRows(files || []);
+        scope.rows.forEach((row) => {
+          if (row.isDirectory && !(row.path in scope.expandedFolders)) {
+            scope.expandedFolders[row.path] = true;
+          }
+        });
         this.updateVisibleRows();
       },
       true
@@ -52,9 +57,15 @@ export class TorrentFilesTreeController {
       this.scope.visibleRows = [];
       return;
     }
-    this.scope.visibleRows = rows.filter(
-      (row) => row.depth === 0 || expandedFolders[row.parentPath!]
-    );
+    const parentByPath = new Map(rows.map((row) => [row.path, row.parentPath]));
+    this.scope.visibleRows = rows.filter((row) => {
+      let parentPath = row.parentPath;
+      while (parentPath) {
+        if (!expandedFolders[parentPath]) return false;
+        parentPath = parentByPath.get(parentPath) || null;
+      }
+      return true;
+    });
     this.scope.visibleRows.forEach((row) => {
       if (row.isDirectory) {
         row._folderWanted = this.getFolderWanted(row);

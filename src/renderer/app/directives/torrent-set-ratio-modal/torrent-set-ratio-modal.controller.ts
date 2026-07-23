@@ -93,7 +93,7 @@ export class TorrentSetRatioModalController {
       this.scope.loading = true;
       this.scope.error = null;
       const client = this.rootScope.$btclient;
-      if (!client || typeof client.setRatioLimit !== "function") {
+      if (!client?.features.ratioLimits || typeof client.setRatioLimit !== "function") {
         throw new Error("Ratio limits are not available for the current client");
       }
       await client.setRatioLimit(this.scope.torrents, { ratioLimit });

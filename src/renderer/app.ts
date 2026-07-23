@@ -4,6 +4,7 @@
 
 // Import all client implementations
 import {
+    Aria2Client,
     UtorrentClient,
     QBittorrentClient,
     TransmissionClient,
@@ -12,7 +13,7 @@ import {
     DelugeClient,
     MockBittorrentClient
 } from "@renderer/app/bittorrent"
-import { CLIENT_METADATA, type ClientId } from "@shared/client-metadata"
+import { CLIENT_METADATA, type ClientId, type ClientMetadata } from "@shared/client-metadata"
 
 const torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
 
@@ -26,9 +27,11 @@ interface ClientRegistration {
     name: string
     service: unknown
     icon: string
+    defaultPort?: number
 }
 
 const clientFactories = {
+    aria2: () => new Aria2Client(),
     utorrent: () => new UtorrentClient(),
     qbittorrent: () => new QBittorrentClient(),
     transmission: () => new TransmissionClient(),
@@ -45,10 +48,12 @@ for (const clientId of Object.keys(clientFactories) as ClientId[]) {
         continue
     }
 
+    const metadata: ClientMetadata = CLIENT_METADATA[clientId]
     btclients[clientId] = {
-        name: CLIENT_METADATA[clientId].name,
+        name: metadata.name,
         service: clientFactories[clientId](),
-        icon: CLIENT_METADATA[clientId].icon,
+        icon: metadata.icon,
+        defaultPort: metadata.defaultPort,
     }
 }
 

@@ -6,10 +6,12 @@ interface DropScope extends IScope {
     title: string;
     original_title: string;
     text_class: string;
+    change?: () => void;
 }
 
 export class DropDownController {
     static $inject = ["$scope"];
+    private changePending = false;
 
     constructor(private $scope: DropScope) {
         this.$scope.options = [];
@@ -35,6 +37,14 @@ export class DropDownController {
     update_model(title: string, value: any) {
         if (this.$scope.model !== value) {
             this.$scope.model = value;
+            this.changePending = true;
+        }
+    }
+
+    notifyChange() {
+        if (this.changePending) {
+            this.changePending = false;
+            this.$scope.change?.();
         }
     }
 

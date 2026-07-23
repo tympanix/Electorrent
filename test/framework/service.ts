@@ -35,7 +35,7 @@ export default class ElectorrentTestService {
           composeOptions,
         )
         await waitForHttp({
-          url: `http://${client.host}:${client.containerHostPort ?? client.port}`,
+          url: `http://${client.host}:${client.containerHostPort ?? client.port}${client.acceptHttpPath ?? ""}`,
           statusCode: client.acceptHttpStatus,
         })
       }),

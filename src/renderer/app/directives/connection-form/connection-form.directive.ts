@@ -70,6 +70,7 @@ export class ConnectionFormDirective implements IDirective {
         scope.setPath = () => {
             if (scope.server?.client) {
                 scope.server.setPath();
+                syncHostFields();
             }
         };
 
