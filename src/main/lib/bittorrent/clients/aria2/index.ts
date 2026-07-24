@@ -233,6 +233,7 @@ export class Aria2Runtime implements BittorrentRuntime {
 
     private rpc?: Aria2JsonRpcTransport
     private gidByHash = new Map<string, string>()
+    private linkedGidsByHash = new Map<string, string[]>()
     private statusByGid = new Map<string, string>()
     private selectedFilesByHash = new Map<string, Set<number>>()
     private dirByHash = new Map<string, string>()
@@ -242,6 +243,7 @@ export class Aria2Runtime implements BittorrentRuntime {
     async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         this.rpc = new Aria2JsonRpcTransport(server)
         this.gidByHash.clear()
+        this.linkedGidsByHash.clear()
         this.statusByGid.clear()
         this.selectedFilesByHash.clear()
         this.dirByHash.clear()
@@ -333,8 +335,29 @@ export class Aria2Runtime implements BittorrentRuntime {
         const nextIdentityByGid = new Map<string, string>()
 
         this.gidByHash = new Map()
+        this.linkedGidsByHash = new Map()
         this.statusByGid = new Map()
         this.dirByHash = new Map()
+        const linkedGidsByGid = new Map<string, Set<string>>()
+        const linkGids = (first: string, second: string) => {
+            const linked = new Set([
+                ...(linkedGidsByGid.get(first.toLowerCase()) || [first]),
+                ...(linkedGidsByGid.get(second.toLowerCase()) || [second]),
+            ])
+            for (const gid of linked) linkedGidsByGid.set(gid.toLowerCase(), linked)
+        }
+        for (const torrent of withOptions) {
+            const gid = nonEmptyString(torrent.gid)
+            if (!gid) continue
+            this.statusByGid.set(gid, nonEmptyString(torrent.status) || "unknown")
+            if (!linkedGidsByGid.has(gid.toLowerCase())) {
+                linkedGidsByGid.set(gid.toLowerCase(), new Set([gid]))
+            }
+            if (!Array.isArray(torrent.followedBy)) continue
+            for (const childGid of torrent.followedBy) {
+                if (typeof childGid === "string" && childGid.length > 0) linkGids(gid, childGid)
+            }
+        }
         const torrents = [...byIdentity.entries()].map(([hash, torrent]) => {
             const gid = String(torrent.gid)
             const normalizedGid = gid.toLowerCase()
@@ -365,6 +388,7 @@ export class Aria2Runtime implements BittorrentRuntime {
             nextSessionMetadata.set(hash, { dateAdded, dateCompleted, completed: isCompleted })
             nextIdentityByGid.set(normalizedGid, hash)
             this.gidByHash.set(hash, gid)
+            this.linkedGidsByHash.set(hash, [...(linkedGidsByGid.get(normalizedGid) || [gid])])
             this.statusByGid.set(gid, status)
             this.dirByHash.set(hash, nonEmptyString(torrent.dir) || "")
 
@@ -566,7 +590,12 @@ export class Aria2Runtime implements BittorrentRuntime {
     }
 
     async remove(hashes: string[]): Promise<void> {
-        const gids = this.resolveGids(hashes)
+        const gids = [...new Set(hashes.flatMap((hash) => {
+            const normalizedHash = hash.toLowerCase()
+            const gid = this.gidByHash.get(normalizedHash)
+            if (!gid) throw new Error(`aria2 download is no longer available: ${hash}`)
+            return this.linkedGidsByHash.get(normalizedHash) || [gid]
+        }))]
         const activeGids = gids.filter((gid) => REMOVABLE_STATUSES.has(this.statusByGid.get(gid) || ""))
         await this.ignoreMissing(this.client().multicall(activeGids.map((gid) => ({ method: "aria2.remove", params: [gid] }))))
         await this.removeDownloadResults(gids)
