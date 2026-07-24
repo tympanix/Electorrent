@@ -40,6 +40,7 @@ async function bootstrap() {
     parser.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
     parser.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
     parser.boolean('force-title-bar-menu')
+    parser.boolean('no-focus-window').describe('no-focus-window', 'Show windows without focusing them')
     parser.string('update-url')
 
     const [
@@ -77,7 +78,13 @@ async function bootstrap() {
     logger.debug('Starting Electorrent in debug mode')
     logger.verbose('Verbose logging enabled')
 
-    const program = parser.parse(process.argv.slice(1)) as { debug?: boolean; verbose?: boolean; forceTitleBarMenu?: boolean; updateUrl?: string }
+    const program = parser.parse(process.argv.slice(1)) as {
+        debug?: boolean
+        verbose?: boolean
+        forceTitleBarMenu?: boolean
+        noFocusWindow?: boolean
+        updateUrl?: string
+    }
 
     if (!app.isPackaged) {
         try {
@@ -161,10 +168,16 @@ async function bootstrap() {
         }
 
         if (!torrentWindow.isVisible()) {
-            torrentWindow.show()
+            if (program.noFocusWindow) {
+                torrentWindow.showInactive()
+            } else {
+                torrentWindow.show()
+            }
         }
 
-        torrentWindow.focus()
+        if (!program.noFocusWindow) {
+            torrentWindow.focus()
+        }
     }
 
     function showOrCreateTorrentWindow() {
@@ -208,7 +221,11 @@ async function bootstrap() {
 
         torrentWindow.once('ready-to-show', () => {
             if (!startInBackground) {
-                torrentWindow?.show()
+                if (program.noFocusWindow) {
+                    torrentWindow?.showInactive()
+                } else {
+                    torrentWindow?.show()
+                }
             }
         })
 

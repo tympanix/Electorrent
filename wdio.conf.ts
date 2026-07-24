@@ -41,7 +41,7 @@ function electronCapability(client: (typeof selectedClients)[number]): Webdriver
         'electorrent:client': client,
         'wdio:electronServiceOptions': {
             ...useDistribution ? {} : { appEntryPoint: 'app/main.js' },
-            appArgs: client.appArgs ?? [],
+            appArgs: ['--no-focus-window', ...(client.appArgs ?? [])],
         },
         'goog:chromeOptions': {
             args: [
