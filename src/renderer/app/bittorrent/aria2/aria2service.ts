@@ -51,11 +51,11 @@ export class Aria2Client extends TorrentClient<Aria2Torrent> {
     }
 
     resume(torrents: Aria2Torrent[]): Promise<void> {
-        return invokeAction("resume", torrents.map((torrent) => torrent.hash))
+        return invokeAction("resume", torrents.map((torrent) => torrent.id))
     }
 
     pause(torrents: Aria2Torrent[]): Promise<void> {
-        return invokeAction("pause", torrents.map((torrent) => torrent.hash))
+        return invokeAction("pause", torrents.map((torrent) => torrent.id))
     }
 
     resumeAll(): Promise<void> {
@@ -67,23 +67,23 @@ export class Aria2Client extends TorrentClient<Aria2Torrent> {
     }
 
     remove(torrents: Aria2Torrent[]): Promise<void> {
-        return invokeAction("remove", torrents.map((torrent) => torrent.hash))
+        return invokeAction("remove", torrents.map((torrent) => torrent.id))
     }
 
     setSpeedLimits(torrents: Aria2Torrent[], options: TorrentSpeedLimitOptions): Promise<void> {
-        return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options)
+        return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.id), options)
     }
 
     setRatioLimit(torrents: Aria2Torrent[], options: TorrentRatioLimitOptions): Promise<void> {
-        return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.hash), options)
+        return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.id), options)
     }
 
     setTorrentFileSelection(torrent: Aria2Torrent, files: TorrentFile[]): Promise<void> {
-        return setTorrentFileSelection(torrent.hash, files)
+        return setTorrentFileSelection(torrent.id, files)
     }
 
     protected getTorrentDetailsData(torrent: Aria2Torrent): Promise<BittorrentTorrentDetailsData> {
-        return getTorrentDetails(torrent.hash)
+        return getTorrentDetails(torrent.id)
     }
 
     protected getTorrentDetailsInfoSections(torrent: Aria2Torrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {

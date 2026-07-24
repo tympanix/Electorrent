@@ -91,7 +91,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     extraColumns = [Torrent.COL_DOWNLIMIT, Torrent.COL_UPLIMIT];
 
     resume(torrents: Torrent[]): Promise<void> {
-      return invokeAction("resume", torrents.map((torrent) => torrent.hash));
+      return invokeAction("resume", torrents.map((torrent) => torrent.id));
     };
 
     resumeAll(): Promise<void> {
@@ -99,7 +99,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     };
 
     pause(torrents: Torrent[]): Promise<void> {
-      return invokeAction("pause", torrents.map((torrent) => torrent.hash));
+      return invokeAction("pause", torrents.map((torrent) => torrent.id));
     };
 
     pauseAll(): Promise<void> {
@@ -111,54 +111,54 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     };
 
     recheck(torrents: Torrent[]): Promise<void> {
-      return invokeAction("recheck", torrents.map((torrent) => torrent.hash));
+      return invokeAction("recheck", torrents.map((torrent) => torrent.id));
     };
 
     increasePrio(torrents: Torrent[]): Promise<void> {
-      return invokeAction("increasePrio", torrents.map((torrent) => torrent.hash));
+      return invokeAction("increasePrio", torrents.map((torrent) => torrent.id));
     };
 
     decreasePrio(torrents: Torrent[]): Promise<void> {
-      return invokeAction("decreasePrio", torrents.map((torrent) => torrent.hash));
+      return invokeAction("decreasePrio", torrents.map((torrent) => torrent.id));
     };
 
     topPrio(torrents: Torrent[]): Promise<void> {
-      return invokeAction("topPrio", torrents.map((torrent) => torrent.hash));
+      return invokeAction("topPrio", torrents.map((torrent) => torrent.id));
     };
 
     bottomPrio(torrents: Torrent[]): Promise<void> {
-      return invokeAction("bottomPrio", torrents.map((torrent) => torrent.hash));
+      return invokeAction("bottomPrio", torrents.map((torrent) => torrent.id));
     };
 
     toggleSequentialDownload(torrents: Torrent[]): Promise<void> {
-      return invokeAction("toggleSequentialDownload", torrents.map((torrent) => torrent.hash));
+      return invokeAction("toggleSequentialDownload", torrents.map((torrent) => torrent.id));
     };
 
     delete(torrents: Torrent[]): Promise<void> {
-      return invokeAction("delete", torrents.map((torrent) => torrent.hash));
+      return invokeAction("delete", torrents.map((torrent) => torrent.id));
     };
 
     deleteAndRemove(torrents: Torrent[]): Promise<void> {
-      return invokeAction("deleteAndRemove", torrents.map((torrent) => torrent.hash));
+      return invokeAction("deleteAndRemove", torrents.map((torrent) => torrent.id));
     };
 
     setCategory(torrents: Torrent[], category: string, create?: boolean): Promise<void> {
-      return invokeAction("setCategory", torrents.map((torrent) => torrent.hash), category, create);
+      return invokeAction("setCategory", torrents.map((torrent) => torrent.id), category, create);
     };
 
     setLocation(torrents: QBittorrentTorrent[], location: string): Promise<void> {
-      const resumeHashes = torrents
+      const resumeIds = torrents
         .filter((torrent) => !torrent.isStatusPaused() && !torrent.isStatusStopped())
-        .map((torrent) => torrent.hash);
-      return invokeAction("setLocation", torrents.map((torrent) => torrent.hash), location, resumeHashes);
+        .map((torrent) => torrent.id);
+      return invokeAction("setLocation", torrents.map((torrent) => torrent.id), location, resumeIds);
     }
 
     setSpeedLimits(torrents: QBittorrentTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
-      return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
+      return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.id), options);
     }
 
     setRatioLimit(torrents: QBittorrentTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
-      return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.hash), options);
+      return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.id), options);
     }
 
     deleteTorrents(torrents: QBittorrentTorrent[]): Promise<void> {
@@ -166,11 +166,11 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
     }
 
     setTorrentFileSelection(torrent: QBittorrentTorrent, files: TorrentFile[]): Promise<void> {
-      return setTorrentFileSelection(torrent.hash, files);
+      return setTorrentFileSelection(torrent.id, files);
     }
 
     protected getTorrentDetailsData(torrent: QBittorrentTorrent): Promise<BittorrentTorrentDetailsData> {
-      return getTorrentDetails(torrent.hash);
+      return getTorrentDetails(torrent.id);
     }
 
     protected getTorrentDetailsInfoSections(torrent: QBittorrentTorrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {

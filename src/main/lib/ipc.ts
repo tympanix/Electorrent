@@ -255,24 +255,24 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         return bittorrentManager.getActions(event.sender)
     })
 
-    ipcMain.handle(IPC_CHANNELS.bittorrent.setSelectedTorrents, async function(event: IpcMainInvokeEvent, { hashes }) {
-        bittorrentManager.setSelectedTorrents(event.sender, hashes)
+    ipcMain.handle(IPC_CHANNELS.bittorrent.setSelectedTorrents, async function(event: IpcMainInvokeEvent, { ids }) {
+        bittorrentManager.setSelectedTorrents(event.sender, ids)
     })
 
-    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentDetails, async function(event: IpcMainInvokeEvent, { hash }) {
-        return bittorrentManager.getTorrentDetails(event.sender, hash)
+    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentDetails, async function(event: IpcMainInvokeEvent, { id }) {
+        return bittorrentManager.getTorrentDetails(event.sender, id)
     })
 
-    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentFiles, async function(event: IpcMainInvokeEvent, { hash }) {
-        return bittorrentManager.getTorrentFiles(event.sender, hash)
+    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentFiles, async function(event: IpcMainInvokeEvent, { id }) {
+        return bittorrentManager.getTorrentFiles(event.sender, id)
     })
 
-    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentPeers, async function(event: IpcMainInvokeEvent, { hash }) {
-        return bittorrentManager.getTorrentPeers(event.sender, hash)
+    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentPeers, async function(event: IpcMainInvokeEvent, { id }) {
+        return bittorrentManager.getTorrentPeers(event.sender, id)
     })
 
-    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentTrackers, async function(event: IpcMainInvokeEvent, { hash }) {
-        return bittorrentManager.getTorrentTrackers(event.sender, hash)
+    ipcMain.handle(IPC_CHANNELS.bittorrent.getTorrentTrackers, async function(event: IpcMainInvokeEvent, { id }) {
+        return bittorrentManager.getTorrentTrackers(event.sender, id)
     })
 
     ipcMain.handle(IPC_CHANNELS.bittorrent.setTorrentFileSelection, async function(event: IpcMainInvokeEvent, request) {

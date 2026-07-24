@@ -10,6 +10,7 @@ export class DelugeTorrent extends Torrent {
         const dateCompleted = DelugeTorrent.normalizeDateCompleted(hash, data)
 
         super({
+            id: hash,
             hash: hash, /* Hash (string): unique identifier for the torrent */
             name: data.name, /* Name (string): the name of the torrent */
             size: data.total_wanted, /* Size (integer): size of the file to be downloaded in bytes */

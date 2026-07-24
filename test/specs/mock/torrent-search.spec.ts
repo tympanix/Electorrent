@@ -20,7 +20,7 @@ describe("mock torrent search", function () {
     for (const torrent of torrents) {
       await invokeMockAction("addMockedTorrent", torrent)
     }
-    await expectVisibleHashes(torrents.map(({ hash }) => hash))
+    await expectVisibleIds(torrents.map(({ hash }) => hash))
   })
 
   it("filters torrents by name and info hash search", async function () {
@@ -42,13 +42,13 @@ async function invokeMockAction(action: string, ...args: any[]) {
   }, { action, args })
 }
 
-async function getVisibleHashes() {
-  const rows = await $$("#torrentTable tbody tr[data-hash]")
-  const hashes: string[] = []
+async function getVisibleIds() {
+  const rows = await $$("#torrentTable tbody tr[data-id]")
+  const ids: string[] = []
   for (const row of rows) {
-    hashes.push(await row.getAttribute("data-hash"))
+    ids.push(await row.getAttribute("data-id"))
   }
-  return hashes
+  return ids
 }
 
 async function setSearch(searchInput: ReturnType<typeof $>, value: string) {
@@ -56,7 +56,7 @@ async function setSearch(searchInput: ReturnType<typeof $>, value: string) {
   await browser.keys([Key.Ctrl, "a"])
   await browser.keys(Key.Backspace)
   await eventually(() => searchInput.getValue()).equals("")
-  await expectVisibleHashes(torrents.map(({ hash }) => hash))
+  await expectVisibleIds(torrents.map(({ hash }) => hash))
 
   if (value) {
     await searchInput.addValue(value)
@@ -71,11 +71,11 @@ async function expectSearchResults(searchInput: ReturnType<typeof $>, search: st
     if (await searchInput.getValue() !== search) {
       await setSearch(searchInput, search)
     }
-    return (await getVisibleHashes()).sort().join(",")
+    return (await getVisibleIds()).sort().join(",")
   }).equals(sortedExpected, { interval: 500 })
 }
 
-async function expectVisibleHashes(expected: string[]) {
-  await eventually(async () => (await getVisibleHashes()).sort().join(","))
+async function expectVisibleIds(expected: string[]) {
+  await eventually(async () => (await getVisibleIds()).sort().join(","))
     .equals([...expected].sort().join(","), { interval: 500 })
 }

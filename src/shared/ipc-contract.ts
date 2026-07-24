@@ -93,26 +93,26 @@ export interface BittorrentUploadTorrentRequest {
 
 export interface BittorrentInvokeActionRequest {
     action: string
-    hashes?: string[]
+    ids?: string[]
     args?: unknown[]
 }
 
 export interface BittorrentGetTorrentFilesRequest {
-    hash: string
+    id: string
 }
 
 export interface BittorrentGetTorrentPeersRequest {
-    hash: string
+    id: string
 }
 
 export interface BittorrentGetTorrentTrackersRequest {
-    hash: string
+    id: string
 }
 
 export type BittorrentTorrentDetailsPrimitive = string | number | boolean | null
 
 export interface BittorrentGetTorrentDetailsRequest {
-    hash: string
+    id: string
 }
 
 export interface BittorrentTorrentDetailsFile {
@@ -169,7 +169,7 @@ export interface BittorrentFileSelection {
 }
 
 export interface BittorrentSetTorrentFileSelectionRequest {
-    hash: string
+    id: string
     files: BittorrentFileSelection[]
 }
 
@@ -426,7 +426,7 @@ export interface ElectorrentBridge {
         uploadTorrent(request: BittorrentUploadTorrentRequest): Promise<void>
         invokeAction(request: BittorrentInvokeActionRequest): Promise<void>
         getActions(): Promise<TorrentActionItem[]>
-        setSelectedTorrents(hashes: string[]): Promise<void>
+        setSelectedTorrents(ids: string[]): Promise<void>
         getTorrentDetails(request: BittorrentGetTorrentDetailsRequest): Promise<BittorrentTorrentDetailsData>
         getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<BittorrentTorrentDetailsFile[]>
         getTorrentPeers(request: BittorrentGetTorrentPeersRequest): Promise<BittorrentTorrentPeer[]>

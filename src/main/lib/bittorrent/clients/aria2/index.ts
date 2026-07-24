@@ -23,19 +23,12 @@ const TORRENT_FIELDS = [
 const MAX_RESULTS = 2_147_483_647
 const REMOVABLE_STATUSES = new Set(["active", "waiting", "paused"])
 const CHANGEABLE_STATUSES = new Set(["active", "waiting", "paused"])
-const STOPPED_STATUSES = new Set(["complete", "error", "removed"])
 
 interface Aria2TorrentData extends Record<string, unknown> {
     gid?: unknown
     status?: unknown
     bittorrent?: unknown
     followedBy?: unknown
-}
-
-interface TorrentSessionMetadata {
-    dateAdded: number
-    dateCompleted?: number
-    completed: boolean
 }
 
 function finiteNumber(value: unknown): number {
@@ -181,6 +174,24 @@ function compactFileSelection(indices: number[]): string {
     return ranges.join(",")
 }
 
+function selectedFileIndices(selection: unknown): Set<number> | undefined {
+    const value = nonEmptyString(selection)
+    if (!value) return undefined
+
+    const indices = new Set<number>()
+    for (const part of value.split(",")) {
+        const match = part.trim().match(/^(\d+)(?:-(\d+))?$/)
+        if (!match) continue
+        const start = Number(match[1])
+        const end = Number(match[2] || match[1])
+        if (start < 1 || end < start) continue
+        for (let index = start; index <= end; index += 1) {
+            indices.add(index - 1)
+        }
+    }
+    return indices
+}
+
 function relativeFilePath(path: string, directory: string | undefined): string {
     const normalizedPath = path.replace(/\\/g, "/")
     const normalizedDirectory = directory?.replace(/\\/g, "/").replace(/\/+$/, "")
@@ -212,14 +223,6 @@ function aria2Options(options?: TorrentUploadOptions): Record<string, string> {
         .filter((entry): entry is [string, string] => entry[1] !== undefined))
 }
 
-function preference(torrent: Aria2TorrentData, followedGids: Set<string>): number {
-    const gid = nonEmptyString(torrent.gid) || ""
-    const status = nonEmptyString(torrent.status)
-    return (followedGids.has(gid) ? 100 : 0)
-        + (status === "active" ? 20 : status === "waiting" || status === "paused" ? 10 : 0)
-        + (torrent.bittorrent ? 1 : 0)
-}
-
 export class Aria2Runtime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
         { role: "details", label: "Details", icon: "info circle" },
@@ -232,21 +235,9 @@ export class Aria2Runtime implements BittorrentRuntime {
     ]
 
     private rpc?: Aria2JsonRpcTransport
-    private gidByHash = new Map<string, string>()
-    private statusByGid = new Map<string, string>()
-    private selectedFilesByHash = new Map<string, Set<number>>()
-    private dirByHash = new Map<string, string>()
-    private sessionMetadata = new Map<string, TorrentSessionMetadata>()
-    private identityByGid = new Map<string, string>()
 
     async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         this.rpc = new Aria2JsonRpcTransport(server)
-        this.gidByHash.clear()
-        this.statusByGid.clear()
-        this.selectedFilesByHash.clear()
-        this.dirByHash.clear()
-        this.sessionMetadata.clear()
-        this.identityByGid.clear()
         const result = await this.rpc.call<{ version?: string }>("aria2.getVersion", [], HTTP_LOGIN_TIMEOUT)
         if (typeof result?.version !== "string" || !result.version.trim()) {
             throw new Error("aria2 did not return its version")
@@ -298,77 +289,30 @@ export class Aria2Runtime implements BittorrentRuntime {
                 method: "aria2.getOption",
                 params: [torrent.gid],
             })))
-        const withOptions = rawTorrents.map((torrent, index) => ({ ...torrent, options: optionResults[index] || {} }))
-        const followedGids = new Set(withOptions.flatMap((torrent) => Array.isArray(torrent.followedBy)
-            ? torrent.followedBy.filter((gid): gid is string => typeof gid === "string")
-            : []))
+        const withOptions: Aria2TorrentData[] = rawTorrents.map((torrent, index) => ({
+            ...torrent,
+            options: optionResults[index] || {},
+        }))
         const presentGids = new Set(withOptions.map((torrent) => nonEmptyString(torrent.gid)).filter((gid): gid is string => Boolean(gid)))
         const candidates = withOptions.filter((torrent) => {
             const children = Array.isArray(torrent.followedBy) ? torrent.followedBy : []
             return !children.some((gid) => typeof gid === "string" && presentGids.has(gid))
         })
-        const byIdentity = new Map<string, Aria2TorrentData>()
-        for (const torrent of candidates) {
-            const gid = nonEmptyString(torrent.gid)
-            if (!gid) continue
-            const identity = infoHash(torrent) || gid.toLowerCase()
-            const existing = byIdentity.get(identity)
-            if (!existing || preference(torrent, followedGids) > preference(existing, followedGids)) {
-                byIdentity.set(identity, torrent)
-            }
-        }
-
         const observedAt = Date.now()
-        const predecessorIdentityByGid = new Map<string, string>()
-        for (const torrent of withOptions) {
+        const torrents = candidates.flatMap((torrent) => {
             const gid = nonEmptyString(torrent.gid)
-            if (!gid || !Array.isArray(torrent.followedBy)) continue
-            const identity = infoHash(torrent) || gid.toLowerCase()
-            for (const childGid of torrent.followedBy) {
-                if (typeof childGid === "string") predecessorIdentityByGid.set(childGid.toLowerCase(), identity)
-            }
-        }
-
-        const nextSessionMetadata = new Map<string, TorrentSessionMetadata>()
-        const nextIdentityByGid = new Map<string, string>()
-
-        this.gidByHash = new Map()
-        this.statusByGid = new Map()
-        this.dirByHash = new Map()
-        const torrents = [...byIdentity.entries()].map(([hash, torrent]) => {
-            const gid = String(torrent.gid)
-            const normalizedGid = gid.toLowerCase()
+            if (!gid) return []
             const status = nonEmptyString(torrent.status) || "unknown"
             const totalLength = finiteNumber(torrent.totalLength)
             const completedLength = finiteNumber(torrent.completedLength)
             const connections = finiteNumber(torrent.connections)
             const numSeeders = finiteNumber(torrent.numSeeders)
             const knownPeers = Math.max(connections, numSeeders)
+            const hash = infoHash(torrent) || gid.toLowerCase()
             const isCompleted = status === "complete" || (totalLength > 0 && completedLength >= totalLength)
-            const metadataKeys = [
-                hash,
-                this.identityByGid.get(normalizedGid),
-                predecessorIdentityByGid.get(normalizedGid),
-            ].filter((key): key is string => Boolean(key))
-            const previousMetadata = metadataKeys
-                .map((key) => this.sessionMetadata.get(key))
-                .filter((metadata): metadata is TorrentSessionMetadata => Boolean(metadata))
-            const dateAdded = previousMetadata.length > 0
-                ? Math.min(...previousMetadata.map((metadata) => metadata.dateAdded))
-                : observedAt
-            const previousCompletion = previousMetadata
-                .filter((metadata) => metadata.completed && metadata.dateCompleted !== undefined)
-                .map((metadata) => metadata.dateCompleted as number)
-            const dateCompleted = isCompleted
-                ? (previousCompletion.length > 0 ? Math.min(...previousCompletion) : observedAt)
-                : undefined
-            nextSessionMetadata.set(hash, { dateAdded, dateCompleted, completed: isCompleted })
-            nextIdentityByGid.set(normalizedGid, hash)
-            this.gidByHash.set(hash, gid)
-            this.statusByGid.set(gid, status)
-            this.dirByHash.set(hash, nonEmptyString(torrent.dir) || "")
 
-            return {
+            return [{
+                id: gid,
                 hash,
                 gid,
                 status,
@@ -382,8 +326,8 @@ export class Aria2Runtime implements BittorrentRuntime {
                 peersInSwarm: knownPeers,
                 seedsConnected: numSeeders,
                 seedsInSwarm: knownPeers,
-                dateAdded,
-                dateCompleted,
+                dateAdded: observedAt,
+                dateCompleted: isCompleted ? observedAt : undefined,
                 seeder: boolean(torrent.seeder),
                 dir: nonEmptyString(torrent.dir) || "",
                 trackers: trackers(torrent),
@@ -392,15 +336,8 @@ export class Aria2Runtime implements BittorrentRuntime {
                 verifyIntegrityPending: boolean(torrent.verifyIntegrityPending),
                 errorMessage: nonEmptyString(torrent.errorMessage) || "",
                 options: torrent.options && typeof torrent.options === "object" ? torrent.options : {},
-            }
+            }]
         })
-        for (const [gid, predecessorIdentity] of predecessorIdentityByGid) {
-            if (!nextIdentityByGid.has(gid) && nextSessionMetadata.has(predecessorIdentity)) {
-                nextIdentityByGid.set(gid, predecessorIdentity)
-            }
-        }
-        this.sessionMetadata = nextSessionMetadata
-        this.identityByGid = nextIdentityByGid
         const stats = globalStat && typeof globalStat === "object" ? globalStat as Record<string, unknown> : {}
 
         return {
@@ -417,11 +354,10 @@ export class Aria2Runtime implements BittorrentRuntime {
         await this.client().call("aria2.addTorrent", [Buffer.from(buffer).toString("base64"), [], aria2Options(options)])
     }
 
-    async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
-        const gid = this.resolveGids([hash])[0]
+    async getTorrentDetails(id: string): Promise<BittorrentTorrentDetailsData> {
         const [status, options] = await this.client().multicall<Record<string, unknown>>([
-            { method: "aria2.tellStatus", params: [gid, TORRENT_FIELDS] },
-            { method: "aria2.getOption", params: [gid] },
+            { method: "aria2.tellStatus", params: [id, TORRENT_FIELDS] },
+            { method: "aria2.getOption", params: [id] },
         ])
         const data = status || {}
         const torrentOptions = options || {}
@@ -430,7 +366,7 @@ export class Aria2Runtime implements BittorrentRuntime {
 
         return {
             info: {
-                hash: infoHash(data) || hash.toLowerCase(),
+                hash: infoHash(data) || id.toLowerCase(),
                 savePath: nonEmptyString(data.dir) || null,
                 totalSize: finiteNumber(data.totalLength),
                 totalDownloaded: completedLength,
@@ -455,16 +391,16 @@ export class Aria2Runtime implements BittorrentRuntime {
         }
     }
 
-    async getTorrentFiles(hash: string): Promise<BittorrentTorrentDetailsFile[]> {
-        const gid = this.resolveGids([hash])[0]
-        const [files, status] = await this.client().multicall<unknown>([
-            { method: "aria2.getFiles", params: [gid] },
-            { method: "aria2.tellStatus", params: [gid, ["gid", "status", "dir", "bittorrent", "infoHash", "followedBy"]] },
+    async getTorrentFiles(id: string): Promise<BittorrentTorrentDetailsFile[]> {
+        const [files, status, options] = await this.client().multicall<unknown>([
+            { method: "aria2.getFiles", params: [id] },
+            { method: "aria2.tellStatus", params: [id, ["dir"]] },
+            { method: "aria2.getOption", params: [id] },
         ])
         const context = status && typeof status === "object" ? status as Aria2TorrentData : {}
-        this.rememberDownloadState(hash, context, gid)
-        const directory = nonEmptyString(context.dir) || this.dirByHash.get(hash.toLowerCase())
-        const selectedOverride = this.selectedFilesByHash.get(hash.toLowerCase())
+        const torrentOptions = options && typeof options === "object" ? options as Record<string, unknown> : {}
+        const directory = nonEmptyString(context.dir)
+        const selected = selectedFileIndices(torrentOptions["select-file"])
         return (Array.isArray(files) ? files : []).flatMap((value) => {
             if (!value || typeof value !== "object") return []
             const file = value as Record<string, unknown>
@@ -482,16 +418,15 @@ export class Aria2Runtime implements BittorrentRuntime {
                 name: path.split(/[/\\]/).pop() || path,
                 size,
                 progress: size > 0 ? Math.max(0, Math.min(1, completed / size)) : 0,
-                wanted: selectedOverride ? selectedOverride.has(aria2Index - 1) : boolean(file.selected),
+                wanted: selected ? selected.has(aria2Index - 1) : boolean(file.selected),
             }]
         })
     }
 
-    async getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {
-        const gid = this.resolveGids([hash])[0]
+    async getTorrentPeers(id: string): Promise<BittorrentTorrentPeer[]> {
         const [peers, status] = await this.client().multicall<unknown>([
-            { method: "aria2.getPeers", params: [gid] },
-            { method: "aria2.tellStatus", params: [gid, ["numPieces"]] },
+            { method: "aria2.getPeers", params: [id] },
+            { method: "aria2.tellStatus", params: [id, ["numPieces"]] },
         ])
         const torrentStatus = status && typeof status === "object" ? status as Record<string, unknown> : {}
 
@@ -515,62 +450,58 @@ export class Aria2Runtime implements BittorrentRuntime {
         })
     }
 
-    async getTorrentTrackers(hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
-        const gid = this.resolveGids([hash])[0]
-        const status = await this.client().call<unknown>("aria2.tellStatus", [gid, ["bittorrent"]])
+    async getTorrentTrackers(id: string): Promise<BittorrentTorrentDetailsTracker[]> {
+        const status = await this.client().call<unknown>("aria2.tellStatus", [id, ["bittorrent"]])
         return trackerDetails(status && typeof status === "object" ? status as Aria2TorrentData : {})
     }
 
-    async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {
-        const normalizedHash = hash.toLowerCase()
+    async setTorrentFileSelection(id: string, files: BittorrentFileSelection[]): Promise<void> {
         const wantedByIndex = new Map(files.map((file) => [file.index, file.wanted]))
-        const currentFiles = await this.getTorrentFiles(hash)
+        const currentFiles = await this.getTorrentFiles(id)
         const selectedIndices = currentFiles
             .filter((file) => wantedByIndex.get(file.index) ?? file.wanted)
             .map((file) => file.index)
-        this.selectedFilesByHash.set(normalizedHash, new Set(selectedIndices))
-        if (currentFiles.length > 1) {
-            await this.changeFileSelection(normalizedHash, compactFileSelection(selectedIndices))
-        }
+        const selection = compactFileSelection(selectedIndices) || String(currentFiles.length + 1)
+        await this.changeFileSelection(id, selection)
     }
 
-    async setSpeedLimits(hashes: string[], options: Record<string, unknown>): Promise<void> {
+    async setSpeedLimits(ids: string[], options: Record<string, unknown>): Promise<void> {
         const changedOptions: Record<string, string> = {}
         const downloadLimit = integerOption(options.downloadSpeedLimit, 1024)
         const uploadLimit = integerOption(options.uploadSpeedLimit, 1024)
         if (downloadLimit !== undefined) changedOptions["max-download-limit"] = downloadLimit
         if (uploadLimit !== undefined) changedOptions["max-upload-limit"] = uploadLimit
-        await this.changeOptions(hashes, changedOptions)
+        await this.changeOptions(ids, changedOptions)
     }
 
-    async setRatioLimit(hashes: string[], options: Record<string, unknown>): Promise<void> {
+    async setRatioLimit(ids: string[], options: Record<string, unknown>): Promise<void> {
         const ratioLimit = Number(options.ratioLimit)
         if (!Number.isFinite(ratioLimit) || ratioLimit < 0) throw new Error("Ratio limit must be zero or greater")
-        await this.changeOptions(hashes, { "seed-ratio": String(ratioLimit) })
+        await this.changeOptions(ids, { "seed-ratio": String(ratioLimit) })
     }
 
-    async resume(hashes: string[]): Promise<void> {
-        await this.forHashes("aria2.unpause", hashes, new Set(["paused"]))
+    async resume(ids: string[]): Promise<void> {
+        await this.forIds("aria2.unpause", ids, new Set(["paused"]))
     }
 
     async resumeAll(): Promise<void> {
         await this.client().call("aria2.unpauseAll")
     }
 
-    async pause(hashes: string[]): Promise<void> {
-        await this.forHashes("aria2.pause", hashes, new Set(["active", "waiting"]))
+    async pause(ids: string[]): Promise<void> {
+        await this.forIds("aria2.pause", ids, new Set(["active", "waiting"]))
     }
 
     async pauseAll(): Promise<void> {
         await this.client().call("aria2.pauseAll")
     }
 
-    async remove(hashes: string[]): Promise<void> {
-        const gids = this.resolveGids(hashes)
-        const activeGids = gids.filter((gid) => REMOVABLE_STATUSES.has(this.statusByGid.get(gid) || ""))
+    async remove(ids: string[]): Promise<void> {
+        const gids = [...new Set(ids)]
+        const statuses = await this.statusesForGids(gids)
+        const activeGids = gids.filter((gid) => REMOVABLE_STATUSES.has(statuses.get(gid) || ""))
         await this.ignoreMissing(this.client().multicall(activeGids.map((gid) => ({ method: "aria2.remove", params: [gid] }))))
         await this.removeDownloadResults(gids)
-        hashes.forEach((hash) => this.selectedFilesByHash.delete(hash.toLowerCase()))
     }
 
     private client() {
@@ -578,111 +509,45 @@ export class Aria2Runtime implements BittorrentRuntime {
         return this.rpc
     }
 
-    private resolveGids(hashes: string[]): string[] {
-        return [...new Set(hashes.map((hash) => {
-            const gid = this.gidByHash.get(hash.toLowerCase())
-            if (!gid) throw new Error(`aria2 download is no longer available: ${hash}`)
-            return gid
-        }))]
+    private async forIds(method: string, ids: string[], statuses: Set<string>) {
+        const gids = [...new Set(ids)]
+        const currentStatuses = await this.statusesForGids(gids)
+        const matchingGids = gids.filter((gid) => statuses.has(currentStatuses.get(gid) || ""))
+        await this.client().multicall(matchingGids.map((gid) => ({ method, params: [gid] })))
     }
 
-    private async forHashes(method: string, hashes: string[], statuses: Set<string>) {
-        const gids = this.resolveGids(hashes).filter((gid) => statuses.has(this.statusByGid.get(gid) || ""))
-        await this.client().multicall(gids.map((gid) => ({ method, params: [gid] })))
-    }
-
-    private async changeOptions(hashes: string[], options: Record<string, string>) {
-        if (Object.keys(options).length === 0) return
-        const gids = this.resolveGids(hashes)
-        await this.client().multicall(gids.map((gid) => ({
-            method: "aria2.changeOption",
-            params: [gid, options],
+    private async statusesForGids(gids: string[]): Promise<Map<string, string>> {
+        const results = await this.client().multicall<Aria2TorrentData>(gids.map((gid) => ({
+            method: "aria2.tellStatus",
+            params: [gid, ["gid", "status"]],
         })))
+        return new Map(results.flatMap((torrent, index) => {
+            const status = nonEmptyString(torrent?.status)
+            return status ? [[gids[index], status]] : []
+        }))
     }
 
-    private async changeFileSelection(hash: string, selection: string): Promise<void> {
-        for (let attempt = 0; attempt < 3; attempt += 1) {
-            const gid = this.gidByHash.get(hash)
-            if (!gid) return
-
-            let status = this.statusByGid.get(gid) || ""
-            if (!CHANGEABLE_STATUSES.has(status) && !STOPPED_STATUSES.has(status)) {
-                const current = await this.refreshDownloadState(hash, gid)
-                if (!current) return
-                status = current.status
-            }
-            if (STOPPED_STATUSES.has(status)) return
-            if (!CHANGEABLE_STATUSES.has(status)) {
-                throw new Error(`aria2 download has unsupported status for file selection: ${status || "unknown"}`)
-            }
-
-            try {
-                await this.client().call("aria2.changeOption", [gid, { "select-file": selection }])
-                return
-            } catch (error) {
-                if (this.isMissingGid(error)) {
-                    this.forgetGid(hash, gid)
-                    return
-                }
-                if (!this.isCannotChangeOption(error)) throw error
-
-                const current = await this.refreshDownloadState(hash, gid)
-                if (!current || STOPPED_STATUSES.has(current.status)) return
-                if (current.gid === gid && current.status === status) throw error
-            }
-        }
-
-        throw new Error(`aria2 download kept changing GID while updating file selection: ${hash}`)
+    private async changeOptions(ids: string[], options: Record<string, string>) {
+        if (Object.keys(options).length === 0) return
+        const gids = [...new Set(ids)]
+        await this.client().multicall(gids.map((gid) => ({ method: "aria2.changeOption", params: [gid, options] })))
     }
 
-    private async refreshDownloadState(hash: string, gid: string): Promise<{ gid: string, status: string } | undefined> {
-        let current: Aria2TorrentData
+    private async changeFileSelection(id: string, selection: string): Promise<void> {
+        let status: string
         try {
-            current = await this.client().call<Aria2TorrentData>("aria2.tellStatus", [
-                gid,
-                ["gid", "status", "bittorrent", "infoHash", "followedBy"],
-            ])
+            status = (await this.statusesForGids([id])).get(id) || "unknown"
+        } catch (error) {
+            if (this.isMissingGid(error)) return
+            throw error
+        }
+        if (!CHANGEABLE_STATUSES.has(status)) return
+
+        try {
+            await this.client().call("aria2.changeOption", [id, { "select-file": selection }])
         } catch (error) {
             if (!this.isMissingGid(error)) throw error
-            this.forgetGid(hash, gid)
-            return undefined
         }
-
-        const followedBy = Array.isArray(current.followedBy)
-            ? current.followedBy.filter((child): child is string => typeof child === "string" && child.length > 0)
-            : []
-        if (followedBy.length > 0) {
-            const children = await this.client().multicall<Aria2TorrentData>(followedBy.map((childGid) => ({
-                method: "aria2.tellStatus",
-                params: [childGid, ["gid", "status", "bittorrent", "infoHash", "followedBy"]],
-            })))
-            const child = children.find((candidate) => infoHash(candidate) === hash)
-                || children.find((candidate) => CHANGEABLE_STATUSES.has(nonEmptyString(candidate.status) || ""))
-                || children[0]
-            if (child) current = child
-        }
-
-        return this.rememberDownloadState(hash, current, gid)
-    }
-
-    private rememberDownloadState(hash: string, torrent: Aria2TorrentData, previousGid: string): { gid: string, status: string } {
-        const gid = nonEmptyString(torrent.gid) || previousGid
-        const status = nonEmptyString(torrent.status) || this.statusByGid.get(gid) || "unknown"
-        if (gid !== previousGid) this.statusByGid.delete(previousGid)
-        this.gidByHash.set(hash.toLowerCase(), gid)
-        this.statusByGid.set(gid, status)
-        return { gid, status }
-    }
-
-    private forgetGid(hash: string, gid: string): void {
-        if (this.gidByHash.get(hash) === gid) this.gidByHash.delete(hash)
-        this.statusByGid.delete(gid)
-    }
-
-    private isCannotChangeOption(error: unknown): error is Aria2RpcError {
-        return error instanceof Aria2RpcError
-            && error.code === 1
-            && /^Cannot change option for GID#[0-9a-f]+$/i.test(error.message)
     }
 
     private isMissingGid(error: unknown): error is Aria2RpcError {

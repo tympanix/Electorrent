@@ -52,34 +52,34 @@ export function uploadTorrent(data: Uint8Array, filename: string, options?: Torr
     return bridge().uploadTorrent({ data, filename, options, sourcePath })
 }
 
-export function invokeAction(action: string, hashes: string[] = [], ...args: unknown[]) {
-    return bridge().invokeAction({ action, hashes, args })
+export function invokeAction(action: string, ids: string[] = [], ...args: unknown[]) {
+    return bridge().invokeAction({ action, ids, args })
 }
 
 export function getActions(): Promise<TorrentActionItem[]> {
     return bridge().getActions()
 }
 
-export function setSelectedTorrents(hashes: string[]) {
-    return bridge().setSelectedTorrents(hashes)
+export function setSelectedTorrents(ids: string[]) {
+    return bridge().setSelectedTorrents(ids)
 }
 
-export function getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
-    return bridge().getTorrentDetails({ hash })
+export function getTorrentDetails(id: string): Promise<BittorrentTorrentDetailsData> {
+    return bridge().getTorrentDetails({ id })
 }
 
-export function getTorrentFiles(hash: string) {
-    return bridge().getTorrentFiles({ hash })
+export function getTorrentFiles(id: string) {
+    return bridge().getTorrentFiles({ id })
 }
 
-export function getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {
-    return bridge().getTorrentPeers({ hash })
+export function getTorrentPeers(id: string): Promise<BittorrentTorrentPeer[]> {
+    return bridge().getTorrentPeers({ id })
 }
 
-export function getTorrentTrackers(hash: string) {
-    return bridge().getTorrentTrackers({ hash })
+export function getTorrentTrackers(id: string) {
+    return bridge().getTorrentTrackers({ id })
 }
 
-export function setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]) {
-    return bridge().setTorrentFileSelection({ hash, files })
+export function setTorrentFileSelection(id: string, files: BittorrentFileSelection[]) {
+    return bridge().setTorrentFileSelection({ id, files })
 }

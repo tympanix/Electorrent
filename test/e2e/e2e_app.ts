@@ -407,7 +407,7 @@ export class App {
     const table = "#torrentTable tbody tr";
     const torrents = $$(table)
     const data = torrents.map(
-      async (e) => new Torrent({ hash: await e.getAttribute("data-hash"), app: this })
+      async (e) => new Torrent({ id: await e.getAttribute("data-id"), app: this })
     );
     return await data
   }
@@ -416,7 +416,7 @@ export class App {
     const table = "#torrentTable tbody tr.active";
     const tableElem = $$(table)
     const data = tableElem.map(async (e) => {
-      return new Torrent({ hash: await e.getAttribute("data-hash"), app: this })
+      return new Torrent({ id: await e.getAttribute("data-id"), app: this })
     })
     return await data
   }

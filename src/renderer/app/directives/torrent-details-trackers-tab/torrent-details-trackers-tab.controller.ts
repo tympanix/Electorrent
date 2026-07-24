@@ -28,7 +28,7 @@ export class TorrentDetailsTrackersTabController {
   private sortKey: keyof BittorrentTorrentDetailsTracker = "url"
   private sortDescending = false
   private requestId = 0
-  private torrentHash?: string
+  private torrentId?: string
 
   constructor(
     public scope: TorrentDetailsTrackersTabScope,
@@ -80,8 +80,8 @@ export class TorrentDetailsTrackersTabController {
       return
     }
 
-    if (this.torrentHash !== torrent.hash) {
-      this.torrentHash = torrent.hash
+    if (this.torrentId !== torrent.id) {
+      this.torrentId = torrent.id
       this.scope.trackers = []
       this.scope.loaded = false
     }

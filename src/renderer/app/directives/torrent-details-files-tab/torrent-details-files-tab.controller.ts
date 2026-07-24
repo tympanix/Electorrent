@@ -55,7 +55,7 @@ export class TorrentDetailsFilesTabController {
   private fileSortDescending = false;
   private readonly collapsedFolders = new Set<string>();
   private requestId = 0;
-  private torrentHash?: string;
+  private torrentId?: string;
 
   constructor(
     public scope: TorrentDetailsFilesTabScope,
@@ -340,8 +340,8 @@ export class TorrentDetailsFilesTabController {
       return;
     }
 
-    if (this.torrentHash !== torrent.hash) {
-      this.torrentHash = torrent.hash;
+    if (this.torrentId !== torrent.id) {
+      this.torrentId = torrent.id;
       this.scope.files = { columns: [], items: [] };
       this.scope.loaded = false;
       this.collapsedFolders.clear();

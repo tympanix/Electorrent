@@ -19,6 +19,7 @@ export class Aria2Torrent extends Torrent {
         const options = data.options && typeof data.options === "object" ? data.options : {}
 
         super({
+            id: String(data.id || data.gid || ""),
             hash: typeof data.hash === "string" ? data.hash.toLowerCase() : String(data.gid || "").toLowerCase(),
             name: typeof data.name === "string" ? data.name : String(data.gid || "Unknown"),
             size: total,

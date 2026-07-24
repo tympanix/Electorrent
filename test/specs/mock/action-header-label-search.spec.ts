@@ -20,12 +20,12 @@ describe("mock action header label search", function () {
       await invokeMockAction("addMockedTorrent", torrent)
     }
 
-    await eventually(async () => (await $$("#torrentTable tbody tr[data-hash]")).length)
+    await eventually(async () => (await $$("#torrentTable tbody tr[data-id]")).length)
       .equals(torrents.length)
   })
 
   it("filters the labels in the action header dropdown", async function () {
-    const torrentRow = $(`#torrentTable tbody tr[data-hash='${torrents[0].hash}']`)
+    const torrentRow = $(`#torrentTable tbody tr[data-id='${torrents[0].hash}']`)
     await torrentRow.waitForClickable()
     await torrentRow.click()
 

@@ -180,7 +180,7 @@ class BittorrentManager {
         if (typeof action !== "function") {
             throw new Error(`Unsupported bittorrent action: ${request.action}`)
         }
-        return action.call(runtime, request.hashes || [], ...(request.args || []))
+        return action.call(runtime, request.ids || [], ...(request.args || []))
     }
 
     async getActions(sender: WebContents) {
@@ -188,39 +188,39 @@ class BittorrentManager {
         return withTorrentActionAccelerators(runtime.actions)
     }
 
-    setSelectedTorrents(sender: WebContents, hashes: unknown) {
+    setSelectedTorrents(sender: WebContents, ids: unknown) {
         const state = this.getSessionState(sender)
         if (!state.isConnected) return
-        const selectedTorrentCount = Array.isArray(hashes)
-            ? new Set(hashes.filter((hash): hash is string => typeof hash === "string")).size
+        const selectedTorrentCount = Array.isArray(ids)
+            ? new Set(ids.filter((id): id is string => typeof id === "string")).size
             : 0
         if (selectedTorrentCount === state.selectedTorrentCount) return
         this.setSessionState(sender.id, { ...state, selectedTorrentCount })
     }
 
-    async getTorrentDetails(sender: WebContents, hash: string): Promise<BittorrentTorrentDetailsData> {
+    async getTorrentDetails(sender: WebContents, id: string): Promise<BittorrentTorrentDetailsData> {
         const runtime = await this.getSession(sender)
         if (typeof runtime.getTorrentDetails !== "function") {
             throw new Error("Torrent details not supported for this client")
         }
-        return runtime.getTorrentDetails(hash)
+        return runtime.getTorrentDetails(id)
     }
 
-    async getTorrentFiles(sender: WebContents, hash: string): Promise<BittorrentTorrentDetailsFile[]> {
+    async getTorrentFiles(sender: WebContents, id: string): Promise<BittorrentTorrentDetailsFile[]> {
         const runtime = await this.getSession(sender)
         if (typeof runtime.getTorrentFiles !== "function") {
             throw new Error("Torrent files not supported for this client")
         }
-        return runtime.getTorrentFiles(hash)
+        return runtime.getTorrentFiles(id)
     }
 
-    async getTorrentPeers(sender: WebContents, hash: string): Promise<BittorrentTorrentPeer[]> {
+    async getTorrentPeers(sender: WebContents, id: string): Promise<BittorrentTorrentPeer[]> {
         const runtime = await this.getSession(sender)
         if (typeof runtime.getTorrentPeers !== "function") {
             throw new Error("Torrent peers not supported for this client")
         }
 
-        const peers = await runtime.getTorrentPeers(hash)
+        const peers = await runtime.getTorrentPeers(id)
         return peers.map((peer) => {
             if (peer.countryCode && peer.country) {
                 return peer
@@ -231,12 +231,12 @@ class BittorrentManager {
         })
     }
 
-    async getTorrentTrackers(sender: WebContents, hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
+    async getTorrentTrackers(sender: WebContents, id: string): Promise<BittorrentTorrentDetailsTracker[]> {
         const runtime = await this.getSession(sender)
         if (typeof runtime.getTorrentTrackers !== "function") {
             throw new Error("Torrent trackers not supported for this client")
         }
-        return runtime.getTorrentTrackers(hash)
+        return runtime.getTorrentTrackers(id)
     }
 
     async setTorrentFileSelection(sender: WebContents, request: BittorrentSetTorrentFileSelectionRequest) {
@@ -244,7 +244,7 @@ class BittorrentManager {
         if (typeof runtime.setTorrentFileSelection !== "function") {
             throw new Error("Torrent file selection not supported for this client")
         }
-        return runtime.setTorrentFileSelection(request.hash, request.files)
+        return runtime.setTorrentFileSelection(request.id, request.files)
     }
 
     disconnectWindow(sender: WebContents | null | undefined) {

@@ -18,11 +18,11 @@ export interface BittorrentRuntime {
     getSnapshot(fullUpdate?: boolean): Promise<any>
     addTorrentUrl(uri: string, options?: TorrentUploadOptions): Promise<void>
     uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions): Promise<void>
-    setLocation?(hashes: string[], location: string): Promise<void>
-    getTorrentDetails?(hash: string): Promise<BittorrentTorrentDetailsData>
-    getTorrentFiles?(hash: string): Promise<BittorrentTorrentDetailsFile[]>
-    getTorrentPeers?(hash: string): Promise<BittorrentTorrentPeer[]>
-    getTorrentTrackers?(hash: string): Promise<BittorrentTorrentDetailsTracker[]>
-    setTorrentFileSelection?(hash: string, files: BittorrentFileSelection[]): Promise<void>
+    setLocation?(ids: string[], location: string): Promise<void>
+    getTorrentDetails?(id: string): Promise<BittorrentTorrentDetailsData>
+    getTorrentFiles?(id: string): Promise<BittorrentTorrentDetailsFile[]>
+    getTorrentPeers?(id: string): Promise<BittorrentTorrentPeer[]>
+    getTorrentTrackers?(id: string): Promise<BittorrentTorrentDetailsTracker[]>
+    setTorrentFileSelection?(id: string, files: BittorrentFileSelection[]): Promise<void>
     disconnect?(): Promise<void>
 }

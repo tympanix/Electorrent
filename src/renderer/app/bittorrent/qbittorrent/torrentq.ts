@@ -53,6 +53,7 @@ export class QBittorrentTorrent extends Torrent {
 
     constructor(hash: string, data: Record<string, any>) {
         super({
+            id: hash,
             hash: hash,
             name: data.name,
             size: data.size || data.total_size,
