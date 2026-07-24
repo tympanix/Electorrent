@@ -122,7 +122,7 @@
     "webpack-node-externals": "^3.0.0",
     "webpack-remove-empty-scripts": "^1.1.1",
     "winston": "^2.4.4",
-    "yargs": "^4.8.1"
+    "yargs": "^18.0.0"
   },
   "resolutions": {
     "graceful-fs": "^4.2.4",
