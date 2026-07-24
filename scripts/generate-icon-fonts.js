@@ -8,7 +8,7 @@ const outputDirectory = path.join(root, 'app/css/fonts')
 
 const iconNames = ['deluge', 'downloadstation', 'qbittorrent', 'rtorrent', 'transmission', 'utorrent', 'aria2']
 const result = await webfont({
-  files: iconNames.map((name) => path.join(iconsDirectory, `${name}.svg`)),
+  files: iconNames.map((name) => path.join(iconsDirectory, `${name}.svg`).replaceAll('\\', '/')),
   fontName: 'bittorrent',
   formats: ['eot', 'woff', 'ttf', 'svg'],
   normalize: true,
