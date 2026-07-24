@@ -16,11 +16,6 @@ interface TorrentControllerScope extends angular.IScope {
     };
     speedLimitModalRef?: { open(torrents: any[]): void };
     setRatioModalRef?: { open(torrents: any[]): void };
-    setLabelModalRef?: ModalController;
-    labelAssignment?: {
-        label: string;
-        torrents: any[];
-    };
     [key: string]: any;
 }
 
@@ -77,10 +72,6 @@ export class TorrentsPageController {
         $scope.uploadAdvancedOptionsKey = "Ctrl";
         $scope.deleteConfirmation = {
             action: null,
-            label: "",
-            torrents: [],
-        };
-        $scope.labelAssignment = {
             label: "",
             torrents: [],
         };
@@ -287,6 +278,10 @@ export class TorrentsPageController {
         });
 
         $scope.$on("torrentLocation:updated", () => {
+            syncAfterTorrentMutation();
+        });
+
+        $scope.$on("torrentLabel:updated", () => {
             syncAfterTorrentMutation();
         });
 
@@ -766,11 +761,7 @@ export class TorrentsPageController {
             }
             if (item?.role === "set-label") {
                 if (selected.length >= 1) {
-                    $scope.labelAssignment = {
-                        label: $scope.labels[0] || "",
-                        torrents: selected.slice(),
-                    };
-                    $scope.setLabelModalRef?.showModal();
+                    $rootScope.$emit("torrentLabel:open", selected.slice());
                 }
                 return $q.resolve();
             }
@@ -791,21 +782,6 @@ export class TorrentsPageController {
                 return $q.resolve();
             }
             return runContextAction(action, selected);
-        };
-
-        $scope.assignExistingLabel = () => {
-            const assignment = $scope.labelAssignment;
-            const labelAction: any = $rootScope.$btclient?.actionHeader.find((item: any) => item.type === "labels");
-            if (!assignment?.label || !labelAction) {
-                return $q.resolve();
-            }
-
-            return labelAction.click.call($rootScope.$btclient, assignment.torrents, assignment.label)
-                .then(() => syncAfterTorrentMutation())
-                .catch((err: unknown) => {
-                    console.error("Set label error", err);
-                    $notify.alert("Invalid action", "The label could not be assigned because the server responded with a faulty reply");
-                });
         };
 
         function fetchTorrents(): any[] {

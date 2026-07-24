@@ -152,42 +152,7 @@
     <context-menu id="contextmenu" bind="contextMenu" menu="$btclient.contextMenu" click="doContextAction" debug="debug">
     </context-menu>
 
-    <modal
-        id="setLabelModal"
-        size="tiny"
-        approve="assignExistingLabel()"
-        ng-ref="setLabelModalRef">
-        <div class="header">
-            <i class="tag icon"></i>
-            Set Label
-        </div>
-        <div class="content">
-            <div class="ui form">
-                <div class="field">
-                    <label for="set-label-dropdown">Label</label>
-                    <dropdown
-                        id="set-label-dropdown"
-                        title="Select label"
-                        class="fluid"
-                        open-on-focus="false"
-                        ng-model="labelAssignment.label">
-                        <dropdown-group ng-repeat="label in labels track by label" title="label" value="label">
-                            <span class="set-label-dropdown-chip" label-chip="label">
-                                <span class="label-chip-text">{{ label }}</span>
-                            </span>
-                        </dropdown-group>
-                    </dropdown>
-                </div>
-            </div>
-        </div>
-        <div class="actions">
-            <button type="button" class="ui black deny button">Cancel</button>
-            <button type="button" class="ui green right labeled icon approve button" ng-disabled="!labelAssignment.label">
-                Apply Label
-                <i class="tag icon"></i>
-            </button>
-        </div>
-    </modal>
+    <set-label-modal labels="labels"></set-label-modal>
 
     <modal
         id="deleteTorrentModal"

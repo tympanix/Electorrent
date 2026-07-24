@@ -218,6 +218,8 @@ import { TorrentDetailsTrackersTabDirective } from "@renderer/app/directives/tor
 torrentApp.directive('torrentDetailsTrackersTab', TorrentDetailsTrackersTabDirective.getInstance())
 import { SetLocationModalDirective } from "@renderer/app/directives/set-location-modal/set-location-modal.directive";
 torrentApp.directive('setLocationModal', SetLocationModalDirective.getInstance())
+import { SetLabelModalDirective } from "@renderer/app/directives/set-label-modal/set-label-modal.directive";
+torrentApp.directive('setLabelModal', SetLabelModalDirective.getInstance())
 import { TorrentSpeedModalDirective } from "@renderer/app/directives/torrent-speed-modal/torrent-speed-modal.directive";
 torrentApp.directive('torrentSpeedModal', TorrentSpeedModalDirective.getInstance())
 import { TorrentSetRatioModalDirective } from "@renderer/app/directives/torrent-set-ratio-modal/torrent-set-ratio-modal.directive";
