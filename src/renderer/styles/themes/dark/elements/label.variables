@@ -1,3 +1,19 @@
 @backgroundColor: @gray-dark;
+@basicBackground: none @pageForeground;
 @labelActiveBackgroundColor: @gray-light;
 @ribbonShadowColor: @gray-dark;
+
+/* Muted semantic colors for labels on dark surfaces */
+@red: #8b4547;
+@orange: #93613f;
+@yellow: #82703a;
+@olive: #66723c;
+@green: #3e704c;
+@teal: #386f6c;
+@blue: #416581;
+@violet: #5b5080;
+@purple: #704f7d;
+@pink: #7d4d68;
+@brown: #715745;
+@grey: #596168;
+@black: #34383c;

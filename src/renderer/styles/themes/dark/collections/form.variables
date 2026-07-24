@@ -3,3 +3,20 @@
 *******************************/
 
 @loaderDimmerColor: fadeout(@pageForeground, 50%);
+
+/* Error states should sit naturally on dark form surfaces */
+@formErrorBackground: #512f31;
+@formErrorBorder: #704347;
+@formErrorColor: #ff9c99;
+
+@inputErrorFocusBackground: lighten(@formErrorBackground, 3%);
+@inputErrorFocusBorder: lighten(@formErrorBorder, 7%);
+@inputErrorFocusColor: #ffaaa7;
+@inputErrorPlaceholderColor: fade(@formErrorColor, 70%);
+@inputErrorPlaceholderFocusColor: fade(@inputErrorFocusColor, 80%);
+
+@dropdownErrorHoverBackground: lighten(@formErrorBackground, 3%);
+@dropdownErrorSelectedBackground: @dropdownErrorHoverBackground;
+@dropdownErrorActiveBackground: lighten(@formErrorBackground, 6%);
+@dropdownErrorLabelBackground: @formErrorBorder;
+@dropdownErrorLabelColor: @formErrorColor;
