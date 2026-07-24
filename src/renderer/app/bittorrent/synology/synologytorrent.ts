@@ -9,6 +9,7 @@ export class SynologyTorrent extends Torrent {
         var track = data.additional.tracker;
 
         super({
+            id: data.id,
             hash: data.id, /* Hash (string): unique identifier for the torrent */
             name: data.title, /* Name (string): the name of the torrent */
             size: data.size, /* Size (integer): size of the file to be downloaded in bytes */

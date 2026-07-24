@@ -8,14 +8,18 @@ export type ColumnName = "decodedName" | "size" | "downloadSpeed" | "uploadSpeed
 
 export class Torrent {
   app: App
+  id?: string
   hash: string
   query: string
   timeout: number
 
-  constructor({ hash, app }) {
+  constructor({ id, hash, app }: { id?: string, hash?: string, app: App }) {
     this.app = app;
-    this.hash = hash;
-    this.query = `#torrentTable tbody tr[data-hash="${hash}"]`;
+    this.id = id;
+    this.hash = hash || id || "";
+    this.query = id
+      ? `#torrentTable tbody tr[data-id="${id}"]`
+      : `#torrentTable tbody tr[data-info-hash="${hash}"]`;
     this.timeout = 10 * 1000;
   }
 
@@ -71,7 +75,7 @@ export class Torrent {
     try {
       await elem.waitForExist({
         timeout,
-        timeoutMsg: `Torrent ${this.hash} did not appear in the downloading filter within ${timeout}ms`,
+        timeoutMsg: `Torrent ${this.id || this.hash} did not appear in the downloading filter within ${timeout}ms`,
       })
     } catch (err: any) {
       const allState = $("#page-torrents li[data-state=all]")

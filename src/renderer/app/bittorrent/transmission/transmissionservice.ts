@@ -65,15 +65,15 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     };
 
     start(torrents: TransmissionTorrent[]): Promise<void> {
-      return invokeAction("start", torrents.map((torrent) => torrent.hash));
+      return invokeAction("start", torrents.map((torrent) => torrent.id));
     };
 
     stop(torrents: TransmissionTorrent[]): Promise<void> {
-      return invokeAction("stop", torrents.map((torrent) => torrent.hash));
+      return invokeAction("stop", torrents.map((torrent) => torrent.id));
     };
 
     verify(torrents: TransmissionTorrent[]): Promise<void> {
-      return invokeAction("verify", torrents.map((torrent) => torrent.hash));
+      return invokeAction("verify", torrents.map((torrent) => torrent.id));
     };
 
     pauseAll(): Promise<void> {
@@ -85,27 +85,27 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     };
 
     queueUp(torrents: TransmissionTorrent[]): Promise<void> {
-      return invokeAction("queueUp", torrents.map((torrent) => torrent.hash));
+      return invokeAction("queueUp", torrents.map((torrent) => torrent.id));
     };
 
     queueDown(torrents: TransmissionTorrent[]): Promise<void> {
-      return invokeAction("queueDown", torrents.map((torrent) => torrent.hash));
+      return invokeAction("queueDown", torrents.map((torrent) => torrent.id));
     };
 
     remove(torrents: TransmissionTorrent[]): Promise<void> {
-      return invokeAction("remove", torrents.map((torrent) => torrent.hash));
+      return invokeAction("remove", torrents.map((torrent) => torrent.id));
     };
 
     removeAndLocal(torrents: TransmissionTorrent[]): Promise<void> {
-      return invokeAction("removeAndLocal", torrents.map((torrent) => torrent.hash));
+      return invokeAction("removeAndLocal", torrents.map((torrent) => torrent.id));
     };
 
     setLocation(torrents: TransmissionTorrent[], location: string): Promise<void> {
-      return invokeAction("setLocation", torrents.map((torrent) => torrent.hash), location);
+      return invokeAction("setLocation", torrents.map((torrent) => torrent.id), location);
     }
 
     label(torrents: TransmissionTorrent[], label: string): Promise<void> {
-      return invokeAction("label", torrents.map((torrent) => torrent.hash), label);
+      return invokeAction("label", torrents.map((torrent) => torrent.id), label);
     }
 
     deleteTorrents(torrents: TransmissionTorrent[]): Promise<void> {
@@ -113,17 +113,17 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     }
 
     setSpeedLimits(torrents: TransmissionTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
-      return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
+      return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.id), options);
     }
 
     setRatioLimit(torrents: TransmissionTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
-      return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.hash), options);
+      return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.id), options);
     }
 
     extraColumns = [Torrent.COL_DOWNLIMIT, Torrent.COL_UPLIMIT];
 
     protected getTorrentDetailsData(torrent: TransmissionTorrent): Promise<BittorrentTorrentDetailsData> {
-      return getTorrentDetails(torrent.hash);
+      return getTorrentDetails(torrent.id);
     }
 
     protected getTorrentDetailsInfoSections(torrent: TransmissionTorrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {

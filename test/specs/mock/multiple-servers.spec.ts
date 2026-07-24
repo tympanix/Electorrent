@@ -152,7 +152,7 @@ async function addMockedTorrent(torrent: MockTorrent) {
 }
 
 async function getTorrentNames() {
-  const cells = await $$("#torrentTable tbody tr[data-hash] td[data-col='decodedName']")
+  const cells = await $$("#torrentTable tbody tr[data-id] td[data-col='decodedName']")
   const names: string[] = []
   for (const cell of cells) {
     names.push((await cell.getText()).trim())

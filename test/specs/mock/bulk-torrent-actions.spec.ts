@@ -20,22 +20,22 @@ describe("mock bulk torrent actions", function () {
     for (const torrent of torrents) {
       await invokeMockAction("addMockedTorrent", torrent)
     }
-    await eventually(async () => (await $$("#torrentTable tbody tr[data-hash]")).length)
+    await eventually(async () => (await $$("#torrentTable tbody tr[data-id]")).length)
       .equals(torrents.length)
   })
 
   it("applies a stop and resume action to every selected torrent", async function () {
-    const firstSelected = await $(`#torrentTable tbody tr[data-hash='${torrents[0].hash}']`)
-    const secondSelected = await $(`#torrentTable tbody tr[data-hash='${torrents[1].hash}']`)
+    const firstSelected = await $(`#torrentTable tbody tr[data-id='${torrents[0].hash}']`)
+    const secondSelected = await $(`#torrentTable tbody tr[data-id='${torrents[1].hash}']`)
     await firstSelected.waitForClickable()
     await firstSelected.click()
     await shiftClick(secondSelected)
 
-    await eventually(getSelectedHashes).satisfies(
+    await eventually(getSelectedIds).satisfies(
       "include both selected torrents",
-      (hashes) => hashes.length === 2
-        && hashes.includes(torrents[0].hash)
-        && hashes.includes(torrents[1].hash),
+      (ids) => ids.length === 2
+        && ids.includes(torrents[0].hash)
+        && ids.includes(torrents[1].hash),
     )
 
     const stopButton = $("#torrent-action-header a[data-role='stop']")
@@ -79,20 +79,20 @@ async function shiftClick(row: Awaited<ReturnType<typeof $>>) {
   ])
 }
 
-async function getSelectedHashes() {
-  const rows = await $$("#torrentTable tbody tr.active[data-hash]")
-  const hashes: string[] = []
+async function getSelectedIds() {
+  const rows = await $$("#torrentTable tbody tr.active[data-id]")
+  const ids: string[] = []
   for (const row of rows) {
-    hashes.push(await row.getAttribute("data-hash"))
+    ids.push(await row.getAttribute("data-id"))
   }
-  return hashes
+  return ids
 }
 
-async function getTorrentState(hash: string) {
-  return $(`#torrentTable tbody tr[data-hash='${hash}'] td[data-col='percent']`).getText()
+async function getTorrentState(id: string) {
+  return $(`#torrentTable tbody tr[data-id='${id}'] td[data-col='percent']`).getText()
 }
 
-async function expectTorrentState(hash: string, expected: string) {
-  await eventually(() => getTorrentState(hash))
+async function expectTorrentState(id: string, expected: string) {
+  await eventually(() => getTorrentState(id))
     .satisfies(`include ${expected}`, (state) => state.includes(expected))
 }

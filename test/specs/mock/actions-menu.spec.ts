@@ -15,7 +15,7 @@ describe("mock Actions menu", function () {
         args: [{ hash: "a".repeat(40), name: "Actions menu torrent" }],
       })
     })
-    await eventually(async () => $("#torrentTable tbody tr[data-hash]").isExisting()).equals(true)
+    await eventually(async () => $("#torrentTable tbody tr[data-id]").isExisting()).equals(true)
   })
 
   it("contains the mock client's context actions and follows torrent selection", async function () {
@@ -34,7 +34,7 @@ describe("mock Actions menu", function () {
     ])
     assert.isTrue(initial.disabled)
 
-    const row = $("#torrentTable tbody tr[data-hash]")
+    const row = $("#torrentTable tbody tr[data-id]")
     await row.waitForClickable()
     await row.click()
 
@@ -54,7 +54,7 @@ describe("mock Actions menu", function () {
   it("opens submenu items in a flyout to the right", async function () {
     await browser.keys("Escape")
 
-    const row = $("#torrentTable tbody tr[data-hash]")
+    const row = $("#torrentTable tbody tr[data-id]")
     await row.waitForClickable()
     await row.click()
 

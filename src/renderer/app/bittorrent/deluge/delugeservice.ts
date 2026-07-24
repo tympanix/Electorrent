@@ -33,43 +33,43 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
     }
 
     resume(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("resume", torrents.map((torrent) => torrent.hash))
+        return invokeAction("resume", torrents.map((torrent) => torrent.id))
     }
 
     pause(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("pause", torrents.map((torrent) => torrent.hash))
+        return invokeAction("pause", torrents.map((torrent) => torrent.id))
     }
 
     verify(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("verify", torrents.map((torrent) => torrent.hash))
+        return invokeAction("verify", torrents.map((torrent) => torrent.id))
     }
 
     remove(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("remove", torrents.map((torrent) => torrent.hash))
+        return invokeAction("remove", torrents.map((torrent) => torrent.id))
     }
 
     removeAndDelete(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("removeAndDelete", torrents.map((torrent) => torrent.hash))
+        return invokeAction("removeAndDelete", torrents.map((torrent) => torrent.id))
     }
 
     queueUp(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("queueUp", torrents.map((torrent) => torrent.hash))
+        return invokeAction("queueUp", torrents.map((torrent) => torrent.id))
     }
 
     queueDown(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("queueDown", torrents.map((torrent) => torrent.hash))
+        return invokeAction("queueDown", torrents.map((torrent) => torrent.id))
     }
 
     queueTop(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("queueTop", torrents.map((torrent) => torrent.hash))
+        return invokeAction("queueTop", torrents.map((torrent) => torrent.id))
     }
 
     queueBottom(torrents: DelugeTorrent[]): Promise<void> {
-        return invokeAction("queueBottom", torrents.map((torrent) => torrent.hash))
+        return invokeAction("queueBottom", torrents.map((torrent) => torrent.id))
     }
 
     setLabel(torrents: DelugeTorrent[], label: string, create?: boolean): Promise<void> {
-        return invokeAction("setLabel", torrents.map((torrent) => torrent.hash), label, create)
+        return invokeAction("setLabel", torrents.map((torrent) => torrent.id), label, create)
     }
 
     deleteTorrents(torrents: DelugeTorrent[]): Promise<void> {
@@ -77,15 +77,15 @@ export class DelugeClient extends TorrentClient<DelugeTorrent> {
     }
 
     setSpeedLimits(torrents: DelugeTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
-        return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options)
+        return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.id), options)
     }
 
     setRatioLimit(torrents: DelugeTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
-        return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.hash), options)
+        return invokeAction("setRatioLimit", torrents.map((torrent) => torrent.id), options)
     }
 
     protected getTorrentDetailsData(torrent: DelugeTorrent): Promise<BittorrentTorrentDetailsData> {
-        return getTorrentDetails(torrent.hash)
+        return getTorrentDetails(torrent.id)
     }
 
     protected getTorrentDetailsInfoSections(torrent: DelugeTorrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {

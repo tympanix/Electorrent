@@ -35,51 +35,51 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   }
 
   start(torrents): Promise<void> {
-    return invokeAction("start", torrents.map((torrent) => torrent.hash));
+    return invokeAction("start", torrents.map((torrent) => torrent.id));
   };
 
   stop(torrents): Promise<void> {
-    return invokeAction("stop", torrents.map((torrent) => torrent.hash));
+    return invokeAction("stop", torrents.map((torrent) => torrent.id));
   };
 
   pause(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("pause", torrents.map((torrent) => torrent.hash));
+    return invokeAction("pause", torrents.map((torrent) => torrent.id));
   };
 
   remove(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("remove", torrents.map((torrent) => torrent.hash));
+    return invokeAction("remove", torrents.map((torrent) => torrent.id));
   };
 
   removedata(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("removedata", torrents.map((torrent) => torrent.hash));
+    return invokeAction("removedata", torrents.map((torrent) => torrent.id));
   };
 
   removetorrent(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("removetorrent", torrents.map((torrent) => torrent.hash));
+    return invokeAction("removetorrent", torrents.map((torrent) => torrent.id));
   };
 
   removedatatorrent(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("removedatatorrent", torrents.map((torrent) => torrent.hash));
+    return invokeAction("removedatatorrent", torrents.map((torrent) => torrent.id));
   };
 
   forcestart(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("forcestart", torrents.map((torrent) => torrent.hash));
+    return invokeAction("forcestart", torrents.map((torrent) => torrent.id));
   };
 
   recheck(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("recheck", torrents.map((torrent) => torrent.hash));
+    return invokeAction("recheck", torrents.map((torrent) => torrent.id));
   };
 
   queueup(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("queueup", torrents.map((torrent) => torrent.hash));
+    return invokeAction("queueup", torrents.map((torrent) => torrent.id));
   };
 
   queuedown(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("queuedown", torrents.map((torrent) => torrent.hash));
+    return invokeAction("queuedown", torrents.map((torrent) => torrent.id));
   };
 
   getprops(torrents: UtorrentTorrent[]): Promise<void> {
-    return invokeAction("getprops", torrents.map((torrent) => torrent.hash));
+    return invokeAction("getprops", torrents.map((torrent) => torrent.id));
   };
 
   deleteTorrents(torrents: UtorrentTorrent[]): Promise<void> {
@@ -87,17 +87,17 @@ export class UtorrentClient extends TorrentClient<UtorrentTorrent> {
   }
 
   setLabel(torrents: UtorrentTorrent[], label: string): Promise<void> {
-    return invokeAction("setLabel", torrents.map((torrent) => torrent.hash), label);
+    return invokeAction("setLabel", torrents.map((torrent) => torrent.id), label);
   };
 
   setSpeedLimits(torrents: UtorrentTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
-    return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options);
+    return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.id), options);
   }
 
   async setRatioLimit(torrents: UtorrentTorrent[], options: TorrentRatioLimitOptions): Promise<void> {
-    const hashes = torrents.map((torrent) => torrent.hash);
-    await invokeAction("setRatioLimit", hashes, options);
-    await invokeAction("getprops", hashes);
+    const ids = torrents.map((torrent) => torrent.id);
+    await invokeAction("setRatioLimit", ids, options);
+    await invokeAction("getprops", ids);
   };
 
   private baseActionHeader: TorrentActionList<UtorrentTorrent> = [

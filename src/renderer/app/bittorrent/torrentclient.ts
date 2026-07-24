@@ -247,7 +247,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      *              This means they have just been added or never seen before since the last startup.
      *      changed {array}: array of objects inherited from 'AbstractTorrent' that have already been send before.
      *              This means they may contain partial information in which case they ar merged with any present infomation.
-     *      deleted {array}: array of string containg the hashes of which torrents to be removed from the list in the GUI.
+     *      deleted {array}: array of torrent IDs to be removed from the list in the GUI.
      * @param {boolean} fullupdate
      * @return {promise} data
      */
@@ -297,7 +297,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         if (!this.features.fileSelection && !this.features.torrentDetails) {
             throw new Error("Torrent files not supported for this client")
         }
-        return getTorrentFilesData(torrent.hash)
+        return getTorrentFilesData(torrent.id)
     }
 
     /**
@@ -382,7 +382,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             throw new Error("Torrent peers not supported for this client")
         }
 
-        return { items: await getTorrentPeersData(torrent.hash) }
+        return { items: await getTorrentPeersData(torrent.id) }
     }
 
     async getTorrentDetailsTrackers(torrent: T): Promise<TorrentDetailsTrackersData> {
@@ -391,7 +391,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         }
 
         return {
-            items: await getTorrentTrackersData(torrent.hash),
+            items: await getTorrentTrackersData(torrent.id),
         }
     }
 
@@ -538,7 +538,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         return {
             ...item,
             click: (torrents: T[]) => item.action
-                ? invokeAction(item.action, torrents.map((torrent) => torrent.hash))
+                ? invokeAction(item.action, torrents.map((torrent) => torrent.id))
                 : Promise.resolve(),
             check: item.checkProperty
                 ? (torrent: T) => !!(torrent as unknown as Record<string, unknown>)[item.checkProperty!]

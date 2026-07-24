@@ -26,7 +26,7 @@ export class TorrentDetailsPeersTabController {
   static $inject = ["$scope", "$rootScope", "settingsService"]
 
   private requestId = 0
-  private torrentHash?: string
+  private torrentId?: string
 
   constructor(
     public scope: TorrentDetailsPeersTabScope,
@@ -98,8 +98,8 @@ export class TorrentDetailsPeersTabController {
       return
     }
 
-    if (this.torrentHash !== torrent.hash) {
-      this.torrentHash = torrent.hash
+    if (this.torrentId !== torrent.id) {
+      this.torrentId = torrent.id
       this.scope.peers = { items: [] }
       this.scope.loaded = false
     }

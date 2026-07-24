@@ -16,6 +16,7 @@ export class TransmissionTorrent extends Torrent {
 
     constructor(data: Record<string, any>) {
         super({
+            id: data.hashString,
             hash: data.hashString, /* Hash (string): unique identifier for the torrent */
             name: data.name, /* Name (string): the name of the torrent */
             size: data.totalSize, /* Size (integer): size of the file to be downloaded in bytes */

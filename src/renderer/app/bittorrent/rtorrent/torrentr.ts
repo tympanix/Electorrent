@@ -22,6 +22,7 @@ export class RtorrentTorrent extends Torrent {
     constructor(data: Record<string, any>) {
 
         super({
+            id: data.hash,
             hash: data.hash, /* Hash (string): unique identifier for the torrent */
             name: data.name, /* Name (string): the name of the torrent */
             size: data.size, /* Size (integer): size of the file to be downloaded in bytes */

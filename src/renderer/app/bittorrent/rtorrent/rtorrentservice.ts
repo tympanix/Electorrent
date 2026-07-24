@@ -34,43 +34,43 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     };
 
     start(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("start", torrents.map((torrent) => torrent.hash))
+      return invokeAction("start", torrents.map((torrent) => torrent.id))
     };
 
     stop(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("stop", torrents.map((torrent) => torrent.hash))
+      return invokeAction("stop", torrents.map((torrent) => torrent.id))
     };
 
     label(torrents: RtorrentTorrent[], label: string): Promise<void> {
-      return invokeAction("label", torrents.map((torrent) => torrent.hash), label)
+      return invokeAction("label", torrents.map((torrent) => torrent.id), label)
     };
 
     remove(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("remove", torrents.map((torrent) => torrent.hash))
+      return invokeAction("remove", torrents.map((torrent) => torrent.id))
     };
 
     deleteAndErase(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("deleteAndErase", torrents.map((torrent) => torrent.hash))
+      return invokeAction("deleteAndErase", torrents.map((torrent) => torrent.id))
     };
 
     recheck(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("recheck", torrents.map((torrent) => torrent.hash))
+      return invokeAction("recheck", torrents.map((torrent) => torrent.id))
     };
 
     priorityHigh(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("priorityHigh", torrents.map((torrent) => torrent.hash))
+      return invokeAction("priorityHigh", torrents.map((torrent) => torrent.id))
     };
 
     priorityNormal(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("priorityNormal", torrents.map((torrent) => torrent.hash))
+      return invokeAction("priorityNormal", torrents.map((torrent) => torrent.id))
     };
 
     priorityLow(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("priorityLow", torrents.map((torrent) => torrent.hash))
+      return invokeAction("priorityLow", torrents.map((torrent) => torrent.id))
     };
 
     priorityOff(torrents: RtorrentTorrent[]): Promise<void> {
-      return invokeAction("priorityOff", torrents.map((torrent) => torrent.hash))
+      return invokeAction("priorityOff", torrents.map((torrent) => torrent.id))
     };
 
     deleteTorrents(torrents: RtorrentTorrent[]): Promise<void> {
@@ -78,11 +78,11 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
     }
 
     setSpeedLimits(torrents: RtorrentTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
-      return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.hash), options)
+      return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.id), options)
     }
 
     protected getTorrentDetailsData(torrent: RtorrentTorrent): Promise<BittorrentTorrentDetailsData> {
-      return getTorrentDetails(torrent.hash)
+      return getTorrentDetails(torrent.id)
     }
 
     protected getTorrentDetailsInfoSections(torrent: RtorrentTorrent, details: BittorrentTorrentDetailsData): TorrentDetailsInfoSection[] {
