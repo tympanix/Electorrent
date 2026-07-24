@@ -153,6 +153,32 @@
     </context-menu>
 
     <modal
+        id="setLabelModal"
+        size="tiny"
+        approve="assignExistingLabel()"
+        ng-ref="setLabelModalRef">
+        <div class="header">
+            <i class="tag icon"></i>
+            Set Label
+        </div>
+        <div class="content">
+            <div class="ui form">
+                <div class="field">
+                    <label for="set-label-select">Label</label>
+                    <select id="set-label-select" class="ui fluid dropdown" ng-model="labelAssignment.label" ng-options="label for label in labels"></select>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <button type="button" class="ui black deny button">Cancel</button>
+            <button type="button" class="ui green right labeled icon approve button" ng-disabled="!labelAssignment.label">
+                Apply Label
+                <i class="tag icon"></i>
+            </button>
+        </div>
+    </modal>
+
+    <modal
         id="deleteTorrentModal"
         size="tiny"
         approve="confirmDelete()"

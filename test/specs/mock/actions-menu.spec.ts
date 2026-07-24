@@ -27,6 +27,7 @@ describe("mock Actions menu", function () {
       "Queue",
       "Sequential Download",
       "Set Location",
+      "Set Label",
       "Set Speed Limits",
       "Set Ratio",
       "Remove",
@@ -49,6 +50,18 @@ describe("mock Actions menu", function () {
     const detailsShortcut = $("//button[contains(@class, 'title-bar-menu-item')][.//span[normalize-space(.)='Details']]//span[contains(@class, 'title-bar-menu-accelerator')]")
     await detailsShortcut.waitForDisplayed()
     assert.notInclude(await detailsShortcut.getText(), "CmdOrCtrl")
+  })
+
+  it("exposes the label action and shortcut in the title menu", async function () {
+    await browser.keys("Escape")
+
+    const actionsMenu = $("//button[contains(@class, 'title-bar-menu-trigger') and normalize-space(.)='Actions']")
+    await actionsMenu.waitForClickable()
+    await actionsMenu.click()
+
+    const labelAction = $("//button[contains(@class, 'title-bar-menu-item')][.//span[normalize-space(.)='Set Label']]")
+    await labelAction.waitForEnabled()
+    assert.include(await labelAction.$(".title-bar-menu-accelerator").getText(), "L")
   })
 
   it("opens submenu items in a flyout to the right", async function () {

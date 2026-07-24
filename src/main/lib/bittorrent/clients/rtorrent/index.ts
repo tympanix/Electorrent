@@ -31,6 +31,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
             { label: "Low", action: "priorityLow" },
             { label: "Don't Download", action: "priorityOff" },
         ] },
+        { role: "set-label", label: "Set Label", icon: "tag" },
         { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
         { role: "remove", label: "Remove", action: "remove", icon: "remove" },
         { label: "Remove and Delete", action: "deleteAndErase", icon: "trash", role: "delete" },
