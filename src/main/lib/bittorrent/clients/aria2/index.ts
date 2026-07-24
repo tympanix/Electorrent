@@ -569,15 +569,13 @@ export class Aria2Runtime implements BittorrentRuntime {
         const resolvedGids = this.resolveGids(hashes)
         const statuses = await this.client().multicall<Aria2TorrentData>(resolvedGids.map((gid) => ({
             method: "aria2.tellStatus",
-            params: [gid, ["gid", "following", "followedBy"]],
+            params: [gid, ["gid", "following"]],
         })))
-        const gids = [...new Set(statuses.flatMap((status, index) => [
-            nonEmptyString(status.gid) || resolvedGids[index],
-            ...(nonEmptyString(status.following) ? [status.following as string] : []),
-            ...(Array.isArray(status.followedBy)
-                ? status.followedBy.filter((gid): gid is string => typeof gid === "string" && gid.length > 0)
-                : []),
-        ]))]
+        const gids = [...new Set(statuses.flatMap((status, index) => {
+            const gid = nonEmptyString(status.gid) || resolvedGids[index]
+            const following = nonEmptyString(status.following)
+            return following ? [gid, following] : [gid]
+        }))]
         await this.ignoreMissing(this.client().multicall(gids.map((gid) => ({ method: "aria2.remove", params: [gid] }))))
         await this.removeDownloadResults(gids)
         hashes.forEach((hash) => this.selectedFilesByHash.delete(hash.toLowerCase()))
