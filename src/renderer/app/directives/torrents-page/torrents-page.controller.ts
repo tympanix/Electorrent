@@ -281,6 +281,10 @@ export class TorrentsPageController {
             syncAfterTorrentMutation();
         });
 
+        $scope.$on("torrentLabel:updated", () => {
+            syncAfterTorrentMutation();
+        });
+
         $scope.$on("$destroy", () => {
             void window.electorrent.bittorrent.setSelectedTorrents([]);
         });
@@ -752,6 +756,12 @@ export class TorrentsPageController {
             if (item?.role === "set-location") {
                 if (selected.length >= 1) {
                     $rootScope.$emit("torrentLocation:open", selected.slice());
+                }
+                return $q.resolve();
+            }
+            if (item?.role === "set-label") {
+                if (selected.length >= 1) {
+                    $rootScope.$emit("torrentLabel:open", selected.slice());
                 }
                 return $q.resolve();
             }

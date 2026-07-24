@@ -20,6 +20,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
         { label: "Force Start", action: "forcestart", icon: "flag" },
         { label: "Move Up Queue", action: "queueup", icon: "arrow up" },
         { label: "Move Queue Down", action: "queuedown", icon: "arrow down" },
+        { role: "set-label", label: "Set Label", icon: "tag" },
         { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
         { role: "remove", label: "Remove", action: "remove", icon: "remove" },
         { label: "Remove And", menu: [

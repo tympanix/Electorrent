@@ -1,0 +1,37 @@
+<modal
+    id="setLabelModal"
+    size="tiny"
+    approve="ctl.apply()"
+    on-hidden="ctl.onHidden()"
+    ng-ref="ctl.modalref">
+    <div class="header">
+        <i class="tag icon"></i>
+        Set Label
+    </div>
+    <div class="content">
+        <div class="ui form">
+            <div class="field">
+                <label for="set-label-dropdown">Label</label>
+                <dropdown
+                    id="set-label-dropdown"
+                    title="Select label"
+                    class="fluid"
+                    open-on-focus="false"
+                    ng-model="ctl.scope.label">
+                    <dropdown-group ng-repeat="label in ctl.scope.labels track by label" title="label" value="label">
+                        <span class="set-label-dropdown-chip" label-chip="label">
+                            <span class="label-chip-text">{{ label }}</span>
+                        </span>
+                    </dropdown-group>
+                </dropdown>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <button type="button" class="ui black deny button">Cancel</button>
+        <button type="button" class="ui green right labeled icon approve button" ng-disabled="!ctl.scope.label">
+            Apply Label
+            <i class="tag icon"></i>
+        </button>
+    </div>
+</modal>
