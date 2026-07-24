@@ -66,16 +66,16 @@ export function configureSpec(options: { login?: boolean, clearTorrents?: boolea
 }
 
 async function removeAllTorrents(app: App) {
-  const rows = await $$("[data-hash]")
-  const hashes: string[] = []
+  const rows = await $$("[data-id]")
+  const ids: string[] = []
   for (let index = 0; index < await rows.length; index += 1) {
-    const hash = await rows[index].getAttribute("data-hash")
-    if (hash) {
-      hashes.push(hash)
+    const id = await rows[index].getAttribute("data-id")
+    if (id) {
+      ids.push(id)
     }
   }
-  for (const hash of new Set(hashes.filter((value): value is string => Boolean(value)))) {
-    const torrent = new Torrent({ hash, app })
+  for (const id of new Set(ids.filter((value): value is string => Boolean(value)))) {
+    const torrent = new Torrent({ id, app })
     if (await torrent.isExisting()) {
       await torrent.delete()
     }

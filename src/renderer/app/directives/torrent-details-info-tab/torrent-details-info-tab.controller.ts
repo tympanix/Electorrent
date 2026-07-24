@@ -15,7 +15,7 @@ export class TorrentDetailsInfoTabController {
   static $inject = ["$scope", "$rootScope", "$filter"];
 
   private requestId = 0;
-  private torrentHash?: string;
+  private torrentId?: string;
 
   constructor(
     public scope: TorrentDetailsInfoTabScope,
@@ -88,8 +88,8 @@ export class TorrentDetailsInfoTabController {
       return;
     }
 
-    if (this.torrentHash !== torrent.hash) {
-      this.torrentHash = torrent.hash;
+    if (this.torrentId !== torrent.id) {
+      this.torrentId = torrent.id;
       this.scope.sections = [];
       this.scope.loaded = false;
     }

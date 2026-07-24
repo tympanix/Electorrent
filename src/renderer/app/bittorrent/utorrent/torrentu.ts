@@ -99,6 +99,7 @@ export class UtorrentTorrent extends Torrent {
     constructor(data: UtorrentApiTorrent) {
 
         super({
+            id: data.hash,
             hash: data.hash,
             name: data.name,
             size: data.size,

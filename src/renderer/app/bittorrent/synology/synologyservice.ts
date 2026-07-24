@@ -36,19 +36,19 @@ export class SynologyClient extends TorrentClient<SynologyTorrent> {
     }
 
     start(torrents: SynologyTorrent[]): Promise<void> {
-        return invokeAction("start", torrents.map((torrent) => torrent.hash));
+        return invokeAction("start", torrents.map((torrent) => torrent.id));
     }
 
     pause(torrents: SynologyTorrent[]): Promise<void> {
-        return invokeAction("pause", torrents.map((torrent) => torrent.hash));
+        return invokeAction("pause", torrents.map((torrent) => torrent.id));
     }
 
     remove(torrents: SynologyTorrent[]): Promise<void> {
-        return invokeAction("remove", torrents.map((torrent) => torrent.hash));
+        return invokeAction("remove", torrents.map((torrent) => torrent.id));
     }
 
     setLocation(torrents: SynologyTorrent[], location: string): Promise<void> {
-        return invokeAction("setLocation", torrents.map((torrent) => torrent.hash), location);
+        return invokeAction("setLocation", torrents.map((torrent) => torrent.id), location);
     }
 
     deleteTorrents(torrents: SynologyTorrent[]): Promise<void> {

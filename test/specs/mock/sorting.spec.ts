@@ -74,7 +74,7 @@ describe("mock torrent table sorting", function () {
   }
 
   async function waitForMockRows(expectedCount = 1) {
-    await eventually(async () => (await $$("#torrentTable tbody tr[data-hash]")).length)
+    await eventually(async () => (await $$("#torrentTable tbody tr[data-id]")).length)
       .satisfies(`be at least ${expectedCount}`, (count) => count >= expectedCount)
   }
 
@@ -104,7 +104,7 @@ describe("mock torrent table sorting", function () {
 
   async function getColumnValues(column: string) {
     await waitForMockRows(sortingScenario.length)
-    const cells = await $$(`#torrentTable tbody tr[data-hash] td[data-col='${column}']`)
+    const cells = await $$(`#torrentTable tbody tr[data-id] td[data-col='${column}']`)
     const values: string[] = []
     for (const cell of cells) {
       values.push((await cell.getText()).trim())
@@ -112,17 +112,17 @@ describe("mock torrent table sorting", function () {
     return values
   }
 
-  async function getSelectedHashes() {
-    const rows = await $$("#torrentTable tbody tr.active[data-hash]")
-    const hashes: string[] = []
+  async function getSelectedIds() {
+    const rows = await $$("#torrentTable tbody tr.active[data-id]")
+    const ids: string[] = []
     for (const row of rows) {
-      hashes.push(await row.getAttribute("data-hash"))
+      ids.push(await row.getAttribute("data-id"))
     }
-    return hashes
+    return ids
   }
 
-  async function expectSelectedHashes(expected: string[]) {
-    await eventually(async () => (await getSelectedHashes()).join(","))
+  async function expectSelectedIds(expected: string[]) {
+    await eventually(async () => (await getSelectedIds()).join(","))
       .equals(expected.join(","))
   }
 
@@ -165,7 +165,7 @@ describe("mock torrent table sorting", function () {
 
   async function getProgressRows() {
     await waitForMockRows(sortingScenario.length)
-    const cells = await $$("#torrentTable tbody tr[data-hash] td[data-col='percent']")
+    const cells = await $$("#torrentTable tbody tr[data-id] td[data-col='percent']")
     const values: Array<{ progress: number, status: string }> = []
     for (const cell of cells) {
       values.push(parseProgress((await cell.getText()).trim()))
@@ -200,41 +200,41 @@ describe("mock torrent table sorting", function () {
   }
 
   it("navigates the selected torrent with arrow keys", async function () {
-    const rows = await $$("#torrentTable tbody tr[data-hash]")
-    const hashes = await rows.map((row) => row.getAttribute("data-hash"))
+    const rows = await $$("#torrentTable tbody tr[data-id]")
+    const ids = await rows.map((row) => row.getAttribute("data-id"))
 
     await rows[1].click()
     await browser.keys([Key.ArrowDown])
-    await expectSelectedHashes([hashes[2]])
+    await expectSelectedIds([ids[2]])
 
     await browser.keys([Key.ArrowUp])
-    await expectSelectedHashes([hashes[1]])
+    await expectSelectedIds([ids[1]])
   })
 
   it("extends the torrent selection with shift and arrow keys", async function () {
-    const rows = await $$("#torrentTable tbody tr[data-hash]")
-    const hashes = await rows.map((row) => row.getAttribute("data-hash"))
+    const rows = await $$("#torrentTable tbody tr[data-id]")
+    const ids = await rows.map((row) => row.getAttribute("data-id"))
 
     await rows[2].click()
     await browser.keys([Key.Shift, Key.ArrowDown])
-    await expectSelectedHashes(hashes.slice(2, 4))
+    await expectSelectedIds(ids.slice(2, 4))
 
     await browser.keys([Key.Shift, Key.ArrowDown])
-    await expectSelectedHashes(hashes.slice(2, 5))
+    await expectSelectedIds(ids.slice(2, 5))
 
     await browser.keys([Key.Shift, Key.ArrowUp])
-    await expectSelectedHashes(hashes.slice(1, 5))
+    await expectSelectedIds(ids.slice(1, 5))
   })
 
   it("collapses multiple selections from the directional edge", async function () {
-    const rows = await $$("#torrentTable tbody tr[data-hash]")
-    const hashes = await rows.map((row) => row.getAttribute("data-hash"))
+    const rows = await $$("#torrentTable tbody tr[data-id]")
+    const ids = await rows.map((row) => row.getAttribute("data-id"))
 
     await rows[1].click()
     await shiftClick(rows[3])
-    await expectSelectedHashes(hashes.slice(1, 4))
+    await expectSelectedIds(ids.slice(1, 4))
     await browser.keys([Key.ArrowDown])
-    await expectSelectedHashes([hashes[4]])
+    await expectSelectedIds([ids[4]])
   })
 
   it("sorts by size and persists that sort after restart", async function () {

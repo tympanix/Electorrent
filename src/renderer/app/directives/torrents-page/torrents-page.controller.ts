@@ -303,7 +303,7 @@ export class TorrentsPageController {
         }
 
         function syncSelectedTorrents() {
-            void window.electorrent.bittorrent.setSelectedTorrents(selected.map((torrent) => torrent.hash));
+            void window.electorrent.bittorrent.setSelectedTorrents(selected.map((torrent) => torrent.id));
         }
 
         function syncAfterTorrentMutation() {
@@ -605,12 +605,12 @@ export class TorrentsPageController {
         };
 
         function toggleSelect(target: any) {
-            const torrent = $scope.torrents[target.hash];
+            const torrent = $scope.torrents[target.id];
             if (!torrent.selected) {
                 selected.push(torrent);
             } else {
                 selected = selected.filter((item) => {
-                    return item.hash !== torrent.hash;
+                    return item.id !== torrent.id;
                 });
             }
             torrent.selected = !torrent.selected;
@@ -627,7 +627,7 @@ export class TorrentsPageController {
 
         function singleSelect(target: any) {
             deselectAll();
-            const torrent = $scope.torrents[target.hash];
+            const torrent = $scope.torrents[target.id];
             if (!torrent) {
                 return;
             }
@@ -706,18 +706,10 @@ export class TorrentsPageController {
             }
             $scope.torrentLimit = Math.max($scope.torrentLimit, targetIndex + 1);
             $timeout(() => {
-                document.querySelector<HTMLElement>(`#torrentTable tbody tr[data-hash="${target.hash.toLowerCase()}"]`)
+                document.querySelector<HTMLElement>(`#torrentTable tbody tr[data-id="${target.id.toLowerCase()}"]`)
                     ?.scrollIntoView({ block: "nearest" });
             });
         };
-
-        function getSelectedHashes() {
-            const hashes: string[] = [];
-            angular.forEach(selected, (torrent: any) => {
-                hashes.push(torrent.hash);
-            });
-            return hashes;
-        }
 
         $scope.doAction = (action: any, name: string, data: any, ...args: any[]) => {
             return action.call($rootScope.$btclient, selected, data, ...args)
@@ -890,11 +882,11 @@ export class TorrentsPageController {
             if ($scope.filters.search) {
                 const value = search || $scope.filters.search;
                 fuse.setCollection(torrents);
-                const matchingHashes = torrents.filter((torrent) => {
+                const matchingInfoHashes = torrents.filter((torrent) => {
                     return typeof torrent.hash === "string"
                         && torrent.hash.toLowerCase().includes(value.toLowerCase());
                 });
-                return Array.from(new Set([...fuse.search(value), ...matchingHashes]));
+                return Array.from(new Set([...fuse.search(value), ...matchingInfoHashes]));
             }
             return torrents;
         }
@@ -915,7 +907,7 @@ export class TorrentsPageController {
         function reassignSelected() {
             const newSelected: any[] = [];
             selected.forEach((torrent) => {
-                const delegate = $scope.torrents[torrent.hash];
+                const delegate = $scope.torrents[torrent.id];
                 if (delegate) {
                     delegate.selected = true;
                     newSelected.push(delegate);
@@ -929,7 +921,7 @@ export class TorrentsPageController {
             if (!lastSelected) {
                 return;
             }
-            const lastDelegate = $scope.torrents[lastSelected.hash];
+            const lastDelegate = $scope.torrents[lastSelected.id];
             if (lastDelegate) {
                 lastSelected = lastDelegate;
             } else {
@@ -937,11 +929,11 @@ export class TorrentsPageController {
             }
         }
 
-        function clearDeletedSelections(deletedHashes: string[]) {
-            const deletedHashSet = new Set(deletedHashes);
+        function clearDeletedSelections(deletedIds: string[]) {
+            const deletedIdSet = new Set(deletedIds);
 
             selected = selected.filter((torrent) => {
-                if (deletedHashSet.has(torrent.hash)) {
+                if (deletedIdSet.has(torrent.id)) {
                     torrent.selected = false;
                     return false;
                 }
@@ -949,7 +941,7 @@ export class TorrentsPageController {
                 return true;
             });
 
-            if (lastSelected && deletedHashSet.has(lastSelected.hash)) {
+            if (lastSelected && deletedIdSet.has(lastSelected.id)) {
                 lastSelected = null;
             }
         }
@@ -1012,8 +1004,8 @@ export class TorrentsPageController {
                 const torrentMap: Record<string, any> = {};
                 for (let index = 0; index < torrents.all.length; index += 1) {
                     const torrent = torrents.all[index];
-                    torrentMap[torrent.hash] = torrent;
-                    const oldTorrent = $scope.torrents[torrent.hash];
+                    torrentMap[torrent.id] = torrent;
+                    const oldTorrent = $scope.torrents[torrent.id];
                     checkNotification(oldTorrent, torrent);
                 }
                 $scope.torrents = torrentMap;
@@ -1036,13 +1028,13 @@ export class TorrentsPageController {
             if (torrents.changed && torrents.changed.length > 0) {
                 for (let index = 0; index < torrents.changed.length; index += 1) {
                     const torrent = torrents.changed[index];
-                    const existing = $scope.torrents[torrent.hash];
+                    const existing = $scope.torrents[torrent.id];
                     checkNotification(existing, torrent);
 
                     if (existing) {
                         existing.update(torrent);
                     } else {
-                        $scope.torrents[torrent.hash] = torrent;
+                        $scope.torrents[torrent.id] = torrent;
                     }
                 }
                 refreshTorrents();

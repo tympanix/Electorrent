@@ -14,6 +14,7 @@ export interface TorrentFile {
 }
 
 export interface TorrentProps {
+    id: string
     hash: string
     status?: number
     name?: string
@@ -50,6 +51,7 @@ export abstract class Torrent implements TorrentProps {
     cleanedName: string
 
     // Inherited fields
+    id: string
     hash: string
     status: number
     name: string
