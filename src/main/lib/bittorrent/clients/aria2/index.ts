@@ -21,7 +21,6 @@ const TORRENT_FIELDS = [
 ]
 
 const MAX_RESULTS = 2_147_483_647
-const REMOVABLE_STATUSES = new Set(["active", "waiting", "paused"])
 const CHANGEABLE_STATUSES = new Set(["active", "waiting", "paused"])
 const STOPPED_STATUSES = new Set(["complete", "error", "removed"])
 
@@ -29,6 +28,7 @@ interface Aria2TorrentData extends Record<string, unknown> {
     gid?: unknown
     status?: unknown
     bittorrent?: unknown
+    following?: unknown
     followedBy?: unknown
 }
 
@@ -566,9 +566,17 @@ export class Aria2Runtime implements BittorrentRuntime {
     }
 
     async remove(hashes: string[]): Promise<void> {
-        const gids = this.resolveGids(hashes)
-        const activeGids = gids.filter((gid) => REMOVABLE_STATUSES.has(this.statusByGid.get(gid) || ""))
-        await this.ignoreMissing(this.client().multicall(activeGids.map((gid) => ({ method: "aria2.remove", params: [gid] }))))
+        const resolvedGids = this.resolveGids(hashes)
+        const statuses = await this.client().multicall<Aria2TorrentData>(resolvedGids.map((gid) => ({
+            method: "aria2.tellStatus",
+            params: [gid, ["gid", "following"]],
+        })))
+        const gids = [...new Set(statuses.flatMap((status, index) => {
+            const gid = nonEmptyString(status.gid) || resolvedGids[index]
+            const following = nonEmptyString(status.following)
+            return following ? [gid, following] : [gid]
+        }))]
+        await this.ignoreMissing(this.client().multicall(gids.map((gid) => ({ method: "aria2.remove", params: [gid] }))))
         await this.removeDownloadResults(gids)
         hashes.forEach((hash) => this.selectedFilesByHash.delete(hash.toLowerCase()))
     }
