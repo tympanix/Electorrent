@@ -102,7 +102,6 @@ const rendererConfig = {
   entry: {
     app: [
       path.resolve(__dirname, 'src/renderer/vendor.ts'),
-      path.resolve(__dirname, 'src/renderer/styles/assets/fonts/bittorrent.font.json'),
       path.resolve(__dirname, 'src/renderer/app.ts'),
     ],
     light: path.resolve(__dirname, 'src/renderer/styles/entries/light.less'),
@@ -117,14 +116,6 @@ const rendererConfig = {
   module: {
     rules: [
       makeTsRule('src/renderer/tsconfig.json'),
-      {
-        test: /\.font\.json$/i,
-        type: 'javascript/auto',
-        use: [
-          'null-loader',
-          'webfonts-loader',
-        ],
-      },
       {
         test: /\.less$/i,
         use: [
@@ -149,7 +140,7 @@ const rendererConfig = {
               },
             },
           },
-          'import-glob-loader',
+          'glob-import-loader',
         ],
       },
       {

@@ -9,7 +9,7 @@
     "app": "electron app/main.js",
     "app:debug": "NODE_ENV=test npm run app -- --force-title-bar-menu",
     "build": "npm run build:webpack",
-    "build:webpack": "webpack --config webpack.config.js",
+    "build:webpack": "node ./scripts/generate-icon-fonts.js && webpack --config webpack.config.js",
     "build:watch": "webpack --config webpack.config.js --watch",
     "postinstall": "electron-builder install-app-deps",
     "pack": "electron-builder --dir",
@@ -68,17 +68,17 @@
     "@wdio/types": "^9.27.1",
     "angular": "^1.8.2",
     "angular-animate": "^1.8.2",
-    "angular-marked": "^1.2.2",
     "angular-resource": "^1.8.2",
     "angular-table-resize": "^3.0.0",
     "angular-ui-sortable": "^0.19.0",
     "axios": "^1.18.1",
     "base64-js": "^1.2.0",
-    "chai": "^4.2.0",
+    "chai": "^4.5.0",
     "chai-as-promised": "^7.1.1",
     "copy-webpack-plugin": "^13.0.1",
     "css-loader": "^7.1.2",
     "docker-compose": "^1.3.1",
+    "dompurify": "^3.4.12",
     "electron": "^42.0.1",
     "electron-builder": "^26.8.1",
     "electron-builder-squirrel-windows": "^26.8.1",
@@ -88,15 +88,14 @@
     "eslint": "^8.57.1",
     "form-data": "^4.0.4",
     "fuse.js": "^3.0.5",
-    "hoek": "^5.0.4",
+    "glob-import-loader": "^2.0.0",
     "html-loader": "^3.0.1",
     "html-webpack-plugin": "^5.6.7",
-    "import-glob-loader": "^1.1.0",
     "jquery": "^3.0.0",
     "jquery-ui-dist": "1.12.1",
     "less-loader": "^12.3.0",
     "magnet-uri": "^6.2.0",
-    "marked": "~0.3.1",
+    "marked": "4.3.0",
     "mini-css-extract-plugin": "^2.9.4",
     "mocha": "^10.2.0",
     "moment": "^2.13.0",
@@ -109,14 +108,14 @@
     "request": "^2.88.2",
     "semantic-ui-css": "~2.4.1",
     "semantic-ui-less": "~2.4.1",
-    "semver": "^5.7.1",
+    "semver": "^7.8.5",
     "terser-webpack-plugin": "^5.3.12",
     "ts-loader": "^9.6.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
-    "underscore": "^1.8.3",
+    "underscore": "^1.13.8",
     "wdio": "^6.0.1",
-    "webfonts-loader": "^8.1.1",
+    "webfont": "^11.2.26",
     "webpack": "^5.105.0",
     "webpack-cli": "^6.0.1",
     "webpack-node-externals": "^3.0.0",
@@ -129,6 +128,22 @@
     "@types/tapable": "1.0.0"
   },
   "overrides": {
-    "form-data": "$form-data"
+    "form-data": "$form-data",
+    "basic-ftp": "^5.3.1",
+    "@wdio/config": {
+      "minimatch": {
+        "brace-expansion": "^2.1.2"
+      }
+    },
+    "braces": "^3.0.3",
+    "js-yaml": "^4.3.0",
+    "request": {
+      "qs": "^6.14.1"
+    },
+    "serialize-javascript": "^7.0.5",
+    "tar": "^7.5.19",
+    "ts-loader": {
+      "loader-utils": "^2.0.4"
+    }
   }
 }

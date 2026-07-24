@@ -12,7 +12,7 @@ import 'angular-resource'
 import 'angular-animate'
 import 'angular-table-resize/dist/angular-table-resize.js'
 import './app/vendor/ng-infinite-scroll.js'
-import 'angular-marked'
+import './app/vendor/marked'
 import 'angular-ui-sortable'
 import 'semantic-ui-css/semantic.min.js'
 
