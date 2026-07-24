@@ -75,6 +75,14 @@ describe("upload queue", function () {
       for (const torrent of uploadedTorrents) {
         await torrent.waitForExist({ timeout: 30 * 1000 })
       }
+      const magnetTorrent = uploadedTorrents[0]
+      await eventually(() => magnetTorrent.getColumn("decodedName")).satisfies(
+        "not contain [METADATA]",
+        (name) => !/\[metadata\]/i.test(name),
+        { timeout: 30 * 1000 },
+      )
+      await magnetTorrent.waitForStates(["Seeding", "Finished"], { timeout: 120 * 1000 })
+      await magnetTorrent.delete()
     } finally {
       for (const torrent of uploadedTorrents) {
         if (await torrent.isExisting()) {
