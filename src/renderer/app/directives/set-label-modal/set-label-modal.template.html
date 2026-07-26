@@ -1,7 +1,6 @@
 <modal
     id="setLabelModal"
     size="tiny"
-    approve="ctl.apply()"
     on-hidden="ctl.onHidden()"
     ng-ref="ctl.modalref">
     <div class="header">
@@ -9,7 +8,7 @@
         Set Label
     </div>
     <div class="content">
-        <div class="ui form">
+        <form id="set-label-form" class="ui form" ng-submit="ctl.apply()" ng-keydown="ctl.submitOnEnter($event)">
             <div class="field">
                 <label for="set-label-dropdown">Label</label>
                 <dropdown
@@ -25,11 +24,15 @@
                     </dropdown-group>
                 </dropdown>
             </div>
-        </div>
+        </form>
     </div>
     <div class="actions">
         <button type="button" class="ui black deny button">Cancel</button>
-        <button type="button" class="ui green right labeled icon approve button" ng-disabled="!ctl.scope.label">
+        <button
+            type="submit"
+            form="set-label-form"
+            class="ui green right labeled icon button"
+            ng-disabled="!ctl.scope.label">
             Apply Label
             <i class="tag icon"></i>
         </button>

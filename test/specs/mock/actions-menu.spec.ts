@@ -1,6 +1,7 @@
 import chai from "chai"
 import { $, browser } from "@wdio/globals"
 import { eventually } from "../../e2e/eventually"
+import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
 import { configureSpec } from "../../framework/fixture"
 
 const assert: Chai.AssertStatic = chai.assert
@@ -91,7 +92,36 @@ describe("mock Actions menu", function () {
     const flyoutX = await queueFlyout.getLocation("x")
     assert.isAtLeast(flyoutX, triggerX + triggerWidth - 2)
   })
+
+  it("closes modals with Escape and submits the Set Label form with Enter", async function () {
+    const modal = await openSetLabelModal()
+
+    await browser.keys("Escape")
+    await waitForModalClose(modal)
+
+    await openSetLabelModal()
+    await browser.keys("Enter")
+    await waitForModalClose(modal)
+
+    const label = await $("#torrentTable tbody tr[data-id] td[data-col='label']").getText()
+    assert.equal(label.trim(), "mock-label-1")
+  })
 })
+
+async function openSetLabelModal() {
+  const row = $("#torrentTable tbody tr[data-id]")
+  await row.waitForClickable()
+  await row.click({ button: "right" })
+
+  const action = $("#contextmenu a[data-role='set-label']")
+  await action.waitForDisplayed()
+  await action.waitForClickable()
+  await action.click()
+
+  const modal = $("#setLabelModal")
+  await waitForModalOpen(modal)
+  return modal
+}
 
 async function getActionsMenu() {
   return browser.electron.execute((electron) => {
