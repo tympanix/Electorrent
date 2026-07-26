@@ -152,7 +152,11 @@
     <context-menu id="contextmenu" bind="contextMenu" menu="$btclient.contextMenu" click="doContextAction" debug="debug">
     </context-menu>
 
-    <set-label-modal labels="labels"></set-label-modal>
+    <set-label-modal
+        labels="labels"
+        modal-ref="setLabelModalRef"
+        on-saved="syncAfterTorrentMutation">
+    </set-label-modal>
 
     <modal
         id="deleteTorrentModal"
@@ -189,6 +193,12 @@
         upload-torrent-url-action="uploadTorrentURL">
     </add-torrent-modal>
 
-    <torrent-files-modal on-saved="syncAfterTorrentMutation"></torrent-files-modal>
-    <set-location-modal></set-location-modal>
+    <torrent-files-modal
+        modal-ref="torrentFilesModalRef"
+        on-saved="syncAfterTorrentMutation">
+    </torrent-files-modal>
+    <set-location-modal
+        modal-ref="setLocationModalRef"
+        on-saved="syncAfterTorrentMutation">
+    </set-location-modal>
 </div>

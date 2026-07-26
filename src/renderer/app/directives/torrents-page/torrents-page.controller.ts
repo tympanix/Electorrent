@@ -16,6 +16,9 @@ interface TorrentControllerScope extends angular.IScope {
     };
     speedLimitModalRef?: { open(torrents: any[]): void };
     setRatioModalRef?: { open(torrents: any[]): void };
+    torrentFilesModalRef?: { open(torrent: any): void };
+    setLocationModalRef?: { open(torrents: any[]): void };
+    setLabelModalRef?: { open(torrents: any[]): void };
     [key: string]: any;
 }
 
@@ -275,14 +278,6 @@ export class TorrentsPageController {
             if (bound && "click" in bound) {
                 $scope.doContextAction(bound.click, bound.label, bound);
             }
-        });
-
-        $scope.$on("torrentLocation:updated", () => {
-            syncAfterTorrentMutation();
-        });
-
-        $scope.$on("torrentLabel:updated", () => {
-            syncAfterTorrentMutation();
         });
 
         $scope.$on("$destroy", () => {
@@ -749,19 +744,19 @@ export class TorrentsPageController {
             }
             if (item?.role === "files") {
                 if (selected.length >= 1) {
-                    $rootScope.$emit("torrentFiles:open", selected[0]);
+                    $scope.torrentFilesModalRef?.open(selected[0]);
                 }
                 return $q.resolve();
             }
             if (item?.role === "set-location") {
                 if (selected.length >= 1) {
-                    $rootScope.$emit("torrentLocation:open", selected.slice());
+                    $scope.setLocationModalRef?.open(selected.slice());
                 }
                 return $q.resolve();
             }
             if (item?.role === "set-label") {
                 if (selected.length >= 1) {
-                    $rootScope.$emit("torrentLabel:open", selected.slice());
+                    $scope.setLabelModalRef?.open(selected.slice());
                 }
                 return $q.resolve();
             }

@@ -18,7 +18,6 @@ export class TorrentFilesModalController {
   rootScope: IRootScopeService;
   modalref: ModalController;
   $timeout: ng.ITimeoutService;
-  private unsubscribeOpen?: () => void;
 
   constructor(
     scope: TorrentFilesModalScope,
@@ -32,17 +31,7 @@ export class TorrentFilesModalController {
     this.scope.loading = false;
     this.scope.error = null;
     this.scope.onClose = () => this.close();
-
-    const off = this.rootScope.$on("torrentFiles:open", (_event, torrent) => {
-      this.open(torrent);
-    });
-    this.unsubscribeOpen = () => off();
-
-    this.scope.$on("$destroy", () => {
-      if (this.unsubscribeOpen) {
-        this.unsubscribeOpen();
-      }
-    });
+    this.scope.modalRef = this;
   }
 
   open(torrent: any) {

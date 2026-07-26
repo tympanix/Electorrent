@@ -3,6 +3,7 @@ import { TorrentFilesModalController } from "./torrent-files-modal.controller";
 import html from "./torrent-files-modal.template.html";
 
 export interface TorrentFilesModalScope extends angular.IScope {
+  modalRef?: TorrentFilesModalController;
   onSaved?: () => Promise<void> | void;
 }
 
@@ -10,6 +11,7 @@ export class TorrentFilesModalDirective implements IDirective {
   template = html;
   restrict = "E";
   scope = {
+    modalRef: "=?",
     onSaved: "<",
   };
   controller = TorrentFilesModalController;
