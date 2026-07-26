@@ -29,6 +29,14 @@ describe("mock saved servers", function () {
     })
     await app.torrentsPageIsVisible()
 
+    await serverMenu.click()
+    const serverSelection = $("//button[contains(@class, 'title-bar-menu-item')][.//span[normalize-space(.)='Server selection...']]")
+    await serverSelection.waitForClickable()
+    await serverSelection.click()
+    await app.serverSelectionPageIsVisible()
+    await app.connectServerSelection(0)
+    await app.torrentsPageIsVisible()
+
     await app.openSettings()
     await app.settingsGotoTab("servers")
     assert.include(await getSettingsServerHosts(), savedServerHost)
