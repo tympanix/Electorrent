@@ -36,6 +36,15 @@ export class SetLabelModalController {
     this.reset();
   }
 
+  submitOnEnter(event: KeyboardEvent) {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    void this.apply();
+  }
+
   async apply() {
     if (!this.scope.label || !this.scope.torrents.length) {
       return;

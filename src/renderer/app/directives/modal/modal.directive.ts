@@ -39,6 +39,17 @@ export class ModalDirective implements IDirective {
 
         controller.attachModal(modal)
 
+        const onKeyDown = (event: JQuery.KeyDownEvent) => {
+            if (event.key !== "Escape" || !modal.modal("is active")) {
+                return
+            }
+
+            event.preventDefault()
+            modal.modal("hide")
+        }
+
+        $(document).on("keydown", onKeyDown)
+
         modal.modal({
             onDeny: () => {
                 accepted = false
@@ -66,6 +77,7 @@ export class ModalDirective implements IDirective {
                 modal.modal('refresh')
             },
             closable: this.isTruthy(scope, attr.closable),
+            keyboardShortcuts: false,
             duration: 150
         });
 
@@ -76,6 +88,7 @@ export class ModalDirective implements IDirective {
         }.bind(this)
 
         scope.$on("$destroy", function() {
+            $(document).off("keydown", onKeyDown)
             element.remove();
         });
     }
