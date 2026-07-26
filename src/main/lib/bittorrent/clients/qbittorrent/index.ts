@@ -118,6 +118,8 @@ function normalizeTorrentTrackers(body: unknown): BittorrentTorrentDetailsTracke
 
 export class QBittorrentRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
+        { role: "start", label: "Start", action: "resume", icon: "play" },
+        { role: "stop", label: "Pause", action: "pause", icon: "pause" },
         { role: "details", label: "Details", icon: "info circle" },
         { role: "files", label: "Files", icon: "file" },
         { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },

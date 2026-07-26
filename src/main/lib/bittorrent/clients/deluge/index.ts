@@ -62,6 +62,8 @@ const DELUGE_TORRENT_FILES_FIELDS = ["files", "file_progress", "file_priorities"
 
 export class DelugeRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
+        { role: "start", label: "Start", action: "resume", icon: "play" },
+        { role: "stop", label: "Pause", action: "pause", icon: "pause" },
         { role: "details", label: "Details", icon: "info circle" },
         { role: "verify", label: "Verify", action: "verify", icon: "checkmark" },
         { label: "Move Queue Up", action: "queueUp", icon: "arrow up" },

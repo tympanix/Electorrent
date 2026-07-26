@@ -101,8 +101,8 @@ const TRANSMISSION_TORRENT_FILES_FIELDS = ['files', 'fileStats', 'priorities', '
 export class TransmissionRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
         { role: "details", label: "Details", icon: "info circle" },
-        { label: "Start", action: "start", icon: "play" },
-        { label: "Pause", action: "stop", icon: "pause" },
+        { role: "start", label: "Start", action: "start", icon: "play" },
+        { role: "stop", label: "Pause", action: "stop", icon: "pause" },
         { role: "verify", label: "Verify", action: "verify", icon: "checkmark" },
         { label: "Move Up Queue", action: "queueUp", icon: "arrow up" },
         { label: "Move Queue Down", action: "queueDown", icon: "arrow down" },

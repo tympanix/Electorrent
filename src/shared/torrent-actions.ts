@@ -1,4 +1,6 @@
 export type TorrentActionRole =
+    | "start"
+    | "stop"
     | "details"
     | "files"
     | "verify"
@@ -20,6 +22,8 @@ export interface TorrentActionItem {
 }
 
 const COMMON_ACCELERATORS: Partial<Record<TorrentActionRole, string>> = {
+    start: "CmdOrCtrl+Alt+S",
+    stop: "CmdOrCtrl+Alt+P",
     details: "CmdOrCtrl+D",
     files: "CmdOrCtrl+Shift+D",
     verify: "CmdOrCtrl+Shift+R",

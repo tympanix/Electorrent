@@ -16,6 +16,8 @@ import type { TorrentActionItem } from '@shared/torrent-actions'
 
 export class UtorrentRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
+        { role: "start", label: "Start", action: "start", icon: "play" },
+        { role: "stop", label: "Pause", action: "pause", icon: "pause" },
         { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },
         { label: "Force Start", action: "forcestart", icon: "flag" },
         { label: "Move Up Queue", action: "queueup", icon: "arrow up" },
