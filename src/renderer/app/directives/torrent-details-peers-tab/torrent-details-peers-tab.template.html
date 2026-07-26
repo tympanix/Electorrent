@@ -44,7 +44,7 @@
           <td data-col="flags">{{ peer.flags || '' }}</td>
         </tr>
         <tr ng-if="!ctl.scope.sortedPeers.length">
-          <td colspan="11">No peers connected.</td>
+          <td class="torrent-details-empty-state" colspan="11">No peers connected.</td>
         </tr>
       </tbody>
     </table>

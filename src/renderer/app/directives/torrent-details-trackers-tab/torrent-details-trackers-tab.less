@@ -1,9 +1,19 @@
 torrent-details-trackers-tab {
-    .torrent-details-trackers {
+    .torrent-details-trackers,
+    .torrent-details-trackers-content {
         flex: 1 1 auto;
         height: 100%;
         min-width: 0;
         min-height: 0;
+    }
+
+    .torrent-details-trackers {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .torrent-details-trackers-content {
         overflow: auto;
 
         > .ui.table {
