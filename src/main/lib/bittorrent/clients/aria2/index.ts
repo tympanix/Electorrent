@@ -229,8 +229,8 @@ export class Aria2Runtime implements BittorrentRuntime {
         { role: "files", label: "Files", icon: "file" },
         { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
         { role: "set-ratio", label: "Set Ratio", icon: "percent" },
-        { label: "Start", action: "resume", icon: "play" },
-        { label: "Pause", action: "pause", icon: "pause" },
+        { role: "start", label: "Start", action: "resume", icon: "play" },
+        { role: "stop", label: "Pause", action: "pause", icon: "pause" },
         { role: "delete", label: "Remove", action: "remove", icon: "remove" },
     ]
 

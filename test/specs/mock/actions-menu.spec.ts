@@ -21,6 +21,8 @@ describe("mock Actions menu", function () {
   it("contains the mock client's context actions and follows torrent selection", async function () {
     const initial = await getActionsMenu()
     assert.includeMembers(initial.labels, [
+      "Start",
+      "Pause",
       "Details",
       "Files",
       "Recheck",
@@ -50,6 +52,21 @@ describe("mock Actions menu", function () {
     const detailsShortcut = $("//button[contains(@class, 'title-bar-menu-item')][.//span[normalize-space(.)='Details']]//span[contains(@class, 'title-bar-menu-accelerator')]")
     await detailsShortcut.waitForDisplayed()
     assert.notInclude(await detailsShortcut.getText(), "CmdOrCtrl")
+  })
+
+  it("exposes common start and pause shortcuts in the title menu", async function () {
+    await browser.keys("Escape")
+
+    const actionsMenu = $("//button[contains(@class, 'title-bar-menu-trigger') and normalize-space(.)='Actions']")
+    await actionsMenu.waitForClickable()
+    await actionsMenu.click()
+
+    const startShortcut = $("//button[contains(@class, 'title-bar-menu-item')][.//span[normalize-space(.)='Start']]//span[contains(@class, 'title-bar-menu-accelerator')]")
+    const pauseShortcut = $("//button[contains(@class, 'title-bar-menu-item')][.//span[normalize-space(.)='Pause']]//span[contains(@class, 'title-bar-menu-accelerator')]")
+    await startShortcut.waitForDisplayed()
+    await pauseShortcut.waitForDisplayed()
+    assert.include(await startShortcut.getText(), "S")
+    assert.include(await pauseShortcut.getText(), "P")
   })
 
   it("exposes the label action and shortcut in the title menu", async function () {

@@ -23,6 +23,8 @@ type RtorrentMulticallCommand = string | [string, ...any[]]
 
 export class RtorrentRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
+        { role: "start", label: "Start", action: "start", icon: "play" },
+        { role: "stop", label: "Pause", action: "stop", icon: "pause" },
         { role: "details", label: "Details", icon: "info circle" },
         { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },
         { label: "Priority", menu: [
