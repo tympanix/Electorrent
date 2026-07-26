@@ -59,7 +59,7 @@
                 <button ng-disabled="$first" class="circular green ui icon mini button" ng-click="moveServerUp(server)">
                     <i class="icon arrow up"></i>
                 </button>
-                <button class="circular blue ui icon mini button" ng-click="openRenameModal(server)">
+                <button class="circular blue ui icon mini button" ng-click="renameModalRef.open(server)">
                     <i class="icon tag"></i>
                 </button>
                 <button ng-if="server.proto === 'https' && server.tlsSecurity === 'insecure'" class="circular orange ui icon mini button" ng-click="disableInsecureTls(server)" title="Disable Insecure TLS">
@@ -73,4 +73,8 @@
     </tbody>
 </table>
 
-<rename-server-modal data="renameData" approve="renameServer()"></rename-server-modal>
+<rename-server-modal
+    data="renameData"
+    approve="renameServer()"
+    modal-ref="renameModalRef">
+</rename-server-modal>

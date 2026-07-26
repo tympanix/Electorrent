@@ -127,13 +127,6 @@ export class SettingsPageController {
             $scope.settings.watchDirectory = "";
         };
 
-        $scope.openRenameModal = (server: any) => {
-            $scope.renameData.server = server;
-            $scope.renameData.name = server.getDisplayName();
-            const modal: any = $("#renameModal");
-            modal.modal("show");
-        };
-
         $scope.renameServer = () => {
             if (!$scope.renameData.name) {
                 return false;

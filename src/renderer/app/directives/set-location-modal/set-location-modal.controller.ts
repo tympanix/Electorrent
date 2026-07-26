@@ -1,10 +1,10 @@
-import { IScope } from "angular";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import type { SettingsService } from "@renderer/app/services/settings";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { SavedLocationConfig } from "@shared/ipc-contract";
+import type { SetLocationModalScope as SetLocationModalDirectiveScope } from "./set-location-modal.directive";
 
-export interface SetLocationModalScope extends IScope {
+export interface SetLocationModalScope extends SetLocationModalDirectiveScope {
   torrents: any[];
   location: string;
   loading: boolean;
@@ -18,7 +18,6 @@ export class SetLocationModalController {
   rootScope: ElectorrentRootScope;
   modalref: ModalController;
   savedLocations: SavedLocationConfig[] = [];
-  private unsubscribeOpen?: () => void;
 
   constructor(
     scope: SetLocationModalScope,
@@ -31,17 +30,7 @@ export class SetLocationModalController {
     this.scope.location = "";
     this.scope.loading = false;
     this.scope.error = null;
-
-    const off = this.rootScope.$on("torrentLocation:open", (_event, torrents) => {
-      this.open(Array.isArray(torrents) ? torrents : []);
-    });
-    this.unsubscribeOpen = () => off();
-
-    this.scope.$on("$destroy", () => {
-      if (this.unsubscribeOpen) {
-        this.unsubscribeOpen();
-      }
-    });
+    this.scope.modalRef = this;
   }
 
   private getSharedLocation(torrents: any[]) {
@@ -107,7 +96,7 @@ export class SetLocationModalController {
         throw new Error("Set location is not available for the current client");
       }
       await client.setLocation(this.scope.torrents, this.scope.location);
-      this.rootScope.$broadcast("torrentLocation:updated");
+      await this.scope.onSaved?.();
       this.close();
     } catch (err: any) {
       this.scope.error = err?.message || "Failed to set location";

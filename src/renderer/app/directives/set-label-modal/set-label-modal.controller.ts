@@ -1,9 +1,8 @@
-import { IScope } from "angular";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
+import type { SetLabelModalScope as SetLabelModalDirectiveScope } from "./set-label-modal.directive";
 
-export interface SetLabelModalScope extends IScope {
-  labels: string[];
+export interface SetLabelModalScope extends SetLabelModalDirectiveScope {
   label: string;
   torrents: any[];
 }
@@ -12,7 +11,6 @@ export class SetLabelModalController {
   static $inject = ["$scope", "$rootScope", "notificationService"];
 
   modalref: ModalController;
-  private unsubscribeOpen?: () => void;
 
   constructor(
     public readonly scope: SetLabelModalScope,
@@ -20,13 +18,7 @@ export class SetLabelModalController {
     private readonly notify: any,
   ) {
     this.reset();
-
-    const off = this.rootScope.$on("torrentLabel:open", (_event, torrents) => {
-      this.open(Array.isArray(torrents) ? torrents : []);
-    });
-    this.unsubscribeOpen = () => off();
-
-    this.scope.$on("$destroy", () => this.unsubscribeOpen?.());
+    this.scope.modalRef = this;
   }
 
   private reset() {
@@ -56,7 +48,7 @@ export class SetLabelModalController {
 
     try {
       await labelAction.click.call(this.rootScope.$btclient, this.scope.torrents, this.scope.label);
-      this.rootScope.$broadcast("torrentLabel:updated");
+      await this.scope.onSaved?.();
       this.modalref.hideModal();
     } catch (err) {
       console.error("Set label error", err);
