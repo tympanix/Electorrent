@@ -159,6 +159,7 @@ export function deriveTitleMenu(state: TitleMenuState): TitleMenuItem[] {
     ]
 
     const serverItems: TitleMenuItem[] = [
+        { label: "Server selection...", action: { type: "show-servers" } },
         { label: "Add new server...", accelerator: "CmdOrCtrl+N", action: { type: "add-server" } },
         {
             label: "Set current as default",
