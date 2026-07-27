@@ -114,6 +114,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 setLocation: true,
                 torrentDetails: true,
                 torrentPeers: true,
+                torrentTrackers: true,
                 ratioLimits: true,
                 freeDiskSpace: true,
                 uploadOptions: {

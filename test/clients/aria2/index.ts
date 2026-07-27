@@ -10,6 +10,7 @@ const features = {
   setLocation: false,
   torrentDetails: true,
   torrentPeers: true,
+  torrentTrackers: true,
   trackerFilter: true,
   alternativeSpeedLimits: false,
   speedLimits: true,

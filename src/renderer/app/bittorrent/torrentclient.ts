@@ -62,6 +62,7 @@ const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     setLocation: false,
     torrentDetails: false,
     torrentPeers: false,
+    torrentTrackers: false,
     trackerFilter: false,
     alternativeSpeedLimits: false,
     speedLimits: false,
@@ -386,8 +387,8 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
     }
 
     async getTorrentDetailsTrackers(torrent: T): Promise<TorrentDetailsTrackersData> {
-        if (!this.features.torrentDetails) {
-            throw new Error("Torrent details not supported for this client")
+        if (!this.features.torrentTrackers) {
+            throw new Error("Torrent trackers not supported for this client")
         }
 
         return {

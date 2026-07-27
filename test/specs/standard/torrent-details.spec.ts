@@ -78,6 +78,22 @@ describe("torrent details", function () {
     }
   })
 
+  it("hides unsupported peer and tracker tabs", async function () {
+    if (getTestFixture().client.features.torrentPeers === true || getTestFixture().client.features.torrentTrackers === true) {
+      return this.skip()
+    }
+
+    const panel = await torrent.openDetailsPanel()
+    try {
+      const peersTabExists = await panel.$("[data-role='torrent-details-tab-peers']").isExisting()
+      const trackersTabExists = await panel.$("[data-role='torrent-details-tab-trackers']").isExisting()
+      peersTabExists.should.equal(false)
+      trackersTabExists.should.equal(false)
+    } finally {
+      await torrent.closeDetailsPanel()
+    }
+  })
+
   it("shows expected torrent information in the info tab", async function () {
     this.timeout(60 * 1000)
 
@@ -144,6 +160,10 @@ describe("torrent details", function () {
 
   it("shows every torrent tracker in the trackers tab", async function () {
     this.timeout(60 * 1000)
+
+    if (getTestFixture().client.features.torrentTrackers !== true) {
+      return this.skip()
+    }
 
     const panel = await torrent.openDetailsPanel()
     await torrent.openDetailsTab("trackers")

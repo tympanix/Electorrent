@@ -273,6 +273,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 uploadFileSelection: true,
                 torrentDetails: true,
                 torrentPeers: true,
+                torrentTrackers: true,
                 speedLimits: true,
                 ratioLimits: true,
                 freeDiskSpace: true,
