@@ -204,8 +204,6 @@ import { TorrentFilesTreeDirective } from "@renderer/app/directives/torrent-file
 torrentApp.directive('torrentFilesTree', TorrentFilesTreeDirective.getInstance())
 import { indeterminateValueDirective } from "@renderer/app/directives/torrent-files-tree/indeterminate-value.directive";
 torrentApp.directive('indeterminateValue', indeterminateValueDirective)
-import { TorrentFilesModalDirective } from "@renderer/app/directives/torrent-files-modal/torrent-files-modal.directive";
-torrentApp.directive('torrentFilesModal', TorrentFilesModalDirective.getInstance())
 import { TorrentDetailsPanelDirective } from "@renderer/app/directives/torrent-details-panel/torrent-details-panel.directive";
 torrentApp.directive('torrentDetailsPanel', TorrentDetailsPanelDirective.getInstance())
 import { TorrentDetailsInfoTabDirective } from "@renderer/app/directives/torrent-details-info-tab/torrent-details-info-tab.directive";

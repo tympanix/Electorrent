@@ -25,7 +25,6 @@ describe("mock Actions menu", function () {
       "Start",
       "Pause",
       "Details",
-      "Files",
       "Recheck",
       "Queue",
       "Sequential Download",

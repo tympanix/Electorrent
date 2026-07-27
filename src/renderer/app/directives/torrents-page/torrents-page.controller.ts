@@ -16,7 +16,6 @@ interface TorrentControllerScope extends angular.IScope {
     };
     speedLimitModalRef?: { open(torrents: any[]): void };
     setRatioModalRef?: { open(torrents: any[]): void };
-    torrentFilesModalRef?: { open(torrent: any): void };
     setLocationModalRef?: { open(torrents: any[]): void };
     setLabelModalRef?: { open(torrents: any[]): void };
     [key: string]: any;
@@ -739,12 +738,6 @@ export class TorrentsPageController {
                 const currentTorrent = getCurrentSelectedTorrent();
                 if (currentTorrent) {
                     $rootScope.$emit("torrentDetails:open", currentTorrent);
-                }
-                return $q.resolve();
-            }
-            if (item?.role === "files") {
-                if (selected.length >= 1) {
-                    $scope.torrentFilesModalRef?.open(selected[0]);
                 }
                 return $q.resolve();
             }

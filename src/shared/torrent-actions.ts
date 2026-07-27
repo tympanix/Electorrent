@@ -2,7 +2,6 @@ export type TorrentActionRole =
     | "start"
     | "stop"
     | "details"
-    | "files"
     | "verify"
     | "set-location"
     | "set-label"
@@ -25,7 +24,6 @@ const COMMON_ACCELERATORS: Partial<Record<TorrentActionRole, string>> = {
     start: "CmdOrCtrl+Alt+S",
     stop: "CmdOrCtrl+Alt+P",
     details: "CmdOrCtrl+D",
-    files: "CmdOrCtrl+Shift+D",
     verify: "CmdOrCtrl+Shift+R",
     "set-label": "CmdOrCtrl+L",
     remove: "Delete",

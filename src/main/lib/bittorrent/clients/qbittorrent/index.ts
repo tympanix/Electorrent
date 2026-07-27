@@ -121,7 +121,6 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         { role: "start", label: "Start", action: "resume", icon: "play" },
         { role: "stop", label: "Pause", action: "pause", icon: "pause" },
         { role: "details", label: "Details", icon: "info circle" },
-        { role: "files", label: "Files", icon: "file" },
         { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },
         { label: "Queue", menu: [
             { label: "Move Up Queue", action: "increasePrio", icon: "arrow up" },

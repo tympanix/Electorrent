@@ -226,7 +226,6 @@ function aria2Options(options?: TorrentUploadOptions): Record<string, string> {
 export class Aria2Runtime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
         { role: "details", label: "Details", icon: "info circle" },
-        { role: "files", label: "Files", icon: "file" },
         { role: "set-speed-limits", label: "Set Speed Limits", icon: "dashboard" },
         { role: "set-ratio", label: "Set Ratio", icon: "percent" },
         { role: "start", label: "Start", action: "resume", icon: "play" },
