@@ -94,6 +94,10 @@ export class TorrentDetailsPanelController {
     return !!this.rootScope.$btclient?.features.torrentPeers;
   }
 
+  canShowTrackers() {
+    return !!this.rootScope.$btclient?.features.torrentTrackers;
+  }
+
   startResizing(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();

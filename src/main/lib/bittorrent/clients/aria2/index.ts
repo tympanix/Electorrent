@@ -251,6 +251,7 @@ export class Aria2Runtime implements BittorrentRuntime {
                 uploadFileSelection: true,
                 torrentDetails: true,
                 torrentPeers: true,
+                torrentTrackers: true,
                 trackerFilter: true,
                 speedLimits: true,
                 ratioLimits: true,

@@ -228,6 +228,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 setLocation: true,
                 torrentDetails: true,
                 torrentPeers: true,
+                torrentTrackers: true,
                 trackerFilter: true,
                 speedLimits: true,
                 ratioLimits: true,

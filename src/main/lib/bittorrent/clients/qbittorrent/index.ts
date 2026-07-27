@@ -208,14 +208,15 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 fileSelection: true,
-                uploadFileSelection: true,
+                uploadFileSelection: api.supportsUploadFileSelection,
                 setLocation: true,
                 torrentDetails: true,
-                torrentPeers: true,
-                trackerFilter: true,
-                alternativeSpeedLimits: true,
+                torrentPeers: api.supportsTorrentPeers,
+                torrentTrackers: api.supportsTorrentTrackers,
+                trackerFilter: api.supportsTrackerFilter,
+                alternativeSpeedLimits: api.supportsAlternativeSpeedLimits,
                 speedLimits: true,
-                ratioLimits: true,
+                ratioLimits: api.supportsRatioLimits,
                 freeDiskSpace: true,
                 uploadOptions: {
                     saveLocation: true,
@@ -253,7 +254,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         this.mergeTorrentCache(data)
         this.prepareTrackerData(data, changedTrackerHashes)
 
-        if (data?.server_state && data.server_state.use_alt_speed_limits === undefined) {
+        if (api.supportsAlternativeSpeedLimits && data?.server_state && data.server_state.use_alt_speed_limits === undefined) {
             data.server_state.use_alt_speed_limits = await defer<boolean>((done) => api.getSpeedLimitsMode(done))
         }
 
@@ -585,7 +586,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
         const api = this.getApi()
         const properties = await new Promise<Record<string, any>>((resolve, reject) => {
-            api.getJson("torrents/properties", { qs: { hash } }, (err: any, _res: any, body: any) => {
+            api.getTorrentProperties(hash, (err: any, body: any) => {
                 if (err) {
                     reject(err)
                     return
@@ -641,7 +642,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
     private fetchTorrentFiles(hash: string): Promise<unknown> {
         const api = this.getApi()
         return new Promise((resolve, reject) => {
-            api.getJson("torrents/files", { qs: { hash } }, (err: unknown, _res: unknown, body: unknown) => {
+            api.getTorrentFiles(hash, (err: unknown, body: unknown) => {
                 if (err) {
                     reject(err)
                     return
@@ -694,13 +695,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 return
             }
 
-            api.post("torrents/filePrio", {
-                form: {
-                    hash,
-                    id: ids.join("|"),
-                    priority: String(priority),
-                },
-            }, (err: any) => {
+            api.setTorrentFilePriority(hash, ids, priority, (err: any) => {
                 if (err) {
                     reject(err)
                     return

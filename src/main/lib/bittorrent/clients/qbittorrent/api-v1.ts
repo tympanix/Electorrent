@@ -2,6 +2,13 @@ import { urlPath } from "@main/lib/bittorrent/helpers"
 import { AUTH_ERRORS, QBittorrentBaseApi, TORRENT_ERRORS } from "./base-api"
 
 export class QBittorrentApiV1 extends QBittorrentBaseApi {
+    readonly supportsAlternativeSpeedLimits = false
+    readonly supportsRatioLimits = false
+    readonly supportsTrackerFilter = false
+    readonly supportsTorrentPeers = false
+    readonly supportsTorrentTrackers = false
+    readonly supportsUploadFileSelection = false
+
     protected buildPath(name: string) {
         return urlPath(this.basePath, name)
     }
@@ -47,6 +54,32 @@ export class QBittorrentApiV1 extends QBittorrentBaseApi {
         this.getJson(`query/propertiesPeers/${hash}`, {}, (err, res, body) => {
             this.handleError(cb, TORRENT_ERRORS)(err, res, body)
         })
+    }
+
+    getTorrentProperties(hash: string, cb: (err?: any, body?: any) => void) {
+        this.getJson(`query/propertiesGeneral/${hash}`, {}, (err, res, body) => {
+            this.handleError(cb, TORRENT_ERRORS)(err, res, body)
+        })
+    }
+
+    getTorrentFiles(hash: string, cb: (err?: any, body?: any) => void) {
+        this.getJson(`query/propertiesFiles/${hash}`, {}, (err, res, body) => {
+            this.handleError(cb, TORRENT_ERRORS)(err, res, body)
+        })
+    }
+
+    setTorrentFilePriority(hash: string, ids: number[], priority: number, cb: (err?: any, body?: any) => void) {
+        Promise.all(ids.map((id) => new Promise<void>((resolve, reject) => {
+            this.post("command/setFilePrio", {
+                form: {
+                    hash,
+                    id: String(id),
+                    priority: String(priority),
+                },
+            }, (err, res, body) => {
+                this.handleError((actionErr) => actionErr ? reject(actionErr) : resolve(), TORRENT_ERRORS)(err, res, body)
+            })
+        }))).then(() => cb()).catch((err) => cb(err))
     }
 
     addTorrentFileContent(content: Buffer | Uint8Array, filename: string, options: Record<string, any> | undefined, cb: (err?: any, body?: any) => void) {
@@ -152,11 +185,11 @@ export class QBittorrentApiV1 extends QBittorrentBaseApi {
     }
 
     setDownloadLimit(hashes: string[], limit: number, cb: (err?: any, body?: any) => void) {
-        this.performPostAction("setDownloadLimit", hashes, { limit }, cb)
+        this.performPostAction("setTorrentsDlLimit", hashes, { limit }, cb)
     }
 
     setUploadLimit(hashes: string[], limit: number, cb: (err?: any, body?: any) => void) {
-        this.performPostAction("setUploadLimit", hashes, { limit }, cb)
+        this.performPostAction("setTorrentsUpLimit", hashes, { limit }, cb)
     }
 
     createCategory(category: string, _savePath: string, cb: (err?: any, body?: any) => void) {

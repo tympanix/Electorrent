@@ -32,6 +32,7 @@
     <a
       class="item"
       data-role="torrent-details-tab-trackers"
+      ng-if="ctl.canShowTrackers()"
       ng-class="{ active: ctl.isActiveTab('trackers') }"
       ng-click="ctl.showTab('trackers')"
     >
@@ -71,12 +72,12 @@
     ></torrent-details-files-tab>
 
     <torrent-details-peers-tab
-      ng-if="ctl.scope.torrent && ctl.isActiveTab('peers')"
+      ng-if="ctl.scope.torrent && ctl.canShowPeers() && ctl.isActiveTab('peers')"
       torrent="ctl.scope.torrent"
       refresh="ctl.scope.refresh"
     ></torrent-details-peers-tab>
     <torrent-details-trackers-tab
-      ng-if="ctl.scope.torrent && ctl.isActiveTab('trackers')"
+      ng-if="ctl.scope.torrent && ctl.canShowTrackers() && ctl.isActiveTab('trackers')"
       torrent="ctl.scope.torrent"
       refresh="ctl.scope.refresh"
     ></torrent-details-trackers-tab>

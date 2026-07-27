@@ -24,6 +24,13 @@ export type QBittorrentApiOptions = {
 }
 
 export abstract class QBittorrentBaseApi {
+    abstract readonly supportsAlternativeSpeedLimits: boolean
+    abstract readonly supportsRatioLimits: boolean
+    abstract readonly supportsTrackerFilter: boolean
+    abstract readonly supportsTorrentPeers: boolean
+    abstract readonly supportsTorrentTrackers: boolean
+    abstract readonly supportsUploadFileSelection: boolean
+
     protected readonly basePath: string
 
     protected readonly user: string
@@ -144,6 +151,9 @@ export abstract class QBittorrentBaseApi {
 
     abstract getTorrentTrackers(hash: string, cb: (err?: any, body?: any) => void): void
     abstract getTorrentPeers(hash: string, cb: (err?: any, body?: any) => void): void
+    abstract getTorrentProperties(hash: string, cb: (err?: any, body?: any) => void): void
+    abstract getTorrentFiles(hash: string, cb: (err?: any, body?: any) => void): void
+    abstract setTorrentFilePriority(hash: string, ids: number[], priority: number, cb: (err?: any, body?: any) => void): void
 
     abstract addTorrentFileContent(content: Buffer | Uint8Array, filename: string, options: Record<string, any> | undefined, cb: (err?: any, body?: any) => void): void
 

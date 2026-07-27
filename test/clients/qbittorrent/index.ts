@@ -10,6 +10,7 @@ const features = {
   setLocation: true,
   torrentDetails: true,
   torrentPeers: true,
+  torrentTrackers: true,
   trackerFilter: true,
   alternativeSpeedLimits: true,
   speedLimits: true,
@@ -28,7 +29,29 @@ const features = {
   },
 } satisfies TorrentClientFeatures
 
+const legacyFeatures = {
+  ...features,
+  alternativeSpeedLimits: false,
+  ratioLimits: false,
+  trackerFilter: false,
+  torrentPeers: false,
+  torrentTrackers: false,
+  uploadFileSelection: false,
+} satisfies TorrentClientFeatures
+
 export default {
+  "qbittorrent:4.1": defineClient({
+    key: "qbittorrent:4.1",
+    clientId: "qbittorrent",
+    features: legacyFeatures,
+    fixture: "clients/qbittorrent",
+    version: "amd64-4.1.5.99201812282032-6681-264b689ubuntu18.04.1-ls1",
+    port: 48080,
+    containerPort: 8080,
+    username: "admin",
+    password: "adminadmin",
+    downloadRoot: "/downloads",
+  }),
   "qbittorrent:4": defineClient({
     key: "qbittorrent:4",
     clientId: "qbittorrent",

@@ -237,6 +237,7 @@ export interface TorrentClientFeatures {
     readonly setLocation?: boolean
     readonly torrentDetails?: boolean
     readonly torrentPeers?: boolean
+    readonly torrentTrackers?: boolean
     readonly trackerFilter?: boolean
     readonly alternativeSpeedLimits?: boolean
     readonly speedLimits?: boolean
@@ -279,6 +280,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly setLocation: boolean
     readonly torrentDetails: boolean
     readonly torrentPeers: boolean
+    readonly torrentTrackers: boolean
     readonly trackerFilter: boolean
     readonly alternativeSpeedLimits: boolean
     readonly speedLimits: boolean
