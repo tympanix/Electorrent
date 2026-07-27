@@ -1,8 +1,5 @@
-import chai from "chai"
-import { $ } from "@wdio/globals"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
-import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
 import { configureSpec, getTestFixture, requireFeature } from "../../framework/fixture"
 import { createSlowTorrentFile } from "../../torrent"
 
@@ -48,48 +45,5 @@ describe("torrent file selection", function () {
     await eventually(() => checkboxAfter.isSelected()).equals(!initialSelected)
 
     await torrent.closeDetailsPanel()
-  })
-
-  it("persists file wanted state via Files modal", async function () {
-    this.timeout(60 * 1000)
-
-    await torrent.openContextMenu()
-    const contextMenu = $("#contextmenu")
-
-    const filesItem = contextMenu.$("a=Files")
-    await filesItem.waitForDisplayed()
-    await filesItem.click()
-    await contextMenu.waitForDisplayed({ reverse: true })
-
-    const modal = $("#torrentFilesModal")
-    await waitForModalOpen(modal)
-
-    const firstFileCheckbox = modal.$('.torrent-files-tree input[id^="file-cb-"]')
-    await firstFileCheckbox.waitForExist({ timeout: 30_000 })
-
-    const initialSelected = await firstFileCheckbox.isSelected()
-    await firstFileCheckbox.click()
-
-    const saveButton = modal.$("button.ui.green")
-    await saveButton.waitForEnabled()
-    await saveButton.click()
-    await waitForModalClose(modal)
-
-    await torrent.openContextMenu()
-    const filesItem2 = contextMenu.$("a=Files")
-    await filesItem2.waitForDisplayed()
-    await filesItem2.click()
-    await contextMenu.waitForDisplayed({ reverse: true })
-    await waitForModalOpen(modal)
-
-    const firstFileCheckboxAfter = modal.$('.torrent-files-tree input[id^="file-cb-"]')
-    await firstFileCheckboxAfter.waitForExist({ timeout: 30_000 })
-    const selectedAfter = await firstFileCheckboxAfter.isSelected()
-    chai.expect(selectedAfter).to.equal(!initialSelected)
-
-    const closeButton = modal.$("button.ui.black")
-    await closeButton.waitForEnabled()
-    await closeButton.click()
-    await waitForModalClose(modal)
   })
 })

@@ -164,13 +164,6 @@ export class ContextMenuDirective implements IDirective {
                 }
 
                 if (
-                    item.role === "files"
-                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.fileSelection)
-                ) {
-                    return;
-                }
-
-                if (
                     item.role === "set-speed-limits"
                     && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.speedLimits)
                 ) {
