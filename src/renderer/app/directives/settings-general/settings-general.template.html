@@ -12,9 +12,9 @@
         </div>
         <div class="center aligned extra content">
             <dropdown class="fluid" title="Connection Mode" ng-model="settings.startup">
-                <dropdown-group data-value="default">Default</dropdown-group>
-                <dropdown-group data-value="ask">Ask</dropdown-group>
-                <dropdown-group data-value="latest">Latest</dropdown-group>
+                <dropdown-item data-value="default">Default</dropdown-item>
+                <dropdown-item data-value="ask">Ask</dropdown-item>
+                <dropdown-item data-value="latest">Latest</dropdown-item>
             </dropdown>
         </div>
     </div>
@@ -30,7 +30,7 @@
         </div>
         <div class="center aligned extra content">
             <dropdown class="fluid" title="Theme" ng-model="settings.ui.theme">
-                <dropdown-group ng-repeat="theme in themes" title="theme.theme" value="theme.basename"></dropdown-group>
+                <dropdown-item ng-repeat="theme in themes" title="theme.theme" value="theme.basename"></dropdown-item>
             </dropdown>
         </div>
     </div>
@@ -46,9 +46,9 @@
         </div>
         <div class="center aligned extra content">
             <dropdown class="fluid" title="System Startup" ng-model="settings.systemStartup">
-                <dropdown-group data-value="disabled">Disabled</dropdown-group>
-                <dropdown-group data-value="open">Start</dropdown-group>
-                <dropdown-group data-value="background">Start in background</dropdown-group>
+                <dropdown-item data-value="disabled">Disabled</dropdown-item>
+                <dropdown-item data-value="open">Start</dropdown-item>
+                <dropdown-item data-value="background">Start in background</dropdown-item>
             </dropdown>
         </div>
     </div>
@@ -64,9 +64,9 @@
         </div>
         <div class="center aligned extra content">
             <dropdown class="fluid" title="Display Size" ng-model="settings.ui.displaySize">
-                <dropdown-group data-value="small">Small</dropdown-group>
-                <dropdown-group data-value="normal">Normal</dropdown-group>
-                <dropdown-group data-value="large">Large</dropdown-group>
+                <dropdown-item data-value="small">Small</dropdown-item>
+                <dropdown-item data-value="normal">Normal</dropdown-item>
+                <dropdown-item data-value="large">Large</dropdown-item>
             </dropdown>
         </div>
     </div>
@@ -82,9 +82,9 @@
         </div>
         <div class="center aligned extra content">
             <dropdown class="fluid" title="Resize Mode" ng-model="settings.ui.resizeMode">
-                <dropdown-group data-value="FixedResizer">Static</dropdown-group>
-                <dropdown-group data-value="OverflowResizer">Overflow</dropdown-group>
-                <dropdown-group data-value="BasicResizer">Relative</dropdown-group>
+                <dropdown-item data-value="FixedResizer">Static</dropdown-item>
+                <dropdown-item data-value="OverflowResizer">Overflow</dropdown-item>
+                <dropdown-item data-value="BasicResizer">Relative</dropdown-item>
             </dropdown>
         </div>
     </div>
@@ -101,9 +101,9 @@
         </div>
         <div class="center aligned extra content">
             <dropdown class="fluid" title="Resize Mode" ng-model="settings.refreshRate">
-                <dropdown-group data-value="1000">Fast (1 second)</dropdown-group>
-                <dropdown-group data-value="2000">Default (2 seconds)</dropdown-group>
-                <dropdown-group data-value="4000">Slow (4 seconds)</dropdown-group>
+                <dropdown-item value="1000">Fast (1 second)</dropdown-item>
+                <dropdown-item value="2000">Default (2 seconds)</dropdown-item>
+                <dropdown-item value="4000">Slow (4 seconds)</dropdown-item>
             </dropdown>
         </div>
     </div>
