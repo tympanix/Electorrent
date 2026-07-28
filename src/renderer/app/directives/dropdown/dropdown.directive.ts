@@ -15,6 +15,7 @@ export class DropdownController {
             transition: "vertical flip",
             duration: 100,
             action: ngModel ? "activate" : "hide",
+            showOnFocus: attrs.openOnFocus !== "false",
             onChange: (value: string) => {
                 const modelValue = this.values.has(value) ? this.values.get(value) : value;
 

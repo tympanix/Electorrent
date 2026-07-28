@@ -43,7 +43,7 @@
         <label ng-if="showLabels">Bittorrent Client</label>
         <dropdown title="Client Program" id="connection-client" class="fluid" ng-model="server.client" ng-change="setPath()">
             <dropdown-item value="id" id="connection-client-{{id}}" title="client.name" ng-repeat="(id, client) in btclients">
-                <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}}
+                <i class="icon torrent" ng-class="client.icon"></i> {{client.name}}
             </dropdown-item>
         </dropdown>
         <div class="ui pointing red basic label" ng-if="server.client && !btclients[server.client]">

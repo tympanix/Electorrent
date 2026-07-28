@@ -295,7 +295,7 @@ export class App {
     }
 
     if (options?.label) {
-      const labelElem = modal.$("div[title=Label]")
+      const labelElem = modal.$("#upload-options-label")
       await labelElem.waitForClickable()
       await labelElem.click()
       const labelItemElem = labelElem.$(`div[data-label='${options.label}']`)
