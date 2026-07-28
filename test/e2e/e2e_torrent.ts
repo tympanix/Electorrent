@@ -316,7 +316,7 @@ export class Torrent {
     await elem.waitForDisplayed()
     await elem.click()
 
-    const labelsElem = $("#torrent-action-header div[data-role=labels]")
+    const labelsElem = $("#torrent-action-header dropdown[data-role=labels]")
     await labelsElem.waitForDisplayed()
     await labelsElem.waitForClickable()
     await labelsElem.click()

@@ -386,7 +386,7 @@ export class App {
   }
 
   async waitForLabelInDropdown(labelName) {
-    const labels = "#torrent-action-header div[data-role=labels]";
+    const labels = "#torrent-action-header dropdown[data-role=labels]";
     const labelBtn = `div[data-label='${labelName}']`;
 
     const labelsElem = $(labels)
