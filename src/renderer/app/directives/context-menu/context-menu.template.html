@@ -1,1 +1,44 @@
+<div class="ui vertical menu">
+    <a class="item" ng-if="isDebug && debug" ng-click="runDebugItem()">
+        <i class="ui help icon"></i>
+        Debug
+    </a>
 
+    <a
+        class="item"
+        ng-repeat-start="item in menu track by $index"
+        ng-if="!item.menu && isItemVisible(item)"
+        ng-attr-data-role="{{item.role}}"
+        ng-click="runMenuItem(item)">
+        <i class="ui icon" ng-if="item.icon" ng-class="item.icon"></i>
+        <div class="ui checkbox" ng-if="item.check">
+            <input type="checkbox" ng-checked="isItemChecked(item)">
+            <label></label>
+        </div>
+        {{item.label}}
+    </a>
+
+    <div
+        class="ui context dropdown item"
+        ng-if="item.menu"
+        ng-mouseenter="toggleSubmenu($event, true)"
+        ng-mouseleave="toggleSubmenu($event, false)"
+        ng-repeat-end>
+        <i class="ui dropdown icon"></i>
+        {{item.label}}
+        <div class="menu">
+            <a
+                class="item"
+                ng-repeat="child in item.menu track by $index"
+                ng-attr-data-role="{{child.role}}"
+                ng-click="runMenuItem(child)">
+                <i class="ui icon" ng-if="child.icon" ng-class="child.icon"></i>
+                <div class="ui checkbox" ng-if="child.check">
+                    <input type="checkbox" ng-checked="isItemChecked(child)">
+                    <label></label>
+                </div>
+                {{child.label}}
+            </a>
+        </div>
+    </div>
+</div>
