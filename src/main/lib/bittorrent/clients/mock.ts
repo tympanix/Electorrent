@@ -81,6 +81,14 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         { role: "set-ratio", label: "Set Ratio", icon: "percent" },
         { role: "remove", label: "Remove", action: "delete", icon: "remove" },
         { label: "Remove And Delete", action: "deleteAndRemove", icon: "trash", role: "delete" },
+        { label: "Debug", menu: [
+            {
+                label: "Generate 100 Mock Torrents",
+                action: "generateMockedTorrents",
+                icon: "bug",
+                requiresTorrentSelection: false,
+            },
+        ] },
     ]
     private static stores = new Map<string, MockRuntimeStore>()
 
@@ -216,6 +224,10 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         this.files.set(hash, input.files || this.createFiles(name, size, progress))
         this.trackers.set(hash, input.trackers || [])
         return hash
+    }
+
+    async generateMockedTorrents(): Promise<void> {
+        await Promise.all(Array.from({ length: 100 }, () => this.addMockedTorrent([])))
     }
 
     async clearMockedTorrents(): Promise<void> {

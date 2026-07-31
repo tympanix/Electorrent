@@ -19,6 +19,26 @@ describe("mock Actions menu", function () {
     await eventually(async () => $("#torrentTable tbody tr[data-id]").isExisting()).equals(true)
   })
 
+  it("generates many mock torrents without a torrent selection", async function () {
+    const actionsMenu = $("//button[contains(@class, 'title-bar-menu-trigger') and normalize-space(.)='Actions']")
+    await actionsMenu.waitForClickable()
+    await actionsMenu.click()
+
+    const debugTrigger = $("//button[contains(@class, 'title-bar-menu-submenu-trigger')][.//span[normalize-space(.)='Debug']]")
+    await debugTrigger.waitForEnabled()
+    await debugTrigger.moveTo()
+
+    const generateAction = debugTrigger.$("..").$(".//div[contains(@class, 'title-bar-menu-flyout')]//button[.//span[normalize-space(.)='Generate 100 Mock Torrents']]")
+    await generateAction.waitForClickable()
+    await generateAction.click()
+
+    await eventually(async () => browser.execute(async () => {
+      const snapshot = await (window as any).electorrent.bittorrent.getSnapshot({ fullUpdate: true })
+      return Object.keys(snapshot.torrents).length
+    }))
+      .satisfies("generate at least 100 mock torrents", (count) => count >= 100)
+  })
+
   it("contains the mock client's context actions and follows torrent selection", async function () {
     const initial = await getActionsMenu()
     assert.includeMembers(initial.labels, [
@@ -34,14 +54,22 @@ describe("mock Actions menu", function () {
       "Set Ratio",
       "Remove",
       "Remove And Delete",
+      "Debug",
     ])
-    assert.isTrue(initial.disabled)
+    assert.isTrue(initial.selectionActionsDisabled)
+    assert.isFalse(initial.debugDisabled)
 
     const row = $("#torrentTable tbody tr[data-id]")
     await row.waitForClickable()
     await row.click()
 
     await eventually(async () => (await getActionsMenu()).disabled).equals(false)
+
+    await row.click({ button: "right" })
+    const debugContextMenu = $("//*[@id='contextmenu']//div[contains(@class, 'context') and contains(@class, 'dropdown')][contains(normalize-space(.), 'Debug')]")
+    await debugContextMenu.waitForDisplayed()
+    await debugContextMenu.moveTo()
+    await debugContextMenu.$(".//a[normalize-space(.)='Generate 100 Mock Torrents']").waitForDisplayed()
   })
 
   it("renders platform-localized shortcuts in the title menu", async function () {
@@ -148,6 +176,10 @@ async function getActionsMenu() {
       labels: actions.submenu.items.map((item) => item.label),
       disabled: actions.submenu.items.filter((item) => item.type !== "separator")
         .every((item) => !item.enabled),
+      selectionActionsDisabled: actions.submenu.items
+        .filter((item) => item.type !== "separator" && item.label !== "Debug")
+        .every((item) => !item.enabled),
+      debugDisabled: !actions.submenu.items.find((item) => item.label === "Debug")?.enabled,
     }
   })
 }

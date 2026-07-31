@@ -65,13 +65,17 @@ export interface TitleMenuSources {
 
 const separator = (): TitleMenuItem => ({ type: "separator" })
 
-function toTitleTorrentAction(item: TorrentActionItem, hasSelection: boolean): TitleMenuItem {
+function toTitleTorrentAction(item: TorrentActionItem, hasSelection: boolean, hasConnectedServer: boolean): TitleMenuItem {
+    const submenu = item.menu?.map((child) => toTitleTorrentAction(child, hasSelection, hasConnectedServer))
+
     return {
         label: item.label,
         accelerator: item.accelerator,
-        enabled: hasSelection,
+        enabled: submenu
+            ? submenu.some((child) => child.enabled !== false)
+            : hasConnectedServer && (hasSelection || item.requiresTorrentSelection === false),
         action: item.menu ? undefined : { type: "torrent-action", action: item },
-        submenu: item.menu?.map((child) => toTitleTorrentAction(child, hasSelection)),
+        submenu,
     }
 }
 
@@ -135,7 +139,7 @@ export function deriveTitleMenu(state: TitleMenuState): TitleMenuItem[] {
     ]
 
     const actionItems = session.actions.length > 0
-        ? session.actions.map((item) => toTitleTorrentAction(item, hasSelection))
+        ? session.actions.map((item) => toTitleTorrentAction(item, hasSelection, hasConnectedServer))
         : [{ label: "No actions available", enabled: false }]
 
     const viewItems: TitleMenuItem[] = [
