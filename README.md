@@ -62,7 +62,7 @@ Electorrent can connect to the following bittorrent clients:
 
  * **What kind of technologies are used to build this?**
 
- The application is build around [Electron](http://electron.atom.io/), [AngularJS](https://angularjs.org/) and [SemanticUI](http://semantic-ui.com/)
+ The application is built around [Electron](https://www.electronjs.org/), [AngularJS](https://angularjs.org/) and [Fomantic UI](https://fomantic-ui.com/).
 
 * **I can't connect to rTorrent what is wrong?**
 

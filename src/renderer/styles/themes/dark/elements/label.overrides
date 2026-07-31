@@ -1,4 +1,4 @@
-/* Semantic UI hard-codes @white for hovered basic color labels. */
+/* Fomantic UI hard-codes @white for hovered basic color labels. */
 .ui.basic.red.labels a.label:hover,
 a.ui.basic.red.label:hover,
 .ui.basic.orange.labels a.label:hover,

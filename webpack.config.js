@@ -11,10 +11,10 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const defaultInclude = path.resolve(__dirname, 'src')
 const outDir = path.resolve(__dirname, 'app')
-const semanticUiLessDir = path.resolve(__dirname, 'node_modules/semantic-ui-less')
+const fomanticUiDir = path.resolve(__dirname, 'node_modules/fomantic-ui')
 const geoIpCountryDir = path.resolve(__dirname, 'node_modules/geoip-country')
 const countriesListDir = path.resolve(__dirname, 'node_modules/countries-list')
-const semanticThemeConfigPath = path.resolve(__dirname, 'src/renderer/styles/semantic/theme.config')
+const fomanticThemeConfigPath = path.resolve(__dirname, 'src/renderer/styles/semantic/theme.config')
 const isProduction = process.env.NODE_ENV === 'production'
 
 const sharedCache = {
@@ -34,7 +34,7 @@ const sharedResolve = {
     '@main': path.resolve(__dirname, 'src/main'),
     '@renderer': path.resolve(__dirname, 'src/renderer'),
     '@shared': path.resolve(__dirname, 'src/shared'),
-    '../../theme.config$': semanticThemeConfigPath,
+    '../../theme.config$': fomanticThemeConfigPath,
   },
   modules: ['node_modules', 'src'],
 }
@@ -69,7 +69,7 @@ const commonPlugins = [
         to: path.resolve(outDir, 'build'),
       },
       {
-        from: path.resolve(semanticUiLessDir, 'themes/default/assets'),
+        from: path.resolve(fomanticUiDir, 'src/themes/default/assets'),
         to: path.resolve(outDir, 'css/themes/default/assets'),
       },
       {

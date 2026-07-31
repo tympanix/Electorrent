@@ -11,7 +11,7 @@ interface DropdownScope extends IScope {
     bind?: string;
 }
 
-export class SemanticDropdownDirective implements IDirective {
+export class FomanticDropdownDirective implements IDirective {
     restrict = "A";
     scope = {
         ref: "=?",
@@ -20,7 +20,7 @@ export class SemanticDropdownDirective implements IDirective {
     controller = DropdownController;
 
     static getInstance(): IDirectiveFactory {
-        return () => new SemanticDropdownDirective();
+        return () => new FomanticDropdownDirective();
     }
 
     link(scope: DropdownScope, element: IAugmentedJQuery, attr: IAttributes) {
