@@ -1,4 +1,5 @@
 import { IScope } from "angular"
+import type { SortChange } from "@renderer/app/directives/sorting/sorting.controller"
 import type { SettingsService } from "@renderer/app/services/settings"
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope"
 import type { BittorrentTorrentPeer } from "@shared/ipc-contract"
@@ -70,8 +71,8 @@ export class TorrentDetailsPeersTabController {
   private sortKey: TorrentDetailsPeerColumn["id"] = "ip"
   private sortDescending = false
 
-  changeSorting = (columnId: TorrentDetailsPeerColumn["id"], descending: boolean) => {
-    this.sortKey = columnId
+  changeSorting = ({ sortKey, descending }: SortChange<TorrentDetailsPeerColumn["id"]>) => {
+    this.sortKey = sortKey
     this.sortDescending = descending
     this.sortPeers()
   }

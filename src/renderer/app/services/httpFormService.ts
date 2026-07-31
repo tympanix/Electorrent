@@ -1,8 +1,8 @@
-export let httpFormService = [function() {
+export const httpFormService = [function() {
 
     // I prepare the request data for the form post.
     function transformRequest(data, getHeaders) {
-        var headers = getHeaders();
+        const headers = getHeaders();
         headers["Content-Type"] = "application/x-www-form-urlencoded";
         return(serializeData(data));
     }
@@ -16,13 +16,13 @@ export let httpFormService = [function() {
             return((data === null) ? "" : data.toString());
         }
 
-        var buffer = [];
+        const buffer = [];
         // Serialize each key in the object.
-        for(var name in data) {
-            if(!data.hasOwnProperty(name)) {
+        for(const name in data) {
+            if(!Object.prototype.hasOwnProperty.call(data, name)) {
                 continue;
             }
-            var value = data[name];
+            const value = data[name];
             buffer.push(parseComponent(name, value));
         }
 
@@ -36,7 +36,7 @@ export let httpFormService = [function() {
 
     function parseValue(value){
         if (Array.isArray(value)) {
-            var encoded = value.map(encodeURIComponent);
+            const encoded = value.map(encodeURIComponent);
             return encoded.join('|');
         } else if (value !== null) {
             return encodeURIComponent(value)

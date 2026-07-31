@@ -20,8 +20,8 @@
       columns="ctl.scope.columns"
     >
       <thead>
-        <tr sorting="ctl.changeSorting" mode="ctl.scope.resizeProfile" default-sort-key="ip" default-sort-order="false" sort-key-prefix="torrent-details-peers.sort-key" sort-order-prefix="torrent-details-peers.sort-desc">
-          <th ng-repeat="column in ctl.scope.columns track by column.id" rz-col="column.id" sort="column.id">
+        <tr sorting mode="ctl.scope.resizeProfile" on-sort-change="ctl.changeSorting($event)" default-sort-key="ip" default-sort-order="false" sort-key-prefix="torrent-details-peers.sort-key" sort-order-prefix="torrent-details-peers.sort-desc">
+          <th ng-repeat="column in ctl.scope.columns track by column.id" rz-col="column.id" sort-header sort-key="column.id">
             <span class="torrent-details-table-header-label">{{ column.label }}</span>
           </th>
         </tr>

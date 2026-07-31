@@ -1,17 +1,12 @@
 import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
-import { SortingController } from "./sorting.controller";
-
-interface SortScope extends IScope {
-    sort: string;
-    update: () => void;
-}
+import { SortHeaderController, SortingController } from "./sorting.controller";
 
 export class SortingDirective implements IDirective {
     restrict = "A";
     bindToController = true;
     scope = {
-        mode: "=",
-        sorting: "=",
+        mode: "<",
+        onSortChange: "&?",
         defaultSortKey: "@?",
         defaultSortOrder: "<?",
         sortKeyPrefix: "@?",
@@ -22,105 +17,33 @@ export class SortingDirective implements IDirective {
     static getInstance(): IDirectiveFactory {
         return () => new SortingDirective();
     }
-
-    link(scope: IScope, element: IAugmentedJQuery, attr: IAttributes, controller: SortingController) {
-        const update = () => {
-            $(element)
-                .find("*[sort]")
-                .each((index, column) => {
-                    const columnScope = angular.element(column).scope() as SortScope;
-                    columnScope.update();
-                });
-        };
-
-        scope.$watch(
-            () => controller.mode,
-            (newMode, oldMode) => {
-                if (newMode !== oldMode) {
-                    controller.updateSettings();
-                    update();
-                }
-            },
-        );
-    }
 }
 
-export class SortDirective implements IDirective {
+export class SortHeaderDirective implements IDirective {
     restrict = "A";
-    require = "^^sorting";
     scope = false;
+    controller = SortHeaderController;
+    require = ["sortHeader", "^^sorting"];
 
     static getInstance(): IDirectiveFactory {
-        return () => new SortDirective();
+        return () => new SortHeaderDirective();
     }
 
-    link(scope: SortScope, element: IAugmentedJQuery, attr: IAttributes, controller: SortingController) {
-        const column = $(element);
-        scope.sort = scope.$eval(attr.sort || "");
-
-        if (attr.sortDisabled && scope.$eval(attr.sortDisabled)) {
-            scope.update = () => undefined;
-            column.addClass("sorting-disabled");
-            return;
-        }
-
-        const setSortingArrow = (sortDesc?: boolean) => {
-            if (controller.last) {
-                controller.last.removeClass("sortdown sortup");
-            }
-
-            if (sortDesc === true) {
-                column.addClass("sortdown");
-            } else if (sortDesc === false) {
-                column.addClass("sortup");
-            } else {
-                column.removeClass("sortdown sortup");
-            }
-
-            controller.last = column;
-        };
-
-        const showSortingArrows = () => {
-            if (column.is(".sortdown, .sortup")) {
-                column.toggleClass("sortdown sortup");
-            } else {
-                if (controller.last) {
-                    controller.last.removeClass("sortdown sortup");
-                }
-                column.addClass("sortdown");
-                controller.last = column;
-            }
-
-            const desc = column.hasClass("sortdown");
-            controller.sorting(scope.sort, desc);
-            controller.save(scope.sort, desc);
-        };
-
-        let isDragging = false;
-
-        column.mousedown(() => {
-            $(window).one("mousemove", () => {
-                isDragging = true;
-            });
-        });
-
-        column.mouseup(() => {
-            const wasDragging = isDragging;
-            isDragging = false;
-            $(window).off("mousemove");
-            if (!wasDragging) {
-                showSortingArrows();
-            }
-        });
-
-        scope.update = () => {
-            if (scope.sort === controller.sortKey) {
-                setSortingArrow(controller.sortOrder);
-                controller.sorting(scope.sort, controller.sortOrder);
-            }
-        };
-
-        column.append('<i class="ui sorting icon"></i>');
-        scope.update();
+    link(
+        scope: IScope,
+        element: IAugmentedJQuery,
+        attrs: IAttributes,
+        controllers: [SortHeaderController, SortingController],
+    ) {
+        const header = controllers[0];
+        header.setInputs(scope.$eval(attrs.sortKey), attrs.disabled ? scope.$eval(attrs.disabled) === true : false);
+        header.connect(controllers[1]);
+        scope.$watchGroup(
+            [
+                () => scope.$eval(attrs.sortKey),
+                () => attrs.disabled ? scope.$eval(attrs.disabled) : false,
+            ],
+            ([sortKey, disabled]) => header.setInputs(sortKey, disabled === true),
+        );
     }
 }

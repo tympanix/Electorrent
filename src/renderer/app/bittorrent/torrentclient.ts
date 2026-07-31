@@ -311,7 +311,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      *
      * Concrete clients that support file selection must override this method.
      */
-    async setTorrentFileSelection(torrent: T, files: TorrentFile[]): Promise<void> {
+    async setTorrentFileSelection(_torrent: T, _files: TorrentFile[]): Promise<void> {
         if (!this.features.fileSelection) {
             throw new Error("File selection not supported for this client")
         }

@@ -1,27 +1,37 @@
-@font-face {
-    font-family: 'bittorrent';
-    src: url(../fonts/bittorrent.eot);
-    src: url(../fonts/bittorrent.eot?#iefix) format('embedded-opentype'),
-         url(../fonts/bittorrent.woff) format('woff'),
-         url(../fonts/bittorrent.ttf) format('truetype'),
-         url(../fonts/bittorrent.svg#bittorrent) format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
 .torrent.icon {
-  font-family: 'bittorrent' !important;
-  display: inline-block;
-  font-style: normal;
-  font-weight: normal;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale
+  background-color: currentColor;
+  mask: var(--torrent-icon) center / contain no-repeat;
+  -webkit-mask: var(--torrent-icon) center / contain no-repeat;
 }
 
-.deluge:before{content:'\EA01'}
-.aria2:before{content:'\EA07'}
-.downloadstation:before{content:'\EA02';}
-.qbittorrent:before{content:'\EA03';}
-.rtorrent:before{content:'\EA04';}
-.transmission:before{content:'\EA05';}
-.utorrent:before{content:'\EA06';}
+.torrent.icon::before {
+  content: none;
+}
+
+.torrent.icon.aria2 {
+  --torrent-icon: url('../assets/fonts/icons/aria2.svg');
+}
+
+.torrent.icon.deluge {
+  --torrent-icon: url('../assets/fonts/icons/deluge.svg');
+}
+
+.torrent.icon.downloadstation {
+  --torrent-icon: url('../assets/fonts/icons/downloadstation.svg');
+}
+
+.torrent.icon.qbittorrent {
+  --torrent-icon: url('../assets/fonts/icons/qbittorrent.svg');
+}
+
+.torrent.icon.rtorrent {
+  --torrent-icon: url('../assets/fonts/icons/rtorrent.svg');
+}
+
+.torrent.icon.transmission {
+  --torrent-icon: url('../assets/fonts/icons/transmission.svg');
+}
+
+.torrent.icon.utorrent {
+  --torrent-icon: url('../assets/fonts/icons/utorrent.svg');
+}

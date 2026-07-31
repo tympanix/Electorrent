@@ -1,16 +1,8 @@
 import {
     IAttributes,
     IAugmentedJQuery,
-    ICompileService,
-    IControllerProvider,
-    IControllerService,
     IDirective,
     IDirectiveCompileFn,
-    IDirectiveFactory,
-    IDirectiveLinkFn,
-    IDirectivePrePost,
-    IRootElementService,
-    IRootScopeService,
     IScope,
 } from 'angular'
 import { TorrentUploadFormController } from './torrent-upload-form.controller'
@@ -37,10 +29,10 @@ export abstract class Directive implements IDirective {
     priority?: number;
     require?: string | string[] | {[controller: string]: string};
     restrict?: string;
-    scope?: boolean | Object;
-    template?: string | Function;
+    scope?: boolean | object;
+    template?: string | ((...args: any[]) => any);
     templateNamespace?: string;
-    templateUrl?: string | Function;
+    templateUrl?: string | ((...args: any[]) => any);
     terminal?: boolean;
     transclude?: boolean | string | {[slot: string]: string};
 

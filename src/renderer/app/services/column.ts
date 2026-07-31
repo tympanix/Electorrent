@@ -21,8 +21,8 @@ export class Column implements ColumnProps {
     }
 
     static ALPHABETICAL = function(a: string, b: string) {
-        var aLower = a.toLowerCase();
-        var bLower = b.toLowerCase();
+        const aLower = a.toLowerCase();
+        const bLower = b.toLowerCase();
         return aLower.localeCompare(bLower);
     }
 
