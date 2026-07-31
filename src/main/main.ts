@@ -207,7 +207,7 @@ async function bootstrap() {
         menu.setWindow(torrentWindow)
 
         torrentWindow.once('ready-to-show', () => {
-            if (!startInBackground) {
+            if (!startInBackground && !app.commandLine.hasSwitch('headless')) {
                 torrentWindow?.show()
             }
         })
