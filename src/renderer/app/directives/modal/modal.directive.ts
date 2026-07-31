@@ -6,34 +6,46 @@ interface ModalAttributes extends IAttributes {
     size?: string
 }
 
-interface ModalScope extends IScope {
-    applyAndClose?: () => void
-}
-
 export class ModalDirective implements IDirective {
-    restrict = 'EA'
-    controller = ModalController
+    restrict = "E"
+    scope = {}
     bindToController = {
-        after: "&?",
-        approve: "&?",
+        size: "@?",
         closable: "<?",
+        approve: "&?",
         deny: "&?",
-        hidden: "&?",
+        after: "&?",
         onHidden: "&?",
+        hidden: "&?",
         onShow: "&?",
         show: "&?",
     }
+    controller = ModalController
+    controllerAs = "$modal"
+    transclude = true
+    template = ""
 
     static getInstance(): IDirectiveFactory {
         return () => new ModalDirective()
     }
 
-    link(scope: ModalScope, element: IAugmentedJQuery, attr: ModalAttributes, controller: ModalController) {
+    link(
+        scope: IScope,
+        element: IAugmentedJQuery,
+        attr: ModalAttributes,
+        controller: ModalController,
+        transclude: any,
+    ) {
         let accepted = false
 
+        transclude((contents: IAugmentedJQuery, transcludedScope: any) => {
+            transcludedScope.$modal = controller
+            element.append(contents)
+        })
+
         element.addClass("ui modal")
-        if (attr.size) {
-            element.addClass(attr.size)
+        if (controller.size) {
+            element.addClass(controller.size)
         }
 
         const modal: any = $(element)
@@ -81,13 +93,6 @@ export class ModalDirective implements IDirective {
             keyboardShortcuts: false,
             duration: 150
         });
-
-        scope.applyAndClose = function() {
-            if (!controller.approve || controller.approve() !== false) {
-                modal.modal('hide')
-            }
-        }
-
         scope.$on("$destroy", function() {
             $(document).off("keydown", onKeyDown)
             element.remove();

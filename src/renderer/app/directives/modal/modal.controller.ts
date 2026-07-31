@@ -1,13 +1,9 @@
-import { IScope } from "angular";
-
 export type ModalCallback = (locals?: { accepted: boolean }) => unknown
 
 export class ModalController {
-
-    static $inject = ["$scope"]
-
     // jQuery element for Fomantic UI modal
     modal: any
+    size?: string
     after?: ModalCallback
     approve?: ModalCallback
     closable?: boolean
@@ -17,13 +13,14 @@ export class ModalController {
     onShow?: ModalCallback
     show?: ModalCallback
 
-    constructor(scope: IScope) {
-        this.modal = scope.modal
-
-    }
-
     attachModal(modal: any) {
         this.modal = modal
+    }
+
+    applyAndClose() {
+        if (!this.approve || this.approve() !== false) {
+            this.hideModal()
+        }
     }
 
     showModal() {
@@ -41,5 +38,4 @@ export class ModalController {
     refreshModal() {
         this.modal.modal('refresh')
     }
-
 }

@@ -31,19 +31,36 @@
         <div class="container">
             <div class="content" ng-switch="page">
                 <div ng-switch-when="general" id="page-settings-general">
-                    <settings-general></settings-general>
+                    <settings-general
+                        settings="settings"
+                        themes="themes"
+                        platform="is"
+                        general="general">
+                    </settings-general>
                 </div>
 
                 <div ng-switch-when="connection" id="page-settings-connection">
-                    <settings-connection></settings-connection>
+                    <settings-connection
+                        server="server"
+                        btclients="btclients"
+                        connecting="connecting">
+                    </settings-connection>
                 </div>
 
                 <div ng-switch-when="layout" id="page-settings-layout">
-                    <settings-layout></settings-layout>
+                    <settings-layout server="server" sort-options="layoutSortOptions"></settings-layout>
                 </div>
 
                 <div ng-switch-when="servers" id="page-settings-servers">
-                    <settings-servers></settings-servers>
+                    <settings-servers
+                        settings="settings"
+                        rename-data="renameData"
+                        on-toggle-default-server="toggleDefaultServer(server)"
+                        on-move-server-up="moveServerUp(server)"
+                        on-disable-insecure-tls="disableInsecureTls(server)"
+                        on-remove-server="removeServer(server)"
+                        on-rename-server="renameServer()">
+                    </settings-servers>
                 </div>
 
                 <div ng-switch-when="advanced" id="page-settings-advanced">
@@ -51,7 +68,12 @@
                 </div>
 
                 <div ng-switch-when="about" id="page-settings-about">
-                    <settings-about></settings-about>
+                    <settings-about
+                        app-version="appVersion"
+                        node-version="nodeVersion"
+                        chrome-version="chromeVersion"
+                        electron-version="electronVersion">
+                    </settings-about>
                 </div>
             </div>
             <div class="actions footer">
