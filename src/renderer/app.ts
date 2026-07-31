@@ -160,6 +160,8 @@ import { ModalDirective } from "@renderer/app/directives/modal/modal.directive"
 torrentApp.directive("modal", ModalDirective.getInstance())
 import { ActionHeaderDirective } from "@renderer/app/directives/action-header/action-header.directive"
 torrentApp.directive("actionHeader", ActionHeaderDirective.getInstance())
+import { ActionHeaderDropdownDirective } from "@renderer/app/directives/action-header/action-header-dropdown.directive"
+torrentApp.directive("actionHeaderDropdown", ActionHeaderDropdownDirective.getInstance())
 import { LabelsDropdownDirective } from "@renderer/app/directives/labels-dropdown/labels-dropdown.directive"
 torrentApp.directive("labelsDropdown", LabelsDropdownDirective.getInstance())
 import { LabelsMenuDirective } from "@renderer/app/directives/labels-menu/labels-menu.directive"
