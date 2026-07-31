@@ -270,7 +270,7 @@ export class TorrentsPageController {
         });
 
         $scope.$on("torrent-action", (_event: unknown, item: TorrentActionItem) => {
-            if (selected.length === 0 && item.requiresTorrentSelection !== false) {
+            if (selected.length === 0) {
                 return;
             }
             const bound = $rootScope.$btclient?.bindContextAction(item);

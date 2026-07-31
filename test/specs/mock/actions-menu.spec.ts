@@ -19,101 +19,6 @@ describe("mock Actions menu", function () {
     await eventually(async () => $("#torrentTable tbody tr[data-id]").isExisting()).equals(true)
   })
 
-  it("generates many mock torrents without a torrent selection", async function () {
-    await invokeMockAction("clearMockedTorrents")
-
-    const actionsMenu = $("//button[contains(@class, 'title-bar-menu-trigger') and normalize-space(.)='Actions']")
-    await actionsMenu.waitForClickable()
-    await actionsMenu.click()
-
-    const debugTrigger = $("//button[contains(@class, 'title-bar-menu-submenu-trigger')][.//span[normalize-space(.)='Debug']]")
-    await debugTrigger.waitForEnabled()
-    await debugTrigger.moveTo()
-
-    const generateAction = debugTrigger.$("..").$(".//div[contains(@class, 'title-bar-menu-flyout')]//button[.//span[normalize-space(.)='Generate 100 Mock Torrents']]")
-    await generateAction.waitForClickable()
-    await generateAction.click()
-
-    await eventually(async () => Object.keys(await getMockTorrents()).length)
-      .equals(100)
-
-    const firstRun = await getMockTorrents()
-    const torrents = Object.values(firstRun) as Array<Record<string, any>>
-    const states = new Set(torrents.map((torrent) => torrent.state))
-
-    assert.isAtLeast(new Set(torrents.map((torrent) => torrent.size)).size, 90, "varies torrent sizes")
-    assert.isAtLeast(new Set(torrents.map((torrent) => torrent.category)).size, 6, "varies categories")
-    assert.includeMembers(Array.from(states), ["downloading", "uploading", "stalledDL", "stalledUP", "pausedDL", "pausedUP"])
-
-    torrents.forEach((torrent) => {
-      assert.isAtLeast(torrent.size, 350 * 1024 * 1024)
-      assert.strictEqual(torrent.total_size, torrent.size)
-      assert.isAtMost(torrent.num_seeds, torrent.num_complete)
-      assert.isAtMost(torrent.num_leechs, torrent.num_incomplete)
-
-      switch (torrent.state) {
-        case "downloading":
-          assert.isBelow(torrent.progress, 1)
-          assert.strictEqual(torrent.total_downloaded, Math.floor(torrent.size * torrent.progress))
-          assert.isAbove(torrent.dl_speed, 0)
-          assert.isAbove(torrent.eta, 0)
-          assert.isAtLeast(torrent.num_seeds, 1)
-          break
-        case "uploading":
-          assert.strictEqual(torrent.progress, 1)
-          assert.strictEqual(torrent.total_downloaded, torrent.size)
-          assert.strictEqual(torrent.dl_speed, 0)
-          assert.strictEqual(torrent.eta, 0)
-          assert.isAbove(torrent.up_speed, 0)
-          assert.isAtLeast(torrent.num_leechs, 1)
-          break
-        case "stalledDL":
-        case "pausedDL":
-          assert.isBelow(torrent.progress, 1)
-          assert.strictEqual(torrent.total_downloaded, Math.floor(torrent.size * torrent.progress))
-          assert.strictEqual(torrent.dl_speed, 0)
-          assert.strictEqual(torrent.up_speed, 0)
-          assert.strictEqual(torrent.eta, 0)
-          assert.strictEqual(torrent.num_seeds, 0)
-          assert.strictEqual(torrent.num_leechs, 0)
-          break
-        case "stalledUP":
-        case "pausedUP":
-          assert.strictEqual(torrent.progress, 1)
-          assert.strictEqual(torrent.total_downloaded, torrent.size)
-          assert.strictEqual(torrent.dl_speed, 0)
-          assert.strictEqual(torrent.up_speed, 0)
-          assert.strictEqual(torrent.eta, 0)
-          assert.strictEqual(torrent.num_seeds, 0)
-          assert.strictEqual(torrent.num_leechs, 0)
-          break
-        default:
-          assert.fail(`unexpected generated state: ${torrent.state}`)
-      }
-    })
-
-    await invokeMockAction("clearMockedTorrents")
-    await invokeMockAction("generateMockedTorrents")
-    const secondRun = await getMockTorrents()
-    assert.deepEqual(secondRun, firstRun, "generates the same torrents from a clean store")
-
-    await invokeMockAction("clearMockedTorrents")
-    await invokeMockAction("addMockedTorrent", { hash: "a".repeat(40), name: "Actions menu torrent" })
-  })
-
-  async function invokeMockAction(action: string, ...args: any[]) {
-    await browser.execute(async (request) => {
-      await (window as any).electorrent.bittorrent.invokeAction(request)
-    }, { action, args })
-  }
-
-  async function getMockTorrents(): Promise<Record<string, unknown>> {
-    return browser.execute(async () => {
-      const snapshot = await (window as any).electorrent.bittorrent.getSnapshot({ fullUpdate: true })
-      return snapshot.torrents
-    })
-  }
-
   it("contains the mock client's context actions and follows torrent selection", async function () {
     const initial = await getActionsMenu()
     assert.includeMembers(initial.labels, [
@@ -129,22 +34,14 @@ describe("mock Actions menu", function () {
       "Set Ratio",
       "Remove",
       "Remove And Delete",
-      "Debug",
     ])
-    assert.isTrue(initial.selectionActionsDisabled)
-    assert.isFalse(initial.debugDisabled)
+    assert.isTrue(initial.disabled)
 
     const row = $("#torrentTable tbody tr[data-id]")
     await row.waitForClickable()
     await row.click()
 
     await eventually(async () => (await getActionsMenu()).disabled).equals(false)
-
-    await row.click({ button: "right" })
-    const debugContextMenu = $("//*[@id='contextmenu']//div[contains(@class, 'context') and contains(@class, 'dropdown')][contains(normalize-space(.), 'Debug')]")
-    await debugContextMenu.waitForDisplayed()
-    await debugContextMenu.moveTo()
-    await debugContextMenu.$(".//a[normalize-space(.)='Generate 100 Mock Torrents']").waitForDisplayed()
   })
 
   it("renders platform-localized shortcuts in the title menu", async function () {
@@ -251,10 +148,6 @@ async function getActionsMenu() {
       labels: actions.submenu.items.map((item) => item.label),
       disabled: actions.submenu.items.filter((item) => item.type !== "separator")
         .every((item) => !item.enabled),
-      selectionActionsDisabled: actions.submenu.items
-        .filter((item) => item.type !== "separator" && item.label !== "Debug")
-        .every((item) => !item.enabled),
-      debugDisabled: !actions.submenu.items.find((item) => item.label === "Debug")?.enabled,
     }
   })
 }
