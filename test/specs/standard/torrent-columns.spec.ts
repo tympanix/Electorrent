@@ -1,6 +1,7 @@
 import chai from "chai"
 import fs from "node:fs"
 import parseTorrent from "parse-torrent"
+import { $, $$ } from "@wdio/globals"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
 import { createTorrentFile } from "../../torrent"
@@ -10,6 +11,7 @@ const { assert } = chai
 const fixture = getTestFixture()
 const client = fixture.client
 const tracker = fixture.tracker
+const minimumColumnWidth = 25
 
 const builtInColumns = [
   "Name",
@@ -148,5 +150,33 @@ describe("torrent columns", function () {
   it("shows Date Completed when a torrent finishes", async function () {
     await eventually(() => torrent.getColumn("dateCompleted"))
       .satisfies("show a completion date", (value) => dateIsSensible(value.trim()), { timeout: 20 * 1000 })
+  })
+
+  it("gives newly enabled columns a minimum width", async function () {
+    this.timeout(60 * 1000)
+
+    await this.app.openSettings()
+    await this.app.settingsGotoTab("layout")
+    await this.app.setLayoutColumnEnabled("Ratio", false)
+    await this.app.settingsSave()
+    await this.app.torrentsPageIsVisible()
+
+    const nameHeader = $("#torrentTable thead th:first-child")
+    const resizeHandle = nameHeader.$(".rz-handle")
+    await resizeHandle.waitForDisplayed({ timeout: 10 * 1000 })
+    await resizeHandle.dragAndDrop({ x: 40, y: 0 })
+
+    await this.app.openSettings()
+    await this.app.settingsGotoTab("layout")
+    await this.app.setLayoutColumnEnabled("Ratio", true)
+    await this.app.settingsSave()
+    await this.app.torrentsPageIsVisible()
+
+    const headers = await $$("#torrentTable thead th")
+    for (const header of headers) {
+      const columnName = (await header.getText()).trim()
+      const width = (await header.getSize()).width
+      assert.isAtLeast(width, minimumColumnWidth, `${columnName} column width`)
+    }
   })
 })

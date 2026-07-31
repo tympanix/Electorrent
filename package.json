@@ -71,7 +71,7 @@
     "angular-animate": "^1.8.2",
     "angular-marked": "^1.2.2",
     "angular-resource": "^1.8.2",
-    "angular-table-resize": "^3.0.0",
+    "angular-table-resize": "^3.0.1",
     "angular-ui-sortable": "^0.19.0",
     "axios": "^1.18.1",
     "base64-js": "^1.2.0",
