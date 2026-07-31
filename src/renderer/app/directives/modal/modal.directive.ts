@@ -1,15 +1,8 @@
-import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IParseService, IScope } from "angular";
+import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
 import { ModalController } from "./modal.controller";
 
 interface ModalAttributes extends IAttributes {
-    after?: string
-    approve?: string
     closable?: string
-    deny?: string
-    hidden?: string
-    onHidden?: string
-    onShow?: string
-    show?: string
     size?: string
 }
 
@@ -20,11 +13,19 @@ interface ModalScope extends IScope {
 export class ModalDirective implements IDirective {
     restrict = 'EA'
     controller = ModalController
-
-    constructor(private readonly $parse: IParseService) {}
+    bindToController = {
+        after: "&?",
+        approve: "&?",
+        closable: "<?",
+        deny: "&?",
+        hidden: "&?",
+        onHidden: "&?",
+        onShow: "&?",
+        show: "&?",
+    }
 
     static getInstance(): IDirectiveFactory {
-        return ["$parse", ($parse: IParseService) => new ModalDirective($parse)] as unknown as IDirectiveFactory
+        return () => new ModalDirective()
     }
 
     link(scope: ModalScope, element: IAugmentedJQuery, attr: ModalAttributes, controller: ModalController) {
@@ -53,74 +54,44 @@ export class ModalDirective implements IDirective {
         modal.modal({
             onDeny: () => {
                 accepted = false
-                return this.invokeExpression(scope, attr.deny)
+                return controller.deny?.()
             },
             onApprove: () => {
                 accepted = true
-                if (!attr.approve) {
+                if (!controller.approve) {
                     return true
                 }
-                return this.invokeExpression(scope, attr.approve)
+                return controller.approve()
             },
             onHidden: () => {
                 ModalDirective.clearForm(element)
-                this.invokeAfter(scope, attr.after, accepted)
-                this.invokeExpression(scope, attr.onHidden)
-                this.invokeExpression(scope, attr.hidden)
+                controller.after?.({ accepted })
+                controller.onHidden?.()
+                controller.hidden?.()
             },
             onShow: () => {
                 accepted = false
-                this.invokeExpression(scope, attr.onShow)
-                this.invokeExpression(scope, attr.show)
+                controller.onShow?.()
+                controller.show?.()
             },
             onVisible: () => {
                 modal.modal('refresh')
             },
-            closable: this.isTruthy(scope, attr.closable),
+            closable: attr.closable === "" || controller.closable === true,
             keyboardShortcuts: false,
             duration: 150
         });
 
         scope.applyAndClose = function() {
-            if (!attr.approve || this.invokeExpression(scope, attr.approve) !== false) {
+            if (!controller.approve || controller.approve() !== false) {
                 modal.modal('hide')
             }
-        }.bind(this)
+        }
 
         scope.$on("$destroy", function() {
             $(document).off("keydown", onKeyDown)
             element.remove();
         });
-    }
-
-    private invokeExpression(scope: IScope, expression?: string) {
-        if (!expression) {
-            return undefined
-        }
-
-        return this.$parse(expression)(scope)
-    }
-
-    private invokeAfter(scope: IScope, expression: string | undefined, accepted: boolean) {
-        if (!expression) {
-            return
-        }
-
-        const result = this.$parse(expression)(scope, { accepted })
-        if (typeof result === "function") {
-            result(accepted)
-        }
-    }
-
-    private isTruthy(scope: IScope, expression?: string) {
-        if (expression == null) {
-            return false
-        }
-        if (expression === "") {
-            return true
-        }
-
-        return !!this.$parse(expression)(scope)
     }
 
     static clearForm(element: IAugmentedJQuery) {
