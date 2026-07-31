@@ -19,14 +19,14 @@ The orchestrator agent must transition the feature implementation through the fo
 Worker agent using model `gpt-5.6-sol` on medium reasoning to implement the feature. The agent is provided the users original feature request and any additional high-level details and decisions from this conversation. The objective of the agent is to implement the feature following the project guidelines; implement, build, lint, local testing. Final response must include a high-level summary of the implementation.
 
 ## Validation agent
-Agent using model `gpt-5.6-terra` on low reasoning. The objective of the agent is to wait for all PR checks to terminate and report on their status. The prompt must include the **No polling** rule. If any PR check fails, fetch the log for the failed checks and determine the failure cause. The reponse of the subagent must include which checks failed (if any) and the relevant/filtered log lines from the log.
+Agent using model `gpt-5.6-terra` on low reasoning. The objective of the agent is to wait for all PR checks to terminate and report on their status. The prompt must include the **No polling** rule. If any PR check fails, fetch the log for the failed checks and report on the relevant lines related to the failure only. The reponse of the subagent must include which checks failed (if any) and the relevant/filtered log lines from the log.
 
 ## Fixup agent
 Agent using model `gpt-5.6-sol` on medium reasoning. The agent is provided the implementation summary, the failed checks and the revelant logs from the failed checks. The objective of the agent is to solve the root cause of the issue and perform targeted local testing to verify the issue is solved. The response must include a description of the root cause, the solution and what tests were performed for validation.
 
 # Rules
-## No polling
-Do NOT check in with or report progress on agents and long running commands. Wait until subagents and/or commands terminate before taking any turns! Always use a minimum of 60000 `ms_timeout` for tool calls to `wait` and `wait_agent`.
+## No frequent polling
+Do NOT check in with or report progress on agents and long running commands regularily. Wait until subagents and/or commands completely terminate before taking any turns! Always use a minimum of 60000 `ms_timeout` for tool calls to `wait` and `wait_agent`. You may retry commands/waits after unexpected failures/terminations.
 
 ## Orchestrator token discipline:
 - Keep context clean by tracking high-level objectives and agent responses
