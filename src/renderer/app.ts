@@ -172,9 +172,9 @@ import { NewLabelModalDirective } from "@renderer/app/directives/new-label-modal
 torrentApp.directive("newLabelModal", NewLabelModalDirective.getInstance())
 import { DragAndDropDirective } from "@renderer/app/directives/drag-and-drop/drag-and-drop.directive"
 torrentApp.directive("dragAndDrop", DragAndDropDirective.getInstance())
-import { SortingDirective, SortDirective } from "@renderer/app/directives/sorting/sorting.directive"
+import { SortingDirective, SortHeaderDirective } from "@renderer/app/directives/sorting/sorting.directive"
 torrentApp.directive("sorting", SortingDirective.getInstance())
-torrentApp.directive("sort", SortDirective.getInstance())
+torrentApp.directive("sortHeader", SortHeaderDirective.getInstance())
 import { TorrentBodyDirective, TorrentRowDirective } from "@renderer/app/directives/torrent-table/torrent-table.directive"
 torrentApp.directive("torrentBody", TorrentBodyDirective.getInstance())
 torrentApp.directive("torrentRow", TorrentRowDirective.getInstance())

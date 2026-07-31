@@ -1,4 +1,5 @@
 import { IScope } from "angular"
+import type { SortChange } from "@renderer/app/directives/sorting/sorting.controller"
 import type { SettingsService } from "@renderer/app/services/settings"
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope"
 import type { BittorrentTorrentDetailsTracker } from "@shared/ipc-contract"
@@ -68,8 +69,8 @@ export class TorrentDetailsTrackersTabController {
     this.scope.$on("$destroy", () => { this.requestId += 1 })
   }
 
-  changeSorting = (columnId: keyof BittorrentTorrentDetailsTracker, descending: boolean) => {
-    this.sortKey = columnId
+  changeSorting = ({ sortKey, descending }: SortChange<keyof BittorrentTorrentDetailsTracker>) => {
+    this.sortKey = sortKey
     this.sortDescending = descending
     this.sortTrackers()
   }
