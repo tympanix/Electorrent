@@ -4,7 +4,7 @@ import {
   TorrentDetailsFileItem,
   TorrentDetailsPanelData,
 } from "@renderer/app/bittorrent/torrentclient";
-import { loadSortingState, SortingOptions } from "@renderer/app/directives/sorting/sorting.controller";
+import { loadSortingState, SortChange, SortingOptions } from "@renderer/app/directives/sorting/sorting.controller";
 import type { SettingsService } from "@renderer/app/services/settings";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
@@ -101,8 +101,8 @@ export class TorrentDetailsFilesTabController {
     return !!this.rootScope.$btclient?.features.fileSelection;
   }
 
-  changeSorting = (columnId: string, descending: boolean) => {
-    this.fileSortKey = columnId;
+  changeSorting = ({ sortKey, descending }: SortChange) => {
+    this.fileSortKey = sortKey;
     this.fileSortDescending = descending;
     this.sortFiles();
   };

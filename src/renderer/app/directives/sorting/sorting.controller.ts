@@ -1,10 +1,20 @@
-import { IWindowService } from "angular";
+import { IAugmentedJQuery, IWindowService } from "angular";
 
 export interface SortingOptions {
     defaultSortKey?: string;
     defaultSortOrder?: boolean;
     sortKeyPrefix?: string;
     sortOrderPrefix?: string;
+}
+
+export interface SortChange<TSortKey = string> {
+    sortKey: TSortKey;
+    descending: boolean;
+}
+
+export interface SortHeader {
+    readonly sortKey: string;
+    setSortState(change: SortChange): void;
 }
 
 const DEFAULT_SORT_KEY = "dateAdded";
@@ -52,26 +62,62 @@ export class SortingController {
     defaultSortOrder?: boolean;
     sortKeyPrefix?: string;
     sortOrderPrefix?: string;
-    sorting!: (sortKey: string, descending: boolean) => void;
-    sortKey!: string;
-    sortOrder!: boolean;
-    last?: JQuery;
+    onSortChange?: (locals: { $event: SortChange }) => void;
+
+    private readonly headers = new Set<SortHeader>();
+    private initialized = false;
+    private state!: SortChange;
 
     constructor(private $window: IWindowService) {}
 
     $onInit() {
-        this.updateSettings();
+        this.initialized = true;
+        this.loadState();
     }
 
-    updateSettings() {
+    $onChanges() {
+        if (this.initialized) {
+            this.loadState();
+        }
+    }
+
+    register(header: SortHeader) {
+        this.headers.add(header);
+        if (this.state) {
+            header.setSortState(this.state);
+            if (header.sortKey === this.state.sortKey) {
+                this.emitState();
+            }
+        }
+    }
+
+    unregister(header: SortHeader) {
+        this.headers.delete(header);
+    }
+
+    select(sortKey: string) {
+        const descending = this.state.sortKey === sortKey ? !this.state.descending : true;
+        this.state = { sortKey, descending };
+        saveSortingState(this.$window, this.mode, sortKey, descending, this.getOptions());
+        this.renderState();
+        this.emitState();
+    }
+
+    private loadState() {
         const { sortKey, sortOrder } = loadSortingState(this.$window, this.mode, this.getOptions());
-
-        this.sortKey = sortKey;
-        this.sortOrder = sortOrder;
+        this.state = { sortKey, descending: sortOrder };
+        this.renderState();
+        if (Array.from(this.headers).some((header) => header.sortKey === sortKey)) {
+            this.emitState();
+        }
     }
 
-    save(key: string, order: boolean) {
-        saveSortingState(this.$window, this.mode, key, order, this.getOptions());
+    private renderState() {
+        this.headers.forEach((header) => header.setSortState(this.state));
+    }
+
+    private emitState() {
+        this.onSortChange?.({ $event: this.state });
     }
 
     private getOptions(): SortingOptions {
@@ -81,5 +127,91 @@ export class SortingController {
             sortKeyPrefix: this.sortKeyPrefix,
             sortOrderPrefix: this.sortOrderPrefix,
         };
+    }
+}
+
+export class SortHeaderController implements SortHeader {
+    static $inject = ["$element", "$window"];
+
+    sortKey!: string;
+    disabled?: boolean;
+
+    private sorting?: SortingController;
+    private currentState?: SortChange;
+    private isDragging = false;
+    private readonly column: JQuery;
+    private readonly windowElement: JQuery<IWindowService>;
+
+    constructor($element: IAugmentedJQuery, $window: IWindowService) {
+        this.column = $($element);
+        this.windowElement = $($window);
+    }
+
+    $onInit() {
+        this.column.on("mousedown", this.onMouseDown);
+        this.column.on("mouseup", this.onMouseUp);
+        this.render();
+    }
+
+    $onDestroy() {
+        this.sorting?.unregister(this);
+        this.column.off("mousedown", this.onMouseDown);
+        this.column.off("mouseup", this.onMouseUp);
+        this.windowElement.off("mousemove", this.onWindowMouseMove);
+    }
+
+    connect(sorting: SortingController) {
+        this.sorting = sorting;
+        sorting.register(this);
+    }
+
+    setInputs(sortKey: string, disabled: boolean) {
+        this.sortKey = sortKey;
+        this.disabled = disabled;
+        this.render();
+    }
+
+    setSortState(change: SortChange) {
+        this.currentState = change;
+        this.render();
+    }
+
+    private readonly onMouseDown = () => {
+        if (this.disabled) {
+            return;
+        }
+        this.isDragging = false;
+        this.windowElement.one("mousemove", this.onWindowMouseMove);
+    };
+
+    private readonly onWindowMouseMove = () => {
+        this.isDragging = true;
+    };
+
+    private readonly onMouseUp = () => {
+        const wasDragging = this.isDragging;
+        this.isDragging = false;
+        this.windowElement.off("mousemove", this.onWindowMouseMove);
+        if (!this.disabled && !wasDragging) {
+            this.sorting?.select(this.sortKey);
+        }
+    };
+
+    private render() {
+        const isActive = !this.disabled && this.currentState?.sortKey === this.sortKey;
+        const descending = isActive && this.currentState?.descending === true;
+        const icon = this.column.children(".sorting.icon");
+
+        if (this.disabled) {
+            icon.remove();
+        } else if (!icon.length) {
+            this.column.append('<i class="ui sorting icon" aria-hidden="true"></i>');
+        }
+
+        this.column.toggleClass("sorting-disabled", this.disabled === true);
+        this.column.toggleClass("sortdown", descending);
+        this.column.toggleClass("sortup", isActive && !descending);
+        this.column.attr("aria-disabled", this.disabled === true ? "true" : "false");
+        this.column.attr("aria-sort", isActive ? (descending ? "descending" : "ascending") : "none");
     }
 }
