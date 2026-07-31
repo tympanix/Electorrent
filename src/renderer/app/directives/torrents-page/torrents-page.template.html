@@ -96,7 +96,7 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="zoom" ng-class="settings.ui.displaySize" torrent-body columns="$server.columns">
+                    <tbody class="zoom" ng-class="settings.ui.displaySize">
                         <tr
                             ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit track by torrent.id"
                             ng-class="{active: torrent.selected}"
@@ -107,8 +107,37 @@
                             data-id="{{torrent.id | lowercase }}"
                             data-info-hash="{{torrent.hash | lowercase }}"
                             limit-source
-                            torrent-row
-                        ></tr>
+                        >
+                            <td
+                                ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name"
+                                ng-switch="col.attribute"
+                                data-col="{{col.attribute}}"
+                            >
+                                <span ng-switch-when="decodedName">{{settings.ui.cleanNames ? torrent.decodedName : torrent.name}}</span>
+                                <span ng-switch-when="size">{{torrent.size | bytes}}</span>
+                                <span ng-switch-when="downloadSpeed">{{torrent.downloadSpeed | speed}}</span>
+                                <span ng-switch-when="uploadSpeed">{{torrent.uploadSpeed | speed}}</span>
+                                <span ng-switch-when="downloadLimit">{{torrent.downloadLimit | speedLimit}}</span>
+                                <span ng-switch-when="uploadLimit">{{torrent.uploadLimit | speedLimit}}</span>
+                                <div ng-switch-when="percent" progress="torrent"></div>
+                                <span ng-switch-when="label">
+                                    <span
+                                        class="torrent-table-label-chip"
+                                        ng-if="torrent.label"
+                                        label-chip="torrent.label"
+                                    ><span class="label-chip-text">{{torrent.label}}</span></span>
+                                </span>
+                                <span ng-switch-when="dateAdded" time="torrent.dateAdded"></span>
+                                <span ng-switch-when="dateCompleted" time="torrent.dateCompleted"></span>
+                                <span ng-switch-when="peersConnected">{{torrent.peersText()}}</span>
+                                <span ng-switch-when="seedsConnected">{{torrent.seedsText()}}</span>
+                                <span ng-switch-when="torrentQueueOrder">{{torrent.torrentQueueOrder | torrentQueue}}</span>
+                                <span ng-switch-when="eta">{{torrent.eta | eta}}</span>
+                                <span ng-switch-when="ratio">{{torrent.ratio | torrentRatio}}</span>
+                                <span ng-switch-when="ratioLimit">{{torrent.ratioLimit | torrentRatio}}</span>
+                                <span ng-switch-when="tracker">{{torrent.tracker}}</span>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
