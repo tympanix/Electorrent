@@ -24,7 +24,7 @@ Pick one of the following test strategies from context:
 * <client>: affected bittorrent client or `qbittorrent:latest` by default
 * <spec>: a spec file in the directory `test/specs`
 ```shell
-npm run test -- --client "<client>" --spec "<spec>"
+npm run test -- --client "<client>" --spec "<spec>" --headless
 ```
 
 > NOTE: A single test case within a spec may be targeted with `--mochaOpts.grep "<grep>"`
@@ -43,6 +43,7 @@ gh pr checks --watch
 Do not actively poll or send progress updates. Resume only when checks are terminal or a check fails
 
 # Coding Guidelines
+* Always use `--headless` when running tests
 * Avoid using `browser.execute` in browser testing - prefer organic user interaction
 * Avoid conditional logic based on client ID - deduce feature support from `TorrentClient`
 * The `BittorrentRuntime` MUST return all `n` torrents from `getSnapshot` in `O(1)` HTTP calls
