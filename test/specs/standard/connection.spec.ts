@@ -34,8 +34,9 @@ describe("connection", function () {
       return settings.servers[0]
     })
 
-    assert.equal(rendererServer.password, expectedPassword)
     assert.equal(rendererServer.hasPassword, Boolean(client.password))
+    assert.notProperty(rendererServer, "password")
+    assert.notProperty(rendererServer, "newPassword")
     assert.notProperty(rendererServer, "encryptedPassword")
 
     const storage = await browser.electron.execute((electron) => ({
@@ -51,14 +52,43 @@ describe("connection", function () {
     } else if (storage.available) {
       assert.notProperty(persistedServer, "password")
       assert.deepInclude(persistedServer.encryptedPassword, {
-        version: 1,
-        provider: "electron-safe-storage",
+        cipher: "electron-safe-storage",
       })
-      assert.isNotEmpty(persistedServer.encryptedPassword.data)
+      assert.isNotEmpty(persistedServer.encryptedPassword.value)
     } else {
-      assert.equal(persistedServer.password, client.password)
-      assert.notProperty(persistedServer, "encryptedPassword")
+      assert.notProperty(persistedServer, "password")
+      assert.deepEqual(persistedServer.encryptedPassword, {
+        cipher: "plaintext",
+        value: client.password,
+      })
     }
+  })
+
+  it("migrates a legacy plaintext password into the password envelope", async function () {
+    if (!client.password) {
+      this.skip()
+    }
+
+    const storage = await browser.electron.execute((electron) => ({
+      available: electron.safeStorage.isEncryptionAvailable(),
+      userDataPath: electron.app.getPath("userData"),
+    }))
+    const configPath = path.join(storage.userDataPath, "config.json")
+    const legacySettings = JSON.parse(fs.readFileSync(configPath, "utf8"))
+    delete legacySettings.servers[0].encryptedPassword
+    legacySettings.servers[0].password = client.password
+    fs.writeFileSync(configPath, JSON.stringify(legacySettings, null, 4))
+
+    await restartApplication(this)
+    await this.app.torrentsPageIsVisible()
+
+    const migratedServer = JSON.parse(fs.readFileSync(configPath, "utf8")).servers[0]
+    assert.notProperty(migratedServer, "password")
+    assert.equal(
+      migratedServer.encryptedPassword.cipher,
+      storage.available ? "electron-safe-storage" : "plaintext",
+    )
+    assert.isNotEmpty(migratedServer.encryptedPassword.value)
   })
 
   it("shows a connection indicator before the disconnect overlay on the torrent page", async function () {

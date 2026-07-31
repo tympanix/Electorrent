@@ -3,7 +3,8 @@ import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
 import https from 'https'
 
-import type { BittorrentServerConfig, TorrentClientConnection } from '@shared/ipc-contract'
+import type { TorrentClientConnection } from '@shared/ipc-contract'
+import type { ResolvedServerConfig } from '@main/lib/bittorrent/server-config'
 import {
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
@@ -55,7 +56,7 @@ export class SynologyRuntime implements BittorrentRuntime {
         { role: "set-location", label: "Set Location", icon: "folder open" },
         { role: "remove", label: "Remove Torrent", action: "remove", icon: "remove" },
     ]
-    private server!: BittorrentServerConfig
+    private server!: ResolvedServerConfig
     private http!: AxiosInstance
     private authPath = ''
     private authVersion = ''
@@ -180,7 +181,7 @@ export class SynologyRuntime implements BittorrentRuntime {
         return !!data?.success
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+    async connect(server: ResolvedServerConfig): Promise<TorrentClientConnection> {
         this.server = server
         this.http = axios.create({
             httpsAgent: new https.Agent({

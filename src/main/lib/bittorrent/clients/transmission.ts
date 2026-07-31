@@ -2,7 +2,8 @@ import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import https from 'https'
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from '@shared/ipc-contract'
+import type { BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from '@shared/ipc-contract'
+import type { ResolvedServerConfig } from '@main/lib/bittorrent/server-config'
 import {
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
@@ -115,7 +116,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
             { label: "Torrent and Local Data", action: "removeAndLocal", icon: "remove", role: "delete" },
         ] },
     ]
-    private server!: BittorrentServerConfig
+    private server!: ResolvedServerConfig
     private session?: string
 
     private url(endpoint = '') {
@@ -196,7 +197,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         return http
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+    async connect(server: ResolvedServerConfig): Promise<TorrentClientConnection> {
         this.server = server
         this.session = undefined
 

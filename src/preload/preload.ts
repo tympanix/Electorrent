@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
 
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { ColorTheme, ElectorrentBridge, PendingTorrentUploadFile, PendingTorrentUploadLink } from '@shared/ipc-contract'
+import type { AppSettings, BittorrentConnectRequest, BittorrentConnectResult, ColorTheme, ElectorrentBridge, PendingTorrentUploadFile, PendingTorrentUploadLink, RendererServerConfig, SettingsSaveAllRequest } from '@shared/ipc-contract'
 import type { TitleMenuItem } from '@shared/title-menu'
 
 const INITIAL_THEME_ARGUMENT = '--theme='
@@ -34,8 +34,8 @@ const electorrentBridge: ElectorrentBridge = {
         openExternal: (url: string) => invoke(IPC_CHANNELS.shell.openExternal, { url }),
     },
     settings: {
-        getAll: () => invoke(IPC_CHANNELS.settings.getAll),
-        saveAll: (settings) => invoke(IPC_CHANNELS.settings.saveAll, { settings }),
+        getAll: () => invoke<AppSettings<RendererServerConfig>>(IPC_CHANNELS.settings.getAll),
+        saveAll: (settings) => invoke<void>(IPC_CHANNELS.settings.saveAll, { settings } satisfies SettingsSaveAllRequest),
         listThemes: () => invoke(IPC_CHANNELS.settings.listThemes),
         getSystemTheme: () => invoke(IPC_CHANNELS.settings.getSystemTheme),
         onSystemThemeChanged: (callback: (theme: ColorTheme) => void) => subscribe(IPC_CHANNELS.settings.systemThemeChanged, callback),
@@ -52,7 +52,7 @@ const electorrentBridge: ElectorrentBridge = {
         getPathForFile: (file) => webUtils.getPathForFile(file),
     },
     bittorrent: {
-        connect: (server) => invoke(IPC_CHANNELS.bittorrent.connect, { server }),
+        connect: (server) => invoke<BittorrentConnectResult>(IPC_CHANNELS.bittorrent.connect, { server } satisfies BittorrentConnectRequest),
         disconnect: () => invoke(IPC_CHANNELS.bittorrent.disconnect),
         getSnapshot: (request) => invoke(IPC_CHANNELS.bittorrent.getSnapshot, request || {}),
         addTorrentUrl: (request) => invoke(IPC_CHANNELS.bittorrent.addTorrentUrl, request),

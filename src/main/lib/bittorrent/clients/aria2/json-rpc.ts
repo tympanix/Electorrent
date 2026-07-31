@@ -3,7 +3,7 @@ import httpAdapter from "axios/lib/adapters/http.js"
 import https from "node:https"
 
 import { HTTP_REQUEST_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
-import type { BittorrentServerConfig } from "@shared/ipc-contract"
+import type { ResolvedServerConfig } from '@main/lib/bittorrent/server-config'
 
 export interface Aria2RpcCall {
     method: string
@@ -66,7 +66,7 @@ export class Aria2JsonRpcTransport {
     private readonly endpoint: string
     private readonly secret: string
 
-    constructor(server: BittorrentServerConfig) {
+    constructor(server: ResolvedServerConfig) {
         this.endpoint = serverUrl(server)
         this.secret = server.password || ""
         this.http = axios.create({

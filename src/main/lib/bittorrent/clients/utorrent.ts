@@ -5,7 +5,8 @@ import FormData from 'form-data'
 import https from 'https'
 import qs from 'qs'
 
-import type { BittorrentServerConfig, TorrentClientConnection } from '@shared/ipc-contract'
+import type { TorrentClientConnection } from '@shared/ipc-contract'
+import type { ResolvedServerConfig } from '@main/lib/bittorrent/server-config'
 import {
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
@@ -31,7 +32,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
             { label: "Delete All", action: "removedatatorrent", role: "delete" },
         ] },
     ]
-    private server!: BittorrentServerConfig
+    private server!: ResolvedServerConfig
     private http!: AxiosInstance
     private data = {
         username: '',
@@ -104,7 +105,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
         }
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+    async connect(server: ResolvedServerConfig): Promise<TorrentClientConnection> {
         this.server = server
 
         this.http = axios.create({

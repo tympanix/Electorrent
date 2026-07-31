@@ -2,25 +2,18 @@ import { app, dialog, safeStorage, shell, type BrowserWindow, type MessageBoxOpt
 import fs from 'fs'
 import path from 'path'
 
-import type { AppSettings, BittorrentServerConfig, StoredServerConfig } from '@shared/ipc-contract'
+import { PASSWORD_MASK, type AppSettings, type BittorrentConnectServer, type RendererServerConfig, type ServerConfigBase } from '@shared/ipc-contract'
 import { createDefaultSettings, normalizeSettings } from '@shared/settings-defaults'
+import type { ResolvedServerConfig } from './bittorrent/types'
 import * as electorrent from './electorrent'
 import type { StoredWindowState } from './window-state'
 
-const ENCRYPTED_PASSWORD_VERSION = 1
-const ENCRYPTED_PASSWORD_PROVIDER = 'electron-safe-storage'
-export const PASSWORD_MASK = '••••••••'
+export type PersistedPassword =
+    | { cipher: 'plaintext'; value: string }
+    | { cipher: 'electron-safe-storage'; value: string }
 
-export interface EncryptedPassword {
-    version: typeof ENCRYPTED_PASSWORD_VERSION
-    provider: typeof ENCRYPTED_PASSWORD_PROVIDER
-    data: string
-}
-
-export interface PersistedServerConfig extends Omit<StoredServerConfig, 'password' | 'hasPassword'> {
-    /** Backwards-compatible fallback used only when Electron safeStorage is unavailable. */
-    password?: string
-    encryptedPassword?: EncryptedPassword
+export interface PersistedServerConfig extends ServerConfigBase {
+    encryptedPassword?: PersistedPassword
 }
 
 export interface PersistedSettings extends AppSettings<PersistedServerConfig> {
@@ -28,6 +21,7 @@ export interface PersistedSettings extends AppSettings<PersistedServerConfig> {
 }
 
 let data: PersistedSettings | null = null
+let needsSettingsRewrite = false
 const changeListeners = new Set<() => void>()
 
 const CONF_PATH = path.join(app.getPath('userData'), 'config.json')
@@ -37,6 +31,53 @@ load()
 function deleteConfig() {
     if (fs.existsSync(CONF_PATH)) {
         fs.unlinkSync(CONF_PATH)
+    }
+}
+
+function decodeSettings(raw: unknown): PersistedSettings {
+    const normalized = normalizeSettings(raw) as AppSettings<RendererServerConfig>
+    return {
+        ...normalized,
+        servers: normalized.servers.map((server) => {
+            const input = server as RendererServerConfig & {
+                password?: unknown
+                encryptedPassword?: unknown
+            }
+            const {
+                password: legacyPassword,
+                encryptedPassword: encodedPassword,
+                hasPassword: _hasPassword,
+                newPassword: _newPassword,
+                ...publicServer
+            } = input
+
+            if (isPersistedPassword(encodedPassword)) {
+                return { ...publicServer, encryptedPassword: encodedPassword }
+            }
+
+            // Decode configs written by the short-lived versioned safeStorage format.
+            if (encodedPassword && typeof encodedPassword === 'object') {
+                const legacyEncrypted = encodedPassword as { version?: unknown; provider?: unknown; data?: unknown }
+                if (legacyEncrypted.version === 1
+                    && legacyEncrypted.provider === 'electron-safe-storage'
+                    && typeof legacyEncrypted.data === 'string'
+                    && legacyEncrypted.data.length > 0) {
+                    needsSettingsRewrite = true
+                    return {
+                        ...publicServer,
+                        encryptedPassword: { cipher: 'electron-safe-storage', value: legacyEncrypted.data },
+                    }
+                }
+            }
+
+            if (typeof legacyPassword === 'string') {
+                needsSettingsRewrite = true
+                return legacyPassword.length > 0
+                    ? { ...publicServer, encryptedPassword: { cipher: 'plaintext', value: legacyPassword } }
+                    : publicServer
+            }
+            return publicServer
+        }),
     }
 }
 
@@ -83,7 +124,7 @@ function load(): PersistedSettings {
     }
 
     try {
-        data = normalizeSettings(JSON.parse(file)) as PersistedSettings
+        data = decodeSettings(JSON.parse(file))
     } catch (_e) {
         data = createDefaultSettings() as PersistedSettings
         if (app.isReady()) {
@@ -147,7 +188,7 @@ export function put<K extends keyof PersistedSettings>(key: K, value: PersistedS
     }
 }
 
-export function getAllSettings(): AppSettings {
+export function getAllSettings(): AppSettings<RendererServerConfig> {
     const settings = normalizeSettings(load()) as PersistedSettings
     return {
         ...settings,
@@ -163,7 +204,7 @@ export function write() {
     saveSync()
 }
 
-export function saveAll(settings: AppSettings, callback?: (err?: Error | null) => void) {
+export function saveAll(settings: AppSettings<RendererServerConfig>, callback?: (err?: Error | null) => void) {
     const previousSettings = load()
     const previousServers = new Map(previousSettings.servers.map((server) => [server.id, server]))
     const normalized = normalizeSettings(settings)
@@ -178,16 +219,15 @@ export function saveAll(settings: AppSettings, callback?: (err?: Error | null) =
     }
 }
 
-function hasEncryptedPassword(value: unknown): value is EncryptedPassword {
+function isPersistedPassword(value: unknown): value is PersistedPassword {
     if (!value || typeof value !== 'object') {
         return false
     }
 
-    const encrypted = value as Partial<EncryptedPassword>
-    return encrypted.version === ENCRYPTED_PASSWORD_VERSION
-        && encrypted.provider === ENCRYPTED_PASSWORD_PROVIDER
-        && typeof encrypted.data === 'string'
-        && encrypted.data.length > 0
+    const password = value as Partial<PersistedPassword>
+    return (password.cipher === 'plaintext' || password.cipher === 'electron-safe-storage')
+        && typeof password.value === 'string'
+        && password.value.length > 0
 }
 
 function encryptionAvailable() {
@@ -198,125 +238,113 @@ function encryptionAvailable() {
     }
 }
 
-function encryptPassword(password: string): EncryptedPassword | null {
+function encryptSecurely(password: string): PersistedPassword | null {
     if (!encryptionAvailable()) {
         return null
     }
 
     try {
         return {
-            version: ENCRYPTED_PASSWORD_VERSION,
-            provider: ENCRYPTED_PASSWORD_PROVIDER,
-            data: safeStorage.encryptString(password).toString('base64'),
+            cipher: 'electron-safe-storage',
+            value: safeStorage.encryptString(password).toString('base64'),
         }
     } catch {
         return null
     }
 }
 
+function encryptPassword(password: string): PersistedPassword {
+    return encryptSecurely(password) || { cipher: 'plaintext', value: password }
+}
+
 function decryptPassword(server: PersistedServerConfig): string {
-    if (hasEncryptedPassword(server.encryptedPassword)) {
-        if (encryptionAvailable()) {
-            try {
-                return safeStorage.decryptString(Buffer.from(server.encryptedPassword.data, 'base64'))
-            } catch {
-                if (typeof server.password !== 'string') {
-                    throw new Error(`Could not decrypt the password for server ${server.id}`)
-                }
-            }
-        }
-
-        if (typeof server.password !== 'string') {
-            throw new Error(`Secure password storage is unavailable for server ${server.id}`)
-        }
+    const password = server.encryptedPassword
+    if (!password) {
+        return ''
     }
-
-    return typeof server.password === 'string' ? server.password : ''
+    if (password.cipher === 'plaintext') {
+        return password.value
+    }
+    if (!encryptionAvailable()) {
+        throw new Error('Stored password is unavailable; please re-enter it.')
+    }
+    try {
+        return safeStorage.decryptString(Buffer.from(password.value, 'base64'))
+    } catch {
+        throw new Error('Stored password is unavailable; please re-enter it.')
+    }
 }
 
 function hasPassword(server: PersistedServerConfig) {
-    return hasEncryptedPassword(server.encryptedPassword)
-        || (typeof server.password === 'string' && server.password.length > 0)
+    return isPersistedPassword(server.encryptedPassword)
 }
 
-function toRendererServer(server: PersistedServerConfig): StoredServerConfig {
+function toRendererServer(server: PersistedServerConfig): RendererServerConfig {
     const { encryptedPassword: _encryptedPassword, ...publicServer } = server
-    const passwordStored = hasPassword(server)
     return {
         ...publicServer,
-        password: passwordStored ? PASSWORD_MASK : '',
-        hasPassword: passwordStored,
+        hasPassword: hasPassword(server),
     }
 }
 
-function withStoredPassword(server: Omit<PersistedServerConfig, 'password' | 'encryptedPassword'>, password: string): PersistedServerConfig {
+function withStoredPassword(server: ServerConfigBase, password: string): PersistedServerConfig {
     if (!password) {
         return server
     }
 
-    const encryptedPassword = encryptPassword(password)
-    if (encryptedPassword) {
-        return { ...server, encryptedPassword }
-    }
-
-    return { ...server, password }
+    return { ...server, encryptedPassword: encryptPassword(password) }
 }
 
-function toPersistedServer(server: StoredServerConfig, previous?: PersistedServerConfig): PersistedServerConfig {
+function toPersistedServer(server: RendererServerConfig, previous?: PersistedServerConfig): PersistedServerConfig {
     const {
-        password,
+        newPassword,
         hasPassword: _hasPassword,
         encryptedPassword: _untrustedEncryptedPassword,
+        password: _untrustedPassword,
         ...publicServer
-    } = server as StoredServerConfig & { encryptedPassword?: unknown }
+    } = server as RendererServerConfig & { encryptedPassword?: unknown; password?: unknown }
 
-    if ((password === PASSWORD_MASK || password === undefined) && previous) {
-        const persisted = { ...publicServer } as PersistedServerConfig
-        if (hasEncryptedPassword(previous.encryptedPassword)) {
-            persisted.encryptedPassword = previous.encryptedPassword
-        }
-        if (typeof previous.password === 'string') {
-            persisted.password = previous.password
-        }
-        return persisted
+    if ((newPassword === PASSWORD_MASK || newPassword === undefined) && previous?.encryptedPassword) {
+        return { ...publicServer, encryptedPassword: previous.encryptedPassword }
     }
 
-    return withStoredPassword(publicServer, typeof password === 'string' ? password : '')
+    return withStoredPassword(publicServer, typeof newPassword === 'string' ? newPassword : '')
 }
 
 /** Encrypts legacy plaintext credentials once safeStorage becomes available after app ready. */
 export function migratePasswords(): boolean {
-    if (!encryptionAvailable()) {
-        return false
-    }
-
     const settings = load()
-    let changed = false
-    settings.servers = settings.servers.map((server) => {
-        if (typeof server.password !== 'string') {
+    let changed = needsSettingsRewrite
+    const servers = settings.servers.map((server) => {
+        if (server.encryptedPassword?.cipher !== 'plaintext') {
             return server
         }
 
-        const encryptedPassword = server.password ? encryptPassword(server.password) : server.encryptedPassword
-        if (server.password && !encryptedPassword) {
+        const encryptedPassword = encryptSecurely(server.encryptedPassword.value)
+        if (!encryptedPassword) {
             return server
         }
-
-        const { password: _password, ...publicServer } = server
         changed = true
-        return encryptedPassword ? { ...publicServer, encryptedPassword } : publicServer
+        return { ...server, encryptedPassword }
     })
 
     if (changed) {
-        saveSync()
-        notifyChanged()
+        const migrated = { ...settings, servers }
+        try {
+            fs.writeFileSync(CONF_PATH, JSON.stringify(migrated, null, 4))
+            data = migrated
+            needsSettingsRewrite = false
+            notifyChanged()
+        } catch {
+            return false
+        }
     }
     return changed
 }
 
 /** Resolves a renderer-safe server request into credentials only inside the main process. */
-export function resolveConnectionServer(server: BittorrentServerConfig): BittorrentServerConfig {
-    let password = server.password
+export function resolveConnectionServer(server: BittorrentConnectServer): ResolvedServerConfig {
+    let password = server.newPassword
     if (password === PASSWORD_MASK || password === undefined) {
         const persistedServer = load().servers.find((candidate) => candidate.id === server.id)
         password = persistedServer ? decryptPassword(persistedServer) : ''
@@ -324,9 +352,11 @@ export function resolveConnectionServer(server: BittorrentServerConfig): Bittorr
 
     const {
         hasPassword: _hasPassword,
+        newPassword: _newPassword,
         encryptedPassword: _untrustedEncryptedPassword,
+        password: _untrustedPassword,
         ...connectionServer
-    } = server as BittorrentServerConfig & { encryptedPassword?: unknown }
+    } = server as BittorrentConnectServer & { encryptedPassword?: unknown; password?: unknown }
     return { ...connectionServer, password }
 }
 

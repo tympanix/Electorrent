@@ -1,6 +1,5 @@
 import type {
     BittorrentFileSelection,
-    BittorrentServerConfig,
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
@@ -9,12 +8,14 @@ import type {
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
 import type { TorrentActionItem } from "@shared/torrent-actions"
+import type { ResolvedServerConfig } from './server-config'
+export type { ResolvedServerConfig } from './server-config'
 
 export type CallbackFunc<T = unknown> = (err: unknown, val: T) => void
 
 export interface BittorrentRuntime {
     readonly actions: TorrentActionItem[]
-    connect(server: BittorrentServerConfig): Promise<TorrentClientConnection>
+    connect(server: ResolvedServerConfig): Promise<TorrentClientConnection>
     getSnapshot(fullUpdate?: boolean): Promise<any>
     addTorrentUrl(uri: string, options?: TorrentUploadOptions): Promise<void>
     uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions): Promise<void>

@@ -4,10 +4,10 @@ import { Torrent } from "@renderer/app/bittorrent"
 import type { ColumnProps } from "@renderer/app/services/column"
 import { parseServerAddressInput, sanitizeServerAddress } from "@shared/server-address"
 import type { CertificateResponseService } from "@renderer/app/services/certificate-response"
-import type { LabelColorHue, LabelColorOverrides, SavedLocationConfig, StoredServerConfig, TorrentUploadOptions } from "@shared/ipc-contract"
+import { PASSWORD_MASK, type LabelColorHue, type LabelColorOverrides, type RendererServerConfig, type SavedLocationConfig, type TorrentUploadOptions } from "@shared/ipc-contract"
 import { normalizeLabelColorHue } from "@renderer/app/services/label-colors"
 
-export interface Server extends Omit<StoredServerConfig, "columns"> {
+export interface Server extends Omit<RendererServerConfig, "columns"> {
     columns: ColumnProps[]
     certificateData?: Uint8Array
     isConnected: boolean
@@ -30,7 +30,8 @@ export interface Server extends Omit<StoredServerConfig, "columns"> {
     defaultColumns(): ColumnProps[]
     addCustomColumns(columns: ColumnProps[]): ColumnProps[]
     bootstrap(): void
-    json(): StoredServerConfig
+    json(): RendererServerConfig
+    markPasswordSaved(): void
 }
 
 export const serverService = ['$q', 'notificationService', '$bittorrent', '$btclients', 'certificateResponseService',
@@ -89,7 +90,8 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
                 this.proto = proto
                 this.port = port
                 this.user = user || ''
-                this.password = password || ''
+                this.hasPassword = false
+                this.newPassword = password || undefined
                 this.client = client
                 this.path = path
                 this.lastused = -1
@@ -140,7 +142,8 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
             this.proto = data.proto || "http"
             this.port = data.port
             this.user = data.user || ''
-            this.password = data.password || ''
+            this.hasPassword = data.hasPassword === true
+            this.newPassword = this.hasPassword ? PASSWORD_MASK : undefined
             this.client = data.client
             this.path = data.path || ''
             this.default = data.default
@@ -156,14 +159,14 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
         };
 
         Server.prototype.json = function() {
-            return {
+            const server: RendererServerConfig = {
                 name: this.name,
                 id: this.id,
                 ip: this.ip,
                 proto: this.proto,
                 port: this.port,
                 user: this.user,
-                password: this.password,
+                hasPassword: this.hasPassword === true,
                 client: this.client,
                 path: this.path,
                 default: this.default,
@@ -176,7 +179,18 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
                 defaultUploadOptions: normalizeDefaultUploadOptions(this.defaultUploadOptions),
                 labelColors: normalizeLabelColors(this.labelColors),
             }
+            if (typeof this.newPassword === 'string' && this.newPassword !== PASSWORD_MASK) {
+                server.newPassword = this.newPassword
+            }
+            return server
         };
+
+        Server.prototype.markPasswordSaved = function() {
+            if (typeof this.newPassword === 'string' && this.newPassword !== PASSWORD_MASK) {
+                this.hasPassword = this.newPassword.length > 0
+            }
+            this.newPassword = this.hasPassword ? PASSWORD_MASK : undefined
+        }
 
         Server.prototype.getName = function() {
             return $btclients[this.client]?.name || `Unknown client (${this.client || "missing client ID"})`
@@ -285,9 +299,10 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
         Server.prototype.askForCertificate = function() {
             const self = this
             const response = certificateResponseService.wait(self.id)
+            const { newPassword: _newPassword, ...server } = self.json()
 
             electorrent.certificates.fetch({
-                server: self.json() as StoredServerConfig,
+                server,
             }).catch((err: unknown) => {
                 certificateResponseService.reject(self.id, err)
             })
@@ -318,7 +333,7 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
                 this.proto === other.proto &&
                 this.port === other.port &&
                 this.user === other.user &&
-                this.password === other.password &&
+                this.newPassword === other.newPassword &&
                 this.client === other.client &&
                 this.path === other.path &&
                 this.certificate === other.certificate &&

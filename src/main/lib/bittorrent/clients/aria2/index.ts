@@ -2,7 +2,6 @@ import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import { HTTP_LOGIN_TIMEOUT } from "@main/lib/bittorrent/helpers"
 import type {
     BittorrentFileSelection,
-    BittorrentServerConfig,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
     BittorrentTorrentDetailsTracker,
@@ -10,6 +9,7 @@ import type {
     TorrentClientConnection,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
+import type { ResolvedServerConfig } from '@main/lib/bittorrent/server-config'
 import type { TorrentActionItem } from "@shared/torrent-actions"
 import { Aria2JsonRpcTransport, Aria2RpcError, type Aria2RpcCall } from "./json-rpc"
 
@@ -235,7 +235,7 @@ export class Aria2Runtime implements BittorrentRuntime {
 
     private rpc?: Aria2JsonRpcTransport
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+    async connect(server: ResolvedServerConfig): Promise<TorrentClientConnection> {
         this.rpc = new Aria2JsonRpcTransport(server)
         const result = await this.rpc.call<{ version?: string }>("aria2.getVersion", [], HTTP_LOGIN_TIMEOUT)
         if (typeof result?.version !== "string" || !result.version.trim()) {
