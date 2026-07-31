@@ -1,0 +1,32 @@
+diff --git a/node_modules/angular-table-resize/dist/angular-table-resize.js b/node_modules/angular-table-resize/dist/angular-table-resize.js
+index d1a1640..8922de0 100644
+--- a/node_modules/angular-table-resize/dist/angular-table-resize.js
++++ b/node_modules/angular-table-resize/dist/angular-table-resize.js
+@@ -268,9 +268,9 @@ angular.module("rzTable").directive('rzTable', ['resizeStorage', '$injector', '$
+         this.ctrlColumns.each(function(index, column){
+             var colScope = angular.element(column).scope()
+             var id = colScope.rzCol || $(column).attr('id')
+-            var cacheWidth = cache[id];
++            var cacheWidth = angular.isDefined(cache[id]) ? cache[id] : this.resizer.getMinWidth(column);
+             $(column).css({ width: cacheWidth });
+-        })
++        }.bind(this))
+ 
+         this.resizer.onTableReady();
+     }
+diff --git a/node_modules/angular-table-resize/scripts/directives/resize-table-directive.js b/node_modules/angular-table-resize/scripts/directives/resize-table-directive.js
+index 93bc1a0..f5460d3 100644
+--- a/node_modules/angular-table-resize/scripts/directives/resize-table-directive.js
++++ b/node_modules/angular-table-resize/scripts/directives/resize-table-directive.js
+@@ -266,9 +266,9 @@ angular.module("rzTable").directive('rzTable', ['resizeStorage', '$injector', '$
+         this.ctrlColumns.each(function(index, column){
+             var colScope = angular.element(column).scope()
+             var id = colScope.rzCol || $(column).attr('id')
+-            var cacheWidth = cache[id];
++            var cacheWidth = angular.isDefined(cache[id]) ? cache[id] : this.resizer.getMinWidth(column);
+             $(column).css({ width: cacheWidth });
+-        })
++        }.bind(this))
+ 
+         this.resizer.onTableReady();
+     }
