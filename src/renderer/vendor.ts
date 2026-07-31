@@ -14,7 +14,7 @@ import 'angular-table-resize/dist/angular-table-resize.js'
 import './app/vendor/ng-infinite-scroll.js'
 import 'angular-marked'
 import 'angular-ui-sortable'
-import 'semantic-ui-css/semantic.min.js'
+import 'fomantic-ui/dist/semantic.min.js'
 
 const rendererWindow = window as RendererGlobals
 

@@ -4,7 +4,7 @@ export class ModalController {
 
     static $inject = ["$scope"]
 
-    // jQuery element for Semantic UI modal
+    // jQuery element for Fomantic UI modal
     modal: any
 
     constructor(scope: IScope) {

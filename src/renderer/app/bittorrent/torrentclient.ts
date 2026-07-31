@@ -512,7 +512,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      *      type [string]: Can be 'button' or 'dropdown' or 'labels'
      *      color [string]: Can be 'red', 'orange', 'yellow', 'olive', 'green', 'teal', 'blue', 'violet', 'purple', 'pink', 'brown', 'grey', 'black'
      *      click [function]: The function to be executed when the when the button/element is pressed
-     *      icon [string]: The icon of the button. See here: http://semantic-ui.com/elements/icon.html
+     *      icon [string]: The icon of the button. See here: https://fomantic-ui.com/elements/icon.html
      */
     public abstract actionHeader: TorrentActionList<T>
 
@@ -522,7 +522,7 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
      * Each element has an:
      *      label [string]:     The name of the action
      *      click [function]:   The function to be executed when clicked
-     *      icon [string]:      The icon of the action. See here: http://semantic-ui.com/elements/icon.html
+     *      icon [string]:      The icon of the action. See here: https://fomantic-ui.com/elements/icon.html
      *      check [function]:   Displays a checkbox instead of an icon. The function is a predicate which
      *                          has to hold for all selected torrents, for the checkbox to be checked.
      */

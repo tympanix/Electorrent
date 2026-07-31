@@ -113,8 +113,8 @@ import { RightClickDirective } from "@renderer/app/directives/right-click/right-
 torrentApp.directive("ngRightClick", RightClickDirective.getInstance())
 import { ContextMenuDirective } from "@renderer/app/directives/context-menu/context-menu.directive"
 torrentApp.directive("contextMenu", ContextMenuDirective.getInstance())
-import { SemanticDropdownDirective, DropItemDirective } from "@renderer/app/directives/dropdown/dropdown.directive"
-torrentApp.directive("dropdown", SemanticDropdownDirective.getInstance())
+import { FomanticDropdownDirective, DropItemDirective } from "@renderer/app/directives/dropdown/dropdown.directive"
+torrentApp.directive("dropdown", FomanticDropdownDirective.getInstance())
 torrentApp.directive("dropItem", DropItemDirective.getInstance())
 import { ReadyBroadcastDirective } from "@renderer/app/directives/ready-broadcast/ready-broadcast.directive"
 torrentApp.directive("readyBroadcast", ReadyBroadcastDirective.getInstance())
