@@ -28,14 +28,14 @@ export class ModalDirective implements IDirective {
     }
 
     link(scope: ModalScope, element: IAugmentedJQuery, attr: ModalAttributes, controller: ModalController) {
-        var accepted = false
+        let accepted = false
 
         element.addClass("ui modal")
         if (attr.size) {
             element.addClass(attr.size)
         }
 
-        let modal: any = $(element)
+        const modal: any = $(element)
 
         controller.attachModal(modal)
 
@@ -124,7 +124,7 @@ export class ModalDirective implements IDirective {
     }
 
     static clearForm(element: IAugmentedJQuery) {
-        let form: any = $(element)
+        const form: any = $(element)
         if (!form.find('[ng-model], [data-ng-model], [x-ng-model]').length) {
             form.form('clear');
         }

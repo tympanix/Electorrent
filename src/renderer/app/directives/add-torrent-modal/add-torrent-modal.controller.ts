@@ -133,7 +133,7 @@ export class AddTorrentModalController {
     async uploadCurrentTorrent() {
         try {
             this.isLoading = true
-            let torrent = this.getCurrentTorrentUpload()
+            const torrent = this.getCurrentTorrentUpload()
             if (torrent.type === 'file') {
                 await this.performTorrentUpload(torrent.data, torrent.filename, this.uploadOptions, torrent.sourcePath)
             } else {

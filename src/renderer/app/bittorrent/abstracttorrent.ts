@@ -80,7 +80,7 @@ export abstract class Torrent implements TorrentProps {
 
 
     constructor(props: TorrentProps) {
-        for (let p in props) {
+        for (const p in props) {
             this[p] = props[p]
         }
         this.selected = false;
@@ -92,7 +92,7 @@ export abstract class Torrent implements TorrentProps {
     private decodeName(name: string) {
         if(!name) return undefined
 
-        return name.replace(/[\._]/g, ' ').replace(/(\[[^\]]*\])(.*)$/, '$2 $1').trim();
+        return name.replace(/[._]/g, ' ').replace(/(\[[^\]]*\])(.*)$/, '$2 $1').trim();
     };
 
     private cleanName(name: string) {
@@ -105,8 +105,8 @@ export abstract class Torrent implements TorrentProps {
 
 
     update(other: Torrent) {
-        for(var k in other) {
-            if(other.hasOwnProperty(k) && k !== 'selected') {
+        for(const k in other) {
+            if(Object.prototype.hasOwnProperty.call(other, k) && k !== 'selected') {
                 if(other[k] !== undefined) {
                     this[k] = other[k];
                 }
@@ -115,15 +115,14 @@ export abstract class Torrent implements TorrentProps {
     };
 
     getMagnetURI(longUri: string) {
-        var i = 0;
-        var link = 'magnet:?xt=urn:btih:' + this.hash;
+        let link = 'magnet:?xt=urn:btih:' + this.hash;
         if(longUri) {
             link += '&dn=' + encodeURIComponent(this.name);
             link += '&xl=' + encodeURIComponent(this.size);
 
             if(this.props && this.props.trackers) {
-                var trackers = this.props.trackers.split('\r\n');
-                for(i = 0; i < trackers.length; i++) {
+                const trackers = this.props.trackers.split('\r\n');
+                for(let i = 0; i < trackers.length; i++) {
                     if(trackers[i].length > 0) {
                         link += '&tr=' + encodeURIComponent(trackers[i]);
                     }
@@ -359,8 +358,8 @@ export abstract class Torrent implements TorrentProps {
     ]
 
     private static alphabetical(a: string, b: string) {
-        var aLower = a.toLowerCase();
-        var bLower = b.toLowerCase();
+        const aLower = a.toLowerCase();
+        const bLower = b.toLowerCase();
         return aLower.localeCompare(bLower);
     }
 

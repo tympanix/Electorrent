@@ -4,10 +4,8 @@ export class SynologyTorrent extends Torrent {
 
     constructor(data: Record<string, any>) {
         // Information variables.
-        var detail = data.additional.detail;
-        var trans = data.additional.transfer;
-        var track = data.additional.tracker;
-
+        const detail = data.additional.detail;
+        const trans = data.additional.transfer;
         super({
             id: data.id,
             hash: data.id, /* Hash (string): unique identifier for the torrent */
@@ -39,13 +37,13 @@ export class SynologyTorrent extends Torrent {
         if (!track || track.length === 0) {
             return 0;
         }
-        var numArr = track.map(mapFun)
+        const numArr = track.map(mapFun)
         return numArr.reduce((acc: number, curr: number) => acc + curr);
     }
 
     // Roughly calculates the ETA each update from the server.
     static etaCalc(data: any, trans: any) {
-        var remain = data.size - trans.size_downloaded;
+        const remain = data.size - trans.size_downloaded;
         return remain / trans.speed_download;
     }
 
