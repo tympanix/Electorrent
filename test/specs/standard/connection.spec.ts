@@ -1,5 +1,7 @@
 import chai from "chai"
-import { $ } from "@wdio/globals"
+import fs from "node:fs"
+import path from "node:path"
+import { $, browser } from "@wdio/globals"
 import { eventually } from "../../e2e/eventually"
 import { configureSpec, getTestFixture } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
@@ -11,7 +13,7 @@ const TORRENT_PAGE_FAILURE_TEST_TIMEOUT = HTTP_REQUEST_TIMEOUT + CONNECT_FAILURE
 const CONNECT_FAILURE_TEST_TIMEOUT = CONNECT_FAILURE_TIMEOUT + CONNECT_FAILURE_BUFFER + 10 * 1000
 const CONNECTION_SPEC_TIMEOUT = Math.max(CONNECT_FAILURE_TEST_TIMEOUT, TORRENT_PAGE_FAILURE_TEST_TIMEOUT)
 
-const { assert } = chai
+const assert: Chai.AssertStatic = chai.assert
 const fixture = getTestFixture()
 const client = fixture.client
 const backend = fixture.backend
@@ -23,6 +25,36 @@ describe("connection", function () {
   it("automatically reconnects after restarting the app", async function () {
     await restartApplication(this)
     await this.app.torrentsPageIsVisible()
+  })
+
+  it("keeps stored passwords out of renderer settings", async function () {
+    const rendererServer = await browser.execute(async () => {
+      const settings = await (window as any).electorrent.settings.getAll()
+      return settings.servers[0]
+    })
+
+    assert.equal(rendererServer.password, "••••••••")
+    assert.isTrue(rendererServer.hasPassword)
+    assert.notProperty(rendererServer, "encryptedPassword")
+
+    const storage = await browser.electron.execute((electron) => ({
+      available: electron.safeStorage.isEncryptionAvailable(),
+      userDataPath: electron.app.getPath("userData"),
+    }))
+    const persistedSettings = JSON.parse(fs.readFileSync(path.join(storage.userDataPath, "config.json"), "utf8"))
+    const persistedServer = persistedSettings.servers[0]
+
+    if (storage.available) {
+      assert.notProperty(persistedServer, "password")
+      assert.deepInclude(persistedServer.encryptedPassword, {
+        version: 1,
+        provider: "electron-safe-storage",
+      })
+      assert.isNotEmpty(persistedServer.encryptedPassword.data)
+    } else {
+      assert.equal(persistedServer.password, client.password)
+      assert.notProperty(persistedServer, "encryptedPassword")
+    }
   })
 
   it("shows a connection indicator before the disconnect overlay on the torrent page", async function () {
@@ -55,7 +87,7 @@ describe("connection", function () {
       assert.equal(await $("#page-settings-connection input[name='ip']").getValue(), client.host)
       assert.equal(await $("#page-settings-connection input[name='port']").getValue(), String(client.port))
       assert.equal(await $("#page-settings-connection input[name='username']").getValue(), client.username)
-      assert.equal(await $("#page-settings-connection input[name='password']").getValue(), client.password)
+      assert.equal(await $("#page-settings-connection input[name='password']").getValue(), "••••••••")
     } finally {
       await backend.unpause()
     }

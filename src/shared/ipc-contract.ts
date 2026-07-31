@@ -190,6 +190,8 @@ export interface StoredServerConfig {
     port: number
     user: string
     password: string
+    /** True when the masked password represents a credential held by the main process. */
+    hasPassword?: boolean
     client: string
     path: string
     default?: boolean

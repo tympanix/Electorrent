@@ -452,6 +452,7 @@ async function bootstrap() {
     })
 
     app.on('ready', function() {
+        settings.migratePasswords()
         queuePendingLaunchArgs(process.argv)
         configureSystemStartup(settings.getAllSettings().systemStartup)
         startedInBackground = shouldStartInBackground(settings.getAllSettings().systemStartup)
