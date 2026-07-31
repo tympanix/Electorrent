@@ -102,7 +102,6 @@ const rendererConfig = {
   entry: {
     app: [
       path.resolve(__dirname, 'src/renderer/vendor.ts'),
-      path.resolve(__dirname, 'src/renderer/styles/assets/fonts/bittorrent.font.json'),
       path.resolve(__dirname, 'src/renderer/app.ts'),
     ],
     light: path.resolve(__dirname, 'src/renderer/styles/entries/light.less'),
@@ -118,14 +117,6 @@ const rendererConfig = {
     rules: [
       makeTsRule('src/renderer/tsconfig.json'),
       {
-        test: /\.font\.json$/i,
-        type: 'javascript/auto',
-        use: [
-          'null-loader',
-          'webfonts-loader',
-        ],
-      },
-      {
         test: /\.less$/i,
         use: [
           MiniCssExtractPlugin.loader,
@@ -134,7 +125,7 @@ const rendererConfig = {
             options: {
               sourceMap: !isProduction,
               url: {
-                filter: (url) => !url.includes('default/assets/') && !url.includes('fonts/bittorrent.'),
+                filter: (url) => !url.includes('default/assets/'),
               },
             },
           },
