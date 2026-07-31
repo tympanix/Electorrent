@@ -11,6 +11,7 @@ const standardSpecs = [
     'test/specs/standard/**/*.spec.ts',
 ]
 const useDistribution = process.argv.includes('--dist')
+const useHeadless = process.argv.includes('--headless')
 
 function requestedClients() {
     return process.argv.flatMap((argument, index, arguments_) => {
@@ -41,7 +42,10 @@ function electronCapability(client: (typeof selectedClients)[number]): Webdriver
         'electorrent:client': client,
         'wdio:electronServiceOptions': {
             ...useDistribution ? {} : { appEntryPoint: 'app/main.js' },
-            appArgs: client.appArgs ?? [],
+            appArgs: [
+                ...(client.appArgs ?? []),
+                ...(useHeadless ? ['--headless'] : []),
+            ],
         },
         'goog:chromeOptions': {
             args: [
