@@ -1,5 +1,5 @@
 
-export let notificationService = ["$rootScope", function ($rootScope) {
+export const notificationService = ["$rootScope", function ($rootScope) {
     const electorrent = window.electorrent
 
     const ERR_SELF_SIGNED_CERT = 'DEPTH_ZERO_SELF_SIGNED_CERT'
@@ -8,29 +8,29 @@ export let notificationService = ["$rootScope", function ($rootScope) {
     const UNABLE_TO_VERIFY_LEAF_SIGNATURE = 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
 
     const ERR_CODES = {
-        ERR_SELF_SIGNED_CERT: {
+        [ERR_SELF_SIGNED_CERT]: {
             title: 'Untrusted certificate',
             msg: 'Self signed certificate is not trusted with this server',
         },
-        ERR_TLS_CERT_ALTNAME_INVALID: {
+        [ERR_TLS_CERT_ALTNAME_INVALID]: {
             title: 'Certificate error',
             msg: 'The certificate is not useable with this server\
                 because the common name of the certificate does not match\
                 the hostname of the server',
         },
-        CERT_HAS_EXPIRED: {
+        [CERT_HAS_EXPIRED]: {
             title: 'Certificate expired',
             msg: 'The certificate for this server has expired\
                 and is therefore not trusted',
         },
-        UNABLE_TO_VERIFY_LEAF_SIGNATURE: {
+        [UNABLE_TO_VERIFY_LEAF_SIGNATURE]: {
             title: 'Invalid certificate chain',
             msg: 'The certificate could not be verified because the certificate\
                 chain is invalid. Consolidate your webserver TLS configuration'
         }
     }
 
-    var disableNotifications = false;
+    let disableNotifications = false;
 
     this.disableAll = function () {
         disableNotifications = true;
@@ -54,7 +54,7 @@ export let notificationService = ["$rootScope", function ($rootScope) {
 
     function sendNotification(title, message, type) {
         if (disableNotifications) return;
-        var notification = {
+        const notification = {
             title: title,
             message: message,
             type: type
@@ -73,7 +73,7 @@ export let notificationService = ["$rootScope", function ($rootScope) {
             this.alert("Connection problem", "Connection timed out.")
         } else if (err.status === 401) {
             this.alert("Connection problem", "Incorrect username or password.")
-        } else if (err.code && ERR_CODES.hasOwnProperty(err.code)) {
+        } else if (err.code && Object.prototype.hasOwnProperty.call(ERR_CODES, err.code)) {
             this.alert(ERR_CODES[err.code].title, ERR_CODES[err.code].msg)
         } else {
             this.alert("Connection problem", "Could not connect to client.")
@@ -81,7 +81,7 @@ export let notificationService = ["$rootScope", function ($rootScope) {
     }
 
     this.torrentComplete = function (torrent) {
-        var torrentNotification = new Notification('Torrent Completed!', {
+        const torrentNotification = new Notification('Torrent Completed!', {
             body: torrent.decodedName,
             icon: 'img/electorrent-icon.png'
         })

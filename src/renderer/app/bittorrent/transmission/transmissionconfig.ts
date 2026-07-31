@@ -1,4 +1,4 @@
-export let fields = [
+export const fields = [
     "activityDate",
     "addedDate",
     "bandwidthPriority",

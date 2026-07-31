@@ -17,7 +17,7 @@ export class ReadyBroadcastDirective implements IDirective {
         private $timeout: ITimeoutService,
     ) {}
 
-    link(scope: IScope) {
+    link(_scope: IScope) {
         this.$timeout(() => {
             this.$rootScope.$emit("ready");
         });

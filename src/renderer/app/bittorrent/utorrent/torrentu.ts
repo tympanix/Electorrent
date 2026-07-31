@@ -162,14 +162,12 @@ export class UtorrentTorrent extends Torrent {
 
     getStatuses() {
         //var str = '';
-        var i = 0;
-
         if(this.statusesCached) {
             return this.statusesCached;
         }
-        var res = [];
+        const res = [];
 
-        for(i = 0; i < this.statusesFlags.length; i++) {
+        for(let i = 0; i < this.statusesFlags.length; i++) {
             if(this.getStatusFlag(this.statusesFlags[i])) {
                 res.push(this.statusesMap[this.statusesFlags[i]]);
             }

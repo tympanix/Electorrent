@@ -843,18 +843,10 @@ export class TorrentsPageController {
             };
         }
 
-        function searchFilter(search: string) {
-            return function searchFilterFn(torrent: any) {
-                return torrent.name.toLowerCase().includes(search.toLowerCase());
-            };
-        }
-
-        function torrentFilter(status?: string, label?: string, tracker?: string, search?: string) {
+        function torrentFilter(status?: string, label?: string, tracker?: string) {
             const filterStatus = status || $scope.filters.status;
             const filterLabel = label || $scope.filters.label;
             const filterTracker = tracker || $scope.filters.tracker;
-            const filterSearch = search || $scope.filters.search;
-
             const filters: Array<(torrent: any) => boolean> = [];
 
             if (filterStatus) {

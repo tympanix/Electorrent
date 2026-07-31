@@ -47,8 +47,8 @@ export class AppShellController {
         let activeConnectionId = 0;
         let initialLaunchPayloadDelivered = false;
         let initialLaunchPayloadPromise: Promise<LaunchPayload> | null = null;
-        let pendingMagnets: Array<PendingTorrentUploadLink & { askUploadOptions?: boolean }> = [];
-        let pendingTorrentFiles: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }> = [];
+        const pendingMagnets: Array<PendingTorrentUploadLink & { askUploadOptions?: boolean }> = [];
+        const pendingTorrentFiles: Array<PendingTorrentUploadFile & { askUploadOptions?: boolean }> = [];
 
         $scope.servers = settingsService.getServers();
         $scope.connectedServerName = () => $rootScope.$server?.getDisplayName() || "";

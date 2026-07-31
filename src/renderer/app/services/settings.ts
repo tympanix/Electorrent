@@ -25,10 +25,10 @@ export interface SettingsService {
     getRecentServer(): Server | undefined
 }
 
-export let settingsService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
+export const settingsService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
     const electorrent = window.electorrent
 
-    var settings: AppSettings<any> = createDefaultSettings();
+    const settings: AppSettings<any> = createDefaultSettings();
 
     function loadServerCertificate(server: any) {
         if (server?.tlsSecurity === "insecure") {
@@ -120,7 +120,7 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
     }
 
     this.setDefault = function(server, skipsave) {
-        let found = this.getServer(server.id)
+        const found = this.getServer(server.id)
         if (!found) return
         settings.servers.forEach(function(value) {
             value.default = false
@@ -136,7 +136,7 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
     }
 
     function settingsToJson() {
-        let copy: any = {}
+        const copy: any = {}
         angular.copy(settings, copy)
         copy.servers = copy.servers.map((server) => {
             return server.json()
@@ -156,7 +156,7 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
 
     function updateServerReference() {
       if (!$rootScope.$server) return
-      let server = settings.servers.find(function(s) {
+      const server = settings.servers.find(function(s) {
           return s.id === $rootScope.$server.id
       })
       if (!server) return
@@ -185,9 +185,10 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
         return this.saveAllSettings()
     }
 
-    this.saveServer = function(ip, port, user, password, client) {
-        if(arguments.length === 1) {
-            this.appendServer(arguments[0]);
+    this.saveServer = function(...args) {
+        const [ip, port, user, password, client] = args
+        if(args.length === 1) {
+            this.appendServer(args[0]);
         } else {
             this.appendServer(new Server(ip, port, user, password, client))
         }
@@ -201,7 +202,7 @@ export let settingsService = ['$rootScope', '$bittorrent', 'notificationService'
     }
 
     this.updateServer = function(update) {
-        let server = this.getServer(update.id);
+        const server = this.getServer(update.id);
         if(!server) return $q.reject('Server with id ' + update.id + ' not found')
         angular.merge(server, update)
         return this.saveAllSettings()

@@ -33,19 +33,5 @@ export class WelcomePageController {
             });
         };
 
-
-        function saveServer(ip: string, port: number, username: string, password: string, client: string) {
-            const server = new Server(ip, port, username, password, client);
-
-            $bittorrent.setServer(server);
-
-            settingsService.saveServer(server).then(() => {
-                $scope.$emit("show:torrents");
-                clearForm();
-                $notify.ok("Success!", "Hooray! Welcome to Electorrent");
-            }).catch(() => {
-                $notify.alert("Oops!", "Could not save settings?!");
-            });
-        }
     }
 }
