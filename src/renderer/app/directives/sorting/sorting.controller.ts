@@ -148,7 +148,6 @@ export class SortHeaderController implements SortHeader {
     }
 
     $onInit() {
-        this.column.append('<i class="ui sorting icon" aria-hidden="true"></i>');
         this.column.on("mousedown", this.onMouseDown);
         this.column.on("mouseup", this.onMouseUp);
         this.render();
@@ -201,6 +200,14 @@ export class SortHeaderController implements SortHeader {
     private render() {
         const isActive = !this.disabled && this.currentState?.sortKey === this.sortKey;
         const descending = isActive && this.currentState?.descending === true;
+        const icon = this.column.children(".sorting.icon");
+
+        if (this.disabled) {
+            icon.remove();
+        } else if (!icon.length) {
+            this.column.append('<i class="ui sorting icon" aria-hidden="true"></i>');
+        }
+
         this.column.toggleClass("sorting-disabled", this.disabled === true);
         this.column.toggleClass("sortdown", descending);
         this.column.toggleClass("sortup", isActive && !descending);
