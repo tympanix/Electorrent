@@ -15,6 +15,7 @@ export interface TorrentActionItem {
     icon?: string
     role?: TorrentActionRole
     action?: string
+    requiresTorrentSelection?: boolean
     checkProperty?: string
     accelerator?: string
     menu?: TorrentActionItem[]

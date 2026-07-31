@@ -539,7 +539,12 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         return {
             ...item,
             click: (torrents: T[]) => item.action
-                ? invokeAction(item.action, torrents.map((torrent) => torrent.id))
+                ? invokeAction(
+                    item.action,
+                    item.requiresTorrentSelection === false
+                        ? []
+                        : torrents.map((torrent) => torrent.id),
+                )
                 : Promise.resolve(),
             check: item.checkProperty
                 ? (torrent: T) => !!(torrent as unknown as Record<string, unknown>)[item.checkProperty!]
