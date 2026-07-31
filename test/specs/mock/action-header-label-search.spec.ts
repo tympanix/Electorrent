@@ -29,7 +29,7 @@ describe("mock action header label search", function () {
     await torrentRow.waitForClickable()
     await torrentRow.click()
 
-    const labelsDropdown = $("#torrent-action-header div[data-role='labels']")
+    const labelsDropdown = $("#torrent-action-header dropdown[data-role='labels']")
     await labelsDropdown.waitForClickable()
     await labelsDropdown.click()
 

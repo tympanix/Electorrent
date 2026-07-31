@@ -17,11 +17,11 @@
                     class="fluid"
                     open-on-focus="false"
                     ng-model="ctl.scope.label">
-                    <dropdown-group ng-repeat="label in ctl.scope.labels track by label" title="label" value="label">
+                    <dropdown-item ng-repeat="label in ctl.scope.labels track by label" title="label" value="label">
                         <span class="set-label-dropdown-chip" label-chip="label">
                             <span class="label-chip-text">{{ label }}</span>
                         </span>
-                    </dropdown-group>
+                    </dropdown-item>
                 </dropdown>
             </div>
         </form>

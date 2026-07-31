@@ -16,8 +16,8 @@
         <div class="six wide field">
             <label ng-if="showLabels">Protocol</label>
             <dropdown title="Protocol" id="connection-proto" class="fluid" ng-model="server.proto" ng-disabled="hostLocks.scheme">
-                <dropdown-group value="http" id="connection-proto-http" title="http">http</dropdown-group>
-                <dropdown-group value="https" id="connection-proto-https" title="https">https</dropdown-group>
+                <dropdown-item value="http" id="connection-proto-http" title="http">http</dropdown-item>
+                <dropdown-item value="https" id="connection-proto-https" title="https">https</dropdown-item>
             </dropdown>
         </div>
     </div>
@@ -42,9 +42,9 @@
     <div class="field">
         <label ng-if="showLabels">Bittorrent Client</label>
         <dropdown title="Client Program" id="connection-client" class="fluid" ng-model="server.client" ng-change="setPath()">
-            <dropdown-group value="id" id="connection-client-{{id}}" title="client.name" ng-repeat="(id, client) in btclients">
-                <i class="icon torrent big" ng-class="client.icon"></i> {{client.name}}
-            </dropdown-group>
+            <dropdown-item value="id" id="connection-client-{{id}}" title="client.name" ng-repeat="(id, client) in btclients">
+                <i class="icon torrent" ng-class="client.icon"></i> {{client.name}}
+            </dropdown-item>
         </dropdown>
         <div class="ui pointing red basic label" ng-if="server.client && !btclients[server.client]">
             Invalid client: {{server.client}}

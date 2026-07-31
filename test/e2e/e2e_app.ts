@@ -295,7 +295,7 @@ export class App {
     }
 
     if (options?.label) {
-      const labelElem = modal.$("div[title=Label]")
+      const labelElem = modal.$("#upload-options-label")
       await labelElem.waitForClickable()
       await labelElem.click()
       const labelItemElem = labelElem.$(`div[data-label='${options.label}']`)
@@ -386,7 +386,7 @@ export class App {
   }
 
   async waitForLabelInDropdown(labelName) {
-    const labels = "#torrent-action-header div[data-role=labels]";
+    const labels = "#torrent-action-header dropdown[data-role=labels]";
     const labelBtn = `div[data-label='${labelName}']`;
 
     const labelsElem = $(labels)

@@ -1,4 +1,4 @@
-<div data-role="labels" dropdown dropdown-no-blur class="ui icon top left pointing dropdown button" ng-class="{disabled: enabled}">
+<dropdown data-role="labels" dropdown-no-blur class="ui icon top left pointing dropdown button" ng-class="{disabled: enabled}">
     <i class="tag icon"></i>
     <div class="menu">
         <div class="ui icon input">
@@ -18,6 +18,6 @@
         </div>
         <div class="message" ng-if="labelSearch && (labels | filter:labelSearch).length === 0">No results found</div>
     </div>
-</div>
+</dropdown>
 
 <new-label-modal data="form" approve="action(form.label, true)"></new-label-modal>

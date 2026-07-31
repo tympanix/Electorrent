@@ -113,9 +113,9 @@ import { RightClickDirective } from "@renderer/app/directives/right-click/right-
 torrentApp.directive("ngRightClick", RightClickDirective.getInstance())
 import { ContextMenuDirective } from "@renderer/app/directives/context-menu/context-menu.directive"
 torrentApp.directive("contextMenu", ContextMenuDirective.getInstance())
-import { FomanticDropdownDirective, DropItemDirective } from "@renderer/app/directives/dropdown/dropdown.directive"
-torrentApp.directive("dropdown", FomanticDropdownDirective.getInstance())
-torrentApp.directive("dropItem", DropItemDirective.getInstance())
+import { DropdownDirective, DropdownItemDirective } from "@renderer/app/directives/dropdown/dropdown.directive"
+torrentApp.directive("dropdown", DropdownDirective.getInstance())
+torrentApp.directive("dropdownItem", DropdownItemDirective.getInstance())
 import { ReadyBroadcastDirective } from "@renderer/app/directives/ready-broadcast/ready-broadcast.directive"
 torrentApp.directive("readyBroadcast", ReadyBroadcastDirective.getInstance())
 import { AppThemeDirective } from "@renderer/app/directives/app-theme/app-theme.directive"
@@ -175,9 +175,6 @@ torrentApp.directive("dragAndDrop", DragAndDropDirective.getInstance())
 import { SortingDirective, SortDirective } from "@renderer/app/directives/sorting/sorting.directive"
 torrentApp.directive("sorting", SortingDirective.getInstance())
 torrentApp.directive("sort", SortDirective.getInstance())
-import { DropdownElementDirective, DropdownGroupDirective } from "@renderer/app/directives/drop/drop.directive"
-torrentApp.directive("dropdown", DropdownElementDirective.getInstance())
-torrentApp.directive("dropdownGroup", DropdownGroupDirective.getInstance())
 import { TorrentBodyDirective, TorrentRowDirective } from "@renderer/app/directives/torrent-table/torrent-table.directive"
 torrentApp.directive("torrentBody", TorrentBodyDirective.getInstance())
 torrentApp.directive("torrentRow", TorrentRowDirective.getInstance())
