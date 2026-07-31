@@ -227,7 +227,10 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
     }
 
     async generateMockedTorrents(): Promise<void> {
-        await Promise.all(Array.from({ length: 100 }, () => this.addMockedTorrent([])))
+        const firstIndex = this.torrents.size + 1
+        for (let offset = 0; offset < 100; offset += 1) {
+            await this.addMockedTorrent([], this.createGeneratedMockTorrent(firstIndex + offset))
+        }
     }
 
     async clearMockedTorrents(): Promise<void> {
@@ -441,6 +444,72 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
 
     private createHash(index: number) {
         return index.toString(16).padStart(40, "0")
+    }
+
+    private createGeneratedMockTorrent(index: number): MockTorrentInput {
+        const random = this.createDeterministicRandom(index)
+        const states = ["downloading", "uploading", "stalledDL", "stalledUP", "pausedDL", "pausedUP"]
+        const adjectives = ["Complete", "Extended", "Open", "Classic", "Remastered", "Essential", "Community", "Ultimate"]
+        const subjects = ["Linux Distribution", "Nature Documentary", "Developer Archive", "Live Concert", "Photo Collection", "Open Dataset", "Indie Film", "Audio Library"]
+        const formats = ["4K HEVC", "1080p BluRay", "FLAC", "ISO", "WEB-DL", "Lossless", "Source Files", "Archive"]
+        const categories = ["Movies", "TV", "Music", "Software", "Books", "Games", "Photos", "Uncategorized"]
+        const savePaths = ["/mock/downloads", "/mock/media/movies", "/mock/media/tv", "/mock/media/music", "/mock/archive"]
+        const state = states[(index - 1) % states.length]
+        const completed = state.endsWith("UP") || state === "uploading"
+        const progress = completed ? 1 : Number((0.03 + random() * 0.94).toFixed(3))
+        const size = Math.floor((350 + random() * 125_000) * 1024 * 1024)
+        const totalDownloaded = completed ? size : Math.floor(size * progress)
+        const ratioTarget = completed ? 0.1 + random() * 4.9 : random() * 0.35
+        const totalUploaded = Math.floor(totalDownloaded * ratioTarget)
+        const ratio = totalDownloaded === 0 ? 0 : Number((totalUploaded / totalDownloaded).toFixed(2))
+        const activeDownload = state === "downloading"
+        const activeUpload = state === "uploading"
+        const dlSpeed = activeDownload ? Math.floor((0.5 + random() * 79.5) * 1024 * 1024) : 0
+        const upSpeed = activeUpload
+            ? Math.floor((0.1 + random() * 11.9) * 1024 * 1024)
+            : (activeDownload ? Math.floor((0.02 + random() * 2.98) * 1024 * 1024) : 0)
+        const addedOn = 1_750_000_000 - Math.floor(random() * 540 * 24 * 60 * 60)
+        const completionOn = completed ? addedOn + Math.floor((15 * 60) + random() * 14 * 24 * 60 * 60) : undefined
+        const totalSeeds = 5 + Math.floor(random() * 2_000)
+        const totalLeechers = 1 + Math.floor(random() * 600)
+        const connectedSeeds = activeDownload
+            ? 1 + Math.floor(random() * Math.min(totalSeeds, 80))
+            : (activeUpload ? Math.floor(random() * Math.min(totalSeeds, 80)) : 0)
+        const connectedLeechers = activeUpload
+            ? 1 + Math.floor(random() * Math.min(totalLeechers, 45))
+            : (activeDownload ? Math.floor(random() * Math.min(totalLeechers, 45)) : 0)
+
+        return {
+            added_on: addedOn,
+            category: categories[Math.floor(random() * categories.length)],
+            completion_on: completionOn,
+            dl_speed: dlSpeed,
+            eta: activeDownload ? Math.ceil((size - totalDownloaded) / dlSpeed) : 0,
+            name: `${adjectives[Math.floor(random() * adjectives.length)]} ${subjects[Math.floor(random() * subjects.length)]} (${formats[Math.floor(random() * formats.length)]})`,
+            num_complete: totalSeeds,
+            num_incomplete: totalLeechers,
+            num_leechs: connectedLeechers,
+            num_seeds: connectedSeeds,
+            priority: 1 + Math.floor(random() * 100),
+            progress,
+            ratio,
+            save_path: savePaths[Math.floor(random() * savePaths.length)],
+            seq_dl: random() > 0.75,
+            size,
+            state,
+            total_downloaded: totalDownloaded,
+            total_size: size,
+            total_uploaded: totalUploaded,
+            up_speed: upSpeed,
+        }
+    }
+
+    private createDeterministicRandom(seed: number): () => number {
+        let state = seed
+        return () => {
+            state = ((state * 1_664_525) + 1_013_904_223) % 4_294_967_296
+            return state / 4_294_967_296
+        }
     }
 
     private createFiles(name: string, size: number, progress: number): MockTorrentFile[] {
