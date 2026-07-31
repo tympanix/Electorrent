@@ -1,1 +1,22 @@
+<template data-context-menu-template="menu">
+    <div class="ui vertical menu" data-context-menu-items></div>
+</template>
 
+<template data-context-menu-template="item">
+    <a class="item">
+        <i data-context-menu-icon></i>
+        <div class="ui checkbox" data-context-menu-checkbox>
+            <input type="checkbox">
+            <label></label>
+        </div>
+        <span data-context-menu-label></span>
+    </a>
+</template>
+
+<template data-context-menu-template="submenu">
+    <div class="ui context dropdown item">
+        <i data-context-menu-icon></i>
+        <span data-context-menu-label></span>
+        <div class="menu" data-context-menu-items></div>
+    </div>
+</template>

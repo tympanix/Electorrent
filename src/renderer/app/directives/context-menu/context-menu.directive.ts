@@ -1,5 +1,6 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IDocumentService, IRootScopeService, IScope, IWindowService } from "angular";
 import { ContextMenuController } from "./context-menu.controller";
+import html from "./context-menu.template.html";
 
 interface ContextMenuItem {
     id?: string;
@@ -30,6 +31,7 @@ export class ContextMenuDirective implements IDirective {
         debug: "=?",
     };
     controller = ContextMenuController;
+    template = html;
     private isDebug = false
 
     static getInstance(): IDirectiveFactory {
@@ -54,27 +56,46 @@ export class ContextMenuDirective implements IDirective {
 
         const checkboxes: Array<{ checkbox: HTMLInputElement; predicate: (item: any) => boolean }> = [];
 
+        const cloneTemplate = (name: string) => {
+            const template = element[0].querySelector<HTMLTemplateElement>(`template[data-context-menu-template="${name}"]`);
+            const templateElement = template?.content.firstElementChild;
+
+            if (!templateElement) {
+                throw new Error(`Missing context menu template: ${name}`);
+            }
+
+            return angular.element(templateElement.cloneNode(true)) as IAugmentedJQuery;
+        };
+
+        const setLabel = (item: IAugmentedJQuery, label: string) => {
+            const labelElement = item[0].querySelector<HTMLElement>("[data-context-menu-label]");
+            if (labelElement) {
+                labelElement.textContent = label;
+            }
+        };
+
         const addIcon = (item: IAugmentedJQuery, iconName: string) => {
-            const icon = angular.element("<i></i>");
+            const icon = angular.element(item[0].querySelector("[data-context-menu-icon]"));
             icon.addClass(`ui ${iconName} icon`);
-            item.append(icon);
         };
 
         const addCheckbox = (item: IAugmentedJQuery, predicate: (menuItem: any) => boolean) => {
-            const check = angular.element('<div class="ui checkbox"></div>');
-            const checkbox = angular.element('<input type="checkbox">');
-            const label = angular.element("<label></label>");
-            check.append(checkbox);
-            check.append(label);
-            item.append(check);
+            const checkbox = item[0].querySelector<HTMLInputElement>("input[type=checkbox]");
+
+            if (!checkbox) {
+                throw new Error("Missing checkbox in context menu item template");
+            }
+
             checkboxes.push({
-                checkbox: checkbox[0] as HTMLInputElement,
+                checkbox,
                 predicate,
             });
         };
 
         const appendMenuItem = (list: IAugmentedJQuery, item: ContextMenuItem) => {
-            const menuItem = angular.element('<a class="item"></a>');
+            const menuItem = cloneTemplate("item");
+            const icon = menuItem[0].querySelector("[data-context-menu-icon]");
+            const checkbox = menuItem[0].querySelector("[data-context-menu-checkbox]");
 
             if (item.role) {
                 menuItem.attr("data-role", item.role);
@@ -82,8 +103,13 @@ export class ContextMenuDirective implements IDirective {
 
             if (item.icon) {
                 addIcon(menuItem, item.icon);
+                checkbox?.remove();
             } else if (item.check) {
+                icon?.remove();
                 addCheckbox(menuItem, item.check);
+            } else {
+                icon?.remove();
+                checkbox?.remove();
             }
 
             menuItem.on("click", () => {
@@ -91,21 +117,20 @@ export class ContextMenuDirective implements IDirective {
                 scope.click(item.click, item.label, item);
             });
 
-            menuItem.append(item.label);
+            setLabel(menuItem, item.label);
             list.append(menuItem);
         };
 
         const appendSubmenu = (list: IAugmentedJQuery, submenu: ContextMenuItem) => {
-            const item = angular.element('<div class="ui context dropdown item"></div>');
-            const menu = angular.element('<div class="menu"></div>');
+            const item = cloneTemplate("submenu");
+            const menu = angular.element(item[0].querySelector("[data-context-menu-items]"));
 
             submenu.menu?.forEach((subItem) => {
                 appendMenuItem(menu, subItem);
             });
 
             addIcon(item, "dropdown");
-            item.append(submenu.label);
-            item.append(menu);
+            setLabel(item, submenu.label);
             list.append(item);
         };
 
@@ -140,11 +165,13 @@ export class ContextMenuDirective implements IDirective {
                 return;
             }
 
-            element.empty();
             checkboxes.length = 0;
 
-            const list = angular.element('<div class="ui vertical menu"></div>');
-            element.append(list);
+            const existingList = element[0].querySelector("[data-context-menu-items]");
+            existingList?.remove();
+
+            const list = cloneTemplate("menu");
+            element.prepend(list);
 
             if (this.isDebug) {
                 appendDebugItem(list);
