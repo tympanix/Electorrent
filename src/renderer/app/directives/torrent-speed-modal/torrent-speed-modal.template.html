@@ -19,7 +19,7 @@
                     type="number"
                     min="0"
                     placeholder="Leave unchanged"
-                    ng-model="downloadSpeedLimit">
+                    ng-model="ctl.scope.downloadSpeedLimit">
             </div>
             <div class="field">
                 <label for="torrent-speed-limit-upload">Upload limit (KB/s)</label>
@@ -29,7 +29,7 @@
                     type="number"
                     min="0"
                     placeholder="Leave unchanged"
-                    ng-model="uploadSpeedLimit">
+                    ng-model="ctl.scope.uploadSpeedLimit">
             </div>
             <div class="ui negative message" ng-if="ctl.scope.error">
                 <p>{{ ctl.scope.error }}</p>
