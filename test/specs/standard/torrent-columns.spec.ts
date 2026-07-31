@@ -16,6 +16,7 @@ const builtInColumns = [
   "Size",
   "Down",
   "Up",
+  "Upload total",
   "Progress",
   "Label",
   "Date Added",
@@ -81,6 +82,10 @@ describe("torrent columns", function () {
 
   it("shows a sensible Up column value", async function () {
     assertSpeed((await torrent.getColumn("uploadSpeed")).trim())
+  })
+
+  it("shows a sensible Upload total column value", async function () {
+    assert.match((await torrent.getColumn("uploaded")).trim(), /^\d+(?:\.\d+)? [KMGT]?B$/)
   })
 
   it("shows a sensible Progress column value", async function () {

@@ -4,7 +4,7 @@ import { browser, $, $$ } from '@wdio/globals'
 import { eventually } from "./eventually"
 import { waitForModalClose, waitForModalOpen } from "./modal"
 
-export type ColumnName = "decodedName" | "size" | "downloadSpeed" | "uploadSpeed" | "downloadLimit" | "uploadLimit" | "percent" | "label" | "dateAdded" | "dateCompleted" | "peersConnected" | "seedsConnected" | "torrentQueueOrder" | "eta" | "ratio" | "ratioLimit"
+export type ColumnName = "decodedName" | "size" | "downloadSpeed" | "uploadSpeed" | "uploaded" | "downloadLimit" | "uploadLimit" | "percent" | "label" | "dateAdded" | "dateCompleted" | "peersConnected" | "seedsConnected" | "torrentQueueOrder" | "eta" | "ratio" | "ratioLimit"
 
 export class Torrent {
   app: App

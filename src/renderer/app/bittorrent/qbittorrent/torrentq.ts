@@ -59,7 +59,7 @@ export class QBittorrentTorrent extends Torrent {
             size: data.size || data.total_size,
             percent: data.progress && (data.progress * 1000),
             downloaded: data.total_downloaded,
-            uploaded: data.total_uploaded,
+            uploaded: data.total_uploaded ?? data.uploaded,
             ratio: data.share_ration || data.ratio,
             ratioLimit: data.ratio_limit,
             uploadSpeed: data.up_speed || data.upspeed,
@@ -84,7 +84,7 @@ export class QBittorrentTorrent extends Torrent {
         this.pieceSize = data.piece_size;
         this.comment = data.comment;
         this.totalWasted = data.total_wasted;
-        this.uploadedSession = data.total_uploaded_session;
+        this.uploadedSession = data.total_uploaded_session ?? data.uploaded_session;
         this.downloadedSession = data.total_downloaded_session;
         this.upLimit = data.up_limit;
         this.downLimit = data.dl_limit;
