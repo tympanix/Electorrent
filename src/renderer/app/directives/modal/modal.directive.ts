@@ -43,7 +43,7 @@ export class ModalDirective implements IDirective {
         controller: ModalController,
         transclude: any,
     ) {
-        var accepted = false
+        let accepted = false
 
         transclude((contents: IAugmentedJQuery, transcludedScope: any) => {
             transcludedScope.$modal = controller
@@ -55,7 +55,7 @@ export class ModalDirective implements IDirective {
             element.addClass(controller.size)
         }
 
-        let modal: any = $(element)
+        const modal: any = $(element)
 
         controller.attachModal(modal)
 
@@ -105,7 +105,7 @@ export class ModalDirective implements IDirective {
     }
 
     static clearForm(element: IAugmentedJQuery) {
-        let form: any = $(element)
+        const form: any = $(element)
         if (!form.find('[ng-model], [data-ng-model], [x-ng-model]').length) {
             form.form('clear');
         }

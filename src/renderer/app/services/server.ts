@@ -33,7 +33,7 @@ export interface Server extends Omit<StoredServerConfig, "columns"> {
     json(): StoredServerConfig
 }
 
-export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclients', 'certificateResponseService',
+export const serverService = ['$q', 'notificationService', '$bittorrent', '$btclients', 'certificateResponseService',
     function($q, $notify, $bittorrent, $btclients, certificateResponseService: CertificateResponseService) {
         const electorrent = window.electorrent
 
@@ -78,10 +78,11 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         /**
          * Constructor, with class name
          */
-        function Server(ip, proto, port, user, password, client, path) {
+        function Server(...args) {
+            const [ip, proto, port, user, password, client, path] = args
             this.certificateData = undefined
-            if(arguments.length === 1) {
-                this.fromJson(arguments[0])
+            if(args.length === 1) {
+                this.fromJson(args[0])
             } else {
                 this.id = generateGUID()
                 this.ip = ip || ''
@@ -206,7 +207,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         };
 
         Server.prototype.cleanPath = function () {
-          let path = trim(this.path, "/")
+          const path = trim(this.path, "/")
           if (path) {
             return "/" + path
           } else {
@@ -236,7 +237,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         }
 
         Server.prototype.setPath = function() {
-            let client = $bittorrent.getClient(this.client)
+            const client = $bittorrent.getClient(this.client)
             if(client && client.defaultPath) {
                 this.path = client.defaultPath()
             } else {
@@ -249,7 +250,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         };
 
         Server.prototype.connect = function() {
-            let self = this
+            const self = this
             Object.assign(this, sanitizeServerAddress(this))
 
             if (!this.isClientKnown()) {
@@ -260,7 +261,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
                 return $q.reject(new Error(message))
             }
 
-            let service = $bittorrent.getClient(this.client);
+            const service = $bittorrent.getClient(this.client);
 
             return service.connect(this).catch(function(err) {
                 self.isConnected = false
@@ -282,7 +283,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         };
 
         Server.prototype.askForCertificate = function() {
-            let self = this
+            const self = this
             const response = certificateResponseService.wait(self.id)
 
             electorrent.certificates.fetch({
@@ -327,8 +328,8 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
 
         function zipsort(obj, sor) {
             return function(a, b) {
-                let i = sor.indexOf(a.name)
-                let j = sor.indexOf(b.name)
+                const i = sor.indexOf(a.name)
+                const j = sor.indexOf(b.name)
                 if(i === j) {
                     return 0
                 } else if(i === -1) {
@@ -342,7 +343,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
         }
 
         Server.prototype.parseColumns = function(data) {
-            let columns = this.defaultColumns()
+            const columns = this.defaultColumns()
             if(!data || data.length === 0) return columns
             columns.sort(zipsort(columns, data))
             columns.forEach((column) => {
@@ -360,7 +361,7 @@ export let serverService = ['$q', 'notificationService', '$bittorrent', '$btclie
 
         Server.prototype.addCustomColumns = function (columns) {
             if (this.isClientKnown()) {
-                let client = $bittorrent.getClient(this.client)
+                const client = $bittorrent.getClient(this.client)
                 columns = _.union(columns, client.extraColumns)
             }
             return columns

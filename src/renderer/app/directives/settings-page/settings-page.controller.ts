@@ -15,7 +15,6 @@ export class SettingsPageController {
     ) {
         const electorrent = window.electorrent
         let serverCopy: any;
-        let loadPromise: Promise<void> | undefined;
 
         $scope.settings = {};
         $scope.server = {};
@@ -47,7 +46,7 @@ export class SettingsPageController {
             "ui-floating": true,
         };
 
-        loadPromise = Promise.all([
+        const loadPromise = Promise.all([
             Promise.resolve(settingsService.whenReady()),
             electorrent.settings.listThemes(),
             electorrent.app.getMeta(),

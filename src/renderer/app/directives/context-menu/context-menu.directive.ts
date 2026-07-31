@@ -1,5 +1,6 @@
 import { IAugmentedJQuery, IDirective, IDirectiveFactory, IDocumentService, IRootScopeService, IScope, IWindowService } from "angular";
 import { ContextMenuController } from "./context-menu.controller";
+import html from "./context-menu.template.html";
 
 interface ContextMenuItem {
     id?: string;
@@ -13,12 +14,19 @@ interface ContextMenuItem {
 
 interface ContextMenuScope extends IScope {
     menu: ContextMenuItem[];
+    isDebug: boolean;
+    selectedItems: any[];
     bind: {
         show: (event: MouseEvent, items: any[]) => void;
         hide: () => void;
     };
     click: (...args: any[]) => void;
     debug?: () => void;
+    isItemVisible: (item: ContextMenuItem) => boolean;
+    isItemChecked: (item: ContextMenuItem) => boolean;
+    runMenuItem: (item: ContextMenuItem) => void;
+    runDebugItem: () => void;
+    toggleSubmenu: (event: Event, visible: boolean) => void;
 }
 
 export class ContextMenuDirective implements IDirective {
@@ -30,7 +38,7 @@ export class ContextMenuDirective implements IDirective {
         debug: "=?",
     };
     controller = ContextMenuController;
-    private isDebug = false
+    template = html;
 
     static getInstance(): IDirectiveFactory {
         const factory = (
@@ -52,141 +60,41 @@ export class ContextMenuDirective implements IDirective {
         element.addClass("torrent context menu");
         element.data("contextmenu", true);
 
-        const checkboxes: Array<{ checkbox: HTMLInputElement; predicate: (item: any) => boolean }> = [];
-
-        const addIcon = (item: IAugmentedJQuery, iconName: string) => {
-            const icon = angular.element("<i></i>");
-            icon.addClass(`ui ${iconName} icon`);
-            item.append(icon);
-        };
-
-        const addCheckbox = (item: IAugmentedJQuery, predicate: (menuItem: any) => boolean) => {
-            const check = angular.element('<div class="ui checkbox"></div>');
-            const checkbox = angular.element('<input type="checkbox">');
-            const label = angular.element("<label></label>");
-            check.append(checkbox);
-            check.append(label);
-            item.append(check);
-            checkboxes.push({
-                checkbox: checkbox[0] as HTMLInputElement,
-                predicate,
-            });
-        };
-
-        const appendMenuItem = (list: IAugmentedJQuery, item: ContextMenuItem) => {
-            const menuItem = angular.element('<a class="item"></a>');
-
-            if (item.role) {
-                menuItem.attr("data-role", item.role);
+        scope.isDebug = false;
+        scope.selectedItems = [];
+        scope.isItemVisible = (item) => {
+            if (item.menu) {
+                return true;
             }
 
-            if (item.icon) {
-                addIcon(menuItem, item.icon);
-            } else if (item.check) {
-                addCheckbox(menuItem, item.check);
+            const features = this.$rootScope.$btclient?.features;
+            switch (item.role) {
+                case "details":
+                    return !!features?.torrentDetails;
+                case "set-speed-limits":
+                    return !!features?.speedLimits;
+                case "set-ratio":
+                    return !!features?.ratioLimits;
+                default:
+                    return true;
             }
-
-            menuItem.on("click", () => {
-                element.hide();
-                scope.click(item.click, item.label, item);
-            });
-
-            menuItem.append(item.label);
-            list.append(menuItem);
         };
-
-        const appendSubmenu = (list: IAugmentedJQuery, submenu: ContextMenuItem) => {
-            const item = angular.element('<div class="ui context dropdown item"></div>');
-            const menu = angular.element('<div class="menu"></div>');
-
-            submenu.menu?.forEach((subItem) => {
-                appendMenuItem(menu, subItem);
-            });
-
-            addIcon(item, "dropdown");
-            item.append(submenu.label);
-            item.append(menu);
-            list.append(item);
+        scope.isItemChecked = (item) => {
+            return !!item.check && scope.selectedItems.every((entry) => item.check!(entry));
         };
-
-        const appendDebugItem = (list: IAugmentedJQuery) => {
-            if (typeof scope.debug !== "function") {
-                return;
-            }
-
-            appendMenuItem(list, {
+        scope.runMenuItem = (item) => {
+            element.hide();
+            scope.click(item.click, item.label, item);
+        };
+        scope.runDebugItem = () => {
+            scope.runMenuItem({
                 label: "Debug",
                 icon: "help",
                 click: scope.debug,
             });
         };
-
-        const bindMenuActions = () => {
-            $(element)
-                .find(".context.dropdown")
-                .each(function () {
-                    $(this)
-                        .mouseenter(function () {
-                            $(this).find(".menu").show();
-                        })
-                        .mouseleave(function () {
-                            $(this).find(".menu").hide();
-                        });
-                });
-        };
-
-        const render = () => {
-            if (!scope.menu) {
-                return;
-            }
-
-            element.empty();
-            checkboxes.length = 0;
-
-            const list = angular.element('<div class="ui vertical menu"></div>');
-            element.append(list);
-
-            if (this.isDebug) {
-                appendDebugItem(list);
-            }
-
-            scope.menu.forEach((item) => {
-                if (item.menu) {
-                    appendSubmenu(list, item);
-                    return;
-                }
-
-                if (
-                    item.role === "details"
-                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.torrentDetails)
-                ) {
-                    return;
-                }
-
-                if (
-                    item.role === "set-speed-limits"
-                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.speedLimits)
-                ) {
-                    return;
-                }
-
-                if (
-                    item.role === "set-ratio"
-                    && (!this.$rootScope.$btclient || !this.$rootScope.$btclient.features.ratioLimits)
-                ) {
-                    return;
-                }
-
-                appendMenuItem(list, item);
-            });
-
-            bindMenuActions();
-        };
-
-        const updateCheckboxes = (items: any[]) => {
-            checkboxes.forEach((item) => {
-                item.checkbox.checked = items.every((entry) => item.predicate(entry));
-            });
+        scope.toggleSubmenu = (event, visible) => {
+            $(event.currentTarget).find(".menu").toggle(visible);
         };
 
         const bindCloseOperations = () => {
@@ -202,7 +110,7 @@ export class ContextMenuDirective implements IDirective {
         scope.bind = {
             show: (event: MouseEvent, items: any[]) => {
                 bindCloseOperations();
-                updateCheckboxes(items);
+                scope.selectedItems = items;
 
                 const totalWidth = $(window).width() || 0;
                 const totalHeight = $(window).height() || 0;
@@ -240,21 +148,10 @@ export class ContextMenuDirective implements IDirective {
         document.body.addEventListener("click", onBodyClick);
         document.addEventListener("keyup", onKeyUp);
 
-        render();
-
         window.electorrent.app.getMeta().then((meta) => {
-            this.isDebug = !!meta.isDebug
-            scope.$evalAsync(render)
+            scope.isDebug = !!meta.isDebug;
+            scope.$applyAsync();
         });
-
-        scope.$watch(
-            () => this.$rootScope.$btclient,
-            (client) => {
-                if (client) {
-                    render();
-                }
-            },
-        );
 
         scope.$on("$destroy", () => {
             document.body.removeEventListener("click", onBodyClick);

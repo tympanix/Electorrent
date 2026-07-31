@@ -1,10 +1,10 @@
 import { PendingTorrentUploadLink } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 
-export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notificationService', function($rootScope, $injector, $btclients, $notify){
+export const bittorrentService = ['$rootScope', '$injector', '$btclients', 'notificationService', function($rootScope, $injector, $btclients, $notify){
     const electorrent = window.electorrent
 
     this.getClient = function(name) {
-        var client = $btclients[name];
+        const client = $btclients[name];
         if (client){
             return client.service
         } else {
@@ -13,7 +13,7 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
     }
 
     this.changeClient = function(clientName) {
-        var service = this.getClient(clientName);
+        const service = this.getClient(clientName);
         this.setClient(service);
     }
 
@@ -37,11 +37,11 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
     }
 
     this.uploadFromClipboard = async function(askUploadOptions: boolean) {
-        var magnet = await electorrent.clipboard.readText();
+        const magnet = await electorrent.clipboard.readText();
 
-        var protocol = ['magnet', 'http'];
+        const protocol = ['magnet', 'http'];
 
-        var supported = protocol.some(function(protocol) {
+        const supported = protocol.some(function(protocol) {
             return magnet.startsWith(protocol);
         })
 
@@ -50,7 +50,7 @@ export let bittorrentService = ['$rootScope', '$injector', '$btclients', 'notifi
             return;
         }
 
-        let link: PendingTorrentUploadLink = {
+        const link: PendingTorrentUploadLink = {
             type: 'link',
             uri: magnet
         }
