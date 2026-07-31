@@ -1,42 +1,45 @@
-import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, INgModelController, IScope } from "angular";
+import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
 
 export class DropdownController {
+    model?: any;
+    disabled?: boolean;
+    title?: string;
+    openOnFocus?: string;
+    dropdownNoBlur?: string;
+    onChange?: () => void;
+
     private dropdown?: any;
     private scope?: IScope;
-    private ngModel?: INgModelController;
     private values = new Map<string, any>();
 
-    initialize(scope: IScope, element: IAugmentedJQuery, attrs: IAttributes, ngModel?: INgModelController) {
+    initialize(scope: IScope, element: IAugmentedJQuery, hasModel: boolean) {
         this.scope = scope;
-        this.ngModel = ngModel;
         this.dropdown = $(element);
 
         this.dropdown.dropdown({
             transition: "vertical flip",
             duration: 100,
-            action: ngModel ? "activate" : "hide",
-            showOnFocus: attrs.openOnFocus !== "false",
+            action: hasModel ? "activate" : "hide",
+            showOnFocus: this.openOnFocus !== "false",
             onChange: (value: string) => {
                 const modelValue = this.values.has(value) ? this.values.get(value) : value;
 
-                if (!this.ngModel || this.ngModel.$viewValue === modelValue) {
+                if (!hasModel || this.model === modelValue) {
                     return;
                 }
 
-                scope.$evalAsync(() => this.ngModel?.$setViewValue(modelValue));
+                scope.$evalAsync(() => {
+                    this.model = modelValue;
+                    this.onChange?.();
+                });
             },
         });
 
-        if ("dropdownNoBlur" in attrs) {
+        if (this.dropdownNoBlur !== undefined) {
             this.dropdown.off("blur.dropdown");
         }
 
-        if (ngModel) {
-            ngModel.$render = () => {
-                this.dropdown?.dropdown("set selected", ngModel.$viewValue);
-            };
-            ngModel.$render();
-        }
+        this.render();
     }
 
     addItem(value?: any) {
@@ -56,8 +59,12 @@ export class DropdownController {
     private refresh() {
         this.scope?.$evalAsync(() => {
             this.dropdown?.dropdown("refresh");
-            this.ngModel?.$render();
+            this.render();
         });
+    }
+
+    render() {
+        this.dropdown?.dropdown("set selected", this.model);
     }
 
     setDisabled(disabled: boolean) {
@@ -73,8 +80,20 @@ export class DropdownController {
 
 export class DropdownDirective implements IDirective {
     restrict = "E";
+    scope = {};
+    bindToController = {
+        model: "=?ngModel",
+        disabled: "<?ngDisabled",
+        onChange: "&?ngChange",
+        title: "@?",
+        openOnFocus: "@?",
+        dropdownNoBlur: "@?",
+    };
     controller = DropdownController;
-    require = ["dropdown", "?ngModel"];
+    controllerAs = "ctl";
+    require = "dropdown";
+    transclude = true;
+    template = "";
 
     static getInstance(): IDirectiveFactory {
         return () => new DropdownDirective();
@@ -84,57 +103,73 @@ export class DropdownDirective implements IDirective {
         scope: IScope,
         element: IAugmentedJQuery,
         attrs: IAttributes,
-        controllers: [DropdownController, INgModelController | undefined],
+        controller: DropdownController,
+        transclude: any,
     ) {
-        const [controller, ngModel] = controllers;
+        transclude((contents: IAugmentedJQuery) => element.append(contents));
 
         if (!element.children(".menu").length) {
             const items = element.contents().detach();
             const text = angular.element('<div class="default text"></div>');
             const menu = angular.element('<div class="menu"></div>');
 
-            text.text(attrs.title || "");
+            text.text(controller.title || "");
             menu.append(items);
             element.append(text, angular.element('<i class="dropdown icon"></i>'), menu);
             element.addClass("selection");
         }
 
         element.addClass("ui dropdown");
-        controller.initialize(scope, element, attrs, ngModel);
+        controller.initialize(scope, element, Boolean(attrs.ngModel));
 
-        const unwatchDisabled = attrs.ngDisabled
-            ? scope.$watch(attrs.ngDisabled, (disabled) => controller.setDisabled(Boolean(disabled)))
-            : undefined;
+        const unwatchModel = scope.$watch(() => controller.model, () => controller.render());
+        const unwatchDisabled = scope.$watch(
+            () => controller.disabled,
+            (disabled) => controller.setDisabled(Boolean(disabled)),
+        );
 
         scope.$on("$destroy", () => {
-            unwatchDisabled?.();
+            unwatchModel();
+            unwatchDisabled();
             controller.destroy();
         });
     }
 }
 
+export class DropdownItemController {
+    value?: any;
+    title?: any;
+    dataValue?: string;
+}
+
 export class DropdownItemDirective implements IDirective {
     restrict = "E";
+    scope = {};
+    bindToController = {
+        value: "<?",
+        title: "<?",
+        dataValue: "@?",
+    };
+    controller = DropdownItemController;
+    controllerAs = "ctl";
     replace = true;
     transclude = true;
-    require = "^dropdown";
+    require = ["dropdownItem", "^dropdown"];
     template = '<div class="item" ng-transclude></div>';
 
     static getInstance(): IDirectiveFactory {
         return () => new DropdownItemDirective();
     }
 
-    link(scope: IScope, element: IAugmentedJQuery, attrs: IAttributes, controller: DropdownController) {
-        const evaluate = (expression?: string) => {
-            if (!expression) {
-                return undefined;
-            }
-
-            const value = scope.$eval(expression);
-            return value === undefined ? expression : value;
-        };
-        const value = evaluate(attrs.value) ?? attrs.dataValue;
-        const title = evaluate(attrs.title);
+    link(
+        scope: IScope,
+        element: IAugmentedJQuery,
+        attrs: IAttributes,
+        controllers: [DropdownItemController, DropdownController],
+    ) {
+        const [item, dropdown] = controllers;
+        const value = item.value ?? item.dataValue ?? attrs.value;
+        const title = item.title ?? attrs.title;
 
         if (value !== undefined) {
             element.attr("data-value", String(value));
@@ -143,7 +178,7 @@ export class DropdownItemDirective implements IDirective {
             element.text(String(title));
         }
 
-        controller.addItem(value);
-        scope.$on("$destroy", () => controller.removeItem(value));
+        dropdown.addItem(value);
+        scope.$on("$destroy", () => dropdown.removeItem(value));
     }
 }

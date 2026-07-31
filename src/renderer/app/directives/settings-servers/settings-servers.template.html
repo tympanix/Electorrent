@@ -13,10 +13,10 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="server in settings.servers">
+        <tr ng-repeat="server in ctl.settings.servers">
             <td class="collapsing">
                 <div class="ui toggle checkbox">
-                    <input type="checkbox" ng-model="server.default" ng-change="toggleDefaultServer(server)">
+                    <input type="checkbox" ng-model="server.default" ng-change="ctl.onToggleDefaultServer({server: server})">
                     <label></label>
                 </div>
             </td>
@@ -56,16 +56,16 @@
             <td>{{server.port}}</td>
             <td>{{server.user}}</td>
             <td class="collapsing center aligned">
-                <button ng-disabled="$first" class="circular green ui icon mini button" ng-click="moveServerUp(server)">
+                <button ng-disabled="$first" class="circular green ui icon mini button" ng-click="ctl.onMoveServerUp({server: server})">
                     <i class="icon arrow up"></i>
                 </button>
-                <button class="circular blue ui icon mini button" ng-click="renameModalRef.open(server)">
+                <button class="circular blue ui icon mini button" ng-click="ctl.renameModalRef.open(server)">
                     <i class="icon tag"></i>
                 </button>
-                <button ng-if="server.proto === 'https' && server.tlsSecurity === 'insecure'" class="circular orange ui icon mini button" ng-click="disableInsecureTls(server)" title="Disable Insecure TLS">
+                <button ng-if="server.proto === 'https' && server.tlsSecurity === 'insecure'" class="circular orange ui icon mini button" ng-click="ctl.onDisableInsecureTls({server: server})" title="Disable Insecure TLS">
                     <i class="icon shield alternate"></i>
                 </button>
-                <button class="circular red ui icon mini button" ng-click="removeServer(server)">
+                <button class="circular red ui icon mini button" ng-click="ctl.onRemoveServer({server: server})">
                     <i class="icon remove"></i>
                 </button>
             </td>
@@ -74,7 +74,7 @@
 </table>
 
 <rename-server-modal
-    data="renameData"
-    approve="renameServer()"
-    modal-ref="renameModalRef">
+    data="ctl.renameData"
+    approve="ctl.renameServer()"
+    modal-ref="ctl.renameModalRef">
 </rename-server-modal>
