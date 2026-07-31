@@ -253,6 +253,13 @@ export abstract class Torrent implements TorrentProps {
       attribute: 'uploadSpeed'
     })
 
+    static COL_UPLOAD_TOTAL = new Column({
+      name: 'Upload total',
+      enabled: false,
+      template: '{{torrent.uploaded | bytes}}',
+      attribute: 'uploaded'
+    })
+
     static COL_DOWNLIMIT = new Column({
       name: 'Down Limit',
       enabled: false,
@@ -345,6 +352,7 @@ export abstract class Torrent implements TorrentProps {
         Torrent.COL_SIZE,
         Torrent.COL_DOWNSPEED,
         Torrent.COL_UPSPEED,
+        Torrent.COL_UPLOAD_TOTAL,
         Torrent.COL_PROGRESS,
         Torrent.COL_LABEL,
         Torrent.COL_DATEADDED,
