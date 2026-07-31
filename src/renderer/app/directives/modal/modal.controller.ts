@@ -1,15 +1,17 @@
+export type ModalCallback = (locals?: { accepted: boolean }) => unknown
+
 export class ModalController {
     // jQuery element for Fomantic UI modal
     modal: any
     size?: string
+    after?: ModalCallback
+    approve?: ModalCallback
     closable?: boolean
-    approve?: () => any
-    deny?: () => any
-    after?: (locals: { accepted: boolean }) => any
-    onHidden?: () => any
-    hidden?: () => any
-    onShow?: () => any
-    show?: () => any
+    deny?: ModalCallback
+    hidden?: ModalCallback
+    onHidden?: ModalCallback
+    onShow?: ModalCallback
+    show?: ModalCallback
 
     attachModal(modal: any) {
         this.modal = modal
@@ -36,16 +38,4 @@ export class ModalController {
     refreshModal() {
         this.modal.modal('refresh')
     }
-
-    invokeAfter(accepted: boolean) {
-        if (!this.after) {
-            return
-        }
-
-        const result = this.after({ accepted })
-        if (typeof result === "function") {
-            result(accepted)
-        }
-    }
-
 }

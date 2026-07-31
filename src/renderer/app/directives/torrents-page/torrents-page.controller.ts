@@ -2,6 +2,7 @@ import Fuse from "fuse.js";
 import { TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { PendingTorrentUploadItem, PendingTorrentUploadList } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
+import type { SortChange } from "@renderer/app/directives/sorting/sorting.controller";
 import { matchesLabelFilter } from "@renderer/app/directives/torrent-sidebar/torrent-label-filter";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { TorrentActionItem } from "@shared/torrent-actions";
@@ -776,9 +777,9 @@ export class TorrentsPageController {
             return Array.from(Object.values($scope.torrents)) as any[];
         }
 
-        $scope.changeSorting = (sortName: string, descending: boolean) => {
+        $scope.changeSorting = ({ sortKey, descending }: SortChange) => {
             $scope.torrentLimit = LIMIT;
-            $scope.filters.sort = sortName;
+            $scope.filters.sort = sortKey;
             $scope.filters.order = descending;
             refreshTorrents();
         };

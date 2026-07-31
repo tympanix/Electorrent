@@ -86,11 +86,12 @@
                     class="ui single line unstackable selectable fixed torrent resize table"
                 >
                     <thead>
-                        <tr sorting="changeSorting" mode="$server.id">
+                        <tr sorting mode="$server.id" on-sort-change="changeSorting($event)">
                             <th
                                 ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name"
                                 rz-col="col.attribute"
-                                sort="col.attribute"
+                                sort-header
+                                sort-key="col.attribute"
                             >
                                 {{::col.name}}
                             </th>

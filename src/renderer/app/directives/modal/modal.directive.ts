@@ -2,14 +2,7 @@ import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } 
 import { ModalController } from "./modal.controller";
 
 interface ModalAttributes extends IAttributes {
-    after?: string
-    approve?: string
     closable?: string
-    deny?: string
-    hidden?: string
-    onHidden?: string
-    onShow?: string
-    show?: string
     size?: string
 }
 
@@ -77,11 +70,14 @@ export class ModalDirective implements IDirective {
             },
             onApprove: () => {
                 accepted = true
-                return controller.approve ? controller.approve() : true
+                if (!controller.approve) {
+                    return true
+                }
+                return controller.approve()
             },
             onHidden: () => {
                 ModalDirective.clearForm(element)
-                controller.invokeAfter(accepted)
+                controller.after?.({ accepted })
                 controller.onHidden?.()
                 controller.hidden?.()
             },
@@ -93,11 +89,10 @@ export class ModalDirective implements IDirective {
             onVisible: () => {
                 modal.modal('refresh')
             },
-            closable: controller.closable === true || (attr.closable === "" && controller.closable !== false),
+            closable: attr.closable === "" || controller.closable === true,
             keyboardShortcuts: false,
             duration: 150
         });
-
         scope.$on("$destroy", function() {
             $(document).off("keydown", onKeyDown)
             element.remove();
