@@ -17,6 +17,7 @@ const assert: Chai.AssertStatic = chai.assert
 const fixture = getTestFixture()
 const client = fixture.client
 const backend = fixture.backend
+const expectedPassword = client.password ? "••••••••" : ""
 
 describe("connection", function () {
   this.timeout(CONNECTION_SPEC_TIMEOUT)
@@ -33,8 +34,8 @@ describe("connection", function () {
       return settings.servers[0]
     })
 
-    assert.equal(rendererServer.password, "••••••••")
-    assert.isTrue(rendererServer.hasPassword)
+    assert.equal(rendererServer.password, expectedPassword)
+    assert.equal(rendererServer.hasPassword, Boolean(client.password))
     assert.notProperty(rendererServer, "encryptedPassword")
 
     const storage = await browser.electron.execute((electron) => ({
@@ -44,7 +45,10 @@ describe("connection", function () {
     const persistedSettings = JSON.parse(fs.readFileSync(path.join(storage.userDataPath, "config.json"), "utf8"))
     const persistedServer = persistedSettings.servers[0]
 
-    if (storage.available) {
+    if (!client.password) {
+      assert.notProperty(persistedServer, "password")
+      assert.notProperty(persistedServer, "encryptedPassword")
+    } else if (storage.available) {
       assert.notProperty(persistedServer, "password")
       assert.deepInclude(persistedServer.encryptedPassword, {
         version: 1,
@@ -87,7 +91,7 @@ describe("connection", function () {
       assert.equal(await $("#page-settings-connection input[name='ip']").getValue(), client.host)
       assert.equal(await $("#page-settings-connection input[name='port']").getValue(), String(client.port))
       assert.equal(await $("#page-settings-connection input[name='username']").getValue(), client.username)
-      assert.equal(await $("#page-settings-connection input[name='password']").getValue(), "••••••••")
+      assert.equal(await $("#page-settings-connection input[name='password']").getValue(), expectedPassword)
     } finally {
       await backend.unpause()
     }
