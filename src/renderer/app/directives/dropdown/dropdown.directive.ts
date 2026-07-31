@@ -30,7 +30,9 @@ export class DropdownController {
 
                 scope.$evalAsync(() => {
                     this.model = modelValue;
-                    this.onChange?.();
+                    if (this.onChange) {
+                        scope.$applyAsync(() => this.onChange?.());
+                    }
                 });
             },
         });
