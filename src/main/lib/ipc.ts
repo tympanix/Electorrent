@@ -1,8 +1,8 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain, nativeTheme, shell, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, clipboard, dialog, ipcMain, nativeTheme, safeStorage, shell, type IpcMainInvokeEvent } from 'electron'
 import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { AppSettings, EditCommand, PendingTorrentUploadLink, WindowCommand } from '@shared/ipc-contract'
+import type { AppSettings, BittorrentServerConfig, EditCommand, PendingTorrentUploadLink, PublicServerConfig, WindowCommand } from '@shared/ipc-contract'
 import { getAppVersion } from './app-meta'
 import { bittorrentManager } from './bittorrent'
 import { normalizeConnectionError } from './bittorrent/connection-error'
@@ -12,6 +12,7 @@ import * as settings from './settings'
 import themes, { getSystemTheme } from './themes'
 import * as torrents from './torrents'
 import * as updater from './update'
+import { connectAndPersistPassword } from './server-credentials'
 
 interface RegisterHandlersOptions {
     isDebug: boolean
@@ -155,11 +156,14 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         await shell.openExternal(url)
     })
 
-    ipcMain.handle(IPC_CHANNELS.settings.getAll, async function() {
+    ipcMain.handle(IPC_CHANNELS.settings.getAll, async function(): Promise<AppSettings<PublicServerConfig>> {
         return settings.getAllSettings()
     })
 
-    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings: newSettings }) {
+    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(
+        _event: IpcMainInvokeEvent,
+        { settings: newSettings }: { settings: AppSettings<PublicServerConfig> },
+    ): Promise<void> {
         await new Promise<void>((resolve, reject) => {
             settings.saveAll(newSettings, function(err: Error) {
                 if (err) {
@@ -221,9 +225,19 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         return torrents.parse(request)
     })
 
-    ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
+    ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(
+        event: IpcMainInvokeEvent,
+        { server }: { server: BittorrentServerConfig },
+    ) {
         try {
-            const connection = await bittorrentManager.connect(event.sender, server)
+            const persistedServer = settings.getPersistedServer(server.id)
+            const connection = await connectAndPersistPassword(
+                server,
+                persistedServer,
+                safeStorage,
+                (resolvedServer) => bittorrentManager.connect(event.sender, resolvedServer),
+                settings.saveConnectedPassword,
+            )
             if (!connection) {
                 return {
                     ok: false,

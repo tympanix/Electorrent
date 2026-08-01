@@ -1,7 +1,7 @@
 import request from "request"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, ResolvedServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
 import {
     defer,
     HTTP_LOGIN_TIMEOUT,
@@ -75,7 +75,7 @@ export class DelugeRuntime implements BittorrentRuntime {
         { role: "remove", label: "Remove", action: "remove", icon: "remove" },
         { label: "Remove and delete", action: "removeAndDelete", icon: "trash", role: "delete" },
     ]
-    private url(server: BittorrentServerConfig, endpoint?: string) {
+    private url(server: ResolvedServerConfig, endpoint?: string) {
         return serverUrl(server, endpoint)
     }
 
@@ -224,7 +224,7 @@ export class DelugeRuntime implements BittorrentRuntime {
         return defer<any[]>((done) => this.rpc("web.get_hosts", [], done))
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+    async connect(server: ResolvedServerConfig): Promise<TorrentClientConnection> {
         this.rpcUrl = this.url(server, "json")
         this.uploadUrl = this.url(server, "upload")
         this.requestId = 0

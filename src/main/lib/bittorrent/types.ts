@@ -1,6 +1,6 @@
 import type {
     BittorrentFileSelection,
-    BittorrentServerConfig,
+    ResolvedServerConfig,
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
@@ -14,7 +14,7 @@ export type CallbackFunc<T = unknown> = (err: unknown, val: T) => void
 
 export interface BittorrentRuntime {
     readonly actions: TorrentActionItem[]
-    connect(server: BittorrentServerConfig): Promise<TorrentClientConnection>
+    connect(server: ResolvedServerConfig): Promise<TorrentClientConnection>
     getSnapshot(fullUpdate?: boolean): Promise<any>
     addTorrentUrl(uri: string, options?: TorrentUploadOptions): Promise<void>
     uploadTorrent(buffer: Uint8Array, filename: string, options?: TorrentUploadOptions): Promise<void>

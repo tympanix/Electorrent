@@ -1,5 +1,5 @@
 import { URL } from "node:url"
-import type { BittorrentServerConfig } from "@shared/ipc-contract"
+import type { ResolvedServerConfig } from "@shared/ipc-contract"
 import { sanitizeServerAddress } from "@shared/server-address"
 import type { CallbackFunc } from "./types"
 
@@ -27,7 +27,7 @@ export function urlPath(...pathValues: Array<string | undefined>) {
     return path ? `/${path}` : ""
 }
 
-export function serverOriginUrl(server: BittorrentServerConfig) {
+export function serverOriginUrl(server: ResolvedServerConfig) {
     const sanitizedServer = sanitizeServerAddress(server)
     const url = new URL("http://localhost")
     url.protocol = `${sanitizedServer.proto.replace(/:$/, "")}:`
@@ -36,7 +36,7 @@ export function serverOriginUrl(server: BittorrentServerConfig) {
     return url.origin
 }
 
-export function serverUrl(server: BittorrentServerConfig, endpoint?: string) {
+export function serverUrl(server: ResolvedServerConfig, endpoint?: string) {
     const url = new URL(serverOriginUrl(server))
     url.pathname = urlPath(server.path, endpoint) || "/"
 
@@ -49,4 +49,3 @@ export function appendUrlPath(baseUrl: string, endpoint?: string) {
 
     return url.pathname === "/" ? url.origin : url.toString()
 }
-
