@@ -1,5 +1,5 @@
 # Shared test stack used by ElectorrentTestService.
-# Each WebdriverIO client capability runs this stack as its own compose project.
+# Each WebdriverIO client fixture slot runs this stack as its own compose project.
 x-peer: &peer
   build: ./shared/opentracker/peer
   volumes:
