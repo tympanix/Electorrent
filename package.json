@@ -111,6 +111,7 @@
     "request": "^2.88.2",
     "semver": "^5.7.1",
     "terser-webpack-plugin": "^5.3.12",
+    "thread-loader": "^4.0.4",
     "ts-loader": "^9.6.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
