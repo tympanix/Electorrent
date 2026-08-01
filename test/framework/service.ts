@@ -8,14 +8,20 @@ import { waitForHttp } from "../testutil"
 
 const testDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const stackComposeFile = path.join(testDir, "docker-compose.yml")
+const fixturePortStride = 100
 
 interface ElectorrentCapabilities extends WebdriverIO.Capabilities {
   "electorrent:client"?: TestClient
+  "electorrent:fixtureSlot"?: number
 }
 
 export default class ElectorrentTestService {
+  private readonly workerFixtures = new Map<string, { clientKey: string, slot: number }>()
+  private readonly leasedSlots = new Map<string, Set<number>>()
+  private readonly fixtureCounts = new Map<string, number>()
+
   async onPrepare(
-    _config: WebdriverIO.Config,
+    config: WebdriverIO.Config,
     capabilities: ElectorrentCapabilities[],
   ) {
     const clients = new Map(
@@ -26,20 +32,62 @@ export default class ElectorrentTestService {
         .map((client) => [client.key, client]),
     )
 
+    const fixtureCount = config.maxInstancesPerCapability ?? 1
+
     await Promise.all(
       [...clients.values()].map(async (client) => {
-        const { composeOptions } = this.getClientEnvironment(client)
+        this.fixtureCounts.set(client.key, fixtureCount)
 
-        await compose.upMany(
-          ["tracker", "peer", this.getClientServiceName(client), "nginx"],
-          composeOptions,
-        )
-        await waitForHttp({
-          url: `http://${client.host}:${client.containerHostPort ?? client.port}${client.acceptHttpPath ?? ""}`,
-          statusCode: client.acceptHttpStatus,
-        })
+        // Start a bounded pool once, then reuse each fixture as WDIO schedules specs.
+        for (let slot = 0; slot < fixtureCount; slot += 1) {
+          const { client: isolatedClient, composeOptions } = this.getClientEnvironment(client, slot)
+
+          await compose.upMany(
+            ["tracker", "peer", this.getClientServiceName(client), "nginx"],
+            composeOptions,
+          )
+          await waitForHttp({
+            url: `http://${isolatedClient.host}:${isolatedClient.containerHostPort ?? isolatedClient.port}${isolatedClient.acceptHttpPath ?? ""}`,
+            statusCode: isolatedClient.acceptHttpStatus,
+          })
+        }
       }),
     )
+  }
+
+  onWorkerStart(cid: string, capabilities: ElectorrentCapabilities) {
+    const client = capabilities["electorrent:client"]
+    if (!client?.fixture) {
+      return
+    }
+
+    const fixtureCount = this.fixtureCounts.get(client.key)
+    if (fixtureCount == null) {
+      throw new Error(`Test fixture pool was not prepared for ${client.key}`)
+    }
+
+    const leasedSlots = this.leasedSlots.get(client.key) ?? new Set<number>()
+    const slot = Array.from({ length: fixtureCount }, (_, index) => index)
+      .find((candidate) => !leasedSlots.has(candidate))
+
+    if (slot == null) {
+      throw new Error(`No test fixture available for ${client.key}`)
+    }
+
+    leasedSlots.add(slot)
+    this.leasedSlots.set(client.key, leasedSlots)
+    this.workerFixtures.set(cid, { clientKey: client.key, slot })
+    capabilities["electorrent:fixtureSlot"] = slot
+  }
+
+  onWorkerEnd(cid: string) {
+    const fixture = this.workerFixtures.get(cid)
+    if (!fixture) {
+      return
+    }
+
+    this.leasedSlots.get(fixture.clientKey)?.delete(fixture.slot)
+    this.workerFixtures.delete(cid)
   }
 
   async beforeSession(
@@ -56,10 +104,15 @@ export default class ElectorrentTestService {
       return
     }
 
-    const { composeOptions, proxyPort } = this.getClientEnvironment(client)
+    const slot = capabilities["electorrent:fixtureSlot"]
+    if (slot == null) {
+      throw new Error(`Test fixture slot was not assigned for ${client.key}`)
+    }
+
+    const { client: isolatedClient, composeOptions, proxyPort } = this.getClientEnvironment(client, slot)
 
     initializeTestFixture({
-      client,
+      client: isolatedClient,
       backend: new DockerComposeService(
         testDir,
         { serviceName: this.getClientServiceName(client) },
@@ -74,26 +127,33 @@ export default class ElectorrentTestService {
     })
   }
 
-  private getClientEnvironment(client: TestClient) {
+  private getClientEnvironment(client: TestClient, slot: number) {
+    const portOffset = slot * fixturePortStride
+    const isolatedClient = {
+      ...client,
+      port: client.port + portOffset,
+      ...(client.containerHostPort == null ? {} : { containerHostPort: client.containerHostPort + portOffset }),
+      ...(client.authProxyHostPort == null ? {} : { authProxyHostPort: client.authProxyHostPort + portOffset }),
+    }
     const suffix = client.key.replace(/[^a-z0-9]+/gi, "-").toLowerCase()
     const clientIndex = Object.keys(TEST_CLIENTS).indexOf(client.key)
-    const proxyPort = 50000 + clientIndex
-    const trackerPort = 51000 + clientIndex
-    const authProxyPort = client.authProxyHostPort ?? 55000 + clientIndex
+    const proxyPort = 50000 + clientIndex + portOffset
+    const trackerPort = 51000 + clientIndex + portOffset
+    const authProxyPort = isolatedClient.authProxyHostPort ?? 55000 + clientIndex + portOffset
     const env = {
       ...process.env,
-      COMPOSE_PROJECT_NAME: `electorrent-${suffix}`,
+      COMPOSE_PROJECT_NAME: `electorrent-${suffix}${slot ? `-${slot + 1}` : ""}`,
       VERSION: client.version,
-      CLIENT_HOST_PORT: String(client.containerHostPort ?? client.port),
+      CLIENT_HOST_PORT: String(isolatedClient.containerHostPort ?? isolatedClient.port),
       TRACKER_PORT: String(trackerPort),
       NGINX_HOST_PORT: String(proxyPort),
       NGINX_AUTH_HOST_PORT: String(authProxyPort),
       NGINX_AUTH_PORT: "8081",
       PROXY_HOST: this.getClientServiceName(client),
       PROXY_PORT: String(client.proxyPort ?? client.containerPort ?? client.port),
-      RPC_PORT: String(52000 + clientIndex),
-      PEER_PORT: String(53000 + clientIndex),
-      PEER_UDP_PORT: String(54000 + clientIndex),
+      RPC_PORT: String(52000 + clientIndex + portOffset),
+      PEER_PORT: String(53000 + clientIndex + portOffset),
+      PEER_UDP_PORT: String(54000 + clientIndex + portOffset),
     }
     const composeOptions: IDockerComposeOptions = {
       cwd: testDir,
@@ -102,7 +162,7 @@ export default class ElectorrentTestService {
       log: false,
     }
 
-    return { composeOptions, proxyPort }
+    return { client: isolatedClient, composeOptions, proxyPort }
   }
 
   private getClientServiceName(client: TestClient) {

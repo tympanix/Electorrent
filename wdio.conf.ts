@@ -13,6 +13,18 @@ const standardSpecs = [
 const useDistribution = process.argv.includes('--dist')
 const useHeadless = process.argv.includes('--headless')
 
+function testConcurrency() {
+    const value = Number(process.env.ELECTORRENT_TEST_CONCURRENCY ?? '1')
+
+    if (!Number.isInteger(value) || value < 1 || value > 4) {
+        throw new Error('ELECTORRENT_TEST_CONCURRENCY must be an integer between 1 and 4')
+    }
+
+    return value
+}
+
+const concurrency = testConcurrency()
+
 function requestedClients() {
     return process.argv.flatMap((argument, index, arguments_) => {
         if (argument === '--client') {
@@ -38,6 +50,7 @@ const specReporterPath = fileURLToPath(new URL('./test/framework/spec-reporter.t
 function electronCapability(client: (typeof selectedClients)[number]): WebdriverIO.Capabilities {
     return {
         browserName: 'electron',
+        'wdio:maxInstances': client.fixture ? concurrency : 1,
         'wdio:specs': client.specs ?? standardSpecs,
         'electorrent:client': client,
         'wdio:electronServiceOptions': {
@@ -121,7 +134,7 @@ export const config: WebdriverIO.Config = {
     // from the same test should run tests.
     //
     maxInstances: 4,
-    maxInstancesPerCapability: 1,
+    maxInstancesPerCapability: concurrency,
     //
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
