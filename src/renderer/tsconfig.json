@@ -14,7 +14,6 @@
       "mousetrap",
       "parse-torrent",
       "qs",
-      "underscore",
       "electorrent-bridge",
       "html"
     ],

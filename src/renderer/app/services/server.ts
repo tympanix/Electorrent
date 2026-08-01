@@ -1,4 +1,3 @@
-import _ from "underscore"
 import type { IPromise } from "angular"
 import { Torrent } from "@renderer/app/bittorrent"
 import type { ColumnProps } from "@renderer/app/services/column"
@@ -362,7 +361,7 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
         Server.prototype.addCustomColumns = function (columns) {
             if (this.isClientKnown()) {
                 const client = $bittorrent.getClient(this.client)
-                columns = _.union(columns, client.extraColumns)
+                columns = Array.from(new Set([...columns, ...client.extraColumns]))
             }
             return columns
         };

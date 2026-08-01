@@ -1,7 +1,6 @@
 import { TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
 import { TransmissionTorrent } from "./torrentt";
-import _ from "underscore"
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 import { applyFreeDiskSpace } from "@renderer/app/bittorrent/free-disk-space";
@@ -48,7 +47,7 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
       const trackerArray = Array.from(trackers).map(
         (tracker) => this.parseUrl(tracker)
       );
-      return _.compact(trackerArray);
+      return trackerArray.filter((tracker): tracker is string => Boolean(tracker));
     }
 
     parseUrl(url: string) {
