@@ -63,3 +63,115 @@ describe("connection", function () {
     await this.app.torrentsPageIsVisible()
   })
 })
+
+describe("connection authentication", function () {
+  configureSpec({ login: false })
+
+  it("shows a connection problem when username and password are wrong", async function () {
+    this.timeout(15 * 1000)
+
+    await this.app.login({
+      ...client,
+      username: `wrong-${client.username || "user"}`,
+      password: `wrong-${client.password || "password"}`,
+    })
+
+    const error = await this.app.getNotificationError({ timeout: 5 * 1000 })
+
+    if (!error) {
+      throw new Error("Expected a connection problem notification")
+    }
+    assert.equal(error.title, "Connection problem")
+    assert.equal(error.message, "Incorrect username or password.")
+    await this.app.welcomePageIsVisible()
+  })
+})
+
+describe("connection host path", function () {
+  configureSpec({ login: false })
+
+  it("connects when the host includes the root path", async function () {
+    await this.app.login({
+      ...client,
+      host: `http://${client.host}:${client.port}/`,
+      port: 1,
+    })
+    await this.app.torrentsPageIsVisible()
+  })
+})
+
+describe("connection host port", function () {
+  configureSpec({ login: false })
+
+  it("connects when the host includes the port", async function () {
+    await this.app.login({
+      ...client,
+      host: `${client.host}:${client.port}`,
+      port: 1,
+    })
+    await this.app.torrentsPageIsVisible()
+  })
+})
+
+describe("connection host scheme", function () {
+  configureSpec({ login: false })
+
+  it("connects when the host includes an http scheme", async function () {
+    await this.app.login({
+      ...client,
+      host: `http://${client.host}`,
+    })
+    await this.app.torrentsPageIsVisible()
+  })
+})
+
+describe("insecure tls connection", function () {
+  configureSpec({ login: false })
+
+  it("connects when certificate identity verification fails", async function () {
+    this.retries(3)
+    await this.app.login({
+      ...client,
+      host: "127.0.0.1",
+      https: true,
+      port: fixture.proxyPort,
+    })
+    await this.app.certificateModalIsVisible()
+    await this.app.openInsecureTlsConfirmation()
+    await this.app.acceptInsecureTls()
+    await this.app.torrentsPageIsVisible()
+  })
+})
+
+describe("tls connection host scheme", function () {
+  configureSpec({ login: false })
+
+  it("accepts a self-signed certificate when the host includes an https scheme", async function () {
+    this.retries(3)
+    await this.app.login({
+      ...client,
+      host: `https://${client.host}:${fixture.proxyPort}/`,
+      https: false,
+      port: 1,
+    })
+    await this.app.certificateModalIsVisible()
+    await this.app.acceptCertificate()
+    await this.app.torrentsPageIsVisible()
+  })
+})
+
+describe("tls connection", function () {
+  configureSpec({ login: false })
+
+  it("accepts a self-signed certificate", async function () {
+    this.retries(3)
+    await this.app.login({
+      ...client,
+      https: true,
+      port: fixture.proxyPort,
+    })
+    await this.app.certificateModalIsVisible()
+    await this.app.acceptCertificate()
+    await this.app.torrentsPageIsVisible()
+  })
+})
