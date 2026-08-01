@@ -12,18 +12,7 @@ const standardSpecs = [
 ]
 const useDistribution = process.argv.includes('--dist')
 const useHeadless = process.argv.includes('--headless')
-
-function testConcurrency() {
-    const value = Number(process.env.ELECTORRENT_TEST_CONCURRENCY ?? '1')
-
-    if (!Number.isInteger(value) || value < 1 || value > 4) {
-        throw new Error('ELECTORRENT_TEST_CONCURRENCY must be an integer between 1 and 4')
-    }
-
-    return value
-}
-
-const concurrency = testConcurrency()
+const concurrency = process.argv.includes('--parallel') ? 4 : 1
 
 function requestedClients() {
     return process.argv.flatMap((argument, index, arguments_) => {

@@ -15,8 +15,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      ELECTORRENT_TEST_CONCURRENCY: 4
 
     strategy:
       fail-fast: false
@@ -68,7 +66,7 @@ jobs:
     - name: Package application
       run: npm run pack
     - name: Run tests
-      run: xvfb-run -a -- npm test -- --dist --client "${{ matrix.client }}"
+      run: xvfb-run -a -- npm test -- --dist --client "${{ matrix.client }}" --parallel
 
   build:
     strategy:
