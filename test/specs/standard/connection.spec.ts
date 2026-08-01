@@ -56,7 +56,7 @@ describe("connection", function () {
       assert.equal(await $("#page-settings-connection input[name='ip']").getValue(), client.host)
       assert.equal(await $("#page-settings-connection input[name='port']").getValue(), String(client.port))
       assert.equal(await $("#page-settings-connection input[name='username']").getValue(), client.username)
-      assert.equal(await $("#page-settings-connection input[name='password']").getValue(), PASSWORD_MASK)
+      assert.equal(await $("#page-settings-connection input[name='password']").getValue(), client.password ? PASSWORD_MASK : "")
     } finally {
       await backend.unpause()
     }
