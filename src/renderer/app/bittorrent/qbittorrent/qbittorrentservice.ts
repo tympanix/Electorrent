@@ -88,7 +88,22 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
       return addTorrentUrl(magnet, options);
     };
 
-    extraColumns = [Torrent.COL_DOWNLIMIT, Torrent.COL_UPLIMIT];
+    extraColumns = [
+      Torrent.COL_DOWNLIMIT,
+      Torrent.COL_UPLIMIT,
+      QBittorrentTorrent.COL_AVAILABILITY,
+      QBittorrentTorrent.COL_DOWNLOADED_SESSION,
+      QBittorrentTorrent.COL_UPLOADED_SESSION,
+      QBittorrentTorrent.COL_ACTIVE_TIME,
+      QBittorrentTorrent.COL_SEEDING_TIME,
+      QBittorrentTorrent.COL_LAST_ACTIVITY,
+      QBittorrentTorrent.COL_SEEN_COMPLETE,
+      QBittorrentTorrent.COL_TAGS,
+      QBittorrentTorrent.COL_TRACKER,
+      QBittorrentTorrent.COL_CREATED_ON,
+      QBittorrentTorrent.COL_WASTED,
+      QBittorrentTorrent.COL_PRIVATE,
+    ];
 
     resume(torrents: Torrent[]): Promise<void> {
       return invokeAction("resume", torrents.map((torrent) => torrent.id));
@@ -185,11 +200,16 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
           this.createTorrentDetailsField("status", "Status", torrent.statusText()),
           this.createTorrentDetailsField("label", "Label", torrent.label),
           this.createTorrentDetailsField("save-path", "Save Path", info.savePath as string | null, "path"),
+          this.createTorrentDetailsField("content-path", "Content Path", info.contentPath as string | null, "path"),
           this.createTorrentDetailsField("total-size", "Total Size", this.toNumber(info.totalSize) ?? torrent.size, "bytes"),
+          this.createTorrentDetailsField("selected-size", "Selected Size", this.toNumber(info.selectedSize) ?? torrent.size, "bytes"),
         ]),
         this.createTorrentDetailsSection("transfer", "Transfer", [
           this.createTorrentDetailsField("downloaded", "Downloaded", this.toNumber(info.totalDownloaded) ?? torrent.downloaded, "bytes"),
           this.createTorrentDetailsField("uploaded", "Uploaded", this.toNumber(info.totalUploaded) ?? torrent.uploaded, "bytes"),
+          this.createTorrentDetailsField("downloaded-session", "Downloaded This Session", this.toNumber(info.totalDownloadedSession) ?? this.toNumber(torrent.downloadedSession), "bytes"),
+          this.createTorrentDetailsField("uploaded-session", "Uploaded This Session", this.toNumber(info.totalUploadedSession) ?? this.toNumber(torrent.uploadedSession), "bytes"),
+          this.createTorrentDetailsField("wasted", "Wasted", this.toNumber(info.totalWasted), "bytes"),
           this.createTorrentDetailsField("ratio", "Share Ratio", this.toNumber(info.shareRatio) ?? torrent.ratio, "ratio"),
           this.createTorrentDetailsField("ratio-limit", "Ratio Limit", this.toNumber(info.ratioLimit) ?? torrent.ratioLimit, "ratio"),
           this.createTorrentDetailsField("download-speed", "Download Speed", this.toNumber(info.downloadSpeed) ?? torrent.downloadSpeed, "speed"),
@@ -200,12 +220,28 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
           this.createTorrentDetailsField("upload-speed-avg", "Average Upload Speed", this.toNumber(info.averageUploadSpeed), "speed"),
           this.createTorrentDetailsField("eta", "ETA", this.toEpochSeconds(info.eta), "eta"),
           this.createTorrentDetailsField("reannounce", "Reannounce In", this.toEpochSeconds(info.reannounce), "eta"),
+          this.createTorrentDetailsField("active-time", "Active Time", this.toNumber(info.timeElapsed) ?? this.toNumber(torrent.timeActive), "eta"),
+          this.createTorrentDetailsField("seeding-time", "Seeding Time", this.toNumber(info.seedingTime) ?? this.toNumber(torrent.seedingTime), "eta"),
+          this.createTorrentDetailsField("max-ratio", "Maximum Ratio", this.toNumber(info.maxRatio), "ratio"),
+          this.createTorrentDetailsField("max-seeding-time", "Maximum Seeding Time", this.toNumber(info.maxSeedingTime), "eta"),
         ]),
         this.createTorrentDetailsSection("content", "Content", [
           this.createTorrentDetailsField("piece-size", "Piece Size", this.toNumber(info.pieceSize), "bytes"),
           this.createTorrentDetailsField("pieces", "Pieces", piecesHave != null && piecesTotal != null ? `${piecesHave} / ${piecesTotal}` : null),
           this.createTorrentDetailsField("sequential-download", "Sequential Download", (info.sequentialDownload as boolean | null) ?? torrent.sequentialDownload, "boolean"),
+          this.createTorrentDetailsField("first-last-piece-priority", "First/Last Piece Priority", (info.firstLastPiecePriority as boolean | null) ?? torrent.firstLastPiecePriority, "boolean"),
+          this.createTorrentDetailsField("automatic-management", "Automatic Management", (info.automaticTorrentManagement as boolean | null) ?? torrent.automaticTorrentManagement, "boolean"),
+          this.createTorrentDetailsField("force-start", "Force Start", (info.forceStart as boolean | null) ?? torrent.forceStart, "boolean"),
+          this.createTorrentDetailsField("super-seeding", "Super Seeding", (info.superSeeding as boolean | null) ?? torrent.superSeeding, "boolean"),
           this.createTorrentDetailsField("private", "Private Torrent", info.isPrivate as boolean | null, "boolean"),
+          this.createTorrentDetailsField("availability", "Availability", this.toNumber(info.availability), "percent"),
+          this.createTorrentDetailsField("metadata", "Metadata Available", info.hasMetadata as boolean | null, "boolean"),
+          this.createTorrentDetailsField("popularity", "Popularity", this.toNumber(info.popularity), "number"),
+          this.createTorrentDetailsField("infohash-v1", "Info Hash v1", info.infoHashV1 as string | null),
+          this.createTorrentDetailsField("infohash-v2", "Info Hash v2", info.infoHashV2 as string | null),
+          this.createTorrentDetailsField("tags", "Tags", info.tags as string | null),
+          this.createTorrentDetailsField("tracker", "Current Tracker", info.tracker as string | null),
+          this.createTorrentDetailsField("magnet-uri", "Magnet URI", info.magnetUri as string | null, "text", { multiline: true }),
           this.createTorrentDetailsField("created-by", "Created By", info.createdBy as string | null),
           this.createTorrentDetailsField("comment", "Comment", info.comment as string | null, "text", { multiline: true }),
         ]),
@@ -222,6 +258,7 @@ export class QBittorrentClient extends TorrentClient<QBittorrentTorrent> {
           this.createTorrentDetailsField("completed-on", "Completed On", this.toEpochSeconds(info.completionDate), "epoch"),
           this.createTorrentDetailsField("created-on", "Created On", this.toEpochSeconds(info.creationDate), "epoch"),
           this.createTorrentDetailsField("last-seen", "Last Seen Complete", this.toEpochSeconds(info.lastSeen), "epoch"),
+          this.createTorrentDetailsField("last-activity", "Last Activity", this.toEpochSeconds(info.lastActivity), "epoch"),
         ]),
       ]);
     }

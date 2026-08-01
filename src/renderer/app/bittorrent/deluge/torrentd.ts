@@ -1,10 +1,18 @@
 import {Torrent} from "@renderer/app/bittorrent/abstracttorrent";
+import { Column } from "@renderer/app/services/column";
 
 export class DelugeTorrent extends Torrent {
 
     private static fallbackCompletionTimes = new Map<string, number>()
 
     public state: string
+    public autoManaged: boolean
+    public distributedCopies: number
+    public numFiles: number
+    public seedsPeersRatio: number
+    public storageMode: string
+    public totalRemaining: number
+    public trackerHost: string
 
     constructor(hash: string, data: Record<string, any>) {
         const dateCompleted = DelugeTorrent.normalizeDateCompleted(hash, data)
@@ -41,6 +49,13 @@ export class DelugeTorrent extends Torrent {
          * may be added as extra fields. This can be done in the manner below
          */
         this.state = data.state
+        this.autoManaged = data.is_auto_managed ?? data.auto_managed
+        this.distributedCopies = data.distributed_copies
+        this.numFiles = data.num_files
+        this.seedsPeersRatio = data.seeds_peers_ratio
+        this.storageMode = data.storage_mode
+        this.totalRemaining = data.total_remaining
+        this.trackerHost = data.tracker_host
     }
 
     private static normalizeDateCompleted(hash: string, data: Record<string, any>) {
@@ -88,5 +103,56 @@ export class DelugeTorrent extends Torrent {
     isStatusPaused() {
         return false
     };
+
+    seedsPeersRatioText() {
+        if (!Number.isFinite(this.seedsPeersRatio)) {
+            return ""
+        }
+        return this.seedsPeersRatio < 0 ? "∞" : this.seedsPeersRatio.toFixed(2)
+    }
+
+    static COL_AVAILABILITY = new Column({
+        name: "Availability",
+        template: "{{torrent.distributedCopies | number:2}}",
+        attribute: "distributedCopies",
+    })
+
+    static COL_AUTO_MANAGED = new Column({
+        name: "Auto Managed",
+        template: "{{torrent.autoManaged ? 'Yes' : 'No'}}",
+        attribute: "autoManaged",
+    })
+
+    static COL_FILES = new Column({
+        name: "Files",
+        template: "{{torrent.numFiles | number}}",
+        attribute: "numFiles",
+    })
+
+    static COL_REMAINING = new Column({
+        name: "Remaining",
+        template: "{{torrent.totalRemaining | bytes}}",
+        attribute: "totalRemaining",
+    })
+
+    static COL_SEED_PEER_RATIO = new Column({
+        name: "Seed/Peer Ratio",
+        template: "{{torrent.seedsPeersRatioText()}}",
+        attribute: "seedsPeersRatio",
+    })
+
+    static COL_STORAGE_MODE = new Column({
+        name: "Storage Mode",
+        template: "{{torrent.storageMode}}",
+        attribute: "storageMode",
+        sort: Column.ALPHABETICAL,
+    })
+
+    static COL_TRACKER = new Column({
+        name: "Tracker",
+        template: "{{torrent.trackerHost}}",
+        attribute: "trackerHost",
+        sort: Column.ALPHABETICAL,
+    })
 
 }

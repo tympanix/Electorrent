@@ -1,4 +1,5 @@
 import { Torrent } from '@renderer/app/bittorrent/abstracttorrent';
+import { Column } from '@renderer/app/services/column';
 
 export class QBittorrentTorrent extends Torrent {
 
@@ -25,9 +26,14 @@ export class QBittorrentTorrent extends Torrent {
         return value ? value * 1000 : undefined;
     }
 
+    private static normalizeAvailability(value: unknown) {
+        const availability = Number(value);
+        return Number.isFinite(availability) && availability >= 0 ? availability * 100 : undefined;
+    }
+
     // Field specific for qBittorrent
     state: string
-    creationDate: string
+    creationDate: number
     pieceSize: number
     comment: string
     totalWasted: number
@@ -38,17 +44,35 @@ export class QBittorrentTorrent extends Torrent {
     timeElapsed: number
     seedingTime: number
     connectionsLimit: number
-    createdBy: number
+    createdBy: string
     downAvgSpeed: number
     lastSeen: number
     peers: number
     havePieces: any
     totalPieces: number
-    reannounce: string
+    reannounce: number
     upSpeedAvg: number
     forceStart: boolean
     sequentialDownload: boolean
     trackers: string[]
+    availability: number
+    availabilityPercent: number
+    automaticTorrentManagement: boolean
+    completed: number
+    contentPath: string
+    firstLastPiecePriority: boolean
+    isPrivate: boolean
+    lastActivity: number
+    magnetUri: string
+    maxRatio: number
+    maxSeedingTime: number
+    seenComplete: number
+    seedingTimeLimit: number
+    superSeeding: boolean
+    tags: string
+    timeActive: number
+    totalSize: number
+    tracker: string
 
 
     constructor(hash: string, data: Record<string, any>) {
@@ -56,11 +80,11 @@ export class QBittorrentTorrent extends Torrent {
             id: hash,
             hash: hash,
             name: data.name,
-            size: data.size || data.total_size,
-            percent: data.progress && (data.progress * 1000),
-            downloaded: data.total_downloaded,
+            size: data.size ?? data.total_size,
+            percent: typeof data.progress === 'number' ? data.progress * 1000 : undefined,
+            downloaded: data.total_downloaded ?? data.downloaded,
             uploaded: data.total_uploaded ?? data.uploaded,
-            ratio: data.share_ration || data.ratio,
+            ratio: data.share_ratio ?? data.ratio,
             ratioLimit: data.ratio_limit,
             uploadSpeed: data.up_speed || data.upspeed,
             downloadSpeed: data.dl_speed || data.dlspeed,
@@ -85,12 +109,11 @@ export class QBittorrentTorrent extends Torrent {
         this.comment = data.comment;
         this.totalWasted = data.total_wasted;
         this.uploadedSession = data.total_uploaded_session ?? data.uploaded_session;
-        this.downloadedSession = data.total_downloaded_session;
         this.upLimit = data.up_limit;
         this.downLimit = data.dl_limit;
         this.timeElapsed = data.time_elapsed;
         this.seedingTime = data.seeding_time;
-        this.connectionsLimit = data.nb_connections_limit;
+        this.connectionsLimit = data.nb_connections_limit ?? data.connections_limit;
         this.createdBy = data.created_by;
         this.downAvgSpeed = data.dl_speed_avg;
         this.lastSeen = data.last_seen;
@@ -102,6 +125,25 @@ export class QBittorrentTorrent extends Torrent {
         this.forceStart = data.force_start;
         this.sequentialDownload = data.seq_dl;
         this.trackers = Array.isArray(data.trackers) ? data.trackers : [];
+        this.availability = data.availability;
+        this.availabilityPercent = QBittorrentTorrent.normalizeAvailability(data.availability);
+        this.automaticTorrentManagement = data.auto_tmm;
+        this.completed = data.completed;
+        this.contentPath = data.content_path;
+        this.downloadedSession = data.total_downloaded_session ?? data.downloaded_session;
+        this.firstLastPiecePriority = data.f_l_piece_prio;
+        this.isPrivate = data.isPrivate ?? data.is_private ?? data.private;
+        this.lastActivity = QBittorrentTorrent.normalizeEpochMilliseconds(data.last_activity);
+        this.magnetUri = data.magnet_uri;
+        this.maxRatio = data.max_ratio;
+        this.maxSeedingTime = data.max_seeding_time;
+        this.seenComplete = QBittorrentTorrent.normalizeEpochMilliseconds(data.seen_complete);
+        this.seedingTimeLimit = data.seeding_time_limit;
+        this.superSeeding = data.super_seeding;
+        this.tags = data.tags;
+        this.timeActive = data.time_active;
+        this.totalSize = data.total_size;
+        this.tracker = data.tracker;
     }
 
     getStatus(...statusOr: string[]) {
@@ -145,5 +187,79 @@ export class QBittorrentTorrent extends Torrent {
             return super.manualStatusText();
         }
     };
+
+    static COL_AVAILABILITY = new Column({
+        name: 'Availability',
+        template: '{{torrent.availabilityPercent | number:1}}%',
+        attribute: 'availabilityPercent',
+    })
+
+    static COL_DOWNLOADED_SESSION = new Column({
+        name: 'Downloaded (Session)',
+        template: '{{torrent.downloadedSession | bytes}}',
+        attribute: 'downloadedSession',
+    })
+
+    static COL_UPLOADED_SESSION = new Column({
+        name: 'Uploaded (Session)',
+        template: '{{torrent.uploadedSession | bytes}}',
+        attribute: 'uploadedSession',
+    })
+
+    static COL_ACTIVE_TIME = new Column({
+        name: 'Active Time',
+        template: '{{torrent.timeActive | eta}}',
+        attribute: 'timeActive',
+    })
+
+    static COL_SEEDING_TIME = new Column({
+        name: 'Seeding Time',
+        template: '{{torrent.seedingTime | eta}}',
+        attribute: 'seedingTime',
+    })
+
+    static COL_LAST_ACTIVITY = new Column({
+        name: 'Last Activity',
+        template: '<span time="torrent.lastActivity"></span>',
+        attribute: 'lastActivity',
+    })
+
+    static COL_SEEN_COMPLETE = new Column({
+        name: 'Last Seen Complete',
+        template: '<span time="torrent.seenComplete"></span>',
+        attribute: 'seenComplete',
+    })
+
+    static COL_TAGS = new Column({
+        name: 'Tags',
+        template: '{{torrent.tags}}',
+        attribute: 'tags',
+        sort: Column.ALPHABETICAL,
+    })
+
+    static COL_TRACKER = new Column({
+        name: 'Tracker',
+        template: '{{torrent.tracker}}',
+        attribute: 'tracker',
+        sort: Column.ALPHABETICAL,
+    })
+
+    static COL_CREATED_ON = new Column({
+        name: 'Created On',
+        template: '<span time="torrent.creationDate * 1000"></span>',
+        attribute: 'creationDate',
+    })
+
+    static COL_WASTED = new Column({
+        name: 'Wasted',
+        template: '{{torrent.totalWasted | bytes}}',
+        attribute: 'totalWasted',
+    })
+
+    static COL_PRIVATE = new Column({
+        name: 'Private',
+        template: "{{torrent.isPrivate ? 'Yes' : 'No'}}",
+        attribute: 'isPrivate',
+    })
 
 }
