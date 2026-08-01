@@ -17,7 +17,7 @@ const TORRENT_FIELDS = [
     "gid", "status", "totalLength", "completedLength", "uploadLength",
     "downloadSpeed", "uploadSpeed", "connections", "numSeeders", "seeder",
     "dir", "files", "bittorrent", "infoHash", "verifiedLength", "verifyIntegrityPending",
-    "pieceLength", "numPieces", "errorCode", "errorMessage", "followedBy",
+    "pieceLength", "numPieces", "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
 ]
 
 const MAX_RESULTS = 2_147_483_647
@@ -52,6 +52,17 @@ function infoHash(torrent: Aria2TorrentData): string | undefined {
     if (!bittorrent || typeof bittorrent !== "object") return undefined
     const value = nonEmptyString((bittorrent as Record<string, unknown>).infoHash)
     return value?.toLowerCase()
+}
+
+function bittorrentData(torrent: Aria2TorrentData): Record<string, unknown> {
+    return torrent.bittorrent && typeof torrent.bittorrent === "object"
+        ? torrent.bittorrent as Record<string, unknown>
+        : {}
+}
+
+function stringList(value: unknown): string {
+    if (!Array.isArray(value)) return ""
+    return value.filter((entry): entry is string => typeof entry === "string" && entry.length > 0).join(", ")
 }
 
 function torrentName(torrent: Aria2TorrentData): string {
@@ -310,6 +321,8 @@ export class Aria2Runtime implements BittorrentRuntime {
             const knownPeers = Math.max(connections, numSeeders)
             const hash = infoHash(torrent) || gid.toLowerCase()
             const isCompleted = status === "complete" || (totalLength > 0 && completedLength >= totalLength)
+            const bittorrent = bittorrentData(torrent)
+            const creationDate = optionalFiniteNumber(bittorrent.creationDate)
 
             return [{
                 id: gid,
@@ -329,12 +342,20 @@ export class Aria2Runtime implements BittorrentRuntime {
                 dateAdded: observedAt,
                 dateCompleted: isCompleted ? observedAt : undefined,
                 seeder: boolean(torrent.seeder),
+                connections,
+                numSeeders,
                 dir: nonEmptyString(torrent.dir) || "",
                 trackers: trackers(torrent),
                 queuePosition: finiteNumber(torrent._queuePosition),
-                verifiedLength: finiteNumber(torrent.verifiedLength),
+                verifiedLength: optionalFiniteNumber(torrent.verifiedLength),
                 verifyIntegrityPending: boolean(torrent.verifyIntegrityPending),
+                pieceLength: finiteNumber(torrent.pieceLength),
+                numPieces: finiteNumber(torrent.numPieces),
+                fileCount: Array.isArray(torrent.files) ? torrent.files.length : 0,
+                creationDate: creationDate == null ? undefined : creationDate * 1000,
+                mode: nonEmptyString(bittorrent.mode) || "",
                 errorMessage: nonEmptyString(torrent.errorMessage) || "",
+                errorCode: nonEmptyString(torrent.errorCode) || "",
                 options: torrent.options && typeof torrent.options === "object" ? torrent.options : {},
             }]
         })
@@ -363,12 +384,16 @@ export class Aria2Runtime implements BittorrentRuntime {
         const torrentOptions = options || {}
         const completedLength = finiteNumber(data.completedLength)
         const uploadLength = finiteNumber(data.uploadLength)
+        const totalLength = finiteNumber(data.totalLength)
+        const bittorrent = bittorrentData(data)
 
         return {
             info: {
+                gid: nonEmptyString(data.gid) || id,
                 hash: infoHash(data) || id.toLowerCase(),
                 savePath: nonEmptyString(data.dir) || null,
-                totalSize: finiteNumber(data.totalLength),
+                totalSize: totalLength,
+                remaining: Math.max(0, totalLength - completedLength),
                 totalDownloaded: completedLength,
                 totalUploaded: uploadLength,
                 shareRatio: completedLength > 0 ? uploadLength / completedLength : 0,
@@ -379,6 +404,7 @@ export class Aria2Runtime implements BittorrentRuntime {
                 uploadLimit: optionNumber(torrentOptions["max-upload-limit"]),
                 pieceSize: finiteNumber(data.pieceLength),
                 piecesTotal: finiteNumber(data.numPieces),
+                filesTotal: Array.isArray(data.files) ? data.files.length : null,
                 verifiedLength: optionalFiniteNumber(data.verifiedLength) ?? null,
                 verifyIntegrityPending: data.verifyIntegrityPending === undefined
                     ? null
@@ -386,7 +412,23 @@ export class Aria2Runtime implements BittorrentRuntime {
                 errorCode: nonEmptyString(data.errorCode) || null,
                 errorString: nonEmptyString(data.errorMessage) || null,
                 connections: finiteNumber(data.connections),
+                seeders: finiteNumber(data.numSeeders),
+                seeder: data.seeder === undefined ? null : boolean(data.seeder),
                 connectionsLimit: finiteNumber(torrentOptions["bt-max-peers"]),
+                creationDate: optionalFiniteNumber(bittorrent.creationDate) ?? null,
+                mode: nonEmptyString(bittorrent.mode) || null,
+                comment: nonEmptyString(bittorrent.comment) || null,
+                checkIntegrity: torrentOptions["check-integrity"] === undefined ? null : boolean(torrentOptions["check-integrity"]),
+                localPeerDiscovery: torrentOptions["bt-enable-lpd"] === undefined ? null : boolean(torrentOptions["bt-enable-lpd"]),
+                peerExchange: torrentOptions["enable-peer-exchange"] === undefined ? null : boolean(torrentOptions["enable-peer-exchange"]),
+                saveMetadata: torrentOptions["bt-save-metadata"] === undefined ? null : boolean(torrentOptions["bt-save-metadata"]),
+                prioritizePieces: nonEmptyString(torrentOptions["bt-prioritize-piece"]) || null,
+                seedTime: optionalFiniteNumber(torrentOptions["seed-time"]) == null
+                    ? null
+                    : optionalFiniteNumber(torrentOptions["seed-time"])! * 60,
+                followedBy: stringList(data.followedBy) || null,
+                following: nonEmptyString(data.following) || null,
+                belongsTo: nonEmptyString(data.belongsTo) || null,
             },
         }
     }

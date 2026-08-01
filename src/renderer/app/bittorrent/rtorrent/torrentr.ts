@@ -18,6 +18,13 @@ export class RtorrentTorrent extends Torrent {
     message: string;
     tracker: string;
     trackers: string[];
+    priority: string;
+    fileCount: number;
+    pieceCount: number;
+    piecesCompleted: number;
+    isPrivate: boolean;
+    throttleName: string;
+    groupName: string;
 
     constructor(data: Record<string, any>) {
 
@@ -60,6 +67,13 @@ export class RtorrentTorrent extends Torrent {
         this.message = data.message
         this.tracker = data.tracker
         this.trackers = data.trackers
+        this.priority = data.priority
+        this.fileCount = data.file_count
+        this.pieceCount = data.chunk_count
+        this.piecesCompleted = data.chunk_completed
+        this.isPrivate = data.private
+        this.throttleName = data.throttle_name
+        this.groupName = data.group_name
 
         this.eta = data.left_bytes / this.downloadSpeed
     }

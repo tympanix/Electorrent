@@ -584,6 +584,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
     async getTorrentDetails(hash: string): Promise<BittorrentTorrentDetailsData> {
         const api = this.getApi()
+        const snapshot = this.torrentCache.get(hash) || {}
         const properties = await new Promise<Record<string, any>>((resolve, reject) => {
             api.getTorrentProperties(hash, (err: any, body: any) => {
                 if (err) {
@@ -598,7 +599,8 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         return {
             info: {
                 hash,
-                savePath: properties.save_path ?? null,
+                savePath: properties.save_path ?? snapshot.save_path ?? null,
+                contentPath: snapshot.content_path ?? null,
                 creationDate: properties.creation_date ?? null,
                 pieceSize: properties.piece_size ?? null,
                 comment: properties.comment ?? null,
@@ -614,14 +616,17 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 connections: properties.nb_connections ?? null,
                 connectionsLimit: properties.nb_connections_limit ?? null,
                 shareRatio: properties.share_ratio ?? null,
-                ratioLimit: properties.ratio_limit ?? properties.ratioLimit ?? null,
+                ratioLimit: properties.ratio_limit ?? properties.ratioLimit ?? snapshot.ratio_limit ?? null,
+                maxRatio: snapshot.max_ratio ?? null,
+                maxSeedingTime: snapshot.max_seeding_time ?? null,
                 additionDate: properties.addition_date ?? null,
                 completionDate: properties.completion_date ?? null,
                 createdBy: properties.created_by ?? null,
                 averageDownloadSpeed: properties.dl_speed_avg ?? null,
                 downloadSpeed: properties.dl_speed ?? null,
                 eta: properties.eta ?? null,
-                lastSeen: properties.last_seen ?? null,
+                lastSeen: properties.last_seen ?? snapshot.seen_complete ?? null,
+                lastActivity: snapshot.last_activity ?? null,
                 peers: properties.peers ?? null,
                 peersTotal: properties.peers_total ?? null,
                 piecesHave: properties.pieces_have ?? null,
@@ -629,11 +634,24 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 reannounce: properties.reannounce ?? null,
                 seeds: properties.seeds ?? null,
                 seedsTotal: properties.seeds_total ?? null,
-                sequentialDownload: properties.seq_dl ?? null,
-                totalSize: properties.total_size ?? null,
+                sequentialDownload: snapshot.seq_dl ?? properties.seq_dl ?? null,
+                firstLastPiecePriority: snapshot.f_l_piece_prio ?? null,
+                automaticTorrentManagement: snapshot.auto_tmm ?? null,
+                forceStart: snapshot.force_start ?? null,
+                superSeeding: snapshot.super_seeding ?? null,
+                availability: properties.availability ?? snapshot.availability ?? null,
+                hasMetadata: properties.has_metadata ?? snapshot.has_metadata ?? null,
+                infoHashV1: properties.infohash_v1 ?? snapshot.infohash_v1 ?? null,
+                infoHashV2: properties.infohash_v2 ?? snapshot.infohash_v2 ?? null,
+                popularity: properties.popularity ?? snapshot.popularity ?? null,
+                tags: snapshot.tags ?? null,
+                tracker: snapshot.tracker ?? null,
+                magnetUri: snapshot.magnet_uri ?? null,
+                selectedSize: snapshot.size ?? null,
+                totalSize: properties.total_size ?? snapshot.total_size ?? null,
                 averageUploadSpeed: properties.up_speed_avg ?? null,
                 uploadSpeed: properties.up_speed ?? null,
-                isPrivate: properties.is_private ?? properties.isPrivate ?? null,
+                isPrivate: properties.is_private ?? properties.isPrivate ?? properties.private ?? snapshot.isPrivate ?? snapshot.private ?? null,
             },
         }
     }

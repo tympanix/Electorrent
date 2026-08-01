@@ -17,7 +17,20 @@ import { Aria2Torrent } from "./torrentaria2"
 export class Aria2Client extends TorrentClient<Aria2Torrent> {
     public name = "aria2"
     public id = "aria2"
-    public extraColumns = [Torrent.COL_QUEUE, Torrent.COL_DOWNLIMIT, Torrent.COL_UPLIMIT]
+    public extraColumns = [
+        Torrent.COL_QUEUE,
+        Torrent.COL_DOWNLIMIT,
+        Torrent.COL_UPLIMIT,
+        Aria2Torrent.COL_GID,
+        Aria2Torrent.COL_STATUS,
+        Aria2Torrent.COL_CONNECTIONS,
+        Aria2Torrent.COL_FILES,
+        Aria2Torrent.COL_PIECES,
+        Aria2Torrent.COL_PIECE_SIZE,
+        Aria2Torrent.COL_VERIFIED,
+        Aria2Torrent.COL_CREATED_ON,
+        Aria2Torrent.COL_MODE,
+    ]
 
     defaultPort() { return CLIENT_METADATA.aria2.defaultPort }
     defaultPath() { return "/jsonrpc" }
@@ -91,10 +104,17 @@ export class Aria2Client extends TorrentClient<Aria2Torrent> {
         return this.compactTorrentDetailsSections([
             this.createTorrentDetailsSection("overview", "Overview", [
                 this.createTorrentDetailsField("name", "Name", torrent.name),
+                this.createTorrentDetailsField("gid", "GID", info.gid as string | null),
                 this.createTorrentDetailsField("hash", "Hash", typeof info.hash === "string" ? info.hash.toLowerCase() : torrent.hash.toLowerCase()),
                 this.createTorrentDetailsField("status", "Status", torrent.statusText()),
                 this.createTorrentDetailsField("save-path", "Save Path", info.savePath as string | null, "path"),
                 this.createTorrentDetailsField("total-size", "Total Size", this.toNumber(info.totalSize) ?? torrent.size, "bytes"),
+                this.createTorrentDetailsField("files", "Files", this.toNumber(info.filesTotal) ?? torrent.fileCount, "number"),
+                this.createTorrentDetailsField("mode", "Torrent Mode", info.mode as string | null),
+                this.createTorrentDetailsField("created-on", "Created On", this.toEpochSeconds(info.creationDate), "epoch"),
+                this.createTorrentDetailsField("following", "Following", info.following as string | null),
+                this.createTorrentDetailsField("followed-by", "Followed By", info.followedBy as string | null),
+                this.createTorrentDetailsField("belongs-to", "Belongs To", info.belongsTo as string | null),
             ]),
             this.createTorrentDetailsSection("transfer", "Transfer", [
                 this.createTorrentDetailsField("downloaded", "Downloaded", this.toNumber(info.totalDownloaded) ?? torrent.downloaded, "bytes"),
@@ -105,16 +125,26 @@ export class Aria2Client extends TorrentClient<Aria2Torrent> {
                 this.createTorrentDetailsField("upload-speed", "Upload Speed", this.toNumber(info.uploadSpeed) ?? torrent.uploadSpeed, "speed"),
                 this.createTorrentDetailsField("download-limit", "Download Limit", this.toNumber(info.downloadLimit), "speedLimit", { allowEmpty: true }),
                 this.createTorrentDetailsField("upload-limit", "Upload Limit", this.toNumber(info.uploadLimit), "speedLimit", { allowEmpty: true }),
+                this.createTorrentDetailsField("remaining", "Remaining", this.toNumber(info.remaining), "bytes"),
+                this.createTorrentDetailsField("seed-time", "Seed Time", this.toNumber(info.seedTime), "eta"),
             ]),
             this.createTorrentDetailsSection("content", "Content", [
                 this.createTorrentDetailsField("piece-size", "Piece Size", this.toNumber(info.pieceSize), "bytes"),
                 this.createTorrentDetailsField("pieces", "Pieces", this.toNumber(info.piecesTotal), "number"),
                 this.createTorrentDetailsField("verified", "Verified", this.toNumber(info.verifiedLength), "bytes"),
                 this.createTorrentDetailsField("verification-pending", "Verification Pending", info.verifyIntegrityPending as boolean | null, "boolean"),
+                this.createTorrentDetailsField("check-integrity", "Check Integrity", info.checkIntegrity as boolean | null, "boolean"),
+                this.createTorrentDetailsField("prioritize-pieces", "Prioritized Pieces", info.prioritizePieces as string | null),
+                this.createTorrentDetailsField("save-metadata", "Save Metadata", info.saveMetadata as boolean | null, "boolean"),
+                this.createTorrentDetailsField("comment", "Comment", info.comment as string | null, "text", { multiline: true }),
             ]),
             this.createTorrentDetailsSection("swarm", "Swarm", [
                 this.createTorrentDetailsField("connections", "Connected Peers", this.toNumber(info.connections), "number"),
+                this.createTorrentDetailsField("seeders", "Connected Seeders", this.toNumber(info.seeders), "number"),
+                this.createTorrentDetailsField("seeder", "Seeding", info.seeder as boolean | null, "boolean"),
                 this.createTorrentDetailsField("connections-limit", "Peer Limit", this.toNumber(info.connectionsLimit), "number"),
+                this.createTorrentDetailsField("local-peer-discovery", "Local Peer Discovery", info.localPeerDiscovery as boolean | null, "boolean"),
+                this.createTorrentDetailsField("peer-exchange", "Peer Exchange", info.peerExchange as boolean | null, "boolean"),
                 this.createTorrentDetailsField("error-code", "Error Code", info.errorCode as string | null),
                 this.createTorrentDetailsField("error", "Error", info.errorString as string | null, "text", { multiline: true }),
             ]),
