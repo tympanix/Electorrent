@@ -130,6 +130,12 @@ const rendererConfig = {
             },
           },
           {
+            loader: 'thread-loader',
+            options: {
+              workers: 2,
+            },
+          },
+          {
             loader: 'less-loader',
             options: {
               sourceMap: !isProduction,
