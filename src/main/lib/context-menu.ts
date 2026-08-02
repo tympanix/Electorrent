@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, screen, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, ipcMain, screen, type IpcMainInvokeEvent } from 'electron'
 import path from 'path'
 
 import { IPC_CHANNELS } from '@shared/ipc'
@@ -111,7 +111,9 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
         const y = Math.max(display.workArea.y, Math.min(anchor.y - MENU_WINDOW_MARGIN + height > bottom ? anchor.y + MENU_WINDOW_MARGIN - height : anchor.y - MENU_WINDOW_MARGIN, bottom - height))
 
         menuWindow.setBounds({ x, y, width, height })
-        menuWindow.show()
+        if (!app.commandLine.hasSwitch('headless')) {
+            menuWindow.show()
+        }
         return { submenuOnLeft }
     })
 

@@ -372,7 +372,9 @@ export class Torrent {
           return handles.find((handle) => handle !== parentWindow)
         }, { timeout: attempt === 2 ? this.timeout : 1000 })
         await browser.switchToWindow(contextMenuWindow)
-        await $("#contextmenu").waitForDisplayed({ timeout: attempt === 2 ? this.timeout : 1000 })
+        const contextMenu = $("#contextmenu > .ui.menu")
+        await contextMenu.waitForDisplayed({ timeout: attempt === 2 ? this.timeout : 1000 })
+        await contextMenu.waitForClickable({ timeout: attempt === 2 ? this.timeout : 1000 })
         return parentWindow
       } catch (error) {
         await browser.switchToWindow(parentWindow)
@@ -399,7 +401,7 @@ export class Torrent {
       await firstItem.moveTo()
     }
 
-    await buttonElem.waitForEnabled()
+    await buttonElem.waitForClickable()
     await buttonElem.click()
     await browser.switchToWindow(parentWindow)
     await browser.waitUntil(async () => (await browser.getWindowHandles()).length === 1)
