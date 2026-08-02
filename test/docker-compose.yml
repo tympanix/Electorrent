@@ -1,10 +1,11 @@
 # Shared test stack used by ElectorrentTestService.
 # Each WebdriverIO client fixture slot runs this stack as its own compose project.
+# Bare volume targets are anonymous: they provide writable runtime filesystems
+# without introducing persistent, named test data.
 x-peer: &peer
   build: ./shared/opentracker/peer
   volumes:
     - ./shared/opentracker/data/shared:/shared
-  tmpfs:
     - /srv
   entrypoint: ["tail", "-f", "/dev/null"]
 
@@ -47,8 +48,7 @@ services:
       - ${CLIENT_HOST_PORT:-6800}:6800
     volumes:
       - ./clients/aria2/aria2.conf:/config/aria2.conf
-    tmpfs:
-      - /downloads:mode=1777
+      - /downloads
 
   deluge:
     image: linuxserver/deluge:${VERSION:-latest}
@@ -58,13 +58,12 @@ services:
       - TZ=Etc/UTC
     volumes:
       - ./clients/deluge/core.conf:/config/core.conf:ro
-    ports:
-      - ${CLIENT_HOST_PORT:-8112}:8112
-    tmpfs:
       - /config
       - /downloads
       - /home/deluge
       - /root/Downloads
+    ports:
+      - ${CLIENT_HOST_PORT:-8112}:8112
 
   qbittorrent:
     image: linuxserver/qbittorrent:${VERSION:-latest}
@@ -74,7 +73,6 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - ./clients/qbittorrent/qBittorrent.conf:/defaults/qBittorrent.conf
-    tmpfs:
       - /downloads
 
   rtorrent:
@@ -84,7 +82,7 @@ services:
       - ${RPC_PORT:-5000}:5000
       - ${PEER_PORT:-51413}:51413
       - ${PEER_UDP_PORT:-6881}:6881/udp
-    tmpfs:
+    volumes:
       - /downloads
       - /config
 
@@ -104,8 +102,7 @@ services:
       - WAN_IP_CMD=hostname -i
     volumes:
       - ./clients/rtorrent-crazymax/.rtorrent.rc:/data/rtorrent/.rtorrent.rc
-      - rtorrent-crazymax-data:/data
-    tmpfs:
+      - /data
       - /downloads
       - /passwd
 
@@ -116,7 +113,7 @@ services:
       - PASS=password
     ports:
       - ${CLIENT_HOST_PORT:-9091}:9091
-    tmpfs:
+    volumes:
       - /downloads
       - /downloads/complete
       - /downloads/incomplete
@@ -125,8 +122,8 @@ services:
     image: ekho/utorrent:${VERSION:-latest}
     ports:
       - ${CLIENT_HOST_PORT:-8080}:8080
-    tmpfs:
-      - /data:uid=1001,gid=1001
-
-volumes:
-  rtorrent-crazymax-data:
+    environment:
+      - UID=1000
+      - GID=1000
+    volumes:
+      - /data
