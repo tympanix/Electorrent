@@ -4,8 +4,6 @@ x-peer: &peer
   build: ./shared/opentracker/peer
   volumes:
     - ./shared/opentracker/data/shared:/shared
-  tmpfs:
-    - /srv
   entrypoint: ["tail", "-f", "/dev/null"]
 
 services:
@@ -47,8 +45,6 @@ services:
       - ${CLIENT_HOST_PORT:-6800}:6800
     volumes:
       - ./clients/aria2/aria2.conf:/config/aria2.conf
-    tmpfs:
-      - /downloads:mode=1777
 
   deluge:
     image: linuxserver/deluge:${VERSION:-latest}
@@ -60,11 +56,6 @@ services:
       - ./clients/deluge/core.conf:/config/core.conf:ro
     ports:
       - ${CLIENT_HOST_PORT:-8112}:8112
-    tmpfs:
-      - /config
-      - /downloads
-      - /home/deluge
-      - /root/Downloads
 
   qbittorrent:
     image: linuxserver/qbittorrent:${VERSION:-latest}
@@ -74,8 +65,6 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - ./clients/qbittorrent/qBittorrent.conf:/defaults/qBittorrent.conf
-    tmpfs:
-      - /downloads
 
   rtorrent:
     image: linuxserver/rutorrent:${VERSION:-latest}
@@ -84,9 +73,6 @@ services:
       - ${RPC_PORT:-5000}:5000
       - ${PEER_PORT:-51413}:51413
       - ${PEER_UDP_PORT:-6881}:6881/udp
-    tmpfs:
-      - /downloads
-      - /config
 
   rtorrent-crazymax:
     image: crazymax/rtorrent-rutorrent:5.3.1-0.16.13
@@ -104,10 +90,6 @@ services:
       - WAN_IP_CMD=hostname -i
     volumes:
       - ./clients/rtorrent-crazymax/.rtorrent.rc:/data/rtorrent/.rtorrent.rc
-      - rtorrent-crazymax-data:/data
-    tmpfs:
-      - /downloads
-      - /passwd
 
   transmission:
     image: linuxserver/transmission:${VERSION:-latest}
@@ -116,17 +98,8 @@ services:
       - PASS=password
     ports:
       - ${CLIENT_HOST_PORT:-9091}:9091
-    tmpfs:
-      - /downloads
-      - /downloads/complete
-      - /downloads/incomplete
 
   utorrent:
     image: ekho/utorrent:${VERSION:-latest}
     ports:
       - ${CLIENT_HOST_PORT:-8080}:8080
-    tmpfs:
-      - /data:uid=1001,gid=1001
-
-volumes:
-  rtorrent-crazymax-data:
