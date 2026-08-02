@@ -6,12 +6,14 @@ import template from './app/directives/context-menu/context-menu.template.html'
 interface ContextMenuWindowBridge {
     onModel(callback: (model: ContextMenuModel) => void): Unsubscribe
     resize(size: ContextMenuSize): Promise<ContextMenuPlacement>
+    hide(): Promise<void>
     select(actionId: string): Promise<void>
 }
 
 declare const window: Window & { contextMenu: ContextMenuWindowBridge }
 
 const app = angular.module('contextMenuApp', [])
+const MENU_WINDOW_MARGIN = 12
 
 app.directive('contextMenu', ['$timeout', function($timeout: ng.ITimeoutService): ng.IDirective {
     return {
@@ -32,6 +34,12 @@ app.directive('contextMenu', ['$timeout', function($timeout: ng.ITimeoutService)
             scope.toggleSubmenu = (event, visible) => {
                 angular.element(event.currentTarget).find('.menu').css('display', visible ? 'block' : 'none')
             }
+            const closeWhenOutsideMenu = (event: MouseEvent) => {
+                if (!(event.target as Element).closest('.ui.menu')) {
+                    void window.contextMenu.hide()
+                }
+            }
+            document.addEventListener('click', closeWhenOutsideMenu)
 
             const unsubscribe = window.contextMenu.onModel((model) => {
                 const stylesheet = document.createElement('link')
@@ -59,8 +67,8 @@ app.directive('contextMenu', ['$timeout', function($timeout: ng.ITimeoutService)
                                 return size
                             }, { width: 0, height: 0 })
                             void window.contextMenu.resize({
-                                width: Math.ceil((primaryMenu?.scrollWidth || root.scrollWidth) + submenuSize.width + 2),
-                                height: Math.ceil(Math.max(primaryMenu?.scrollHeight || root.scrollHeight, submenuSize.height) + 2),
+                                width: Math.ceil((primaryMenu?.scrollWidth || root.scrollWidth) + submenuSize.width + (MENU_WINDOW_MARGIN * 2) + 2),
+                                height: Math.ceil(Math.max(primaryMenu?.scrollHeight || root.scrollHeight, submenuSize.height) + (MENU_WINDOW_MARGIN * 2) + 2),
                             }).then(({ submenuOnLeft }) => {
                                 element.toggleClass('submenu-on-left', submenuOnLeft)
                             })
@@ -69,7 +77,10 @@ app.directive('contextMenu', ['$timeout', function($timeout: ng.ITimeoutService)
                 }, { once: true })
             })
 
-            scope.$on('$destroy', unsubscribe)
+            scope.$on('$destroy', () => {
+                unsubscribe()
+                document.removeEventListener('click', closeWhenOutsideMenu)
+            })
         },
     }
 }])

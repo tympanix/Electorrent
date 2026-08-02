@@ -5,6 +5,7 @@ import { IPC_CHANNELS } from '@shared/ipc'
 import type { ContextMenuModel, ContextMenuSize } from '@shared/ipc-contract'
 
 const MINIMUM_SIZE = 1
+const MENU_WINDOW_MARGIN = 12
 
 export function registerContextMenuHandlers(getWindow: () => BrowserWindow | null) {
     let menuWindow: BrowserWindow | null = null
@@ -44,7 +45,8 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
             height: MINIMUM_SIZE,
             frame: false,
             transparent: true,
-            focusable: false,
+            focusable: true,
+            hasShadow: false,
             resizable: false,
             movable: false,
             minimizable: false,
@@ -66,18 +68,9 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
                 closeMenu()
             }
         }
-        parent.once('blur', closeIfCurrent)
-        parent.once('hide', closeIfCurrent)
-        parent.once('closed', closeIfCurrent)
-        parent.once('move', closeIfCurrent)
-        parent.once('resize', closeIfCurrent)
+        child.once('blur', closeIfCurrent)
 
         child.once('closed', () => {
-            parent.removeListener('blur', closeIfCurrent)
-            parent.removeListener('hide', closeIfCurrent)
-            parent.removeListener('closed', closeIfCurrent)
-            parent.removeListener('move', closeIfCurrent)
-            parent.removeListener('resize', closeIfCurrent)
             if (menuWindow === child) {
                 menuWindow = null
                 parentWindow = null
@@ -93,7 +86,7 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
     })
 
     ipcMain.handle(IPC_CHANNELS.contextMenu.hide, async function(event: IpcMainInvokeEvent) {
-        if (parentWindow && event.sender === parentWindow.webContents) {
+        if ((parentWindow && event.sender === parentWindow.webContents) || isMenuSender(event)) {
             closeMenu()
         }
     })
@@ -113,12 +106,12 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
         const height = Math.max(MINIMUM_SIZE, Math.min(Math.ceil(size.height), display.workArea.height))
         const right = display.workArea.x + display.workArea.width
         const bottom = display.workArea.y + display.workArea.height
-        const submenuOnLeft = anchor.x + width > right
-        const x = Math.max(display.workArea.x, Math.min(submenuOnLeft ? anchor.x - width : anchor.x, right - width))
-        const y = Math.max(display.workArea.y, Math.min(anchor.y + height > bottom ? anchor.y - height : anchor.y, bottom - height))
+        const submenuOnLeft = anchor.x - MENU_WINDOW_MARGIN + width > right
+        const x = Math.max(display.workArea.x, Math.min(submenuOnLeft ? anchor.x + MENU_WINDOW_MARGIN - width : anchor.x - MENU_WINDOW_MARGIN, right - width))
+        const y = Math.max(display.workArea.y, Math.min(anchor.y - MENU_WINDOW_MARGIN + height > bottom ? anchor.y + MENU_WINDOW_MARGIN - height : anchor.y - MENU_WINDOW_MARGIN, bottom - height))
 
         menuWindow.setBounds({ x, y, width, height })
-        menuWindow.showInactive()
+        menuWindow.show()
         return { submenuOnLeft }
     })
 

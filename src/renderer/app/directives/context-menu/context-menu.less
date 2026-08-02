@@ -3,7 +3,10 @@ context-menu {
     z-index: 300;
     display: none;
 
-    .ui.vertical.menu { box-shadow: 0 0 50px rgba(0, 0, 0, .15); }
+    .ui.vertical.menu {
+        border: 0;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, .3);
+    }
 }
 
 body.context-menu-window {
@@ -12,6 +15,7 @@ body.context-menu-window {
     background: transparent;
 
     context-menu {
+        margin: 12px;
         position: static;
         display: block;
 

@@ -90,6 +90,7 @@ describe("torrent actions", function () {
     }
 
     const parentWindow = await torrent.openContextMenu({ button: "right", ...clickOffset })
+    const visibleMenuLocation = await $("#contextmenu > .ui.menu").getLocation()
 
     const contextMenuLocation = await browser.electron.execute((electron) => {
       const menu = electron.BrowserWindow.getAllWindows().find((window) => window.getTitle() === "Context Menu")
@@ -104,9 +105,9 @@ describe("torrent actions", function () {
       }
     })
     const tolerance = 2
-    assert.closeTo(contextMenuLocation.menu.x, contextMenuLocation.parent.x + expectedMenuLocation.x, tolerance)
-    assert.closeTo(contextMenuLocation.menu.y, contextMenuLocation.parent.y + expectedMenuLocation.y, tolerance)
-    assert.equal(contextMenuLocation.focusable, false)
+    assert.closeTo(contextMenuLocation.menu.x + visibleMenuLocation.x, contextMenuLocation.parent.x + expectedMenuLocation.x, tolerance)
+    assert.closeTo(contextMenuLocation.menu.y + visibleMenuLocation.y, contextMenuLocation.parent.y + expectedMenuLocation.y, tolerance)
+    assert.equal(contextMenuLocation.focusable, true)
     assert.equal(contextMenuLocation.hasParent, true)
 
     await browser.switchToWindow(parentWindow)

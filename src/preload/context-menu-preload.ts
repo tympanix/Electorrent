@@ -12,6 +12,9 @@ contextBridge.exposeInMainWorld('contextMenu', {
     resize(size: ContextMenuSize) {
         return ipcRenderer.invoke(IPC_CHANNELS.contextMenu.resize, size) as Promise<ContextMenuPlacement>
     },
+    hide() {
+        return ipcRenderer.invoke(IPC_CHANNELS.contextMenu.hide)
+    },
     select(actionId: string) {
         return ipcRenderer.invoke(IPC_CHANNELS.contextMenu.select, { actionId })
     },
