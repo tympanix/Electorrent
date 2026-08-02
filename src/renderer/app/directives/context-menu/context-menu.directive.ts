@@ -1,161 +1,137 @@
-import { IAugmentedJQuery, IDirective, IDirectiveFactory, IDocumentService, IRootScopeService, IScope, IWindowService } from "angular";
-import { ContextMenuController } from "./context-menu.controller";
-import html from "./context-menu.template.html";
+import { IDirective, IDirectiveFactory, IRootScopeService, IScope } from 'angular'
+
+import type { ColorTheme, ContextMenuItemModel } from '@shared/ipc-contract'
 
 interface ContextMenuItem {
-    id?: string;
-    label: string;
-    icon?: string;
-    role?: string;
-    click?: (...args: any[]) => void;
-    check?: (item: any) => boolean;
-    menu?: ContextMenuItem[];
+    label: string
+    icon?: string
+    role?: string
+    click?: (...args: any[]) => void
+    check?: (item: any) => boolean
+    menu?: ContextMenuItem[]
 }
 
 interface ContextMenuScope extends IScope {
-    menu: ContextMenuItem[];
-    isDebug: boolean;
-    selectedItems: any[];
+    menu: ContextMenuItem[]
+    selectedItems: any[]
     bind: {
-        show: (event: MouseEvent, items: any[]) => void;
-        hide: () => void;
-    };
-    click: (...args: any[]) => void;
-    debug?: () => void;
-    isItemVisible: (item: ContextMenuItem) => boolean;
-    isItemChecked: (item: ContextMenuItem) => boolean;
-    runMenuItem: (item: ContextMenuItem) => void;
-    runDebugItem: () => void;
-    toggleSubmenu: (event: Event, visible: boolean) => void;
+        show: (event: MouseEvent, items: any[]) => void
+        hide: () => void
+    }
+    click: (...args: any[]) => void
+    debug?: () => void
 }
 
 export class ContextMenuDirective implements IDirective {
-    restrict = "E";
+    restrict = 'E'
     scope = {
-        menu: "=",
-        bind: "=",
-        click: "=",
-        debug: "=?",
-    };
-    controller = ContextMenuController;
-    template = html;
-
-    static getInstance(): IDirectiveFactory {
-        const factory = (
-            $rootScope: IRootScopeService,
-            $document: IDocumentService,
-            $window: IWindowService,
-        ) => new ContextMenuDirective($rootScope, $document, $window);
-        factory.$inject = ["$rootScope", "$document", "$window"];
-        return factory;
+        menu: '=',
+        bind: '=',
+        click: '=',
+        debug: '=?',
     }
 
-    constructor(
-        private $rootScope: IRootScopeService,
-        private $document: IDocumentService,
-        private $window: IWindowService,
-    ) {}
+    static getInstance(): IDirectiveFactory {
+        const factory = ($rootScope: IRootScopeService) => new ContextMenuDirective($rootScope)
+        factory.$inject = ['$rootScope']
+        return factory
+    }
 
-    link(scope: ContextMenuScope, element: IAugmentedJQuery) {
-        element.addClass("torrent context menu");
-        element.data("contextmenu", true);
+    constructor(private $rootScope: IRootScopeService) {}
 
-        scope.isDebug = false;
-        scope.selectedItems = [];
-        scope.isItemVisible = (item) => {
-            if (item.menu) {
-                return true;
-            }
+    link(scope: ContextMenuScope) {
+        let actions = new Map<string, ContextMenuItem>()
+        let nextActionId = 0
 
-            const features = this.$rootScope.$btclient?.features;
+        const isItemVisible = (item: ContextMenuItem) => {
+            if (item.menu) return true
+
+            const features = this.$rootScope.$btclient?.features
             switch (item.role) {
-                case "details":
-                    return !!features?.torrentDetails;
-                case "set-speed-limits":
-                    return !!features?.speedLimits;
-                case "set-ratio":
-                    return !!features?.ratioLimits;
-                default:
-                    return true;
+                case 'details': return !!features?.torrentDetails
+                case 'set-speed-limits': return !!features?.speedLimits
+                case 'set-ratio': return !!features?.ratioLimits
+                default: return true
             }
-        };
-        scope.isItemChecked = (item) => {
-            return !!item.check && scope.selectedItems.every((entry) => item.check!(entry));
-        };
-        scope.runMenuItem = (item) => {
-            element.hide();
-            scope.click(item.click, item.label, item);
-        };
-        scope.runDebugItem = () => {
-            scope.runMenuItem({
-                label: "Debug",
-                icon: "help",
-                click: scope.debug,
-            });
-        };
-        scope.toggleSubmenu = (event, visible) => {
-            $(event.currentTarget).find(".menu").toggle(visible);
-        };
+        }
 
-        const bindCloseOperations = () => {
-            $(".main-content").one("scroll", () => {
-                element.hide();
-            });
+        const serializeItem = (item: ContextMenuItem): ContextMenuItemModel | null => {
+            if (!isItemVisible(item)) return null
 
-            $(this.$window).one("resize", () => {
-                element.hide();
-            });
-        };
+            if (item.menu) {
+                return {
+                    label: item.label,
+                    icon: item.icon,
+                    role: item.role,
+                    menu: item.menu.map(serializeItem).filter((child): child is ContextMenuItemModel => !!child),
+                }
+            }
+
+            const id = `context-action-${nextActionId++}`
+            actions.set(id, item)
+            return {
+                id,
+                label: item.label,
+                icon: item.icon,
+                role: item.role,
+                checked: item.check ? scope.selectedItems.every((entry) => item.check!(entry)) : undefined,
+            }
+        }
+
+        const hide = () => {
+            void window.electorrent.contextMenu.hide()
+        }
 
         scope.bind = {
             show: (event: MouseEvent, items: any[]) => {
-                bindCloseOperations();
-                scope.selectedItems = items;
+                scope.selectedItems = items
+                actions = new Map()
+                nextActionId = 0
+                const menu = scope.menu.map(serializeItem).filter((item): item is ContextMenuItemModel => !!item)
+                const debugItem = scope.debug && this.$rootScope.$btclient
+                    ? serializeItem({ label: 'Debug', icon: 'help', role: 'debug', click: scope.debug }) || undefined
+                    : undefined
+                const themeLink = document.querySelector<HTMLLinkElement>('link[href*="css/themes/"]')
+                const theme: ColorTheme = themeLink?.href.includes('/dark.css') ? 'dark' : 'light'
 
-                const totalWidth = $(window).width() || 0;
-                const totalHeight = $(window).height() || 0;
-                const menuWidth = $(element).width() || 0;
-                const menuHeight = $(element).height() || 0;
-
-                const menuX = event.clientX + menuWidth >= totalWidth ? event.clientX - menuWidth : event.clientX;
-                const menuY = event.clientY + menuHeight >= totalHeight ? event.clientY - menuHeight : event.clientY;
-
-                $(element).css({
-                    left: menuX,
-                    top: menuY,
-                    display: "block",
-                });
+                void window.electorrent.app.getMeta().then((meta) => {
+                    void window.electorrent.contextMenu.show({
+                        x: event.clientX,
+                        y: event.clientY,
+                        theme,
+                        items: menu,
+                        debugItem: meta.isDebug ? debugItem : undefined,
+                    })
+                })
             },
-            hide: () => {
-                element.hide();
-            },
-        };
+            hide,
+        }
 
-        const onBodyClick = (event: Event) => {
-            const target = angular.element(event.target as Element);
-            const inContext = target.inheritedData("contextmenu");
-            if (!inContext) {
-                element.hide();
+        const unsubscribe = window.electorrent.contextMenu.onAction((actionId) => {
+            const item = actions.get(actionId)
+            if (item) {
+                scope.$applyAsync(() => scope.click(item.click, item.label, item))
             }
-        };
-
+        })
+        const onPointerDown = () => hide()
         const onKeyUp = (event: KeyboardEvent) => {
-            if (event.keyCode === 27) {
-                element.hide();
-            }
-        };
+            if (event.key === 'Escape') hide()
+        }
+        const onScroll = () => hide()
+        const onResize = () => hide()
 
-        document.body.addEventListener("click", onBodyClick);
-        document.addEventListener("keyup", onKeyUp);
+        document.body.addEventListener('pointerdown', onPointerDown, true)
+        document.addEventListener('keyup', onKeyUp)
+        document.querySelector('.main-content')?.addEventListener('scroll', onScroll)
+        window.addEventListener('resize', onResize)
 
-        window.electorrent.app.getMeta().then((meta) => {
-            scope.isDebug = !!meta.isDebug;
-            scope.$applyAsync();
-        });
-
-        scope.$on("$destroy", () => {
-            document.body.removeEventListener("click", onBodyClick);
-            document.removeEventListener("keyup", onKeyUp);
-        });
+        scope.$on('$destroy', () => {
+            unsubscribe()
+            document.body.removeEventListener('pointerdown', onPointerDown, true)
+            document.removeEventListener('keyup', onKeyUp)
+            document.querySelector('.main-content')?.removeEventListener('scroll', onScroll)
+            window.removeEventListener('resize', onResize)
+            hide()
+        })
     }
 }

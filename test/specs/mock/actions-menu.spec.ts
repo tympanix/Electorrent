@@ -127,12 +127,20 @@ describe("mock Actions menu", function () {
 async function openSetLabelModal() {
   const row = $("#torrentTable tbody tr[data-id]")
   await row.waitForClickable()
+  const parentWindow = await browser.getWindowHandle()
   await row.click({ button: "right" })
+
+  const contextMenuWindow = await browser.waitUntil(async () => {
+    const handles = await browser.getWindowHandles()
+    return handles.find((handle) => handle !== parentWindow)
+  })
+  await browser.switchToWindow(contextMenuWindow)
 
   const action = $("#contextmenu a[data-role='set-label']")
   await action.waitForDisplayed()
   await action.waitForClickable()
   await action.click()
+  await browser.switchToWindow(parentWindow)
 
   const modal = $("#setLabelModal")
   await waitForModalOpen(modal)

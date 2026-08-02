@@ -106,6 +106,7 @@ const rendererConfig = {
     ],
     light: path.resolve(__dirname, 'src/renderer/styles/entries/light.less'),
     dark: path.resolve(__dirname, 'src/renderer/styles/entries/dark.less'),
+    'context-menu': path.resolve(__dirname, 'src/renderer/context-menu.ts'),
   },
   output: {
     path: outDir,
@@ -179,6 +180,13 @@ const rendererConfig = {
       scriptLoading: 'defer',
       chunks: ['app'],
     }),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, 'src/renderer/assets/context-menu.ejs'),
+      filename: 'context-menu.html',
+      inject: 'body',
+      scriptLoading: 'defer',
+      chunks: ['context-menu'],
+    }),
     ...commonPlugins,
     new MiniCssExtractPlugin({
       filename: ({ chunk }) => {
@@ -237,6 +245,7 @@ const preloadConfig = makeNodeConfig({
   name: 'preload',
   entry: {
     preload: path.resolve(__dirname, 'src/preload/preload.ts'),
+    'context-menu-preload': path.resolve(__dirname, 'src/preload/context-menu-preload.ts'),
   },
   target: 'electron-preload',
   tsConfig: 'src/preload/tsconfig.json',

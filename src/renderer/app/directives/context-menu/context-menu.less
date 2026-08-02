@@ -5,3 +5,23 @@ context-menu {
 
     .ui.vertical.menu { box-shadow: 0 0 50px rgba(0, 0, 0, .15); }
 }
+
+body.context-menu-window {
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+
+    context-menu {
+        position: static;
+        display: block;
+
+        &.submenu-on-left > .ui.menu {
+            float: right;
+
+            .context.dropdown > .menu {
+                right: 100% !important;
+                left: auto !important;
+            }
+        }
+    }
+}

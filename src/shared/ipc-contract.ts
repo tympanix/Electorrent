@@ -2,6 +2,32 @@ import type { TorrentActionItem } from "./torrent-actions"
 
 export type Unsubscribe = () => void
 
+export interface ContextMenuItemModel {
+    id?: string
+    label: string
+    icon?: string
+    role?: string
+    checked?: boolean
+    menu?: ContextMenuItemModel[]
+}
+
+export interface ContextMenuModel {
+    x: number
+    y: number
+    theme: ColorTheme
+    items: ContextMenuItemModel[]
+    debugItem?: ContextMenuItemModel
+}
+
+export interface ContextMenuSize {
+    width: number
+    height: number
+}
+
+export interface ContextMenuPlacement {
+    submenuOnLeft: boolean
+}
+
 export type ColorTheme = "light" | "dark"
 export type ThemePreference = ColorTheme | "system"
 export type SystemStartupOption = "disabled" | "open" | "background"
@@ -460,6 +486,11 @@ export interface ElectorrentBridge {
         getModel(): Promise<import("./title-menu").TitleMenuItem[]>
         onChanged(callback: (menu: import("./title-menu").TitleMenuItem[]) => void): Unsubscribe
         onAction(callback: (action: MenuAction) => void): Unsubscribe
+    }
+    contextMenu: {
+        show(model: ContextMenuModel): Promise<void>
+        hide(): Promise<void>
+        onAction(callback: (actionId: string) => void): Unsubscribe
     }
     clipboard: {
         readText(): Promise<string>

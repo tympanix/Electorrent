@@ -1,18 +1,18 @@
 <div class="ui vertical menu">
-    <a class="item" ng-if="isDebug && debug" ng-click="runDebugItem()">
-        <i class="ui help icon"></i>
-        Debug
+    <a class="item" ng-if="debugItem" ng-attr-data-role="{{debugItem.role}}" ng-click="runMenuItem(debugItem)">
+        <i class="ui icon" ng-if="debugItem.icon" ng-class="debugItem.icon"></i>
+        {{debugItem.label}}
     </a>
 
     <a
         class="item"
         ng-repeat-start="item in menu track by $index"
-        ng-if="!item.menu && isItemVisible(item)"
+        ng-if="!item.menu"
         ng-attr-data-role="{{item.role}}"
         ng-click="runMenuItem(item)">
         <i class="ui icon" ng-if="item.icon" ng-class="item.icon"></i>
-        <div class="ui checkbox" ng-if="item.check">
-            <input type="checkbox" ng-checked="isItemChecked(item)">
+        <div class="ui checkbox" ng-if="item.checked !== undefined">
+            <input type="checkbox" ng-checked="item.checked">
             <label></label>
         </div>
         {{item.label}}
@@ -33,8 +33,8 @@
                 ng-attr-data-role="{{child.role}}"
                 ng-click="runMenuItem(child)">
                 <i class="ui icon" ng-if="child.icon" ng-class="child.icon"></i>
-                <div class="ui checkbox" ng-if="child.check">
-                    <input type="checkbox" ng-checked="isItemChecked(child)">
+                <div class="ui checkbox" ng-if="child.checked !== undefined">
+                    <input type="checkbox" ng-checked="child.checked">
                     <label></label>
                 </div>
                 {{child.label}}

@@ -54,6 +54,7 @@ async function bootstrap() {
         ipcHandlers,
         menu,
         { TorrentFileWatcher },
+        { registerContextMenuHandlers },
         themes,
         titleBar,
         windowState,
@@ -69,10 +70,13 @@ async function bootstrap() {
         import('@main/lib/ipc'),
         import('@main/lib/menu'),
         import('@main/lib/torrent-file-watcher'),
+        import('@main/lib/context-menu'),
         import('@main/lib/themes'),
         import('@main/lib/title-bar'),
         import('@main/lib/window-state'),
     ])
+
+    registerContextMenuHandlers(() => torrentWindow)
 
     logger.debug('Starting Electorrent in debug mode')
     logger.verbose('Verbose logging enabled')

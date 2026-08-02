@@ -89,12 +89,29 @@ describe("torrent actions", function () {
       y: rowLocation.y + Math.floor(rowSize.height / 2) + clickOffset.y,
     }
 
-    await torrent.openContextMenu({ button: "right", ...clickOffset })
+    const parentWindow = await torrent.openContextMenu({ button: "right", ...clickOffset })
 
-    const contextMenuLocation = await $("#contextmenu").getLocation()
+    const contextMenuLocation = await browser.electron.execute((electron) => {
+      const menu = electron.BrowserWindow.getAllWindows().find((window) => window.getTitle() === "Context Menu")
+      if (!menu) throw new Error("Context menu window is unavailable")
+      const parent = menu.getParentWindow()
+      if (!parent) throw new Error("Context menu parent window is unavailable")
+      return {
+        menu: menu.getBounds(),
+        parent: parent.getContentBounds(),
+        focusable: menu.isFocusable(),
+        hasParent: menu.getParentWindow() === parent,
+      }
+    })
     const tolerance = 2
-    assert.closeTo(contextMenuLocation.x, expectedMenuLocation.x, tolerance)
-    assert.closeTo(contextMenuLocation.y, expectedMenuLocation.y, tolerance)
+    assert.closeTo(contextMenuLocation.menu.x, contextMenuLocation.parent.x + expectedMenuLocation.x, tolerance)
+    assert.closeTo(contextMenuLocation.menu.y, contextMenuLocation.parent.y + expectedMenuLocation.y, tolerance)
+    assert.equal(contextMenuLocation.focusable, false)
+    assert.equal(contextMenuLocation.hasParent, true)
+
+    await browser.switchToWindow(parentWindow)
+    await $(torrent.query).click()
+    await browser.waitUntil(async () => (await browser.getWindowHandles()).length === 1)
   })
 
   it("delete action shows a confirmation modal", async function () {
