@@ -67,6 +67,14 @@ export const IPC_CHANNELS = {
         getModel: 'menu:get-model',
         changed: 'menu:changed',
     },
+    contextMenu: {
+        show: 'context-menu:show',
+        hide: 'context-menu:hide',
+        model: 'context-menu:model',
+        resize: 'context-menu:resize',
+        select: 'context-menu:select',
+        action: 'context-menu:action',
+    },
     clipboard: {
         readText: 'clipboard:read-text',
         writeText: 'clipboard:write-text',

@@ -111,8 +111,8 @@ import { ProgressDirective } from "@renderer/app/directives/progress/progress.di
 torrentApp.directive("progress", ProgressDirective.getInstance())
 import { RightClickDirective } from "@renderer/app/directives/right-click/right-click.directive"
 torrentApp.directive("ngRightClick", RightClickDirective.getInstance())
-import { ContextMenuDirective } from "@renderer/app/directives/context-menu/context-menu.directive"
-torrentApp.directive("contextMenu", ContextMenuDirective.getInstance())
+import { ContextMenuIpcDirective } from "@renderer/app/directives/context-menu-ipc/context-menu-ipc.directive"
+torrentApp.directive("contextMenuIpc", ContextMenuIpcDirective.getInstance())
 import { DropdownDirective, DropdownItemDirective } from "@renderer/app/directives/dropdown/dropdown.directive"
 torrentApp.directive("dropdown", DropdownDirective.getInstance())
 torrentApp.directive("dropdownItem", DropdownItemDirective.getInstance())

@@ -1,161 +1,98 @@
-import { IAugmentedJQuery, IDirective, IDirectiveFactory, IDocumentService, IRootScopeService, IScope, IWindowService } from "angular";
-import { ContextMenuController } from "./context-menu.controller";
-import html from "./context-menu.template.html";
+import { IDirective, IDirectiveFactory, IScope } from 'angular'
 
-interface ContextMenuItem {
-    id?: string;
-    label: string;
-    icon?: string;
-    role?: string;
-    click?: (...args: any[]) => void;
-    check?: (item: any) => boolean;
-    menu?: ContextMenuItem[];
+import type { ContextMenuItemModel, ContextMenuModel, ContextMenuPlacement, ContextMenuSize, Unsubscribe } from '@shared/ipc-contract'
+import template from './context-menu.template.html'
+
+interface ContextMenuWindowBridge {
+    onModel(callback: (model: ContextMenuModel) => void): Unsubscribe
+    resize(size: ContextMenuSize): Promise<ContextMenuPlacement>
+    hide(): Promise<void>
+    select(actionId: string): Promise<void>
 }
+
+declare const window: Window & { contextMenu: ContextMenuWindowBridge }
 
 interface ContextMenuScope extends IScope {
-    menu: ContextMenuItem[];
-    isDebug: boolean;
-    selectedItems: any[];
-    bind: {
-        show: (event: MouseEvent, items: any[]) => void;
-        hide: () => void;
-    };
-    click: (...args: any[]) => void;
-    debug?: () => void;
-    isItemVisible: (item: ContextMenuItem) => boolean;
-    isItemChecked: (item: ContextMenuItem) => boolean;
-    runMenuItem: (item: ContextMenuItem) => void;
-    runDebugItem: () => void;
-    toggleSubmenu: (event: Event, visible: boolean) => void;
+    menu: ContextMenuItemModel[]
+    debugItem?: ContextMenuItemModel
+    runMenuItem(item: ContextMenuItemModel): void
+    toggleSubmenu(event: Event, visible: boolean): void
 }
 
+const MENU_WINDOW_MARGIN = 12
+
 export class ContextMenuDirective implements IDirective {
-    restrict = "E";
-    scope = {
-        menu: "=",
-        bind: "=",
-        click: "=",
-        debug: "=?",
-    };
-    controller = ContextMenuController;
-    template = html;
+    restrict = 'E'
+    scope = {}
+    template = template
 
     static getInstance(): IDirectiveFactory {
-        const factory = (
-            $rootScope: IRootScopeService,
-            $document: IDocumentService,
-            $window: IWindowService,
-        ) => new ContextMenuDirective($rootScope, $document, $window);
-        factory.$inject = ["$rootScope", "$document", "$window"];
-        return factory;
+        const factory = ($timeout: ng.ITimeoutService) => new ContextMenuDirective($timeout)
+        factory.$inject = ['$timeout']
+        return factory
     }
 
-    constructor(
-        private $rootScope: IRootScopeService,
-        private $document: IDocumentService,
-        private $window: IWindowService,
-    ) {}
+    constructor(private $timeout: ng.ITimeoutService) {}
 
-    link(scope: ContextMenuScope, element: IAugmentedJQuery) {
-        element.addClass("torrent context menu");
-        element.data("contextmenu", true);
-
-        scope.isDebug = false;
-        scope.selectedItems = [];
-        scope.isItemVisible = (item) => {
-            if (item.menu) {
-                return true;
-            }
-
-            const features = this.$rootScope.$btclient?.features;
-            switch (item.role) {
-                case "details":
-                    return !!features?.torrentDetails;
-                case "set-speed-limits":
-                    return !!features?.speedLimits;
-                case "set-ratio":
-                    return !!features?.ratioLimits;
-                default:
-                    return true;
-            }
-        };
-        scope.isItemChecked = (item) => {
-            return !!item.check && scope.selectedItems.every((entry) => item.check!(entry));
-        };
+    link(scope: ContextMenuScope, element: ng.IAugmentedJQuery) {
+        scope.menu = []
         scope.runMenuItem = (item) => {
-            element.hide();
-            scope.click(item.click, item.label, item);
-        };
-        scope.runDebugItem = () => {
-            scope.runMenuItem({
-                label: "Debug",
-                icon: "help",
-                click: scope.debug,
-            });
-        };
+            if (item.id) {
+                void window.contextMenu.select(item.id).then(() => {
+                    setTimeout(() => void window.contextMenu.hide(), 0)
+                })
+            }
+        }
         scope.toggleSubmenu = (event, visible) => {
-            $(event.currentTarget).find(".menu").toggle(visible);
-        };
+            angular.element(event.currentTarget).find('.menu').css('display', visible ? 'block' : 'none')
+        }
 
-        const bindCloseOperations = () => {
-            $(".main-content").one("scroll", () => {
-                element.hide();
-            });
-
-            $(this.$window).one("resize", () => {
-                element.hide();
-            });
-        };
-
-        scope.bind = {
-            show: (event: MouseEvent, items: any[]) => {
-                bindCloseOperations();
-                scope.selectedItems = items;
-
-                const totalWidth = $(window).width() || 0;
-                const totalHeight = $(window).height() || 0;
-                const menuWidth = $(element).width() || 0;
-                const menuHeight = $(element).height() || 0;
-
-                const menuX = event.clientX + menuWidth >= totalWidth ? event.clientX - menuWidth : event.clientX;
-                const menuY = event.clientY + menuHeight >= totalHeight ? event.clientY - menuHeight : event.clientY;
-
-                $(element).css({
-                    left: menuX,
-                    top: menuY,
-                    display: "block",
-                });
-            },
-            hide: () => {
-                element.hide();
-            },
-        };
-
-        const onBodyClick = (event: Event) => {
-            const target = angular.element(event.target as Element);
-            const inContext = target.inheritedData("contextmenu");
-            if (!inContext) {
-                element.hide();
+        const closeWhenOutsideMenu = (event: MouseEvent) => {
+            if (!(event.target as Element).closest('.ui.menu')) {
+                void window.contextMenu.hide()
             }
-        };
+        }
+        document.addEventListener('click', closeWhenOutsideMenu)
 
-        const onKeyUp = (event: KeyboardEvent) => {
-            if (event.keyCode === 27) {
-                element.hide();
-            }
-        };
+        const unsubscribe = window.contextMenu.onModel((model) => {
+            const stylesheet = document.createElement('link')
+            stylesheet.rel = 'stylesheet'
+            stylesheet.href = `css/themes/${model.theme}.css`
+            document.head.appendChild(stylesheet)
 
-        document.body.addEventListener("click", onBodyClick);
-        document.addEventListener("keyup", onKeyUp);
+            stylesheet.addEventListener('load', () => {
+                scope.$applyAsync(() => {
+                    scope.menu = model.items
+                    scope.debugItem = model.debugItem
+                    this.$timeout(() => {
+                        const root = element[0]
+                        const primaryMenu = root.querySelector<HTMLElement>(':scope > .ui.menu')
+                        const submenus = Array.from(root.querySelectorAll<HTMLElement>('.context.dropdown > .menu'))
+                        const submenuSize = submenus.reduce((size, submenu) => {
+                            const display = submenu.style.display
+                            const visibility = submenu.style.visibility
+                            submenu.style.visibility = 'hidden'
+                            submenu.style.display = 'block'
+                            size.width = Math.max(size.width, submenu.scrollWidth)
+                            size.height = Math.max(size.height, submenu.scrollHeight)
+                            submenu.style.display = display
+                            submenu.style.visibility = visibility
+                            return size
+                        }, { width: 0, height: 0 })
+                        void window.contextMenu.resize({
+                            width: Math.ceil((primaryMenu?.scrollWidth || root.scrollWidth) + submenuSize.width + (MENU_WINDOW_MARGIN * 2) + 2),
+                            height: Math.ceil(Math.max(primaryMenu?.scrollHeight || root.scrollHeight, submenuSize.height) + (MENU_WINDOW_MARGIN * 2) + 2),
+                        }).then(({ submenuOnLeft }) => {
+                            element.toggleClass('submenu-on-left', submenuOnLeft)
+                        })
+                    })
+                })
+            }, { once: true })
+        })
 
-        window.electorrent.app.getMeta().then((meta) => {
-            scope.isDebug = !!meta.isDebug;
-            scope.$applyAsync();
-        });
-
-        scope.$on("$destroy", () => {
-            document.body.removeEventListener("click", onBodyClick);
-            document.removeEventListener("keyup", onKeyUp);
-        });
+        scope.$on('$destroy', () => {
+            unsubscribe()
+            document.removeEventListener('click', closeWhenOutsideMenu)
+        })
     }
 }

@@ -1,7 +1,27 @@
 context-menu {
-    position: fixed;
-    z-index: 300;
-    display: none;
+    .ui.vertical.menu {
+        border: 0;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, .3);
+    }
+}
 
-    .ui.vertical.menu { box-shadow: 0 0 50px rgba(0, 0, 0, .15); }
+body.context-menu-window {
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+
+    context-menu {
+        margin: 12px;
+        position: static;
+        display: block;
+
+        &.submenu-on-left > .ui.menu {
+            float: right;
+
+            .context.dropdown > .menu {
+                right: 100% !important;
+                left: auto !important;
+            }
+        }
+    }
 }

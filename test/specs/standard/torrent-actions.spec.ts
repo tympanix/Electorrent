@@ -81,7 +81,7 @@ describe("torrent actions", function () {
     const rowLocation = await torrentRow.getLocation()
     const rowSize = await torrentRow.getSize()
     const clickOffset = {
-      x: -Math.floor(rowSize.width / 4),
+      x: -Math.floor(rowSize.width / 2) + 50,
       y: 0,
     }
     const expectedMenuLocation = {
@@ -89,12 +89,48 @@ describe("torrent actions", function () {
       y: rowLocation.y + Math.floor(rowSize.height / 2) + clickOffset.y,
     }
 
-    await torrent.openContextMenu({ button: "right", ...clickOffset })
-
-    const contextMenuLocation = await $("#contextmenu").getLocation()
+    const { parentWindow } = await torrent.openContextMenu({ button: "right", ...clickOffset })
     const tolerance = 2
-    assert.closeTo(contextMenuLocation.x, expectedMenuLocation.x, tolerance)
-    assert.closeTo(contextMenuLocation.y, expectedMenuLocation.y, tolerance)
+    const getContextMenuLocation = async () => {
+      const visibleMenu = await $("#contextmenu > .ui.menu").getLocation()
+      const windows = await browser.electron.execute((electron) => {
+        const menu = electron.BrowserWindow.getAllWindows().find((window) => window.getTitle() === "Context Menu")
+        if (!menu) throw new Error("Context menu window is unavailable")
+        const parent = menu.getParentWindow()
+        if (!parent) throw new Error("Context menu parent window is unavailable")
+        return {
+          menu: menu.getBounds(),
+          parent: parent.getContentBounds(),
+          focusable: menu.isFocusable(),
+          hasParent: menu.getParentWindow() === parent,
+        }
+      })
+      return {
+        ...windows,
+        visibleMenu: {
+          x: windows.menu.x + visibleMenu.x,
+          y: windows.menu.y + visibleMenu.y,
+        },
+      }
+    }
+
+    try {
+      await browser.waitUntil(async () => {
+        const location = await getContextMenuLocation()
+        return Math.abs(location.visibleMenu.x - (location.parent.x + expectedMenuLocation.x)) <= tolerance
+          && Math.abs(location.visibleMenu.y - (location.parent.y + expectedMenuLocation.y)) <= tolerance
+      })
+
+      const contextMenuLocation = await getContextMenuLocation()
+      assert.closeTo(contextMenuLocation.visibleMenu.x, contextMenuLocation.parent.x + expectedMenuLocation.x, tolerance)
+      assert.closeTo(contextMenuLocation.visibleMenu.y, contextMenuLocation.parent.y + expectedMenuLocation.y, tolerance)
+      assert.equal(contextMenuLocation.focusable, true)
+      assert.equal(contextMenuLocation.hasParent, true)
+    } finally {
+      await browser.switchToWindow(parentWindow)
+      await $(torrent.query).click()
+      await browser.waitUntil(async () => (await browser.getWindowHandles()).length === 1)
+    }
   })
 
   it("delete action shows a confirmation modal", async function () {

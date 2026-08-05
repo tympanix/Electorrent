@@ -124,13 +124,7 @@ export class Torrent {
   }
 
   async openSetLocationModal() {
-    await this.openContextMenu()
-
-    const contextMenu = $("#contextmenu")
-    const action = contextMenu.$("a=Set Location")
-    await action.waitForDisplayed()
-    await action.click()
-    await contextMenu.waitForDisplayed({ reverse: true })
+    await this.clickContextMenu("set-location")
 
     const modal = $("#setLocationModal");
     await waitForModalOpen(modal, this.timeout);
@@ -138,13 +132,7 @@ export class Torrent {
   }
 
   async openSetSpeedLimitModal() {
-    await this.openContextMenu()
-
-    const contextMenu = $("#contextmenu")
-    const action = contextMenu.$("a=Set Speed Limits")
-    await action.waitForDisplayed()
-    await action.click()
-    await contextMenu.waitForDisplayed({ reverse: true })
+    await this.clickContextMenu("set-speed-limits")
 
     const modal = $("#setSpeedLimitModal");
     await waitForModalOpen(modal, this.timeout);
@@ -152,13 +140,7 @@ export class Torrent {
   }
 
   async openSetRatioModal() {
-    await this.openContextMenu()
-
-    const contextMenu = $("#contextmenu")
-    const action = contextMenu.$("a=Set Ratio")
-    await action.waitForDisplayed()
-    await action.click()
-    await contextMenu.waitForDisplayed({ reverse: true })
+    await this.clickContextMenu("set-ratio")
 
     const modal = $("#torrent-set-ratio-modal");
     await waitForModalOpen(modal, this.timeout);
@@ -381,13 +363,22 @@ export class Torrent {
     await elem.scrollIntoView({ block: "center", inline: "center" })
     await elem.moveTo()
 
-    const contextMeny = $("#contextmenu")
+    const parentWindow = await browser.getWindowHandle()
     for (let attempt = 0; attempt < 3; attempt++) {
+      const existingWindowHandles = new Set(await browser.getWindowHandles())
       await elem.click(options)
       try {
-        await contextMeny.waitForDisplayed({ timeout: attempt === 2 ? this.timeout : 1000 })
-        return
+        const contextMenuWindow = await browser.waitUntil(async () => {
+          const handles = await browser.getWindowHandles()
+          return handles.find((handle) => !existingWindowHandles.has(handle))
+        }, { timeout: attempt === 2 ? this.timeout : 1000 })
+        await browser.switchToWindow(contextMenuWindow)
+        const contextMenu = $("#contextmenu > .ui.menu")
+        await contextMenu.waitForDisplayed({ timeout: attempt === 2 ? this.timeout : 1000 })
+        await contextMenu.waitForClickable({ timeout: attempt === 2 ? this.timeout : 1000 })
+        return { parentWindow, contextMenuWindow }
       } catch (error) {
+        await browser.switchToWindow(parentWindow)
         if (attempt === 2) {
           throw error
         }
@@ -398,9 +389,7 @@ export class Torrent {
   async clickContextMenu(roleName: string) {
     const button = `#contextmenu a[data-role=${roleName}]`;
 
-    await this.openContextMenu()
-
-    const contextMeny = $("#contextmenu")
+    const { parentWindow, contextMenuWindow } = await this.openContextMenu()
 
     const buttonElem = $(button)
     const visible = await buttonElem.isDisplayed()
@@ -413,9 +402,18 @@ export class Torrent {
       await firstItem.moveTo()
     }
 
-    await buttonElem.waitForEnabled()
-    await buttonElem.click()
-    await contextMeny.waitForDisplayed({ reverse: true })
+    await buttonElem.waitForClickable()
+    try {
+      await buttonElem.click()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (!/no such window|target window already closed|web view not found/i.test(message)) {
+        throw error
+      }
+    } finally {
+      await browser.switchToWindow(parentWindow)
+    }
+    await browser.waitUntil(async () => !(await browser.getWindowHandles()).includes(contextMenuWindow))
   }
 
   async checkInState(states: string[]) {

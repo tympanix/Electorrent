@@ -92,6 +92,11 @@ const electorrentBridge: ElectorrentBridge = {
         onChanged: (callback: (menu: TitleMenuItem[]) => void) => subscribe(IPC_CHANNELS.menu.changed, callback),
         onAction: (callback) => subscribe(IPC_CHANNELS.menu.action, callback),
     },
+    contextMenu: {
+        show: (model) => invoke(IPC_CHANNELS.contextMenu.show, model),
+        hide: () => invoke(IPC_CHANNELS.contextMenu.hide),
+        onAction: (callback) => subscribe(IPC_CHANNELS.contextMenu.action, callback),
+    },
     clipboard: {
         readText: () => invoke(IPC_CHANNELS.clipboard.readText),
         writeText: (text: string) => invoke(IPC_CHANNELS.clipboard.writeText, { text }),

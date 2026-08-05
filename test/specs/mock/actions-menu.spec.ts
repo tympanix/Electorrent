@@ -127,12 +127,30 @@ describe("mock Actions menu", function () {
 async function openSetLabelModal() {
   const row = $("#torrentTable tbody tr[data-id]")
   await row.waitForClickable()
+  const parentWindow = await browser.getWindowHandle()
+  const existingWindowHandles = new Set(await browser.getWindowHandles())
   await row.click({ button: "right" })
+
+  const contextMenuWindow = await browser.waitUntil(async () => {
+    const handles = await browser.getWindowHandles()
+    return handles.find((handle) => !existingWindowHandles.has(handle))
+  })
+  await browser.switchToWindow(contextMenuWindow)
 
   const action = $("#contextmenu a[data-role='set-label']")
   await action.waitForDisplayed()
   await action.waitForClickable()
-  await action.click()
+  try {
+    await action.click()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (!/no such window|target window already closed|web view not found/i.test(message)) {
+      throw error
+    }
+  } finally {
+    await browser.switchToWindow(parentWindow)
+  }
+  await browser.waitUntil(async () => !(await browser.getWindowHandles()).includes(contextMenuWindow))
 
   const modal = $("#setLabelModal")
   await waitForModalOpen(modal)
