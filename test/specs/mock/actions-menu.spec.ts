@@ -128,11 +128,12 @@ async function openSetLabelModal() {
   const row = $("#torrentTable tbody tr[data-id]")
   await row.waitForClickable()
   const parentWindow = await browser.getWindowHandle()
+  const existingWindowHandles = new Set(await browser.getWindowHandles())
   await row.click({ button: "right" })
 
   const contextMenuWindow = await browser.waitUntil(async () => {
     const handles = await browser.getWindowHandles()
-    return handles.find((handle) => handle !== parentWindow)
+    return handles.find((handle) => !existingWindowHandles.has(handle))
   })
   await browser.switchToWindow(contextMenuWindow)
 
