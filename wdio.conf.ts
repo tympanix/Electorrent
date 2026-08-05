@@ -46,7 +46,6 @@ function electronCapability(client: (typeof selectedClients)[number]): Webdriver
             ...useDistribution ? {} : { appEntryPoint: 'app/main.js' },
             appArgs: [
                 ...(client.appArgs ?? []),
-                '--test-mode',
                 ...(useHeadless ? ['--headless'] : []),
             ],
         },
