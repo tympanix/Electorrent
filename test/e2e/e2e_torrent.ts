@@ -390,6 +390,7 @@ export class Torrent {
     const button = `#contextmenu a[data-role=${roleName}]`;
 
     const parentWindow = await this.openContextMenu()
+    const contextMenuWindow = await browser.getWindowHandle()
 
     const buttonElem = $(button)
     const visible = await buttonElem.isDisplayed()
@@ -403,9 +404,17 @@ export class Torrent {
     }
 
     await buttonElem.waitForClickable()
-    await buttonElem.click()
-    await browser.switchToWindow(parentWindow)
-    await browser.waitUntil(async () => (await browser.getWindowHandles()).length === 1)
+    try {
+      await buttonElem.click()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (!/no such window|target window already closed|web view not found/i.test(message)) {
+        throw error
+      }
+    } finally {
+      await browser.switchToWindow(parentWindow)
+    }
+    await browser.waitUntil(async () => !(await browser.getWindowHandles()).includes(contextMenuWindow))
   }
 
   async checkInState(states: string[]) {
