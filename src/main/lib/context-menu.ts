@@ -68,7 +68,9 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
                 closeMenu()
             }
         }
-        child.once('blur', closeIfCurrent)
+        if (!app.commandLine.hasSwitch('headless')) {
+            child.once('blur', closeIfCurrent)
+        }
 
         child.once('closed', () => {
             if (menuWindow === child) {
