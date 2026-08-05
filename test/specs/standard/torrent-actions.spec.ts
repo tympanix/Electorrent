@@ -89,7 +89,7 @@ describe("torrent actions", function () {
       y: rowLocation.y + Math.floor(rowSize.height / 2) + clickOffset.y,
     }
 
-    const parentWindow = await torrent.openContextMenu({ button: "right", ...clickOffset })
+    const { parentWindow } = await torrent.openContextMenu({ button: "right", ...clickOffset })
     const tolerance = 2
     const getContextMenuLocation = async () => {
       const visibleMenu = await $("#contextmenu > .ui.menu").getLocation()

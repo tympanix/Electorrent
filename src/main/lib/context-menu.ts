@@ -68,7 +68,7 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
                 closeMenu()
             }
         }
-        if (process.env.NODE_ENV !== 'test') {
+        if (!app.commandLine.hasSwitch('test-mode')) {
             child.once('blur', closeIfCurrent)
         }
 
@@ -125,7 +125,6 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
         }
 
         const target = parentWindow
-        closeMenu()
         target.webContents.send(IPC_CHANNELS.contextMenu.action, actionId)
     })
 }

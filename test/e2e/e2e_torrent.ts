@@ -376,7 +376,7 @@ export class Torrent {
         const contextMenu = $("#contextmenu > .ui.menu")
         await contextMenu.waitForDisplayed({ timeout: attempt === 2 ? this.timeout : 1000 })
         await contextMenu.waitForClickable({ timeout: attempt === 2 ? this.timeout : 1000 })
-        return parentWindow
+        return { parentWindow, contextMenuWindow }
       } catch (error) {
         await browser.switchToWindow(parentWindow)
         if (attempt === 2) {
@@ -389,8 +389,7 @@ export class Torrent {
   async clickContextMenu(roleName: string) {
     const button = `#contextmenu a[data-role=${roleName}]`;
 
-    const parentWindow = await this.openContextMenu()
-    const contextMenuWindow = await browser.getWindowHandle()
+    const { parentWindow, contextMenuWindow } = await this.openContextMenu()
 
     const buttonElem = $(button)
     const visible = await buttonElem.isDisplayed()

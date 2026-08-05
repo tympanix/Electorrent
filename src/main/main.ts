@@ -40,6 +40,7 @@ async function bootstrap() {
     parser.boolean('v').alias('v', 'verbose').describe('v', 'Enable verbose logging')
     parser.boolean('d').alias('d', 'debug').describe('d', 'Start in debug mode')
     parser.boolean('force-title-bar-menu')
+    parser.boolean('test-mode')
     parser.string('update-url')
 
     const [

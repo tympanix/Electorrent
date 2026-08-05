@@ -38,7 +38,9 @@ export class ContextMenuDirective implements IDirective {
         scope.menu = []
         scope.runMenuItem = (item) => {
             if (item.id) {
-                void window.contextMenu.select(item.id)
+                void window.contextMenu.select(item.id).then(() => {
+                    setTimeout(() => void window.contextMenu.hide(), 0)
+                })
             }
         }
         scope.toggleSubmenu = (event, visible) => {
