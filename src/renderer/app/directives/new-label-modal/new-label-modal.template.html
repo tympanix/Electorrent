@@ -1,17 +1,19 @@
-<modal
-    size="tiny"
-    approve="approve()"
-    id="newLabelModal">
+<div #modal class="ui tiny modal" id="newLabelModal">
     <i class="close icon"></i>
     <div class="header">
         New Label
     </div>
     <div class="content">
-        <form id="new-label-form" class="ui form" ng-submit="$modal.applyAndClose()">
+        <form id="new-label-form" class="ui form" (ngSubmit)="applyAndClose()">
             <div class="field">
                 <div class="ui fluid left icon input">
                     <i class="tag icon"></i>
-                    <input type="text" name="label" maxlength="36" ng-model="data.label" placeholder="Label Name">
+                    <input
+                        type="text"
+                        name="label"
+                        maxlength="36"
+                        [(ngModel)]="data.label"
+                        placeholder="Label Name">
                 </div>
             </div>
         </form>
@@ -24,10 +26,10 @@
             type="submit"
             form="new-label-form"
             class="ui green right labeled icon button"
-            ng-class="{ disabled: !data.label }"
-            ng-disabled="!data.label">
+            [class.disabled]="!data.label"
+            [disabled]="!data.label">
             Apply Label
             <i class="tag icon"></i>
         </button>
     </div>
-</modal>
+</div>

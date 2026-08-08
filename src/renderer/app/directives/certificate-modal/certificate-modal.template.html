@@ -1,9 +1,4 @@
-<modal
-    size="large"
-    approve="approve()"
-    after="after(accepted)"
-    id="certificateModal"
-    ng-ref="modalRef">
+<div #modal class="ui large modal" id="certificateModal">
     <i class="close icon"></i>
     <div class="header">
         Untrusted Certificate
@@ -14,154 +9,119 @@
 
         <div class="ui equal width stackable grid">
             <div class="column">
-                <h3 class="ui dividing header">
-                    Certificate
-                </h3>
+                <h3 class="ui dividing header">Certificate</h3>
 
                 <div class="ui list">
                     <div class="item">
                         <i class="user secret big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Self Signed</div>
-                            <span>
-                                <a ng-if="data.selfSigned">Yes</a>
-                                <a ng-if="!data.selfSigned">No</a>
-                            </span>
+                            <span><a>{{ data.selfSigned ? "Yes" : "No" }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="calendar check big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Valid From</div>
-                            <span>
-                                <a>{{data.validFrom | epoch}}</a>
-                            </span>
+                            <span><a>{{ formatEpoch(data.validFrom) }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="calendar times big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Valid To</div>
-                            <span>
-                                <a>{{data.validTo | epoch}}</a>
-                            </span>
+                            <span><a>{{ formatEpoch(data.validTo) }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="certificate big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Serial Number</div>
-                            <span>
-                                <a>{{data.serialNumber}}</a>
-                            </span>
+                            <span><a>{{ data.serialNumber }}</a></span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="column">
-                <h3 class="ui dividing header">
-                    Issuer
-                </h3>
+                <h3 class="ui dividing header">Issuer</h3>
 
                 <div class="ui list">
                     <div class="item">
                         <i class="building big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Organization</div>
-                            <span>
-                                <a>{{data.issuer.organization}}</a>
-                            </span>
+                            <span><a>{{ data.issuer.organization }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="map marker alternate big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Organization Unit</div>
-                            <span>
-                                <a>{{data.issuer.organizationUnit}}</a>
-                            </span>
+                            <span><a>{{ data.issuer.organizationUnit }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="paper plane big icon"></i>
                         <div class="content">
                             <div class="ui sub header">State</div>
-                            <span>
-                                <a>{{data.issuer.state}}</a>
-                            </span>
+                            <span><a>{{ data.issuer.state }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="globe big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Country</div>
-                            <span>
-                                <a>{{data.issuer.country}}</a>
-                            </span>
+                            <span><a>{{ data.issuer.country }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="user big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Common Name</div>
-                            <span>
-                                <a>{{data.issuer.commonName}}</a>
-                            </span>
+                            <span><a>{{ data.issuer.commonName }}</a></span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="column">
-                <h3 class="ui dividing header">
-                    Subject
-                </h3>
+                <h3 class="ui dividing header">Subject</h3>
 
                 <div class="ui list">
                     <div class="item">
                         <i class="building big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Organization</div>
-                            <span>
-                                <a>{{data.subject.organization}}</a>
-                            </span>
+                            <span><a>{{ data.subject.organization }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="map marker alternate big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Organization Unit</div>
-                            <span>
-                                <a>{{data.subject.organizationUnit}}</a>
-                            </span>
+                            <span><a>{{ data.subject.organizationUnit }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="paper plane big icon"></i>
                         <div class="content">
                             <div class="ui sub header">State</div>
-                            <span>
-                                <a>{{data.subject.state}}</a>
-                            </span>
+                            <span><a>{{ data.subject.state }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="globe big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Country</div>
-                            <span>
-                                <a>{{data.subject.country}}</a>
-                            </span>
+                            <span><a>{{ data.subject.country }}</a></span>
                         </div>
                     </div>
                     <div class="item">
                         <i class="user big icon"></i>
                         <div class="content">
                             <div class="ui sub header">Common Name</div>
-                            <span>
-                                <a>{{data.subject.commonName}}</a>
-                            </span>
+                            <span><a>{{ data.subject.commonName }}</a></span>
                         </div>
                     </div>
                 </div>
@@ -172,7 +132,7 @@
         <div class="ui grid">
             <div class="sixteen wide column">
                 <div class="ui left icon fluid input">
-                    <input name="Fingerprint" type="text" readonly ng-model="data.fingerprint">
+                    <input name="Fingerprint" type="text" readonly [value]="data.fingerprint">
                     <i class="address card icon"></i>
                 </div>
             </div>
@@ -180,7 +140,7 @@
                 <button type="button" class="ui black deny button">
                     Cancel
                 </button>
-                <button type="button" class="ui orange right labeled icon button" ng-if="data.serverId" ng-click="allowInsecureTls()">
+                <button type="button" class="ui orange right labeled icon button" *ngIf="data.serverId" (click)="enableInsecureTls()">
                     Insecure TLS
                     <i class="exclamation triangle icon"></i>
                 </button>
@@ -191,4 +151,4 @@
             </div>
         </div>
     </div>
-</modal>
+</div>

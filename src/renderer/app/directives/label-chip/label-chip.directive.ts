@@ -1,45 +1,90 @@
-import { IAugmentedJQuery, IAttributes, IDirective, IDirectiveFactory, IScope } from "angular";
-import type { LabelColorHue, LabelColorOverrides } from "@shared/ipc-contract";
-
-interface LabelChipAttributes extends IAttributes {
-    labelChip?: string
-    labelColor?: string
-    labelColorOverrides?: string
-}
+import {
+    Directive,
+    DoCheck,
+    HostBinding,
+    Inject,
+    Input,
+} from "@angular/core"
+import type { LabelColorHue, LabelColorOverrides } from "@shared/ipc-contract"
 
 interface LabelColorService {
     getHue(label?: string, overrides?: LabelColorOverrides): LabelColorHue
 }
 
-export class LabelChipDirective implements IDirective {
-    restrict = "A";
+@Directive({
+    selector: "[labelChip], [label-chip], [labelColor], [label-color]",
+    standalone: true,
+})
+export class LabelChipDirective implements DoCheck {
+    @HostBinding("class.ui") readonly uiClass = true
+    @HostBinding("class.circular") readonly circularClass = true
+    @HostBinding("class.label") readonly labelClass = true
+    @HostBinding("class.label-chip") readonly labelChipClass = true
+    @HostBinding("style.--label-hue") labelHueStyle = "225"
+    @HostBinding("attr.data-label-hue") labelHueAttribute = "225"
 
-    constructor(private readonly labelColorService: LabelColorService) {}
+    private angularLabelChip?: string
+    private legacyLabelChip?: string
+    private angularLabelColor?: string
+    private legacyLabelColor?: string
+    private angularOverrides?: LabelColorOverrides
+    private legacyOverrides?: LabelColorOverrides
+    private renderedHue?: LabelColorHue
 
-    static getInstance(): IDirectiveFactory {
-        return ["labelColorService", (labelColorService: LabelColorService) => new LabelChipDirective(labelColorService)] as unknown as IDirectiveFactory;
+    constructor(
+        @Inject("labelColorService") private readonly labelColorService: LabelColorService,
+    ) {}
+
+    @Input()
+    set labelChip(label: string | null | undefined) {
+        this.angularLabelChip = label || undefined
     }
 
-    link(scope: IScope, element: IAugmentedJQuery, attrs: LabelChipAttributes) {
-        const getLabel = () => {
-            const expression = attrs.labelChip || attrs.labelColor;
-            const value = expression ? scope.$eval(expression) : undefined;
-            return value || attrs.labelColor || "";
-        };
+    @Input("label-chip")
+    set labelChipAttribute(label: string | null | undefined) {
+        this.legacyLabelChip = label || undefined
+    }
 
-        const getOverrides = () => attrs.labelColorOverrides ? scope.$eval(attrs.labelColorOverrides) : undefined;
+    @Input()
+    set labelColor(label: string | null | undefined) {
+        this.angularLabelColor = label || undefined
+    }
 
-        const render = () => {
-            const label = getLabel();
-            const overrides = getOverrides();
-            const hue = this.labelColorService.getHue(label, overrides);
+    @Input("label-color")
+    set labelColorAttribute(label: string | null | undefined) {
+        this.legacyLabelColor = label || undefined
+    }
 
-            element.addClass("ui circular label label-chip");
-            element.css("--label-hue", String(hue));
-            element.attr("data-label-hue", String(hue));
-        };
+    @Input()
+    set labelColorOverrides(overrides: LabelColorOverrides | null | undefined) {
+        this.angularOverrides = overrides || undefined
+    }
 
-        scope.$watch(getLabel, render);
-        scope.$watch(getOverrides, render, true);
+    @Input("label-color-overrides")
+    set labelColorOverridesAttribute(overrides: LabelColorOverrides | null | undefined) {
+        this.legacyOverrides = overrides || undefined
+    }
+
+    ngDoCheck() {
+        const hue = this.labelColorService.getHue(this.currentLabel, this.currentOverrides)
+        if (hue === this.renderedHue) {
+            return
+        }
+
+        this.renderedHue = hue
+        this.labelHueStyle = String(hue)
+        this.labelHueAttribute = String(hue)
+    }
+
+    private get currentLabel() {
+        return this.angularLabelChip
+            || this.legacyLabelChip
+            || this.angularLabelColor
+            || this.legacyLabelColor
+            || ""
+    }
+
+    private get currentOverrides() {
+        return this.angularOverrides || this.legacyOverrides
     }
 }

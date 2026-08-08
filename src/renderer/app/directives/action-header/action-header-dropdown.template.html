@@ -1,15 +1,7 @@
-<div
-    class="ui top left pointing labeled icon dropdown button"
-    ng-class="[color, {disabled: enabled && !alwaysActive, active: open, visible: open}]"
-    data-role="{{role}}"
-    ng-click="toggle($event)"
-    tabindex="0"
->
-    <i class="ui plus icon"></i>
-    <span class="text">{{label}}</span>
-    <div class="menu transition" ng-class="{hidden: !open, visible: open}">
-        <div class="item" ng-repeat="action in actions track by $index" ng-click="select(action, $event)">
-            {{action.label}}
-        </div>
+<i class="ui plus icon"></i>
+<span class="text">{{ label }}</span>
+<div class="menu transition" [ngClass]="open ? 'visible' : 'hidden'">
+    <div class="item" *ngFor="let action of actions" (click)="select(action, $event)">
+        {{ action.label }}
     </div>
 </div>

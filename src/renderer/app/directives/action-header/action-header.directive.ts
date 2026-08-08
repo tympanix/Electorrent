@@ -1,10 +1,11 @@
-import { IDirective, IDirectiveFactory, IScope } from "angular";
-import { ActionHeaderController } from "./action-header.controller";
-import html from "./action-header.template.html";
+import { CommonModule } from "@angular/common";
+import { Component, Input, OnChanges } from "@angular/core";
+import { LabelsDropdownDirective } from "../labels-dropdown/labels-dropdown.directive";
+import { ActionHeaderDropdownDirective } from "./action-header-dropdown.directive";
 
-type ActionHandler = (...args: never[]) => unknown;
+export type ActionHandler = (...args: never[]) => unknown;
 
-interface ActionHeaderItem {
+export interface ActionHeaderItem {
     actions?: ActionHeaderItem[];
     alwaysActive?: boolean;
     color?: string;
@@ -13,48 +14,43 @@ interface ActionHeaderItem {
     label: string;
     labelAction?: (label: string, create?: boolean) => void;
     role?: string;
-    type?: string;
+    type?: "button" | "dropdown" | "labels";
 }
 
-interface ActionHeaderScope extends IScope {
-    actions: ActionHeaderItem[];
-    actionItems: ActionHeaderItem[];
-    click: (action: ActionHandler | undefined, ...args: unknown[]) => void;
-    labels: string[];
-    bind?: Record<string, never>;
-    enabled?: boolean;
-    invoke: (action: ActionHeaderItem["click"], label: string) => void;
-}
+export type ActionHeaderClick = (
+    action: ActionHandler | undefined,
+    label: string,
+    data?: unknown,
+    ...args: unknown[]
+) => unknown;
 
-export class ActionHeaderDirective implements IDirective {
-    restrict = "A";
-    template = html;
-    scope = {
-        actions: "=",
-        click: "=",
-        labels: "=",
-        bind: "=?",
-        enabled: "=?",
-    };
-    controller = ActionHeaderController;
+@Component({
+    selector: "[action-header]",
+    standalone: true,
+    imports: [CommonModule, ActionHeaderDropdownDirective, LabelsDropdownDirective],
+    templateUrl: "./action-header.template.html",
+})
+export class ActionHeaderDirective implements OnChanges {
+    @Input() actions: ActionHeaderItem[] = [];
+    @Input() labels: string[] = [];
+    @Input() enabled = false;
+    @Input() click: ActionHeaderClick = () => undefined;
+    @Input() bind: Record<string, never> = {};
 
-    static getInstance(): IDirectiveFactory {
-        return () => new ActionHeaderDirective();
+    actionItems: ActionHeaderItem[] = [];
+
+    ngOnChanges(): void {
+        this.actionItems = this.actions.map((item) => ({
+            ...item,
+            labelAction: item.type === "labels"
+                ? (label: string, create?: boolean) => {
+                    this.click(item.click, `${item.label} ${label}`, label, create);
+                }
+                : undefined,
+        }));
     }
 
-    link(scope: ActionHeaderScope) {
-        scope.bind = {};
-        scope.invoke = (action, label) => scope.click(action, label);
-
-        scope.$watchCollection("actions", (actions: ActionHeaderItem[] = []) => {
-            scope.actionItems = actions.map((item) => ({
-                ...item,
-                labelAction: item.type === "labels"
-                    ? (label: string, create?: boolean) => {
-                        scope.click(item.click, `${item.label} ${label}`, label, create);
-                    }
-                    : undefined,
-            }));
-        });
+    invoke(action: ActionHandler | undefined, label: string): void {
+        this.click(action, label);
     }
 }

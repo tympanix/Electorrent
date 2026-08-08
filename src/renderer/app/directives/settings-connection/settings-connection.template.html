@@ -1,7 +1,8 @@
 <h1>Connection</h1>
 <connection-form
-    server="ctl.server"
-    btclients="ctl.btclients"
-    connecting="ctl.connecting"
-    show-labels="true"
-></connection-form>
+    [server]="server"
+    [btclients]="btclients"
+    [connecting]="connecting"
+    [showLabels]="true"
+    (serverChange)="updateServer($event)">
+</connection-form>

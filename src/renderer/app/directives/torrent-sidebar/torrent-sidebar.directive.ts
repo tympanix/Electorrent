@@ -1,25 +1,26 @@
-import { IDirective, IDirectiveFactory } from "angular";
+import { CommonModule } from "@angular/common";
+import { Component, EventEmitter, Inject, Input, Output } from "@angular/core";
 import { matchesLabelFilter, NO_LABEL_FILTER } from "./torrent-label-filter";
-import html from "./torrent-sidebar.template.html";
+import { TorrentSidebarSectionDirective } from "./torrent-sidebar-section.directive";
 
-interface TorrentSidebarFilters {
+export interface TorrentSidebarFilters {
     status?: string;
     label?: string;
     tracker?: string;
 }
 
-interface TorrentSidebarSettings {
+export interface TorrentSidebarSettings {
     ui: {
         sidebarCollapsed?: boolean;
     };
 }
 
-interface TorrentSidebarFeatures {
+export interface TorrentSidebarFeatures {
     labels?: boolean;
     trackerFilter?: boolean;
 }
 
-interface TorrentLike {
+export interface TorrentSidebarTorrent {
     label?: string;
     trackers?: string[];
     isStatusCompleted(): boolean;
@@ -31,64 +32,80 @@ interface TorrentLike {
     isStatusStopped(): boolean;
 }
 
-export class TorrentSidebarController {
-    settings!: TorrentSidebarSettings;
-    features: TorrentSidebarFeatures = {};
-    torrents: Record<string, TorrentLike> = {};
-    filters: TorrentSidebarFilters = {};
-    labels: string[] = [];
-    trackers: string[] = [];
-    noLabelFilter = NO_LABEL_FILTER;
-    onStatus?: (locals: { status: string }) => void;
-    onLabel?: (locals: { label?: string }) => void;
-    onTracker?: (locals: { tracker?: string }) => void;
+interface SettingsService {
+    saveAllSettings(): Promise<void>;
+}
 
-    static $inject = ["settingsService", "notificationService"];
+interface NotificationService {
+    alert(title: string, message: string): void;
+}
+
+@Component({
+    selector: "torrent-sidebar",
+    standalone: true,
+    imports: [CommonModule, TorrentSidebarSectionDirective],
+    templateUrl: "./torrent-sidebar.template.html",
+})
+export class TorrentSidebarDirective {
+    @Input() settings: TorrentSidebarSettings = { ui: {} };
+    @Input() features: TorrentSidebarFeatures = {};
+    @Input() torrents: Record<string, TorrentSidebarTorrent> = {};
+    @Input() filters: TorrentSidebarFilters = {};
+    @Input() labels: string[] = [];
+    @Input() trackers: string[] = [];
+
+    @Output() readonly onStatus = new EventEmitter<string>();
+    @Output() readonly onLabel = new EventEmitter<string | undefined>();
+    @Output() readonly onTracker = new EventEmitter<string | undefined>();
+
+    readonly noLabelFilter = NO_LABEL_FILTER;
 
     constructor(
-        private settingsService: { saveAllSettings(): Promise<void> },
-        private $notify: { alert(title: string, message: string): void },
+        @Inject("settingsService") private readonly settingsService: SettingsService,
+        @Inject("notificationService") private readonly notificationService: NotificationService,
     ) {}
 
-    isCollapsed() {
-        return this.settings?.ui.sidebarCollapsed === true;
+    isCollapsed(): boolean {
+        return this.settings.ui.sidebarCollapsed === true;
     }
 
-    toggleCollapsed() {
+    async toggleCollapsed(): Promise<void> {
         const previousValue = this.isCollapsed();
         this.settings.ui.sidebarCollapsed = !previousValue;
 
-        return this.settingsService.saveAllSettings().catch((err: unknown) => {
+        try {
+            await this.settingsService.saveAllSettings();
+        } catch (error) {
             this.settings.ui.sidebarCollapsed = previousValue;
-            this.$notify.alert("Could not save layout", "The sidebar preference could not be saved");
-            console.error("Sidebar layout save error", err);
-        });
+            this.notificationService.alert("Could not save layout", "The sidebar preference could not be saved");
+            console.error("Sidebar layout save error", error);
+        }
     }
 
-    activeOn(filter: string) {
-        return this.filters.status === filter ? "active" : "";
+    activeOn(filter: string): boolean {
+        return this.filters.status === filter;
     }
 
-    selectStatus(status: string) {
-        this.onStatus?.({ status });
+    selectStatus(status: string): void {
+        this.onStatus.emit(status);
     }
 
-    selectLabel(label?: string) {
-        this.onLabel?.({ label });
+    selectLabel(label?: string): void {
+        this.onLabel.emit(label);
     }
 
-    selectTracker(tracker?: string) {
-        this.onTracker?.({ tracker });
+    selectTracker(tracker?: string): void {
+        this.onTracker.emit(tracker);
     }
 
-    numInStatus(status: string) {
+    numInStatus(status: string): number {
         return Object.values(this.torrents || {}).filter(this.torrentFilter(status)).length;
     }
 
-    private torrentFilter(status: string) {
+    private torrentFilter(status: string): (torrent: TorrentSidebarTorrent) => boolean {
         const filterLabel = this.filters.label;
         const filterTracker = this.filters.tracker;
-        const filters: Array<(torrent: TorrentLike) => boolean> = [
+        const filters: Array<(torrent: TorrentSidebarTorrent) => boolean> = [
             (torrent) => this.statusFilter(torrent, status),
         ];
 
@@ -100,10 +117,10 @@ export class TorrentSidebarController {
             filters.push((torrent) => this.trackerFilter(torrent, filterTracker));
         }
 
-        return (torrent: TorrentLike) => filters.every((filter) => filter(torrent));
+        return (torrent) => filters.every((filter) => filter(torrent));
     }
 
-    private statusFilter(torrent: TorrentLike, status: string) {
+    private statusFilter(torrent: TorrentSidebarTorrent, status: string): boolean {
         switch (status) {
             case "all": return true;
             case "finished": return torrent.isStatusCompleted();
@@ -117,32 +134,9 @@ export class TorrentSidebarController {
         }
     }
 
-    private trackerFilter(torrent: TorrentLike, filterTracker: string) {
-        return torrent.trackers && torrent.trackers.some((tracker: string) => {
-            return tracker && tracker.includes(filterTracker);
-        });
+    private trackerFilter(torrent: TorrentSidebarTorrent, filterTracker: string): boolean {
+        return !!torrent.trackers?.some((tracker) => tracker.includes(filterTracker));
     }
 }
 
-export class TorrentSidebarDirective implements IDirective {
-    restrict = "E";
-    scope = {
-        settings: "=",
-        features: "=",
-        torrents: "=",
-        filters: "=",
-        labels: "=",
-        trackers: "=",
-        onStatus: "&",
-        onLabel: "&",
-        onTracker: "&",
-    };
-    bindToController = true;
-    controller = TorrentSidebarController;
-    controllerAs = "ctl";
-    template = html;
-
-    static getInstance(): IDirectiveFactory {
-        return () => new TorrentSidebarDirective();
-    }
-}
+export { TorrentSidebarDirective as TorrentSidebarComponent, TorrentSidebarDirective as TorrentSidebarController };

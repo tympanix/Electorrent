@@ -284,7 +284,7 @@ export abstract class Torrent implements TorrentProps {
     static COL_LABEL = new Column({
       name: 'Label',
       enabled: true,
-      template: '<span class="torrent-table-label-chip" ng-if="torrent.label" label-chip="torrent.label"><span class="label-chip-text">{{torrent.label}}</span></span>',
+      template: '<span class="torrent-table-label-chip" data-cell-kind="label"></span>',
       attribute: 'label',
       sort: Column.ALPHABETICAL
     })

@@ -1,44 +1,46 @@
 <div class="main wrapper">
     <header class="title-bar" aria-label="Window title bar">
         <title-bar-menu
-            ng-if="showTitleBarMenu()"
-            current-page="currentPage()">
+            [class.is-hidden]="!showTitleBarMenu"
+            [currentPage]="currentPage">
         </title-bar-menu>
         <span class="title-bar-server-name-anchor">
-            <span class="title-bar-server-name">{{connectedServerName()}}</span>
+            <span class="title-bar-server-name">{{ connectedServerName }}</span>
             <span
-                ng-if="showSyncConnectionIndicator()"
-                class="title-bar-sync-connection-indicator"
-                ng-class="'is-' + syncConnectionState()"
+                [class]="'title-bar-sync-connection-indicator is-' + syncConnectionState"
+                [class.is-hidden]="!showSyncConnectionIndicator"
                 aria-label="Sync connection status">
                 <i class="plug icon"></i>
-                <span class="ui bottom center popup transition">{{syncConnectionMessage()}}</span>
+                <span class="ui bottom center popup transition">{{ syncConnectionMessage }}</span>
             </span>
         </span>
     </header>
 
     <div class="app-content">
-        <div ng-show="showLoading" class="overlay animated">
+        <div [class.is-hidden]="!showLoading" class="overlay animated">
             <div class="ui active inverted solid dimmer">
-                <div class="ui huge text loader">{{statusText}}</div>
+                <div class="ui huge text loader">{{ statusText }}</div>
             </div>
         </div>
 
         <notifications-center></notifications-center>
 
-        <div ng-show="showSettings()" class="overlay animated">
+        <div *ngIf="showSettings" class="overlay animated">
             <settings-page></settings-page>
         </div>
 
-        <div ng-show="showWelcome()" class="overlay animated">
-            <welcome-page></welcome-page>
+        <div *ngIf="showWelcome" class="overlay animated">
+            <welcome-page (serverConnected)="connectToServer($any($event))"></welcome-page>
         </div>
 
-        <div ng-show="showServers()" class="overlay animated">
-            <server-selection servers="servers" connect-to-server="connectToServer(server)"></server-selection>
+        <div *ngIf="showServers" class="overlay animated">
+            <server-selection
+                [servers]="servers"
+                (connectToServer)="connectToServer($any($event))">
+            </server-selection>
         </div>
 
-        <div ng-show="showTorrents" drag-and-drop>
+        <div *ngIf="showTorrents" drag-and-drop>
             <torrents-page></torrents-page>
         </div>
     </div>

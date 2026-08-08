@@ -1,44 +1,45 @@
-<modal size="small" id="uploadTorrentModal" on-show="ctl.onShow()" on-hidden="ctl.onHidden()" ng-ref="ctl.modalref">
+<div #modal class="ui small modal" id="uploadTorrentModal">
     <i class="close icon"></i>
     <div class="header">
         Add Torrent
         <div class="ui right floated label">
-            <i class="file alternate icon"></i>{{ ctl.getPendingUploadCountLabel() }}
+            <i class="file alternate icon"></i>{{ getPendingUploadCountLabel() }}
         </div>
     </div>
     <div class="content">
-        <form id="upload-torrent-form" ng-submit="ctl.uploadCurrentTorrent()">
+        <form id="upload-torrent-form" (submit)="$event.preventDefault(); uploadCurrentTorrent()">
             <h4 class="ui header upload-torrent-heading">
-                <span class="upload-torrent-name">{{ ctl.getCurrentTorrentUploadLabel() }}</span>
-                <span class="upload-torrent-size">{{ ctl.getCurrentTorrentUploadSize() | bytes }}</span>
+                <span class="upload-torrent-name">{{ getCurrentTorrentUploadLabel() }}</span>
+                <span class="upload-torrent-size">{{ formatBytes(getCurrentTorrentUploadSize()) }}</span>
             </h4>
-            <div class="ui secondary pointing menu" ng-if="ctl.hasFilesTab()">
-                <a class="item" ng-class="{active: ctl.activeTab === 'general'}" ng-click="ctl.switchTab('general')">General</a>
-                <a class="item" ng-class="{active: ctl.activeTab === 'files'}" ng-click="ctl.switchTab('files')">Files</a>
+            <div class="ui secondary pointing menu" *ngIf="hasFilesTab()">
+                <button type="button" class="item" [class.active]="activeTab === 'general'" (click)="switchTab('general')">General</button>
+                <button type="button" class="item" [class.active]="activeTab === 'files'" (click)="switchTab('files')">Files</button>
             </div>
-            <div ng-show="ctl.activeTab === 'general' || !ctl.hasFilesTab()">
+            <div [hidden]="activeTab !== 'general' && hasFilesTab()">
                 <torrent-upload-form
-                    loading="ctl.isLoading"
-                    options="ctl.uploadOptions"
-                    labels="labels"
-                    can-add-saved-location="!!ctl.rootScope.$server"
-                    on-add-saved-location="ctl.openSavedLocationModal()"></torrent-upload-form>
+                    [loading]="isLoading"
+                    [options]="uploadOptions"
+                    [labels]="labels"
+                    [canAddSavedLocation]="!!server"
+                    (addSavedLocation)="openSavedLocationModal()">
+                </torrent-upload-form>
             </div>
             <torrent-upload-file-selection
-                ng-if="ctl.hasFilesTab()"
-                ng-show="ctl.activeTab === 'files'"
-                files="ctl.getCurrentTorrentUploadFiles()"
-                on-selection-change="ctl.updateFileSelection(selection)"></torrent-upload-file-selection>
+                *ngIf="hasFilesTab()"
+                [hidden]="activeTab !== 'files'"
+                [files]="getCurrentTorrentUploadFiles()"
+                (selectionChange)="updateFileSelection($any($event))">
+            </torrent-upload-file-selection>
         </form>
     </div>
     <div class="actions">
-        <button type="button" class="ui black button" ng-class="{disabled: ctl.isLoading}" ng-click="ctl.discardCurrentTorrent()">
+        <button type="button" class="ui black button" [class.disabled]="isLoading" [disabled]="isLoading" (click)="discardCurrentTorrent()">
             Cancel
         </button>
-        <button type="submit" form="upload-torrent-form" class="ui green right labeled icon button" ng-class="{disabled: ctl.isLoading}" ng-disabled="ctl.isLoading">
+        <button type="submit" form="upload-torrent-form" class="ui green right labeled icon button" [class.disabled]="isLoading" [disabled]="isLoading">
             Add Torrent
             <i class="plus icon"></i>
         </button>
     </div>
-</modal>
-<saved-location-modal modal-id="uploadSavedLocationModal" ng-ref="ctl.savedLocationModalRef"></saved-location-modal>
+</div>

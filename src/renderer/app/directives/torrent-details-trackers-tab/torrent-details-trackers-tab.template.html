@@ -1,45 +1,47 @@
 <div class="torrent-details-trackers" data-role="torrent-details-trackers">
-  <div ng-if="ctl.scope.loading && !ctl.scope.loaded" class="torrent-details-state torrent-details-panel-loader">
+  <div *ngIf="loading && !loaded" class="torrent-details-state torrent-details-panel-loader">
     <div class="ui active inline loader"></div>
   </div>
-  <div ng-if="ctl.scope.error" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
+  <div *ngIf="error" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
     <div class="torrent-details-state-content">
       <i class="big warning circle icon"></i>
-      <p>{{ ctl.scope.error }}</p>
+      <p>{{ error }}</p>
     </div>
   </div>
-  <div class="torrent-details-trackers-content torrent-details-table-content" ng-if="!ctl.scope.error && (!ctl.scope.loading || ctl.scope.loaded)">
+  <div class="torrent-details-trackers-content torrent-details-table-content" *ngIf="!error && (!loading || loaded)">
   <table
     id="torrentDetailsTrackersTable"
     class="ui compact single line unstackable fixed torrent resize table torrent-details-table"
     data-role="torrent-details-trackers-table"
-    rz-table
-    rz-profile="ctl.scope.resizeProfile"
-    rz-mode="ctl.scope.resizeMode"
-    rz-container=".torrent-details-trackers-content"
-    columns="ctl.scope.columns"
   >
     <thead>
-      <tr sorting mode="ctl.scope.resizeProfile" on-sort-change="ctl.changeSorting($event)" default-sort-key="url" default-sort-order="false" sort-key-prefix="torrent-details-trackers.sort-key" sort-order-prefix="torrent-details-trackers.sort-desc">
-        <th ng-repeat="column in ctl.scope.columns track by column.id" rz-col="column.id" sort-header sort-key="column.id">
+      <tr
+        sorting
+        [mode]="resizeProfile"
+        [defaultSortKey]="'url'"
+        [defaultSortOrder]="false"
+        [sortKeyPrefix]="'torrent-details-trackers.sort-key'"
+        [sortOrderPrefix]="'torrent-details-trackers.sort-desc'"
+        (sortChange)="changeSorting($event)">
+        <th *ngFor="let column of columns; trackBy: trackColumn" sort-header [sortKey]="column.id">
           <span class="torrent-details-table-header-label">{{ column.label }}</span>
         </th>
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="tracker in ctl.scope.sortedTrackers track by $index" data-tracker-url="{{ tracker.url }}">
-        <td class="torrent-details-tracker-url" title="{{ tracker.url }}">{{ tracker.url }}</td>
+      <tr *ngFor="let tracker of sortedTrackers; trackBy: trackTracker" [attr.data-tracker-url]="tracker.url">
+        <td class="torrent-details-tracker-url" [title]="tracker.url">{{ tracker.url }}</td>
         <td>{{ tracker.status }}</td>
         <td>{{ tracker.tier }}</td>
         <td>{{ tracker.peers }}</td>
         <td>{{ tracker.seeds }}</td>
         <td>{{ tracker.leeches }}</td>
         <td>{{ tracker.downloaded }}</td>
-        <td>{{ tracker.lastAnnounce ? (tracker.lastAnnounce | epoch) : '' }}</td>
-        <td>{{ tracker.nextAnnounce ? (tracker.nextAnnounce | epoch) : '' }}</td>
-        <td title="{{ tracker.message }}">{{ tracker.message }}</td>
+        <td>{{ formatEpoch(tracker.lastAnnounce) }}</td>
+        <td>{{ formatEpoch(tracker.nextAnnounce) }}</td>
+        <td [title]="tracker.message || ''">{{ tracker.message }}</td>
       </tr>
-      <tr ng-if="!ctl.scope.sortedTrackers.length">
+      <tr *ngIf="!sortedTrackers.length">
         <td class="torrent-details-empty-state" colspan="10">No trackers available.</td>
       </tr>
     </tbody>

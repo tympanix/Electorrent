@@ -1,4 +1,4 @@
-import { IFilterLowercase } from "angular";
+import type { LowercaseFilter as IFilterLowercase } from "./filter-types";
 
 export class TorrentTrackerFilter {
     private static readonly URL_REGEX = /^[a-z]+:\/\/(?:[a-z0-9-]+\.)*((?:[a-z0-9-]+\.)[a-z]+)/;

@@ -1,44 +1,45 @@
 <modal
+    #modal="modal"
     size="tiny"
     id="setLocationModal"
-    on-hidden="ctl.onHidden()"
-    ng-ref="ctl.modalref">
+    [onHidden]="handleHidden">
     <i class="close icon"></i>
     <div class="header">
         Set Location
     </div>
     <div class="content">
-        <form id="set-location-form" class="ui form" ng-submit="ctl.apply()">
-            <p>Choose a new location for {{ ctl.getTargetLabel() }}.</p>
+        <form id="set-location-form" class="ui form" (ngSubmit)="apply()">
+            <p>Choose a new location for {{ getTargetLabel() }}.</p>
             <div class="field">
                 <label for="set-location-dropdown">Location</label>
                 <dropdown
                     title="Select saved location"
                     id="set-location-dropdown"
+                    name="location"
                     class="fluid"
-                    open-on-focus="false"
-                    ng-model="ctl.scope.location"
-                    ng-disabled="!ctl.savedLocations.length">
+                    [openOnFocus]="false"
+                    [disabled]="!savedLocations.length"
+                    [(ngModel)]="location">
                     <dropdown-item
-                        ng-repeat="savedLocation in ctl.savedLocations track by savedLocation.path"
-                        title="savedLocation.path"
-                        value="savedLocation.path"
-                        data-path="{{ savedLocation.path }}">
-                        <i class="{{ savedLocation.icon }} icon"></i>
+                        *ngFor="let savedLocation of savedLocations; trackBy: trackSavedLocation"
+                        [title]="savedLocation.path"
+                        [value]="savedLocation.path"
+                        [attr.data-path]="savedLocation.path">
+                        <i [class]="savedLocation.icon + ' icon'"></i>
                         <span>{{ savedLocation.path }}</span>
                     </dropdown-item>
                 </dropdown>
-                <div class="ui small info message" data-role="set-location-empty" ng-if="!ctl.savedLocations.length">
+                <div class="ui small info message" data-role="set-location-empty" *ngIf="!savedLocations.length">
                     No saved locations are available for this server. Add saved locations in Settings &rarr; Advanced.
                 </div>
             </div>
-            <div class="ui negative message" ng-if="ctl.scope.error">
-                <p>{{ ctl.scope.error }}</p>
+            <div class="ui negative message" *ngIf="error">
+                <p>{{ error }}</p>
             </div>
         </form>
     </div>
     <div class="actions">
-        <button type="button" class="ui black button" ng-class="{ disabled: ctl.scope.loading }" ng-click="ctl.close()">
+        <button type="button" class="ui black button" [class.disabled]="loading" [disabled]="loading" (click)="close()">
             Cancel
         </button>
         <button
@@ -46,8 +47,8 @@
             form="set-location-form"
             class="ui green right labeled icon button"
             data-role="set-location-apply"
-            ng-class="{ disabled: ctl.scope.loading || !ctl.scope.location }"
-            ng-disabled="ctl.scope.loading || !ctl.scope.location">
+            [class.disabled]="loading || !location"
+            [disabled]="loading || !location">
             Set Location
             <i class="folder open icon"></i>
         </button>

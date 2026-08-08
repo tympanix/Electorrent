@@ -1,201 +1,134 @@
-<div id="page-torrents" class="wrapper" ng-class="{ 'is-sidebar-collapsed': settings.ui.sidebarCollapsed }">
-    <div ng-if="connectionLost" class="popup animated">
+<div id="page-torrents" class="wrapper" [class.is-sidebar-collapsed]="settings.ui.sidebarCollapsed">
+    <div *ngIf="connectionLost" class="popup animated">
         <div class="content">
-            <h2 class="ui center aligned icon header">
-                <i class="plug icon"></i>
-                Connection Lost!
-            </h2>
+            <h2 class="ui center aligned icon header"><i class="plug icon"></i>Connection Lost!</h2>
         </div>
     </div>
+
     <torrent-sidebar
-        settings="settings"
-        features="$btclient.features"
-        torrents="torrents"
-        filters="filters"
-        labels="labels"
-        trackers="trackers"
-        on-status="filterByStatus(status)"
-        on-label="filterByLabel(label)"
-        on-tracker="filterByTracker(tracker)">
-    </torrent-sidebar>
+        [settings]="settings"
+        [features]="client?.features || {}"
+        [torrents]="torrents"
+        [filters]="filters"
+        [labels]="labels"
+        [trackers]="trackers"
+        (onStatus)="filterByStatus($event)"
+        (onLabel)="filterByLabel($event)"
+        (onTracker)="filterByTracker($event)"
+    ></torrent-sidebar>
 
     <div class="main-panel">
         <div class="action header">
             <div class="actions left">
-                <div
-                    id="torrent-action-header"
-                    action-header
-                    actions="$btclient.actionHeader"
-                    labels="labels"
-                    enabled="noneSelected()"
-                    click="doAction"
-                ></div>
+                <div id="torrent-action-header" action-header
+                    [actions]="client?.actionHeader || []" [labels]="labels"
+                    [enabled]="noneSelected()" [click]="doAction"></div>
             </div>
             <div class="actions right">
-                <button
-                    type="button"
-                    class="ui icon button"
-                    data-role="show-settings"
-                    aria-label="Show settings"
-                    title="Show settings"
-                    ng-click="$emit('show:settings')"
-                >
+                <button type="button" class="ui icon button" data-role="show-settings"
+                    aria-label="Show settings" title="Show settings" (click)="$emit('show:settings')">
                     <i class="cog icon"></i>
                 </button>
-                <div class="ui fluid search" ng-class="{loading: isSearching}">
+                <div class="ui fluid search" [class.loading]="isSearching">
                     <div class="ui icon input">
-                        <input
-                            search
-                            class="prompt"
-                            type="text"
-                            placeholder="Search torrents..."
-                            ng-model="filters.search"
-                            ng-change="filterBySearch()"
-                            ng-model-options="filters.options"
-                        />
+                        <input search class="prompt" type="text" placeholder="Search torrents..."
+                            [(ngModel)]="filters.search" [ngModelOptions]="filters.options"
+                            (ngModelChange)="filterBySearch()" />
                         <i class="search icon"></i>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="main-content" limit-bind="torrentLimit">
-            <div ng-if="showDragAndDrop" class="popup animated">
+
+        <div class="main-content">
+            <div *ngIf="showDragAndDrop" class="popup animated">
                 <div class="content">
                     <h2 class="ui center aligned icon header">
-                        <i class="add circle icon"></i>
-                        Upload Torrent Files
-                        <div class="sub header" ng-if="!settings.alwaysPromptUploadOptions && supportsUploadOptions()">
+                        <i class="add circle icon"></i>Upload Torrent Files
+                        <div class="sub header" *ngIf="!settings.alwaysPromptUploadOptions && supportsUploadOptions()">
                             Hold down <div class="ui label">{{ uploadAdvancedOptionsKey }}</div> key for advanced options
                         </div>
                     </h2>
                 </div>
             </div>
-            <div infinite-scroll-parent="true" infinite-scroll="showMore()" infinite-scroll-distance="0.5">
-                <table
-                    id="torrentTable"
-                    tabindex="0"
-                    aria-label="Torrents"
-                    ng-keydown="navigateSelection($event)"
-                    ng-class="{ 'compact': settings.ui.displayCompact, 'is-sticky': settings.ui.fixedHeader }"
-                    rz-table
-                    rz-busy="guiBusy"
-                    rz-profile="$server.id"
-                    rz-mode="settings.ui.resizeMode"
-                    rz-container=".main-content"
-                    columns="$server.columns"
-                    class="ui single line unstackable selectable fixed torrent resize table"
-                >
-                    <thead>
-                        <tr sorting mode="$server.id" on-sort-change="changeSorting($event)">
-                            <th
-                                ng-repeat="col in $server.columns | filter:{enabled: true} track by col.name"
-                                rz-col="col.attribute"
-                                sort-header
-                                sort-key="col.attribute"
-                            >
-                                {{::col.name}}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="zoom" ng-class="settings.ui.displaySize" torrent-body columns="$server.columns">
-                        <tr
-                            ng-repeat="torrent in arrayTorrents | limitTo:torrentLimit track by torrent.id"
-                            ng-class="{active: torrent.selected}"
-                            ng-click="setSelected($event, torrent, $index)"
-                            ng-dblclick="openTorrentDetails(torrent)"
-                            ng-right-click="showContextMenu($event, torrent, $index)"
-                            repeat-done="renderDone"
-                            data-id="{{torrent.id | lowercase }}"
-                            data-info-hash="{{torrent.hash | lowercase }}"
-                            limit-source
-                            torrent-row
-                        ></tr>
-                    </tbody>
-                </table>
+
+            <table id="torrentTable" tabindex="0" aria-label="Torrents"
+                (keydown)="navigateSelection($event)"
+                [class.compact]="settings.ui.displayCompact"
+                [class.is-sticky]="settings.ui.fixedHeader"
+                class="ui single line unstackable selectable fixed torrent resize table">
+                <thead>
+                    <tr sorting [mode]="server?.id || ''" [onSortChange]="changeSorting">
+                        <th *ngFor="let col of server?.columns || []; trackBy: trackColumn"
+                            [hidden]="!col.enabled" sort-header [sortKey]="col.attribute">
+                            {{ col.name }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="zoom" [ngClass]="settings.ui.displaySize" torrent-body [columns]="server?.columns || []">
+                    <tr *ngFor="let torrent of arrayTorrents | slice:0:torrentLimit; let index = index; trackBy: trackTorrent"
+                        torrent-row [torrent]="torrent" [settings]="settings"
+                        [class.active]="torrent.selected"
+                        (click)="setSelected($event, torrent, index)"
+                        (dblclick)="openTorrentDetails(torrent)"
+                        (contextmenu)="$event.preventDefault(); showContextMenu($event, torrent)"
+                        [attr.data-id]="torrent.id?.toLowerCase()"
+                        [attr.data-info-hash]="torrent.hash?.toLowerCase()"></tr>
+                </tbody>
+            </table>
+            <div class="ui center aligned basic segment" *ngIf="arrayTorrents.length > torrentLimit">
+                <button type="button" class="ui basic button" (click)="showMore()">Show more</button>
             </div>
         </div>
+
         <torrent-details-panel></torrent-details-panel>
         <div class="action footer status-bar">
-            <div class="client-version" ng-if="$btclient.version">
-                {{$btclient.name}} {{$btclient.version}}
+            <div class="client-version" *ngIf="client?.version">{{ client.name }} {{ client.version }}</div>
+            <div class="download-speed"><i class="ui blue arrow down icon"></i>
+                {{ formatSpeed(totalDownloadSpeed) }} <span *ngIf="totalDownloaded">({{ formatBytes(totalDownloaded, 2) }})</span>
             </div>
-            <div class="download-speed">
-                <i class="ui blue arrow down icon"></i>
-                {{ totalDownloadSpeed | speed }} <span ng-if="totalDownloaded">({{ totalDownloaded | bytes:2 }})</span>
+            <div class="upload-speed"><i class="ui orange arrow up icon"></i>
+                {{ formatSpeed(totalUploadSpeed) }} <span *ngIf="totalUploaded">({{ formatBytes(totalUploaded, 2) }})</span>
             </div>
-            <div class="upload-speed">
-                <i class="ui orange arrow up icon"></i>
-                {{ totalUploadSpeed | speed }} <span ng-if="totalUploaded">({{ totalUploaded | bytes:2 }})</span>
-            </div>
-            <div ng-if="$btclient.features.alternativeSpeedLimits" class="alternative-speed-limits-control">
-                <a
-                    href=""
-                    class="alternative-speed-limits"
-                    ng-class="{active: alternativeSpeedLimitsEnabled}"
-                    data-role="alternative-speed-limits"
-                    aria-label="Alternative rate limits"
-                    title="Alternative rate limits"
-                    ng-click="$event.preventDefault(); setAlternativeSpeedLimitsMode(!alternativeSpeedLimitsEnabled)"
-                >
-                    <i class="ui" ng-class="alternativeSpeedLimitsEnabled ? 'red tachometer alternate icon' : 'green tachometer alternate icon'"></i>
-                </a>
+            <div *ngIf="client?.features?.alternativeSpeedLimits" class="alternative-speed-limits-control">
+                <button type="button" class="ui icon basic button alternative-speed-limits"
+                    [class.active]="alternativeSpeedLimitsUiEnabled"
+                    (click)="toggleAlternativeSpeedLimits($any($event.currentTarget))"
+                    style="position: relative; z-index: 10000;"
+                    data-role="alternative-speed-limits" aria-label="Alternative rate limits" title="Alternative rate limits">
+                    <i class="ui" [ngClass]="alternativeSpeedLimitsEnabled ? 'red tachometer alternate icon' : 'green tachometer alternate icon'"></i>
+                </button>
                 <div class="ui top center popup transition alternative-speed-limits-popup">
                     {{ alternativeSpeedLimitsEnabled ? 'Slow speed mode' : 'Normal speed mode' }}
                 </div>
             </div>
-            <div class="free-space" ng-if="$btclient.features.freeDiskSpace && freeDiskSpace != null">
-                <i class="ui grey database icon"></i>
-                Free: {{ freeDiskSpace | bytes }}
+            <div class="free-space" *ngIf="client?.features?.freeDiskSpace && freeDiskSpace !== undefined && freeDiskSpace !== null">
+                <i class="ui grey database icon"></i>Free: {{ formatBytes(freeDiskSpace) }}
             </div>
         </div>
     </div>
 
-    <context-menu-ipc bind="contextMenu" menu="$btclient.contextMenu" click="doContextAction" debug="debug">
-    </context-menu-ipc>
+    <context-menu-ipc [(bind)]="contextMenu" [menu]="client?.contextMenu || []"
+        [click]="doContextAction" [debug]="debug" [client]="client"></context-menu-ipc>
 
-    <set-label-modal
-        labels="labels"
-        modal-ref="setLabelModalRef"
-        on-saved="syncAfterTorrentMutation">
-    </set-label-modal>
+    <set-label-modal [labels]="labels" [(modalRef)]="setLabelModalRef"
+        [onSaved]="syncAfterTorrentMutation"></set-label-modal>
 
-    <modal
-        id="deleteTorrentModal"
-        size="tiny"
-        approve="confirmDelete()"
-        deny="cancelDelete()"
-        on-hidden="cancelDelete()"
-        ng-ref="deleteModalref">
-        <div class="header">
-            <i class="trash icon"></i>
-            Confirm Delete
-        </div>
-        <div class="content">
-            <p>{{ getDeleteConfirmationMessage() }}</p>
-        </div>
+    <modal id="deleteTorrentModal" size="tiny" [(modalRef)]="deleteModalref"
+        [approve]="confirmDelete" [deny]="cancelDelete" [onHidden]="cancelDelete">
+        <div class="header"><i class="trash icon"></i>Confirm Delete</div>
+        <div class="content"><p>{{ getDeleteConfirmationMessage() }}</p></div>
         <div class="actions">
-            <button type="button" class="ui black deny button">
-                Cancel
-            </button>
+            <button type="button" class="ui black deny button">Cancel</button>
             <button type="button" class="ui red right labeled icon approve button">
-                {{ deleteConfirmation.label || "Delete" }}
-                <i class="trash icon"></i>
+                {{ deleteConfirmation.label || 'Delete' }}<i class="trash icon"></i>
             </button>
         </div>
     </modal>
 
-    <torrent-speed-modal modal-ref="speedLimitModalRef" on-saved="syncAfterTorrentMutation"></torrent-speed-modal>
-    <torrent-set-ratio-modal modal-ref="setRatioModalRef" on-saved="syncAfterTorrentMutation"></torrent-set-ratio-modal>
-
-    <add-torrent-modal
-        torrents="pendingTorrentFiles"
-        labels="labels"
-        upload-torrent-action="uploadTorrent"
-        upload-torrent-url-action="uploadTorrentURL">
-    </add-torrent-modal>
-
-    <set-location-modal
-        modal-ref="setLocationModalRef"
-        on-saved="syncAfterTorrentMutation">
-    </set-location-modal>
+    <torrent-speed-modal [(modalRef)]="speedLimitModalRef" [onSaved]="syncAfterTorrentMutation"></torrent-speed-modal>
+    <torrent-set-ratio-modal [(modalRef)]="setRatioModalRef" [onSaved]="syncAfterTorrentMutation"></torrent-set-ratio-modal>
+    <add-torrent-modal [torrents]="pendingTorrentFiles" [labels]="labels" [client]="client" [server]="server"
+        [uploadTorrentAction]="uploadTorrent" [uploadTorrentUrlAction]="uploadTorrentURL"></add-torrent-modal>
+    <set-location-modal [(modalRef)]="setLocationModalRef" [onSaved]="syncAfterTorrentMutation"></set-location-modal>
 </div>

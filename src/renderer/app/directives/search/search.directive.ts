@@ -1,31 +1,47 @@
-import { IAugmentedJQuery, IDirective, IDirectiveFactory, IRootScopeService, IScope } from "angular";
-import { SearchController } from "./search.controller";
+import {
+    Directive,
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Inject,
+    OnDestroy,
+    OnInit,
+    Output,
+} from "@angular/core"
 
-export class SearchDirective implements IDirective {
-    restrict = "A";
-    controller = SearchController;
+interface SearchEventBus {
+    $on(name: string, callback: (...args: unknown[]) => void): () => void
+}
 
-    static getInstance(): IDirectiveFactory {
-        const factory = ($rootScope: IRootScopeService) => new SearchDirective($rootScope);
-        factory.$inject = ["$rootScope"];
-        return factory;
+@Directive({
+    selector: "input[search]",
+    standalone: true,
+})
+export class SearchDirective implements OnInit, OnDestroy {
+    @Output() readonly searchActivated = new EventEmitter<void>()
+
+    private unsubscribe: () => void = () => undefined
+
+    constructor(
+        private readonly element: ElementRef<HTMLInputElement>,
+        @Inject("$rootScope") private readonly rootEvents: SearchEventBus,
+    ) {}
+
+    ngOnInit() {
+        this.unsubscribe = this.rootEvents.$on("search:torrent", () => {
+            const input = this.element.nativeElement
+            input.focus()
+            input.select()
+            this.searchActivated.emit()
+        })
     }
 
-    constructor(private $rootScope: IRootScopeService) {}
+    ngOnDestroy() {
+        this.unsubscribe()
+    }
 
-    link(scope: IScope, element: IAugmentedJQuery) {
-        element.on("keyup", (event: JQuery.KeyUpEvent) => {
-            if (event.keyCode === 27) {
-                (element[0] as HTMLInputElement).blur();
-            }
-        });
-
-        const unsubscribe = this.$rootScope.$on("search:torrent", () => {
-            const input = element[0] as HTMLInputElement;
-            input.focus();
-            input.select();
-        });
-
-        scope.$on("$destroy", unsubscribe);
+    @HostListener("keyup.escape")
+    blurOnEscape() {
+        this.element.nativeElement.blur()
     }
 }

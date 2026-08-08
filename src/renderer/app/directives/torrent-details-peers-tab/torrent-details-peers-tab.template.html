@@ -1,49 +1,50 @@
 <div class="torrent-details-peers" data-role="torrent-details-peers">
-  <div ng-if="ctl.scope.loading && !ctl.scope.loaded" class="torrent-details-state torrent-details-panel-loader">
+  <div *ngIf="ctl.scope.loading && !ctl.scope.loaded" class="torrent-details-state torrent-details-panel-loader">
     <div class="ui active inline loader"></div>
   </div>
-  <div ng-if="ctl.scope.error" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
+  <div *ngIf="ctl.scope.error" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
     <div class="torrent-details-state-content">
       <i class="big warning circle icon"></i>
       <p>{{ ctl.scope.error }}</p>
     </div>
   </div>
-  <div class="torrent-details-peers-content torrent-details-table-content" ng-if="!ctl.scope.error && (!ctl.scope.loading || ctl.scope.loaded)">
+  <div class="torrent-details-peers-content torrent-details-table-content" *ngIf="!ctl.scope.error && (!ctl.scope.loading || ctl.scope.loaded)">
     <table
       id="torrentDetailsPeersTable"
       class="ui compact single line unstackable fixed torrent resize table torrent-details-table"
-      data-role="torrent-details-peers-table"
-      rz-table
-      rz-profile="ctl.scope.resizeProfile"
-      rz-mode="ctl.scope.resizeMode"
-      rz-container=".torrent-details-peers-content"
-      columns="ctl.scope.columns"
-    >
+      data-role="torrent-details-peers-table">
       <thead>
-        <tr sorting mode="ctl.scope.resizeProfile" on-sort-change="ctl.changeSorting($event)" default-sort-key="ip" default-sort-order="false" sort-key-prefix="torrent-details-peers.sort-key" sort-order-prefix="torrent-details-peers.sort-desc">
-          <th ng-repeat="column in ctl.scope.columns track by column.id" rz-col="column.id" sort-header sort-key="column.id">
+        <tr
+          sorting
+          [mode]="ctl.scope.resizeProfile"
+          [onSortChange]="ctl.changeSorting"
+          defaultSortKey="ip"
+          [defaultSortOrder]="false"
+          sortKeyPrefix="torrent-details-peers.sort-key"
+          sortOrderPrefix="torrent-details-peers.sort-desc">
+          <th *ngFor="let column of ctl.scope.columns" sort-header [sortKey]="column.id">
             <span class="torrent-details-table-header-label">{{ column.label }}</span>
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="peer in ctl.scope.sortedPeers track by (peer.ip + ':' + peer.port + ':' + $index)" data-peer-ip="{{ peer.ip }}">
+        <tr *ngFor="let peer of ctl.scope.sortedPeers" [attr.data-peer-ip]="peer.ip">
           <td data-col="country">
-            <span class="torrent-details-country-flag" title="{{ ctl.countryName(peer) }}" aria-hidden="true">{{ ctl.countryFlag(peer) }}</span>
+            <span class="torrent-details-country-flag" [attr.title]="ctl.countryName(peer)" aria-hidden="true">{{ ctl.countryFlag(peer) }}</span>
             <span>{{ ctl.countryName(peer) }}</span>
           </td>
           <td data-col="ip">{{ peer.ip }}</td>
-          <td data-col="port">{{ peer.port || '' }}</td>
+          <td data-col="port">{{ peer.port || "" }}</td>
           <td data-col="client">{{ peer.client }}</td>
-          <td data-col="progress">{{ ctl.progressPercent(peer) | number:1 }}%</td>
-          <td data-col="downloadSpeed">{{ peer.downloadSpeed | speed }}</td>
-          <td data-col="uploadSpeed">{{ peer.uploadSpeed | speed }}</td>
-          <td data-col="downloaded">{{ peer.downloaded == null ? '' : (peer.downloaded | bytes) }}</td>
-          <td data-col="uploaded">{{ peer.uploaded == null ? '' : (peer.uploaded | bytes) }}</td>
-          <td data-col="connection">{{ peer.connection || '' }}</td>
-          <td data-col="flags">{{ peer.flags || '' }}</td>
+          <td data-col="progress">{{ ctl.progressPercent(peer).toFixed(1) }}%</td>
+          <td data-col="downloadSpeed">{{ ctl.formatSpeed(peer.downloadSpeed) }}</td>
+          <td data-col="uploadSpeed">{{ ctl.formatSpeed(peer.uploadSpeed) }}</td>
+          <td data-col="downloaded">{{ ctl.formatBytes(peer.downloaded) }}</td>
+          <td data-col="uploaded">{{ ctl.formatBytes(peer.uploaded) }}</td>
+          <td data-col="connection">{{ peer.connection || "" }}</td>
+          <td data-col="flags">{{ peer.flags || "" }}</td>
         </tr>
-        <tr ng-if="!ctl.scope.sortedPeers.length">
+        <tr *ngIf="!ctl.scope.sortedPeers.length">
           <td class="torrent-details-empty-state" colspan="11">No peers connected.</td>
         </tr>
       </tbody>

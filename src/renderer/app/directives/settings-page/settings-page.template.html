@@ -2,86 +2,94 @@
     <div class="ui stretched segment">
         <div class="settings sidebar">
             <ul class="nav">
-                <li data-role="settings-tab-general" ng-class="activeOn('general')" ng-click="gotoPage('general')">
+                <li data-role="settings-tab-general" [class.active]="activeOn('general')" (click)="gotoPage('general')">
                     <i class="large settings icon"></i>
                     General Settings
                 </li>
-                <li data-role="settings-tab-connection" ng-class="activeOn('connection')" ng-click="gotoPage('connection')">
+                <li data-role="settings-tab-connection" [class.active]="activeOn('connection')" (click)="gotoPage('connection')">
                     <i class="large sitemap icon"></i>
                     Connection
                 </li>
-                <li data-role="settings-tab-layout" ng-class="activeOn('layout')" ng-click="gotoPage('layout')">
+                <li data-role="settings-tab-layout" [class.active]="activeOn('layout')" (click)="gotoPage('layout')">
                     <i class="large list layout icon"></i>
                     Layout
                 </li>
-                <li data-role="settings-tab-servers" ng-class="activeOn('servers')" ng-click="gotoPage('servers')">
+                <li data-role="settings-tab-servers" [class.active]="activeOn('servers')" (click)="gotoPage('servers')">
                     <i class="large server icon"></i>
                     Servers
                 </li>
-                <li data-role="settings-tab-advanced" ng-class="activeOn('advanced')" ng-click="gotoPage('advanced')">
+                <li data-role="settings-tab-advanced" [class.active]="activeOn('advanced')" (click)="gotoPage('advanced')">
                     <i class="large lab icon"></i>
                     Advanced
                 </li>
-                <li data-role="settings-tab-about" ng-class="activeOn('about')" ng-click="gotoPage('about')">
+                <li data-role="settings-tab-about" [class.active]="activeOn('about')" (click)="gotoPage('about')">
                     <i class="large at icon"></i>
                     About
                 </li>
             </ul>
         </div>
         <div class="container">
-            <div class="content" ng-switch="page">
-                <div ng-switch-when="general" id="page-settings-general">
+            <div class="content">
+                <div *ngIf="page === 'general'" id="page-settings-general">
                     <settings-general
-                        settings="settings"
-                        themes="themes"
-                        platform="is"
-                        general="general">
-                    </settings-general>
+                        [settings]="settings"
+                        [themes]="themes"
+                        [platform]="platform"
+                        [general]="general"
+                    ></settings-general>
                 </div>
 
-                <div ng-switch-when="connection" id="page-settings-connection">
+                <div *ngIf="page === 'connection'" id="page-settings-connection">
                     <settings-connection
-                        server="server"
-                        btclients="btclients"
-                        connecting="connecting">
-                    </settings-connection>
+                        *ngIf="server"
+                        [server]="server"
+                        [btclients]="btclients"
+                        [connecting]="connecting"
+                    ></settings-connection>
                 </div>
 
-                <div ng-switch-when="layout" id="page-settings-layout">
-                    <settings-layout server="server" sort-options="layoutSortOptions"></settings-layout>
+                <div *ngIf="page === 'layout'" id="page-settings-layout">
+                    <settings-layout
+                        *ngIf="server"
+                        [server]="server"
+                        [sortOptions]="layoutSortOptions"
+                    ></settings-layout>
                 </div>
 
-                <div ng-switch-when="servers" id="page-settings-servers">
+                <div *ngIf="page === 'servers'" id="page-settings-servers">
                     <settings-servers
-                        settings="settings"
-                        rename-data="renameData"
-                        on-toggle-default-server="toggleDefaultServer(server)"
-                        on-move-server-up="moveServerUp(server)"
-                        on-disable-insecure-tls="disableInsecureTls(server)"
-                        on-remove-server="removeServer(server)"
-                        on-rename-server="renameServer()">
-                    </settings-servers>
+                        [settings]="settings"
+                        [renameData]="renameData"
+                        (toggleDefaultServer)="toggleDefaultServer($any($event))"
+                        (moveServerUp)="moveServerUp($any($event))"
+                        (disableInsecureTls)="disableInsecureTls($any($event))"
+                        (removeServer)="removeServer($any($event))"
+                        (renameServer)="renameServer()"
+                    ></settings-servers>
                 </div>
 
-                <div ng-switch-when="advanced" id="page-settings-advanced">
-                    <settings-advanced></settings-advanced>
+                <div *ngIf="page === 'advanced'" id="page-settings-advanced">
+                    <settings-advanced
+                        [settings]="settings"
+                        [server]="server"
+                    ></settings-advanced>
                 </div>
 
-                <div ng-switch-when="about" id="page-settings-about">
+                <div *ngIf="page === 'about'" id="page-settings-about">
                     <settings-about
-                        app-version="appVersion"
-                        node-version="nodeVersion"
-                        chrome-version="chromeVersion"
-                        electron-version="electronVersion">
-                    </settings-about>
+                        [appVersion]="appVersion"
+                        [nodeVersion]="nodeVersion"
+                        [chromeVersion]="chromeVersion"
+                        [electronVersion]="electronVersion"
+                    ></settings-about>
                 </div>
             </div>
             <div class="actions footer">
-                <a class="ui deny right labeled icon button" ng-click="close()">
+                <a class="ui deny right labeled icon button" (click)="close()">
                     Cancel
                     <i class="cancel icon"></i>
                 </a>
-                <a class="ui positive right labeled icon button" ng-click="save()">
+                <a class="ui positive right labeled icon button" (click)="save()">
                     Save
                     <i class="checkmark icon"></i>
                 </a>

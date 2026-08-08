@@ -1,28 +1,37 @@
 <div id="notifications" class="notifications container">
-    <div class="animated notification" ng-repeat="notification in notifications">
-        <div class="ui message" ng-class="notification.type">
-            <i class="close icon" ng-click="close($index)"></i>
+    <div
+        class="animated notification"
+        *ngFor="let notification of notifications; let index = index; trackBy: trackNotification">
+        <div class="ui message" [ngClass]="notification.type || ''">
+            <i class="close icon" (click)="close(index)"></i>
             <div class="header">
-                {{notification.title}}
+                {{ notification.title }}
             </div>
-            <p>{{notification.message}}</p>
+            <p>{{ notification.message }}</p>
         </div>
     </div>
 </div>
 
-<update-modal data="updateData" approve="installUpdate()" modal-ref="updateModalRef"></update-modal>
+<update-modal
+    [data]="updateData"
+    [approve]="installUpdate"
+    [modalRef]="updateModalRef"
+    (modalRefChange)="setUpdateModalRef($any($event))">
+</update-modal>
 
 <certificate-modal
-    approve="installCertificate()"
-    allow-insecure-tls="allowInsecureTls()"
-    after="certificateResult"
-    data="certificate"
-    modal-ref="certificateModalRef">
+    [approve]="installCertificate"
+    [allowInsecureTls]="allowInsecureTls"
+    [after]="certificateResult"
+    [data]="certificate"
+    [modalRef]="certificateModalRef"
+    (modalRefChange)="setCertificateModalRef($any($event))">
 </certificate-modal>
 
 <insecure-tls-modal
-    approve="confirmInsecureTls()"
-    after="insecureTlsResult"
-    data="insecureTlsCertificate"
-    modal-ref="insecureTlsModalRef">
+    [approve]="confirmInsecureTls"
+    [after]="insecureTlsResult"
+    [data]="insecureTlsCertificate"
+    [modalRef]="insecureTlsModalRef"
+    (modalRefChange)="setInsecureTlsModalRef($any($event))">
 </insecure-tls-modal>

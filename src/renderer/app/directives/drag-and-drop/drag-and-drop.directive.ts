@@ -1,36 +1,134 @@
-import { IAugmentedJQuery, IDirective, IDirectiveFactory, IRootScopeService, IScope } from "angular";
-import { DragAndDropController } from "./drag-and-drop.controller";
-import type { PendingTorrentUploadFile } from "@shared/ipc-contract";
+import {
+    Directive,
+    EventEmitter,
+    HostListener,
+    Inject,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    Output,
+} from "@angular/core"
+import type { AppMeta, NotificationPayload, PendingTorrentUploadFile } from "@shared/ipc-contract"
 
-export class DragAndDropDirective implements IDirective {
-    restrict = "A";
-    controller = DragAndDropController;
+interface DragAndDropEventBus {
+    $broadcast(name: string, ...args: unknown[]): void
+    $emit(name: string, ...args: unknown[]): void
+}
 
-    static getInstance(): IDirectiveFactory {
-        const factory = ($rootScope: IRootScopeService) =>
-            new DragAndDropDirective($rootScope);
-        factory.$inject = ["$rootScope"];
-        return factory;
-    }
+@Directive({
+    selector: "[drag-and-drop]",
+    standalone: true,
+})
+export class DragAndDropDirective implements OnInit, OnDestroy {
+    @Output() readonly dragActiveChange = new EventEmitter<boolean>()
+    @Output() readonly torrentFilesDropped = new EventEmitter<PendingTorrentUploadFile[]>()
+    @Output() readonly invalidFiles = new EventEmitter<NotificationPayload>()
+
+    private dragging = 0
+    private metaPromise: Promise<AppMeta> = Promise.resolve({} as AppMeta)
+    private previousDragOver: GlobalEventHandlers["ondragover"] = null
+    private previousDrop: GlobalEventHandlers["ondrop"] = null
 
     constructor(
-        private $rootScope: IRootScopeService,
+        @Inject("$rootScope") private readonly rootEvents: DragAndDropEventBus,
+        private readonly zone: NgZone,
     ) {}
 
+    ngOnInit() {
+        this.metaPromise = window.electorrent.app.getMeta()
+        this.previousDragOver = document.ondragover
+        this.previousDrop = document.ondrop
+        document.ondragover = document.ondrop = this.preventDocumentDrop
+    }
+
+    ngOnDestroy() {
+        document.ondragover = this.previousDragOver
+        document.ondrop = this.previousDrop
+    }
+
+    @HostListener("click")
+    onClick() {
+        this.dragging = 0
+        this.setDragActive(false)
+    }
+
+    @HostListener("dragenter", ["$event"])
+    onDragEnter(event: DragEvent) {
+        this.dragging += 1
+        this.setDragActive(true)
+        event.stopPropagation()
+        event.preventDefault()
+    }
+
+    @HostListener("dragleave", ["$event"])
+    onDragLeave(event: DragEvent) {
+        this.dragging = Math.max(0, this.dragging - 1)
+        if (this.dragging === 0) {
+            this.setDragActive(false)
+        }
+        event.stopPropagation()
+        event.preventDefault()
+    }
+
+    @HostListener("drop", ["$event"])
+    onDrop(event: DragEvent) {
+        event.stopPropagation()
+        event.preventDefault()
+
+        const files = Array.from(event.dataTransfer?.files || [])
+        this.dragging = 0
+        this.setDragActive(false)
+
+        void this.metaPromise.then((meta) => {
+            const askUploadOptions = meta.isMacOS ? event.altKey : event.ctrlKey
+            const torrentFiles = files.filter((file) => this.isTorrentFile(file))
+
+            if (torrentFiles.length === 0) {
+                if (files.length > 0) {
+                    this.notifyInvalidFiles()
+                }
+                return []
+            }
+
+            return Promise.all(torrentFiles.map((file) => (
+                this.serializeDroppedTorrent(file, askUploadOptions)
+            )))
+        }).then((torrentFiles) => {
+            this.zone.run(() => {
+                this.torrentFilesDropped.emit(torrentFiles)
+                this.broadcastTorrentFiles(torrentFiles)
+            })
+        })
+    }
+
+    private readonly preventDocumentDrop = (event: DragEvent) => {
+        event.preventDefault()
+    }
+
+    private setDragActive(active: boolean) {
+        this.dragActiveChange.emit(active)
+        this.rootEvents.$emit("show:draganddrop", active)
+    }
+
     private notifyInvalidFiles() {
-        this.$rootScope.$emit("notification", {
+        const notification: NotificationPayload = {
             title: "Oopsy Daisy!",
             message: "Seems like you chose an incorrect file type!",
             type: "negative",
-        });
+        }
+        this.invalidFiles.emit(notification)
+        this.rootEvents.$emit("notification", notification)
     }
 
     private isTorrentFile(file: File) {
-        return file.name.toLowerCase().endsWith(".torrent");
+        return file.name.toLowerCase().endsWith(".torrent")
     }
 
-    private async serializeDroppedTorrent(file: File, askUploadOptions: boolean): Promise<PendingTorrentUploadFile> {
-        const sourcePath = window.electorrent.torrents.getPathForFile(file);
+    private async serializeDroppedTorrent(
+        file: File,
+        askUploadOptions: boolean,
+    ): Promise<PendingTorrentUploadFile> {
+        const sourcePath = window.electorrent.torrents.getPathForFile(file)
 
         return {
             type: "file",
@@ -38,91 +136,17 @@ export class DragAndDropDirective implements IDirective {
             data: new Uint8Array(await file.arrayBuffer()),
             sourcePath: sourcePath || undefined,
             askUploadOptions,
-        };
+        }
     }
 
     private broadcastTorrentFiles(files: PendingTorrentUploadFile[]) {
         files.forEach((file) => {
-            this.$rootScope.$broadcast("torrents:add", {
+            this.rootEvents.$broadcast("torrents:add", {
                 type: "file",
                 filename: file.filename,
                 data: new Uint8Array(file.data),
                 sourcePath: file.sourcePath,
-            }, !!file.askUploadOptions);
-        });
-    }
-
-    link(scope: IScope, element: IAugmentedJQuery) {
-        const electorrent = window.electorrent
-        const metaPromise = electorrent.app.getMeta()
-        let dragging = 0;
-        const previousDragOver = document.ondragover;
-        const previousDrop = document.ondrop;
-
-        document.ondragover = document.ondrop = (event: DragEvent) => {
-            event.preventDefault();
-        };
-
-        const onClick = () => {
-            dragging = 0;
-            this.$rootScope.$emit("show:draganddrop", false);
-        };
-
-        const onDragEnter = (event: JQuery.TriggeredEvent) => {
-            dragging += 1;
-            this.$rootScope.$emit("show:draganddrop", true);
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
-        };
-
-        const onDragLeave = (event: JQuery.TriggeredEvent) => {
-            dragging -= 1;
-
-            if (dragging === 0) {
-                this.$rootScope.$emit("show:draganddrop", false);
-            }
-
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
-        };
-
-        const onDrop = (event: JQuery.TriggeredEvent) => {
-            const files = (event.originalEvent as DragEvent).dataTransfer?.files;
-
-            metaPromise.then((meta) => {
-                const advancedKey = meta.isMacOS ? !!event.altKey : !!event.ctrlKey;
-                const torrentFiles = Array.from(files || []).filter((file) => this.isTorrentFile(file));
-
-                if (torrentFiles.length === 0) {
-                    if (files && files.length > 0) {
-                        this.notifyInvalidFiles();
-                    }
-                    return [];
-                }
-
-                return Promise.all(torrentFiles.map((file) => this.serializeDroppedTorrent(file, advancedKey)));
-            }).then((files: PendingTorrentUploadFile[]) => {
-                this.$rootScope.$applyAsync(() => {
-                    this.broadcastTorrentFiles(files);
-                });
-            });
-            this.$rootScope.$emit("show:draganddrop", false);
-        };
-
-        element.on("click", onClick);
-        element.on("dragenter", onDragEnter);
-        element.on("dragleave", onDragLeave);
-        element.on("drop", onDrop);
-
-        scope.$on("$destroy", () => {
-            document.ondragover = previousDragOver;
-            document.ondrop = previousDrop;
-            element.off("click", onClick);
-            element.off("dragenter", onDragEnter);
-            element.off("dragleave", onDragLeave);
-            element.off("drop", onDrop);
-        });
+            }, !!file.askUploadOptions)
+        })
     }
 }

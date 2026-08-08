@@ -1,43 +1,56 @@
-import { IDirective, IDirectiveFactory } from "angular";
-import { ModalController } from "@renderer/app/directives/modal/modal.controller";
-import html from "./rename-server-modal.template.html";
+import {
+    AfterViewInit,
+    Component,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    Output,
+    ViewChild,
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { ModalDirective, type ModalAction } from "@renderer/app/directives/modal/modal.directive";
 
-interface RenameServerModalScope extends angular.IScope {
-    data: {
-        server?: any;
-        name: string;
+export interface RenameServerItem {
+    getDisplayName(): string;
+}
+
+export interface RenameServerModalData {
+    server?: RenameServerItem;
+    name: string;
+    reset(): void;
+}
+
+@Component({
+    selector: "rename-server-modal",
+    standalone: true,
+    imports: [FormsModule, ModalDirective],
+    templateUrl: "./rename-server-modal.template.html",
+})
+export class RenameServerModalDirective implements AfterViewInit, OnDestroy {
+    @Input() data: RenameServerModalData = {
+        name: "",
+        reset: () => undefined,
     };
-    modalRef?: RenameServerModalController;
-}
+    @Input() approve?: ModalAction;
+    @Input() modalRef?: RenameServerModalDirective;
+    @Output() readonly modalRefChange = new EventEmitter<RenameServerModalDirective | undefined>();
 
-class RenameServerModalController {
-    static $inject = ["$scope"];
+    @ViewChild(ModalDirective) private modal?: ModalDirective;
 
-    modalref?: ModalController;
-
-    constructor(private readonly scope: RenameServerModalScope) {
-        this.scope.modalRef = this;
+    ngAfterViewInit(): void {
+        this.modalRef = this;
+        this.modalRefChange.emit(this);
     }
 
-    open(server: any) {
-        this.scope.data.server = server;
-        this.scope.data.name = server.getDisplayName();
-        this.modalref?.showModal();
+    ngOnDestroy(): void {
+        this.modalRefChange.emit(undefined);
+    }
+
+    open(server: RenameServerItem): void {
+        this.data.server = server;
+        this.data.name = server.getDisplayName();
+        this.modal?.showModal();
     }
 }
 
-export class RenameServerModalDirective implements IDirective {
-    restrict = "E";
-    scope = {
-        data: "=",
-        approve: "&",
-        modalRef: "=?",
-    };
-    template = html;
-    controller = RenameServerModalController;
-    controllerAs = "ctl";
-
-    static getInstance(): IDirectiveFactory {
-        return () => new RenameServerModalDirective();
-    }
-}
+export { RenameServerModalDirective as RenameServerModalComponent };

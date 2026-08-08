@@ -1,31 +1,32 @@
-<a
-    ng-repeat-start="item in actionItems track by $index"
-    ng-if="item.type === 'button'"
-    class="ui labeled icon button"
-    ng-class="[item.color, {disabled: enabled && !item.alwaysActive}]"
-    data-role="{{item.role}}"
-    ng-click="invoke(item.click, item.label)"
->
-    <i class="ui icon" ng-class="item.icon"></i>
-    {{item.label}}
-</a>
+<ng-container *ngFor="let item of actionItems">
+    <a
+        *ngIf="item.type === 'button'"
+        class="ui labeled icon button"
+        [ngClass]="[item.color || '', enabled && !item.alwaysActive ? 'disabled' : '']"
+        [attr.data-role]="item.role"
+        (click)="invoke(item.click, item.label)"
+    >
+        <i class="ui icon" [ngClass]="item.icon || ''"></i>
+        {{ item.label }}
+    </a>
 
-<span
-    ng-if="item.type === 'labels'"
-    labels-dropdown
-    labels="labels"
-    action="item.labelAction"
-    enabled="enabled"
-></span>
+    <span
+        *ngIf="item.type === 'labels'"
+        labels-dropdown
+        [labels]="labels"
+        [action]="item.labelAction"
+        [enabled]="enabled"
+    ></span>
 
-<action-header-dropdown
-    ng-repeat-end
-    ng-if="item.type === 'dropdown'"
-    actions="item.actions"
-    always-active="item.alwaysActive"
-    color="{{item.color}}"
-    enabled="enabled"
-    label="{{item.label}}"
-    on-action="invoke(action, label)"
-    role="{{item.role}}"
-></action-header-dropdown>
+    <div
+        *ngIf="item.type === 'dropdown'"
+        action-header-dropdown
+        [actions]="item.actions || []"
+        [alwaysActive]="item.alwaysActive || false"
+        [color]="item.color"
+        [enabled]="enabled"
+        [label]="item.label"
+        [role]="item.role"
+        (actionSelected)="invoke($event.action, $event.label)"
+    ></div>
+</ng-container>

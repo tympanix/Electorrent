@@ -1,186 +1,251 @@
-import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
+import {
+    AfterContentInit,
+    AfterViewInit,
+    Component,
+    ElementRef,
+    forwardRef,
+    HostBinding,
+    HostListener,
+    inject,
+    Injector,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Output,
+    EventEmitter,
+    booleanAttribute,
+    ChangeDetectorRef,
+} from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from "@angular/forms";
 
-export class DropdownController {
-    model?: any;
-    disabled?: boolean;
-    title?: string;
-    openOnFocus?: string;
-    dropdownNoBlur?: string;
-    onChange?: () => void;
+type ChangeHandler = (value: unknown) => void;
 
+@Component({
+    selector: "dropdown",
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: "./dropdown.template.html",
+    providers: [{
+        provide: NG_VALUE_ACCESSOR,
+        useExisting: forwardRef(() => DropdownDirective),
+        multi: true,
+    }],
+})
+export class DropdownDirective implements AfterContentInit, AfterViewInit, ControlValueAccessor, OnChanges, OnDestroy {
+    @Input() title = "";
+    @Input({ transform: booleanAttribute }) openOnFocus = true;
+    @Input({ transform: booleanAttribute }) dropdownNoBlur = false;
+    @Input() disabled = false;
+    @Output() valueChange = new EventEmitter<unknown>();
+
+    @HostBinding("class.ui") readonly uiClass = true;
+    @HostBinding("class.dropdown") readonly dropdownClass = true;
+    @HostBinding("class.selection") get selectionClass(): boolean {
+        return !this.customContent;
+    }
+    @HostBinding("class.disabled") get disabledClass(): boolean {
+        return this.disabled;
+    }
+    @HostBinding("class.has-selection") get hasSelectionClass(): boolean {
+        return this.model !== undefined && this.model !== null && this.model !== "";
+    }
+
+    private readonly element = inject(ElementRef<HTMLElement>);
+    private readonly injector = inject(Injector);
+    private readonly changeDetector = inject(ChangeDetectorRef);
+    private readonly values = new Map<string, unknown>();
     private dropdown?: any;
-    private scope?: IScope;
-    private values = new Map<string, any>();
+    private model: unknown;
+    private onChange: ChangeHandler = () => undefined;
+    private onTouched: () => void = () => undefined;
+    customContent = false;
 
-    initialize(scope: IScope, element: IAugmentedJQuery, hasModel: boolean) {
-        this.scope = scope;
-        this.dropdown = $(element);
+    ngAfterContentInit(): void {
+        this.customContent = this.element.nativeElement.querySelectorAll(":scope > .menu").length > 1;
+        if (this.customContent) {
+            this.changeDetector.detectChanges();
+        }
+    }
 
+    ngAfterViewInit(): void {
+        const hasModel = this.injector.get(NgControl, null, { self: true }) !== null;
+        this.dropdown = $(this.element.nativeElement);
         this.dropdown.dropdown({
             transition: "vertical flip",
             duration: 100,
             action: hasModel ? "activate" : "hide",
-            showOnFocus: this.openOnFocus !== "false",
+            showOnFocus: this.openOnFocus,
             onChange: (value: string) => {
                 const modelValue = this.values.has(value) ? this.values.get(value) : value;
-
-                if (!hasModel || this.model === modelValue) {
+                if (!hasModel || Object.is(this.model, modelValue)) {
                     return;
                 }
 
-                scope.$evalAsync(() => {
-                    this.model = modelValue;
-                    if (this.onChange) {
-                        scope.$applyAsync(() => this.onChange?.());
-                    }
-                });
+                this.model = modelValue;
+                this.element.nativeElement.classList.toggle(
+                    "has-selection",
+                    modelValue !== undefined && modelValue !== null && modelValue !== "",
+                );
+                this.onChange(modelValue);
+                this.valueChange.emit(modelValue);
+                this.dropdown.dropdown("hide");
+                window.setTimeout(() => this.forceClosed(), 0);
             },
         });
 
-        if (this.dropdownNoBlur !== undefined) {
+        if (this.dropdownNoBlur) {
             this.dropdown.off("blur.dropdown");
         }
 
         this.render();
     }
 
-    addItem(value?: any) {
+    ngOnChanges(): void {
+        this.element.nativeElement.classList.toggle("disabled", this.disabled);
+    }
+
+    ngOnDestroy(): void {
+        this.dropdown?.dropdown("destroy");
+        this.dropdown = undefined;
+        this.values.clear();
+    }
+
+    writeValue(value: unknown): void {
+        this.model = value;
+        this.render();
+    }
+
+    registerOnChange(handler: ChangeHandler): void {
+        this.onChange = handler;
+    }
+
+    registerOnTouched(handler: () => void): void {
+        this.onTouched = handler;
+    }
+
+    setDisabledState(disabled: boolean): void {
+        this.disabled = disabled;
+        this.element.nativeElement.classList.toggle("disabled", disabled);
+    }
+
+    addItem(value: unknown): void {
         if (value !== undefined) {
             this.values.set(String(value), value);
         }
         this.refresh();
     }
 
-    removeItem(value?: any) {
+    removeItem(value: unknown): void {
         if (value !== undefined) {
             this.values.delete(String(value));
         }
         this.refresh();
     }
 
-    private refresh() {
-        this.scope?.$evalAsync(() => {
-            this.dropdown?.dropdown("refresh");
-            this.render();
-        });
+    selectItem(value: unknown): void {
+        if (this.disabled || Object.is(this.model, value)) return;
+        this.model = value;
+        this.element.nativeElement.classList.add("has-selection");
+        this.onChange(value);
+        this.valueChange.emit(value);
+        this.forceClosed();
     }
 
-    render() {
-        this.dropdown?.dropdown("set selected", this.model);
+    @HostListener("blur")
+    markTouched(): void {
+        this.onTouched();
     }
 
-    setDisabled(disabled: boolean) {
-        this.dropdown?.toggleClass("disabled", disabled);
+    private refresh(): void {
+        if (!this.dropdown) {
+            return;
+        }
+
+        this.dropdown.dropdown("refresh");
+        this.render();
     }
 
-    destroy() {
-        this.dropdown?.dropdown("destroy");
-        this.dropdown = undefined;
-        this.values.clear();
+    private render(): void {
+        if (!this.dropdown) {
+            return;
+        }
+
+        if (this.model === undefined || this.model === null) {
+            this.dropdown.dropdown("clear");
+            return;
+        }
+
+        this.dropdown.dropdown("set selected", String(this.model));
+    }
+
+    private forceClosed(): void {
+        const host = this.element.nativeElement as HTMLElement;
+        host.classList.remove("active", "visible");
+        const menu = host.querySelector(":scope > .menu") as HTMLElement | null;
+        if (!menu) return;
+        menu.classList.remove("active", "visible", "animating", "in");
+        menu.style.setProperty("display", "none", "important");
     }
 }
 
-export class DropdownDirective implements IDirective {
-    restrict = "E";
-    scope = {};
-    bindToController = {
-        model: "=?ngModel",
-        disabled: "<?ngDisabled",
-        onChange: "&?ngChange",
-        title: "@?",
-        openOnFocus: "@?",
-        dropdownNoBlur: "@?",
-    };
-    controller = DropdownController;
-    controllerAs = "ctl";
-    require = "dropdown";
-    transclude = true;
-    template = "";
+@Component({
+    selector: "dropdown-item",
+    standalone: true,
+    templateUrl: "./dropdown-item.template.html",
+})
+export class DropdownItemDirective implements AfterContentInit, OnChanges, OnDestroy, OnInit {
+    @Input() value?: unknown;
+    @Input() title?: unknown;
+    @Input("data-value") dataValue?: unknown;
 
-    static getInstance(): IDirectiveFactory {
-        return () => new DropdownDirective();
+    @HostBinding("class.item") readonly itemClass = true;
+    @HostBinding("attr.data-value") get valueAttribute(): string | undefined {
+        const value = this.resolvedValue;
+        return value === undefined ? undefined : String(value);
     }
 
-    link(
-        scope: IScope,
-        element: IAugmentedJQuery,
-        attrs: IAttributes,
-        controller: DropdownController,
-        transclude: any,
-    ) {
-        transclude((contents: IAugmentedJQuery) => element.append(contents));
+    showTitle = false;
 
-        if (!element.children(".menu").length) {
-            const items = element.contents().detach();
-            const text = angular.element('<div class="default text"></div>');
-            const menu = angular.element('<div class="menu"></div>');
+    private readonly dropdown = inject(DropdownDirective);
+    private readonly element = inject(ElementRef<HTMLElement>);
+    private registeredValue: unknown;
+    private initialized = false;
 
-            text.text(controller.title || "");
-            menu.append(items);
-            element.append(text, angular.element('<i class="dropdown icon"></i>'), menu);
-            element.addClass("selection");
-        }
-
-        element.addClass("ui dropdown");
-        controller.initialize(scope, element, Boolean(attrs.ngModel));
-
-        const unwatchModel = scope.$watch(() => controller.model, () => controller.render());
-        const unwatchDisabled = scope.$watch(
-            () => controller.disabled,
-            (disabled) => controller.setDisabled(Boolean(disabled)),
-        );
-
-        scope.$on("$destroy", () => {
-            unwatchModel();
-            unwatchDisabled();
-            controller.destroy();
-        });
-    }
-}
-
-export class DropdownItemController {
-    value?: any;
-    title?: any;
-    dataValue?: string;
-}
-
-export class DropdownItemDirective implements IDirective {
-    restrict = "E";
-    scope = {};
-    bindToController = {
-        value: "<?",
-        title: "<?",
-        dataValue: "@?",
-    };
-    controller = DropdownItemController;
-    controllerAs = "ctl";
-    replace = true;
-    transclude = true;
-    require = ["dropdownItem", "^dropdown"];
-    template = '<div class="item" ng-transclude></div>';
-
-    static getInstance(): IDirectiveFactory {
-        return () => new DropdownItemDirective();
+    get resolvedValue(): unknown {
+        return this.value ?? this.dataValue;
     }
 
-    link(
-        scope: IScope,
-        element: IAugmentedJQuery,
-        attrs: IAttributes,
-        controllers: [DropdownItemController, DropdownController],
-    ) {
-        const [item, dropdown] = controllers;
-        const value = item.value ?? item.dataValue ?? attrs.value;
-        const title = item.title ?? attrs.title;
+    ngOnInit(): void {
+        this.initialized = true;
+        this.registeredValue = this.resolvedValue;
+        this.dropdown.addItem(this.registeredValue);
+    }
 
-        if (value !== undefined) {
-            element.attr("data-value", String(value));
-        }
-        if (!element.text().trim() && title !== undefined) {
-            element.text(String(title));
+    ngOnChanges(): void {
+        if (!this.initialized || Object.is(this.registeredValue, this.resolvedValue)) {
+            return;
         }
 
-        dropdown.addItem(value);
-        scope.$on("$destroy", () => dropdown.removeItem(value));
+        this.dropdown.removeItem(this.registeredValue);
+        this.registeredValue = this.resolvedValue;
+        this.dropdown.addItem(this.registeredValue);
+    }
+
+    ngAfterContentInit(): void {
+        this.showTitle = this.element.nativeElement.textContent?.trim().length === 0;
+    }
+
+    @HostListener("click", ["$event"])
+    select(event: MouseEvent): void {
+        event.preventDefault();
+        this.dropdown.selectItem(this.resolvedValue);
+    }
+
+    ngOnDestroy(): void {
+        if (this.initialized) {
+            this.dropdown.removeItem(this.registeredValue);
+        }
     }
 }

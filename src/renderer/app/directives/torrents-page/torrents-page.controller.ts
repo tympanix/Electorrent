@@ -7,7 +7,7 @@ import { matchesLabelFilter } from "@renderer/app/directives/torrent-sidebar/tor
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { TorrentActionItem } from "@shared/torrent-actions";
 
-interface TorrentControllerScope extends angular.IScope {
+export interface TorrentControllerScope {
     pendingTorrentFiles: PendingTorrentUploadList;
     deleteModalref?: ModalController;
     deleteConfirmation?: {
@@ -19,7 +19,22 @@ interface TorrentControllerScope extends angular.IScope {
     setRatioModalRef?: { open(torrents: any[]): void };
     setLocationModalRef?: { open(torrents: any[]): void };
     setLabelModalRef?: { open(torrents: any[]): void };
+    $on(name: string, callback: (...args: any[]) => void): () => void;
+    $emit(name: string, ...args: any[]): void;
+    $apply(): void;
+    $applyAsync(): void;
     [key: string]: any;
+}
+
+export interface LegacyTimeout {
+    (callback: () => void, delay?: number): ReturnType<typeof setTimeout>;
+    cancel(timer?: ReturnType<typeof setTimeout>): void;
+}
+
+export interface PromiseAdapter {
+    when<T>(value?: T | PromiseLike<T>): Promise<T | undefined>;
+    resolve<T>(value?: T | PromiseLike<T>): Promise<T | undefined>;
+    reject(reason?: unknown): Promise<never>;
 }
 
 export class TorrentsPageController {
@@ -28,9 +43,9 @@ export class TorrentsPageController {
     constructor(
         $rootScope: ElectorrentRootScope,
         $scope: TorrentControllerScope,
-        $timeout: angular.ITimeoutService,
-        $filter: angular.IFilterService,
-        $q: angular.IQService,
+        $timeout: LegacyTimeout,
+        $filter: unknown,
+        $q: PromiseAdapter,
         $bittorrent: any,
         $notify: any,
         settingsService: any,
@@ -43,10 +58,10 @@ export class TorrentsPageController {
 
         let selected: any[] = [];
         let lastSelected: any = null;
-        let timeout: angular.IPromise<void> | undefined;
-        let reconnect: angular.IPromise<void> | undefined;
-        let slowSyncTimer: angular.IPromise<void> | undefined;
-        let slowConnectionTimer: angular.IPromise<void> | undefined;
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+        let reconnect: ReturnType<typeof setTimeout> | undefined;
+        let slowSyncTimer: ReturnType<typeof setTimeout> | undefined;
+        let slowConnectionTimer: ReturnType<typeof setTimeout> | undefined;
         let deferredUploads: Array<{ item: PendingTorrentUploadItem; askUploadOptions: boolean }> = [];
 
         let settings = settingsService.getAllSettings();
@@ -420,6 +435,7 @@ export class TorrentsPageController {
                         $notify.alert("Connection lost", "Trying to reconnect");
                         $scope.connectionLost = true;
                         setSyncConnectionState("broken");
+                        $scope.$applyAsync();
                         startReconnect();
                     });
             }, refreshRate);
@@ -502,6 +518,7 @@ export class TorrentsPageController {
             if (typeof slowThreshold === "number") {
                 status.slowThreshold = slowThreshold;
             }
+            $rootScope.$emit("sync-connection-state", state);
             $rootScope.$applyAsync();
         }
 
@@ -726,9 +743,14 @@ export class TorrentsPageController {
         };
 
         $scope.setAlternativeSpeedLimitsMode = (enabled: boolean) => {
+            const previous = $scope.alternativeSpeedLimitsEnabled;
+            $scope.alternativeSpeedLimitsEnabled = enabled;
+            $rootScope.$applyAsync();
             return $rootScope.$btclient.setAlternativeSpeedLimitsMode(enabled)
                 .then(() => syncAfterTorrentMutation())
                 .catch((err: unknown) => {
+                    $scope.alternativeSpeedLimitsEnabled = previous;
+                    $rootScope.$applyAsync();
                     console.error("Alternative speed limits error", err);
                     $notify.alert("Invalid action", "The alternative rate limits mode could not be changed");
                 });
@@ -968,12 +990,12 @@ export class TorrentsPageController {
                 }
             }).then(() => {
                 syncDetailsPanel();
-                if (!$scope.arrayTorrents || $scope.arrayTorrents.length === 0) {
-                    $scope.renderDone();
-                }
+                $scope.renderDone();
+                $scope.$applyAsync();
             }).catch((err: unknown) => {
                 cancelSlowSyncTimer();
                 setSyncConnectionState("broken");
+                $scope.$applyAsync();
                 $scope.renderDone();
                 return $q.reject(err);
             });

@@ -8,19 +8,31 @@
             <th class="twelve wide">Name</th>
         </tr>
     </thead>
-    <tbody ui-sortable="ctl.sortOptions" ng-model="ctl.server.columns">
-        <tr ng-repeat="col in ctl.server.columns">
+    <tbody>
+        <tr
+            *ngFor="let column of columns; let index = index; trackBy: trackColumn"
+            [class.is-dragging]="draggingIndex === index"
+            (dragover)="allowColumnDrop($event)"
+            (drop)="dropColumn(index, $event)">
             <td style="min-width: 12em">
-                <div class="sort handle">
+                <div
+                    class="sort handle"
+                    draggable="true"
+                    (dragstart)="startColumnDrag(index, $event)"
+                    (dragend)="finishColumnDrag()">
                     <i class="ui grey sort icon"></i>
                 </div>
             </td>
             <td style="min-width: 12em">
                 <div class="ui checkbox">
-                    <input type="checkbox" ng-model="col.enabled"><label></label>
+                    <input
+                        type="checkbox"
+                        [checked]="!!column.enabled"
+                        (change)="setColumnEnabled(column, $any($event.target).checked)">
+                    <label></label>
                 </div>
             </td>
-            <td style="width: 100%">{{col.name}}</td>
+            <td style="width: 100%">{{ column.name }}</td>
         </tr>
     </tbody>
 </table>

@@ -11,20 +11,24 @@
                     data-role="settings-watch-directory-input"
                     type="text"
                     placeholder="Disabled"
-                    ng-model="settings.watchDirectory">
+                    [ngModel]="settings.watchDirectory"
+                    (ngModelChange)="setWatchDirectory($event)"
+                >
                 <button
                     type="button"
                     class="ui button"
                     data-role="settings-watch-directory-browse"
-                    ng-click="chooseWatchDirectory()">
+                    (click)="chooseWatchDirectory()"
+                >
                     Browse
                 </button>
                 <button
                     type="button"
                     class="ui button"
                     data-role="settings-watch-directory-clear"
-                    ng-click="clearWatchDirectory()"
-                    ng-disabled="!settings.watchDirectory">
+                    (click)="clearWatchDirectory()"
+                    [disabled]="!settings.watchDirectory"
+                >
                     Clear
                 </button>
             </div>
@@ -39,18 +43,22 @@
         <div style="margin-left: 2rem;">
             <toggle
                 data-role="settings-default-upload-options-toggle"
-                ng-model="server.defaultUploadOptionsEnabled"
-                ng-disabled="!ctl.hasServer()">
+                [ngModel]="server?.defaultUploadOptionsEnabled"
+                (ngModelChange)="setDefaultUploadOptionsEnabled($event)"
+                [disabled]="!hasServer()"
+            >
                 Use default upload options
             </toggle>
 
             <div
                 data-role="settings-default-upload-options-form"
-                ng-if="ctl.hasServer() && server.defaultUploadOptionsEnabled"
-                style="margin-top: 1rem;">
+                *ngIf="server && hasServer() && server.defaultUploadOptionsEnabled"
+                style="margin-top: 1rem;"
+            >
                 <torrent-upload-form
-                    options="server.defaultUploadOptions"
-                    labels="labels"></torrent-upload-form>
+                    [options]="server.defaultUploadOptions"
+                    [labels]="labels.length ? labels : getLabels()"
+                ></torrent-upload-form>
             </div>
         </div>
     </div>
@@ -61,21 +69,27 @@
         <div class="ui small header">Label colors</div>
         <p>Override colors for each label. By default, label colors are chosen automatically</p>
         <div style="margin-left: 2rem;">
-            <div class="ui divided list settings-label-color-list" ng-if="ctl.hasServer() && ctl.getLabels().length">
+            <div class="ui divided list settings-label-color-list" *ngIf="hasServer() && getLabels().length">
                 <div
                     class="item settings-label-color-item"
-                    ng-repeat="label in ctl.getLabels() track by label"
+                    *ngFor="let label of getLabels()"
                     data-role="settings-label-color-item"
-                    data-label="{{ label }}">
+                    [attr.data-label]="label"
+                >
                     <div class="settings-label-color-row">
-                        <span class="settings-label-color-chip" label-chip="label" label-color-overrides="server.labelColors">
+                        <span
+                            class="settings-label-color-chip"
+                            [labelChip]="label"
+                            [labelColorOverrides]="server?.labelColors"
+                        >
                             <span class="label-chip-text">{{ label }}</span>
                         </span>
                         <button
                             type="button"
                             class="ui tiny button"
                             data-role="settings-label-color-change"
-                            ng-click="ctl.openLabelColorModal(label)">
+                            (click)="openLabelColorModal(label)"
+                        >
                             Change
                         </button>
                         <button
@@ -83,22 +97,27 @@
                             class="ui tiny icon button"
                             title="Use deterministic color"
                             data-role="settings-label-color-reset"
-                            ng-click="ctl.resetLabelColor(label)"
-                            ng-disabled="!ctl.hasCustomLabelColor(label)">
+                            (click)="resetLabelColor(label)"
+                            [disabled]="!hasCustomLabelColor(label)"
+                        >
                             <i class="undo icon"></i>
                         </button>
-                        <span class="settings-label-color-hue" title="Hue {{ ctl.getLabelHue(label) }}" ng-attr-style="--label-hue: {{ ctl.getLabelHue(label) }}">
+                        <span
+                            class="settings-label-color-hue"
+                            [title]="'Hue ' + getLabelHue(label)"
+                            [style.--label-hue]="getLabelHue(label)"
+                        >
                             <span class="label-color-preview-dot"></span>
                         </span>
                     </div>
                 </div>
             </div>
 
-            <div class="ui info message" ng-if="ctl.hasServer() && !ctl.getLabels().length">
+            <div class="ui info message" *ngIf="hasServer() && !getLabels().length">
                 <p>No labels found for this server yet. Labels will appear here after they are reported by the connected client.</p>
             </div>
 
-            <div class="ui warning message" ng-if="!ctl.hasServer()">
+            <div class="ui warning message" *ngIf="!hasServer()">
                 <p>Connect to a server to manage label colors.</p>
             </div>
         </div>
@@ -110,31 +129,33 @@
         <div class="ui small header">Saved locations</div>
         <p>Save reusable upload locations. These locations appear in the upload modal for this server.</p>
         <div style="margin-left: 2rem;">
-            <div class="ui divided list settings-saved-location-list" ng-if="ctl.getSavedLocations().length">
+            <div class="ui divided list settings-saved-location-list" *ngIf="getSavedLocations().length">
                 <div
                     class="item settings-saved-location-item"
-                    ng-repeat="savedLocation in ctl.getSavedLocations() track by savedLocation.path"
-                    data-role="settings-saved-location-item">
+                    *ngFor="let savedLocation of getSavedLocations()"
+                    data-role="settings-saved-location-item"
+                >
                     <div class="settings-saved-location-row">
-                        <i class="{{ savedLocation.icon }} icon"></i>
+                        <i [ngClass]="savedLocation.icon + ' icon'"></i>
                         <div class="content">
-                            <div class="header" title="{{ savedLocation.path }}">{{ savedLocation.path }}</div>
+                            <div class="header" [title]="savedLocation.path">{{ savedLocation.path }}</div>
                         </div>
                         <button
                             class="ui tiny icon button"
                             title="Remove saved location"
-                            ng-click="ctl.removeSavedLocation(savedLocation.path)">
+                            (click)="removeSavedLocation(savedLocation.path)"
+                        >
                             <i class="trash icon"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="ui info message" ng-if="ctl.hasServer() && !ctl.getSavedLocations().length">
+            <div class="ui info message" *ngIf="hasServer() && !getSavedLocations().length">
                 <p>No saved locations configured for this server yet.</p>
             </div>
 
-            <div class="ui warning message" ng-if="!ctl.hasServer()">
+            <div class="ui warning message" *ngIf="!hasServer()">
                 <p>Connect to a server to manage its saved locations.</p>
             </div>
 
@@ -142,13 +163,14 @@
                 type="button"
                 class="ui primary button"
                 data-role="settings-saved-location-add"
-                ng-click="ctl.openSavedLocationModal()"
-                ng-disabled="!ctl.hasServer()">
+                (click)="openSavedLocationModal()"
+                [disabled]="!hasServer()"
+            >
                 Add saved location
             </button>
         </div>
     </div>
 </div>
 
-<saved-location-modal modal-id="settingsSavedLocationModal" ng-ref="ctl.savedLocationModalRef"></saved-location-modal>
-<label-color-modal modal-id="settingsLabelColorModal" ng-ref="ctl.labelColorModalRef"></label-color-modal>
+<saved-location-modal [modalId]="'settingsSavedLocationModal'"></saved-location-modal>
+<label-color-modal [modalId]="'settingsLabelColorModal'"></label-color-modal>

@@ -1,25 +1,45 @@
-import { IDirective, IDirectiveFactory, IRootScopeService, ITimeoutService, IScope } from "angular";
-import { ReadyBroadcastController } from "./ready-broadcast.controller";
+import {
+    AfterViewInit,
+    Directive,
+    EventEmitter,
+    Inject,
+    NgZone,
+    OnDestroy,
+    Output,
+} from "@angular/core"
 
-export class ReadyBroadcastDirective implements IDirective {
-    restrict = "A";
-    controller = ReadyBroadcastController;
+interface ReadyEventBus {
+    $emit(name: string, ...args: unknown[]): void
+}
 
-    static getInstance(): IDirectiveFactory {
-        const factory = ($rootScope: IRootScopeService, $timeout: ITimeoutService) =>
-            new ReadyBroadcastDirective($rootScope, $timeout);
-        factory.$inject = ["$rootScope", "$timeout"];
-        return factory;
-    }
+@Directive({
+    selector: "[readyBroadcast], [ready-broadcast]",
+    standalone: true,
+})
+export class ReadyBroadcastDirective implements AfterViewInit, OnDestroy {
+    @Output() readonly rendererReady = new EventEmitter<void>()
+
+    private readyTimer?: number
 
     constructor(
-        private $rootScope: IRootScopeService,
-        private $timeout: ITimeoutService,
+        @Inject("$rootScope") private readonly rootEvents: ReadyEventBus,
+        private readonly zone: NgZone,
     ) {}
 
-    link(_scope: IScope) {
-        this.$timeout(() => {
-            this.$rootScope.$emit("ready");
-        });
+    ngAfterViewInit() {
+        this.readyTimer = window.setTimeout(() => {
+            this.readyTimer = undefined
+            this.zone.run(() => {
+                this.rootEvents.$emit("ready")
+                this.rendererReady.emit()
+            })
+        }, 0)
+    }
+
+    ngOnDestroy() {
+        if (this.readyTimer !== undefined) {
+            window.clearTimeout(this.readyTimer)
+            this.readyTimer = undefined
+        }
     }
 }

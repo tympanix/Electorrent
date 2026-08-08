@@ -12,7 +12,7 @@ export const httpFormService = [function() {
 
     function serializeData(data) {
         // If this is not an object, defer to native stringification.
-        if(!angular.isObject(data)) {
+        if(data === null || typeof data !== "object") {
             return((data === null) ? "" : data.toString());
         }
 

@@ -1,44 +1,48 @@
 <div class="ui vertical menu">
-    <a class="item" ng-if="debugItem" ng-attr-data-role="{{debugItem.role}}" ng-click="runMenuItem(debugItem)">
-        <i class="ui icon" ng-if="debugItem.icon" ng-class="debugItem.icon"></i>
-        {{debugItem.label}}
-    </a>
-
     <a
         class="item"
-        ng-repeat-start="item in menu track by $index"
-        ng-if="!item.menu"
-        ng-attr-data-role="{{item.role}}"
-        ng-click="runMenuItem(item)">
-        <i class="ui icon" ng-if="item.icon" ng-class="item.icon"></i>
-        <div class="ui checkbox" ng-if="item.checked !== undefined">
-            <input type="checkbox" ng-checked="item.checked">
-            <label></label>
-        </div>
-        {{item.label}}
+        *ngIf="debugItem as item"
+        [attr.data-role]="item.role || null"
+        (click)="runMenuItem(item)">
+        <i class="ui icon" *ngIf="item.icon" [ngClass]="item.icon"></i>
+        {{ item.label }}
     </a>
 
-    <div
-        class="ui context dropdown item"
-        ng-if="item.menu"
-        ng-mouseenter="toggleSubmenu($event, true)"
-        ng-mouseleave="toggleSubmenu($event, false)"
-        ng-repeat-end>
-        <i class="ui dropdown icon"></i>
-        {{item.label}}
-        <div class="menu">
-            <a
-                class="item"
-                ng-repeat="child in item.menu track by $index"
-                ng-attr-data-role="{{child.role}}"
-                ng-click="runMenuItem(child)">
-                <i class="ui icon" ng-if="child.icon" ng-class="child.icon"></i>
-                <div class="ui checkbox" ng-if="child.checked !== undefined">
-                    <input type="checkbox" ng-checked="child.checked">
-                    <label></label>
-                </div>
-                {{child.label}}
-            </a>
+    <ng-container *ngFor="let item of menu; trackBy: trackMenuItem">
+        <a
+            class="item"
+            *ngIf="!item.menu"
+            [attr.data-role]="item.role || null"
+            (click)="runMenuItem(item)">
+            <i class="ui icon" *ngIf="item.icon" [ngClass]="item.icon"></i>
+            <div class="ui checkbox" *ngIf="item.checked !== undefined">
+                <input type="checkbox" [checked]="item.checked">
+                <label></label>
+            </div>
+            {{ item.label }}
+        </a>
+
+        <div
+            class="ui context dropdown item"
+            *ngIf="item.menu"
+            (mouseenter)="toggleSubmenu($event, true)"
+            (mouseleave)="toggleSubmenu($event, false)">
+            <i class="ui dropdown icon"></i>
+            {{ item.label }}
+            <div class="menu">
+                <a
+                    class="item"
+                    *ngFor="let child of item.menu; trackBy: trackMenuItem"
+                    [attr.data-role]="child.role || null"
+                    (click)="runMenuItem(child)">
+                    <i class="ui icon" *ngIf="child.icon" [ngClass]="child.icon"></i>
+                    <div class="ui checkbox" *ngIf="child.checked !== undefined">
+                        <input type="checkbox" [checked]="child.checked">
+                        <label></label>
+                    </div>
+                    {{ child.label }}
+                </a>
+            </div>
         </div>
-    </div>
+    </ng-container>
 </div>

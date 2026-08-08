@@ -1,0 +1,6 @@
+<div *ngIf="!customContent" class="default text">{{ title }}</div>
+<i *ngIf="!customContent" class="dropdown icon"></i>
+<div *ngIf="!customContent" class="menu">
+    <ng-content select="dropdown-item"></ng-content>
+</div>
+<ng-content></ng-content>

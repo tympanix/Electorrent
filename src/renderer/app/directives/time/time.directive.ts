@@ -1,85 +1,114 @@
-import { IAugmentedJQuery, IDirective, IDirectiveFactory, IFilterService, IScope, ITimeoutService, IPromise } from "angular";
-import { TimeController } from "./time.controller";
+import {
+    Directive,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    Output,
+    Renderer2,
+} from "@angular/core"
+import moment from "moment"
 
-interface TimeScope extends IScope {
-    time: number | string | Date;
-}
+export type TimeValue = number | string | Date | null | undefined
 
-export class TimeDirective implements IDirective {
-    restrict = "A";
-    scope = {
-        time: "=",
-    };
-    controller = TimeController;
+const BITTORRENT_EPOCH = 994_032_000_000
+const MINUTE = 60 * 1000
+const HOUR = 60 * MINUTE
+const DAY = 24 * HOUR
 
-    static getInstance(): IDirectiveFactory {
-        const factory = ($timeout: ITimeoutService, $filter: IFilterService) =>
-            new TimeDirective($timeout, $filter);
-        factory.$inject = ["$timeout", "$filter"];
-        return factory;
-    }
+@Directive({
+    selector: "[time]",
+    standalone: true,
+})
+export class TimeDirective implements OnDestroy {
+    @Output() readonly timeRendered = new EventEmitter<string>()
+
+    private value: TimeValue
+    private timer?: number
 
     constructor(
-        private $timeout: ITimeoutService,
-        private $filter: IFilterService,
+        private readonly element: ElementRef<HTMLElement>,
+        private readonly renderer: Renderer2,
     ) {}
 
-    link(scope: TimeScope, element: IAugmentedJQuery) {
-        const DAY = 60 * 60 * 24 * 1000;
-        const HOUR = 60 * 60 * 1000;
-        const MINUTE = 60 * 1000;
-        const filter = this.$filter("date");
-        let timer: IPromise<void> | undefined;
+    @Input()
+    set time(value: TimeValue) {
+        this.value = value
+        this.restartTimer()
+    }
 
-        const updateTime = () => {
-            element.html(filter(scope.time));
-        };
+    get time() {
+        return this.value
+    }
 
-        const nextUpdate = () => {
-            const date = new Date(scope.time);
-            const diff = Math.abs(Date.now() - date.getTime());
+    ngOnDestroy() {
+        this.cancelTimer()
+    }
 
-            if (diff > DAY) {
-                return undefined;
-            }
+    private restartTimer() {
+        this.cancelTimer()
+        this.renderTime()
+        this.scheduleUpdate()
+    }
 
-            if (diff < HOUR) {
-                return MINUTE;
-            }
+    private renderTime() {
+        const text = this.formatTime(this.value)
+        this.renderer.setProperty(this.element.nativeElement, "textContent", text)
+        this.timeRendered.emit(text)
+    }
 
-            if (diff < 6 * HOUR) {
-                return 15 * MINUTE;
-            }
+    private formatTime(value: TimeValue) {
+        const epochTime = value instanceof Date
+            ? value.getTime()
+            : typeof value === "number"
+                ? value
+                : Number(value)
 
-            return 30 * MINUTE;
-        };
+        if (!epochTime || epochTime < BITTORRENT_EPOCH) {
+            return ""
+        }
 
-        const startTimer = () => {
-            const next = nextUpdate();
+        return moment(epochTime).fromNow()
+    }
 
-            if (!next) {
-                return;
-            }
+    private scheduleUpdate() {
+        const delay = this.getNextUpdateDelay(this.value)
+        if (delay === undefined) {
+            return
+        }
 
-            timer = this.$timeout(() => {
-                updateTime();
-                startTimer();
-            }, next);
-        };
+        this.timer = window.setTimeout(() => {
+            this.timer = undefined
+            this.renderTime()
+            this.scheduleUpdate()
+        }, delay)
+    }
 
-        scope.$watch("time", () => {
-            if (timer) {
-                this.$timeout.cancel(timer);
-                timer = undefined;
-            }
-            updateTime();
-            startTimer();
-        });
+    private getNextUpdateDelay(value: TimeValue) {
+        const timestamp = value instanceof Date
+            ? value.getTime()
+            : new Date(value as string | number).getTime()
+        if (!Number.isFinite(timestamp)) {
+            return undefined
+        }
 
-        scope.$on("$destroy", () => {
-            if (timer) {
-                this.$timeout.cancel(timer);
-            }
-        });
+        const difference = Math.abs(Date.now() - timestamp)
+        if (difference > DAY) {
+            return undefined
+        }
+        if (difference < HOUR) {
+            return MINUTE
+        }
+        if (difference < 6 * HOUR) {
+            return 15 * MINUTE
+        }
+        return 30 * MINUTE
+    }
+
+    private cancelTimer() {
+        if (this.timer !== undefined) {
+            window.clearTimeout(this.timer)
+            this.timer = undefined
+        }
     }
 }

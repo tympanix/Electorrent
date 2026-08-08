@@ -1,4 +1,4 @@
-import { IFilterDate } from "angular";
+import type { DateFilterTransform as IFilterDate } from "./filter-types";
 import moment from "moment";
 
 const BT_EPOCH = 994032000000; /* July 2nd 2001, release of bittorrent */

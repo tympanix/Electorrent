@@ -1,25 +1,26 @@
-<modal
-    id="setLabelModal"
-    size="tiny"
-    on-hidden="ctl.onHidden()"
-    ng-ref="ctl.modalref">
+<div #modal id="setLabelModal" class="ui tiny modal">
     <div class="header">
         <i class="tag icon"></i>
         Set Label
     </div>
     <div class="content">
-        <form id="set-label-form" class="ui form" ng-submit="ctl.apply()" ng-keydown="ctl.submitOnEnter($event)">
+        <form
+            id="set-label-form"
+            class="ui form"
+            (ngSubmit)="apply()"
+            (keydown)="submitOnEnter($event)">
             <div class="field">
                 <label for="set-label-dropdown">Label</label>
                 <dropdown
                     id="set-label-dropdown"
                     title="Select label"
                     class="fluid"
-                    open-on-focus="false"
-                    ng-model="ctl.scope.label">
-                    <dropdown-item ng-repeat="label in ctl.scope.labels track by label" title="label" value="label">
-                        <span class="set-label-dropdown-chip" label-chip="label">
-                            <span class="label-chip-text">{{ label }}</span>
+                    [openOnFocus]="false"
+                    [(ngModel)]="label"
+                    name="label">
+                    <dropdown-item *ngFor="let option of labels" [title]="option" [value]="option">
+                        <span class="set-label-dropdown-chip" [labelChip]="option">
+                            <span class="label-chip-text">{{ option }}</span>
                         </span>
                     </dropdown-item>
                 </dropdown>
@@ -32,9 +33,9 @@
             type="submit"
             form="set-label-form"
             class="ui green right labeled icon button"
-            ng-disabled="!ctl.scope.label">
+            [disabled]="!label">
             Apply Label
             <i class="tag icon"></i>
         </button>
     </div>
-</modal>
+</div>

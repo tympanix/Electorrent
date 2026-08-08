@@ -1,18 +1,70 @@
-import { IDirective, IDirectiveFactory } from "angular"
-import { TorrentDetailsPeersTabController } from "./torrent-details-peers-tab.controller"
-import html from "./torrent-details-peers-tab.template.html"
+import {
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+} from "@angular/core"
+import { CommonModule } from "@angular/common"
+import {
+  SortingDirective,
+  SortHeaderDirective,
+} from "@renderer/app/directives/sorting/sorting.directive"
+import {
+  TorrentDetailsPeersRuntime,
+  TorrentDetailsPeersSettings,
+  TorrentDetailsPeersTabController,
+  TorrentDetailsPeersTabScope,
+} from "./torrent-details-peers-tab.controller"
 
-export class TorrentDetailsPeersTabDirective implements IDirective {
-  template = html
-  restrict = "E"
-  scope = {
-    torrent: "<",
-    refresh: "<",
+@Component({
+  selector: "torrent-details-peers-tab",
+  standalone: true,
+  imports: [CommonModule, SortingDirective, SortHeaderDirective],
+  templateUrl: "./torrent-details-peers-tab.template.html",
+})
+export class TorrentDetailsPeersTabDirective implements OnChanges, OnDestroy {
+  @Input() torrent?: any
+  @Input() refresh = 0
+
+  readonly ctl: TorrentDetailsPeersTabController
+
+  constructor(
+    @Inject("$rootScope") runtime: TorrentDetailsPeersRuntime,
+    @Inject("settingsService") settingsService: TorrentDetailsPeersSettings,
+    changeDetector: ChangeDetectorRef,
+  ) {
+    const scope: TorrentDetailsPeersTabScope = {
+      torrent: undefined,
+      refresh: 0,
+      peers: { items: [] },
+      resizeMode: "OverflowResizer",
+      resizeProfile: "torrent-details-peers.default",
+      columns: [],
+      sortedPeers: [],
+      loading: false,
+      loaded: false,
+      error: null,
+    }
+    this.ctl = new TorrentDetailsPeersTabController(
+      scope,
+      runtime,
+      settingsService,
+      () => changeDetector.markForCheck(),
+    )
   }
-  controller = TorrentDetailsPeersTabController
-  controllerAs = "ctl"
 
-  static getInstance(): IDirectiveFactory {
-    return () => new TorrentDetailsPeersTabDirective()
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.torrent || changes.refresh) {
+      this.ctl.update(this.torrent, this.refresh)
+    }
+  }
+
+  ngOnDestroy() {
+    this.ctl.destroy()
   }
 }
+
+export { TorrentDetailsPeersTabDirective as TorrentDetailsPeersTabComponent }

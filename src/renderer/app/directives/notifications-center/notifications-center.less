@@ -9,11 +9,7 @@ notifications-center {
     .notification {
         margin: 5px;
         box-shadow: 0 0 20px rgba(0, 0, 0, .15);
-        &.ng-enter { animation: notification-show .15s cubic-bezier(.175, .885, .32, 1.27499); }
-        &.ng-leave {
-            animation: notification-hide .1s cubic-bezier(.34, .07, 1, .2), notification-shrink .24s .12s cubic-bezier(.5, 0, 0, 1);
-            animation-fill-mode: forwards;
-        }
+        animation: notification-show .15s cubic-bezier(.175, .885, .32, 1.27499);
     }
 }
 

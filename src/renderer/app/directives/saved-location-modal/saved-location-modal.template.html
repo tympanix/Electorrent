@@ -1,24 +1,27 @@
-<modal saved-location-modal
+<modal
+    saved-location-modal
     size="small"
-    id="{{ ctl.modalId }}"
-    on-hidden="ctl.onHidden()"
-    ng-ref="ctl.modalref">
+    [id]="modalId"
+    (closed)="onHidden()"
+>
     <i class="close icon"></i>
     <div class="header">
-        {{ ctl.title }}
+        {{ title }}
     </div>
     <div class="content">
-        <form id="{{ ctl.modalId }}-form" class="ui form" ng-submit="ctl.addSavedLocation()">
+        <form [id]="modalId + '-form'" class="ui form" (ngSubmit)="addSavedLocation()">
             <div class="field">
-                <label for="{{ ctl.modalId }}-path">Path</label>
+                <label [attr.for]="modalId + '-path'">Path</label>
                 <div class="ui left icon input">
                     <i class="folder open icon"></i>
                     <input
-                        id="{{ ctl.modalId }}-path"
+                        [id]="modalId + '-path'"
                         data-role="saved-location-path"
+                        name="path"
                         type="text"
                         placeholder="/downloads/movies"
-                        ng-model="ctl.path">
+                        [(ngModel)]="path"
+                    >
                 </div>
             </div>
 
@@ -26,38 +29,40 @@
                 <label>Icon</label>
                 <div class="ui segment saved-location-icon-picker">
                     <div class="ui eight column doubling grid saved-location-icon-grid">
-                        <div class="column" ng-repeat="icon in ctl.icons track by icon">
+                        <div class="column" *ngFor="let icon of icons">
                             <button
                                 type="button"
                                 class="ui basic compact icon button fluid saved-location-icon-button"
-                                title="{{ icon }}"
+                                [title]="icon"
                                 data-role="saved-location-icon-option"
-                                data-icon="{{ icon }}"
-                                ng-class="{ blue: ctl.isIconSelected(icon) }"
-                                ng-click="ctl.selectIcon(icon)">
-                                <i class="{{ icon }} icon"></i>
+                                [attr.data-icon]="icon"
+                                [class.blue]="isIconSelected(icon)"
+                                (click)="selectIcon(icon)"
+                            >
+                                <i [ngClass]="icon + ' icon'"></i>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="ui negative message" ng-if="ctl.error">
-                <p>{{ ctl.error }}</p>
+            <div class="ui negative message" *ngIf="error">
+                <p>{{ error }}</p>
             </div>
         </form>
     </div>
     <div class="actions">
-        <button type="button" class="ui black button" ng-click="ctl.close()">
+        <button type="button" class="ui black button" (click)="close()">
             Cancel
         </button>
         <button
             type="submit"
-            form="{{ ctl.modalId }}-form"
+            [attr.form]="modalId + '-form'"
             class="ui green right labeled icon button"
             data-role="saved-location-save"
-            ng-disabled="!ctl.path || !ctl.selectedIcon">
-            {{ ctl.submitLabel }}
+            [disabled]="!path || !selectedIcon"
+        >
+            {{ submitLabel }}
             <i class="checkmark icon"></i>
         </button>
     </div>

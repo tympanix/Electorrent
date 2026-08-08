@@ -1,4 +1,4 @@
-import { IFilterNumber, IFilterService } from "angular";
+import type { FilterService as IFilterService, NumberFilter as IFilterNumber } from "./filter-types";
 
 type BytesFilterTransform = IFilterNumber;
 type SpeedFilterTorrent = {

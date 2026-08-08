@@ -1,16 +1,13 @@
-import { IFilterService, IScope, IWindowService } from "angular";
 import {
   TorrentDetailsFileColumn,
   TorrentDetailsFileItem,
   TorrentDetailsPanelData,
 } from "@renderer/app/bittorrent/torrentclient";
 import { loadSortingState, SortChange, SortingOptions } from "@renderer/app/directives/sorting/sorting.controller";
-import type { SettingsService } from "@renderer/app/services/settings";
-import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 
 type TorrentDetailsFiles = TorrentDetailsPanelData["files"];
 
-interface TorrentDetailsFileRow {
+export interface TorrentDetailsFileRow {
   key: string;
   depth: number;
   isDirectory: boolean;
@@ -28,7 +25,7 @@ interface TorrentDetailsFileNode {
   data: TorrentDetailsFileItem;
 }
 
-export interface TorrentDetailsFilesTabScope extends IScope {
+export interface TorrentDetailsFilesTabScope {
   torrent: any;
   refresh: number;
   files: TorrentDetailsFiles;
@@ -42,9 +39,23 @@ export interface TorrentDetailsFilesTabScope extends IScope {
   selectionError: string | null;
 }
 
-export class TorrentDetailsFilesTabController {
-  static $inject = ["$scope", "$rootScope", "$filter", "$window", "settingsService"];
+export interface TorrentDetailsFilesClient {
+  id?: string;
+  features: { fileSelection?: boolean };
+  getTorrentDetailsFiles(torrent: any): Promise<TorrentDetailsFiles>;
+  setTorrentFileSelection(torrent: any, files: TorrentDetailsFileItem[]): Promise<void>;
+}
 
+export interface TorrentDetailsFilesRuntime {
+  $btclient?: TorrentDetailsFilesClient;
+  $server?: { id?: string };
+}
+
+export interface TorrentDetailsFilesSettings {
+  getAllSettings(): { ui: { resizeMode?: string } };
+}
+
+export class TorrentDetailsFilesTabController {
   private readonly sortingOptions: SortingOptions = {
     defaultSortKey: "name",
     defaultSortOrder: false,
@@ -59,10 +70,9 @@ export class TorrentDetailsFilesTabController {
 
   constructor(
     public scope: TorrentDetailsFilesTabScope,
-    private rootScope: ElectorrentRootScope,
-    private $filter: IFilterService,
-    private $window: IWindowService,
-    private settingsService: SettingsService,
+    private rootScope: TorrentDetailsFilesRuntime,
+    private settingsService: TorrentDetailsFilesSettings,
+    private notifyChange: () => void = () => undefined,
   ) {
     this.scope.files = { columns: [], items: [] };
     this.scope.sortedFiles = [];
@@ -72,29 +82,17 @@ export class TorrentDetailsFilesTabController {
     this.scope.selectionUpdating = false;
     this.scope.selectionError = null;
     this.configureResize();
-    this.scope.$watch(
-      () => this.scope.files,
-      (files) => {
-        files?.items.forEach((file) => {
-          file.wanted = file.wanted !== false;
-        });
-        this.scope.selectionError = null;
-        this.loadSortingSettings();
-        this.sortFiles();
-      },
-    );
-    this.scope.$watchGroup(
-      [() => this.scope.torrent, () => this.scope.refresh],
-      () => { void this.load(); },
-    );
-    this.scope.$watchGroup(
-      [
-        () => this.settingsService.getAllSettings().ui.resizeMode,
-        () => this.rootScope.$server?.id || this.rootScope.$btclient?.id,
-      ],
-      () => this.configureResize(),
-    );
-    this.scope.$on("$destroy", () => { this.requestId += 1; });
+  }
+
+  update(torrent: any, refresh: number) {
+    this.scope.torrent = torrent;
+    this.scope.refresh = refresh;
+    this.configureResize();
+    void this.load();
+  }
+
+  destroy() {
+    this.requestId += 1;
   }
 
   canSelectFiles() {
@@ -160,7 +158,7 @@ export class TorrentDetailsFilesTabController {
 
     switch (column.format) {
       case "bytes":
-        return this.applyFilter("bytes", value);
+        return this.formatBytes(value);
       case "percent":
         return this.formatPercent(typeof value === "number" ? value : Number(value));
       case "number":
@@ -330,7 +328,7 @@ export class TorrentDetailsFilesTabController {
       this.sortFiles();
     } finally {
       this.scope.selectionUpdating = false;
-      this.scope.$evalAsync();
+      this.notifyChange();
     }
   }
 
@@ -361,6 +359,12 @@ export class TorrentDetailsFilesTabController {
         return;
       }
       this.scope.files = data || { columns: [], items: [] };
+      this.scope.files.items.forEach((file) => {
+        file.wanted = file.wanted !== false;
+      });
+      this.scope.selectionError = null;
+      this.loadSortingSettings();
+      this.sortFiles();
       this.scope.loaded = true;
     } catch (err) {
       if (requestId === this.requestId && this.scope.torrent === torrent && !this.scope.loaded) {
@@ -369,7 +373,7 @@ export class TorrentDetailsFilesTabController {
     } finally {
       if (requestId === this.requestId && this.scope.torrent === torrent) {
         this.scope.loading = false;
-        this.scope.$evalAsync();
+        this.notifyChange();
       }
     }
   }
@@ -383,7 +387,7 @@ export class TorrentDetailsFilesTabController {
   private loadSortingSettings() {
     const columns = this.scope.files?.columns || [];
     const defaultColumn = columns[0]?.id || "name";
-    const { sortKey, sortOrder } = loadSortingState(this.$window, this.scope.resizeProfile, this.sortingOptions);
+    const { sortKey, sortOrder } = loadSortingState(window, this.scope.resizeProfile, this.sortingOptions);
 
     this.fileSortKey = columns.some((column) => column.id === sortKey)
       ? sortKey
@@ -400,8 +404,13 @@ export class TorrentDetailsFilesTabController {
     return `${(numeric * 100).toFixed(1)}%`;
   }
 
-  private applyFilter(name: string, ...args: any[]) {
-    const filter = this.$filter(name) as (...filterArgs: any[]) => string;
-    return typeof filter === "function" ? filter(...args) : "";
+  private formatBytes(value: unknown) {
+    const bytes = Number(value);
+    if (!Number.isFinite(bytes) || bytes < 0) return "";
+    if (bytes === 0) return "0 B";
+    const unit = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    const index = Math.floor(Math.log(bytes) / Math.log(unit));
+    return `${parseFloat((bytes / Math.pow(unit, index)).toFixed(1))} ${sizes[index]}`;
   }
 }

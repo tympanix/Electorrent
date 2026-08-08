@@ -1,77 +1,134 @@
 <form
     class="ui form"
     id="loginForm"
-    ng-class="{loading: connecting, large: large, welcome: large}"
-    ng-submit="submitForm()"
-    onsubmit="return false;"
+    [ngClass]="{ loading: connecting, large: large, welcome: large }"
+    (ngSubmit)="submitForm()"
 >
     <div class="fields">
         <div class="ten wide field">
-            <label ng-if="showLabels">Host</label>
+            <label *ngIf="showLabels">Host</label>
             <div class="ui left icon input">
                 <i class="world icon"></i>
-                <input type="text" id="connection-host" name="ip" ng-model="server.ip" placeholder="Host" />
+                <input
+                    type="text"
+                    id="connection-host"
+                    name="ip"
+                    [ngModel]="server.ip"
+                    (ngModelChange)="setHost($event)"
+                    placeholder="Host"
+                />
             </div>
         </div>
         <div class="six wide field">
-            <label ng-if="showLabels">Protocol</label>
-            <dropdown title="Protocol" id="connection-proto" class="fluid" ng-model="server.proto" ng-disabled="hostLocks.scheme">
-                <dropdown-item value="http" id="connection-proto-http" title="http">http</dropdown-item>
-                <dropdown-item value="https" id="connection-proto-https" title="https">https</dropdown-item>
+            <label *ngIf="showLabels">Protocol</label>
+            <dropdown
+                title="Protocol"
+                name="proto"
+                id="connection-proto"
+                class="fluid"
+                [ngModel]="server.proto"
+                (ngModelChange)="setProtocol($event)"
+                [disabled]="hostLocks.scheme"
+            >
+                <dropdown-item value="http" id="connection-proto-http" title="http" (click)="setProtocol('http')">http</dropdown-item>
+                <dropdown-item value="https" id="connection-proto-https" title="https" (click)="setProtocol('https')">https</dropdown-item>
             </dropdown>
         </div>
     </div>
 
     <div class="two fields">
         <div class="field">
-            <label ng-if="showLabels">Username</label>
+            <label *ngIf="showLabels">Username</label>
             <div class="ui left icon input">
                 <i class="user icon"></i>
-                <input type="text" id="connection-user" name="username" ng-model="server.user" placeholder="Username" />
+                <input
+                    type="text"
+                    id="connection-user"
+                    name="username"
+                    [(ngModel)]="server.user"
+                    (ngModelChange)="fieldChanged()"
+                    placeholder="Username"
+                />
             </div>
         </div>
         <div class="field">
-            <label ng-if="showLabels">Password</label>
+            <label *ngIf="showLabels">Password</label>
             <div class="ui left icon input">
                 <i class="lock icon"></i>
-                <input type="password" id="connection-password" name="password" ng-model="server.password" placeholder="Password" />
+                <input
+                    type="password"
+                    id="connection-password"
+                    name="password"
+                    [(ngModel)]="server.password"
+                    (ngModelChange)="fieldChanged()"
+                    placeholder="Password"
+                />
             </div>
         </div>
     </div>
 
     <div class="field">
-        <label ng-if="showLabels">Bittorrent Client</label>
-        <dropdown title="Client Program" id="connection-client" class="fluid" ng-model="server.client" ng-change="setPath()">
-            <dropdown-item value="id" id="connection-client-{{id}}" title="client.name" ng-repeat="(id, client) in btclients">
-                <i class="icon torrent" ng-class="client.icon"></i> {{client.name}}
+        <label *ngIf="showLabels">Bittorrent Client</label>
+        <dropdown
+            title="Client Program"
+            name="client"
+            id="connection-client"
+            class="fluid"
+            [ngModel]="server.client"
+            (ngModelChange)="setClient($event)"
+        >
+            <dropdown-item
+                *ngFor="let entry of clientEntries"
+                [value]="entry[0]"
+                [id]="'connection-client-' + entry[0]"
+                [title]="entry[1].name"
+                (click)="setClient(entry[0])"
+            >
+                <i class="icon torrent" [ngClass]="entry[1].icon"></i> {{ entry[1].name }}
             </dropdown-item>
         </dropdown>
-        <div class="ui pointing red basic label" ng-if="server.client && !btclients[server.client]">
-            Invalid client: {{server.client}}
+        <div class="ui pointing red basic label" *ngIf="server.client && !btclients[server.client]">
+            Invalid client: {{ server.client }}
         </div>
     </div>
 
     <div class="fields">
         <div class="six wide field">
-            <label ng-if="showLabels">Port</label>
+            <label *ngIf="showLabels">Port</label>
             <div class="ui left icon input">
                 <i class="sitemap icon"></i>
-                <input type="number" name="port" id="connection-port" ng-model="server.port" placeholder="Port" ng-disabled="hostLocks.port" />
+                <input
+                    type="number"
+                    name="port"
+                    id="connection-port"
+                    [ngModel]="server.port"
+                    (ngModelChange)="setPort($event)"
+                    placeholder="Port"
+                    [disabled]="hostLocks.port"
+                />
             </div>
         </div>
         <div class="ten wide field">
-            <label ng-if="showLabels">Path</label>
+            <label *ngIf="showLabels">Path</label>
             <div class="ui left icon action input">
                 <i class="linkify icon"></i>
-                <input type="text" id="connection-path" name="path" ng-model="server.path" placeholder="Path" ng-change="lockPath()" />
-                <button type="button" class="ui icon button" ng-click="resetPath()">
+                <input
+                    type="text"
+                    id="connection-path"
+                    name="path"
+                    [(ngModel)]="server.path"
+                    (ngModelChange)="fieldChanged()"
+                    placeholder="Path"
+                />
+                <button type="button" class="ui icon button" (click)="resetPath()">
                     <i class="refresh icon"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <button ng-if="showSubmit" id="connection-submit" class="ui fluid large green labeled icon submit button">
+    <button *ngIf="showSubmit" id="connection-submit" type="submit"
+        class="ui fluid large green labeled icon button" style="position: relative;" [style.z-index]="server.client ? 10000 : 0">
         <i class="checkmark icon"></i> Connect
     </button>
 </form>

@@ -1,23 +1,36 @@
-<dropdown data-role="labels" dropdown-no-blur class="ui icon top left pointing dropdown button" ng-class="{disabled: ctl.enabled}">
+<dropdown
+    data-role="labels"
+    class="ui icon top left pointing dropdown button"
+    [dropdownNoBlur]="true"
+    [disabled]="enabled">
     <i class="tag icon"></i>
     <div class="menu">
         <div class="ui icon input">
             <i class="search icon"></i>
-            <input type="text" placeholder="Search labels..." ng-model="ctl.labelSearch">
+            <input type="text" placeholder="Search labels..." [(ngModel)]="labelSearch">
         </div>
-        <div data-role="remove-label" class="item" ng-click="ctl.action('')"><i class="remove icon"></i> Remove Label</div>
-        <div data-role="new-label" class="item" ng-click="ctl.openNewLabelModal()"><i class="edit icon"></i> New Label</div>
+        <div data-role="remove-label" class="item" (click)="selectLabel('')">
+            <i class="remove icon"></i> Remove Label
+        </div>
+        <div data-role="new-label" class="item" (click)="openNewLabelModal()">
+            <i class="edit icon"></i> New Label
+        </div>
         <div class="divider"></div>
         <div class="scrolling menu">
-            <div class="item label-dropdown-option" data-role="label-option" data-label="{{label}}" ng-repeat="label in ctl.labels | filter:ctl.labelSearch" ng-click="ctl.action(label)">
-                <span class="label-dropdown-chip" label-chip="label">
-                    <span class="label-chip-text">{{label}}</span>
+            <div
+                class="item label-dropdown-option"
+                data-role="label-option"
+                *ngFor="let label of filteredLabels; trackBy: trackLabel"
+                [attr.data-label]="label"
+                (click)="selectLabel(label)">
+                <span class="label-dropdown-chip" [labelChip]="label">
+                    <span class="label-chip-text">{{ label }}</span>
                 </span>
             </div>
             <div></div>
         </div>
-        <div class="message" ng-if="ctl.labelSearch && (ctl.labels | filter:ctl.labelSearch).length === 0">No results found</div>
+        <div class="message" *ngIf="labelSearch && filteredLabels.length === 0">No results found</div>
     </div>
 </dropdown>
 
-<new-label-modal data="ctl.form" approve="ctl.action(ctl.form.label, true)"></new-label-modal>
+<new-label-modal [data]="form" [approve]="approveNewLabel"></new-label-modal>

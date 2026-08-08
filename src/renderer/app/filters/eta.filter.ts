@@ -1,4 +1,4 @@
-import { IFilterNumber } from "angular";
+import type { NumberFilter as IFilterNumber } from "./filter-types";
 import moment from "moment";
 
 const MONTH_IN_SECONDS = 60 * 60 * 24 * 30;

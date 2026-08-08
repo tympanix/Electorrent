@@ -1,83 +1,79 @@
-import { IAugmentedJQuery, IDirective, IDirectiveFactory, IScope } from "angular";
-import html from "./action-header-dropdown.template.html";
+import { CommonModule } from "@angular/common";
+import { Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output } from "@angular/core";
+import type { ActionHandler, ActionHeaderItem } from "./action-header.directive";
 
-type ActionHandler = (...args: never[]) => unknown;
-
-interface ActionHeaderDropdownAction {
-    click?: ActionHandler;
+export interface ActionHeaderDropdownSelection {
+    action: ActionHandler | undefined;
     label: string;
 }
 
-interface ActionHeaderDropdownScope extends IScope {
-    actions: ActionHeaderDropdownAction[];
-    alwaysActive?: boolean;
-    color?: string;
-    enabled?: boolean;
-    label: string;
-    onAction: (locals: { action: ActionHeaderDropdownAction["click"]; label: string }) => void;
-    open: boolean;
-    role?: string;
-    select: (action: ActionHeaderDropdownAction, event: JQuery.ClickEvent) => void;
-    toggle: (event: JQuery.ClickEvent) => void;
-}
+@Component({
+    selector: "action-header-dropdown, [action-header-dropdown]",
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: "./action-header-dropdown.template.html",
+    host: {
+        tabindex: "0",
+    },
+})
+export class ActionHeaderDropdownDirective {
+    @Input() actions: ActionHeaderItem[] = [];
+    @Input() alwaysActive = false;
+    @Input() color?: string;
+    @Input() enabled = false;
+    @Input() label = "";
+    @Input() role?: string;
+    @Output() actionSelected = new EventEmitter<ActionHeaderDropdownSelection>();
 
-export class ActionHeaderDropdownDirective implements IDirective {
-    restrict = "E";
-    replace = true;
-    scope = {
-        actions: "=",
-        alwaysActive: "=?",
-        color: "@",
-        enabled: "=?",
-        label: "@",
-        onAction: "&",
-        role: "@",
-    };
-    template = html;
+    open = false;
 
-    static getInstance(): IDirectiveFactory {
-        return () => new ActionHeaderDropdownDirective();
+    constructor(private readonly element: ElementRef<HTMLElement>) {}
+
+    @HostBinding("class")
+    get classes(): string {
+        return [
+            "ui top left pointing labeled icon dropdown button",
+            this.color,
+            this.enabled && !this.alwaysActive ? "disabled" : "",
+            this.open ? "active visible" : "",
+        ].filter(Boolean).join(" ");
     }
 
-    link(scope: ActionHeaderDropdownScope, element: IAugmentedJQuery) {
-        const close = () => {
-            scope.open = false;
-        };
+    @HostBinding("attr.data-role")
+    get dataRole(): string | undefined {
+        return this.role;
+    }
 
-        scope.toggle = (event) => {
-            if (scope.enabled && !scope.alwaysActive) {
-                return;
-            }
+    @HostListener("click", ["$event"])
+    toggle(event: MouseEvent): void {
+        if (this.enabled && !this.alwaysActive) {
+            return;
+        }
 
-            event.preventDefault();
-            scope.open = !scope.open;
-        };
+        event.preventDefault();
+        this.open = !this.open;
+    }
 
-        scope.select = (action, event) => {
-            event.stopPropagation();
-            close();
-            scope.onAction({ action: action.click, label: action.label });
-        };
+    select(action: ActionHeaderItem, event: MouseEvent): void {
+        event.stopPropagation();
+        this.open = false;
+        this.actionSelected.emit({ action: action.click, label: action.label });
+    }
 
-        const onBodyClick = (event: MouseEvent) => {
-            if (!element[0].contains(event.target as Node) && scope.open) {
-                scope.$applyAsync(close);
-            }
-        };
+    @HostListener("document:click", ["$event"])
+    closeOnOutsideClick(event: MouseEvent): void {
+        if (this.open && !this.element.nativeElement.contains(event.target as Node)) {
+            this.open = false;
+        }
+    }
 
-        const onKeyUp = (event: KeyboardEvent) => {
-            if (event.key === "Escape" && scope.open) {
-                scope.$applyAsync(close);
-                (element[0] as HTMLElement).blur();
-            }
-        };
+    @HostListener("window:keyup", ["$event"])
+    closeOnEscape(event: KeyboardEvent): void {
+        if (event.key !== "Escape" || !this.open) {
+            return;
+        }
 
-        document.body.addEventListener("click", onBodyClick);
-        window.addEventListener("keyup", onKeyUp);
-
-        scope.$on("$destroy", () => {
-            document.body.removeEventListener("click", onBodyClick);
-            window.removeEventListener("keyup", onKeyUp);
-        });
+        this.open = false;
+        this.element.nativeElement.blur();
     }
 }
