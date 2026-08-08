@@ -1,102 +1,63 @@
-import { IScope } from "angular";
-import { TorrentUploadOptions, TorrentUploadOptionsEnable } from "@renderer/app/bittorrent/torrentclient";
-import type { SettingsService } from "@renderer/app/services/settings";
-import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
+import type { TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract";
 import type { SavedLocationConfig } from "@shared/ipc-contract";
 
-interface TorrentUploadFormScope extends IScope {
-    options: TorrentUploadOptions
-    canAddSavedLocation?: boolean
-    onAddSavedLocation?: () => void
+export interface TorrentUploadRootScope {
+    $btclient?: {
+        features?: {
+            uploadOptions?: TorrentUploadOptionsEnable;
+        };
+    };
+    $server?: { id?: string };
+    $on(event: string, listener: () => void): () => void;
+}
+
+export interface TorrentUploadSettingsService {
+    getServer(id: string): { savedLocations?: SavedLocationConfig[] } | undefined;
 }
 
 export class TorrentUploadFormController {
+    protected uploadOptions: TorrentUploadOptions = {};
+    canAddSavedLocation = false;
+    optionsEnabled: TorrentUploadOptionsEnable = {};
+    savedLocations: SavedLocationConfig[] = [];
+    selectedSavedLocationPath = "";
 
-    static $inject = ["$scope", "$rootScope", "settingsService"]
+    constructor(
+        protected readonly rootScope: TorrentUploadRootScope,
+        protected readonly settingsService: TorrentUploadSettingsService,
+    ) {}
 
-    scope: TorrentUploadFormScope
-    rootScope: ElectorrentRootScope
-    optionsEnabled: TorrentUploadOptionsEnable = {}
-    savedLocations: SavedLocationConfig[] = []
-    selectedSavedLocationPath = ""
-
-    constructor(scope: TorrentUploadFormScope, rootScope: ElectorrentRootScope, private readonly settingsService: SettingsService) {
-        this.scope = scope
-        this.rootScope = rootScope
-        this.refreshFormState()
-
-        scope.$watch(() => {
-            return this.rootScope.$btclient
-        }, () => {
-            this.refreshFormState()
-        })
-
-        scope.$watch(() => {
-            return this.rootScope.$server?.id
-        }, () => {
-            this.refreshSavedLocations()
-        })
-
-        scope.$watch(() => {
-            return this.scope.options?.saveLocation
-        }, () => {
-            this.syncSelectedSavedLocation()
-        })
-
-        const off = this.rootScope.$on("new:settings", () => {
-            this.refreshSavedLocations()
-            this.scope.$applyAsync()
-        })
-
-        scope.$on("$destroy", () => {
-            off()
-        })
+    set options(value: TorrentUploadOptions | null | undefined) {
+        this.uploadOptions = value || {};
     }
 
-    refreshFormState() {
-        this.optionsEnabled = this.rootScope?.$btclient?.features.uploadOptions || {}
-        this.refreshSavedLocations()
+    get options(): TorrentUploadOptions {
+        return this.uploadOptions;
     }
 
-    refreshSavedLocations() {
-        const serverId = this.rootScope.$server?.id
-        const server = serverId ? this.settingsService.getServer(serverId) : undefined
-        this.savedLocations = Array.isArray(server?.savedLocations) ? server.savedLocations : []
-        this.syncSelectedSavedLocation()
+    refreshFormState(): void {
+        this.optionsEnabled = this.rootScope.$btclient?.features?.uploadOptions || {};
+        this.refreshSavedLocations();
     }
 
-    applySelectedSavedLocation() {
-        if (!this.scope.options) {
-            return
-        }
-
-        this.scope.options.saveLocation = this.selectedSavedLocationPath || ""
+    refreshSavedLocations(): void {
+        const serverId = this.rootScope.$server?.id;
+        const server = serverId ? this.settingsService.getServer(serverId) : undefined;
+        this.savedLocations = Array.isArray(server?.savedLocations) ? server.savedLocations : [];
+        this.syncSelectedSavedLocation();
     }
 
-    syncSelectedSavedLocation() {
-        const saveLocation = this.scope.options?.saveLocation || ""
-        const selectedSavedLocation = this.savedLocations.find((savedLocation) => savedLocation.path === saveLocation)
-        this.selectedSavedLocationPath = selectedSavedLocation?.path || ""
+    applySelectedSavedLocation(): void {
+        this.options.saveLocation = this.selectedSavedLocationPath || "";
     }
 
-    getSelectedSavedLocation() {
-        return this.savedLocations.find((savedLocation) => savedLocation.path === this.selectedSavedLocationPath)
+    syncSelectedSavedLocation(): void {
+        const saveLocation = this.options.saveLocation || "";
+        const selectedSavedLocation = this.savedLocations.find(({ path }) => path === saveLocation);
+        this.selectedSavedLocationPath = selectedSavedLocation?.path || "";
     }
 
-    hasSavedLocationAction() {
-        return typeof this.scope.onAddSavedLocation === "function"
+    getSelectedSavedLocation(): SavedLocationConfig | undefined {
+        return this.savedLocations.find(({ path }) => path === this.selectedSavedLocationPath);
     }
-
-    canOpenSavedLocationModal() {
-        return !!this.scope.canAddSavedLocation && this.hasSavedLocationAction()
-    }
-
-    openSavedLocationModal() {
-        if (!this.canOpenSavedLocationModal() || !this.scope.onAddSavedLocation) {
-            return
-        }
-
-        this.scope.onAddSavedLocation()
-    }
-
 }

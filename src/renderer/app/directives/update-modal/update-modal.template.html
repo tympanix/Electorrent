@@ -1,8 +1,4 @@
-<modal
-    size="small"
-    approve="approve()"
-    id="updateModal"
-    ng-ref="modalRef">
+<div #modal class="ui small modal" id="updateModal">
     <i class="close icon"></i>
     <div class="header">
         Update Available
@@ -11,8 +7,8 @@
         <h4 class="ui header">
             <div class="content">
                 Version:
-                {{data.releaseName}}
-                <div class="sub header">{{data.releaseDate | releaseDate}}</div>
+                {{ data.releaseName }}
+                <div class="sub header">{{ formatReleaseDate(data.releaseDate) }}</div>
             </div>
         </h4>
 
@@ -21,7 +17,7 @@
             Release Notes
         </h4>
 
-        <p marked="data.releaseNotes"></p>
+        <div class="release-notes" [innerHTML]="releaseNotesHtml"></div>
     </div>
     <div class="actions">
         <button type="button" class="ui black deny button">
@@ -32,4 +28,4 @@
             <i class="arrow alternate circle up icon"></i>
         </button>
     </div>
-</modal>
+</div>

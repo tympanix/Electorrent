@@ -13,59 +13,67 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="server in ctl.settings.servers">
+        <tr *ngFor="let server of settings.servers; let first = first; trackBy: trackServer">
             <td class="collapsing">
                 <div class="ui toggle checkbox">
-                    <input type="checkbox" ng-model="server.default" ng-change="ctl.onToggleDefaultServer({server: server})">
+                    <input
+                        type="checkbox"
+                        [checked]="!!server.default"
+                        (change)="toggleDefaultServer(server, $any($event.target).checked)">
                     <label></label>
                 </div>
             </td>
             <td>
-                <span class="invalid-client-indicator" ng-if="!server.isClientKnown()">
-                    <i class="red exclamation triangle icon" title="{{server.getClientWarning()}}"></i>
-                    <span class="ui popup">{{server.getClientWarning()}}</span>
+                <span class="invalid-client-indicator" *ngIf="!server.isClientKnown()">
+                    <i class="red exclamation triangle icon" [attr.title]="server.getClientWarning()"></i>
+                    <span class="ui popup">{{ server.getClientWarning() }}</span>
                 </span>
-                {{server.getName()}}
+                {{ server.getName() }}
             </td>
-            <td>{{server.ip}}</td>
+            <td>{{ server.ip }}</td>
             <td class="collapsing">
-                <div ng-switch="server.proto">
-                    <div ng-switch-when="http">
+                <ng-container [ngSwitch]="server.proto">
+                    <div *ngSwitchCase="'http'">
                         <div class="ui label">
-                            <i class="unlock alternate icon"></i> {{server.proto}}
+                            <i class="unlock alternate icon"></i> {{ server.proto }}
                         </div>
                     </div>
-                    <div ng-switch-when="https">
+                    <div *ngSwitchCase="'https'">
                         <div class="ui label">
-                            <i class="green lock icon"></i> {{server.proto}}
+                            <i class="green lock icon"></i> {{ server.proto }}
                         </div>
                     </div>
-                    <div ng-switch-default>
+                    <div *ngSwitchDefault>
                         <div class="ui label">
-                            <i class="help icon"></i> {{server.proto}}
+                            <i class="help icon"></i> {{ server.proto }}
                         </div>
                     </div>
-                </div>
+                </ng-container>
             </td>
             <td class="collapsing">
-                <div class="ui orange label" ng-if="server.proto === 'https' && server.tlsSecurity === 'insecure'">
+                <div class="ui orange label" *ngIf="server.proto === 'https' && server.tlsSecurity === 'insecure'; else secureTls">
                     <i class="exclamation triangle icon"></i> Insecure TLS
                 </div>
-                <span ng-if="server.proto !== 'https' || server.tlsSecurity !== 'insecure'">—</span>
+                <ng-template #secureTls>—</ng-template>
             </td>
-            <td>{{server.port}}</td>
-            <td>{{server.user}}</td>
+            <td>{{ server.port }}</td>
+            <td>{{ server.user }}</td>
             <td class="collapsing center aligned">
-                <button ng-disabled="$first" class="circular green ui icon mini button" ng-click="ctl.onMoveServerUp({server: server})">
+                <button type="button" [disabled]="first" class="circular green ui icon mini button" (click)="moveServerUp(server)">
                     <i class="icon arrow up"></i>
                 </button>
-                <button class="circular blue ui icon mini button" ng-click="ctl.renameModalRef.open(server)">
+                <button type="button" class="circular blue ui icon mini button" (click)="openRenameModal(server)">
                     <i class="icon tag"></i>
                 </button>
-                <button ng-if="server.proto === 'https' && server.tlsSecurity === 'insecure'" class="circular orange ui icon mini button" ng-click="ctl.onDisableInsecureTls({server: server})" title="Disable Insecure TLS">
+                <button
+                    type="button"
+                    *ngIf="server.proto === 'https' && server.tlsSecurity === 'insecure'"
+                    class="circular orange ui icon mini button"
+                    title="Disable Insecure TLS"
+                    (click)="disableInsecureTls(server)">
                     <i class="icon shield alternate"></i>
                 </button>
-                <button class="circular red ui icon mini button" ng-click="ctl.onRemoveServer({server: server})">
+                <button type="button" class="circular red ui icon mini button" (click)="removeServer(server)">
                     <i class="icon remove"></i>
                 </button>
             </td>
@@ -74,7 +82,7 @@
 </table>
 
 <rename-server-modal
-    data="ctl.renameData"
-    approve="ctl.renameServer()"
-    modal-ref="ctl.renameModalRef">
+    [data]="renameData"
+    [approve]="renameServer"
+    (modalRefChange)="renameModalRef = $any($event)">
 </rename-server-modal>

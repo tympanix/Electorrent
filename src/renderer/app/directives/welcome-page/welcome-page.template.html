@@ -8,13 +8,13 @@
                     </div>
                 </h2>
                 <connection-form
-                    server="server"
-                    btclients="btclients"
-                    connecting="connecting"
-                    show-submit="true"
-                    show-labels="false"
-                    large="true"
-                    submit="connect()"
+                    [server]="server"
+                    [btclients]="btclients"
+                    [connecting]="connecting"
+                    [showSubmit]="true"
+                    [showLabels]="false"
+                    [large]="true"
+                    (submit)="connect()"
                 ></connection-form>
             </div>
         </div>

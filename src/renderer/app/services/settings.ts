@@ -1,4 +1,4 @@
-import { IRootScopeService } from "angular";
+import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { AppSettings, StoredServerConfig } from "@shared/ipc-contract";
 import { createDefaultSettings } from "@shared/settings-defaults";
 import type { Server } from "@renderer/app/services/server";
@@ -25,7 +25,7 @@ export interface SettingsService {
     getRecentServer(): Server | undefined
 }
 
-export const settingsService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: IRootScopeService, $bittorrent, $notify, $q, Server) {
+export const settingsService = ['$rootScope', '$bittorrent', 'notificationService', '$q', 'Server', function($rootScope: ElectorrentRootScope, $bittorrent, $notify, $q, Server) {
     const electorrent = window.electorrent
 
     const settings: AppSettings<any> = createDefaultSettings();
@@ -109,7 +109,7 @@ export const settingsService = ['$rootScope', '$bittorrent', 'notificationServic
     }
 
     this.getAllSettingsCopy = function() {
-      return angular.copy(settings)
+      return cloneSettings(settings)
     }
 
     this.setCurrentServerAsDefault = function() {
@@ -136,9 +136,8 @@ export const settingsService = ['$rootScope', '$bittorrent', 'notificationServic
     }
 
     function settingsToJson() {
-        const copy: any = {}
-        angular.copy(settings, copy)
-        copy.servers = copy.servers.map((server) => {
+        const copy: any = cloneSettings(settings)
+        copy.servers = settings.servers.map((server) => {
             return server.json()
         })
         return copy
@@ -204,7 +203,7 @@ export const settingsService = ['$rootScope', '$bittorrent', 'notificationServic
     this.updateServer = function(update) {
         const server = this.getServer(update.id);
         if(!server) return $q.reject('Server with id ' + update.id + ' not found')
-        angular.merge(server, update)
+        Object.assign(server, update)
         return this.saveAllSettings()
     }
 
@@ -233,4 +232,18 @@ export const settingsService = ['$rootScope', '$bittorrent', 'notificationServic
         return maxServer
     }
 
+    function cloneSettings<T>(value: T): T {
+        if (Array.isArray(value)) {
+            return value.map((item) => cloneSettings(item)) as T
+        }
+        if (value && typeof value === "object") {
+            if (value instanceof Uint8Array) return new Uint8Array(value) as T
+            const copy = Object.create(Object.getPrototypeOf(value)) as Record<string, unknown>
+            Object.entries(value).forEach(([key, item]) => {
+                copy[key] = cloneSettings(item)
+            })
+            return copy as T
+        }
+        return value
+    }
 }];

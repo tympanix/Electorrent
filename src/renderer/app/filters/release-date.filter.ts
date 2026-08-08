@@ -1,4 +1,4 @@
-import { IFilterDate } from "angular";
+import type { DateFilterTransform as IFilterDate } from "./filter-types";
 import moment from "moment";
 
 export class ReleaseDateFilter {

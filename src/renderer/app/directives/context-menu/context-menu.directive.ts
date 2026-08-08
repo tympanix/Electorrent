@@ -1,7 +1,20 @@
-import { IDirective, IDirectiveFactory, IScope } from 'angular'
-
-import type { ContextMenuItemModel, ContextMenuModel, ContextMenuPlacement, ContextMenuSize, Unsubscribe } from '@shared/ipc-contract'
-import template from './context-menu.template.html'
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    HostBinding,
+    NgZone,
+    OnDestroy,
+} from "@angular/core"
+import { CommonModule } from "@angular/common"
+import type {
+    ContextMenuItemModel,
+    ContextMenuModel,
+    ContextMenuPlacement,
+    ContextMenuSize,
+    Unsubscribe,
+} from "@shared/ipc-contract"
 
 interface ContextMenuWindowBridge {
     onModel(callback: (model: ContextMenuModel) => void): Unsubscribe
@@ -12,87 +25,134 @@ interface ContextMenuWindowBridge {
 
 declare const window: Window & { contextMenu: ContextMenuWindowBridge }
 
-interface ContextMenuScope extends IScope {
-    menu: ContextMenuItemModel[]
-    debugItem?: ContextMenuItemModel
-    runMenuItem(item: ContextMenuItemModel): void
-    toggleSubmenu(event: Event, visible: boolean): void
-}
-
 const MENU_WINDOW_MARGIN = 12
 
-export class ContextMenuDirective implements IDirective {
-    restrict = 'E'
-    scope = {}
-    template = template
+@Component({
+    selector: "context-menu",
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: "./context-menu.template.html",
+})
+export class ContextMenuDirective implements AfterViewInit, OnDestroy {
+    menu: ContextMenuItemModel[] = []
+    debugItem?: ContextMenuItemModel
 
-    static getInstance(): IDirectiveFactory {
-        const factory = ($timeout: ng.ITimeoutService) => new ContextMenuDirective($timeout)
-        factory.$inject = ['$timeout']
-        return factory
+    @HostBinding("class.submenu-on-left") submenuOnLeft = false
+
+    private unsubscribe: Unsubscribe = () => undefined
+    private stylesheet?: HTMLLinkElement
+    private destroyed = false
+
+    constructor(
+        private readonly element: ElementRef<HTMLElement>,
+        private readonly changeDetector: ChangeDetectorRef,
+        private readonly zone: NgZone,
+    ) {}
+
+    ngAfterViewInit() {
+        document.addEventListener("click", this.closeWhenOutsideMenu)
+        this.unsubscribe = window.contextMenu.onModel((model) => this.loadModel(model))
     }
 
-    constructor(private $timeout: ng.ITimeoutService) {}
+    ngOnDestroy() {
+        this.destroyed = true
+        this.unsubscribe()
+        document.removeEventListener("click", this.closeWhenOutsideMenu)
+        this.stylesheet?.remove()
+    }
 
-    link(scope: ContextMenuScope, element: ng.IAugmentedJQuery) {
-        scope.menu = []
-        scope.runMenuItem = (item) => {
-            if (item.id) {
-                void window.contextMenu.select(item.id).then(() => {
-                    setTimeout(() => void window.contextMenu.hide(), 0)
-                })
-            }
-        }
-        scope.toggleSubmenu = (event, visible) => {
-            angular.element(event.currentTarget).find('.menu').css('display', visible ? 'block' : 'none')
+    runMenuItem(item: ContextMenuItemModel) {
+        if (!item.id) {
+            return
         }
 
-        const closeWhenOutsideMenu = (event: MouseEvent) => {
-            if (!(event.target as Element).closest('.ui.menu')) {
-                void window.contextMenu.hide()
-            }
-        }
-        document.addEventListener('click', closeWhenOutsideMenu)
-
-        const unsubscribe = window.contextMenu.onModel((model) => {
-            const stylesheet = document.createElement('link')
-            stylesheet.rel = 'stylesheet'
-            stylesheet.href = `css/themes/${model.theme}.css`
-            document.head.appendChild(stylesheet)
-
-            stylesheet.addEventListener('load', () => {
-                scope.$applyAsync(() => {
-                    scope.menu = model.items
-                    scope.debugItem = model.debugItem
-                    this.$timeout(() => {
-                        const root = element[0]
-                        const primaryMenu = root.querySelector<HTMLElement>(':scope > .ui.menu')
-                        const submenus = Array.from(root.querySelectorAll<HTMLElement>('.context.dropdown > .menu'))
-                        const submenuSize = submenus.reduce((size, submenu) => {
-                            const display = submenu.style.display
-                            const visibility = submenu.style.visibility
-                            submenu.style.visibility = 'hidden'
-                            submenu.style.display = 'block'
-                            size.width = Math.max(size.width, submenu.scrollWidth)
-                            size.height = Math.max(size.height, submenu.scrollHeight)
-                            submenu.style.display = display
-                            submenu.style.visibility = visibility
-                            return size
-                        }, { width: 0, height: 0 })
-                        void window.contextMenu.resize({
-                            width: Math.ceil((primaryMenu?.scrollWidth || root.scrollWidth) + submenuSize.width + (MENU_WINDOW_MARGIN * 2) + 2),
-                            height: Math.ceil(Math.max(primaryMenu?.scrollHeight || root.scrollHeight, submenuSize.height) + (MENU_WINDOW_MARGIN * 2) + 2),
-                        }).then(({ submenuOnLeft }) => {
-                            element.toggleClass('submenu-on-left', submenuOnLeft)
-                        })
-                    })
-                })
-            }, { once: true })
+        void window.contextMenu.select(item.id).then(() => {
+            setTimeout(() => void window.contextMenu.hide(), 0)
         })
+    }
 
-        scope.$on('$destroy', () => {
-            unsubscribe()
-            document.removeEventListener('click', closeWhenOutsideMenu)
+    toggleSubmenu(event: Event, visible: boolean) {
+        const target = event.currentTarget as HTMLElement | null
+        const submenu = target?.querySelector<HTMLElement>(":scope > .menu")
+        if (submenu) {
+            submenu.style.display = visible ? "block" : "none"
+        }
+    }
+
+    trackMenuItem(index: number, item: ContextMenuItemModel) {
+        return item.id || `${item.role || "item"}-${index}`
+    }
+
+    private readonly closeWhenOutsideMenu = (event: MouseEvent) => {
+        const target = event.target
+        if (target instanceof Element && !target.closest(".ui.menu")) {
+            void window.contextMenu.hide()
+        }
+    }
+
+    private loadModel(model: ContextMenuModel) {
+        const stylesheet = document.createElement("link")
+        stylesheet.rel = "stylesheet"
+        stylesheet.href = `css/themes/${model.theme}.css`
+        this.stylesheet?.remove()
+        this.stylesheet = stylesheet
+
+        const render = () => {
+            if (this.destroyed || this.stylesheet !== stylesheet) {
+                return
+            }
+            this.zone.run(() => {
+                this.menu = model.items
+                this.debugItem = model.debugItem
+                this.changeDetector.detectChanges()
+                requestAnimationFrame(() => this.resizeWindow())
+            })
+        }
+
+        stylesheet.addEventListener("load", render, { once: true })
+        stylesheet.addEventListener("error", render, { once: true })
+        document.head.appendChild(stylesheet)
+    }
+
+    private resizeWindow() {
+        if (this.destroyed) {
+            return
+        }
+
+        const root = this.element.nativeElement
+        const primaryMenu = root.querySelector<HTMLElement>(":scope > .ui.menu")
+        const submenus = Array.from(root.querySelectorAll<HTMLElement>(".context.dropdown > .menu"))
+        const submenuSize = submenus.reduce((size, submenu) => {
+            const display = submenu.style.display
+            const visibility = submenu.style.visibility
+            submenu.style.visibility = "hidden"
+            submenu.style.display = "block"
+            size.width = Math.max(size.width, submenu.scrollWidth)
+            size.height = Math.max(size.height, submenu.scrollHeight)
+            submenu.style.display = display
+            submenu.style.visibility = visibility
+            return size
+        }, { width: 0, height: 0 })
+
+        void window.contextMenu.resize({
+            width: Math.ceil(
+                (primaryMenu?.scrollWidth || root.scrollWidth)
+                + submenuSize.width
+                + (MENU_WINDOW_MARGIN * 2)
+                + 2,
+            ),
+            height: Math.ceil(
+                Math.max(primaryMenu?.scrollHeight || root.scrollHeight, submenuSize.height)
+                + (MENU_WINDOW_MARGIN * 2)
+                + 2,
+            ),
+        }).then(({ submenuOnLeft }) => {
+            this.zone.run(() => {
+                this.submenuOnLeft = submenuOnLeft
+                this.changeDetector.markForCheck()
+            })
         })
     }
 }
+
+export { ContextMenuDirective as ContextMenuComponent }

@@ -6,6 +6,7 @@ import CopyWebpackPlugin from 'copy-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import RemoveEmptyScriptsPlugin from 'webpack-remove-empty-scripts'
 import nodeExternals from 'webpack-node-externals'
+import { AngularWebpackPlugin } from '@ngtools/webpack'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -49,6 +50,15 @@ function makeTsRule(configFile) {
         transpileOnly: true,
       },
     },
+    include: defaultInclude,
+    exclude: /node_modules/,
+  }
+}
+
+function makeAngularRule() {
+  return {
+    test: /\.[cm]?[jt]sx?$/,
+    loader: '@ngtools/webpack',
     include: defaultInclude,
     exclude: /node_modules/,
   }
@@ -116,7 +126,7 @@ const rendererConfig = {
   mode: isProduction ? 'production' : 'development',
   module: {
     rules: [
-      makeTsRule('src/renderer/tsconfig.json'),
+      makeAngularRule(),
       {
         test: /\.less$/i,
         use: [
@@ -172,6 +182,9 @@ const rendererConfig = {
   },
   resolve: sharedResolve,
   plugins: [
+    new AngularWebpackPlugin({
+      tsconfig: path.resolve(__dirname, 'src/renderer/tsconfig.json'),
+    }),
     new RemoveEmptyScriptsPlugin(),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/renderer/assets/index.ejs'),

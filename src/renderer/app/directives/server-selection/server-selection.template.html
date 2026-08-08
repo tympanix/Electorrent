@@ -8,21 +8,29 @@
             </h2>
 
             <div class="ui one fluid cards server list">
-                <div class="card" ng-repeat="server in servers">
+                <div class="card" *ngFor="let server of servers; trackBy: trackServer">
                     <div class="content">
                         <div class="header">
-                            <i class="red exclamation triangle icon" ng-if="!server.isClientKnown()" title="{{server.getClientWarning()}}"></i>
-                            <i class="torrent icon" ng-if="server.isClientKnown()" ng-class="server.getIcon()"></i>
-                            {{server.getName()}}
+                            <i
+                                class="red exclamation triangle icon"
+                                *ngIf="!server.isClientKnown()"
+                                [attr.title]="getServerWarning(server)">
+                            </i>
+                            <i
+                                class="torrent icon"
+                                *ngIf="server.isClientKnown()"
+                                [ngClass]="getServerIcon(server)">
+                            </i>
+                            {{ getServerName(server) }}
                         </div>
                         <div class="meta">
-                            {{server.getNameAtAddress()}}
+                            {{ getServerAddress(server) }}
                         </div>
                     </div>
-                    <div class="ui bottom attached green button" ng-click="connectToServer({ server: server })">
+                    <button type="button" class="ui bottom attached green button" (click)="connect(server)">
                         Connect
                         <i class="icon right arrow"></i>
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>

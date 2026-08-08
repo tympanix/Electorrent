@@ -1,4 +1,4 @@
-import { IFilterNumber } from "angular";
+import type { NumberFilter as IFilterNumber } from "./filter-types";
 
 export class TorrentRatioFilter {
     public static getInstance(): () => IFilterNumber {

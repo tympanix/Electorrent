@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html ng-app="torrentApp">
-    <head app-theme>
+<html>
+    <head>
         <meta charset="UTF-8">
         <title>Electorrent</title>
 
@@ -8,11 +8,10 @@
             const themeStylesheet = document.createElement("link");
             themeStylesheet.rel = "stylesheet";
             themeStylesheet.href = `css/themes/${window.electorrent.app.initialTheme}.css`;
-            themeStylesheet.setAttribute("ng-href", "css/themes/{{theme}}.css");
             document.head.appendChild(themeStylesheet);
         </script>
     </head>
-    <body ready-broadcast>
+    <body>
         <app-shell></app-shell>
     </body>
 </html>

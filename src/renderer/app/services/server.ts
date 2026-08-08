@@ -1,5 +1,4 @@
 import _ from "underscore"
-import type { IPromise } from "angular"
 import { Torrent } from "@renderer/app/bittorrent"
 import type { ColumnProps } from "@renderer/app/services/column"
 import { parseServerAddressInput, sanitizeServerAddress } from "@shared/server-address"
@@ -11,7 +10,7 @@ export interface Server extends Omit<StoredServerConfig, "columns"> {
     columns: ColumnProps[]
     certificateData?: Uint8Array
     isConnected: boolean
-    connect(): IPromise<void>
+    connect(): Promise<void>
     getName(): string
     getIcon(): string
     isClientKnown(): boolean
@@ -23,7 +22,7 @@ export interface Server extends Omit<StoredServerConfig, "columns"> {
     setPath(): void
     url(): string
     isHTTPS(): boolean
-    askForCertificate(): IPromise<void>
+    askForCertificate(): Promise<void>
     getCertificate(): Uint8Array | undefined
     equals(other: Server): boolean
     parseColumns(columns?: string[]): ColumnProps[]
@@ -354,7 +353,7 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
 
         Server.prototype.defaultColumns = function() {
             let columns = []
-            angular.copy(Torrent.COLUMNS, columns)
+            columns.push(...Torrent.COLUMNS.map((column) => ({ ...column })))
             columns = this.addCustomColumns(columns)
             return columns
         }

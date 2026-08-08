@@ -33,7 +33,7 @@ export function getLabelColorHue(label?: string, overrides?: LabelColorOverrides
     return override ?? getDeterministicLabelColorHue(label);
 }
 
-export const labelColorService = ["$rootScope", function($rootScope: angular.IRootScopeService & { $server?: { labelColors?: LabelColorOverrides } }) {
+export const labelColorService = ["$rootScope", function($rootScope: { $server?: { labelColors?: LabelColorOverrides } }) {
     this.hues = LABEL_COLOR_HUES;
     this.getHue = (label?: string, overrides?: LabelColorOverrides) => getLabelColorHue(label, overrides || $rootScope.$server?.labelColors);
     this.normalizeHue = normalizeLabelColorHue;

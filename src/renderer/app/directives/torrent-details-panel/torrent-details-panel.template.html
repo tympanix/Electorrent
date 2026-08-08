@@ -1,85 +1,91 @@
-<div class="torrent-details-panel" data-role="torrent-details-panel" ng-if="ctl.scope.isOpen" ng-style="ctl.panelStyle()">
-  <div class="torrent-details-panel-resizer" ng-mousedown="ctl.startResizing($event)"></div>
-  <div class="ui top attached tabular menu torrent-details-tabs">
-    <a
-      class="item"
-      data-role="torrent-details-tab-info"
-      ng-class="{ active: ctl.isActiveTab('info') }"
-      ng-click="ctl.showTab('info')"
-    >
-      <i class="small info circle icon" aria-hidden="true"></i>
-      Info
-    </a>
-    <a
-      class="item"
-      data-role="torrent-details-tab-files"
-      ng-class="{ active: ctl.isActiveTab('files') }"
-      ng-click="ctl.showTab('files')"
-    >
-      <i class="small file alternate icon" aria-hidden="true"></i>
-      Files
-    </a>
-    <a
-      class="item"
-      data-role="torrent-details-tab-peers"
-      ng-if="ctl.canShowPeers()"
-      ng-class="{ active: ctl.isActiveTab('peers') }"
-      ng-click="ctl.showTab('peers')"
-    >
-      <i class="small users icon" aria-hidden="true"></i>
-      Peers
-    </a>
-    <a
-      class="item"
-      data-role="torrent-details-tab-trackers"
-      ng-if="ctl.canShowTrackers()"
-      ng-class="{ active: ctl.isActiveTab('trackers') }"
-      ng-click="ctl.showTab('trackers')"
-    >
-      <i class="small bullseye icon" aria-hidden="true"></i>
-      Trackers
-    </a>
-    <div class="right menu">
-      <a
-        class="item"
-        data-role="torrent-details-close"
-        aria-label="Close torrent details"
-        ng-click="ctl.close()"
-      >
-        <i class="close icon"></i>
-      </a>
-    </div>
-  </div>
-
-  <div class="torrent-details-panel-body">
-    <div ng-if="!ctl.scope.torrent" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
-      <div class="torrent-details-state-content">
-        <i class="big info circle icon"></i>
-        <p>Select a torrent to view its details.</p>
-      </div>
+<div
+    class="torrent-details-panel"
+    data-role="torrent-details-panel"
+    *ngIf="isOpen"
+    [style.height.px]="panelHeight"
+>
+    <div class="torrent-details-panel-resizer" (mousedown)="startResizing($event)"></div>
+    <div class="ui top attached tabular menu torrent-details-tabs">
+        <a
+            class="item"
+            data-role="torrent-details-tab-info"
+            [class.active]="isActiveTab('info')"
+            (click)="showTab('info')"
+        >
+            <i class="small info circle icon" aria-hidden="true"></i>
+            Info
+        </a>
+        <a
+            class="item"
+            data-role="torrent-details-tab-files"
+            [class.active]="isActiveTab('files')"
+            (click)="showTab('files')"
+        >
+            <i class="small file alternate icon" aria-hidden="true"></i>
+            Files
+        </a>
+        <a
+            class="item"
+            data-role="torrent-details-tab-peers"
+            *ngIf="canShowPeers()"
+            [class.active]="isActiveTab('peers')"
+            (click)="showTab('peers')"
+        >
+            <i class="small users icon" aria-hidden="true"></i>
+            Peers
+        </a>
+        <a
+            class="item"
+            data-role="torrent-details-tab-trackers"
+            *ngIf="canShowTrackers()"
+            [class.active]="isActiveTab('trackers')"
+            (click)="showTab('trackers')"
+        >
+            <i class="small bullseye icon" aria-hidden="true"></i>
+            Trackers
+        </a>
+        <div class="right menu">
+            <a
+                class="item"
+                data-role="torrent-details-close"
+                aria-label="Close torrent details"
+                (click)="close()"
+            >
+                <i class="close icon"></i>
+            </a>
+        </div>
     </div>
 
-    <torrent-details-info-tab
-      ng-if="ctl.scope.torrent && ctl.isActiveTab('info')"
-      torrent="ctl.scope.torrent"
-      refresh="ctl.scope.refresh"
-    ></torrent-details-info-tab>
+    <div class="torrent-details-panel-body">
+        <div *ngIf="!torrent" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
+            <div class="torrent-details-state-content">
+                <i class="big info circle icon"></i>
+                <p>Select a torrent to view its details.</p>
+            </div>
+        </div>
 
-    <torrent-details-files-tab
-      ng-if="ctl.scope.torrent && ctl.isActiveTab('files')"
-      torrent="ctl.scope.torrent"
-      refresh="ctl.scope.refresh"
-    ></torrent-details-files-tab>
+        <torrent-details-info-tab
+            *ngIf="torrent && isActiveTab('info')"
+            [torrent]="torrent"
+            [refresh]="refresh"
+        ></torrent-details-info-tab>
 
-    <torrent-details-peers-tab
-      ng-if="ctl.scope.torrent && ctl.canShowPeers() && ctl.isActiveTab('peers')"
-      torrent="ctl.scope.torrent"
-      refresh="ctl.scope.refresh"
-    ></torrent-details-peers-tab>
-    <torrent-details-trackers-tab
-      ng-if="ctl.scope.torrent && ctl.canShowTrackers() && ctl.isActiveTab('trackers')"
-      torrent="ctl.scope.torrent"
-      refresh="ctl.scope.refresh"
-    ></torrent-details-trackers-tab>
-  </div>
+        <torrent-details-files-tab
+            *ngIf="torrent && isActiveTab('files')"
+            [torrent]="torrent"
+            [refresh]="refresh"
+        ></torrent-details-files-tab>
+
+        <torrent-details-peers-tab
+            *ngIf="torrent && canShowPeers() && isActiveTab('peers')"
+            [torrent]="torrent"
+            [refresh]="refresh"
+        ></torrent-details-peers-tab>
+
+        <torrent-details-trackers-tab
+            *ngIf="torrent && canShowTrackers() && isActiveTab('trackers')"
+            [torrent]="torrent"
+            [refresh]="refresh"
+        ></torrent-details-trackers-tab>
+    </div>
 </div>

@@ -33,7 +33,7 @@ export const bittorrentService = ['$rootScope', '$injector', '$btclients', 'noti
     }
 
     this.getServerCopy = function() {
-        return angular.copy($rootScope.$server)
+        return $rootScope.$server ? { ...$rootScope.$server } : $rootScope.$server
     }
 
     this.uploadFromClipboard = async function(askUploadOptions: boolean) {

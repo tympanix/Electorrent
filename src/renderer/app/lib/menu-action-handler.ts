@@ -1,11 +1,13 @@
-import { IScope } from "angular";
 import type { PendingTorrentUploadFile } from "@renderer/app/directives/add-torrent-modal/add-torrent-modal.directive";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { MenuAction } from "@shared/ipc-contract";
 
 interface MenuActionHandlerOptions {
     $rootScope: ElectorrentRootScope;
-    $scope: IScope;
+    $scope: {
+        $emit(name: string, ...args: any[]): void;
+        $applyAsync(callback?: () => void): void;
+    };
     $bittorrent: any;
     settingsService: any;
     currentPage: () => string | null;

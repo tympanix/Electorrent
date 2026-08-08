@@ -1,26 +1,78 @@
-import { IAttributes, IAugmentedJQuery, IDirective, IDirectiveFactory, IScope, ITimeoutService } from "angular";
-import { RepeatDoneController } from "./repeat-done.controller";
+import {
+    AfterViewInit,
+    Directive,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnDestroy,
+    Output,
+    SimpleChanges,
+} from "@angular/core"
 
-export class RepeatDoneDirective implements IDirective {
-    restrict = "A";
-    controller = RepeatDoneController;
+export type RepeatDoneCallback = () => void
 
-    static getInstance(): IDirectiveFactory {
-        const factory = ($timeout: ITimeoutService) => new RepeatDoneDirective($timeout);
-        factory.$inject = ["$timeout"];
-        return factory;
+@Directive({
+    selector: "[repeatDone], [repeat-done]",
+    standalone: true,
+})
+export class RepeatDoneDirective implements AfterViewInit, OnChanges, OnDestroy {
+    @Input() repeatDone?: RepeatDoneCallback | null
+    @Input() repeatDoneLast = true
+    @Output() readonly repeatCompleted = new EventEmitter<void>()
+
+    private viewInitialized = false
+    private callbackTimer?: number
+    private invoked = false
+
+    ngAfterViewInit() {
+        this.viewInitialized = true
+        this.scheduleCallback()
     }
 
-    constructor(private $timeout: ITimeoutService) {}
+    ngOnChanges(changes: SimpleChanges) {
+        if (!this.viewInitialized) {
+            return
+        }
 
-    link(scope: IScope, element: IAugmentedJQuery, attrs: IAttributes) {
-        if ((scope as IScope & { $last?: boolean }).$last) {
-            this.$timeout(() => {
-                const callback = scope.$eval(attrs.repeatDone);
-                if (angular.isFunction(callback)) {
-                    callback();
-                }
-            }, 0);
+        if (changes.repeatDoneLast?.currentValue === false) {
+            this.cancelCallback()
+            this.invoked = false
+            return
+        }
+
+        if (changes.repeatDone || changes.repeatDoneLast) {
+            this.scheduleCallback()
+        }
+    }
+
+    ngOnDestroy() {
+        this.cancelCallback()
+    }
+
+    private scheduleCallback() {
+        if (this.invoked || this.callbackTimer !== undefined || !this.repeatDoneLast) {
+            return
+        }
+        if (typeof this.repeatDone !== "function") {
+            return
+        }
+
+        this.callbackTimer = window.setTimeout(() => {
+            this.callbackTimer = undefined
+            if (!this.repeatDoneLast || typeof this.repeatDone !== "function") {
+                return
+            }
+
+            this.invoked = true
+            this.repeatDone()
+            this.repeatCompleted.emit()
+        }, 0)
+    }
+
+    private cancelCallback() {
+        if (this.callbackTimer !== undefined) {
+            window.clearTimeout(this.callbackTimer)
+            this.callbackTimer = undefined
         }
     }
 }

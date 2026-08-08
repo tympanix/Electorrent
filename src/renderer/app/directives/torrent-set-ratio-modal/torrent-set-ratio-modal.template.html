@@ -1,34 +1,35 @@
 <modal
+    #modal="modal"
     id="torrent-set-ratio-modal"
     size="tiny"
-    on-hidden="ctl.onHidden()"
-    ng-ref="ctl.modalref">
+    [onHidden]="handleHidden">
     <i class="close icon"></i>
     <div class="header">
         <i class="percent icon"></i>
         Set Ratio Limit
     </div>
     <div class="content">
-        <form id="torrent-set-ratio-form" class="ui form" ng-submit="ctl.apply()">
+        <form id="torrent-set-ratio-form" class="ui form" (ngSubmit)="apply()">
             <p>Enter a ratio limit. The current limit is shown when all selected torrents share the same limit.</p>
             <div class="field">
                 <label for="torrent-set-ratio-value">Ratio limit</label>
                 <input
                     id="torrent-set-ratio-value"
                     data-role="torrent-set-ratio-value"
+                    name="ratioLimit"
                     type="number"
                     min="0"
                     step="0.01"
                     placeholder="Ratio limit"
-                    ng-model="ctl.scope.ratioLimit">
+                    [(ngModel)]="ratioLimit">
             </div>
-            <div class="ui negative message" ng-if="ctl.scope.error">
-                <p>{{ ctl.scope.error }}</p>
+            <div class="ui negative message" *ngIf="error">
+                <p>{{ error }}</p>
             </div>
         </form>
     </div>
     <div class="actions">
-        <button type="button" class="ui black deny button" ng-class="{ disabled: ctl.scope.loading }" ng-click="ctl.close()">
+        <button type="button" class="ui black deny button" [class.disabled]="loading" [disabled]="loading" (click)="close()">
             Cancel
         </button>
         <button
@@ -36,8 +37,8 @@
             form="torrent-set-ratio-form"
             class="ui green right labeled icon button"
             data-role="torrent-set-ratio-apply"
-            ng-class="{ disabled: ctl.scope.loading }"
-            ng-disabled="ctl.scope.loading">
+            [class.disabled]="loading"
+            [disabled]="loading">
             Apply
             <i class="checkmark icon"></i>
         </button>

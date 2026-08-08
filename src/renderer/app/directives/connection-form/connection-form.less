@@ -1,3 +1,13 @@
 connection-form {
     .ui.welcome.form.loading::before { background: fadeout(@pageBackground, 25%); }
+
+    #connection-client > .menu {
+        max-height: 10rem;
+        overflow-y: auto;
+    }
+
+    #connection-client.has-selection > .menu,
+    #connection-client > .menu:has(.item.active) {
+        display: none !important;
+    }
 }

@@ -5,10 +5,9 @@
       "dom",
       "es2019"
     ],
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
     "types": [
-      "angular",
-      "angular-animate",
-      "angular-resource",
       "jquery",
       "magnet-uri",
       "mousetrap",
@@ -31,5 +30,9 @@
   ],
   "references": [
     { "path": "../shared" }
-  ]
+  ],
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictTemplates": true
+  }
 }

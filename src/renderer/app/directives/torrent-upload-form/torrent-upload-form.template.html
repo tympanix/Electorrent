@@ -1,112 +1,147 @@
 <div>
-    <div class="ui form" ng-class="{'loading': loading}">
-        <div class="fields" ng-if="ctl.optionsEnabled.saveLocation">
+    <div class="ui form" [class.loading]="loading">
+        <div class="fields" *ngIf="optionsEnabled.saveLocation">
             <div class="field upload-location-field">
                 <dropdown
                     title="Default location"
                     id="upload-options-saved-location"
                     class="fluid"
-                    open-on-focus="false"
-                    ng-model="ctl.selectedSavedLocationPath"
-                    ng-change="ctl.applySelectedSavedLocation()">
-                    <dropdown-item title="'Default location'" value="''">
+                    [openOnFocus]="false"
+                    [(ngModel)]="selectedSavedLocationPath"
+                    (ngModelChange)="applySelectedSavedLocation()"
+                >
+                    <dropdown-item title="Default location" [value]="''">
                         <i class="save outline icon"></i>
                         <span>Default location</span>
                     </dropdown-item>
                     <dropdown-item
-                        ng-repeat="savedLocation in ctl.savedLocations track by savedLocation.path"
-                        title="savedLocation.path"
-                        value="savedLocation.path"
-                        data-path="{{ savedLocation.path }}">
-                        <i class="{{ savedLocation.icon }} icon"></i>
+                        *ngFor="let savedLocation of savedLocations; trackBy: trackSavedLocation"
+                        [title]="savedLocation.path"
+                        [value]="savedLocation.path"
+                        [attr.data-path]="savedLocation.path"
+                    >
+                        <i class="icon" [ngClass]="savedLocation.icon"></i>
                         <span>{{ savedLocation.path }}</span>
                     </dropdown-item>
                 </dropdown>
             </div>
-            <div class="three wide field" ng-if="ctl.hasSavedLocationAction()">
+            <div class="three wide field" *ngIf="hasSavedLocationAction()">
                 <button
                     type="button"
                     class="ui basic icon button fluid"
                     title="Add saved location"
                     data-role="upload-add-saved-location"
-                    ng-click="ctl.openSavedLocationModal()"
-                    ng-disabled="!ctl.canOpenSavedLocationModal() || loading">
+                    (click)="openSavedLocationModal()"
+                    [disabled]="!canOpenSavedLocationModal() || loading"
+                >
                     <i class="plus icon"></i>
                 </button>
             </div>
         </div>
 
-        <div class="field" ng-if="ctl.optionsEnabled.renameTorrent">
+        <div class="field" *ngIf="optionsEnabled.renameTorrent">
             <div class="ui left icon input">
                 <i class="tag icon"></i>
-                <input data-action="rename-torrent" id="upload-options-renametorrent" type="text" placeholder="Rename torrent" ng-model="options.renameTorrent">
+                <input
+                    data-action="rename-torrent"
+                    id="upload-options-renametorrent"
+                    type="text"
+                    placeholder="Rename torrent"
+                    [(ngModel)]="options.renameTorrent"
+                    (ngModelChange)="emitOptionsChange()"
+                >
             </div>
         </div>
 
-        <div class="fields" ng-if="ctl.optionsEnabled.category">
+        <div class="fields" *ngIf="optionsEnabled.category">
             <div class="field twelve wide">
-                <dropdown title="Label" id="upload-options-label" class="fluid" ng-model="options.category">
-                    <dropdown-item ng-repeat="label in labels" data-label="{{ label }}" title="label" value="label">
-                    {{ label }}
+                <dropdown title="Label" id="upload-options-label" class="fluid" [(ngModel)]="options.category" (ngModelChange)="emitOptionsChange()">
+                    <dropdown-item
+                        *ngFor="let label of labels; trackBy: trackLabel"
+                        [attr.data-label]="label"
+                        [title]="label"
+                        [value]="label"
+                    >
+                        {{ label }}
                     </dropdown-item>
                 </dropdown>
             </div>
             <div class="field four wide">
-                <button type="button" class="ui button fluid" ng-click="options.category = null" ng-class="{'disabled': !options.category}">
+                <button type="button" class="ui button fluid" (click)="clearCategory()" [class.disabled]="!options.category">
                     Clear Category
                 </button>
             </div>
         </div>
 
         <div class="fields">
-            <div class="eight wide field" ng-if="ctl.optionsEnabled.startTorrent">
-                <toggle data-action="start-torrent" ng-model="options.startTorrent">
+            <div class="eight wide field" *ngIf="optionsEnabled.startTorrent">
+                <toggle data-action="start-torrent" [(ngModel)]="options.startTorrent" (ngModelChange)="emitOptionsChange()">
                     Start torrent
                 </toggle>
             </div>
 
-            <div class="eight wide field" ng-if="ctl.optionsEnabled.skipCheck">
-                <toggle data-action="skip-check" ng-model="options.skipCheck">
+            <div class="eight wide field" *ngIf="optionsEnabled.skipCheck">
+                <toggle data-action="skip-check" [(ngModel)]="options.skipCheck" (ngModelChange)="emitOptionsChange()">
                     Skip hash check
                 </toggle>
             </div>
 
-            <div class="eight wide field" ng-if="ctl.optionsEnabled.sequentialDownload">
-                <toggle data-action="sequential-download" ng-model="options.sequentialDownload">
+            <div class="eight wide field" *ngIf="optionsEnabled.sequentialDownload">
+                <toggle data-action="sequential-download" [(ngModel)]="options.sequentialDownload" (ngModelChange)="emitOptionsChange()">
                     Sequential download
                 </toggle>
             </div>
 
-            <div class="eight wide field" ng-if="ctl.optionsEnabled.firstAndLastPiecePrio">
-                <toggle data-action="first-last-piece-prio" ng-model="options.firstAndLastPiecePrio">
+            <div class="eight wide field" *ngIf="optionsEnabled.firstAndLastPiecePrio">
+                <toggle data-action="first-last-piece-prio" [(ngModel)]="options.firstAndLastPiecePrio" (ngModelChange)="emitOptionsChange()">
                     First and last piece priority
                 </toggle>
             </div>
         </div>
 
-        <div class="field" ng-if="ctl.optionsEnabled.downloadSpeedLimit || ctl.optionsEnabled.uploadSpeedLimit">
+        <div class="field" *ngIf="optionsEnabled.downloadSpeedLimit || optionsEnabled.uploadSpeedLimit">
             <div class="two fields">
-                <div class="field" ng-if="ctl.optionsEnabled.downloadSpeedLimit">
+                <div class="field" *ngIf="optionsEnabled.downloadSpeedLimit">
                     <div class="ui left icon input">
                         <i class="arrow circle down icon"></i>
-                        <input data-action="download-speed-limit" id="upload-options-downloadspeedlimit" type="number" placeholder="Download speed limit (KB/s)" ng-model="options.downloadSpeedLimit">
+                        <input
+                            data-action="download-speed-limit"
+                            id="upload-options-downloadspeedlimit"
+                            type="number"
+                            placeholder="Download speed limit (KB/s)"
+                            [(ngModel)]="options.downloadSpeedLimit"
+                            (ngModelChange)="emitOptionsChange()"
+                        >
                     </div>
                 </div>
-                <div class="field" ng-if="ctl.optionsEnabled.uploadSpeedLimit">
+                <div class="field" *ngIf="optionsEnabled.uploadSpeedLimit">
                     <div class="ui left icon input">
                         <i class="arrow circle up icon"></i>
-                        <input data-action="upload-speed-limit" id="upload-options-uploadspeedlimit" type="number" placeholder="Upload speed limit (KB/s)" ng-model="options.uploadSpeedLimit">
+                        <input
+                            data-action="upload-speed-limit"
+                            id="upload-options-uploadspeedlimit"
+                            type="number"
+                            placeholder="Upload speed limit (KB/s)"
+                            [(ngModel)]="options.uploadSpeedLimit"
+                            (ngModelChange)="emitOptionsChange()"
+                        >
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="field" ng-if="ctl.optionsEnabled.peerLimit">
+        <div class="field" *ngIf="optionsEnabled.peerLimit">
             <div class="ui left icon input">
                 <i class="users icon"></i>
-                <input data-action="peer-limit" id="upload-options-peerlimit" type="number" placeholder="Peer limit" ng-model="options.peerLimit">
+                <input
+                    data-action="peer-limit"
+                    id="upload-options-peerlimit"
+                    type="number"
+                    placeholder="Peer limit"
+                    [(ngModel)]="options.peerLimit"
+                    (ngModelChange)="emitOptionsChange()"
+                >
             </div>
         </div>
-
     </div>
 </div>

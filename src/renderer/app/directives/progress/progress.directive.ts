@@ -1,55 +1,80 @@
-import { IAugmentedJQuery, IDirective, IDirectiveFactory, IScope, ITimeoutService } from "angular";
-import { ProgressController } from "./progress.controller";
-import html from "./progress.template.html";
+import { Component, DoCheck, HostBinding, Input, OnDestroy } from "@angular/core";
 
-export class ProgressDirective implements IDirective {
-    restrict = "A";
-    replace = true;
-    template = html;
-    scope = {
-        torrent: "=progress",
-    };
-    bindToController = true;
-    controller = ProgressController;
-    controllerAs = "ctl";
+interface ProgressTorrent {
+    percent: number;
+    getPercentStr(): string;
+    isStatusCompleted(): boolean;
+    isStatusDownloading(): boolean;
+    isStatusSeeding(): boolean;
+    statusColor(): string;
+    statusText(): string;
+}
 
-    static getInstance(): IDirectiveFactory {
-        const factory = ($timeout: ITimeoutService) => new ProgressDirective($timeout);
-        factory.$inject = ["$timeout"];
-        return factory;
+@Component({
+    selector: "[progress]",
+    standalone: true,
+    templateUrl: "./progress.template.html",
+})
+export class ProgressDirective implements DoCheck, OnDestroy {
+    @Input({ alias: "progress", required: true }) torrent?: ProgressTorrent;
+
+    idle = true;
+
+    private lastPercent?: number;
+    private idleTimer?: number;
+
+    @HostBinding("class")
+    get classes(): string {
+        return ["ui torrent progress", this.torrent?.statusColor()].filter(Boolean).join(" ");
     }
 
-    constructor(private $timeout: ITimeoutService) {}
+    get label(): string {
+        if (!this.torrent) {
+            return "";
+        }
 
-    link(scope: IScope, element: IAugmentedJQuery, attr: unknown, controller: ProgressController) {
-        let idle = true;
-        const bar = element.find(".bar");
+        let label = this.torrent.statusText();
+        if (
+            this.torrent.isStatusDownloading()
+            || this.torrent.isStatusCompleted()
+            || this.torrent.isStatusSeeding()
+        ) {
+            label += ` ${this.torrent.getPercentStr()}`;
+        }
 
-        const updateProgress = (oldPercent?: number) => {
-            if (!controller.torrent) {
-                return;
-            }
+        return label;
+    }
 
-            if (controller.torrent.percent < 1000 || (oldPercent !== undefined && oldPercent < 1000)) {
-                bar.css("width", controller.torrent.getPercentStr());
-                if (idle) {
-                    this.$timeout(() => {
-                        bar.removeClass("idle");
-                        idle = false;
-                    });
-                }
-            }
-        };
+    get width(): string {
+        return this.torrent?.getPercentStr() ?? "0%";
+    }
 
-        scope.$watch(
-            () => controller.torrent && controller.torrent.percent,
-            (newPercent, oldPercent) => {
-                if (newPercent !== oldPercent) {
-                    updateProgress(oldPercent);
-                }
-            },
-        );
+    ngDoCheck(): void {
+        if (!this.torrent || this.torrent.percent === this.lastPercent) {
+            return;
+        }
 
-        updateProgress();
+        const oldPercent = this.lastPercent;
+        this.lastPercent = this.torrent.percent;
+        if (this.torrent.percent < 1000 || (oldPercent !== undefined && oldPercent < 1000)) {
+            this.activateTransitions();
+        }
+    }
+
+    ngOnDestroy(): void {
+        if (this.idleTimer !== undefined) {
+            window.clearTimeout(this.idleTimer);
+        }
+    }
+
+    private activateTransitions(): void {
+        if (!this.idle || this.idleTimer !== undefined) {
+            return;
+        }
+
+        this.idleTimer = window.setTimeout(() => {
+            this.idle = false;
+            this.idleTimer = undefined;
+        });
     }
 }

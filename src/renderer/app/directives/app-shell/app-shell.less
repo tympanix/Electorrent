@@ -2,6 +2,8 @@ app-shell {
     display: block;
     height: 100%;
 
+    .is-hidden { display: none !important; }
+
     .main.wrapper {
         position: relative;
         top: 0;
@@ -102,6 +104,11 @@ app-shell {
         background-color: @overlayBackground;
     }
 
+    .app-content > .overlay { pointer-events: none; }
+    .app-content > .overlay > settings-page,
+    .app-content > .overlay > welcome-page,
+    .app-content > .overlay > server-selection { pointer-events: auto; }
+
     .transparent.overlay { background-color: rgba(0, 0, 0, 0.75); }
 
     .overlay.ng-hide-add,
@@ -131,3 +138,6 @@ app-shell {
         transform: scale(1);
     }
 }
+
+.ui.dimmer.modals.page { pointer-events: none; }
+.ui.dimmer.modals.page > .ui.modal { pointer-events: auto; }

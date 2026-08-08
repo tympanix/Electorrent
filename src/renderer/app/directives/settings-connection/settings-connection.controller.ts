@@ -1,5 +1,2 @@
-export class SettingsConnectionController {
-    server: any;
-    btclients: any;
-    connecting?: boolean;
-}
+// Compatibility for code importing the former AngularJS controller.
+export { SettingsConnectionDirective as SettingsConnectionController } from "./settings-connection.directive"

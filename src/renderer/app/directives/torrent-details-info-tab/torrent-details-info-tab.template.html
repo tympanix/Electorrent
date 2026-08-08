@@ -1,43 +1,43 @@
 <div class="torrent-details-info" data-role="torrent-details-info">
-  <div ng-if="ctl.scope.loading && !ctl.scope.loaded" class="torrent-details-state torrent-details-panel-loader">
+  <div *ngIf="loading && !loaded" class="torrent-details-state torrent-details-panel-loader">
     <div class="ui active inline loader"></div>
   </div>
-  <div ng-if="ctl.scope.error" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
+  <div *ngIf="error" class="torrent-details-state torrent-details-message" data-role="torrent-details-message">
     <div class="torrent-details-state-content">
       <i class="big warning circle icon"></i>
-      <p>{{ ctl.scope.error }}</p>
+      <p>{{ error }}</p>
     </div>
   </div>
   <section
-    ng-if="!ctl.scope.error"
+    *ngFor="let section of sections; trackBy: trackSection"
     class="torrent-details-section"
-    ng-repeat="section in ctl.scope.sections track by section.id"
-    aria-labelledby="torrent-details-section-{{ section.id }}"
+    [hidden]="!!error"
+    [attr.aria-labelledby]="'torrent-details-section-' + section.id"
   >
     <header class="torrent-details-section-header">
-      <i class="icon {{ ctl.sectionIcon(section.id) }}" aria-hidden="true"></i>
-      <h3 id="torrent-details-section-{{ section.id }}">{{ section.title }}</h3>
+      <i [class]="'icon ' + sectionIcon(section.id)" aria-hidden="true"></i>
+      <h3 [id]="'torrent-details-section-' + section.id">{{ section.title }}</h3>
     </header>
 
     <dl class="torrent-details-field-list">
       <div
         class="torrent-details-field"
-        ng-repeat="field in section.fields track by field.id"
+        *ngFor="let field of section.fields; trackBy: trackField"
         data-role="torrent-details-field"
-        data-field-id="{{ field.id }}"
+        [attr.data-field-id]="field.id"
       >
         <dt>{{ field.label }}</dt>
         <dd
-          class="value torrent-details-field-value torrent-details-field-value-{{ field.format || 'text' }}"
-          ng-class="{ multiline: field.multiline }"
+          [class]="'value torrent-details-field-value torrent-details-field-value-' + (field.format || 'text')"
+          [class.multiline]="field.multiline"
         >
           <button
             type="button"
             class="torrent-details-field-copy"
-            ng-click="ctl.copyFieldValue(field)"
-            title="{{ ctl.fieldTitle(field) || 'Copy value' }}"
-            aria-label="Copy {{ field.label }} value"
-          >{{ ctl.formatFieldValue(field) }}</button>
+            (click)="copyFieldValue(field)"
+            [title]="fieldTitle(field) || 'Copy value'"
+            [attr.aria-label]="'Copy ' + field.label + ' value'"
+          >{{ formatFieldValue(field) }}</button>
         </dd>
       </div>
     </dl>

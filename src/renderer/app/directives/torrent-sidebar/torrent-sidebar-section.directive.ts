@@ -1,61 +1,54 @@
-import { IDirective, IDirectiveFactory } from "angular";
-import html from "./torrent-sidebar-section.template.html";
+import { CommonModule } from "@angular/common";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { LabelChipDirective } from "@renderer/app/directives/label-chip/label-chip.directive";
 
-export class TorrentSidebarSectionController {
-    items: string[] = [];
-    active?: string;
-    title = "";
-    clearRole = "";
-    emptyText = "";
-    itemAttribute = "";
-    specialItemValue?: string;
-    specialItemText?: string;
-    onSelect?: (locals: { item?: string }) => void;
+@Component({
+    selector: "torrent-sidebar-section",
+    standalone: true,
+    imports: [CommonModule, LabelChipDirective],
+    templateUrl: "./torrent-sidebar-section.template.html",
+})
+export class TorrentSidebarSectionDirective {
+    @Input() items: string[] = [];
+    @Input() active?: string;
+    @Input() title = "";
+    @Input() clearRole = "";
+    @Input() emptyText = "";
+    @Input() itemAttribute = "";
+    @Input() specialItemValue?: string;
+    @Input() specialItemText?: string;
+    @Output() readonly onSelect = new EventEmitter<string | undefined>();
 
-    isActive(item: string) {
+    isActive(item: string): boolean {
         return this.active === item;
     }
 
-    itemText(item: string) {
+    itemText(item: string): string {
         return item === this.specialItemValue && this.specialItemText ? this.specialItemText : item;
     }
 
-    hasSpecialItem() {
+    hasSpecialItem(): boolean {
         return !!this.specialItemValue;
     }
 
-    displayEmpty() {
+    displayEmpty(): boolean {
         return this.items.length === 0 && !this.hasSpecialItem();
     }
 
-    select(item: string) {
-        this.onSelect?.({ item: this.isActive(item) ? undefined : item });
+    select(item: string): void {
+        this.onSelect.emit(this.isActive(item) ? undefined : item);
     }
 
-    clear() {
-        this.onSelect?.({ item: undefined });
+    clear(): void {
+        this.onSelect.emit(undefined);
     }
-}
 
-export class TorrentSidebarSectionDirective implements IDirective {
-    restrict = "E";
-    scope = {
-        items: "=",
-        active: "=",
-        title: "@",
-        clearRole: "@",
-        emptyText: "@",
-        itemAttribute: "@",
-        specialItemValue: "@",
-        specialItemText: "@",
-        onSelect: "&",
-    };
-    bindToController = true;
-    controller = TorrentSidebarSectionController;
-    controllerAs = "ctl";
-    template = html;
-
-    static getInstance(): IDirectiveFactory {
-        return () => new TorrentSidebarSectionDirective();
+    trackItem(_index: number, item: string): string {
+        return item;
     }
 }
+
+export {
+    TorrentSidebarSectionDirective as TorrentSidebarSectionComponent,
+    TorrentSidebarSectionDirective as TorrentSidebarSectionController,
+};

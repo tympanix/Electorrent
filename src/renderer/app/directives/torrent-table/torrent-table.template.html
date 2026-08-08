@@ -1,1 +1,14 @@
-
+<td *ngFor="let column of body.renderColumns; trackBy: trackColumn" [attr.data-col]="column.attribute">
+    <ng-container [ngSwitch]="cellKind(column)">
+        <div *ngSwitchCase="'progress'" [progress]="$any(torrent)"></div>
+        <span
+            *ngSwitchCase="'label'"
+            class="torrent-table-label-chip"
+            [hidden]="!labelValue(column)"
+            [labelChip]="labelValue(column)">
+            <span class="label-chip-text">{{ labelValue(column) }}</span>
+        </span>
+        <span *ngSwitchCase="'time'" [time]="timeValue(column)"></span>
+        <ng-container *ngSwitchDefault>{{ columnValue(column) }}</ng-container>
+    </ng-container>
+</td>

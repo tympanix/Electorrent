@@ -1,19 +1,26 @@
 <modal
+    #modal="modal"
     size="small"
-    approve="approve()"
+    [approve]="approve"
     id="renameModal"
-    ng-ref="ctl.modalref">
+>
     <i class="close icon"></i>
     <div class="header">
         Rename Server
     </div>
     <div class="content">
-        <form id="rename-server-form" class="ui form" ng-submit="$modal.applyAndClose()">
+        <form id="rename-server-form" class="ui form" (submit)="$event.preventDefault(); modal.applyAndClose()">
             <div class="field">
                 <div class="ui fluid left icon action input">
                     <i class="user icon"></i>
-                    <input type="text" name="servername" maxlength="36" ng-model="data.name" placeholder="Server Name">
-                    <button type="button" class="ui icon button" ng-click="data.reset()">
+                    <input
+                        type="text"
+                        name="servername"
+                        maxlength="36"
+                        [(ngModel)]="data.name"
+                        placeholder="Server Name"
+                    >
+                    <button type="button" class="ui icon button" (click)="data.reset()">
                         <i class="refresh icon"></i>
                     </button>
                 </div>
@@ -28,8 +35,9 @@
             type="submit"
             form="rename-server-form"
             class="ui green right labeled icon button"
-            ng-class="{ disabled: !data.name }"
-            ng-disabled="!data.name">
+            [class.disabled]="!data.name"
+            [disabled]="!data.name"
+        >
             Rename
             <i class="tag icon"></i>
         </button>

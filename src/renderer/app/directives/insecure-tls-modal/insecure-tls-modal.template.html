@@ -1,9 +1,4 @@
-<modal
-    size="small"
-    approve="approve()"
-    after="after(accepted)"
-    id="insecureTlsModal"
-    ng-ref="modalRef">
+<div #modal class="ui small modal" id="insecureTlsModal">
     <i class="close icon"></i>
     <div class="header">
         Allow Insecure TLS?
@@ -14,9 +9,11 @@
             <p>Electorrent will no longer verify that the server certificate is trusted, valid, or issued for this hostname. This can expose your connection to interception.</p>
         </div>
         <p>Only continue if you control this server or understand the security risk.</p>
-        <div class="ui fluid input" ng-if="data.fingerprint">
-            <input name="Fingerprint" type="text" readonly ng-model="data.fingerprint">
-        </div>
+        @if (data.fingerprint) {
+            <div class="ui fluid input">
+                <input name="Fingerprint" type="text" readonly [value]="data.fingerprint">
+            </div>
+        }
     </div>
     <div class="actions">
         <button type="button" class="ui black deny button">
@@ -26,4 +23,4 @@
             I Understand, Use Insecure TLS
         </button>
     </div>
-</modal>
+</div>
