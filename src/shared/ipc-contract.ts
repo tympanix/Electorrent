@@ -31,6 +31,7 @@ export interface ContextMenuPlacement {
 export type ColorTheme = "light" | "dark"
 export type ThemePreference = ColorTheme | "system"
 export type SystemStartupOption = "disabled" | "open" | "background"
+export type SpeedUnit = "bytes" | "bits"
 
 export interface AppMeta {
     appName: string
@@ -334,6 +335,7 @@ export interface AppSettings<TServer = StoredServerConfig> {
         fixedHeader: boolean
         theme: ThemePreference
         sidebarCollapsed: boolean
+        speedUnit: SpeedUnit
     }
     servers: TServer[]
     certificates: string[]
