@@ -1,8 +1,7 @@
-import { IFilterNumber, IFilterService } from "angular";
-import { formatSpeedValue } from "@renderer/app/filters/speed-format";
+import { IFilterNumber } from "angular";
+import { formatBits, formatBytes } from "@renderer/app/filters/speed-format";
 import type { SettingsService } from "@renderer/app/services/settings";
 
-type BytesFilterTransform = IFilterNumber;
 type SpeedFilterTorrent = {
     isStatusDownloading: () => boolean;
 };
@@ -13,27 +12,24 @@ interface SpeedFilterTransform extends IFilterNumber {
 }
 
 interface SpeedFilterFactory {
-    ($filter: IFilterService, settingsService: SettingsService): SpeedFilterTransform;
+    (settingsService: SettingsService): SpeedFilterTransform;
     $inject?: string[];
 }
 
 export class SpeedFilter {
     public static getInstance(): SpeedFilterFactory {
-        const factory: SpeedFilterFactory = ($filter: IFilterService, settingsService: SettingsService) => {
-            const transform = new SpeedFilter($filter<BytesFilterTransform>("bytes"), settingsService).transform;
+        const factory: SpeedFilterFactory = (settingsService: SettingsService) => {
+            const transform = new SpeedFilter(settingsService).transform;
             // The rendered unit comes from user settings rather than from the
             // filter input, so opt out of the stateless filter optimisation.
             transform.$stateful = true;
             return transform;
         };
-        factory.$inject = ["$filter", "settingsService"];
+        factory.$inject = ["settingsService"];
         return factory;
     }
 
-    constructor(
-        private bytesFilter: BytesFilterTransform,
-        private settingsService: SettingsService,
-    ) {}
+    constructor(private settingsService: SettingsService) {}
 
     public transform: SpeedFilterTransform = (bytesPerSecond, torrent): string => {
         let display = true;
@@ -43,8 +39,8 @@ export class SpeedFilter {
         }
 
         if (display) {
-            const unit = this.settingsService.getAllSettings().ui.speedUnit;
-            return `${formatSpeedValue(bytesPerSecond, unit, this.bytesFilter)}/s`;
+            const format = this.settingsService.getAllSettings().ui.speedUnit === "bits" ? formatBits : formatBytes;
+            return `${format(bytesPerSecond)}/s`;
         }
 
         return "";

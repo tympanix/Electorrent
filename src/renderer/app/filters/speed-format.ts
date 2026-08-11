@@ -1,5 +1,5 @@
-import { IFilterNumber } from "angular";
-import type { SpeedUnit } from "@shared/ipc-contract";
+const BYTE_UNIT_BASE = 1024;
+const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
 /**
  * Bit rates conventionally use decimal (SI) prefixes rather than the binary
@@ -8,7 +8,13 @@ import type { SpeedUnit } from "@shared/ipc-contract";
 const BIT_UNIT_BASE = 1000;
 const BIT_UNITS = ["b", "kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb"];
 
-function formatBits(value: number | string | null | undefined, fractionSize = 1): string {
+function format(
+    value: number | string | null | undefined,
+    fractionSize: number | string,
+    scale: number,
+    base: number,
+    units: string[],
+): string {
     if (value === null || value === undefined) {
         return "";
     }
@@ -21,24 +27,22 @@ function formatBits(value: number | string | null | undefined, fractionSize = 1)
     }
 
     if (bytes === 0) {
-        return "0 b";
+        return `0 ${units[0]}`;
     }
 
-    const bits = bytes * 8;
+    const scaled = bytes * scale;
     const dm = decimals < 0 ? 0 : decimals;
-    const i = Math.min(Math.floor(Math.log(bits) / Math.log(BIT_UNIT_BASE)), BIT_UNITS.length - 1);
+    const i = Math.min(Math.floor(Math.log(scaled) / Math.log(base)), units.length - 1);
 
-    return `${parseFloat((bits / Math.pow(BIT_UNIT_BASE, i)).toFixed(dm))} ${BIT_UNITS[i]}`;
+    return `${parseFloat((scaled / Math.pow(base, i)).toFixed(dm))} ${units[i]}`;
 }
 
-/**
- * Formats a byte rate in the unit preferred by the user, without a trailing
- * time suffix. Callers append their own suffix, e.g. "/s".
- */
-export function formatSpeedValue(
-    bytesPerSecond: number | string | null | undefined,
-    unit: SpeedUnit,
-    bytesFilter: IFilterNumber,
-): string {
-    return unit === "bits" ? formatBits(bytesPerSecond) : bytesFilter(bytesPerSecond);
+/** Formats a byte count using binary prefixes, e.g. "1.5 MB". */
+export function formatBytes(value: number | string | null | undefined, fractionSize: number | string = 1): string {
+    return format(value, fractionSize, 1, BYTE_UNIT_BASE, BYTE_UNITS);
+}
+
+/** Formats a byte count as bits using decimal prefixes, e.g. "12.6 Mb". */
+export function formatBits(value: number | string | null | undefined, fractionSize: number | string = 1): string {
+    return format(value, fractionSize, 8, BIT_UNIT_BASE, BIT_UNITS);
 }
