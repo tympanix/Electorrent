@@ -66,7 +66,16 @@ jobs:
     - name: Package application
       run: npm run pack
     - name: Run tests
+      id: tests
       run: xvfb-run -a -- npm test -- --dist --client "${{ matrix.client }}" --parallel
+    - name: Upload failed test videos
+      if: failure() && steps.tests.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: failed-test-videos-${{ strategy.job-index }}
+        path: artifacts/test-videos/**/*.webm
+        if-no-files-found: error
+        retention-days: 7
 
   build:
     strategy:

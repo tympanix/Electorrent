@@ -117,6 +117,7 @@
     "typescript": "^6.0.3",
     "underscore": "^1.8.3",
     "wdio": "^6.0.1",
+    "wdio-video-reporter": "^6.2.0",
     "webpack": "^5.105.0",
     "webpack-cli": "^6.0.1",
     "webpack-node-externals": "^3.0.0",

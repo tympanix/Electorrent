@@ -35,6 +35,13 @@ const selectedClients = selectedClientKeys.length
     : Object.values(TEST_CLIENTS)
 const workerClientLabels = new Map<string, string>()
 const specReporterPath = fileURLToPath(new URL('./test/framework/spec-reporter.ts', import.meta.url))
+const videoReporterOptions = {
+    outputDir: './artifacts/test-videos',
+    rawPath: './artifacts/test-video-frames',
+    saveAllVideos: false,
+    videoSlowdownMultiplier: 3,
+    videoRenderTimeout: 30_000,
+}
 
 function electronCapability(client: (typeof selectedClients)[number]): WebdriverIO.Capabilities {
     return {
@@ -209,9 +216,12 @@ export const config: WebdriverIO.Config = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: https://webdriver.io/docs/dot-reporter
-    reporters: [[ElectorrentSpecReporter, {
-        realtimeReporting: false,
-    }]],
+    reporters: [
+        [ElectorrentSpecReporter, {
+            realtimeReporting: false,
+        }],
+        ['video', videoReporterOptions],
+    ],
 
     // Options to be passed to Mocha.
     // See the full list at http://mochajs.org/
@@ -247,10 +257,13 @@ export const config: WebdriverIO.Config = {
     onWorkerStart: function (cid, caps, specs, args) {
         const label = clientLabel(caps)
         workerClientLabels.set(cid, label)
-        args.reporters = [[specReporterPath, {
-            clientLabel: label,
-            realtimeReporting: false,
-        }]]
+        args.reporters = [
+            [specReporterPath, {
+                clientLabel: label,
+                realtimeReporting: false,
+            }],
+            ['video', videoReporterOptions],
+        ]
     },
     /**
      * Gets executed just after a worker process has exited.
