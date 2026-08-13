@@ -18,5 +18,6 @@ describe("headless window", function () {
     }
 
     assert.isFalse(state.isVisible)
+    assert.fail("Temporary CI probe: verify failed-test video artifact upload")
   })
 })
