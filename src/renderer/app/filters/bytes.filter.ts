@@ -1,4 +1,5 @@
 import { IFilterNumber } from "angular";
+import { formatBytes } from "@renderer/app/filters/speed-format";
 
 export class BytesFilter {
     public static getInstance(): () => IFilterNumber {
@@ -6,26 +7,6 @@ export class BytesFilter {
     }
 
     public transform: IFilterNumber = (value, fractionSize = 1): string => {
-        if (value === null || value === undefined) {
-            return "";
-        }
-
-        const bytes = Number(value);
-        const decimals = Number(fractionSize);
-
-        if (!Number.isFinite(bytes) || bytes < 0) {
-            return "";
-        }
-
-        if (bytes === 0) {
-            return "0 B";
-        }
-
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        return formatBytes(value, fractionSize);
     };
 }

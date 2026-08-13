@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS: AppSettings = {
         fixedHeader: false,
         theme: 'system',
         sidebarCollapsed: false,
+        speedUnit: 'bytes',
     },
 }
 

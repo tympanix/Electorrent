@@ -1,28 +1,35 @@
-import { IFilterNumber, IFilterService } from "angular";
+import { IFilterNumber } from "angular";
+import { formatBits, formatBytes } from "@renderer/app/filters/speed-format";
+import type { SettingsService } from "@renderer/app/services/settings";
 
-type BytesFilterTransform = IFilterNumber;
 type SpeedFilterTorrent = {
     isStatusDownloading: () => boolean;
 };
 
 interface SpeedFilterTransform extends IFilterNumber {
     (bytesPerSecond: number | string, torrent?: SpeedFilterTorrent | number | string): string;
+    $stateful?: boolean;
 }
 
 interface SpeedFilterFactory {
-    ($filter: IFilterService): SpeedFilterTransform;
+    (settingsService: SettingsService): SpeedFilterTransform;
     $inject?: string[];
 }
 
 export class SpeedFilter {
     public static getInstance(): SpeedFilterFactory {
-        const factory: SpeedFilterFactory = ($filter: IFilterService) =>
-            new SpeedFilter($filter<BytesFilterTransform>("bytes")).transform;
-        factory.$inject = ["$filter"];
+        const factory: SpeedFilterFactory = (settingsService: SettingsService) => {
+            const transform = new SpeedFilter(settingsService).transform;
+            // The rendered unit comes from user settings rather than from the
+            // filter input, so opt out of the stateless filter optimisation.
+            transform.$stateful = true;
+            return transform;
+        };
+        factory.$inject = ["settingsService"];
         return factory;
     }
 
-    constructor(private bytesFilter: BytesFilterTransform) {}
+    constructor(private settingsService: SettingsService) {}
 
     public transform: SpeedFilterTransform = (bytesPerSecond, torrent): string => {
         let display = true;
@@ -32,7 +39,8 @@ export class SpeedFilter {
         }
 
         if (display) {
-            return `${this.bytesFilter(bytesPerSecond)}/s`;
+            const format = this.settingsService.getAllSettings().ui.speedUnit === "bits" ? formatBits : formatBytes;
+            return `${format(bytesPerSecond)}/s`;
         }
 
         return "";

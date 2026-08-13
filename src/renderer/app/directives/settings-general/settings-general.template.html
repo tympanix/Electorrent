@@ -73,6 +73,23 @@
     <div class="ui card">
         <div class="content">
             <div class="header">
+                <i class="tachometer alternate icon"></i>
+                Speed Units
+            </div>
+            <div class="description">
+                Show transfer speeds in bytes per second or bits per second
+            </div>
+        </div>
+        <div class="center aligned extra content">
+            <dropdown class="fluid" title="Speed Units" ng-model="ctl.settings.ui.speedUnit">
+                <dropdown-item data-value="bytes">Bytes (MB/s)</dropdown-item>
+                <dropdown-item data-value="bits">Bits (Mb/s)</dropdown-item>
+            </dropdown>
+        </div>
+    </div>
+    <div class="ui card">
+        <div class="content">
+            <div class="header">
                 <i class="expand icon"></i>
                 Table Resize Style
             </div>
