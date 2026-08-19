@@ -39,13 +39,14 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
 
         parentWindow = parent
         parentModel = model
+        const keepWindowHidden = app.commandLine.hasSwitch('test') || app.commandLine.hasSwitch('headless')
         const child = new BrowserWindow({
             show: false,
             width: MINIMUM_SIZE,
             height: MINIMUM_SIZE,
             frame: false,
             transparent: true,
-            focusable: true,
+            focusable: !keepWindowHidden,
             hasShadow: false,
             resizable: false,
             movable: false,
@@ -68,7 +69,7 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
                 closeMenu()
             }
         }
-        if (process.env.NODE_ENV !== 'test') {
+        if (!keepWindowHidden) {
             child.once('blur', closeIfCurrent)
         }
 
@@ -113,7 +114,7 @@ export function registerContextMenuHandlers(getWindow: () => BrowserWindow | nul
         const y = Math.max(display.workArea.y, Math.min(anchor.y - MENU_WINDOW_MARGIN + height > bottom ? anchor.y + MENU_WINDOW_MARGIN - height : anchor.y - MENU_WINDOW_MARGIN, bottom - height))
 
         menuWindow.setBounds({ x, y, width, height })
-        if (!app.commandLine.hasSwitch('headless')) {
+        if (!app.commandLine.hasSwitch('test') && !app.commandLine.hasSwitch('headless')) {
             menuWindow.show()
         }
         return { submenuOnLeft }
