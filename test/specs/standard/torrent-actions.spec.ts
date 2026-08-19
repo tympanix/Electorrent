@@ -124,7 +124,7 @@ describe("torrent actions", function () {
       const contextMenuLocation = await getContextMenuLocation()
       assert.closeTo(contextMenuLocation.visibleMenu.x, contextMenuLocation.parent.x + expectedMenuLocation.x, tolerance)
       assert.closeTo(contextMenuLocation.visibleMenu.y, contextMenuLocation.parent.y + expectedMenuLocation.y, tolerance)
-      assert.equal(contextMenuLocation.focusable, true)
+      assert.equal(contextMenuLocation.focusable, false)
       assert.equal(contextMenuLocation.hasParent, true)
     } finally {
       await browser.switchToWindow(parentWindow)
