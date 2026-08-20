@@ -98,7 +98,9 @@ export type ParseTorrentRequest =
 
 export type TlsSecurity = "default" | "insecure"
 
-export interface BittorrentServerConfig extends StoredServerConfig {
+export const PASSWORD_MASK = '••••••••'
+
+export interface BittorrentConnectServer extends RendererServerConfig {
     certificateData?: Uint8Array
 }
 
@@ -209,14 +211,13 @@ export type LabelColorHue = number
 
 export type LabelColorOverrides = Partial<Record<string, LabelColorHue>>
 
-export interface StoredServerConfig {
+export interface ServerConfigBase {
     name?: string
     id: string
     ip: string
     proto: string
     port: number
     user: string
-    password: string
     client: string
     path: string
     default?: boolean
@@ -228,6 +229,12 @@ export interface StoredServerConfig {
     defaultUploadOptionsEnabled?: boolean
     defaultUploadOptions?: TorrentUploadOptions
     labelColors?: LabelColorOverrides
+}
+
+/** Renderer-safe server data. `newPassword` is submission-only and never returned by main. */
+export interface RendererServerConfig extends ServerConfigBase {
+    hasPassword: boolean
+    newPassword?: string
 }
 
 export interface SavedLocationConfig {
@@ -299,6 +306,10 @@ export type BittorrentConnectResult =
     | { readonly ok: true; readonly connection: TorrentClientConnection }
     | { readonly ok: false; readonly error: BittorrentConnectionError }
 
+export interface BittorrentConnectRequest {
+    server: BittorrentConnectServer
+}
+
 export interface ResolvedTorrentClientFeatures {
     readonly magnetLinks: boolean
     readonly labels: boolean
@@ -316,7 +327,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly uploadOptions: Readonly<Required<Record<keyof TorrentUploadOptions, boolean>>>
 }
 
-export interface AppSettings<TServer = StoredServerConfig> {
+export interface AppSettings<TServer = RendererServerConfig> {
     startup: string
     systemStartup: SystemStartupOption
     refreshRate: number
@@ -339,6 +350,10 @@ export interface AppSettings<TServer = StoredServerConfig> {
     }
     servers: TServer[]
     certificates: string[]
+}
+
+export interface SettingsSaveAllRequest {
+    settings: AppSettings<RendererServerConfig>
 }
 
 export interface UpdateEvent {
@@ -375,7 +390,7 @@ export interface CertificatePrompt {
 }
 
 export interface CertificateFetchRequest {
-    server: StoredServerConfig
+    server: RendererServerConfig
 }
 
 export interface CertificateInstallRequest {
@@ -431,8 +446,8 @@ export interface ElectorrentBridge {
         openExternal(url: string): Promise<void>
     }
     settings: {
-        getAll(): Promise<AppSettings>
-        saveAll(settings: AppSettings): Promise<void>
+        getAll(): Promise<AppSettings<RendererServerConfig>>
+        saveAll(settings: AppSettings<RendererServerConfig>): Promise<void>
         listThemes(): Promise<ThemeInfo[]>
         getSystemTheme(): Promise<ColorTheme>
         onSystemThemeChanged(callback: (theme: ColorTheme) => void): Unsubscribe
@@ -449,7 +464,7 @@ export interface ElectorrentBridge {
         getPathForFile(file: File): string
     }
     bittorrent: {
-        connect(server: BittorrentServerConfig): Promise<BittorrentConnectResult>
+        connect(server: BittorrentConnectServer): Promise<BittorrentConnectResult>
         disconnect(): Promise<void>
         getSnapshot(request?: BittorrentSnapshotRequest): Promise<any>
         addTorrentUrl(request: BittorrentAddTorrentUrlRequest): Promise<void>

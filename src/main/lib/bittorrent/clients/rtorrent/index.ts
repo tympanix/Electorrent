@@ -3,7 +3,8 @@ import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFileSelection, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
+import type { ResolvedServerConfig } from '@main/lib/bittorrent/server-config'
 import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import type { TorrentActionItem } from "@shared/torrent-actions"
@@ -40,7 +41,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
     ]
     private client: any
 
-    private url(server: BittorrentServerConfig) {
+    private url(server: ResolvedServerConfig) {
         return server.path ? serverUrl(server) : serverUrl(server, "RPC2")
     }
 
@@ -197,7 +198,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         await this.getMulticallHashes(hashes, commands, params)
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+    async connect(server: ResolvedServerConfig): Promise<TorrentClientConnection> {
         const rpcUrl = new URL(this.url(server))
         const options: Record<string, any> = {
             host: rpcUrl.hostname.replace(/^\[|\]$/g, ""),

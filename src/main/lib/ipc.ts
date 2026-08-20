@@ -2,7 +2,7 @@ import { app, BrowserWindow, clipboard, dialog, ipcMain, nativeTheme, shell, typ
 import is from 'electron-is'
 
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { AppSettings, EditCommand, PendingTorrentUploadLink, WindowCommand } from '@shared/ipc-contract'
+import type { AppSettings, BittorrentConnectRequest, EditCommand, PendingTorrentUploadLink, RendererServerConfig, SettingsSaveAllRequest, WindowCommand } from '@shared/ipc-contract'
 import { getAppVersion } from './app-meta'
 import { bittorrentManager } from './bittorrent'
 import { normalizeConnectionError } from './bittorrent/connection-error'
@@ -21,7 +21,7 @@ interface RegisterHandlersOptions {
         magnets: PendingTorrentUploadLink[]
         torrentFiles: unknown[]
     }>
-    onSettingsSaved?: (settings: AppSettings) => void | Promise<void>
+    onSettingsSaved?: (settings: AppSettings<RendererServerConfig>) => void | Promise<void>
     onSystemThemeChanged?: () => void
     onBittorrentConnected?: () => void | Promise<void>
 }
@@ -159,7 +159,7 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         return settings.getAllSettings()
     })
 
-    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings: newSettings }) {
+    ipcMain.handle(IPC_CHANNELS.settings.saveAll, async function(_event: IpcMainInvokeEvent, { settings: newSettings }: SettingsSaveAllRequest) {
         await new Promise<void>((resolve, reject) => {
             settings.saveAll(newSettings, function(err: Error) {
                 if (err) {
@@ -221,9 +221,9 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         return torrents.parse(request)
     })
 
-    ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }) {
+    ipcMain.handle(IPC_CHANNELS.bittorrent.connect, async function(event: IpcMainInvokeEvent, { server }: BittorrentConnectRequest) {
         try {
-            const connection = await bittorrentManager.connect(event.sender, server)
+            const connection = await bittorrentManager.connect(event.sender, settings.resolveConnectionServer(server))
             if (!connection) {
                 return {
                     ok: false,

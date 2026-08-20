@@ -3,7 +3,7 @@ import type {
     ElectorrentBridge,
     BittorrentFileSelection,
     BittorrentTorrentPeer,
-    BittorrentServerConfig,
+    BittorrentConnectServer,
     TorrentClientConnection,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
@@ -15,7 +15,7 @@ function bridge() {
     return window.electorrent.bittorrent
 }
 
-export function serializeServer(server: any): BittorrentServerConfig {
+export function serializeServer(server: any): BittorrentConnectServer {
     const data = typeof server?.json === "function" ? server.json() : { ...server }
     const certificateData = typeof server?.getCertificate === "function"
         ? server.getCertificate()

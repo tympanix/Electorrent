@@ -5,7 +5,6 @@ import { lookup as lookupCountry } from "geoip-country"
 import type {
     BittorrentAddTorrentUrlRequest,
     BittorrentInvokeActionRequest,
-    BittorrentServerConfig,
     BittorrentSetTorrentFileSelectionRequest,
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
@@ -18,6 +17,7 @@ import logger from "../logger"
 import * as settings from "../settings"
 import { createRuntime } from "./registry"
 import type { BittorrentRuntime } from "./types"
+import type { ResolvedServerConfig } from './server-config'
 import { withTorrentActionAccelerators } from "@shared/torrent-actions"
 
 export interface BittorrentSessionState {
@@ -76,7 +76,7 @@ class BittorrentManager {
         return sourceBasename === filename && sourceBasename.toLowerCase().endsWith(".torrent")
     }
 
-    async connect(sender: WebContents, server: BittorrentServerConfig): Promise<TorrentClientConnection | null> {
+    async connect(sender: WebContents, server: ResolvedServerConfig): Promise<TorrentClientConnection | null> {
         const senderId = sender.id
         this.setSessionState(senderId, {
             activeServerId: server.id || null,

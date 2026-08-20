@@ -1,5 +1,5 @@
 import { IRootScopeService } from "angular";
-import type { AppSettings, StoredServerConfig } from "@shared/ipc-contract";
+import type { AppSettings, RendererServerConfig } from "@shared/ipc-contract";
 import { createDefaultSettings } from "@shared/settings-defaults";
 import type { Server } from "@renderer/app/services/server";
 
@@ -68,7 +68,7 @@ export const settingsService = ['$rootScope', '$bittorrent', 'notificationServic
         }
     }
 
-    const readyPromise = electorrent.settings.getAll().then((org: AppSettings<StoredServerConfig>) => {
+    const readyPromise = electorrent.settings.getAll().then((org: AppSettings<RendererServerConfig>) => {
         mergeSettings(org)
         return loadServerCertificates(settings.servers).then(() => settings)
     });
@@ -150,6 +150,7 @@ export const settingsService = ['$rootScope', '$bittorrent', 'notificationServic
             mergeSettings(newSettings)
         }
         return loadServerCertificates(settings.servers).then(() => electorrent.settings.saveAll(settingsToJson())).then(function() {
+            settings.servers.forEach((server) => server.markPasswordSaved())
             updateServerReference()
         });
     }
