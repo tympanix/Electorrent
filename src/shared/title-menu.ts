@@ -1,5 +1,5 @@
 import { CLIENT_METADATA } from "./client-metadata"
-import type { AppSettings, EditCommand, MenuAction, StoredServerConfig, Unsubscribe, WindowCommand } from "./ipc-contract"
+import type { AppSettings, EditCommand, MenuAction, PublicServerConfig, Unsubscribe, WindowCommand } from "./ipc-contract"
 import type { TorrentActionItem } from "./torrent-actions"
 
 export type TitleMenuPlatform = "darwin" | "linux" | "win32"
@@ -80,7 +80,7 @@ function serverAccelerator(index: number, platform: TitleMenuPlatform) {
     return `${platform === "darwin" ? "CmdOrCtrl" : "Ctrl"}+${index % 10}`
 }
 
-function getServerLabel(server: StoredServerConfig) {
+function getServerLabel(server: PublicServerConfig) {
     const clientName = CLIENT_METADATA[server.client as keyof typeof CLIENT_METADATA]?.name || server.client || "Server"
     return server.name || `${clientName} @ ${server.ip || "unknown host"}`
 }

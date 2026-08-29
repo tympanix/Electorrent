@@ -4,10 +4,10 @@ import { Torrent } from "@renderer/app/bittorrent"
 import type { ColumnProps } from "@renderer/app/services/column"
 import { parseServerAddressInput, sanitizeServerAddress } from "@shared/server-address"
 import type { CertificateResponseService } from "@renderer/app/services/certificate-response"
-import type { LabelColorHue, LabelColorOverrides, SavedLocationConfig, StoredServerConfig, TorrentUploadOptions } from "@shared/ipc-contract"
+import { PASSWORD_MASK, type LabelColorHue, type LabelColorOverrides, type PublicServerConfig, type SavedLocationConfig, type TorrentUploadOptions } from "@shared/ipc-contract"
 import { normalizeLabelColorHue } from "@renderer/app/services/label-colors"
 
-export interface Server extends Omit<StoredServerConfig, "columns"> {
+export interface Server extends Omit<PublicServerConfig, "columns"> {
     columns: ColumnProps[]
     certificateData?: Uint8Array
     isConnected: boolean
@@ -30,7 +30,7 @@ export interface Server extends Omit<StoredServerConfig, "columns"> {
     defaultColumns(): ColumnProps[]
     addCustomColumns(columns: ColumnProps[]): ColumnProps[]
     bootstrap(): void
-    json(): StoredServerConfig
+    json(): PublicServerConfig
 }
 
 export const serverService = ['$q', 'notificationService', '$bittorrent', '$btclients', 'certificateResponseService',
@@ -79,7 +79,7 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
          * Constructor, with class name
          */
         function Server(...args) {
-            const [ip, proto, port, user, password, client, path] = args
+            const [ip, proto, port, user, newPassword, client, path] = args
             this.certificateData = undefined
             if(args.length === 1) {
                 this.fromJson(args[0])
@@ -89,7 +89,8 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
                 this.proto = proto
                 this.port = port
                 this.user = user || ''
-                this.password = password || ''
+                this.hasPassword = false
+                this.newPassword = newPassword || undefined
                 this.client = client
                 this.path = path
                 this.lastused = -1
@@ -140,7 +141,8 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
             this.proto = data.proto || "http"
             this.port = data.port
             this.user = data.user || ''
-            this.password = data.password || ''
+            this.hasPassword = data.hasPassword === true
+            this.newPassword = this.hasPassword ? PASSWORD_MASK : undefined
             this.client = data.client
             this.path = data.path || ''
             this.default = data.default
@@ -156,14 +158,14 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
         };
 
         Server.prototype.json = function() {
-            return {
+            const result: PublicServerConfig = {
                 name: this.name,
                 id: this.id,
                 ip: this.ip,
                 proto: this.proto,
                 port: this.port,
                 user: this.user,
-                password: this.password,
+                hasPassword: this.hasPassword || !!this.newPassword,
                 client: this.client,
                 path: this.path,
                 default: this.default,
@@ -176,6 +178,10 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
                 defaultUploadOptions: normalizeDefaultUploadOptions(this.defaultUploadOptions),
                 labelColors: normalizeLabelColors(this.labelColors),
             }
+            if (this.newPassword !== undefined && !(this.hasPassword && this.newPassword === PASSWORD_MASK)) {
+                result.newPassword = this.newPassword
+            }
+            return result
         };
 
         Server.prototype.getName = function() {
@@ -287,7 +293,7 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
             const response = certificateResponseService.wait(self.id)
 
             electorrent.certificates.fetch({
-                server: self.json() as StoredServerConfig,
+                server: self.json(),
             }).catch((err: unknown) => {
                 certificateResponseService.reject(self.id, err)
             })
@@ -318,7 +324,7 @@ export const serverService = ['$q', 'notificationService', '$bittorrent', '$btcl
                 this.proto === other.proto &&
                 this.port === other.port &&
                 this.user === other.user &&
-                this.password === other.password &&
+                this.newPassword === other.newPassword &&
                 this.client === other.client &&
                 this.path === other.path &&
                 this.certificate === other.certificate &&

@@ -14,6 +14,7 @@ const UNREACHABLE_CODES = new Set(["ECONNREFUSED", "ECONNRESET", "EHOSTUNREACH",
 
 const MESSAGES: Record<BittorrentConnectionErrorKind, string> = {
     authentication: "Incorrect username or password.",
+    credential: "The stored password could not be decrypted. Re-enter the password.",
     timeout: "Connection timed out.",
     unreachable: "Client is unreachable.",
     address: "Check the client address and path.",
@@ -71,6 +72,10 @@ export function normalizeConnectionError(error: unknown): BittorrentConnectionEr
     const details: ErrorDetails = { codes: new Set(), statuses: new Set(), messages: [] }
     collectErrorDetails(error, details, new Set())
     const message = details.messages.join(" ").toLowerCase()
+
+    if (typeof error === "object" && error !== null && (error as { kind?: unknown }).kind === "credential") {
+        return connectionError("credential", details)
+    }
 
     if (message.includes("stale bittorrent connection")) {
         return connectionError("cancelled", details)

@@ -5,7 +5,7 @@ import { lookup as lookupCountry } from "geoip-country"
 import type {
     BittorrentAddTorrentUrlRequest,
     BittorrentInvokeActionRequest,
-    BittorrentServerConfig,
+    ResolvedServerConfig,
     BittorrentSetTorrentFileSelectionRequest,
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
@@ -76,7 +76,7 @@ class BittorrentManager {
         return sourceBasename === filename && sourceBasename.toLowerCase().endsWith(".torrent")
     }
 
-    async connect(sender: WebContents, server: BittorrentServerConfig): Promise<TorrentClientConnection | null> {
+    async connect(sender: WebContents, server: ResolvedServerConfig): Promise<TorrentClientConnection | null> {
         const senderId = sender.id
         this.setSessionState(senderId, {
             activeServerId: server.id || null,

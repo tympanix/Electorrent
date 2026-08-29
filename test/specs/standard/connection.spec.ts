@@ -1,5 +1,6 @@
 import chai from "chai"
 import { $ } from "@wdio/globals"
+import { PASSWORD_MASK } from "../../../src/shared/ipc-contract"
 import { eventually } from "../../e2e/eventually"
 import { configureSpec, getTestFixture } from "../../framework/fixture"
 import { restartApplication } from "../../shared"
@@ -55,7 +56,7 @@ describe("connection", function () {
       assert.equal(await $("#page-settings-connection input[name='ip']").getValue(), client.host)
       assert.equal(await $("#page-settings-connection input[name='port']").getValue(), String(client.port))
       assert.equal(await $("#page-settings-connection input[name='username']").getValue(), client.username)
-      assert.equal(await $("#page-settings-connection input[name='password']").getValue(), client.password)
+      assert.equal(await $("#page-settings-connection input[name='password']").getValue(), client.password ? PASSWORD_MASK : "")
     } finally {
       await backend.unpause()
     }

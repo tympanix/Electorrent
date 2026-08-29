@@ -1,6 +1,6 @@
 import type {
     BittorrentFileSelection,
-    BittorrentServerConfig,
+    ResolvedServerConfig,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
     BittorrentTorrentPeer,
@@ -95,7 +95,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
     private connected = false
     private store?: MockRuntimeStore
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+    async connect(server: ResolvedServerConfig): Promise<TorrentClientConnection> {
         const key = this.getServerKey(server)
         let store = MockBittorrentRuntime.stores.get(key)
         if (!store) {
@@ -665,7 +665,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
         return this.store!.removedHashes
     }
 
-    private getServerKey(server: BittorrentServerConfig) {
+    private getServerKey(server: ResolvedServerConfig) {
         return server.id || `${server.client}:${server.proto}://${server.ip}:${server.port}${server.path || ""}`
     }
 }

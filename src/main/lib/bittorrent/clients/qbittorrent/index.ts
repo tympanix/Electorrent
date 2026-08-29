@@ -4,7 +4,7 @@ import parseTorrent from "parse-torrent"
 
 import type {
     BittorrentFileSelection,
-    BittorrentServerConfig,
+    ResolvedServerConfig,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
     BittorrentTorrentPeer,
@@ -136,7 +136,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         { role: "remove", label: "Remove", action: "delete", icon: "remove" },
         { label: "Remove And Delete", action: "deleteAndRemove", icon: "trash", role: "delete" },
     ]
-    private url(server: BittorrentServerConfig, endpoint?: string) {
+    private url(server: ResolvedServerConfig, endpoint?: string) {
         return serverUrl(server, endpoint)
     }
 
@@ -146,7 +146,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
     private torrentCache = new Map<string, Record<string, any>>()
 
-    private async selectApi(server: BittorrentServerConfig) {
+    private async selectApi(server: ResolvedServerConfig) {
         const origin = serverOriginUrl(server)
         const requestOptions = {
             timeout: HTTP_LOGIN_TIMEOUT,
@@ -191,7 +191,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         return this.api
     }
 
-    async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
+    async connect(server: ResolvedServerConfig): Promise<TorrentClientConnection> {
         const api = await this.selectApi(server)
         this.api = api
         await defer((done) => api.login(done))

@@ -98,7 +98,7 @@ export type ParseTorrentRequest =
 
 export type TlsSecurity = "default" | "insecure"
 
-export interface BittorrentServerConfig extends StoredServerConfig {
+export interface BittorrentServerConfig extends PublicServerConfig {
     certificateData?: Uint8Array
 }
 
@@ -209,14 +209,15 @@ export type LabelColorHue = number
 
 export type LabelColorOverrides = Partial<Record<string, LabelColorHue>>
 
-export interface StoredServerConfig {
+export const PASSWORD_MASK = "********"
+
+export interface ServerConfigBase {
     name?: string
     id: string
     ip: string
     proto: string
     port: number
     user: string
-    password: string
     client: string
     path: string
     default?: boolean
@@ -228,6 +229,16 @@ export interface StoredServerConfig {
     defaultUploadOptionsEnabled?: boolean
     defaultUploadOptions?: TorrentUploadOptions
     labelColors?: LabelColorOverrides
+}
+
+export interface PublicServerConfig extends ServerConfigBase {
+    hasPassword: boolean
+    newPassword?: string
+}
+
+export interface ResolvedServerConfig extends ServerConfigBase {
+    password: string
+    certificateData?: Uint8Array
 }
 
 export interface SavedLocationConfig {
@@ -280,6 +291,7 @@ export interface TorrentClientConnection {
 
 export type BittorrentConnectionErrorKind =
     | "authentication"
+    | "credential"
     | "timeout"
     | "unreachable"
     | "address"
@@ -316,7 +328,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly uploadOptions: Readonly<Required<Record<keyof TorrentUploadOptions, boolean>>>
 }
 
-export interface AppSettings<TServer = StoredServerConfig> {
+export interface AppSettings<TServer = PublicServerConfig> {
     startup: string
     systemStartup: SystemStartupOption
     refreshRate: number
@@ -375,7 +387,7 @@ export interface CertificatePrompt {
 }
 
 export interface CertificateFetchRequest {
-    server: StoredServerConfig
+    server: PublicServerConfig
 }
 
 export interface CertificateInstallRequest {
@@ -431,8 +443,8 @@ export interface ElectorrentBridge {
         openExternal(url: string): Promise<void>
     }
     settings: {
-        getAll(): Promise<AppSettings>
-        saveAll(settings: AppSettings): Promise<void>
+        getAll(): Promise<AppSettings<PublicServerConfig>>
+        saveAll(settings: AppSettings<PublicServerConfig>): Promise<void>
         listThemes(): Promise<ThemeInfo[]>
         getSystemTheme(): Promise<ColorTheme>
         onSystemThemeChanged(callback: (theme: ColorTheme) => void): Unsubscribe
