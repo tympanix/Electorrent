@@ -381,6 +381,12 @@ export class TorrentsPageController {
 
         function remove() {
             const selectedTorrents = $scope.arrayTorrents.filter(({ selected: isSelected }: { selected: boolean }) => isSelected);
+            if (selectedTorrents.length === 0) {
+                return $q.resolve();
+            }
+            if (settings.confirmTorrentDeletion !== false && !window.confirm("Are you sure you want to delete the selected torrents?")) {
+                return $q.resolve();
+            }
             return $rootScope.$btclient?.deleteTorrents(selectedTorrents)
                 .then(() => {
                     return syncAfterTorrentMutation();

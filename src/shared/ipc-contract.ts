@@ -325,6 +325,7 @@ export interface AppSettings<TServer = StoredServerConfig> {
     debugMode?: boolean
     autoRemoveTorrents?: boolean
     alwaysPromptUploadOptions?: boolean
+    confirmTorrentDeletion?: boolean
     watchDirectory?: string
     ui: {
         resizeMode: string
