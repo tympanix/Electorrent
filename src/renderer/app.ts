@@ -175,9 +175,6 @@ torrentApp.directive("dragAndDrop", DragAndDropDirective.getInstance())
 import { SortingDirective, SortHeaderDirective } from "@renderer/app/directives/sorting/sorting.directive"
 torrentApp.directive("sorting", SortingDirective.getInstance())
 torrentApp.directive("sortHeader", SortHeaderDirective.getInstance())
-import { TorrentBodyDirective, TorrentRowDirective } from "@renderer/app/directives/torrent-table/torrent-table.directive"
-torrentApp.directive("torrentBody", TorrentBodyDirective.getInstance())
-torrentApp.directive("torrentRow", TorrentRowDirective.getInstance())
 import { SearchDirective } from "@renderer/app/directives/search/search.directive"
 torrentApp.directive("search", SearchDirective.getInstance())
 import { TimeDirective } from "@renderer/app/directives/time/time.directive"

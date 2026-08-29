@@ -4,7 +4,6 @@ export interface ColumnProps {
     name?: string
     enabled?: boolean
     attribute?: string
-    template?: string
     sort?: sortFunc
 }
 
@@ -13,7 +12,6 @@ export class Column implements ColumnProps {
     name: string
     attribute: string
     enabled: boolean
-    template: string
     sort: sortFunc
 
 
@@ -40,7 +38,6 @@ export class Column implements ColumnProps {
 
     private static defaultProps: ColumnProps = {
         enabled: false,
-        template: '',
         sort: Column.NUMERICAL,
     }
 }

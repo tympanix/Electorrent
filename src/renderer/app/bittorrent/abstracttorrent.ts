@@ -227,7 +227,6 @@ export abstract class Torrent implements TorrentProps {
     static COL_NAME = new Column({
       name: 'Name',
       enabled: true,
-      template: '{{settings.ui.cleanNames ? torrent.decodedName : torrent.name}}',
       attribute: 'decodedName',
       sort: Column.ALPHABETICAL
     })
@@ -235,21 +234,18 @@ export abstract class Torrent implements TorrentProps {
     static COL_SIZE = new Column({
       name: 'Size',
       enabled: true,
-      template: '{{torrent.size | bytes}}',
       attribute: 'size'
     })
 
     static COL_DOWNSPEED = new Column({
       name: 'Down',
       enabled: true,
-      template: '{{torrent.downloadSpeed | speed}}',
       attribute: 'downloadSpeed'
     })
 
     static COL_UPSPEED = new Column({
       name: 'Up',
       enabled: true,
-      template: '{{torrent.uploadSpeed | speed}}',
       attribute: 'uploadSpeed'
     })
 
@@ -263,28 +259,24 @@ export abstract class Torrent implements TorrentProps {
     static COL_DOWNLIMIT = new Column({
       name: 'Down Limit',
       enabled: false,
-      template: '{{torrent.downloadLimit | speedLimit}}',
       attribute: 'downloadLimit'
     })
 
     static COL_UPLIMIT = new Column({
       name: 'Up Limit',
       enabled: false,
-      template: '{{torrent.uploadLimit | speedLimit}}',
       attribute: 'uploadLimit'
     })
 
     static COL_PROGRESS = new Column({
       name: 'Progress',
       enabled: true,
-      template: '<div progress="torrent"></div>',
       attribute: 'percent'
     })
 
     static COL_LABEL = new Column({
       name: 'Label',
       enabled: true,
-      template: '<span class="torrent-table-label-chip" ng-if="torrent.label" label-chip="torrent.label"><span class="label-chip-text">{{torrent.label}}</span></span>',
       attribute: 'label',
       sort: Column.ALPHABETICAL
     })
@@ -292,35 +284,30 @@ export abstract class Torrent implements TorrentProps {
     static COL_DATEADDED = new Column({
       name: 'Date Added',
       enabled: true,
-      template: '<span time="torrent.dateAdded"></span>',
       attribute: 'dateAdded'
     })
 
     static COL_DATECOMPLETED = new Column({
       name: 'Date Completed',
       enabled: true,
-      template: '<span time="torrent.dateCompleted"></span>',
       attribute: 'dateCompleted'
     })
 
     static COL_PEERS = new Column({
       name: 'Peers',
       enabled: false,
-      template: '{{torrent.peersText()}}',
       attribute: 'peersConnected'
     })
 
     static COL_SEEDS = new Column({
       name: 'Seeds',
       enabled: false,
-      template: '{{torrent.seedsText()}}',
       attribute: 'seedsConnected'
     })
 
     static COL_QUEUE = new Column({
       name: 'Queue',
       enabled: false,
-      template: '{{torrent.torrentQueueOrder | torrentQueue}}',
       attribute: 'torrentQueueOrder',
       sort: Column.NATURAL_NUMBER_ASC
     })
@@ -328,7 +315,6 @@ export abstract class Torrent implements TorrentProps {
     static COL_ETA = new Column({
       name: 'ETA',
       enabled: false,
-      template: '{{torrent.eta | eta}}',
       attribute: 'eta',
       sort: Column.NATURAL_NUMBER_ASC
     })
@@ -336,14 +322,12 @@ export abstract class Torrent implements TorrentProps {
     static COL_RATIO = new Column({
       name: 'Ratio',
       enabled: false,
-      template: '{{torrent.ratio | torrentRatio}}',
       attribute: 'ratio'
     })
 
     static COL_RATIO_LIMIT = new Column({
       name: 'Ratio Limit',
       enabled: false,
-      template: '{{torrent.ratioLimit | torrentRatio}}',
       attribute: 'ratioLimit'
     })
 

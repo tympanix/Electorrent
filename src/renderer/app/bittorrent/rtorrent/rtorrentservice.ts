@@ -164,7 +164,6 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
       new Column({
         name: "Tracker",
         attribute: "tracker",
-        template: "{{ torrent.tracker }}",
         sort: Column.ALPHABETICAL,
       }),
       new Column({
