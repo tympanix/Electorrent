@@ -266,7 +266,11 @@ export class TorrentsPageController {
         $scope.$on("remove-and-delete:torrents", () => {
             const deleteAction = findContextActionByRole($rootScope.$btclient?.contextMenu || [], "delete");
             if (deleteAction && selected.length > 0) {
-                openDeleteConfirmation(deleteAction.click, deleteAction.label);
+                if (settings.confirmTorrentDeletion !== false) {
+                    openDeleteConfirmation(deleteAction.click, deleteAction.label);
+                } else {
+                    runContextAction(deleteAction.click, selected);
+                }
             }
         });
 
@@ -382,9 +386,6 @@ export class TorrentsPageController {
         function remove() {
             const selectedTorrents = $scope.arrayTorrents.filter(({ selected: isSelected }: { selected: boolean }) => isSelected);
             if (selectedTorrents.length === 0) {
-                return $q.resolve();
-            }
-            if (settings.confirmTorrentDeletion !== false && !window.confirm("Are you sure you want to delete the selected torrents?")) {
                 return $q.resolve();
             }
             return $rootScope.$btclient?.deleteTorrents(selectedTorrents)
@@ -772,7 +773,7 @@ export class TorrentsPageController {
                 }
                 return $q.resolve();
             }
-            if (item && item.role === "delete") {
+            if (item && item.role === "delete" && settings.confirmTorrentDeletion !== false) {
                 openDeleteConfirmation(action, label);
                 return $q.resolve();
             }
