@@ -28,7 +28,7 @@ function findDownloadedDirectoryCommand(downloadRoot: string, contentName: strin
 }
 
 async function sendTorrentActionShortcut(accelerator: string) {
-  await browser.electron.execute((electron) => {
+  await browser.electron.execute((electron, accelerator) => {
     const win = electron.BrowserWindow.getFocusedWindow()
       || electron.BrowserWindow.getAllWindows().find((window) => !window.isDestroyed())
 
