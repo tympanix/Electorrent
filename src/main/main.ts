@@ -441,17 +441,26 @@ async function bootstrap() {
     } else {
         app.on('second-instance', function(_event: ElectronEvent, args: string[]) {
             queueAndFlushPendingLaunchArgs(args)
+            if (!app.isReady()) {
+                return
+            }
             showOrCreateTorrentWindow()
         })
     }
 
     app.on('open-url', function(_event: ElectronEvent, url: string) {
         queueAndFlushPendingLaunchArgs([url])
+        if (!app.isReady()) {
+            return
+        }
         showOrCreateTorrentWindow()
     })
 
     app.on('open-file', function(_event: ElectronEvent, filePath: string) {
         queueAndFlushPendingLaunchArgs([filePath])
+        if (!app.isReady()) {
+            return
+        }
         showOrCreateTorrentWindow()
     })
 
