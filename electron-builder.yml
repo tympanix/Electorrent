@@ -1,6 +1,8 @@
 directories:
   output: dist
   buildResources: build
+toolsets:
+  appimage: 1.0.3
 productName: Electorrent
 appId: com.github.tympanix.electorrent
 mac:
