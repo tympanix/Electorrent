@@ -32,6 +32,7 @@ const builtInColumns = [
 
 const dateIsSensible = (value: string) => value.length > 0 && !/1969|1970/.test(value)
 const decodeTorrentName = (name: string) => name.replace(/[._]/g, " ").replace(/(\[[^\]]*\])(.*)$/, "$2 $1").trim()
+const connectedPeers = (value: string) => Number(value.match(/^(\d+) of \d+$/)?.[1] ?? 0)
 const totalPeers = (value: string) => Number(value.match(/^\d+ of (\d+)$/)?.[1] ?? 0)
 
 function assertSpeed(value: string) {
@@ -107,6 +108,32 @@ describe("torrent columns", function () {
       .satisfies("show a positive total seed count", (value) => totalPeers(value.trim()) > 0, { timeout: 20 * 1000 })
 
     assert.match((await torrent.getColumn("seedsConnected")).trim(), /^\d+ of \d+$/)
+  })
+
+  it("shows a connected peer in the Peers or Seeds column", async function () {
+    this.timeout(60 * 1000)
+
+    const filename = await createTorrentFile(tracker, {
+      fileSize: 100_000,
+      uploadSpeed: 1,
+      seedDelay: 15,
+    })
+    const peerTorrent = await this.app.uploadTorrent({ filename })
+    await peerTorrent.waitForExist()
+
+    try {
+      await eventually(async () => {
+        const [peers, seeds] = await Promise.all([
+          peerTorrent.getColumn("peersConnected"),
+          peerTorrent.getColumn("seedsConnected"),
+        ])
+        return connectedPeers(peers.trim()) + connectedPeers(seeds.trim())
+      }).satisfies("show a connected peer", (count) => count > 0, { timeout: 30_000 })
+    } finally {
+      if (await peerTorrent.isExisting()) {
+        await peerTorrent.delete()
+      }
+    }
   })
 
   it("shows a sensible Queue column value", async function () {
