@@ -21,6 +21,14 @@ type RtorrentDeleteMetadata = {
 
 type RtorrentMulticallCommand = string | [string, ...any[]]
 
+function normalizeFilePath(value: unknown): string {
+    if (typeof value === "string") {
+        return value
+    }
+
+    return Buffer.isBuffer(value) ? value.toString("utf8") : ""
+}
+
 export class RtorrentRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
         { role: "start", label: "Start", action: "start", icon: "play" },
@@ -480,6 +488,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         files.forEach((file) => stringsToNumbers(file))
 
         return files.map((file: Record<string, any>, index: number) => {
+                const filePath = normalizeFilePath(file.path)
                 const size = typeof file.size === "number" ? file.size : 0
                 const totalChunks = typeof file.totalChunks === "number" ? file.totalChunks : 0
                 const completedChunks = typeof file.completedChunks === "number" ? file.completedChunks : 0
@@ -487,8 +496,8 @@ export class RtorrentRuntime implements BittorrentRuntime {
 
                 return {
                     index,
-                    path: file.path || "",
-                    name: (file.path || "").split(/[/\\]/).pop() || "",
+                    path: filePath,
+                    name: filePath.split(/[/\\]/).pop() || "",
                     size,
                     progress: totalChunks > 0 ? Math.max(0, Math.min(1, completedChunks / totalChunks)) : 0,
                     priority,
