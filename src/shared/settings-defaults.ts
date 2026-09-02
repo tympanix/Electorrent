@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     debugMode: false,
     autoRemoveTorrents: false,
     alwaysPromptUploadOptions: false,
+    confirmTorrentDeletion: true,
     watchDirectory: '',
     ui: {
         resizeMode: 'OverflowResizer',

@@ -9,7 +9,7 @@ import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
 import { createTorrentFile } from "../../torrent"
 import { configureSpec, createUniqueLabel, getTestFixture } from "../../framework/fixture"
 
-const { assert } = chai
+const assert: Chai.AssertStatic = chai.assert
 const fixture = getTestFixture()
 const client = fixture.client
 const backend = fixture.backend
@@ -27,8 +27,8 @@ function findDownloadedDirectoryCommand(downloadRoot: string, contentName: strin
   return `find ${shellQuote(downloadRoot)} -maxdepth 5 -type d -name ${shellQuote(contentName)} -print -quit`
 }
 
-async function sendRemoveAndDeleteShortcut() {
-  await browser.electron.execute((electron) => {
+async function sendTorrentActionShortcut(accelerator: string) {
+  await browser.electron.execute((electron, accelerator) => {
     const win = electron.BrowserWindow.getFocusedWindow()
       || electron.BrowserWindow.getAllWindows().find((window) => !window.isDestroyed())
 
@@ -38,7 +38,7 @@ async function sendRemoveAndDeleteShortcut() {
     const actionsMenu = menu?.items.find((item) => item.id === "actions" || item.label === "Actions")
     const findShortcut = (items: Electron.MenuItem[]): Electron.MenuItem | undefined => {
       for (const item of items) {
-        if (item.accelerator === "CmdOrCtrl+Delete") return item
+        if (item.accelerator === accelerator) return item
         const submenuItem = item.submenu && findShortcut(item.submenu.items)
         if (submenuItem) return submenuItem
       }
@@ -46,11 +46,35 @@ async function sendRemoveAndDeleteShortcut() {
     const menuItem = actionsMenu?.submenu && findShortcut(actionsMenu.submenu.items)
 
     if (!menuItem || !menuItem.visible || !menuItem.enabled) {
-      throw new Error("CmdOrCtrl+Delete action is unavailable")
+      throw new Error(`${accelerator} action is unavailable`)
     }
 
     menuItem.click({}, win, win.webContents)
-  })
+  }, accelerator)
+}
+
+async function hasTorrentActionShortcut(accelerator: string): Promise<boolean> {
+  return await browser.electron.execute((electron, accelerator) => {
+    const menu = electron.Menu.getApplicationMenu()
+    const actionsMenu = menu?.items.find((item) => item.id === "actions" || item.label === "Actions")
+    const findShortcut = (items: Electron.MenuItem[]): Electron.MenuItem | undefined => {
+      for (const item of items) {
+        if (item.accelerator === accelerator) return item
+        const submenuItem = item.submenu && findShortcut(item.submenu.items)
+        if (submenuItem) return submenuItem
+      }
+    }
+    const menuItem = actionsMenu?.submenu && findShortcut(actionsMenu.submenu.items)
+    return Boolean(menuItem && menuItem.visible && menuItem.enabled)
+  }, accelerator)
+}
+
+async function sendRemoveShortcut() {
+  await sendTorrentActionShortcut("Delete")
+}
+
+async function sendRemoveAndDeleteShortcut() {
+  await sendTorrentActionShortcut("CmdOrCtrl+Delete")
 }
 
 describe("torrent actions", function () {
@@ -133,7 +157,7 @@ describe("torrent actions", function () {
     }
   })
 
-  it("delete action shows a confirmation modal", async function () {
+  it("remove and delete action shows a confirmation modal", async function () {
     const modal = await torrent.openDeleteConfirmation()
     await eventually(() => modal.$(".content").getText()).contains("Are you sure")
 
@@ -157,6 +181,59 @@ describe("torrent actions", function () {
     await waitForModalClose(modal)
 
     await torrent.waitForExist()
+  })
+
+  it("Delete removes the torrent without confirmation", async function () {
+    if (!await hasTorrentActionShortcut("Delete")) {
+      return this.skip()
+    }
+    this.timeout(60 * 1000)
+    const filename = await createTorrentFile(tracker, {
+      torrentName: createUniqueLabel("remove-no-confirm"),
+      fileSize: 1,
+    })
+    const torrentToRemove = await this.app.uploadTorrent({ filename })
+
+    await torrentToRemove.waitForExist({ timeout: 20 * 1000 })
+    await $(torrentToRemove.query).click()
+    await sendRemoveShortcut()
+    await torrentToRemove.waitForGone()
+
+    assert.isFalse(await $("#deleteTorrentModal").isDisplayed())
+  })
+
+  it("delete confirmation setting disables remove and delete confirmations", async function () {
+    this.timeout(60 * 1000)
+    const filename = await createTorrentFile(tracker, {
+      torrentName: createUniqueLabel("delete-no-confirm"),
+      fileSize: 1,
+    })
+    const torrentToDelete = await this.app.uploadTorrent({ filename })
+
+    await torrentToDelete.waitForExist({ timeout: 20 * 1000 })
+    await this.app.openSettings()
+    await this.app.settingsGotoTab("general")
+    const initialState = await this.app.getGeneralToggleState("Confirm torrent data deletion")
+    await this.app.setGeneralToggle("Confirm torrent data deletion", false)
+    await this.app.settingsSave()
+    await this.app.torrentsPageIsVisible()
+
+    try {
+      await $(torrentToDelete.query).click()
+      await sendRemoveAndDeleteShortcut()
+      await torrentToDelete.waitForGone()
+      assert.isFalse(await $("#deleteTorrentModal").isDisplayed())
+    } finally {
+      await this.app.openSettings()
+      await this.app.settingsGotoTab("general")
+      await this.app.setGeneralToggle("Confirm torrent data deletion", initialState)
+      await this.app.settingsSave()
+      await this.app.torrentsPageIsVisible()
+
+      if (await torrentToDelete.isExisting()) {
+        await torrentToDelete.delete()
+      }
+    }
   })
 
   it("torrent is stopped and resumed", async function () {
