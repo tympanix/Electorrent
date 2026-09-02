@@ -17,6 +17,11 @@ const features = {
   },
 } satisfies TorrentClientFeatures
 
+const specs = [
+  "test/specs/standard/**/*.spec.ts",
+  "test/specs/rtorrent/**/*.spec.ts",
+]
+
 export default {
   rtorrent: defineClient({
     key: "rtorrent",
@@ -31,6 +36,7 @@ export default {
     authProxyHostPort: 48081,
     username: "admin",
     password: "admin",
+    specs,
     downloadRoot: "/downloads",
     saveLocation: "/downloads/custom/save/location",
   }),
@@ -47,6 +53,7 @@ export default {
     authProxyHostPort: 48083,
     username: "admin",
     password: "admin",
+    specs,
     downloadRoot: "/downloads",
     saveLocation: "/downloads/custom/save/location",
   }),

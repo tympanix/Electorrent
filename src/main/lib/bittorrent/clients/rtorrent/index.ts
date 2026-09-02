@@ -507,17 +507,37 @@ export class RtorrentRuntime implements BittorrentRuntime {
             uploadSpeed: "p.up_rate",
             downloaded: "p.down_total",
             uploaded: "p.up_total",
+            incoming: "p.is_incoming",
+            encrypted: "p.is_encrypted",
+            obfuscated: "p.is_obfuscated",
+            snubbed: "p.is_snubbed",
+            unwanted: "p.is_unwanted",
+            preferred: "p.is_preferred",
+            banned: "p.banned",
         })
-        return peers.map((peer) => ({
-            ip: typeof peer.ip === "string" ? peer.ip : "",
-            port: Number(peer.port) || undefined,
-            client: typeof peer.client === "string" ? peer.client : "",
-            progress: Math.max(0, Math.min(1, (Number(peer.progress) || 0) / 100)),
-            downloadSpeed: Number(peer.downloadSpeed) || 0,
-            uploadSpeed: Number(peer.uploadSpeed) || 0,
-            downloaded: Number(peer.downloaded) || 0,
-            uploaded: Number(peer.uploaded) || 0,
-        }))
+        return peers.map((peer) => {
+            const flags = [
+                [peer.encrypted, "Encrypted"],
+                [peer.obfuscated, "Obfuscated"],
+                [peer.snubbed, "Snubbed"],
+                [peer.unwanted, "Unwanted"],
+                [peer.preferred, "Preferred"],
+                [peer.banned, "Banned"],
+            ].flatMap(([value, label]) => Number(value) !== 0 ? [label] : [])
+
+            return {
+                ip: typeof peer.ip === "string" ? peer.ip : "",
+                port: Number(peer.port) || undefined,
+                client: typeof peer.client === "string" ? peer.client : "",
+                progress: Math.max(0, Math.min(1, (Number(peer.progress) || 0) / 100)),
+                downloadSpeed: Number(peer.downloadSpeed) || 0,
+                uploadSpeed: Number(peer.uploadSpeed) || 0,
+                downloaded: Number(peer.downloaded) || 0,
+                uploaded: Number(peer.uploaded) || 0,
+                connection: Number(peer.incoming) !== 0 ? "Incoming" : "Outgoing",
+                flags: flags.join(", ") || "None",
+            }
+        })
     }
 
     async getTorrentTrackers(hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
