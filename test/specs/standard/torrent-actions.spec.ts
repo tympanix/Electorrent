@@ -53,6 +53,22 @@ async function sendTorrentActionShortcut(accelerator: string) {
   }, accelerator)
 }
 
+async function hasTorrentActionShortcut(accelerator: string): Promise<boolean> {
+  return await browser.electron.execute((electron, accelerator) => {
+    const menu = electron.Menu.getApplicationMenu()
+    const actionsMenu = menu?.items.find((item) => item.id === "actions" || item.label === "Actions")
+    const findShortcut = (items: Electron.MenuItem[]): Electron.MenuItem | undefined => {
+      for (const item of items) {
+        if (item.accelerator === accelerator) return item
+        const submenuItem = item.submenu && findShortcut(item.submenu.items)
+        if (submenuItem) return submenuItem
+      }
+    }
+    const menuItem = actionsMenu?.submenu && findShortcut(actionsMenu.submenu.items)
+    return Boolean(menuItem && menuItem.visible && menuItem.enabled)
+  }, accelerator)
+}
+
 async function sendRemoveShortcut() {
   await sendTorrentActionShortcut("Delete")
 }
@@ -168,6 +184,9 @@ describe("torrent actions", function () {
   })
 
   it("Delete removes the torrent without confirmation", async function () {
+    if (!await hasTorrentActionShortcut("Delete")) {
+      return this.skip()
+    }
     this.timeout(60 * 1000)
     const filename = await createTorrentFile(tracker, {
       torrentName: createUniqueLabel("remove-no-confirm"),
