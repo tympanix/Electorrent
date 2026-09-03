@@ -5,6 +5,7 @@ import { defineClient } from "../define"
 const features = {
   magnetLinks: true,
   labels: true,
+  fileSelection: true,
   uploadFileSelection: true,
   torrentDetails: true,
   torrentPeers: true,
