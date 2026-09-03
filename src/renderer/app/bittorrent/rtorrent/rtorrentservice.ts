@@ -1,8 +1,8 @@
 import { Column } from "@renderer/app/services/column";
-import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
+import { Torrent, TorrentFile } from "@renderer/app/bittorrent/abstracttorrent";
 import { TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { RtorrentTorrent } from "./torrentr";
-import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
+import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, setTorrentFileSelection, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 
 export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
@@ -79,6 +79,10 @@ export class RtorrentClient extends TorrentClient<RtorrentTorrent> {
 
     setSpeedLimits(torrents: RtorrentTorrent[], options: TorrentSpeedLimitOptions): Promise<void> {
       return invokeAction("setSpeedLimits", torrents.map((torrent) => torrent.id), options)
+    }
+
+    setTorrentFileSelection(torrent: RtorrentTorrent, files: TorrentFile[]): Promise<void> {
+      return setTorrentFileSelection(torrent.id, files)
     }
 
     protected getTorrentDetailsData(torrent: RtorrentTorrent): Promise<BittorrentTorrentDetailsData> {

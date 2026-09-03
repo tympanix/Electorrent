@@ -94,10 +94,18 @@ export class RtorrentRuntime implements BittorrentRuntime {
             return
         }
 
+        await this.setTorrentFileSelection(hash, unwantedFiles)
+    }
+
+    async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {
+        if (files.length === 0) {
+            return
+        }
+
         await this.call("system.multicall", [[
-            ...unwantedFiles.map((file): RtorrentMethodCall => ({
+            ...files.map((file): RtorrentMethodCall => ({
                 methodName: "f.priority.set",
-                params: [`${hash}:f${file.index}`, 0],
+                params: [`${hash}:f${file.index}`, file.wanted ? 1 : 0],
             })),
             {
                 methodName: "d.update_priorities",
@@ -240,6 +248,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
             features: {
                 magnetLinks: true,
                 labels: true,
+                fileSelection: true,
                 uploadFileSelection: true,
                 torrentDetails: true,
                 torrentPeers: true,
