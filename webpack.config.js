@@ -4,6 +4,7 @@ import webpack from 'webpack'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import RemoveEmptyScriptsPlugin from 'webpack-remove-empty-scripts'
 import nodeExternals from 'webpack-node-externals'
 
@@ -25,7 +26,8 @@ const sharedCache = {
 }
 
 const sharedOptimization = {
-  minimize: false,
+  minimize: isProduction,
+  minimizer: ['...', new CssMinimizerPlugin()],
 }
 
 const sharedResolve = {

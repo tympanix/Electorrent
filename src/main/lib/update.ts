@@ -8,24 +8,17 @@ import semver from 'semver'
 import { IPC_CHANNELS } from '@shared/ipc'
 import * as electorrent from './electorrent'
 import logger from './logger'
+import { buildUpdateUrl } from './update-url'
 
 const ENDPOINT = 'https://electorrent.vercel.app/'
 const UPDATE_CONNECTION_ERROR = 'Could not check version automatically. Please visit the website instead'
 const version = app.getVersion()
 
-let updateUrl: string | null = null
+let updateUrl = buildUpdateUrl(ENDPOINT, process.platform, version, process.arch)
 let mainWindow: BrowserWindow | null = null
 let update: any = null
 let downloadedUpdate: string | null = null
 let verbose = false
-
-if (is.windows()) {
-    updateUrl = `${ENDPOINT}update/win32/${version}`
-} else if (is.macOS()) {
-    updateUrl = `${ENDPOINT}update/dmg/${version}`
-} else if (is.linux()) {
-    updateUrl = `${ENDPOINT}update/appimage/${version}`
-}
 
 export function checkForUpdates(notifyVerbose: boolean) {
     verbose = notifyVerbose === true

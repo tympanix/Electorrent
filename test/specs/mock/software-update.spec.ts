@@ -5,6 +5,7 @@ import path from "node:path"
 import { $, browser } from "@wdio/globals"
 import { waitForModalClose, waitForModalOpen } from "../../e2e/modal"
 import { configureSpec } from "../../framework/fixture"
+import { buildUpdateUrl } from "../../../src/main/lib/update-url"
 
 const assert: Chai.AssertStatic = chai.assert
 const updatePort = 43871
@@ -79,5 +80,25 @@ describe("software updates", function () {
 
     await modal.$("button.deny").click()
     await waitForModalClose(modal)
+  })
+})
+
+describe("macOS software update architecture", function () {
+  const endpoint = "https://electorrent.example/"
+
+  for (const architecture of ["arm64", "x64"]) {
+    it(`requests the ${architecture} update`, function () {
+      assert.equal(
+        buildUpdateUrl(endpoint, "darwin", "2.16.2", architecture),
+        `${endpoint}update/dmg/2.16.2?arch=${architecture}`,
+      )
+    })
+  }
+
+  it("falls back to the universal update for an unknown architecture", function () {
+    assert.equal(
+      buildUpdateUrl(endpoint, "darwin", "2.16.2", "unknown"),
+      `${endpoint}update/dmg/2.16.2`,
+    )
   })
 })
