@@ -39,7 +39,28 @@ const legacyFeatures = {
   uploadFileSelection: false,
 } satisfies TorrentClientFeatures
 
+const basicAuthSpecs = [
+  "test/specs/qbittorrent/http-basic-auth.spec.ts",
+]
+
 export default {
+  "qbittorrent:http-basic-auth": defineClient({
+    key: "qbittorrent:http-basic-auth",
+    clientId: "qbittorrent",
+    features,
+    fixture: "clients/qbittorrent",
+    version: "latest",
+    port: 58080,
+    containerPort: 8080,
+    containerHostPort: 58081,
+    proxyPort: 8080,
+    authProxyHostPort: 58080,
+    authProxyPasswordFile: "qbittorrent-basic-auth.htpasswd",
+    username: "admin",
+    password: "adminadmin",
+    specs: basicAuthSpecs,
+    downloadRoot: "/downloads",
+  }),
   "qbittorrent:4.1": defineClient({
     key: "qbittorrent:4.1",
     clientId: "qbittorrent",
