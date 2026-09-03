@@ -1,3 +1,5 @@
+electronLanguages:
+  - en
 directories:
   output: dist
   buildResources: build
