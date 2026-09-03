@@ -21,6 +21,7 @@ export type QBittorrentApiOptions = {
     ca?: Uint8Array
     strictSSL?: boolean
     timeout?: number
+    useBasicAuth?: boolean
 }
 
 export abstract class QBittorrentBaseApi {
@@ -60,6 +61,13 @@ export abstract class QBittorrentBaseApi {
             headers: {
                 Referer: this.origin,
             },
+            ...(options.useBasicAuth ? {
+                auth: {
+                    user: this.user,
+                    pass: this.pass,
+                    sendImmediately: true,
+                },
+            } : {}),
         }
     }
 

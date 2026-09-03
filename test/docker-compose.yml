@@ -41,6 +41,7 @@ services:
       - PROXY_HOST=${PROXY_HOST}
       - PROXY_PORT=${PROXY_PORT}
       - NGINX_AUTH_PORT=${NGINX_AUTH_PORT:-8081}
+      - NGINX_AUTH_PASSWORD_FILE=${NGINX_AUTH_PASSWORD_FILE:-rtorrent-basic-auth.htpasswd}
 
   aria2:
     image: opengg/aria2:${VERSION:-edge}

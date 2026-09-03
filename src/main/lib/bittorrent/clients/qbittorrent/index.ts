@@ -148,7 +148,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
     private async selectApi(server: BittorrentServerConfig) {
         const origin = serverOriginUrl(server)
-        const requestOptions = {
+        const requestOptions: request.CoreOptions & request.UriOptions = {
             timeout: HTTP_LOGIN_TIMEOUT,
             ca: server.certificateData,
             strictSSL: server.tlsSecurity !== "insecure",
@@ -159,16 +159,30 @@ export class QBittorrentRuntime implements BittorrentRuntime {
             uri: this.url(server, "version/api"),
         }
 
-        const hasLegacyApi = await new Promise<boolean>((resolve, reject) => {
-            request(requestOptions, (err: any, res: any) => {
+        const probeLegacyApi = (useBasicAuth: boolean) => new Promise<number>((resolve, reject) => {
+            request({
+                ...requestOptions,
+                ...(useBasicAuth ? {
+                    auth: {
+                        user: server.user,
+                        pass: server.password,
+                        sendImmediately: true,
+                    },
+                } : {}),
+            }, (err: any, res: any) => {
                 if (err) {
                     reject(err)
                     return
                 }
 
-                resolve(res?.statusCode === 200)
+                resolve(res?.statusCode || 0)
             })
         })
+
+        const statusCode = await probeLegacyApi(false)
+        const authenticatedStatusCode = statusCode === 401 ? await probeLegacyApi(true) : statusCode
+        const useBasicAuth = statusCode === 401 && authenticatedStatusCode !== 401
+        const hasLegacyApi = authenticatedStatusCode === 200
 
         const options = {
             origin,
@@ -178,6 +192,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
             ca: server.certificateData,
             strictSSL: server.tlsSecurity !== "insecure",
             timeout: HTTP_REQUEST_TIMEOUT,
+            useBasicAuth,
         }
 
         return hasLegacyApi ? new QBittorrentApiV1(options) : new QBittorrentApiV2(options)

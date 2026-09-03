@@ -15,6 +15,7 @@ export interface TestClient {
   containerHostPort?: number
   proxyPort?: number
   authProxyHostPort?: number
+  authProxyPasswordFile?: string
   acceptHttpStatus: number
   acceptHttpPath?: string
   stopLabel: string

@@ -149,6 +149,7 @@ export default class ElectorrentTestService {
       NGINX_HOST_PORT: String(proxyPort),
       NGINX_AUTH_HOST_PORT: String(authProxyPort),
       NGINX_AUTH_PORT: "8081",
+      NGINX_AUTH_PASSWORD_FILE: client.authProxyPasswordFile ?? "rtorrent-basic-auth.htpasswd",
       PROXY_HOST: this.getClientServiceName(client),
       PROXY_PORT: String(client.proxyPort ?? client.containerPort ?? client.port),
       RPC_PORT: String(52000 + clientIndex + portOffset),
