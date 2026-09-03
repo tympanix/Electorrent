@@ -105,7 +105,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
         await this.call("system.multicall", [[
             ...files.map((file): RtorrentMethodCall => ({
                 methodName: "f.priority.set",
-                params: [`${hash}:f${file.index}`, file.wanted ? 1 : 0],
+                params: [`${hash}:f${file.index}`, file.wanted ? 2 : 0],
             })),
             {
                 methodName: "d.update_priorities",
