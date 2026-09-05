@@ -65,6 +65,7 @@ const electorrentBridge: ElectorrentBridge = {
         getTorrentPeers: (request) => invoke(IPC_CHANNELS.bittorrent.getTorrentPeers, request),
         getTorrentTrackers: (request) => invoke(IPC_CHANNELS.bittorrent.getTorrentTrackers, request),
         setTorrentFileSelection: (request) => invoke(IPC_CHANNELS.bittorrent.setTorrentFileSelection, request),
+        setTorrentFilePriority: (request) => invoke(IPC_CHANNELS.bittorrent.setTorrentFilePriority, request),
     },
     updates: {
         check: (verbose?: boolean) => invoke(IPC_CHANNELS.updates.check, { verbose }),

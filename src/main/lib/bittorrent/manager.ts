@@ -7,6 +7,7 @@ import type {
     BittorrentInvokeActionRequest,
     BittorrentServerConfig,
     BittorrentSetTorrentFileSelectionRequest,
+    BittorrentSetTorrentFilePriorityRequest,
     TorrentClientConnection,
     BittorrentTorrentDetailsData,
     BittorrentTorrentDetailsFile,
@@ -250,6 +251,14 @@ class BittorrentManager {
             throw new Error("Torrent file selection not supported for this client")
         }
         return runtime.setTorrentFileSelection(request.id, request.files)
+    }
+
+    async setTorrentFilePriority(sender: WebContents, request: BittorrentSetTorrentFilePriorityRequest) {
+        const runtime = await this.getSession(sender)
+        if (typeof runtime.setTorrentFilePriority !== "function") {
+            throw new Error("Torrent file priorities not supported for this client")
+        }
+        return runtime.setTorrentFilePriority(request.id, request.fileIndexes, request.priorityId)
     }
 
     disconnectWindow(sender: WebContents | null | undefined) {

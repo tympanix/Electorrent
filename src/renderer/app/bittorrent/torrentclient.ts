@@ -1,6 +1,7 @@
 import { Torrent, TorrentFile } from "./abstracttorrent"
 import type {
     BittorrentTorrentDetailsData,
+    BittorrentFilePriority,
     BittorrentTorrentDetailsFile,
     BittorrentTorrentPeer,
     BittorrentTorrentDetailsTracker,
@@ -9,7 +10,7 @@ import type {
     TorrentSpeedLimitOptions,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
-import { connect, getActions, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData, getTorrentTrackers as getTorrentTrackersData, invokeAction } from "./ipc"
+import { connect, getActions, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData, getTorrentTrackers as getTorrentTrackersData, invokeAction, setTorrentFilePriority as setTorrentFilePriorityData } from "./ipc"
 import type { TorrentActionItem, TorrentActionRole } from "@shared/torrent-actions"
 
 export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
@@ -58,6 +59,7 @@ const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     magnetLinks: false,
     labels: false,
     fileSelection: false,
+    filePriorities: Object.freeze([]),
     uploadFileSelection: false,
     setLocation: false,
     torrentDetails: false,
@@ -173,6 +175,7 @@ export interface TorrentDetailsFileColumn {
 
 export interface TorrentDetailsFileItem extends BittorrentTorrentDetailsFile {
     wanted: boolean
+    priorityId?: string
 }
 
 export interface TorrentDetailsPanelData {
@@ -316,6 +319,13 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
             throw new Error("File selection not supported for this client")
         }
         return Promise.reject(new Error("File selection not implemented for this client"))
+    }
+
+    async setTorrentFilePriority(torrent: T, files: TorrentDetailsFileItem[], priority: BittorrentFilePriority): Promise<void> {
+        if (!this.features.filePriorities.length) {
+            throw new Error("File priorities not supported for this client")
+        }
+        return setTorrentFilePriorityData(torrent.id, files.map((file) => file.index), priority.id)
     }
 
     /**

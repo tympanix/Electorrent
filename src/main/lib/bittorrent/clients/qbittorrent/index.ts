@@ -3,6 +3,7 @@ import request from "request"
 import parseTorrent from "parse-torrent"
 
 import type {
+    BittorrentFilePriority,
     BittorrentFileSelection,
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
@@ -20,6 +21,12 @@ import type { QBittorrentBaseApi } from "./base-api"
 
 const QBITTORRENT_PRIORITY_SKIP = 0
 const QBITTORRENT_PRIORITY_NORMAL = 1
+const QBITTORRENT_FILE_PRIORITIES: readonly BittorrentFilePriority[] = Object.freeze([
+    { id: "skip", label: "Skip", value: 0, wanted: false },
+    { id: "normal", label: "Normal", value: 1, wanted: true },
+    { id: "high", label: "High", value: 6, wanted: true },
+    { id: "maximum", label: "Maximum", value: 7, wanted: true },
+])
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null
@@ -222,6 +229,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 fileSelection: true,
+                filePriorities: QBITTORRENT_FILE_PRIORITIES,
                 uploadFileSelection: api.supportsUploadFileSelection,
                 setLocation: true,
                 torrentDetails: true,
@@ -739,5 +747,20 @@ export class QBittorrentRuntime implements BittorrentRuntime {
 
         await setPriority(unwantedIds, QBITTORRENT_PRIORITY_SKIP)
         await setPriority(wantedIds, QBITTORRENT_PRIORITY_NORMAL)
+    }
+
+    async setTorrentFilePriority(hash: string, fileIndexes: number[], priorityId: string): Promise<void> {
+        const priority = QBITTORRENT_FILE_PRIORITIES.find((item) => item.id === priorityId)
+        if (!priority) {
+            throw new Error(`Unsupported qBittorrent file priority: ${priorityId}`)
+        }
+        if (!fileIndexes.length) return
+
+        await new Promise<void>((resolve, reject) => {
+            this.getApi().setTorrentFilePriority(hash, fileIndexes, priority.value, (err: unknown) => {
+                if (err) reject(err)
+                else resolve()
+            })
+        })
     }
 }

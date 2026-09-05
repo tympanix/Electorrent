@@ -3,7 +3,7 @@ import { URL } from "node:url"
 import xmlrpc from "@electorrent/xmlrpc"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFilePriority, BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
 import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
 import type { TorrentActionItem } from "@shared/torrent-actions"
@@ -20,6 +20,12 @@ type RtorrentDeleteMetadata = {
 }
 
 type RtorrentMulticallCommand = string | [string, ...any[]]
+
+const RTORRENT_FILE_PRIORITIES: readonly BittorrentFilePriority[] = Object.freeze([
+    { id: "skip", label: "Skip", value: 0, wanted: false },
+    { id: "normal", label: "Normal", value: 1, wanted: true },
+    { id: "high", label: "High", value: 2, wanted: true },
+])
 
 function normalizeFilePath(value: unknown): string {
     if (typeof value === "string") {
@@ -111,6 +117,20 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 methodName: "d.update_priorities",
                 params: [hash],
             },
+        ]])
+    }
+
+    async setTorrentFilePriority(hash: string, fileIndexes: number[], priorityId: string): Promise<void> {
+        const priority = RTORRENT_FILE_PRIORITIES.find((item) => item.id === priorityId)
+        if (!priority) throw new Error(`Unsupported rTorrent file priority: ${priorityId}`)
+        if (!fileIndexes.length) return
+
+        await this.call("system.multicall", [[
+            ...fileIndexes.map((index): RtorrentMethodCall => ({
+                methodName: "f.priority.set",
+                params: [`${hash}:f${index}`, priority.value],
+            })),
+            { methodName: "d.update_priorities", params: [hash] },
         ]])
     }
 
@@ -249,6 +269,7 @@ export class RtorrentRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 fileSelection: true,
+                filePriorities: RTORRENT_FILE_PRIORITIES,
                 uploadFileSelection: true,
                 torrentDetails: true,
                 torrentPeers: true,

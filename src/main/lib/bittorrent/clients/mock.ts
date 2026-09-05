@@ -1,4 +1,5 @@
 import type {
+    BittorrentFilePriority,
     BittorrentFileSelection,
     BittorrentServerConfig,
     BittorrentTorrentDetailsData,
@@ -13,6 +14,12 @@ import parseTorrent from "parse-torrent"
 
 const PRIORITY_SKIP = 0
 const PRIORITY_NORMAL = 1
+const MOCK_FILE_PRIORITIES: readonly BittorrentFilePriority[] = Object.freeze([
+    { id: "skip", label: "Skip", value: 0, wanted: false },
+    { id: "normal", label: "Normal", value: 1, wanted: true },
+    { id: "high", label: "High", value: 6, wanted: true },
+    { id: "maximum", label: "Maximum", value: 7, wanted: true },
+])
 
 interface MockTorrent {
     added_on: number
@@ -117,6 +124,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 fileSelection: true,
+                filePriorities: MOCK_FILE_PRIORITIES,
                 uploadFileSelection: true,
                 setLocation: true,
                 torrentDetails: true,
@@ -385,6 +393,14 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 file.priority = selection.wanted ? PRIORITY_NORMAL : PRIORITY_SKIP
             }
         })
+    }
+
+    async setTorrentFilePriority(hash: string, fileIndexes: number[], priorityId: string): Promise<void> {
+        this.assertConnected()
+        const priority = MOCK_FILE_PRIORITIES.find((item) => item.id === priorityId)
+        if (!priority) throw new Error(`Unsupported mock file priority: ${priorityId}`)
+        const files = this.files.get(hash) || []
+        files.filter((file) => fileIndexes.includes(file.index)).forEach((file) => { file.priority = priority.value })
     }
 
     async setRatioLimit(hashes: string[], options: Record<string, any>): Promise<void> {

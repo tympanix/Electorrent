@@ -40,6 +40,7 @@ export const IPC_CHANNELS = {
         getTorrentPeers: 'bittorrent:get-torrent-peers',
         getTorrentTrackers: 'bittorrent:get-torrent-trackers',
         setTorrentFileSelection: 'bittorrent:set-torrent-file-selection',
+        setTorrentFilePriority: 'bittorrent:set-torrent-file-priority',
     },
     updates: {
         check: 'updates:check',
