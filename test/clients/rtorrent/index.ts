@@ -6,6 +6,11 @@ const features = {
   magnetLinks: true,
   labels: true,
   fileSelection: true,
+  filePriorities: [
+    { id: "skip", label: "Skip", value: 0, wanted: false },
+    { id: "normal", label: "Normal", value: 1, wanted: true },
+    { id: "high", label: "High", value: 2, wanted: true },
+  ],
   uploadFileSelection: true,
   torrentDetails: true,
   torrentPeers: true,

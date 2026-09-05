@@ -288,6 +288,10 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         return bittorrentManager.setTorrentFileSelection(event.sender, request)
     })
 
+    ipcMain.handle(IPC_CHANNELS.bittorrent.setTorrentFilePriority, async function(event: IpcMainInvokeEvent, request) {
+        return bittorrentManager.setTorrentFilePriority(event.sender, request)
+    })
+
     ipcMain.handle(IPC_CHANNELS.updates.check, async function(_event: IpcMainInvokeEvent, { verbose }) {
         updater.checkForUpdates(verbose)
     })

@@ -83,3 +83,7 @@ export function getTorrentTrackers(id: string) {
 export function setTorrentFileSelection(id: string, files: BittorrentFileSelection[]) {
     return bridge().setTorrentFileSelection({ id, files })
 }
+
+export function setTorrentFilePriority(id: string, fileIndexes: number[], priorityId: string) {
+    return bridge().setTorrentFilePriority({ id, fileIndexes, priorityId })
+}

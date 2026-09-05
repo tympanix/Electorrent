@@ -200,6 +200,19 @@ export interface BittorrentSetTorrentFileSelectionRequest {
     files: BittorrentFileSelection[]
 }
 
+export interface BittorrentFilePriority {
+    readonly id: string
+    readonly label: string
+    readonly value: number
+    readonly wanted: boolean
+}
+
+export interface BittorrentSetTorrentFilePriorityRequest {
+    id: string
+    fileIndexes: number[]
+    priorityId: string
+}
+
 export interface LaunchPayload {
     magnets: PendingTorrentUploadLink[]
     torrentFiles: PendingTorrentUploadFile[]
@@ -260,6 +273,7 @@ export interface TorrentClientFeatures {
     readonly magnetLinks?: boolean
     readonly labels?: boolean
     readonly fileSelection?: boolean
+    readonly filePriorities?: readonly BittorrentFilePriority[]
     readonly uploadFileSelection?: boolean
     readonly setLocation?: boolean
     readonly torrentDetails?: boolean
@@ -303,6 +317,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly magnetLinks: boolean
     readonly labels: boolean
     readonly fileSelection: boolean
+    readonly filePriorities: readonly BittorrentFilePriority[]
     readonly uploadFileSelection: boolean
     readonly setLocation: boolean
     readonly torrentDetails: boolean
@@ -463,6 +478,7 @@ export interface ElectorrentBridge {
         getTorrentPeers(request: BittorrentGetTorrentPeersRequest): Promise<BittorrentTorrentPeer[]>
         getTorrentTrackers(request: BittorrentGetTorrentTrackersRequest): Promise<BittorrentTorrentDetailsTracker[]>
         setTorrentFileSelection(request: BittorrentSetTorrentFileSelectionRequest): Promise<void>
+        setTorrentFilePriority(request: BittorrentSetTorrentFilePriorityRequest): Promise<void>
     }
     updates: {
         check(verbose?: boolean): Promise<void>

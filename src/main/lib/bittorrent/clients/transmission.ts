@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import https from 'https'
 
-import type { BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from '@shared/ipc-contract'
+import type { BittorrentFilePriority, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from '@shared/ipc-contract'
 import {
     HTTP_LOGIN_TIMEOUT,
     HTTP_REQUEST_TIMEOUT,
@@ -102,6 +102,12 @@ const TRANSMISSION_TORRENT_DETAILS_FIELDS = TRANSMISSION_FIELDS.filter((field) =
 ].includes(field))
 
 const TRANSMISSION_TORRENT_FILES_FIELDS = ['files', 'fileStats', 'priorities', 'wanted']
+const TRANSMISSION_FILE_PRIORITIES: readonly BittorrentFilePriority[] = Object.freeze([
+    { id: 'skip', label: 'Skip', value: 0, wanted: false },
+    { id: 'low', label: 'Low', value: -1, wanted: true },
+    { id: 'normal', label: 'Normal', value: 0, wanted: true },
+    { id: 'high', label: 'High', value: 1, wanted: true },
+])
 
 export class TransmissionRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
@@ -230,6 +236,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 magnetLinks: true,
                 labels: true,
                 uploadFileSelection: true,
+                filePriorities: TRANSMISSION_FILE_PRIORITIES,
                 setLocation: true,
                 torrentDetails: true,
                 torrentPeers: true,
@@ -609,6 +616,18 @@ export class TransmissionRuntime implements BittorrentRuntime {
         return this.doAction('torrent-set-location', hashes, {
             location,
             move: true,
+        }).then((response) => this.ensureSuccess(response)).then(() => undefined)
+    }
+
+    setTorrentFilePriority(hash: string, fileIndexes: number[], priorityId: string): Promise<void> {
+        const priority = TRANSMISSION_FILE_PRIORITIES.find((item) => item.id === priorityId)
+        if (!priority) return Promise.reject(new Error(`Unsupported Transmission file priority: ${priorityId}`))
+        if (!fileIndexes.length) return Promise.resolve()
+
+        const priorityField = priority.wanted ? `priority-${priority.id}` : undefined
+        return this.doAction('torrent-set', [hash], {
+            [priority.wanted ? 'files-wanted' : 'files-unwanted']: fileIndexes,
+            ...(priorityField ? { [priorityField]: fileIndexes } : {}),
         }).then((response) => this.ensureSuccess(response)).then(() => undefined)
     }
 
