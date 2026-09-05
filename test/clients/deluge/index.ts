@@ -5,6 +5,12 @@ import { defineClient } from "../define"
 const baseFeatures = {
   labels: true,
   uploadFileSelection: true,
+  filePriorities: [
+    { id: "skip", label: "Skip", value: 0, wanted: false },
+    { id: "normal", label: "Normal", value: 1, wanted: true },
+    { id: "high", label: "High", value: 2, wanted: true },
+    { id: "highest", label: "Highest", value: 5, wanted: true },
+  ],
   torrentDetails: true,
   torrentPeers: true,
   torrentTrackers: true,

@@ -1,7 +1,7 @@
 import request from "request"
 import parseTorrent from "parse-torrent"
 
-import type { BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
+import type { BittorrentFilePriority, BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
 import {
     defer,
     HTTP_LOGIN_TIMEOUT,
@@ -83,6 +83,12 @@ const DELUGE_TORRENT_DETAIL_FIELDS = [
 ]
 
 const DELUGE_TORRENT_FILES_FIELDS = ["files", "file_progress", "file_priorities"]
+const DELUGE_FILE_PRIORITIES: readonly BittorrentFilePriority[] = Object.freeze([
+    { id: "skip", label: "Skip", value: 0, wanted: false },
+    { id: "normal", label: "Normal", value: 1, wanted: true },
+    { id: "high", label: "High", value: 2, wanted: true },
+    { id: "highest", label: "Highest", value: 5, wanted: true },
+])
 
 export class DelugeRuntime implements BittorrentRuntime {
     readonly actions: TorrentActionItem[] = [
@@ -295,6 +301,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 magnetLinks: Array.isArray(methods) && methods.includes("core.add_torrent_magnet"),
                 labels: this.supportsLabels,
                 uploadFileSelection: true,
+                filePriorities: DELUGE_FILE_PRIORITIES,
                 torrentDetails: true,
                 torrentPeers: true,
                 torrentTrackers: true,
@@ -430,6 +437,19 @@ export class DelugeRuntime implements BittorrentRuntime {
                     wanted: priority !== 0,
                 }
             })
+    }
+
+    async setTorrentFilePriority(hash: string, fileIndexes: number[], priorityId: string): Promise<void> {
+        const priority = DELUGE_FILE_PRIORITIES.find((item) => item.id === priorityId)
+        if (!priority) throw new Error(`Unsupported Deluge file priority: ${priorityId}`)
+        if (!fileIndexes.length) return
+
+        const files = await this.getTorrentFiles(hash)
+        const priorities = files.map((file) => file.priority ?? 1)
+        fileIndexes.forEach((index) => {
+            if (index >= 0 && index < priorities.length) priorities[index] = priority.value
+        })
+        await defer<void>((done) => this.rpc("core.set_torrent_file_priorities", [hash, priorities], done))
     }
 
     async getTorrentPeers(hash: string): Promise<BittorrentTorrentPeer[]> {

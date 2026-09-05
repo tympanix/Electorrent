@@ -7,6 +7,7 @@ import {
 import { loadSortingState, SortChange, SortingOptions } from "@renderer/app/directives/sorting/sorting.controller";
 import type { SettingsService } from "@renderer/app/services/settings";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
+import type { BittorrentFilePriority } from "@shared/ipc-contract";
 
 type TorrentDetailsFiles = TorrentDetailsPanelData["files"];
 
@@ -77,6 +78,7 @@ export class TorrentDetailsFilesTabController {
       (files) => {
         files?.items.forEach((file) => {
           file.wanted = file.wanted !== false;
+          file.priorityId = this.priorityForFile(file)?.id;
         });
         this.scope.selectionError = null;
         this.loadSortingSettings();
@@ -99,6 +101,18 @@ export class TorrentDetailsFilesTabController {
 
   canSelectFiles() {
     return !!this.rootScope.$btclient?.features.fileSelection;
+  }
+
+  canChangeFilePriority() {
+    return this.filePriorities().length > 0;
+  }
+
+  filePriorities(): readonly BittorrentFilePriority[] {
+    return this.rootScope.$btclient?.features.filePriorities || [];
+  }
+
+  priorityLabel(file: TorrentDetailsFileItem) {
+    return this.priorityForFile(file)?.label || (file.priority == null ? "" : String(file.priority));
   }
 
   changeSorting = ({ sortKey, descending }: SortChange) => {
@@ -153,6 +167,13 @@ export class TorrentDetailsFilesTabController {
   toggleRowSelection(row: TorrentDetailsFileRow, event: Event) {
     event.stopPropagation();
     return this.updateFileSelection(row.filesInSubtree, !this.rowWanted(row));
+  }
+
+  changeRowPriority(row: TorrentDetailsFileRow) {
+    const priority = this.filePriorities().find((item) => item.id === row.data.priorityId);
+    if (priority) {
+      return this.updateFilePriority(row.filesInSubtree, priority);
+    }
   }
 
   formatFileCell(column: TorrentDetailsFileColumn, file: TorrentDetailsFileItem) {
@@ -291,6 +312,7 @@ export class TorrentDetailsFilesTabController {
         return values.reduce((sum, file) => sum + Number(file[key]), 0) / values.length;
       };
       const priorities = new Set(node.filesInSubtree.map((file) => file.priority).filter((value) => value != null));
+      const priorityIds = new Set(node.filesInSubtree.map((file) => file.priorityId));
       node.data = {
         ...node.data,
         size: totalSize,
@@ -298,6 +320,7 @@ export class TorrentDetailsFilesTabController {
         availability: weightedValue("availability"),
         wanted: node.filesInSubtree.every((file) => file.wanted !== false),
         priority: priorities.size === 1 ? priorities.values().next().value : undefined,
+        priorityId: priorityIds.size === 1 ? priorityIds.values().next().value : undefined,
       };
       return node.filesInSubtree;
     };
@@ -332,6 +355,49 @@ export class TorrentDetailsFilesTabController {
       this.scope.selectionUpdating = false;
       this.scope.$evalAsync();
     }
+  }
+
+  private async updateFilePriority(files: TorrentDetailsFileItem[], priority: BittorrentFilePriority) {
+    const client = this.rootScope.$btclient;
+    const torrent = this.scope.torrent;
+    if (!this.canChangeFilePriority() || !client || !torrent || this.scope.selectionUpdating || !files.length) {
+      return;
+    }
+
+    const previous = files.map((file) => ({
+      file,
+      priority: file.priority,
+      priorityId: file.priorityId,
+      wanted: file.wanted,
+    }));
+    files.forEach((file) => {
+      file.priority = priority.value;
+      file.priorityId = priority.id;
+      file.wanted = priority.wanted;
+    });
+    this.scope.selectionUpdating = true;
+    this.scope.selectionError = null;
+    this.sortFiles();
+
+    try {
+      await client.setTorrentFilePriority(torrent, files, priority);
+    } catch (err) {
+      previous.forEach((entry) => {
+        entry.file.priority = entry.priority;
+        entry.file.priorityId = entry.priorityId;
+        entry.file.wanted = entry.wanted;
+      });
+      this.scope.selectionError = err && err.message ? err.message : "Failed to update file priority";
+      this.sortFiles();
+    } finally {
+      this.scope.selectionUpdating = false;
+      this.scope.$evalAsync();
+    }
+  }
+
+  private priorityForFile(file: TorrentDetailsFileItem) {
+    return this.filePriorities().find((priority) =>
+      priority.value === file.priority && priority.wanted === (file.wanted !== false));
   }
 
   private async load() {
