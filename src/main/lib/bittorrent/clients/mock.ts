@@ -130,6 +130,7 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
                 torrentDetails: true,
                 torrentPeers: true,
                 torrentTrackers: true,
+                torrentTrackerManagement: true,
                 ratioLimits: true,
                 freeDiskSpace: true,
                 uploadOptions: {
@@ -378,6 +379,30 @@ export class MockBittorrentRuntime implements BittorrentRuntime {
     async getTorrentTrackers(hash: string): Promise<BittorrentTorrentDetailsTracker[]> {
         this.assertConnected()
         return (this.trackers.get(hash) || []).map((tracker) => ({ ...tracker }))
+    }
+
+    async addTorrentTracker(hash: string, url: string): Promise<void> {
+        this.assertConnected()
+        const trackers = this.trackers.get(hash) || []
+        if (trackers.some((tracker) => tracker.url === url)) throw new Error("Tracker already exists")
+        trackers.push({ url, tier: trackers.length, status: "Working" })
+        this.trackers.set(hash, trackers)
+    }
+
+    async editTorrentTracker(hash: string, url: string, newUrl: string): Promise<void> {
+        this.assertConnected()
+        const trackers = this.trackers.get(hash) || []
+        const tracker = trackers.find((item) => item.url === url)
+        if (!tracker) throw new Error("Mock tracker was not found")
+        tracker.url = newUrl
+    }
+
+    async removeTorrentTracker(hash: string, url: string): Promise<void> {
+        this.assertConnected()
+        const trackers = this.trackers.get(hash) || []
+        const changed = trackers.filter((tracker) => tracker.url !== url)
+        if (changed.length === trackers.length) throw new Error("Mock tracker was not found")
+        this.trackers.set(hash, changed)
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {

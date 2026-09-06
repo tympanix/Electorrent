@@ -235,6 +235,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 torrentDetails: true,
                 torrentPeers: api.supportsTorrentPeers,
                 torrentTrackers: api.supportsTorrentTrackers,
+                torrentTrackerManagement: api.supportsTorrentTrackers,
                 trackerFilter: api.supportsTrackerFilter,
                 alternativeSpeedLimits: api.supportsAlternativeSpeedLimits,
                 speedLimits: true,
@@ -722,6 +723,18 @@ export class QBittorrentRuntime implements BittorrentRuntime {
             })
         })
         return normalizeTorrentTrackers(body)
+    }
+
+    addTorrentTracker(hash: string, url: string): Promise<void> {
+        return defer((done) => this.getApi().addTorrentTracker(hash, url, done))
+    }
+
+    editTorrentTracker(hash: string, url: string, newUrl: string): Promise<void> {
+        return defer((done) => this.getApi().editTorrentTracker(hash, url, newUrl, done))
+    }
+
+    removeTorrentTracker(hash: string, url: string): Promise<void> {
+        return defer((done) => this.getApi().removeTorrentTracker(hash, url, done))
     }
 
     async setTorrentFileSelection(hash: string, files: BittorrentFileSelection[]): Promise<void> {

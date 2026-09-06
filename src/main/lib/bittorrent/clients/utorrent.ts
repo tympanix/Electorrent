@@ -19,6 +19,7 @@ export class UtorrentRuntime implements BittorrentRuntime {
         { role: "start", label: "Start", action: "start", icon: "play" },
         { role: "stop", label: "Pause", action: "pause", icon: "pause" },
         { role: "verify", label: "Recheck", action: "recheck", icon: "checkmark" },
+        { role: "details", label: "Details", icon: "info circle" },
         { label: "Force Start", action: "forcestart", icon: "flag" },
         { label: "Move Up Queue", action: "queueup", icon: "arrow up" },
         { label: "Move Queue Down", action: "queuedown", icon: "arrow down" },
@@ -182,6 +183,8 @@ export class UtorrentRuntime implements BittorrentRuntime {
                 labels: true,
                 speedLimits: true,
                 ratioLimits: false,
+                torrentTrackers: true,
+                torrentTrackerManagement: true,
                 uploadOptions: {
                     saveLocation: true,
                 },
@@ -239,6 +242,55 @@ export class UtorrentRuntime implements BittorrentRuntime {
         })
 
         return res.data
+    }
+
+    async getTorrentTrackers(hash: string) {
+        const res = await this.http.get(this.url(), {
+            params: { token: this.data.token, t: Date.now(), action: "getprops", hash },
+        })
+        const props = Array.isArray(res.data?.props)
+            ? res.data.props.find((item) => String(item?.hash).toLowerCase() === hash.toLowerCase())
+            : undefined
+        if (!props || typeof props.trackers !== "string") throw new Error("uTorrent did not return torrent trackers")
+        return props.trackers.split(/\r?\n/).map((url: string) => url.trim()).filter(Boolean).map((url: string) => ({ url }))
+    }
+
+    async addTorrentTracker(hash: string, url: string): Promise<void> {
+        const trackers = await this.getTorrentTrackers(hash)
+        if (trackers.some((tracker) => tracker.url === url)) throw new Error("Tracker already exists")
+        await this.setTorrentTrackers(hash, [...trackers.map((tracker) => tracker.url), url])
+    }
+
+    async editTorrentTracker(hash: string, url: string, newUrl: string): Promise<void> {
+        const trackers = await this.getTorrentTrackers(hash)
+        let found = false
+        const urls = trackers.map((tracker) => {
+            if (tracker.url !== url) return tracker.url
+            found = true
+            return newUrl
+        })
+        if (!found) throw new Error("uTorrent tracker was not found")
+        await this.setTorrentTrackers(hash, urls)
+    }
+
+    async removeTorrentTracker(hash: string, url: string): Promise<void> {
+        const trackers = await this.getTorrentTrackers(hash)
+        const urls = trackers.filter((tracker) => tracker.url !== url).map((tracker) => tracker.url)
+        if (urls.length === trackers.length) throw new Error("uTorrent tracker was not found")
+        await this.setTorrentTrackers(hash, urls)
+    }
+
+    private setTorrentTrackers(hash: string, urls: string[]): Promise<void> {
+        return this.http.get(this.url(), {
+            params: {
+                token: this.data.token,
+                t: Date.now(),
+                action: "setprops",
+                hash,
+                s: "trackers",
+                v: urls.join("\r\n"),
+            },
+        }).then(() => undefined)
     }
 
     private doAction(action: string, hashes: string[]): Promise<void> {

@@ -13,6 +13,13 @@ torrent-details-trackers-tab {
         overflow: hidden;
     }
 
+    .torrent-details-trackers-toolbar {
+        flex: 0 0 auto;
+        padding: .35rem;
+        text-align: center;
+        border-bottom: 1px solid @borderColor;
+    }
+
     .torrent-details-trackers-content {
         overflow: auto;
 
@@ -29,5 +36,11 @@ torrent-details-trackers-tab {
         max-width: 520px;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    .torrent-details-tracker-actions {
+        width: 78px;
+        text-align: center;
+        .ui.button { margin: 0 .1rem; }
     }
 }

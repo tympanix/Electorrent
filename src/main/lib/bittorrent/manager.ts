@@ -245,6 +245,34 @@ class BittorrentManager {
         return runtime.getTorrentTrackers(id)
     }
 
+    async addTorrentTracker(sender: WebContents, id: string, url: string): Promise<void> {
+        const runtime = await this.getSession(sender)
+        if (typeof runtime.addTorrentTracker !== "function") {
+            throw new Error("Torrent tracker management not supported for this client")
+        }
+        return runtime.addTorrentTracker(this.requireString(id, "torrent id"), this.requireTrackerUrl(url))
+    }
+
+    async editTorrentTracker(sender: WebContents, id: string, url: string, newUrl: string): Promise<void> {
+        const runtime = await this.getSession(sender)
+        if (typeof runtime.editTorrentTracker !== "function") {
+            throw new Error("Torrent tracker management not supported for this client")
+        }
+        return runtime.editTorrentTracker(
+            this.requireString(id, "torrent id"),
+            this.requireTrackerUrl(url),
+            this.requireTrackerUrl(newUrl),
+        )
+    }
+
+    async removeTorrentTracker(sender: WebContents, id: string, url: string): Promise<void> {
+        const runtime = await this.getSession(sender)
+        if (typeof runtime.removeTorrentTracker !== "function") {
+            throw new Error("Torrent tracker management not supported for this client")
+        }
+        return runtime.removeTorrentTracker(this.requireString(id, "torrent id"), this.requireTrackerUrl(url))
+    }
+
     async setTorrentFileSelection(sender: WebContents, request: BittorrentSetTorrentFileSelectionRequest) {
         const runtime = await this.getSession(sender)
         if (typeof runtime.setTorrentFileSelection !== "function") {
@@ -293,6 +321,25 @@ class BittorrentManager {
             this.sessionStates.delete(senderId)
         }
         this.sessionListeners.forEach((listener) => listener())
+    }
+
+    private requireString(value: unknown, label: string): string {
+        if (typeof value !== "string" || !value.trim()) throw new Error(`Invalid ${label}`)
+        return value.trim()
+    }
+
+    private requireTrackerUrl(value: unknown): string {
+        const url = this.requireString(value, "tracker URL")
+        let parsed: URL
+        try {
+            parsed = new URL(url)
+        } catch {
+            throw new Error("Invalid tracker URL")
+        }
+        if (!["http:", "https:", "udp:", "ws:", "wss:"].includes(parsed.protocol)) {
+            throw new Error("Unsupported tracker URL protocol")
+        }
+        return url
     }
 }
 

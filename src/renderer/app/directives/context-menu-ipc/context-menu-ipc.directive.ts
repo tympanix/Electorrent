@@ -48,7 +48,7 @@ export class ContextMenuIpcDirective implements IDirective {
 
             const features = this.$rootScope.$btclient?.features
             switch (item.role) {
-                case 'details': return !!features?.torrentDetails
+                case 'details': return !!features?.torrentDetails || !!features?.torrentTrackers
                 case 'set-speed-limits': return !!features?.speedLimits
                 case 'set-ratio': return !!features?.ratioLimits
                 default: return true

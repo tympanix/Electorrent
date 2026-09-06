@@ -80,6 +80,18 @@ export function getTorrentTrackers(id: string) {
     return bridge().getTorrentTrackers({ id })
 }
 
+export function addTorrentTracker(id: string, url: string) {
+    return bridge().addTorrentTracker({ id, url })
+}
+
+export function editTorrentTracker(id: string, url: string, newUrl: string) {
+    return bridge().editTorrentTracker({ id, url, newUrl })
+}
+
+export function removeTorrentTracker(id: string, url: string) {
+    return bridge().removeTorrentTracker({ id, url })
+}
+
 export function setTorrentFileSelection(id: string, files: BittorrentFileSelection[]) {
     return bridge().setTorrentFileSelection({ id, files })
 }

@@ -3,9 +3,10 @@ import type { SortChange } from "@renderer/app/directives/sorting/sorting.contro
 import type { SettingsService } from "@renderer/app/services/settings"
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope"
 import type { BittorrentTorrentDetailsTracker } from "@shared/ipc-contract"
+import type { ModalController } from "@renderer/app/directives/modal/modal.controller"
 
 interface TorrentDetailsTrackerColumn {
-  id: keyof BittorrentTorrentDetailsTracker
+  id: keyof BittorrentTorrentDetailsTracker | "actions"
   label: string
   sortType: "alphabetical" | "numeric"
 }
@@ -21,6 +22,12 @@ export interface TorrentDetailsTrackersTabScope extends IScope {
   loading: boolean
   loaded: boolean
   error: string | null
+  mutationError: string | null
+  trackerUrl: string
+  trackerModalTitle: string
+  trackerModalAction: string
+  trackerModalRef?: ModalController
+  removeModalRef?: ModalController
 }
 
 export class TorrentDetailsTrackersTabController {
@@ -30,6 +37,8 @@ export class TorrentDetailsTrackersTabController {
   private sortDescending = false
   private requestId = 0
   private torrentId?: string
+  private trackerToEdit?: BittorrentTorrentDetailsTracker
+  private trackerToRemove?: BittorrentTorrentDetailsTracker
 
   constructor(
     public scope: TorrentDetailsTrackersTabScope,
@@ -53,6 +62,8 @@ export class TorrentDetailsTrackersTabController {
     this.scope.loading = false
     this.scope.loaded = false
     this.scope.error = null
+    this.scope.mutationError = null
+    this.scope.trackerUrl = ""
     this.configureResize()
     this.scope.$watch(() => this.scope.trackers, () => this.sortTrackers())
     this.scope.$watchGroup(
@@ -73,6 +84,89 @@ export class TorrentDetailsTrackersTabController {
     this.sortKey = sortKey
     this.sortDescending = descending
     this.sortTrackers()
+  }
+
+  canManageTrackers() {
+    return !!this.rootScope.$btclient?.features.torrentTrackerManagement
+  }
+
+  canManageTracker(tracker: BittorrentTorrentDetailsTracker) {
+    return this.canManageTrackers() && /^(?:https?|udp|wss?):\/\//i.test(tracker.url)
+  }
+
+  openAddTracker() {
+    this.trackerToEdit = undefined
+    this.scope.trackerModalTitle = "Add Tracker"
+    this.scope.trackerModalAction = "Add"
+    this.scope.trackerUrl = ""
+    this.scope.mutationError = null
+    this.scope.trackerModalRef?.showModal()
+  }
+
+  openEditTracker(tracker: BittorrentTorrentDetailsTracker) {
+    this.trackerToEdit = tracker
+    this.scope.trackerModalTitle = "Edit Tracker"
+    this.scope.trackerModalAction = "Save"
+    this.scope.trackerUrl = tracker.url
+    this.scope.mutationError = null
+    this.scope.trackerModalRef?.showModal()
+  }
+
+  openRemoveTracker(tracker: BittorrentTorrentDetailsTracker) {
+    this.trackerToRemove = tracker
+    this.scope.mutationError = null
+    this.scope.removeModalRef?.showModal()
+  }
+
+  removeTrackerUrl() {
+    return this.trackerToRemove?.url || ""
+  }
+
+  closeTrackerModal() {
+    this.scope.trackerModalRef?.hideModal()
+  }
+
+  closeRemoveModal() {
+    this.scope.removeModalRef?.hideModal()
+  }
+
+  async saveTracker() {
+    const torrent = this.scope.torrent
+    const client = this.rootScope.$btclient
+    const url = this.scope.trackerUrl?.trim()
+    if (!torrent || !client || !url) return
+    try {
+      this.scope.loading = true
+      this.scope.mutationError = null
+      if (this.trackerToEdit) await client.editTorrentTracker(torrent, this.trackerToEdit.url, url)
+      else await client.addTorrentTracker(torrent, url)
+      this.closeTrackerModal()
+      await this.load()
+    } catch (err: any) {
+      this.scope.mutationError = err?.message || "Failed to save tracker"
+    } finally {
+      this.scope.loading = false
+      this.scope.$evalAsync()
+    }
+  }
+
+  async removeTracker() {
+    const torrent = this.scope.torrent
+    const client = this.rootScope.$btclient
+    const tracker = this.trackerToRemove
+    if (!torrent || !client || !tracker) return
+    try {
+      this.scope.loading = true
+      this.scope.mutationError = null
+      await client.removeTorrentTracker(torrent, tracker.url)
+      this.closeRemoveModal()
+      await this.load()
+    } catch (err: any) {
+      this.scope.mutationError = err?.message || "Failed to remove tracker"
+    } finally {
+      this.scope.loading = false
+      this.scope.$evalAsync()
+    }
   }
 
   private async load() {
@@ -123,8 +217,8 @@ export class TorrentDetailsTrackersTabController {
   private sortTrackers() {
     const column = this.scope.columns.find(({ id }) => id === this.sortKey) || this.scope.columns[0]
     this.scope.sortedTrackers = [...(this.scope.trackers || [])].sort((left, right) => {
-      const leftValue = left[column.id]
-      const rightValue = right[column.id]
+      const leftValue = column.id === "actions" ? "" : left[column.id]
+      const rightValue = column.id === "actions" ? "" : right[column.id]
       const compared = column.sortType === "numeric"
         ? Number(leftValue ?? 0) - Number(rightValue ?? 0)
         : String(leftValue ?? "").localeCompare(String(rightValue ?? ""), undefined, { sensitivity: "base" })

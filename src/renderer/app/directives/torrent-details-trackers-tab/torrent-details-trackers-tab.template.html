@@ -1,4 +1,9 @@
 <div class="torrent-details-trackers" data-role="torrent-details-trackers">
+  <div class="torrent-details-trackers-toolbar" ng-if="ctl.canManageTrackers()">
+    <button class="ui tiny icon button" type="button" data-role="torrent-tracker-add" aria-label="Add tracker" title="Add tracker" ng-click="ctl.openAddTracker()">
+      <i class="plus icon" aria-hidden="true"></i>
+    </button>
+  </div>
   <div ng-if="ctl.scope.loading && !ctl.scope.loaded" class="torrent-details-state torrent-details-panel-loader">
     <div class="ui active inline loader"></div>
   </div>
@@ -24,6 +29,7 @@
         <th ng-repeat="column in ctl.scope.columns track by column.id" rz-col="column.id" sort-header sort-key="column.id">
           <span class="torrent-details-table-header-label">{{ column.label }}</span>
         </th>
+        <th class="torrent-details-tracker-actions" ng-if="ctl.canManageTrackers()">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -38,11 +44,47 @@
         <td>{{ tracker.lastAnnounce ? (tracker.lastAnnounce | epoch) : '' }}</td>
         <td>{{ tracker.nextAnnounce ? (tracker.nextAnnounce | epoch) : '' }}</td>
         <td title="{{ tracker.message }}">{{ tracker.message }}</td>
+        <td class="torrent-details-tracker-actions" ng-if="ctl.canManageTrackers()">
+          <button ng-if="ctl.canManageTracker(tracker)" class="ui mini icon button" type="button" data-role="torrent-tracker-edit" aria-label="Edit tracker" title="Edit tracker" ng-click="ctl.openEditTracker(tracker)"><i class="pencil icon"></i></button>
+          <button ng-if="ctl.canManageTracker(tracker)" class="ui mini red icon button" type="button" data-role="torrent-tracker-remove" aria-label="Remove tracker" title="Remove tracker" ng-click="ctl.openRemoveTracker(tracker)"><i class="trash icon"></i></button>
+        </td>
       </tr>
       <tr ng-if="!ctl.scope.sortedTrackers.length">
-        <td class="torrent-details-empty-state" colspan="10">No trackers available.</td>
+        <td class="torrent-details-empty-state" ng-attr-colspan="{{ ctl.canManageTrackers() ? 11 : 10 }}">No trackers available.</td>
       </tr>
     </tbody>
   </table>
   </div>
+
+<modal id="torrent-tracker-modal" size="tiny" ng-ref="ctl.scope.trackerModalRef">
+  <i class="close icon"></i>
+  <div class="header">{{ ctl.scope.trackerModalTitle }}</div>
+  <div class="content">
+    <form id="torrent-tracker-form" class="ui form" ng-submit="ctl.saveTracker()">
+      <div class="field">
+        <label for="torrent-tracker-url">Tracker URL</label>
+        <input id="torrent-tracker-url" data-role="torrent-tracker-url" type="url" required ng-model="ctl.scope.trackerUrl" placeholder="https://tracker.example/announce">
+      </div>
+      <div class="ui negative message" ng-if="ctl.scope.mutationError"><p>{{ ctl.scope.mutationError }}</p></div>
+    </form>
+  </div>
+  <div class="actions">
+    <button type="button" class="ui black button" ng-click="ctl.closeTrackerModal()">Cancel</button>
+    <button type="submit" form="torrent-tracker-form" class="ui green right labeled icon button" data-role="torrent-tracker-save" ng-disabled="ctl.scope.loading || !ctl.scope.trackerUrl">{{ ctl.scope.trackerModalAction }}<i class="checkmark icon"></i></button>
+  </div>
+</modal>
+
+<modal id="torrent-tracker-remove-modal" size="tiny" ng-ref="ctl.scope.removeModalRef">
+  <i class="close icon"></i>
+  <div class="header">Remove Tracker</div>
+  <div class="content">
+    <p>Remove tracker <strong>{{ ctl.removeTrackerUrl() }}</strong>?</p>
+    <div class="ui negative message" ng-if="ctl.scope.mutationError"><p>{{ ctl.scope.mutationError }}</p></div>
+  </div>
+  <div class="actions">
+    <button type="button" class="ui black deny button" ng-click="ctl.closeRemoveModal()">Cancel</button>
+    <button type="button" class="ui red right labeled icon button approve" data-role="torrent-tracker-remove-confirm" ng-click="ctl.removeTracker()" ng-disabled="ctl.scope.loading">Remove<i class="trash icon"></i></button>
+  </div>
+</modal>
+
 </div>

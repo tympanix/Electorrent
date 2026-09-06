@@ -241,6 +241,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
                 torrentDetails: true,
                 torrentPeers: true,
                 torrentTrackers: true,
+                torrentTrackerManagement: true,
                 trackerFilter: true,
                 speedLimits: true,
                 ratioLimits: true,
@@ -453,6 +454,39 @@ export class TransmissionRuntime implements BittorrentRuntime {
             lastAnnounce: optionalNumber(tracker.lastAnnounceTime),
             nextAnnounce: optionalNumber(tracker.nextAnnounceTime),
         })).filter((tracker: BittorrentTorrentDetailsTracker) => tracker.url)
+    }
+
+    async addTorrentTracker(hash: string, url: string): Promise<void> {
+        await this.setTorrentTrackers(hash, { trackerAdd: [url] })
+    }
+
+    async editTorrentTracker(hash: string, url: string, newUrl: string): Promise<void> {
+        const trackerId = await this.getTrackerId(hash, url)
+        await this.setTorrentTrackers(hash, { trackerReplace: [trackerId, newUrl] })
+    }
+
+    async removeTorrentTracker(hash: string, url: string): Promise<void> {
+        const trackerId = await this.getTrackerId(hash, url)
+        await this.setTorrentTrackers(hash, { trackerRemove: [trackerId] })
+    }
+
+    private async getTrackerId(hash: string, url: string): Promise<number> {
+        const response = await this.getHttpClient().post(this.url(), {
+            arguments: { ids: [hash], fields: ["trackers"] },
+            method: "torrent-get",
+        })
+        const trackers = response?.data?.arguments?.torrents?.[0]?.trackers
+        const tracker = Array.isArray(trackers) ? trackers.find((item) => item?.announce === url) : undefined
+        if (!tracker || !Number.isInteger(tracker.id)) throw new Error("Transmission tracker was not found")
+        return tracker.id
+    }
+
+    private async setTorrentTrackers(hash: string, arguments_: Record<string, unknown>): Promise<void> {
+        const response = await this.getHttpClient().post(this.url(), {
+            arguments: { ids: [hash], ...arguments_ },
+            method: "torrent-set",
+        })
+        this.ensureSuccess(response)
     }
 
     private removeEmpty(obj: Record<string, any>) {

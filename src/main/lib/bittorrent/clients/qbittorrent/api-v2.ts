@@ -59,6 +59,26 @@ export class QBittorrentApiV2 extends QBittorrentBaseApi {
         })
     }
 
+    addTorrentTracker(hash: string, url: string, cb: (err?: any, body?: any) => void) {
+        this.post("torrents/addTrackers", { form: { hash, urls: url } }, (err, res, body) => {
+            this.handleError(cb, TORRENT_ERRORS)(err, res, body)
+        })
+    }
+
+    editTorrentTracker(hash: string, url: string, newUrl: string, cb: (err?: any, body?: any) => void) {
+        // qBittorrent 5 names the original URL `url`; older Web API v2 releases
+        // documented it as `origUrl`. Both generations ignore the extra field.
+        this.post("torrents/editTracker", { form: { hash, url, origUrl: url, newUrl } }, (err, res, body) => {
+            this.handleError(cb, TORRENT_ERRORS)(err, res, body)
+        })
+    }
+
+    removeTorrentTracker(hash: string, url: string, cb: (err?: any, body?: any) => void) {
+        this.post("torrents/removeTrackers", { form: { hash, urls: url } }, (err, res, body) => {
+            this.handleError(cb, TORRENT_ERRORS)(err, res, body)
+        })
+    }
+
     getTorrentPeers(hash: string, cb: (err?: any, body?: any) => void) {
         this.getJson("sync/torrentPeers", { qs: { hash } }, (err, res, body) => {
             this.handleError(cb, TORRENT_ERRORS)(err, res, body)

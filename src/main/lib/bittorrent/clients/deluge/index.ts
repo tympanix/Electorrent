@@ -305,6 +305,7 @@ export class DelugeRuntime implements BittorrentRuntime {
                 torrentDetails: true,
                 torrentPeers: true,
                 torrentTrackers: true,
+                torrentTrackerManagement: true,
                 speedLimits: true,
                 ratioLimits: true,
                 freeDiskSpace: true,
@@ -478,6 +479,42 @@ export class DelugeRuntime implements BittorrentRuntime {
                 status,
             }]
         })
+    }
+
+    async addTorrentTracker(hash: string, url: string): Promise<void> {
+        const trackers = await this.getTorrentTrackers(hash)
+        await this.setTorrentTrackers(hash, [...trackers, { url, tier: this.nextTrackerTier(trackers) }])
+    }
+
+    async editTorrentTracker(hash: string, url: string, newUrl: string): Promise<void> {
+        const trackers = await this.getTorrentTrackers(hash)
+        let found = false
+        const changed = trackers.map((tracker) => {
+            if (tracker.url !== url) return tracker
+            found = true
+            return { ...tracker, url: newUrl }
+        })
+        if (!found) throw new Error("Deluge tracker was not found")
+        await this.setTorrentTrackers(hash, changed)
+    }
+
+    async removeTorrentTracker(hash: string, url: string): Promise<void> {
+        const trackers = await this.getTorrentTrackers(hash)
+        const changed = trackers.filter((tracker) => tracker.url !== url)
+        if (changed.length === trackers.length) throw new Error("Deluge tracker was not found")
+        await this.setTorrentTrackers(hash, changed)
+    }
+
+    private setTorrentTrackers(hash: string, trackers: BittorrentTorrentDetailsTracker[]): Promise<void> {
+        const values = trackers.map((tracker, index) => ({
+            url: tracker.url,
+            tier: typeof tracker.tier === "number" ? tracker.tier : index,
+        }))
+        return defer((done) => this.rpc("core.set_torrent_trackers", [hash, values], done))
+    }
+
+    private nextTrackerTier(trackers: BittorrentTorrentDetailsTracker[]): number {
+        return trackers.reduce((max, tracker) => Math.max(max, Number(tracker.tier) || 0), -1) + 1
     }
 
     async addTorrentUrl(uri: string, options?: Record<string, any>): Promise<void> {

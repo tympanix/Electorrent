@@ -23,6 +23,9 @@ export interface BittorrentRuntime {
     getTorrentFiles?(id: string): Promise<BittorrentTorrentDetailsFile[]>
     getTorrentPeers?(id: string): Promise<BittorrentTorrentPeer[]>
     getTorrentTrackers?(id: string): Promise<BittorrentTorrentDetailsTracker[]>
+    addTorrentTracker?(id: string, url: string): Promise<void>
+    editTorrentTracker?(id: string, url: string, newUrl: string): Promise<void>
+    removeTorrentTracker?(id: string, url: string): Promise<void>
     setTorrentFileSelection?(id: string, files: BittorrentFileSelection[]): Promise<void>
     setTorrentFilePriority?(id: string, fileIndexes: number[], priorityId: string): Promise<void>
     disconnect?(): Promise<void>
