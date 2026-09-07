@@ -1,1 +1,17 @@
 sandbox_mode = "danger-full-access"
+
+[mcp_servers.chrome_devtools]
+command = "npx"
+args = [
+    "-y",
+    "chrome-devtools-mcp@1.8.0",
+    "--browser-url=http://127.0.0.1:9222",
+    "--no-usage-statistics",
+    "--no-performance-crux",
+]
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+
+[mcp_servers.chrome_devtools.tools.evaluate_script]
+approval_mode = "approve"
+output_token_limit = 30000

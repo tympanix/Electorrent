@@ -42,6 +42,16 @@ gh pr checks --watch
 
 Do not actively poll or send progress updates. Resume only when checks are terminal or a check fails
 
+## Inspecting Electron with Chrome DevTools MCP
+The project-scoped `.codex/config.toml` registers the `chrome_devtools` MCP server. It is loaded for new Codex sessions opened from this trusted repository.
+
+Build the app, then start the inspectable Electron instance:
+```shell
+npm run app:mcp
+```
+
+Wait for `http://127.0.0.1:9222/json/version` to respond before using the MCP tools. Use `list_pages` to select the Electorrent renderer and `evaluate_script` with `() => document.documentElement.outerHTML` to inspect its HTML. The debugging port controls the application, so keep it bound to loopback and stop the Electron process when inspection is complete.
+
 # Coding Guidelines
 * Always use `--headless` when running tests
 * Avoid using `browser.execute` in browser testing - prefer organic user interaction
