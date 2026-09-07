@@ -63,7 +63,7 @@
     <form id="torrent-tracker-form" class="ui form" ng-submit="ctl.saveTracker()">
       <div class="field">
         <label for="torrent-tracker-url">Tracker URL</label>
-        <input id="torrent-tracker-url" data-role="torrent-tracker-url" type="url" required ng-model="ctl.scope.trackerUrl" placeholder="https://tracker.example/announce">
+        <input id="torrent-tracker-url" data-role="torrent-tracker-url" type="text" ng-model="ctl.scope.trackerUrl" placeholder="https://tracker.example/announce">
       </div>
       <div class="ui negative message" ng-if="ctl.scope.mutationError"><p>{{ ctl.scope.mutationError }}</p></div>
     </form>
