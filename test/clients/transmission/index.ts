@@ -16,6 +16,7 @@ const features = {
   torrentDetails: true,
   torrentPeers: true,
   torrentTrackers: true,
+  torrentTrackerManagement: true,
   trackerFilter: true,
   speedLimits: true,
   ratioLimits: true,

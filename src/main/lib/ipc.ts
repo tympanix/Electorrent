@@ -284,6 +284,18 @@ export function registerHandlers({ isDebug, forceTitleBarMenu, getWindow, consum
         return bittorrentManager.getTorrentTrackers(event.sender, id)
     })
 
+    ipcMain.handle(IPC_CHANNELS.bittorrent.addTorrentTracker, async function(event: IpcMainInvokeEvent, { id, url }) {
+        return bittorrentManager.addTorrentTracker(event.sender, id, url)
+    })
+
+    ipcMain.handle(IPC_CHANNELS.bittorrent.editTorrentTracker, async function(event: IpcMainInvokeEvent, { id, url, newUrl }) {
+        return bittorrentManager.editTorrentTracker(event.sender, id, url, newUrl)
+    })
+
+    ipcMain.handle(IPC_CHANNELS.bittorrent.removeTorrentTracker, async function(event: IpcMainInvokeEvent, { id, url }) {
+        return bittorrentManager.removeTorrentTracker(event.sender, id, url)
+    })
+
     ipcMain.handle(IPC_CHANNELS.bittorrent.setTorrentFileSelection, async function(event: IpcMainInvokeEvent, request) {
         return bittorrentManager.setTorrentFileSelection(event.sender, request)
     })

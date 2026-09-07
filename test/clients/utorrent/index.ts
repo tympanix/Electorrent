@@ -6,6 +6,8 @@ const features = {
   magnetLinks: true,
   labels: true,
   speedLimits: true,
+  torrentTrackers: true,
+  torrentTrackerManagement: true,
   ratioLimits: false,
   uploadOptions: {
     saveLocation: true,

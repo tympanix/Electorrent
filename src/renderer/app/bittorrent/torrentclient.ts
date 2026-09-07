@@ -10,7 +10,18 @@ import type {
     TorrentSpeedLimitOptions,
     TorrentUploadOptions,
 } from "@shared/ipc-contract"
-import { connect, getActions, getTorrentFiles as getTorrentFilesData, getTorrentPeers as getTorrentPeersData, getTorrentTrackers as getTorrentTrackersData, invokeAction, setTorrentFilePriority as setTorrentFilePriorityData } from "./ipc"
+import {
+    addTorrentTracker as addTorrentTrackerData,
+    connect,
+    editTorrentTracker as editTorrentTrackerData,
+    getActions,
+    getTorrentFiles as getTorrentFilesData,
+    getTorrentPeers as getTorrentPeersData,
+    getTorrentTrackers as getTorrentTrackersData,
+    invokeAction,
+    removeTorrentTracker as removeTorrentTrackerData,
+    setTorrentFilePriority as setTorrentFilePriorityData,
+} from "./ipc"
 import type { TorrentActionItem, TorrentActionRole } from "@shared/torrent-actions"
 
 export type { TorrentSpeedLimitOptions, TorrentUploadOptions, TorrentUploadOptionsEnable } from "@shared/ipc-contract"
@@ -65,6 +76,7 @@ const DEFAULT_FEATURES: ResolvedTorrentClientFeatures = Object.freeze({
     torrentDetails: false,
     torrentPeers: false,
     torrentTrackers: false,
+    torrentTrackerManagement: false,
     trackerFilter: false,
     alternativeSpeedLimits: false,
     speedLimits: false,
@@ -404,6 +416,21 @@ export abstract class TorrentClient<T extends Torrent = Torrent> {
         return {
             items: await getTorrentTrackersData(torrent.id),
         }
+    }
+
+    async addTorrentTracker(torrent: T, url: string): Promise<void> {
+        if (!this.features.torrentTrackerManagement) throw new Error("Torrent tracker management not supported for this client")
+        return addTorrentTrackerData(torrent.id, url)
+    }
+
+    async editTorrentTracker(torrent: T, url: string, newUrl: string): Promise<void> {
+        if (!this.features.torrentTrackerManagement) throw new Error("Torrent tracker management not supported for this client")
+        return editTorrentTrackerData(torrent.id, url, newUrl)
+    }
+
+    async removeTorrentTracker(torrent: T, url: string): Promise<void> {
+        if (!this.features.torrentTrackerManagement) throw new Error("Torrent tracker management not supported for this client")
+        return removeTorrentTrackerData(torrent.id, url)
     }
 
     protected async getTorrentDetailsData(_torrent: T): Promise<BittorrentTorrentDetailsData> {

@@ -50,6 +50,18 @@ export class QBittorrentApiV1 extends QBittorrentBaseApi {
         })
     }
 
+    addTorrentTracker(_hash: string, _url: string, cb: (err?: any) => void) {
+        cb(new Error("Torrent tracker management requires qBittorrent Web API v2"))
+    }
+
+    editTorrentTracker(_hash: string, _url: string, _newUrl: string, cb: (err?: any) => void) {
+        cb(new Error("Torrent tracker management requires qBittorrent Web API v2"))
+    }
+
+    removeTorrentTracker(_hash: string, _url: string, cb: (err?: any) => void) {
+        cb(new Error("Torrent tracker management requires qBittorrent Web API v2"))
+    }
+
     getTorrentPeers(hash: string, cb: (err?: any, body?: any) => void) {
         this.getJson(`query/propertiesPeers/${hash}`, {}, (err, res, body) => {
             this.handleError(cb, TORRENT_ERRORS)(err, res, body)

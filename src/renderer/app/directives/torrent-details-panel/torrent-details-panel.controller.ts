@@ -27,7 +27,7 @@ export class TorrentDetailsPanelController {
     this.scope.isOpen = false;
     this.scope.torrent = null;
     this.scope.refresh = 0;
-    this.scope.activeTab = "info";
+    this.scope.activeTab = this.defaultTab();
 
     const openListener = this.rootScope.$on("torrentDetails:open", (_event, torrent) => {
       this.open(torrent);
@@ -64,7 +64,7 @@ export class TorrentDetailsPanelController {
 
     this.scope.isOpen = true;
     this.panelHeight = this.defaultPanelHeight;
-    this.scope.activeTab = "info";
+    this.scope.activeTab = this.defaultTab();
     this.scope.torrent = torrent;
     this.scope.refresh += 1;
   }
@@ -92,6 +92,10 @@ export class TorrentDetailsPanelController {
 
   canShowPeers() {
     return !!this.rootScope.$btclient?.features.torrentPeers;
+  }
+
+  canShowDetails() {
+    return !!this.rootScope.$btclient?.features.torrentDetails;
   }
 
   canShowTrackers() {
@@ -132,5 +136,9 @@ export class TorrentDetailsPanelController {
   private clearSelection() {
     this.scope.torrent = null;
     this.scope.refresh += 1;
+  }
+
+  private defaultTab(): TorrentDetailsTab {
+    return this.rootScope.$btclient?.features.torrentDetails ? "info" : "trackers";
   }
 }

@@ -158,6 +158,9 @@ export abstract class QBittorrentBaseApi {
     abstract syncMaindata(cb: (err?: any, body?: any) => void): void
 
     abstract getTorrentTrackers(hash: string, cb: (err?: any, body?: any) => void): void
+    abstract addTorrentTracker(hash: string, url: string, cb: (err?: any, body?: any) => void): void
+    abstract editTorrentTracker(hash: string, url: string, newUrl: string, cb: (err?: any, body?: any) => void): void
+    abstract removeTorrentTracker(hash: string, url: string, cb: (err?: any, body?: any) => void): void
     abstract getTorrentPeers(hash: string, cb: (err?: any, body?: any) => void): void
     abstract getTorrentProperties(hash: string, cb: (err?: any, body?: any) => void): void
     abstract getTorrentFiles(hash: string, cb: (err?: any, body?: any) => void): void

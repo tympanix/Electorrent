@@ -3,6 +3,7 @@
   <div class="ui top attached tabular menu torrent-details-tabs">
     <a
       class="item"
+      ng-if="ctl.canShowDetails()"
       data-role="torrent-details-tab-info"
       ng-class="{ active: ctl.isActiveTab('info') }"
       ng-click="ctl.showTab('info')"
@@ -12,6 +13,7 @@
     </a>
     <a
       class="item"
+      ng-if="ctl.canShowDetails()"
       data-role="torrent-details-tab-files"
       ng-class="{ active: ctl.isActiveTab('files') }"
       ng-click="ctl.showTab('files')"
@@ -60,13 +62,13 @@
     </div>
 
     <torrent-details-info-tab
-      ng-if="ctl.scope.torrent && ctl.isActiveTab('info')"
+      ng-if="ctl.scope.torrent && ctl.canShowDetails() && ctl.isActiveTab('info')"
       torrent="ctl.scope.torrent"
       refresh="ctl.scope.refresh"
     ></torrent-details-info-tab>
 
     <torrent-details-files-tab
-      ng-if="ctl.scope.torrent && ctl.isActiveTab('files')"
+      ng-if="ctl.scope.torrent && ctl.canShowDetails() && ctl.isActiveTab('files')"
       torrent="ctl.scope.torrent"
       refresh="ctl.scope.refresh"
     ></torrent-details-files-tab>

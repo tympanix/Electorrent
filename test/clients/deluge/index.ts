@@ -14,6 +14,7 @@ const baseFeatures = {
   torrentDetails: true,
   torrentPeers: true,
   torrentTrackers: true,
+  torrentTrackerManagement: true,
   speedLimits: true,
   ratioLimits: true,
   freeDiskSpace: true,

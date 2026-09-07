@@ -17,6 +17,7 @@ const features = {
   torrentDetails: true,
   torrentPeers: true,
   torrentTrackers: true,
+  torrentTrackerManagement: true,
   trackerFilter: true,
   alternativeSpeedLimits: true,
   speedLimits: true,
@@ -42,6 +43,7 @@ const legacyFeatures = {
   trackerFilter: false,
   torrentPeers: false,
   torrentTrackers: false,
+  torrentTrackerManagement: false,
   uploadFileSelection: false,
 } satisfies TorrentClientFeatures
 

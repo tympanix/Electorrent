@@ -136,6 +136,22 @@ export interface BittorrentGetTorrentTrackersRequest {
     id: string
 }
 
+export interface BittorrentAddTorrentTrackerRequest {
+    id: string
+    url: string
+}
+
+export interface BittorrentEditTorrentTrackerRequest {
+    id: string
+    url: string
+    newUrl: string
+}
+
+export interface BittorrentRemoveTorrentTrackerRequest {
+    id: string
+    url: string
+}
+
 export type BittorrentTorrentDetailsPrimitive = string | number | boolean | null
 
 export interface BittorrentGetTorrentDetailsRequest {
@@ -279,6 +295,7 @@ export interface TorrentClientFeatures {
     readonly torrentDetails?: boolean
     readonly torrentPeers?: boolean
     readonly torrentTrackers?: boolean
+    readonly torrentTrackerManagement?: boolean
     readonly trackerFilter?: boolean
     readonly alternativeSpeedLimits?: boolean
     readonly speedLimits?: boolean
@@ -323,6 +340,7 @@ export interface ResolvedTorrentClientFeatures {
     readonly torrentDetails: boolean
     readonly torrentPeers: boolean
     readonly torrentTrackers: boolean
+    readonly torrentTrackerManagement: boolean
     readonly trackerFilter: boolean
     readonly alternativeSpeedLimits: boolean
     readonly speedLimits: boolean
@@ -477,6 +495,9 @@ export interface ElectorrentBridge {
         getTorrentFiles(request: BittorrentGetTorrentFilesRequest): Promise<BittorrentTorrentDetailsFile[]>
         getTorrentPeers(request: BittorrentGetTorrentPeersRequest): Promise<BittorrentTorrentPeer[]>
         getTorrentTrackers(request: BittorrentGetTorrentTrackersRequest): Promise<BittorrentTorrentDetailsTracker[]>
+        addTorrentTracker(request: BittorrentAddTorrentTrackerRequest): Promise<void>
+        editTorrentTracker(request: BittorrentEditTorrentTrackerRequest): Promise<void>
+        removeTorrentTracker(request: BittorrentRemoveTorrentTrackerRequest): Promise<void>
         setTorrentFileSelection(request: BittorrentSetTorrentFileSelectionRequest): Promise<void>
         setTorrentFilePriority(request: BittorrentSetTorrentFilePriorityRequest): Promise<void>
     }
