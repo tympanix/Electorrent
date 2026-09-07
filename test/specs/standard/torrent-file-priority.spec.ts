@@ -47,8 +47,18 @@ describe("torrent file priority", function () {
     const dropdown = (await getFileDropdowns())[0]
     const fileIndex = await dropdown.getAttribute("data-file-index")
     if (!fileIndex) throw new Error("File priority dropdown did not expose its file index")
+    const priorityCell = await dropdown.parentElement()
+    const priorityTableCell = await priorityCell.parentElement()
+    ;(await priorityCell.getCSSProperty("overflow-y")).value.should.equal("visible")
+    ;(await priorityTableCell.getCSSProperty("overflow-y")).value.should.equal("visible")
+    const filename = priorityTableCell.parentElement().$("[data-col='name'] .torrent-details-file-name > span")
+    ;(await filename.getCSSProperty("overflow-x")).value.should.equal("hidden")
+    ;(await filename.getCSSProperty("text-overflow")).value.should.equal("ellipsis")
+
     await dropdown.click()
     const item = dropdown.$(`[data-priority-id='${target.id}']`)
+    await item.waitForDisplayed({ timeout: 10_000 })
+    ;(await item.getSize("height")).should.be.at.most(await dropdown.getSize("height"))
     await item.waitForClickable({ timeout: 10_000 })
     await item.click()
     const updatedDropdown = panel.$(`tbody tr:not(.torrent-details-folder-row) [data-role='torrent-details-file-priority'][data-file-index='${fileIndex}']`)
