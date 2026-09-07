@@ -12,7 +12,14 @@ torrent-details-files-tab {
     .torrent-details-file-cell > span { display: block; }
     .torrent-details-file-progress { display: flex; align-items: center; gap: .5rem; }
     .torrent-details-file-progress > .ui.tiny.indicating.progress { flex: 1 1 auto; margin: 0; }
-    .ui.mini.dropdown.torrent-details-file-priority { min-width: 7em; min-height: 0; padding-top: .45em; padding-bottom: .45em; }
+    .ui.mini.dropdown.torrent-details-file-priority {
+        min-width: 7em;
+        min-height: 0;
+        padding-top: .45em;
+        padding-bottom: .45em;
+
+        > .menu > .item { min-height: 0; padding: .45em .75em; }
+    }
     .ui.tiny.negative.message.torrent-details-files-error { position: sticky; top: 0; z-index: 2; margin: 0; }
 
     .ui.checkbox.torrent-details-file-checkbox {
@@ -43,6 +50,8 @@ torrent-details-files-tab {
         }
 
         > tbody > tr > td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        > tbody > tr > td[data-col='priority'],
+        > tbody > tr > td[data-col='priority'] > .torrent-details-file-cell { overflow: visible; }
     }
 
     .torrent-details-file-selection-column {
