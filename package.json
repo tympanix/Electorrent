@@ -8,6 +8,7 @@
   "scripts": {
     "app": "electron app/main.js",
     "app:debug": "NODE_ENV=test npm run app -- --force-title-bar-menu",
+    "app:mcp": "electron --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 app/main.js",
     "build": "npm run build:webpack -- --mode production --config-node-env production",
     "build:webpack": "webpack --config webpack.config.js",
     "build:watch": "webpack --config webpack.config.js --mode development --config-node-env development --watch",
