@@ -205,6 +205,8 @@ async function bootstrap() {
         torrentWindow = new BrowserWindow(windowSettings)
         if (windowState.shouldRestoreFullscreen(storedWindowState)) {
             torrentWindow.setFullScreen(true)
+        } else if (windowState.shouldRestoreMaximized(storedWindowState)) {
+            torrentWindow.maximize()
         }
         rendererLoaded = false
         electorrent.setWindow(torrentWindow)

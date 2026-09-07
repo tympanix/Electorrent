@@ -2,6 +2,7 @@ import type { BrowserWindow, BrowserWindowConstructorOptions, Rectangle } from '
 
 export interface StoredWindowState extends Rectangle {
     fullscreen?: boolean
+    maximized?: boolean
 }
 
 interface WindowStateSettings {
@@ -45,18 +46,20 @@ export function shouldRestoreFullscreen(value: unknown): boolean {
     return isObject(value) && value.fullscreen === true
 }
 
+export function shouldRestoreMaximized(value: unknown): boolean {
+    return isObject(value) && value.maximized === true
+}
+
 export function getStoredWindowState(settings: Pick<WindowStateSettings, 'get'>): unknown {
     return settings.get(WINDOW_STATE_KEY)
 }
 
 export function saveWindowState(window: BrowserWindow, settings: WindowStateSettings) {
     const fullscreen = window.isFullScreen()
-    const bounds = fullscreen
-        ? window.getNormalBounds()
-        : window.getBounds()
     const windowState: StoredWindowState = {
-        ...bounds,
+        ...window.getNormalBounds(),
         fullscreen,
+        maximized: window.isMaximized(),
     }
 
     settings.put(WINDOW_STATE_KEY, windowState)
