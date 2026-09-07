@@ -1,97 +1,82 @@
 import chai from "chai"
-import { browser } from "@wdio/globals"
-import type { Rectangle } from "electron"
+import type { BrowserWindow, Rectangle } from "electron"
+import {
+  getWindowBoundsOptions,
+  saveWindowState,
+  shouldRestoreFullscreen,
+  shouldRestoreMaximized,
+  type StoredWindowState,
+} from "../../../src/main/lib/window-state"
 import { configureSpec } from "../../framework/fixture"
 
 const assert: Chai.AssertStatic = chai.assert
 
-interface WindowState {
-  bounds: Rectangle
-  normalBounds: Rectangle
+interface WindowFlags {
   fullscreen: boolean
   maximized: boolean
 }
 
-async function getWindowState(): Promise<WindowState> {
-  return browser.electron.execute((electron) => {
-    const window = electron.BrowserWindow.getAllWindows().find((candidate) => !candidate.isDestroyed())
-    if (!window) {
-      throw new Error("Application window is not available")
-    }
+function persistWindowState(bounds: Rectangle, flags: WindowFlags): StoredWindowState {
+  let storedKey: string | undefined
+  let storedValue: unknown
+  let writes = 0
+  const window = {
+    getNormalBounds: () => bounds,
+    isFullScreen: () => flags.fullscreen,
+    isMaximized: () => flags.maximized,
+  } as BrowserWindow
+  const settings = {
+    get: () => null,
+    put: (key: string, value: unknown) => {
+      storedKey = key
+      storedValue = value
+    },
+    write: () => {
+      writes += 1
+    },
+  }
 
-    return {
-      bounds: window.getBounds(),
-      normalBounds: window.getNormalBounds(),
-      fullscreen: window.isFullScreen(),
-      maximized: window.isMaximized(),
-    }
-  })
+  saveWindowState(window, settings)
+
+  assert.equal(storedKey, "windowsize")
+  assert.equal(writes, 1)
+  return storedValue as StoredWindowState
 }
 
-async function setNormalBounds(bounds: Rectangle) {
-  await browser.electron.execute((electron, nextBounds) => {
-    const window = electron.BrowserWindow.getAllWindows().find((candidate) => !candidate.isDestroyed())
-    if (!window) {
-      throw new Error("Application window is not available")
-    }
-
-    window.setFullScreen(false)
-    window.unmaximize()
-    window.setBounds(nextBounds)
-  }, bounds)
-}
-
-async function restartApplication() {
-  await browser.reloadSession()
-  await browser.waitUntil(async () => {
-    return browser.electron.execute((electron) => electron.BrowserWindow.getAllWindows().length > 0)
-  })
+function assertRestoredBounds(state: StoredWindowState, bounds: Rectangle) {
+  assert.deepEqual(getWindowBoundsOptions(state), bounds)
 }
 
 describe("window state", function () {
   configureSpec({ login: false })
 
-  it("restores ordinary window bounds", async function () {
+  it("persists ordinary window bounds", function () {
     const bounds = { x: 120, y: 90, width: 900, height: 650 }
-    await setNormalBounds(bounds)
+    const stored = persistWindowState(bounds, { fullscreen: false, maximized: false })
 
-    await restartApplication()
-
-    const restored = await getWindowState()
-    assert.deepEqual(restored.bounds, bounds)
-    assert.isFalse(restored.maximized)
-    assert.isFalse(restored.fullscreen)
+    assert.deepEqual(stored, { ...bounds, fullscreen: false, maximized: false })
+    assertRestoredBounds(stored, bounds)
+    assert.isFalse(shouldRestoreMaximized(stored))
+    assert.isFalse(shouldRestoreFullscreen(stored))
   })
 
-  it("restores maximized state and the normal bounds", async function () {
+  it("persists maximized state with normal bounds", function () {
     const bounds = { x: 140, y: 110, width: 920, height: 670 }
-    await setNormalBounds(bounds)
-    await browser.electron.execute((electron) => {
-      electron.BrowserWindow.getAllWindows()[0]?.maximize()
-    })
-    await browser.waitUntil(async () => (await getWindowState()).maximized)
+    const stored = persistWindowState(bounds, { fullscreen: false, maximized: true })
 
-    await restartApplication()
-
-    const restored = await getWindowState()
-    assert.isTrue(restored.maximized)
-    assert.isFalse(restored.fullscreen)
-    assert.deepEqual(restored.normalBounds, bounds)
+    assert.deepEqual(stored, { ...bounds, fullscreen: false, maximized: true })
+    assertRestoredBounds(stored, bounds)
+    assert.isTrue(shouldRestoreMaximized(stored))
+    assert.isFalse(shouldRestoreFullscreen(stored))
   })
 
-  it("restores fullscreen state and the normal bounds", async function () {
+  it("persists fullscreen state with normal bounds", function () {
     const bounds = { x: 160, y: 130, width: 940, height: 690 }
-    await setNormalBounds(bounds)
-    await browser.electron.execute((electron) => {
-      electron.BrowserWindow.getAllWindows()[0]?.setFullScreen(true)
-    })
-    await browser.waitUntil(async () => (await getWindowState()).fullscreen)
+    const stored = persistWindowState(bounds, { fullscreen: true, maximized: false })
 
-    await restartApplication()
-
-    const restored = await getWindowState()
-    assert.isTrue(restored.fullscreen)
-    assert.isFalse(restored.maximized)
-    assert.deepEqual(restored.normalBounds, bounds)
+    assert.deepEqual(stored, { ...bounds, fullscreen: true, maximized: false })
+    assertRestoredBounds(stored, bounds)
+    assert.isFalse(shouldRestoreMaximized(stored))
+    assert.isTrue(shouldRestoreFullscreen(stored))
   })
 })
