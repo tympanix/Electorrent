@@ -354,11 +354,7 @@ async function bootstrap() {
         }
 
         tray.setToolTip(app.name)
-        tray.on('click', () => {
-            refreshTrayMenu()
-            tray?.popUpContextMenu()
-        })
-        tray.on('double-click', showOrCreateTorrentWindow)
+        tray.on('click', showOrCreateTorrentWindow)
         refreshTrayMenu()
     }
 
