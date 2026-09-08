@@ -4,6 +4,7 @@ import { PendingTorrentUploadItem, PendingTorrentUploadList } from "@renderer/ap
 import { ModalController } from "@renderer/app/directives/modal/modal.controller";
 import type { SortChange } from "@renderer/app/directives/sorting/sorting.controller";
 import { matchesLabelFilter } from "@renderer/app/directives/torrent-sidebar/torrent-label-filter";
+import { DEFAULT_TABLE_RESIZE_OPTIONS } from "@renderer/app/lib/table-resize-options";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { TorrentActionItem } from "@shared/torrent-actions";
 
@@ -72,6 +73,7 @@ export class TorrentsPageController {
         $scope.trackers = [];
         $scope.guiBusy = true;
         $scope.pendingTorrentFiles = [];
+        $scope.tableResizeOptions = DEFAULT_TABLE_RESIZE_OPTIONS;
         $scope.uploadAdvancedOptionsKey = "Ctrl";
         $scope.deleteConfirmation = {
             action: null,
