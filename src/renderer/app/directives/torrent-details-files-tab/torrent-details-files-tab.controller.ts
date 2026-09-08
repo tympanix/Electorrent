@@ -5,6 +5,7 @@ import {
   TorrentDetailsPanelData,
 } from "@renderer/app/bittorrent/torrentclient";
 import { loadSortingState, SortChange, SortingOptions } from "@renderer/app/directives/sorting/sorting.controller";
+import { DEFAULT_TABLE_RESIZE_OPTIONS, TableResizeOptions } from "@renderer/app/lib/table-resize-options";
 import type { SettingsService } from "@renderer/app/services/settings";
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope";
 import type { BittorrentFilePriority } from "@shared/ipc-contract";
@@ -35,6 +36,7 @@ export interface TorrentDetailsFilesTabScope extends IScope {
   files: TorrentDetailsFiles;
   resizeMode: string;
   resizeProfile: string;
+  tableResizeOptions: Readonly<TableResizeOptions>;
   sortedFiles: TorrentDetailsFileRow[];
   loading: boolean;
   loaded: boolean;
@@ -72,6 +74,7 @@ export class TorrentDetailsFilesTabController {
     this.scope.error = null;
     this.scope.selectionUpdating = false;
     this.scope.selectionError = null;
+    this.scope.tableResizeOptions = DEFAULT_TABLE_RESIZE_OPTIONS;
     this.configureResize();
     this.scope.$watch(
       () => this.scope.files,

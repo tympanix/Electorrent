@@ -1,5 +1,6 @@
 import { IScope } from "angular"
 import type { SortChange } from "@renderer/app/directives/sorting/sorting.controller"
+import { DEFAULT_TABLE_RESIZE_OPTIONS, type TableResizeOptions } from "@renderer/app/lib/table-resize-options"
 import type { SettingsService } from "@renderer/app/services/settings"
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope"
 import type { BittorrentTorrentPeer } from "@shared/ipc-contract"
@@ -10,6 +11,7 @@ export interface TorrentDetailsPeersTabScope extends IScope {
   peers: { items: BittorrentTorrentPeer[] }
   resizeMode: string
   resizeProfile: string
+  tableResizeOptions: Readonly<TableResizeOptions>
   columns: TorrentDetailsPeerColumn[]
   sortedPeers: BittorrentTorrentPeer[]
   loading: boolean
@@ -52,6 +54,7 @@ export class TorrentDetailsPeersTabController {
     this.scope.loading = false
     this.scope.loaded = false
     this.scope.error = null
+    this.scope.tableResizeOptions = DEFAULT_TABLE_RESIZE_OPTIONS
     this.configureResize()
     this.scope.$watch(() => this.scope.peers, () => this.sortPeers())
     this.scope.$watchGroup(

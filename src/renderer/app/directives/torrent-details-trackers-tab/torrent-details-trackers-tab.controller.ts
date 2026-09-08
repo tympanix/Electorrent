@@ -1,5 +1,6 @@
 import { IScope } from "angular"
 import type { SortChange } from "@renderer/app/directives/sorting/sorting.controller"
+import { DEFAULT_TABLE_RESIZE_OPTIONS, type TableResizeOptions } from "@renderer/app/lib/table-resize-options"
 import type { SettingsService } from "@renderer/app/services/settings"
 import type { ElectorrentRootScope } from "@renderer/app/types/root-scope"
 import type { BittorrentTorrentDetailsTracker } from "@shared/ipc-contract"
@@ -17,6 +18,7 @@ export interface TorrentDetailsTrackersTabScope extends IScope {
   trackers: BittorrentTorrentDetailsTracker[]
   resizeMode: string
   resizeProfile: string
+  tableResizeOptions: Readonly<TableResizeOptions>
   columns: TorrentDetailsTrackerColumn[]
   sortedTrackers: BittorrentTorrentDetailsTracker[]
   loading: boolean
@@ -64,6 +66,7 @@ export class TorrentDetailsTrackersTabController {
     this.scope.error = null
     this.scope.mutationError = null
     this.scope.trackerUrl = ""
+    this.scope.tableResizeOptions = DEFAULT_TABLE_RESIZE_OPTIONS
     this.configureResize()
     this.scope.$watch(() => this.scope.trackers, () => this.sortTrackers())
     this.scope.$watchGroup(

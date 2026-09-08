@@ -1,7 +1,7 @@
 import chai from "chai"
 import fs from "node:fs"
 import parseTorrent from "parse-torrent"
-import { $, $$ } from "@wdio/globals"
+import { $ } from "@wdio/globals"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
 import { createTorrentFile } from "../../torrent"
@@ -11,7 +11,7 @@ const { assert } = chai
 const fixture = getTestFixture()
 const client = fixture.client
 const tracker = fixture.tracker
-const minimumColumnWidth = 25
+const defaultColumnWidth = 250
 
 const builtInColumns = [
   "Name",
@@ -179,7 +179,7 @@ describe("torrent columns", function () {
       .satisfies("show a completion date", (value) => dateIsSensible(value.trim()), { timeout: 20 * 1000 })
   })
 
-  it("gives newly enabled columns a minimum width", async function () {
+  it("gives newly enabled columns the default width", async function () {
     this.timeout(60 * 1000)
 
     await this.app.openSettings()
@@ -199,11 +199,8 @@ describe("torrent columns", function () {
     await this.app.settingsSave()
     await this.app.torrentsPageIsVisible()
 
-    const headers = await $$("#torrentTable thead th")
-    for (const header of headers) {
-      const columnName = (await header.getText()).trim()
-      const width = (await header.getSize()).width
-      assert.isAtLeast(width, minimumColumnWidth, `${columnName} column width`)
-    }
+    const ratioHeader = $("#torrentTable thead").$("th=Ratio")
+    await ratioHeader.waitForDisplayed({ timeout: 10 * 1000 })
+    assert.closeTo((await ratioHeader.getSize()).width, defaultColumnWidth, 1)
   })
 })
