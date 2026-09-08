@@ -77,7 +77,11 @@ export class TorrentDetailsTrackersTabController {
       ],
       () => this.configureResize(),
     )
-    this.scope.$on("$destroy", () => { this.requestId += 1 })
+    const addTrackerListener = this.scope.$on("torrentDetailsTrackers:add", () => this.openAddTracker())
+    this.scope.$on("$destroy", () => {
+      this.requestId += 1
+      addTrackerListener()
+    })
   }
 
   changeSorting = ({ sortKey, descending }: SortChange<keyof BittorrentTorrentDetailsTracker>) => {

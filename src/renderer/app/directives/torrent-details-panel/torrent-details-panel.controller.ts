@@ -102,6 +102,14 @@ export class TorrentDetailsPanelController {
     return !!this.rootScope.$btclient?.features.torrentTrackers;
   }
 
+  canManageTrackers() {
+    return !!this.rootScope.$btclient?.features.torrentTrackerManagement;
+  }
+
+  openAddTracker() {
+    this.scope.$broadcast("torrentDetailsTrackers:add");
+  }
+
   startResizing(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
