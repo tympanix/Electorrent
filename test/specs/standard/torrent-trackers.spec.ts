@@ -39,7 +39,7 @@ describe("torrent tracker management", function () {
 
     await eventually(() => trackersTab.getText()).contains(initialTracker, { timeout: 30_000 })
 
-    await trackersTab.$("[data-role='torrent-tracker-add']").click()
+    await panel.$("[data-role='torrent-tracker-add']").click()
     const trackerModal = $("#torrent-tracker-modal")
     await waitForModalOpen(trackerModal, 10_000)
     const trackerInput = trackerModal.$("[data-role='torrent-tracker-url']")

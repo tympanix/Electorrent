@@ -39,6 +39,19 @@ torrent-details-panel {
 
         > .item > .icon { margin-right: .4rem; }
         > .right.menu > .item > .icon { margin: 0; }
+
+        > .right.menu {
+            align-items: center;
+
+            > .torrent-details-add-tracker {
+                flex: 0 0 auto;
+                margin: 0 .35rem 0 0;
+                padding: .5em .7em;
+                white-space: nowrap;
+
+                > .icon { margin: 0 .4em 0 0; }
+            }
+        }
     }
 
     .torrent-details-panel-body {
@@ -77,4 +90,13 @@ torrent-details-panel {
     .torrent-details-empty-state { color: @mutedTextColor; }
 
     .torrent-details-message { color: inherit; }
+
+    @media (max-width: 720px) {
+        .torrent-details-add-tracker-label { display: none; }
+
+        .ui.top.attached.tabular.menu.torrent-details-tabs
+            > .right.menu
+            > .torrent-details-add-tracker
+            > .icon { margin: 0; }
+    }
 }

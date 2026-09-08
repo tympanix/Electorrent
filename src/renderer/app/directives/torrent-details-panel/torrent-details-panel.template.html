@@ -42,6 +42,18 @@
       Trackers
     </a>
     <div class="right menu">
+      <button
+        class="ui mini button torrent-details-add-tracker"
+        type="button"
+        data-role="torrent-tracker-add"
+        aria-label="Add tracker"
+        title="Add tracker"
+        ng-if="ctl.isActiveTab('trackers') && ctl.canManageTrackers()"
+        ng-click="ctl.openAddTracker()"
+      >
+        <i class="plus icon" aria-hidden="true"></i>
+        <span class="torrent-details-add-tracker-label">Add tracker</span>
+      </button>
       <a
         class="item"
         data-role="torrent-details-close"

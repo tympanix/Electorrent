@@ -1,9 +1,4 @@
 <div class="torrent-details-trackers" data-role="torrent-details-trackers">
-  <div class="torrent-details-trackers-toolbar" ng-if="ctl.canManageTrackers()">
-    <button class="ui tiny icon button" type="button" data-role="torrent-tracker-add" aria-label="Add tracker" title="Add tracker" ng-click="ctl.openAddTracker()">
-      <i class="plus icon" aria-hidden="true"></i>
-    </button>
-  </div>
   <div ng-if="ctl.scope.loading && !ctl.scope.loaded" class="torrent-details-state torrent-details-panel-loader">
     <div class="ui active inline loader"></div>
   </div>
@@ -50,7 +45,19 @@
         </td>
       </tr>
       <tr ng-if="!ctl.scope.sortedTrackers.length">
-        <td class="torrent-details-empty-state" ng-attr-colspan="{{ ctl.canManageTrackers() ? 11 : 10 }}">No trackers available.</td>
+        <td class="torrent-details-empty-state" ng-attr-colspan="{{ ctl.canManageTrackers() ? 11 : 10 }}">
+          <span>No trackers available.</span>
+          <button
+            ng-if="ctl.canManageTrackers()"
+            class="ui mini button torrent-details-empty-add-tracker"
+            type="button"
+            data-role="torrent-tracker-empty-add"
+            ng-click="ctl.openAddTracker()"
+          >
+            <i class="plus icon" aria-hidden="true"></i>
+            Add tracker
+          </button>
+        </td>
       </tr>
     </tbody>
   </table>
