@@ -193,6 +193,53 @@ describe("torrent details", function () {
     await eventually(async () => (await urlHeader.getSize()).width)
       .satisfies(`change by at least 10 from ${initialWidth}`, (nextWidth) => Math.abs(nextWidth - initialWidth) >= 10)
 
+    const resizedWidth = (await urlHeader.getSize()).width
+
+    await torrent.closeDetailsPanel()
+
+    const reopenedPanel = await torrent.openDetailsPanel()
+    await torrent.openDetailsTab("trackers")
+
+    const reopenedTrackersTable = reopenedPanel.$("[data-role='torrent-details-trackers-table']")
+    await reopenedTrackersTable.waitForDisplayed({ timeout: 30_000 })
+    const reopenedWidth = (await reopenedTrackersTable.$("thead th:first-child").getSize()).width
+    reopenedWidth.should.be.closeTo(resizedWidth, 1)
+
+    await torrent.closeDetailsPanel()
+  })
+
+  it("retains the resized tracker actions column", async function () {
+    this.timeout(60 * 1000)
+
+    if (getTestFixture().client.features.torrentTrackerManagement !== true) {
+      return this.skip()
+    }
+
+    const panel = await torrent.openDetailsPanel()
+    await torrent.openDetailsTab("trackers")
+
+    const trackersTable = panel.$("[data-role='torrent-details-trackers-table']")
+    const actionsHeader = trackersTable.$("thead th.torrent-details-tracker-actions")
+    await actionsHeader.scrollIntoView({ block: "center", inline: "center" })
+    const handle = actionsHeader.$(".rz-handle")
+    await handle.waitForDisplayed({ timeout: 10_000 })
+
+    const initialWidth = (await actionsHeader.getSize()).width
+    await handle.dragAndDrop({ x: -40, y: 0 })
+    await eventually(async () => (await actionsHeader.getSize()).width)
+      .satisfies(`change by at least 10 from ${initialWidth}`, (nextWidth) => Math.abs(nextWidth - initialWidth) >= 10)
+
+    const resizedWidth = (await actionsHeader.getSize()).width
+    await torrent.closeDetailsPanel()
+
+    const reopenedPanel = await torrent.openDetailsPanel()
+    await torrent.openDetailsTab("trackers")
+
+    const reopenedActionsHeader = reopenedPanel.$("[data-role='torrent-details-trackers-table'] thead th.torrent-details-tracker-actions")
+    await reopenedActionsHeader.waitForDisplayed({ timeout: 30_000 })
+    const reopenedWidth = (await reopenedActionsHeader.getSize()).width
+    reopenedWidth.should.be.closeTo(resizedWidth, 1)
+
     await torrent.closeDetailsPanel()
   })
 
@@ -240,6 +287,19 @@ describe("torrent details", function () {
 
     await eventually(async () => (await controlledHeader.getSize()).width)
       .satisfies(`change by at least 10 from ${initialWidth}`, (nextWidth) => Math.abs(nextWidth - initialWidth) >= 10)
+
+    const resizedWidth = (await controlledHeader.getSize()).width
+
+    await torrent.closeDetailsPanel()
+
+    const reopenedPanel = await torrent.openDetailsPanel()
+    await torrent.openDetailsTab("files")
+
+    const reopenedFilesTable = reopenedPanel.$("[data-role='torrent-details-files-table']")
+    await reopenedFilesTable.waitForDisplayed({ timeout: 30_000 })
+    const reopenedHeaders = await reopenedFilesTable.$$("thead th")
+    const reopenedWidth = (await reopenedHeaders[1].getSize()).width
+    reopenedWidth.should.be.closeTo(resizedWidth, 1)
 
     await torrent.closeDetailsPanel()
   })
