@@ -8,10 +8,6 @@ export function buildUpdateUrl(endpoint: string, platform: NodeJS.Platform, vers
     const updateType = UPDATE_TYPES[platform]
     if (!updateType) return null
 
-    const updateUrl = `${endpoint}update/${updateType}/${version}`
-    if (platform !== 'darwin' || !['arm64', 'x64'].includes(architecture)) {
-        return updateUrl
-    }
-
-    return `${updateUrl}?arch=${architecture}`
+    const architectureSuffix = platform === 'darwin' && architecture === 'arm64' ? '_arm64' : ''
+    return `${endpoint}update/${updateType}${architectureSuffix}/${version}`
 }
