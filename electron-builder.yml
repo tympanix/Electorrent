@@ -18,7 +18,6 @@ mac:
       arch:
         - universal
         - arm64
-        - x64
 win:
   target: squirrel
   publish:

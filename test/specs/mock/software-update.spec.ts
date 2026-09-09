@@ -83,22 +83,28 @@ describe("software updates", function () {
   })
 })
 
-describe("macOS software update architecture", function () {
+describe("software update URL", function () {
   const endpoint = "https://electorrent.example/"
 
-  for (const architecture of ["arm64", "x64"]) {
-    it(`requests the ${architecture} update`, function () {
-      assert.equal(
-        buildUpdateUrl(endpoint, "darwin", "2.16.2", architecture),
-        `${endpoint}update/dmg/2.16.2?arch=${architecture}`,
-      )
+  const supportedPlatforms: Array<{
+    platform: NodeJS.Platform
+    architecture: string
+    updatePath: string
+  }> = [
+    { platform: "darwin", architecture: "arm64", updatePath: "dmg_arm64" },
+    { platform: "darwin", architecture: "x64", updatePath: "dmg" },
+    { platform: "darwin", architecture: "unknown", updatePath: "dmg" },
+    { platform: "win32", architecture: "x64", updatePath: "win32" },
+    { platform: "linux", architecture: "x64", updatePath: "appimage" },
+  ]
+
+  for (const { platform, architecture, updatePath } of supportedPlatforms) {
+    it(`builds the ${platform} ${architecture} update URL`, function () {
+      assert.equal(buildUpdateUrl(endpoint, platform, "2.16.2", architecture), `${endpoint}update/${updatePath}/2.16.2`)
     })
   }
 
-  it("falls back to the universal update for an unknown architecture", function () {
-    assert.equal(
-      buildUpdateUrl(endpoint, "darwin", "2.16.2", "unknown"),
-      `${endpoint}update/dmg/2.16.2`,
-    )
+  it("returns null for an unsupported platform", function () {
+    assert.isNull(buildUpdateUrl(endpoint, "aix", "2.16.2", "ppc64"))
   })
 })
