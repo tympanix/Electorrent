@@ -40,18 +40,18 @@ Electorrent can connect to the following bittorrent clients:
 
 ## Screenshots
 <p align="center">
-  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen0-win.png?raw=true">
-    <img src="assets/screen0-win.png" width="75%">
+  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen0.png?raw=true">
+    <img src="assets/screen0.png" width="75%">
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen1-win.png?raw=true">
-    <img src="assets/screen1-win.png" width="75%">
+  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen1.png?raw=true">
+    <img src="assets/screen1.png" width="75%">
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen2-win.png?raw=true">
-    <img src="assets/screen2-win.png" width="75%">
+  <a href="https://github.com/tympanix/Electorrent/blob/master/assets/screen2.png?raw=true">
+    <img src="assets/screen2.png" width="75%">
   </a>
 </p>
 
