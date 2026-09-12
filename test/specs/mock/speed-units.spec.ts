@@ -1,5 +1,5 @@
 import chai from "chai"
-import { $$, browser } from "@wdio/globals"
+import { $, $$, browser } from "@wdio/globals"
 import { Torrent } from "../../e2e"
 import { eventually } from "../../e2e/eventually"
 import { configureSpec, getTestFixture } from "../../framework/fixture"
@@ -33,10 +33,12 @@ describe("mock speed units", function () {
       })
     }, {
       hash,
-      name: "Speed unit torrent",
+      name: "Idle speed unit torrent",
       state: "downloading",
-      dl_speed: 1024 * 1024,
-      up_speed: 512 * 1024,
+      dl_speed: 0,
+      up_speed: 0,
+      total_downloaded: 0,
+      total_uploaded: 0,
     })
 
     const app = getTestFixture().app
@@ -45,6 +47,26 @@ describe("mock speed units", function () {
 
     const downloadSpeed = async () => (await torrent.getColumn("downloadSpeed")).trim()
     const uploadSpeed = async () => (await torrent.getColumn("uploadSpeed")).trim()
+    const totalDownloadSpeed = async () => (await $("#page-torrents .status-bar .download-speed").getText()).trim()
+    const totalUploadSpeed = async () => (await $("#page-torrents .status-bar .upload-speed").getText()).trim()
+
+    await eventually(downloadSpeed).equals("0 B/s")
+    await eventually(uploadSpeed).equals("0 B/s")
+    await eventually(totalDownloadSpeed).equals("0 B/s")
+    await eventually(totalUploadSpeed).equals("0 B/s")
+
+    await browser.execute(async (torrent) => {
+      await (window as any).electorrent.bittorrent.invokeAction({
+        action: "addMockedTorrent",
+        args: [torrent],
+      })
+    }, {
+      hash,
+      name: "Speed unit torrent",
+      state: "downloading",
+      dl_speed: 1024 * 1024,
+      up_speed: 512 * 1024,
+    })
 
     await eventually(downloadSpeed).equals("1 MB/s")
     await eventually(uploadSpeed).equals("512 KB/s")
