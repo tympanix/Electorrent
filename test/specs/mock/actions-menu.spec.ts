@@ -19,8 +19,9 @@ describe("mock Actions menu", function () {
     await eventually(async () => $("#torrentTable tbody tr[data-id]").isExisting()).equals(true)
   })
 
-  it("contains the mock client's context actions and follows torrent selection", async function () {
+  it("keeps nested actions that do not require a selection available", async function () {
     const initial = await getActionsMenu()
+    const initialTorrentCount = await getMockTorrentCount()
     assert.includeMembers(initial.labels, [
       "Start",
       "Pause",
@@ -34,14 +35,36 @@ describe("mock Actions menu", function () {
       "Set Ratio",
       "Remove",
       "Remove And Delete",
+      "Debug",
     ])
-    assert.isTrue(initial.disabled)
+    assert.isFalse(initial.disabled)
+
+    const actionsMenu = $("//button[contains(@class, 'title-bar-menu-trigger') and normalize-space(.)='Actions']")
+    await actionsMenu.waitForClickable()
+    await actionsMenu.click()
+
+    const debugTrigger = $("//button[contains(@class, 'title-bar-menu-submenu-trigger')][.//span[normalize-space(.)='Debug']]")
+    await debugTrigger.waitForEnabled()
+    await debugTrigger.moveTo()
+
+    const generateAction = debugTrigger.$("..").$(".title-bar-menu-flyout .title-bar-menu-item")
+    await generateAction.waitForClickable()
+    assert.equal(await generateAction.$(".title-bar-menu-label").getText(), "Generate 100 Mock Torrents")
+    await generateAction.click()
+
+    await eventually(getMockTorrentCount).equals(initialTorrentCount + 100)
+    await resetMockTorrents()
+  })
+
+  it("keeps selection-required actions disabled until a torrent is selected", async function () {
+    const startAction = await getNativeAction("Start")
+    assert.isFalse(startAction.enabled)
 
     const row = $("#torrentTable tbody tr[data-id]")
     await row.waitForClickable()
     await row.click()
 
-    await eventually(async () => (await getActionsMenu()).disabled).equals(false)
+    await eventually(async () => (await getNativeAction("Start")).enabled).equals(true)
   })
 
   it("renders platform-localized shortcuts in the title menu", async function () {
@@ -125,7 +148,7 @@ describe("mock Actions menu", function () {
 })
 
 async function openSetLabelModal() {
-  const row = $("#torrentTable tbody tr[data-id]")
+  const row = $(`#torrentTable tbody tr[data-id='${"a".repeat(40)}']`)
   await row.waitForClickable()
   const parentWindow = await browser.getWindowHandle()
   const existingWindowHandles = new Set(await browser.getWindowHandles())
@@ -157,6 +180,26 @@ async function openSetLabelModal() {
   return modal
 }
 
+async function getMockTorrentCount() {
+  return browser.execute(async () => {
+    const snapshot = await (window as any).electorrent.bittorrent.getSnapshot({ fullUpdate: true })
+    return Object.keys(snapshot.torrents).length
+  })
+}
+
+async function resetMockTorrents() {
+  await browser.execute(async () => {
+    const bittorrent = (window as any).electorrent.bittorrent
+    await bittorrent.invokeAction({ action: "clearMockedTorrents", args: [] })
+    await bittorrent.invokeAction({
+      action: "addMockedTorrent",
+      args: [{ hash: "a".repeat(40), name: "Actions menu torrent" }],
+    })
+  })
+  await browser.refresh()
+  await eventually(async () => $(`#torrentTable tbody tr[data-id='${"a".repeat(40)}']`).isExisting()).equals(true)
+}
+
 async function getActionsMenu() {
   return browser.electron.execute((electron) => {
     const menu = electron.Menu.getApplicationMenu()
@@ -168,4 +211,14 @@ async function getActionsMenu() {
         .every((item) => !item.enabled),
     }
   })
+}
+
+async function getNativeAction(label: string) {
+  return browser.electron.execute((electron, actionLabel) => {
+    const menu = electron.Menu.getApplicationMenu()
+    const actions = menu?.items.find((item) => item.id === "actions")
+    const action = actions?.submenu?.items.find((item) => item.label === actionLabel)
+    if (!action) throw new Error(`Action ${actionLabel} is unavailable`)
+    return { enabled: action.enabled }
+  }, label)
 }

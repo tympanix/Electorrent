@@ -66,12 +66,16 @@ export interface TitleMenuSources {
 const separator = (): TitleMenuItem => ({ type: "separator" })
 
 function toTitleTorrentAction(item: TorrentActionItem, hasSelection: boolean): TitleMenuItem {
+    const submenu = item.menu?.map((child) => toTitleTorrentAction(child, hasSelection))
+
     return {
         label: item.label,
         accelerator: item.accelerator,
-        enabled: hasSelection,
+        enabled: submenu
+            ? submenu.some((child) => child.visible !== false && child.enabled !== false)
+            : hasSelection || item.requiresTorrentSelection === false,
         action: item.menu ? undefined : { type: "torrent-action", action: item },
-        submenu: item.menu?.map((child) => toTitleTorrentAction(child, hasSelection)),
+        submenu,
     }
 }
 
