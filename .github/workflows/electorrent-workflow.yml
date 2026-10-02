@@ -13,6 +13,27 @@ env:
   ELECTRON_IS_DEV: 0
 
 jobs:
+  prepare-release:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: prepare-release-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+    - name: Create draft release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        version="$(node -p "require('./package.json').version")"
+        tag="v${version}"
+        gh release view "$tag" > /dev/null 2>&1 || \
+          gh release create "$tag" --draft --title "$version" --target "$GITHUB_SHA"
+
   test:
     runs-on: ubuntu-latest
 
@@ -69,6 +90,8 @@ jobs:
       run: xvfb-run -a -- npm test -- --dist --client "${{ matrix.client }}" --parallel
 
   build:
+    needs: prepare-release
+    if: always() && (needs.prepare-release.result == 'success' || needs.prepare-release.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
