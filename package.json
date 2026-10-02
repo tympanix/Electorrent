@@ -20,6 +20,7 @@
     "release": "electron-builder",
     "version": "node ./scripts/sync-app-version.js && git add app/package.json",
     "test": "wdio run ./wdio.conf.ts",
+    "test:unit": "tsc --build src/main && mocha --no-config --timeout 10000 test/unit/**/*.spec.mjs",
     "smoketest": "npm test -- --client qbittorrent:latest --mochaOpts.grep \"torrent is stopped and resumed\" --headless",
     "lint": "eslint ./src ./test ./wdio.conf.ts && tsc --build"
   },
@@ -39,7 +40,6 @@
     "winreg": "^1.2.2"
   },
   "devDependencies": {
-    "@electorrent/xmlrpc": "^1.5.0",
     "@eslint/js": "^10.0.1",
     "@fontsource/lato": "^5.2.7",
     "@types/angular": "^1.5.8",
@@ -89,6 +89,7 @@
     "electron-reloader": "^1.2.3",
     "electron-squirrel-startup": "^1.0.0",
     "eslint": "^10.8.0",
+    "fast-xml-parser": "^5.11.2",
     "fomantic-ui": "^2.9.4",
     "form-data": "^4.0.4",
     "fuse.js": "^3.0.5",
