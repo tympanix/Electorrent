@@ -191,7 +191,11 @@ describe("torrent columns", function () {
     const nameHeader = $("#torrentTable thead th:first-child")
     const resizeHandle = nameHeader.$(".rz-handle")
     await resizeHandle.waitForDisplayed({ timeout: 10 * 1000 })
-    await resizeHandle.dragAndDrop({ x: 40, y: 0 })
+    const initialNameWidth = (await nameHeader.getSize()).width
+    await eventually(async () => {
+      await resizeHandle.dragAndDrop({ x: 40, y: 0 })
+      return (await nameHeader.getSize()).width
+    }).satisfies(`change by at least 10 from ${initialNameWidth}`, (width) => Math.abs(width - initialNameWidth) >= 10)
 
     await this.app.openSettings()
     await this.app.settingsGotoTab("layout")
@@ -201,6 +205,7 @@ describe("torrent columns", function () {
 
     const ratioHeader = $("#torrentTable thead").$("th=Ratio")
     await ratioHeader.waitForDisplayed({ timeout: 10 * 1000 })
-    assert.closeTo((await ratioHeader.getSize()).width, defaultColumnWidth, 1)
+    await eventually(async () => (await ratioHeader.getSize()).width)
+      .satisfies("equal the default width", (width) => Math.abs(width - defaultColumnWidth) <= 1)
   })
 })
