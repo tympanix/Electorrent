@@ -64,5 +64,5 @@ fileAssociations:
     role: Viewer
     description: Torrent Files
 afterPack: ./util/after-pack.js
-afterSign: ./util/after-sign.js
+afterAllArtifactBuild: ./util/after-sign.js
 electronVersion: 42.0.1
