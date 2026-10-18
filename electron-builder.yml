@@ -11,6 +11,9 @@ files:
   - '!**/*.map'
 mac:
   category: public.app-category.utilities
+  identity: '-'
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.inherit.plist
   extendInfo:
     NSLocalNetworkUsageDescription: Electorrent connects to torrent clients running on devices on your local network.
   target:
@@ -61,4 +64,5 @@ fileAssociations:
     role: Viewer
     description: Torrent Files
 afterPack: ./util/after-pack.js
+afterSign: ./util/after-sign.js
 electronVersion: 42.0.1
