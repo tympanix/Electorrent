@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import httpAdapter from 'axios/lib/adapters/http.js'
 import FormData from 'form-data'
 import https from 'https'
@@ -69,7 +69,7 @@ export class SynologyRuntime implements BittorrentRuntime {
         return serverUrl(this.server, endpoint)
     }
 
-    private config(choice: string, args: any[] = []) {
+    private config(choice: string, args: any[] = []): AxiosRequestConfig {
         switch (choice) {
             case 'query':
                 return {
