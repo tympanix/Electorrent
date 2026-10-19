@@ -18,13 +18,20 @@ export interface TestFixture {
   app: App
 }
 
-let fixture: TestFixture | undefined
+type TestFixtureGlobal = typeof globalThis & {
+  __electorrentTestFixture?: TestFixture
+}
+
+function fixtureGlobal() {
+  return globalThis as TestFixtureGlobal
+}
 
 export function initializeTestFixture(value: Omit<TestFixture, "app">) {
-  fixture = { ...value, app: new App() }
+  fixtureGlobal().__electorrentTestFixture = { ...value, app: new App() }
 }
 
 export function getTestFixture(): TestFixture {
+  const fixture = fixtureGlobal().__electorrentTestFixture
   if (!fixture) {
     throw new Error("The test fixture has not been initialized by the WDIO service")
   }

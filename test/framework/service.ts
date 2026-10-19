@@ -40,16 +40,7 @@ export default class ElectorrentTestService {
 
         // Start a bounded pool once, then reuse each fixture as WDIO schedules specs.
         for (let slot = 0; slot < fixtureCount; slot += 1) {
-          const { client: isolatedClient, composeOptions } = this.getClientEnvironment(client, slot)
-
-          await compose.upMany(
-            ["tracker", "peer", this.getClientServiceName(client), "nginx"],
-            composeOptions,
-          )
-          await waitForHttp({
-            url: `http://${isolatedClient.host}:${isolatedClient.containerHostPort ?? isolatedClient.port}${isolatedClient.acceptHttpPath ?? ""}`,
-            statusCode: isolatedClient.acceptHttpStatus,
-          })
+          await this.ensureClientFixture(client, slot)
         }
       }),
     )
@@ -111,6 +102,11 @@ export default class ElectorrentTestService {
 
     const { client: isolatedClient, composeOptions, proxyPort } = this.getClientEnvironment(client, slot)
 
+    // WDIO logs service onPrepare failures but still launches workers. Re-check the
+    // assigned fixture here so a transient Compose startup failure cannot hand a
+    // worker an unreachable client, including on spec retries.
+    await this.ensureClientFixture(client, slot)
+
     initializeTestFixture({
       client: isolatedClient,
       backend: new DockerComposeService(
@@ -125,6 +121,23 @@ export default class ElectorrentTestService {
       ),
       proxyPort,
     })
+  }
+
+  private async ensureClientFixture(client: TestClient, slot: number) {
+    const { client: isolatedClient, composeOptions } = this.getClientEnvironment(client, slot)
+
+    try {
+      await compose.upMany(
+        ["tracker", "peer", this.getClientServiceName(client), "nginx"],
+        composeOptions,
+      )
+      await waitForHttp({
+        url: `http://${isolatedClient.host}:${isolatedClient.containerHostPort ?? isolatedClient.port}${isolatedClient.acceptHttpPath ?? ""}`,
+        statusCode: isolatedClient.acceptHttpStatus,
+      })
+    } catch (error) {
+      throw new Error(`Failed to prepare fixture ${client.key} slot ${slot + 1}: ${String(error)}`)
+    }
   }
 
   private getClientEnvironment(client: TestClient, slot: number) {

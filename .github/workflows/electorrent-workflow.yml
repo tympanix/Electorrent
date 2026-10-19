@@ -101,6 +101,9 @@ jobs:
     - name: Build distribution
       run: npm run dist
       if: github.ref != 'refs/heads/master'
+      env:
+        # electron-builder otherwise skips even explicit ad-hoc signing for pull requests.
+        CSC_FOR_PULL_REQUEST: 'true'
     - name: Upload distribution
       uses: actions/upload-artifact@v4
       if: github.event_name == 'pull_request'
