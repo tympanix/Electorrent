@@ -1,5 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
+import chai from "chai"
+import { browser } from "@wdio/globals"
 import parseTorrent from "parse-torrent"
 import * as e2e from "../../e2e"
 import { eventually } from "../../e2e/eventually"
@@ -9,6 +11,7 @@ import { restartApplication } from "../../shared"
 
 const fixture = getTestFixture()
 const tracker = fixture.tracker
+const assert: Chai.AssertStatic = chai.assert
 
 describe("upload queue", function () {
   configureSpec()
@@ -64,6 +67,16 @@ describe("upload queue", function () {
       await fs.promises.copyFile(watchTorrentPath, watchedTorrentPath)
 
       await eventually(() => this.app.uploadTorrentModalPendingCountLabel()).contains("3 torrents remaining", { timeout: 30 * 1000 })
+
+      const windowState = await browser.electron.execute((electron) => ({
+        isHeadless: electron.app.commandLine.hasSwitch("headless"),
+        isFocused: electron.BrowserWindow.getAllWindows().some((window) => window.isFocused()),
+        isVisible: electron.BrowserWindow.getAllWindows().some((window) => window.isVisible()),
+      }))
+      if (windowState.isHeadless) {
+        assert.isFalse(windowState.isFocused)
+        assert.isFalse(windowState.isVisible)
+      }
 
       for (let index = 0; index < torrentItems.length; index++) {
         const remaining = torrentItems.length - index
