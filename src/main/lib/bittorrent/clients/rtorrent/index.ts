@@ -1,11 +1,11 @@
 import path from "node:path"
 import { URL } from "node:url"
-import xmlrpc from "@electorrent/xmlrpc"
 import parseTorrent from "parse-torrent"
 
 import type { BittorrentFilePriority, BittorrentFileSelection, BittorrentServerConfig, BittorrentTorrentDetailsData, BittorrentTorrentDetailsFile, BittorrentTorrentDetailsTracker, BittorrentTorrentPeer, TorrentClientConnection } from "@shared/ipc-contract"
-import { defer, HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
+import { HTTP_LOGIN_TIMEOUT, serverUrl } from "@main/lib/bittorrent/helpers"
 import type { BittorrentRuntime } from "@main/lib/bittorrent/types"
+import { XmlRpcClient, type XmlRpcValue } from "@main/lib/xml-rpc"
 import type { TorrentActionItem } from "@shared/torrent-actions"
 import { doubleArrayToHash, postfix, rtorrentFields, stringsToBooleans, stringsToNumbers, urlHostname } from "./helpers"
 
@@ -52,14 +52,18 @@ export class RtorrentRuntime implements BittorrentRuntime {
         { role: "remove", label: "Remove", action: "remove", icon: "remove" },
         { label: "Remove and Delete", action: "deleteAndErase", icon: "trash", role: "delete" },
     ]
-    private client: any
+    private client?: XmlRpcClient
 
     private url(server: BittorrentServerConfig) {
         return server.path ? serverUrl(server) : serverUrl(server, "RPC2")
     }
 
     private async call<T = any>(method: string, params: any[]): Promise<T> {
-        return defer<T>((done) => this.client.methodCall(method, params, done))
+        if (!this.client) {
+            throw new Error("rTorrent XML-RPC client is not connected")
+        }
+
+        return this.client.call<T>(method, params as XmlRpcValue[])
     }
 
     private async ensureSaveLocation(saveLocation?: string) {
@@ -235,28 +239,17 @@ export class RtorrentRuntime implements BittorrentRuntime {
 
     async connect(server: BittorrentServerConfig): Promise<TorrentClientConnection> {
         const rpcUrl = new URL(this.url(server))
-        const options: Record<string, any> = {
-            host: rpcUrl.hostname.replace(/^\[|\]$/g, ""),
-            port: Number(rpcUrl.port),
-            path: rpcUrl.pathname,
-            headers: {
-                "User-Agent": "NodeJS XML-RPC Client",
-                "Content-Type": "text/xml",
-                Accept: "text/xml",
-                "Accept-Charset": "UTF8",
-                Connection: "Close",
-            },
-            ca: server.certificateData,
-            rejectUnauthorized: server.tlsSecurity !== "insecure",
-            timeout: HTTP_LOGIN_TIMEOUT,
-        }
 
         if (server.user && server.password) {
-            options.username = server.user
-            options.password = server.password
+            rpcUrl.username = server.user
+            rpcUrl.password = server.password
         }
 
-        this.client = server.proto === "https" ? xmlrpc.createSecureClient(options) : xmlrpc.createClient(options)
+        this.client = new XmlRpcClient(rpcUrl, {
+            ca: server.certificateData ? Buffer.from(server.certificateData) : undefined,
+            rejectUnauthorized: server.tlsSecurity !== "insecure",
+            timeout: HTTP_LOGIN_TIMEOUT,
+        })
 
         const version = await this.call<string>("system.client_version", [])
         if (typeof version !== "string" || !version.trim()) {
