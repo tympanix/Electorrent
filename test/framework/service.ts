@@ -124,7 +124,7 @@ export default class ElectorrentTestService {
   }
 
   private async ensureClientFixture(client: TestClient, slot: number) {
-    const { client: isolatedClient, composeOptions } = this.getClientEnvironment(client, slot)
+    const { client: isolatedClient, composeOptions, proxyPort, authProxyPort } = this.getClientEnvironment(client, slot)
 
     try {
       await compose.upMany(
@@ -134,6 +134,20 @@ export default class ElectorrentTestService {
       await waitForHttp({
         url: `http://${isolatedClient.host}:${isolatedClient.containerHostPort ?? isolatedClient.port}${isolatedClient.acceptHttpPath ?? ""}`,
         statusCode: isolatedClient.acceptHttpStatus,
+      })
+      // Specs also connect through the nginx proxies (TLS and HTTP Basic auth). Docker binds
+      // the host ports before nginx listens, so early connections fail with ECONNRESET.
+      // Upstream readiness is covered by the check above, and some upstreams (e.g. rTorrent
+      // SCGI) reject plain GET requests, so any HTTP response proves the proxy is ready.
+      const anyResponse = () => true
+      await waitForHttp({
+        url: `https://${isolatedClient.host}:${proxyPort}/`,
+        statusCode: anyResponse,
+        insecure: true,
+      })
+      await waitForHttp({
+        url: `http://${isolatedClient.host}:${authProxyPort}/`,
+        statusCode: anyResponse,
       })
     } catch (error) {
       throw new Error(`Failed to prepare fixture ${client.key} slot ${slot + 1}: ${String(error)}`)
@@ -176,7 +190,7 @@ export default class ElectorrentTestService {
       log: false,
     }
 
-    return { client: isolatedClient, composeOptions, proxyPort }
+    return { client: isolatedClient, composeOptions, proxyPort, authProxyPort }
   }
 
   private getClientServiceName(client: TestClient) {
