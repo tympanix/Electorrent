@@ -6,7 +6,7 @@ export class TorrentBodyController {
     columns: any[] = [];
     $template = "";
     $renderColumns: any[] = [];
-    $rows: Array<{ render: () => void }> = [];
+    $rows = new Set<{ render: () => void }>();
     $link: (scope: IScope, cloneAttachFn?: (clonedElement: JQuery) => void) => JQuery;
 
     constructor(private $compile: ICompileService) {
@@ -14,7 +14,11 @@ export class TorrentBodyController {
     }
 
     subscribe(row: { render: () => void }) {
-        this.$rows.push(row);
+        this.$rows.add(row);
+    }
+
+    unsubscribe(row: { render: () => void }) {
+        this.$rows.delete(row);
     }
 
     renderTemplate() {

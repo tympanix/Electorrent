@@ -37,6 +37,7 @@ export class TorrentsPageController {
         settingsService: any,
     ) {
         const LIMIT = 25;
+        const SIDEBAR_STATUSES = ["all", "downloading", "finished", "seeding", "stopped", "error"];
         const SYNC_LATENCY_SAMPLE_SIZE = 5;
         const MIN_SLOW_LATENCY_MS = 1000;
         const MAX_SLOW_LATENCY_MS = 2000;
@@ -59,6 +60,7 @@ export class TorrentsPageController {
         $scope.connectionLost = false;
         $scope.torrents = {};
         $scope.arrayTorrents = [];
+        $scope.statusCounts = {};
         $scope.totalDownloadSpeed = 0;
         $scope.totalUploadSpeed = 0;
         $scope.totalDownloaded = 0;
@@ -457,6 +459,7 @@ export class TorrentsPageController {
         function clearAll() {
             $scope.torrents = {};
             $scope.arrayTorrents = [];
+            $scope.statusCounts = {};
             setLabels([]);
             if ($rootScope.$server?.id) {
                 $rootScope.currentLabelsByServer = $rootScope.currentLabelsByServer || {};
@@ -891,8 +894,33 @@ export class TorrentsPageController {
             return torrents;
         }
 
+        function countTorrentsByStatus(allTorrents: any[]) {
+            const filterLabel = $scope.filters.label;
+            const filterTracker = $scope.filters.tracker;
+            const matchesTracker = filterTracker ? trackerFilter(filterTracker) : null;
+            const counts: Record<string, number> = {};
+            SIDEBAR_STATUSES.forEach((status) => {
+                counts[status] = 0;
+            });
+
+            allTorrents.forEach((torrent) => {
+                if (!matchesLabelFilter(torrent.label, filterLabel) || (matchesTracker && !matchesTracker(torrent))) {
+                    return;
+                }
+                SIDEBAR_STATUSES.forEach((status) => {
+                    if (statusFilter(torrent, status)) {
+                        counts[status] += 1;
+                    }
+                });
+            });
+
+            return counts;
+        }
+
         function refreshTorrents() {
             let torrents = fetchTorrents();
+            // Counted once per data/filter change instead of on every digest by the sidebar.
+            $scope.statusCounts = countTorrentsByStatus(torrents);
             torrents = torrents.filter(torrentFilter());
             torrents = fuzzySearch(torrents);
             torrents = torrents.sort(torrentSorter());

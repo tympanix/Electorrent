@@ -18,8 +18,10 @@ import { CLIENT_METADATA, type ClientId, type ClientMetadata } from "@shared/cli
 const torrentApp = angular.module("torrentApp", ["ngResource", "ngAnimate", "rzTable", "infinite-scroll", "hc.marked", "ui.sortable"]);
 
 // Configure the application
-torrentApp.config(['$animateProvider', function($animateProvider) {
+torrentApp.config(['$animateProvider', '$compileProvider', function($animateProvider, $compileProvider) {
         $animateProvider.classNameFilter(/\banimated\b|\btransition\b/);
+        // Skip binding/scope debug metadata on every compiled element; it slows down rendering large torrent lists.
+        $compileProvider.debugInfoEnabled(false);
     }
 ]);
 

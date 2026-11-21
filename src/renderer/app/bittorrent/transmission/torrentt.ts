@@ -67,7 +67,7 @@ export class TransmissionTorrent extends Torrent {
             : []
         this.activityDate = data.activityDate > 0 ? data.activityDate * 1000 : undefined
         this.activeTime = (Number(data.secondsDownloading) || 0) + (Number(data.secondsSeeding) || 0)
-        this.availabilityPercent = TransmissionTorrent.normalizeAvailability(data.availability)
+        this.availabilityPercent = TransmissionTorrent.normalizeAvailability(data)
         this.bandwidthPriority = data.bandwidthPriority
         this.corruptEver = data.corruptEver
         this.fileCount = data['file-count']
@@ -86,13 +86,20 @@ export class TransmissionTorrent extends Torrent {
 
     }
 
-    private static normalizeAvailability(value: unknown): number {
-        if (!Array.isArray(value) || value.length === 0) {
+    /**
+     * Percentage of the wanted data that is either downloaded or available from connected peers.
+     * Derived from scalar fields so the per-piece `availability` array does not have to be polled.
+     */
+    private static normalizeAvailability(data: Record<string, any>): number {
+        const sizeWhenDone = Number(data.sizeWhenDone)
+        const leftUntilDone = Number(data.leftUntilDone)
+        const desiredAvailable = Number(data.desiredAvailable)
+        if (!Number.isFinite(sizeWhenDone) || sizeWhenDone <= 0 || !Number.isFinite(leftUntilDone) || !Number.isFinite(desiredAvailable)) {
             return undefined
         }
 
-        const availablePieces = value.filter((piece) => Number(piece) !== 0).length
-        return availablePieces / value.length * 100
+        const available = sizeWhenDone - leftUntilDone + desiredAvailable
+        return Math.min(100, Math.max(0, available / sizeWhenDone * 100))
     }
 
     bandwidthPriorityText(): string {

@@ -49,5 +49,8 @@ export class TorrentRowDirective implements IDirective {
 
         scope.render();
         controller.subscribe(scope);
+        scope.$on("$destroy", () => {
+            controller.unsubscribe(scope);
+        });
     }
 }
