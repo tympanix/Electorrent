@@ -475,6 +475,7 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                 this.getHttpUploadOptions({ ...options, startTorrent: false }, false),
                 done,
             ))
+            await this.waitForTorrentFiles(hash)
             await this.setTorrentFileSelection(hash, fileSelection)
             if (options?.startTorrent !== false) {
                 await this.resume([hash])
@@ -483,6 +484,28 @@ export class QBittorrentRuntime implements BittorrentRuntime {
         }
 
         return defer((done) => api.addTorrentFileContent(Buffer.from(buffer), filename, this.getHttpUploadOptions(options, false), done))
+    }
+
+    // torrents/add returns before qBittorrent registers the torrent, so file
+    // endpoints may 404 (or return no files) for a short while after upload.
+    private async waitForTorrentFiles(hash: string, timeoutMs = 10000, intervalMs = 200): Promise<void> {
+        const deadline = Date.now() + timeoutMs
+        for (;;) {
+            let lastError: unknown
+            try {
+                const files = await this.fetchTorrentFiles(hash)
+                if (Array.isArray(files) && files.length > 0) {
+                    return
+                }
+            } catch (err) {
+                lastError = err
+            }
+
+            if (Date.now() >= deadline) {
+                throw lastError ?? new Error(`qBittorrent did not register torrent ${hash} in time`)
+            }
+            await new Promise((resolve) => setTimeout(resolve, intervalMs))
+        }
     }
 
     resume(hashes: string[]): Promise<void> {
