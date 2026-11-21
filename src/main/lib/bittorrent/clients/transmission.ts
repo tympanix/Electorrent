@@ -101,6 +101,56 @@ const TRANSMISSION_TORRENT_DETAILS_FIELDS = TRANSMISSION_FIELDS.filter((field) =
     'wanted',
 ].includes(field))
 
+/**
+ * Fields polled for every torrent on each refresh. Keep this list limited to what the torrent
+ * list renders: per-torrent collections (files, peers, pieces, availability, trackerStats, ...)
+ * grow with torrent size and make the payload explode for large libraries (see #843).
+ * Heavy fields are fetched on demand for a single torrent by the details panel instead.
+ */
+const TRANSMISSION_SNAPSHOT_FIELDS = [
+    'activityDate',
+    'addedDate',
+    'bandwidthPriority',
+    'corruptEver',
+    'desiredAvailable',
+    'doneDate',
+    'downloadDir',
+    'downloadedEver',
+    'downloadLimit',
+    'downloadLimited',
+    'error',
+    'eta',
+    'file-count',
+    'group',
+    'hashString',
+    'isPrivate',
+    'isStalled',
+    'labels',
+    'leftUntilDone',
+    'name',
+    'peersConnected',
+    'peersGettingFromUs',
+    'peersSendingToUs',
+    'percentDone',
+    'queuePosition',
+    'rateDownload',
+    'rateUpload',
+    'recheckProgress',
+    'secondsDownloading',
+    'secondsSeeding',
+    'seedRatioLimit',
+    'seedRatioMode',
+    'sizeWhenDone',
+    'startDate',
+    'status',
+    'totalSize',
+    'trackers',
+    'uploadedEver',
+    'uploadLimit',
+    'uploadLimited',
+    'uploadRatio',
+]
+
 const TRANSMISSION_TORRENT_FILES_FIELDS = ['files', 'fileStats', 'priorities', 'wanted']
 const TRANSMISSION_FILE_PRIORITIES: readonly BittorrentFilePriority[] = Object.freeze([
     { id: 'skip', label: 'Skip', value: 0, wanted: false },
@@ -263,7 +313,7 @@ export class TransmissionRuntime implements BittorrentRuntime {
         const [torrentsResponse, sessionResponse] = await Promise.all([
             this.getHttpClient().post(this.url(), {
                 arguments: {
-                    fields: TRANSMISSION_FIELDS,
+                    fields: TRANSMISSION_SNAPSHOT_FIELDS,
                 },
                 method: 'torrent-get',
             }),
