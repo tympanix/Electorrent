@@ -25,7 +25,7 @@ async function createMagnetTorrent(app: e2e.App, prefix: string) {
   })
   const torrent = new e2e.Torrent({ hash: info.infoHash, app })
 
-  await browser.electron.execute((electron, value) => electron.clipboard.writeText(value), magnetUri)
+  await browser.electron.execute(async (electron, value) => await electron.clipboard.writeText(value), magnetUri)
   return torrent
 }
 
