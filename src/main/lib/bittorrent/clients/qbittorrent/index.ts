@@ -595,6 +595,8 @@ export class QBittorrentRuntime implements BittorrentRuntime {
                     seedingTimeLimit: "-2",
                     inactiveSeedingTimeLimit: "-2",
                     shareLimitAction: "0",
+                    // Required since qBittorrent 5.3 (WebAPI 2.16); ignored by older versions
+                    shareLimitsMode: "Default",
                 },
             }, (err: any) => {
                 if (err) {
