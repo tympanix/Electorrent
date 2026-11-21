@@ -1,7 +1,6 @@
 import { TorrentActionList, TorrentClient, TorrentDetailsInfoSection, TorrentRatioLimitOptions, TorrentSpeedLimitOptions, TorrentUpdates, TorrentUploadOptions } from "@renderer/app/bittorrent/torrentclient";
 import { Torrent } from "@renderer/app/bittorrent/abstracttorrent";
 import { TransmissionTorrent } from "./torrentt";
-import _ from "underscore"
 import { addTorrentUrl, getSnapshot, getTorrentDetails, invokeAction, uploadTorrent } from "@renderer/app/bittorrent/ipc";
 import type { BittorrentTorrentDetailsData } from "@shared/ipc-contract";
 import { applyFreeDiskSpace } from "@renderer/app/bittorrent/free-disk-space";
@@ -41,14 +40,19 @@ export class TransmissionClient extends TorrentClient<TransmissionTorrent> {
     }
 
     getTrackers(torrents) {
-      const trackers = new Set<string>();
+      const announceUrls = new Set<string>();
       torrents.forEach((torrent) => {
-        torrent.trackers.forEach((tracker) => trackers.add(tracker));
+        torrent.trackers.forEach((tracker) => announceUrls.add(tracker));
       });
-      const trackerArray = Array.from(trackers).map(
-        (tracker) => this.parseUrl(tracker)
-      );
-      return _.compact(trackerArray);
+      // Different announce URLs often share a domain; the sidebar repeats on unique values.
+      const domains = new Set<string>();
+      announceUrls.forEach((tracker) => {
+        const domain = this.parseUrl(tracker);
+        if (domain) {
+          domains.add(domain);
+        }
+      });
+      return Array.from(domains);
     }
 
     parseUrl(url: string) {
