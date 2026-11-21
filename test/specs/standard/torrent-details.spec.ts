@@ -109,7 +109,7 @@ describe("torrent details", function () {
 
     const hashValue = infoTab.$("[data-field-id='hash'] .torrent-details-field-copy")
     await hashValue.click()
-    const clipboardText = await browser.electron.execute((electron) => electron.clipboard.readText())
+    const clipboardText = await browser.electron.execute(async (electron) => await electron.clipboard.readText())
     clipboardText.should.equal(torrentMetadata.infoHash)
 
     await torrent.closeDetailsPanel()

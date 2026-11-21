@@ -125,11 +125,16 @@ export async function readFiles(filepaths: string[], askUploadOptions: boolean) 
     return Promise.all(torrents.map((file) => serializeTorrentFile(file, askUploadOptions)))
 }
 
+// Electron >= 43 defaults the dialog to the Downloads folder instead of letting
+// the OS restore the last-used directory, so remember it ourselves.
+let lastBrowseDirectory: string | undefined
+
 export async function browse(askUploadOptions: boolean) {
     const win = electorrent.getWindow()
 
     const result = await dialog.showOpenDialog(win, {
         title: 'Open Torrent File',
+        defaultPath: lastBrowseDirectory,
         buttonLabel: 'Add Torrent',
         filters: [
             { name: 'Torrent', extensions: ['torrent'] },
@@ -139,6 +144,10 @@ export async function browse(askUploadOptions: boolean) {
 
     if (result.canceled) {
         return []
+    }
+
+    if (result.filePaths.length > 0) {
+        lastBrowseDirectory = path.dirname(result.filePaths[0])
     }
 
     return readFiles(result.filePaths, askUploadOptions)
