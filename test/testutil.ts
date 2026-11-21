@@ -1,7 +1,6 @@
 import axios from "axios"
 import https from "node:https"
 import readline from "readline"
-import { afterEach } from "mocha";
 
 /**
  * Asks for a qestion is console and wait for answer

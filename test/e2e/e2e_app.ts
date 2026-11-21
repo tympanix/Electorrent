@@ -193,7 +193,8 @@ export class App {
   async getNotificationError(opts?: { timeout: number }) {
       const msg = $("#notifications .negative")
       try {
-        await msg.waitForExist({ timeout: opts?.timeout ?? 1000 })
+        // Notifications fade in, and getText() returns '' until the element is visible
+        await msg.$(".header").waitForDisplayed({ timeout: opts?.timeout ?? 1000 })
         return {
           title: await msg.$(".header").getText(),
           message: await msg.$("p").getText()
