@@ -61,13 +61,14 @@
     "@types/underscore": "^1.10.24",
     "@typescript-eslint/eslint-plugin": "^8.61.1",
     "@typescript-eslint/parser": "^8.61.1",
-    "@wdio/cli": "^9.23.3",
-    "@wdio/electron-service": "^10.0.0",
+    "@wdio/cli": "^9.33.1",
+    "@wdio/electron-service": "^10.4.1",
     "@wdio/electron-types": "^9.2.1",
-    "@wdio/local-runner": "^9.27.1",
-    "@wdio/mocha-framework": "^10.0.1",
-    "@wdio/spec-reporter": "^9.27.1",
-    "@wdio/types": "^9.27.1",
+    "@wdio/globals": "^9.33.1",
+    "@wdio/local-runner": "^9.33.1",
+    "@wdio/mocha-framework": "^9.33.1",
+    "@wdio/spec-reporter": "^9.33.1",
+    "@wdio/types": "^9.33.1",
     "angular": "^1.8.2",
     "angular-animate": "^1.8.2",
     "angular-marked": "^1.2.2",
@@ -103,7 +104,6 @@
     "magnet-uri": "^6.2.0",
     "marked": "~0.3.1",
     "mini-css-extract-plugin": "^2.9.4",
-    "mocha": "^12.0.3",
     "moment": "^2.31.0",
     "mousetrap": "^1.6.2",
     "ng-infinite-scroll": "github:sroze/ngInfiniteScroll#1.3.4",
@@ -118,7 +118,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
     "underscore": "^1.8.3",
-    "wdio": "^6.0.1",
+    "webdriverio": "^9.33.1",
     "webpack": "^5.105.0",
     "webpack-cli": "^6.0.1",
     "webpack-node-externals": "^3.0.0",
@@ -131,6 +131,10 @@
     "@types/tapable": "1.0.0"
   },
   "overrides": {
-    "form-data": "$form-data"
+    "form-data": "$form-data",
+    "@wdio/electron-service": {
+      "webdriverio": "$webdriverio",
+      "@wdio/globals": "$@wdio/globals"
+    }
   }
 }
