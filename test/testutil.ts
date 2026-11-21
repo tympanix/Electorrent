@@ -1,4 +1,5 @@
 import axios from "axios"
+import https from "node:https"
 import readline from "readline"
 import { afterEach } from "mocha";
 
@@ -26,30 +27,42 @@ export const sleep: (time: number) => Promise<void>
 
 /**
  * Continously performs http requests every `step` milliseconds for up to `timeout` milliseconds
- * until response has status code `statusCode`. If status code has not been observed within `timeout`
- * an exception is thrown
+ * until response has status code `statusCode` (or satisfies it, when given a predicate). If no
+ * matching status code has been observed within `timeout` an exception is thrown
  */
 export async function waitForHttp(
-  { url, statusCode=200, timeout=30000, step=1000 }:
-  { url: string, statusCode?: number, timeout?: number, step?: number })
+  { url, statusCode=200, timeout=30000, step=1000, insecure=false }:
+  {
+    url: string,
+    statusCode?: number | ((status: number) => boolean),
+    timeout?: number,
+    step?: number,
+    insecure?: boolean,
+  })
 {
+  const accept = typeof statusCode === "function" ? statusCode : (status: number) => status === statusCode
+  const httpsAgent = insecure ? new https.Agent({ rejectUnauthorized: false }) : undefined
+  let lastResult = "no response"
   let timeSpent = 0;
   while (timeSpent <= timeout) {
     try {
       const res = await axios.get(url, {
         timeout: 1000,
-        validateStatus: () => true
+        validateStatus: () => true,
+        httpsAgent,
       })
-      if (res.status === statusCode) {
+      if (accept(res.status)) {
         return;
       }
-    } catch {
+      lastResult = `status ${res.status}`
+    } catch (err) {
       // Retry until the timeout elapses.
+      lastResult = String(err)
     }
     await sleep(step)
     timeSpent += step
   }
-  throw new Error(`Timeout waiting for ${url}`);
+  throw new Error(`Timeout waiting for ${url} (last result: ${lastResult})`);
 }
 
 /**
